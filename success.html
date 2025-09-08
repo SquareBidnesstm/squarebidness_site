@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Order Successful — Square Bidness</title>
+  <link rel="stylesheet" href="styles/style.css" />
+  <meta name="theme-color" content="#000000" />
+
+  <style>
+    .success {
+      max-width: 760px; margin: 2rem auto; padding: 1.5rem;
+      background:#0e0e0e; border:1px solid #1f1f1f; border-radius:14px;
+      text-align:center;
+    }
+    .success h1 { margin:.25rem 0 .5rem; }
+    .success p { color:#d1d6dd; }
+    .success .next {
+      margin-top:1rem; display:flex; gap:.6rem; justify-content:center; flex-wrap:wrap;
+    }
+    .ok-badge {
+      display:inline-flex; align-items:center; gap:.4rem;
+      background:#222; color:#00e676; padding:.35rem .6rem; border-radius:999px; font-weight:800;
+      border:1px solid #333;
+    }
+    .muted { opacity:.8; }
+  </style>
+
+  <script>
+    // Load shared nav/footer
+    document.addEventListener("DOMContentLoaded", () => {
+      fetch("nav.html").then(r=>r.text()).then(d=>document.getElementById("nav-placeholder").innerHTML=d);
+      fetch("footer.html").then(r=>r.text()).then(d=>document.getElementById("footer-placeholder").innerHTML=d);
+    });
+  </script>
+</head>
+
+<body class="theme-dark" id="top">
+  <div id="nav-placeholder"></div>
+
+  <main class="container">
+    <div class="success">
+      <div class="ok-badge">✅ Order Confirmed</div>
+      <h1>Thank you for your purchase!</h1>
+      <p>Your order has been placed successfully. We’ll send updates once it ships.</p>
+
+      <!-- Hidden by default; revealed if session_id exists -->
+      <p id="session-container" class="muted" style="display:none;">
+        Stripe Session: <code id="stripe-session-id"></code>
+      </p>
+
+      <div class="next">
+        <a class="btn btn--gold" href="shop.html">Continue Shopping</a>
+        <a class="btn btn--ghost" href="community.html">See Community Work</a>
+        <a class="btn btn--ghost" href="index.html">Back Home</a>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <!-- Reveal session_id if present -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const params = new URLSearchParams(window.location.search);
+      const sessionId = params.get("session_id");
+      if (!sessionId) return;
+
+      const el = document.getElementById("stripe-session-id");
+      if (el) {
+        el.textContent = sessionId;
+        const wrap = document.getElementById("session-container");
+        if (wrap) wrap.style.display = "block";
+      }
+    });
+  </script>
+</body>
+</html>

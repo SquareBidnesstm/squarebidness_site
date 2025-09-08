@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Basics -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Checkout Canceled — Square Bidness</title>
+  <link rel="stylesheet" href="styles/style.css" />
+
+  <!-- Basic SEO -->
+  <meta name="description" content="Your checkout was canceled. Your cart is saved and you can complete your order anytime.">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Square Bidness">
+  <meta property="og:title" content="Checkout Canceled — Square Bidness">
+  <meta property="og:description" content="Your checkout was canceled. Your cart is saved and you can complete your order anytime.">
+  <meta property="og:url" content="https://squarebidness.com/cancel.html">
+  <meta property="og:image" content="https://squarebidness.com/assets/og-square-bidness.png">
+
+  <!-- Favicons -->
+  <link rel="icon" href="/favicon.ico" sizes="any">
+
+  <!-- Browser UI color -->
+  <meta name="theme-color" content="#000000">
+  <meta name="mobile-web-app-capable" content="yes">
+
+  <!-- Load Nav + Footer -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      fetch("nav.html").then(r => r.text()).then(d => {
+        document.getElementById("nav-placeholder").innerHTML = d;
+        
+        // Mark Shop as active since this is checkout-related
+        const shopLink = document.querySelector('.main-nav a[href="shop.html"]');
+        if (shopLink) shopLink.classList.add("active");
+      });
+
+      fetch("footer.html").then(r => r.text()).then(d => {
+        document.getElementById("footer-placeholder").innerHTML = d;
+      });
+    });
+  </script>
+</head>
+
+<body class="theme-dark" id="top">
+  <!-- NAV -->
+  <div id="nav-placeholder"></div>
+
+  <!-- PAGE HERO -->
+  <header class="page-hero">
+    <div class="container">
+      <h1 class="page-title">Checkout Canceled</h1>
+      <p class="page-subtitle">No worries — your cart is saved and ready when you are</p>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="section">
+    <div class="container">
+      <div class="cancel-message">
+        
+        <div class="status-badge status-badge--warning">
+          ⚠️ Checkout Canceled
+        </div>
+
+        <div class="cancel-content">
+          <h2>Your items are still in your cart</h2>
+          <p class="cancel-description">
+            You can return to your cart to complete checkout or continue shopping. 
+            Your selected items and sizes are saved for your convenience.
+          </p>
+
+          <!-- Optional reason display -->
+          <div id="cancel-reason" class="cancel-reason" style="display:none;">
+            <p class="reason-text"></p>
+          </div>
+
+          <!-- Action buttons -->
+          <div class="cancel-actions">
+            <a class="btn btn--gold" href="cart.html">Return to Cart</a>
+            <a class="btn btn--ghost" href="shop.html">Continue Shopping</a>
+          </div>
+
+          <!-- Help section -->
+          <div class="cancel-help">
+            <h3>Need Help?</h3>
+            <p>If you experienced issues during checkout, please contact us and we'll help you complete your order.</p>
+            <a href="mailto:hello@squarebidness.com" class="btn btn--ghost btn--small">Contact Support</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Related products suggestion -->
+      <div class="suggested-products">
+        <h3>You might also like</h3>
+        <div class="product-suggestions">
+          <a href="product-vsop-jacket.html" class="suggestion-item">
+            <img loading="lazy" src="assets/vsop-jacket.jpg" alt="VSOP Hooded Jacket">
+            <span>VSOP Hooded Jacket</span>
+          </a>
+          <a href="product-vsop-shorts.html" class="suggestion-item">
+            <img loading="lazy" src="assets/vsop-shorts.jpg" alt="VSOP Shorts">
+            <span>VSOP Shorts</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <div id="footer-placeholder"></div>
+
+  <!-- Scripts: load after HTML so selectors exist -->
+  <script>
+    // Handle optional cancel reason from URL params
+    document.addEventListener("DOMContentLoaded", () => {
+      const params = new URLSearchParams(location.search);
+      const reason = params.get("reason");
+      
+      if (reason) {
+        const reasonContainer = document.getElementById("cancel-reason");
+        const reasonText = reasonContainer.querySelector(".reason-text");
+        
+         if (reasonText) {
+          reasonText.textContent = `Cancellation reason: ${reason}`;
+          reasonContainer.style.display = "block";
+        }
+      }
+    });
+  </script>
+</body>
+</html>

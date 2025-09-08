@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Basics -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Your Cart — Square Bidness</title>
+  <link rel="stylesheet" href="styles/style.css" />
+
+  <!-- Basic SEO -->
+  <meta name="description" content="Review your Square Bidness cart and complete your order. Secure checkout for apparel and exclusives.">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Square Bidness">
+  <meta property="og:title" content="Your Cart — Square Bidness">
+  <meta property="og:description" content="Review your Square Bidness cart and complete your order.">
+  <meta property="og:url" content="https://squarebidness.com/cart.html">
+  <meta property="og:image" content="https://squarebidness.com/assets/og-square-bidness.png">
+
+  <!-- Favicons -->
+  <link rel="icon" href="/favicon.ico" sizes="any">
+
+  <!-- Browser UI color -->
+  <meta name="theme-color" content="#000000">
+  <meta name="mobile-web-app-capable" content="yes">
+
+  <!-- Load Nav + Footer -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      fetch("nav.html").then(r => r.text()).then(d => {
+        document.getElementById("nav-placeholder").innerHTML = d;
+
+        // Highlight active cart link if it exists
+        const cartLink = document.querySelector('.main-nav a[href="cart.html"]');
+        if (cartLink) cartLink.classList.add("active");
+      });
+
+      fetch("footer.html").then(r => r.text()).then(d => {
+        document.getElementById("footer-placeholder").innerHTML = d;
+      });
+    });
+  </script>
+</head>
+
+<body class="theme-dark" id="top">
+  <!-- NAV -->
+  <div id="nav-placeholder"></div>
+
+  <!-- PAGE HERO -->
+  <header class="page-hero">
+    <div class="container">
+      <h1 class="page-title">Your Cart</h1>
+      <p class="page-subtitle">Review your items and complete your order</p>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="section">
+    <div class="container">
+
+      <!-- Cart Items Table -->
+      <div class="cart">
+        <table class="cart-table">
+          <thead>
+            <tr>
+              <th style="text-align:left;">Item</th>
+              <th>Price</th>
+              <th>Qty</th>
+              <th>Line</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="cart-items">
+            <!-- Cart items will be inserted here by cart.js -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Cart Summary -->
+      <div class="summary" id="cart-summary" style="display:none; margin-top:1.5rem">
+        <table>
+          <tr>
+            <td>Subtotal</td>
+            <td class="right" id="cart-subtotal">$0.00</td>
+          </tr>
+          <tr>
+            <td>Estimated Tax (8.5%)</td>
+            <td class="right" id="cart-tax">$0.00</td>
+          </tr>
+          <tr class="total">
+            <td>Total</td>
+            <td class="right" id="cart-total">$0.00</td>
+          </tr>
+        </table>
+
+        <button id="checkout-button" class="btn btn--gold" style="margin-top:1rem;" disabled>
+          Proceed to Checkout
+        </button>
+      </div>
+
+      <!-- Cart Actions -->
+      <div style="margin-top:1rem">
+        <button onclick="window.SB.clearCart()" class="btn btn--ghost">Clear Cart</button>
+        <a href="shop.html" class="btn btn--ghost">Continue Shopping</a>
+      </div>
+
+      <!-- Security Notice -->
+      <div class="security-notice" style="margin-top:2rem">
+        <p>🔒 Secure checkout powered by Stripe. Your payment information is encrypted and secure.</p>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <div id="footer-placeholder"></div>
+
+  <!-- Scripts: load after HTML so selectors exist -->
+  <script src="scripts/cart.js"></script>
+
+  <!-- Stripe.js for secure checkout -->
+  <script src="https://js.stripe.com/v3/"></script>
+
+  <!-- Checkout functionality -->
+  <script>
+    // Checkout endpoint configuration
+  
+const CHECKOUT_ENDPOINT = "https://sb-checkout-server.onrender.com/create-checkout-sessions";
+    document.addEventListener("DOMContentLoaded", () => {
+      // Setup checkout button
+      const btn = document.getElementById("checkout-button");
+      if (!btn) return;
+
+      btn.addEventListener("click", async () => {
+        if (btn.disabled) return;
+
+        // Build payload from localStorage cart
+        const raw = localStorage.getItem("sb_cart_v1") || "[]";
+        const items = JSON.parse(raw)
+          .filter(i => Number(i.qty) > 0 && Number(i.price) > 0)
+          .map(i => ({
+            id: i.id,
+            name: i.name,
+            price: Number(i.price),
+            qty: Number(i.qty)
+          }));
+
+        if (!items.length) {
+          alert("Your cart is empty");
+          return;
+        }
+
+        const oldText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = "Processing...";
+
+        try {
+          const res = await fetch(CHECKOUT_ENDPOINT, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ items })
+          });
+
+          if (!res.ok) {
+            const txt = await res.text();
+            console.error("Server responded", res.status, txt);
+            throw new Error("Checkout server error");
+          }
+
+          const data = await res.json();
+          
+          if (data.url) {
+            window.location = data.url;
+            return;
+          }
+
+          // Alternative flow if server returns sessionId
+          if (data.id && data.publishableKey && window.Stripe) {
+            const stripe = Stripe(data.publishableKey);
+            const { error } = await stripe.redirectToCheckout({ sessionId: data.id });
+            if (error) throw error;
+            return;
+          }
+
+          throw new Error("No checkout URL returned from server");
+        } catch (err) {
+          console.error("Checkout error:", err);
+          alert("Checkout failed. Please try again or contact support.");
+          btn.disabled = false;
+          btn.textContent = oldText;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

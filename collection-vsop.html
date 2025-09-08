@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Basic SEO -->
+<meta name="description" content="Apparel and culture from Square Bidness. Exclusives, drops, and legacy in fabric.">
+
+<!-- Open Graph (Facebook, LinkedIn, iMessage) -->
+<meta property="og:title" content="VSOP Hooded Jacket — Square Bidness">
+<meta property="og:description" content="Burgundy + Brown. Premium fabric. Embroidered.">
+<meta property="og:url" content="https://squarebidness.com/product-vsop-jacket.html">
+<meta property="og:image" content="https://squarebidness.com/assets/vsop-jacket-og.jpg">
+<meta name="twitter:title" content="VSOP Hooded Jacket — Square Bidness">
+<meta name="twitter:description" content="Premium. Embroidered. Fall 2025.">
+<meta name="twitter:image" content="https://squarebidness.com/assets/vsop-jacket-og.jpg">
+
+<!-- Twitter / X -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Square Bidness — Principles. Morals. Business Done Right.">
+<meta name="twitter:description" content="Exclusives, drops, and legacy in fabric.">
+<meta name="twitter:image" content="https://YOUR_DOMAIN/assets/og-square-bidness.jpg">
+
+    <!-- Favicons -->
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="/favicon-32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/favicon-48.png" sizes="48x48">
+<link rel="icon" type="image/png" href="/favicon-192.png" sizes="192x192">
+
+<!-- Apple iOS home screen icon -->
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+<!-- Browser UI color (Android, Windows tiles, iOS Safari tab) -->
+<meta name="theme-color" content="#000000">
+<meta name="msapplication-TileColor" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="/favicon-32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/favicon-48.png" sizes="48x48">
+<link rel="icon" type="image/png" href="/favicon-192.png" sizes="192x192">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Square Bidness – VSOP Collection</title>
+  <link rel="stylesheet" href="styles/style.css" />
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      fetch("nav.html").then(r => r.text()).then(d => {
+        document.getElementById("nav-placeholder").innerHTML = d;
+
+        // underline active link if pointing here
+        const current = window.location.pathname.split("/").pop() || "collection-vsop.html";
+        document.querySelectorAll(".main-nav a").forEach(a => {
+          if (a.getAttribute("href") === current) a.classList.add("active");
+        });
+      });
+
+      fetch("footer.html").then(r => r.text()).then(d => {
+        document.getElementById("footer-placeholder").innerHTML = d;
+      });
+    });
+  </script>
+</head>
+<script>
+fetch("products.json")
+  .then(res => res.json())
+  .then(data => {
+    document.querySelectorAll("[data-product-id]").forEach(card => {
+      const id = card.getAttribute("data-product-id");
+      const product = data[id];
+      if (!product) return;
+
+      const badge = card.querySelector(".badge");
+      const price = card.querySelector(".price");
+      const btn = card.querySelector(".btn");
+
+      if (product.price !== null) {
+        price.textContent = `$${product.price}`;
+      }
+
+      if (product.status === "in-stock") {
+        badge.textContent = "In Stock";
+        badge.style.background = "#28a745";
+        if (btn) btn.removeAttribute("disabled");
+      } else if (product.status === "coming-soon") {
+        badge.textContent = "Coming Soon";
+        badge.style.background = "#f5d742";
+        if (btn) btn.setAttribute("disabled", "true");
+      }
+    });
+  });
+</script>
+
+<body class="theme-dark" id="top">
+  <!-- NAV -->
+  <div id="nav-placeholder"></div>
+
+  <!-- PAGE HERO -->
+  <header class="page-hero">
+    <div class="container">
+      <h1 class="page-title">🔥 VSOP Collection</h1>
+      <p class="page-subtitle">Burgundy + Brown. Fall 2025. Premium. Embroidered. All Square.</p>
+    </div>
+  </header>
+
+  <main class="section">
+    <div class="container">
+
+      <!-- PRODUCT GRID -->
+      <div class="product-grid">
+        
+        <!-- VSOP Jacket -->
+        <article class="product-card">
+          <a href="product-vsop-jacket.html" class="thumb">
+            <img src="assets/vsop-jacket.jpg" alt="VSOP Hooded Jacket">
+            <span class="badge">Preorder Soon</span>
+          </a>
+          <h3 class="title"><a href="product-vsop-jacket.html">VSOP Hooded Jacket</a></h3>
+          <p class="desc">Burgundy & Brown heavyweight hoodie. Full embroidery.</p>
+          <div class="meta">
+            <span class="price">$—</span>
+            <a class="btn btn--gold" href="product-vsop-jacket.html">View</a>
+          </div>
+        </article>
+
+        <!-- VSOP Shorts -->
+        <article class="product-card">
+          <a href="product-vsop-shorts.html" class="thumb">
+            <img src="assets/vsop-shorts.jpg" alt="VSOP Matching Shorts">
+            <span class="badge">Preorder Soon</span>
+          </a>
+          <h3 class="title"><a href="product-vsop-shorts.html">VSOP Shorts</a></h3>
+          <p class="desc">Matching burgundy & brown shorts. Athletic fit. Embroidered mark.</p>
+          <div class="meta">
+            <span class="price">$—</span>
+            <a class="btn btn--gold" href="product-vsop-shorts.html">View</a>
+          </div>
+        </article>
+
+        <!-- Full Look -->
+        <article class="product-card">
+          <a href="#" class="thumb">
+            <img src="assets/hero.jpg" alt="VSOP Full Look">
+            <span class="badge badge--soon">Fall 2025</span>
+          </a>
+          <h3 class="title"><a href="#">Full VSOP Look</a></h3>
+          <p class="desc">Complete set: hooded jacket + shorts. Limited release.</p>
+          <div class="meta">
+            <span class="price">$—</span>
+            <a class="btn btn--ghost" href="#">Details</a>
+          </div>
+        </article>
+
+      </div>
+
+      <!-- Back to shop -->
+      <div style="margin-top:1.5rem;text-align:center">
+        <a class="btn btn--ghost" href="shop.html">⬅️ Back to Shop</a>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- F
+<script src="scripts/cart.js"></script>

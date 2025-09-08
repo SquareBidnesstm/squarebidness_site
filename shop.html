@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Basics -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Square Bidness – Shop</title>
+  <link rel="stylesheet" href="styles/style.css" />
+
+  <!-- Basic SEO -->
+  <meta name="description" content="Shop Square Bidness apparel: VSOP Collection, tees, hats, and exclusive drops.">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Square Bidness">
+  <meta property="og:title" content="Shop Square Bidness — Exclusives, Drops, Legacy in Fabric">
+  <meta property="og:description" content="Shop Square Bidness apparel: VSOP Collection, tees, hats, and exclusive drops.">
+  <meta property="og:url" content="https://squarebidness.com/shop.html">
+  <meta property="og:image" content="https://squarebidness.com/assets/og-square-bidness.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Square Bidness original scorpion logo">
+
+  <!-- Twitter / X -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Shop Square Bidness — Exclusives, Drops, Legacy in Fabric">
+  <meta name="twitter:description" content="VSOP Collection, tees, hats, and exclusive drops.">
+  <meta name="twitter:image" content="https://squarebidness.com/assets/og-square-bidness.png">
+
+  <!-- Favicons -->
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+
+  <!-- Browser UI color -->
+  <meta name="theme-color" content="#000000">
+  <meta name="mobile-web-app-capable" content="yes">
+
+  <!-- Load Nav + Footer -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      fetch("nav.html").then(r => r.text()).then(d => {
+        document.getElementById("nav-placeholder").innerHTML = d;
+        
+        // Highlight active link
+        const current = window.location.pathname.split("/").pop() || "shop.html";
+        document.querySelectorAll(".main-nav a").forEach(a => {
+          if (a.getAttribute("href") === current) {
+            a.classList.add("active");
+          }
+        });
+      });
+
+      fetch("footer.html").then(r => r.text()).then(d => {
+        document.getElementById("footer-placeholder").innerHTML = d;
+      });
+    });
+  </script>
+</head>
+
+<body class="theme-dark" id="top">
+  <!-- NAV -->
+  <div id="nav-placeholder"></div>
+
+  <!-- PAGE HERO -->
+  <header class="page-hero">
+    <div class="container">
+      <h1 class="page-title">Shop Square Bidness</h1>
+      <p class="page-subtitle">Exclusives. Drops. Legacy in Fabric.</p>
+    </div>
+  </header>
+
+  <main class="section">
+    <div class="container">
+
+      <!-- Filter Chips -->
+      <div class="shop-filters">
+        <button class="chip is-active" data-filter="all">All</button>
+        <button class="chip" data-filter="vsop">VSOP</button>
+        <button class="chip" data-filter="tees">Tees</button>
+        <button class="chip" data-filter="hats">Hats</button>
+      </div>
+
+      <!-- PRODUCT GRID -->
+      <!-- IMPROVED VSOP COLLECTION CARDS -->
+<div class="grid vsop-grid">
+  <!-- Jacket card -->
+  <article class="card" data-product-id="vsop-jacket">
+    <div class="card__media">
+      <img loading="lazy" src="assets/vsop-jacket.jpg" alt="VSOP embroidered hooded jacket in burgundy and brown">
+      <span class="badge badge--available">Multiple Sizes Available</span>
+    </div>
+    <div class="card__content">
+      <h3>VSOP Hooded Jacket</h3>
+      <p class="card__description">Burgundy + Brown. Premium fabric. Embroidered.</p>
+      <p class="price">$129.99</p>
+    </div>
+    <div class="card__actions">
+      <a class="btn btn--gold btn--primary" href="product-vsop-jacket.html">
+        Choose Size & Add to Cart
+      </a>
+      <a class="btn btn--ghost btn--secondary" href="product-vsop-jacket.html">
+        View Details
+      </a>
+    </div>
+  </article>
+
+  <!-- Shorts card -->
+  <article class="card" data-product-id="vsop-shorts">
+    <div class="card__media">
+      <img loading="lazy" src="assets/vsop-shorts.jpg" alt="VSOP matching shorts in burgundy and brown">
+      <span class="badge badge--available">Multiple Sizes Available</span>
+    </div>
+    <div class="card__content">
+      <h3>VSOP Shorts</h3>
+      <p class="card__description">Burgundy + Brown. Embroidered mark. Athletic fit.</p>
+      <p class="price">$89.99</p>
+    </div>
+    <div class="card__actions">
+      <a class="btn btn--gold btn--primary" href="product-vsop-shorts.html">
+        Choose Size & Add to Cart
+      </a>
+      <a class="btn btn--ghost btn--secondary" href="product-vsop-shorts.html">
+        View Details
+      </a>
+    </div>
+  </article>
+
+  <!-- Collection card -->
+  <article class="card">
+    <div class="card__media">
+      <img loading="lazy" src="assets/hero.jpg" alt="VSOP look — jacket with matching shorts">
+    </div>
+    <div class="card__content">
+      <h3>Full VSOP Look</h3>
+      <p class="card__description">Complete the set with both pieces</p>
+    </div>
+    <div class="card__actions">
+      <a class="btn btn--gold btn--primary" href="collection-vsop.html">
+        Shop Collection
+      </a>
+    </div>
+  </article>
+</div>
+      <!-- Back to top -->
+      <div class="section__cta">
+        <a class="btn btn--ghost" href="#top">⬆️ Back to Top</a>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <div id="footer-placeholder"></div>
+
+  <!-- Scripts: load after HTML so selectors exist -->
+  <script src="scripts/cart.js"></script>
+  <script>
+    // Simple filter functionality
+    document.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        // Update active chip
+        document.querySelectorAll('.chip').forEach(c => c.classList.remove('is-active'));
+        chip.classList.add('is-active');
+        
+        const filter = chip.dataset.filter;
+        const cards = document.querySelectorAll('.product-card');
+        
+        cards.forEach(card => {
+          if (filter === 'all' || card.dataset.category === filter) {
+            card.style.display = 'block';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      });
+    });
+
+    // Optional: hydrate price/badge from products.json to keep single source of truth
+    // Update your products.json hydration script
+fetch("products.json")
+  .then(r => r.json())
+  .then(data => {
+    document.querySelectorAll("[data-product-id]").forEach(card => {
+      const id = card.getAttribute("data-product-id");
+      const p = data[id];
+      if (!p) return;
+
+      // Update content
+      const title = card.querySelector(".title a, h3 a, h3");
+      const desc = card.querySelector(".desc, .card__description");
+      const img = card.querySelector("img");
+      const price = card.querySelector(".price");
+
+      if (title && p.name) title.textContent = p.name;
+      if (desc && p.desc) desc.textContent = p.desc;
+      if (img && p.image) img.src = p.image;
+      if (price && typeof p.price === "number") price.textContent = `$${p.price.toFixed(2)}`;
+
+      // Update stock badge and button states
+      const badge = card.querySelector(".badge");
+      const primaryBtn = card.querySelector(".btn--primary");
+      
+      if (badge && primaryBtn) {
+        // Remove all status classes
+        card.classList.remove("card--disabled");
+        badge.className = "badge";
+        
+        if (p.status === "in-stock") {
+          badge.textContent = "Multiple Sizes Available";
+          badge.classList.add("badge--available");
+          primaryBtn.textContent = "Choose Size & Add to Cart";
+        } else if (p.status === "low-stock") {
+          badge.textContent = `Only ${p.stock || 3} Left`;
+          badge.classList.add("badge--low-stock");
+          primaryBtn.textContent = "Choose Size & Add to Cart";
+        } else if (p.status === "sold-out") {
+          badge.textContent = "Sold Out";
+          badge.classList.add("badge--sold-out");
+          primaryBtn.textContent = "Out of Stock";
+          card.classList.add("card--disabled");
+        } else if (p.status === "coming-soon") {
+          badge.textContent = "Coming Soon";
+          badge.classList.add("badge--coming-soon");
+          primaryBtn.textContent = "Notify When Available";
+        }
+      }
+    });
+  })
+  .catch(() => {/* ignore if file missing */});
+  </script>
+</body>
+</html>
