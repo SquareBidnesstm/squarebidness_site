@@ -2,8 +2,6 @@
 <html lang="en">
 <head>
   <!-- Basics -->
-<head>
-  <!-- Basics -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Square Bidness – Home</title>
@@ -14,7 +12,7 @@
   <meta name="keywords" content="Square Bidness, apparel, lifestyle, fashion, veteran owned, Louisiana clothing, VSOP collection, Square Bidness Apparel" />
   <meta name="author" content="Square Bidness Apparel, LLC" />
 
-  <!-- Open Graph (Facebook / LinkedIn) -->
+  <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Square Bidness" />
   <meta property="og:title" content="Square Bidness — Principles. Morals. Business Done Right." />
@@ -38,24 +36,43 @@
   <!-- Browser UI color -->
   <meta name="theme-color" content="#000000" />
   <meta name="mobile-web-app-capable" content="yes" />
-  <!-- Google tag (GA4) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
 
-  gtag('config', 'G-XXXXXXXXXX'); // Replace with your GA4 Measurement ID
-</script>
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX'); // Replace with your GA4 Measurement ID
+  </script>
 
+  <!-- Load Nav + Footer -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      fetch("nav.html").then(r => r.text()).then(d => {
+        document.getElementById("nav-placeholder").innerHTML = d;
+
+        // Highlight active link
+        const current = (window.location.pathname.split("/").pop() || "index.html");
+        document.querySelectorAll(".main-nav a").forEach(a => {
+          if (a.getAttribute("href") === current || (current === "" && a.getAttribute("href") === "index.html")) {
+            a.classList.add("active");
+          }
+        });
+      });
+
+      fetch("footer.html").then(r => r.text()).then(d => {
+        document.getElementById("footer-placeholder").innerHTML = d;
+      });
+    });
+  </script>
 </head>
-
 
 <body class="theme-dark" id="top">
   <!-- NAV -->
   <div id="nav-placeholder"></div>
 
-  <!-- HERO (dark) -->
+  <!-- HERO -->
   <header class="hero hero--dark">
     <div class="container hero__inner">
       <picture class="hero__media" aria-hidden="true">
@@ -82,66 +99,70 @@
           Burgundy + Brown. Hooded jacket and matching shorts. All embroidered. All Square.
         </p>
 
-       <!-- IMPROVED VSOP COLLECTION CARDS -->
-<div class="grid vsop-grid">
-  <!-- Jacket card -->
-  <article class="card" data-product-id="vsop-jacket">
-    <div class="card__media">
-      <img loading="lazy" src="assets/vsop-jacket.jpg" alt="VSOP embroidered hooded jacket in burgundy and brown">
-      <span class="badge badge--available">Multiple Sizes Available</span>
-    </div>
-    <div class="card__content">
-      <h3>VSOP Hooded Jacket</h3>
-      <p class="card__description">Burgundy + Brown. Premium fabric. Embroidered.</p>
-      <p class="price">$129.99</p>
-    </div>
-    <div class="card__actions">
-      <a class="btn btn--gold btn--primary" href="product-vsop-jacket.html">
-        Choose Size & Add to Cart
-      </a>
-      <a class="btn btn--ghost btn--secondary" href="product-vsop-jacket.html">
-        View Details
-      </a>
-    </div>
-  </article>
+        <div class="grid vsop-grid">
+          <!-- Jacket card -->
+          <article class="card" data-product-id="vsop-jacket">
+            <div class="card__media">
+              <img loading="lazy" src="assets/vsop-jacket.jpg" alt="VSOP embroidered hooded jacket in burgundy and brown">
+              <span class="badge badge--available">Multiple Sizes Available</span>
+            </div>
+            <div class="card__content">
+              <h3>VSOP Hooded Jacket</h3>
+              <p class="card__description">Burgundy + Brown. Premium fabric. Embroidered.</p>
+              <p class="price">$129.99</p>
+            </div>
+            <div class="card__actions">
+              <a class="btn btn--gold btn--primary" href="product-vsop-jacket.html">
+                Choose Size & Add to Cart
+              </a>
+              <a class="btn btn--ghost btn--secondary" href="product-vsop-jacket.html">
+                View Details
+              </a>
+            </div>
+          </article>
 
-  <!-- Shorts card -->
-  <article class="card" data-product-id="vsop-shorts">
-    <div class="card__media">
-      <img loading="lazy" src="assets/vsop-shorts.jpg" alt="VSOP matching shorts in burgundy and brown">
-      <span class="badge badge--available">Multiple Sizes Available</span>
-    </div>
-    <div class="card__content">
-      <h3>VSOP Shorts</h3>
-      <p class="card__description">Burgundy + Brown. Embroidered mark. Athletic fit.</p>
-      <p class="price">$89.99</p>
-    </div>
-    <div class="card__actions">
-      <a class="btn btn--gold btn--primary" href="product-vsop-shorts.html">
-        Choose Size & Add to Cart
-      </a>
-      <a class="btn btn--ghost btn--secondary" href="product-vsop-shorts.html">
-        View Details
-      </a>
-    </div>
-  </article>
+          <!-- Shorts card -->
+          <article class="card" data-product-id="vsop-shorts">
+            <div class="card__media">
+              <img loading="lazy" src="assets/vsop-shorts.jpg" alt="VSOP matching shorts in burgundy and brown">
+              <span class="badge badge--available">Multiple Sizes Available</span>
+            </div>
+            <div class="card__content">
+              <h3>VSOP Shorts</h3>
+              <p class="card__description">Burgundy + Brown. Embroidered mark. Athletic fit.</p>
+              <p class="price">$89.99</p>
+            </div>
+            <div class="card__actions">
+              <a class="btn btn--gold btn--primary" href="product-vsop-shorts.html">
+                Choose Size & Add to Cart
+              </a>
+              <a class="btn btn--ghost btn--secondary" href="product-vsop-shorts.html">
+                View Details
+              </a>
+            </div>
+          </article>
 
-  <!-- Collection card -->
-  <article class="card">
-    <div class="card__media">
-      <img loading="lazy" src="assets/hero.jpg" alt="VSOP look — jacket with matching shorts">
-    </div>
-    <div class="card__content">
-      <h3>Full VSOP Look</h3>
-      <p class="card__description">Complete the set with both pieces</p>
-    </div>
-    <div class="card__actions">
-      <a class="btn btn--gold btn--primary" href="collection-vsop.html">
-        Shop Collection
-      </a>
-    </div>
-  </article>
-</div>
+          <!-- Collection card -->
+          <article class="card">
+            <div class="card__media">
+              <img loading="lazy" src="assets/hero.jpg" alt="VSOP look — jacket with matching shorts">
+            </div>
+            <div class="card__content">
+              <h3>Full VSOP Look</h3>
+              <p class="card__description">Complete the set with both pieces</p>
+            </div>
+            <div class="card__actions">
+              <a class="btn btn--gold btn--primary" href="collection-vsop.html">
+                Shop Collection
+              </a>
+            </div>
+          </article>
+        </div>
+
+        <div class="section__cta">
+          <a class="btn btn--gold" href="collection-vsop.html">Shop VSOP</a>
+        </div>
+      </div>
     </section>
 
     <!-- PRESS STRIP -->
@@ -174,58 +195,57 @@
   <!-- Scripts: load after HTML so selectors exist -->
   <script src="scripts/cart.js"></script>
   <script>
-    // Optional: hydrate from products.json (safe if missing)
-    // Update your products.json hydration script
-fetch("products.json")
-  .then(r => r.json())
-  .then(data => {
-    document.querySelectorAll("[data-product-id]").forEach(card => {
-      const id = card.getAttribute("data-product-id");
-      const p = data[id];
-      if (!p) return;
+    // Product data hydration
+    fetch("products.json")
+      .then(r => r.json())
+      .then(data => {
+        document.querySelectorAll("[data-product-id]").forEach(card => {
+          const id = card.getAttribute("data-product-id");
+          const p = data[id];
+          if (!p) return;
 
-      // Update content
-      const title = card.querySelector(".title a, h3 a, h3");
-      const desc = card.querySelector(".desc, .card__description");
-      const img = card.querySelector("img");
-      const price = card.querySelector(".price");
+          // Update content
+          const title = card.querySelector(".title a, h3 a, h3");
+          const desc = card.querySelector(".desc, .card__description");
+          const img = card.querySelector("img");
+          const price = card.querySelector(".price");
 
-      if (title && p.name) title.textContent = p.name;
-      if (desc && p.desc) desc.textContent = p.desc;
-      if (img && p.image) img.src = p.image;
-      if (price && typeof p.price === "number") price.textContent = `$${p.price.toFixed(2)}`;
+          if (title && p.name) title.textContent = p.name;
+          if (desc && p.desc) desc.textContent = p.desc;
+          if (img && p.image) img.src = p.image;
+          if (price && typeof p.price === "number") price.textContent = `$${p.price.toFixed(2)}`;
 
-      // Update stock badge and button states
-      const badge = card.querySelector(".badge");
-      const primaryBtn = card.querySelector(".btn--primary");
-      
-      if (badge && primaryBtn) {
-        // Remove all status classes
-        card.classList.remove("card--disabled");
-        badge.className = "badge";
-        
-        if (p.status === "in-stock") {
-          badge.textContent = "Multiple Sizes Available";
-          badge.classList.add("badge--available");
-          primaryBtn.textContent = "Choose Size & Add to Cart";
-        } else if (p.status === "low-stock") {
-          badge.textContent = `Only ${p.stock || 3} Left`;
-          badge.classList.add("badge--low-stock");
-          primaryBtn.textContent = "Choose Size & Add to Cart";
-        } else if (p.status === "sold-out") {
-          badge.textContent = "Sold Out";
-          badge.classList.add("badge--sold-out");
-          primaryBtn.textContent = "Out of Stock";
-          card.classList.add("card--disabled");
-        } else if (p.status === "coming-soon") {
-          badge.textContent = "Coming Soon";
-          badge.classList.add("badge--coming-soon");
-          primaryBtn.textContent = "Notify When Available";
-        }
-      }
-    });
-  })
-  .catch(() => {/* ignore if file missing */});
+          // Update stock badge and button states
+          const badge = card.querySelector(".badge");
+          const primaryBtn = card.querySelector(".btn--primary");
+          
+          if (badge && primaryBtn) {
+            // Remove all status classes
+            card.classList.remove("card--disabled");
+            badge.className = "badge";
+            
+            if (p.status === "in-stock") {
+              badge.textContent = "Multiple Sizes Available";
+              badge.classList.add("badge--available");
+              primaryBtn.textContent = "Choose Size & Add to Cart";
+            } else if (p.status === "low-stock") {
+              badge.textContent = `Only ${p.stock || 3} Left`;
+              badge.classList.add("badge--low-stock");
+              primaryBtn.textContent = "Choose Size & Add to Cart";
+            } else if (p.status === "sold-out") {
+              badge.textContent = "Sold Out";
+              badge.classList.add("badge--sold-out");
+              primaryBtn.textContent = "Out of Stock";
+              card.classList.add("card--disabled");
+            } else if (p.status === "coming-soon") {
+              badge.textContent = "Coming Soon";
+              badge.classList.add("badge--coming-soon");
+              primaryBtn.textContent = "Notify When Available";
+            }
+          }
+        });
+      })
+      .catch(() => {/* ignore if file missing */});
   </script>
 </body>
 </html>
