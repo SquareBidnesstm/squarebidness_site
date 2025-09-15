@@ -76,6 +76,25 @@
   }
   </script>
 </head>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  fetch("nav.html?v=2")           // cache-bust to avoid old copies
+    .then(r => r.text())
+    .then(d => {
+      const host = document.getElementById("nav-placeholder");
+      if (!host) return;
+      host.innerHTML = d;
+
+      // Optional: active link highlight
+      const current = (location.pathname.split("/").pop() || "index.html");
+      document.querySelectorAll(".main-nav a").forEach(a => {
+        if (a.getAttribute("href") === current) a.classList.add("active");
+      });
+    })
+    .catch(err => console.error("nav load error:", err));
+});
+</script>
+
 
 <body class="theme-dark" id="top">
   <!-- NAV -->
