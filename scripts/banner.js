@@ -1,10 +1,5 @@
-/* ============================
-   Square Bidness Banner Script
-   ============================ */
-
-// CONFIG — edit these lines for each event
 const CONFIG = {
-  switchAt: new Date(2025, 8, 19, 0, 0, 0), // Year, month-1, day → Sept 19, 2025 @ midnight
+  switchAt: new Date(2025, 8, 19, 0, 0, 0), // Innovation Fest flip date
   live: {
     text: `🚀 Square Bidness is LIVE at 
       <a href="https://events.fastcompany.com/innovationfestival" target="_blank" rel="noopener">
@@ -16,19 +11,19 @@ const CONFIG = {
       <a href="https://events.fastcompany.com/innovationfestival" target="_blank" rel="noopener">
       Innovation Fest 2025</a>. See you again soon.`,
     class: "sb-banner sb-banner--thanks",
+  },
+
+  // 🔥 Bonus variations
+  holiday: {
+    text: `🎄 Holiday Heat: Square Bidness exclusive drop — shop limited pieces now.`,
+    class: "sb-banner sb-banner--holiday",
+  },
+  drop: {
+    text: `⚡ Limited Edition Drop: VSOP Collection live now. Don’t miss it.`,
+    class: "sb-banner sb-banner--drop",
+  },
+  sale: {
+    text: `💸 Special Offer: Save up to 20% today only. Shop the sale ➡`,
+    class: "sb-banner sb-banner--sale",
   }
 };
-
-// RENDER
-(function(){
-  const now = new Date();
-  const showLive = now < CONFIG.switchAt;
-
-  const el = document.createElement("div");
-  el.className = showLive ? CONFIG.live.class : CONFIG.thanks.class;
-  el.innerHTML = showLive ? CONFIG.live.text : CONFIG.thanks.text;
-
-  // Mount under nav
-  const nav = document.querySelector("#nav-placeholder");
-  if (nav) nav.insertAdjacentElement("afterend", el);
-})();
