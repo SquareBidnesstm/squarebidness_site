@@ -76,13 +76,57 @@
 </noscript>
 <!-- End Google Tag Manager (noscript) -->
 
-  <!-- INNOVATION FEST BANNER -->
+<!-- INNOVATION FEST BANNER -->
 <div class="sb-banner">
   🚀 Square Bidness Live at 
   <a href="https://events.fastcompany.com/innovationfestival" target="_blank" rel="noopener">
     Innovation Fest NYC
   </a> — September 15–18
 </div>
+
+<script>
+(() => {
+  const CONFIG = {
+    live: {
+      text: `🚀 Square Bidness is LIVE at 
+        <a href="https://events.fastcompany.com/innovationfestival" target="_blank" rel="noopener">
+        Innovation Fest 2025</a> — tap in with us in NYC!`,
+      class: "sb-banner sb-banner--live",
+    },
+    thanks: {
+  text: `🙏 Thank you, NYC! We are thankful for the opportunity to be part of 
+    <a href="https://events.fastcompany.com/innovationfestival" target="_blank" rel="noopener">
+    Innovation Fest 2025</a>. See you again soon.`,
+  class: "sb-banner sb-banner--thanks",
+},
+
+    vsop: {
+      text: `🔥 VSOP Preorders Live Now → 
+        <a href="https://squarebidness.com" target="_blank" rel="noopener">
+        squarebidness.com</a>`,
+      class: "sb-banner sb-banner--vsop",
+    }
+  };
+
+  const start = new Date(2025, 8, 15);  // Sept 15, 2025
+  const end = new Date(2025, 8, 18);    // Sept 18, 2025
+  const vsopStart = new Date(2025, 8, 25); // Sept 25, 2025
+  const now = new Date();
+
+  const banner = document.querySelector(".sb-banner");
+
+  if (now >= start && now <= end) {
+    banner.innerHTML = CONFIG.live.text;
+    banner.className = CONFIG.live.class;
+  } else if (now > end && now < vsopStart) {
+    banner.innerHTML = CONFIG.thanks.text;
+    banner.className = CONFIG.thanks.class;
+  } else if (now >= vsopStart) {
+    banner.innerHTML = CONFIG.vsop.text;
+    banner.className = CONFIG.vsop.class;
+  }
+})();
+</script>
 
 <style>
   .sb-banner {
