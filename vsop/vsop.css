@@ -1,0 +1,302 @@
+:root {
+  --burgundy:#800020;
+  --gold:#FFD700;
+  --ink:#111;
+  --ink-2:#333;
+  --bg:#f9f9f9;
+  --card:#ffffff;
+  --radius:18px;
+  --shadow:0 10px 30px rgba(0,0,0,.08);
+}
+
+* { box-sizing:border-box; }
+
+body {
+  margin:0;
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Arial,sans-serif;
+  color:var(--ink);
+  background:var(--bg);
+}
+
+.container {
+  max-width:1100px;
+  margin:0 auto;
+  padding:24px;
+}
+
+/* HERO */
+/* HERO */
+.hero {
+  /* Fallback burgundy even if image fails */
+  background-color: #800020;
+
+  /* Gradient overlay + image */
+  background-image:
+    linear-gradient(135deg, rgba(128,0,32,.95), rgba(128,0,32,.85)),
+    url('assets/vsop-hero.jpg');
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+
+  color: #fff;
+  padding: 64px 24px;
+  text-align: center;
+  position: relative;
+
+  /* Make sure it’s visibly tall */
+  min-height: 60vh;
+}
+
+
+
+.btn {
+  display:inline-block;
+  background:var(--gold);
+  color:var(--ink);
+  font-weight:800;
+  padding:12px 18px;
+  border-radius:999px;
+  text-decoration:none;
+  border:2px solid #e6c533;
+  box-shadow:0 6px 16px rgba(0,0,0,.15);
+  transition:transform .12s ease, box-shadow .2s ease;
+}
+
+.btn:hover {
+  transform:translateY(-2px);
+  box-shadow:0 10px 24px rgba(0,0,0,.18);
+}
+
+/* Meta pill row (desktop) */
+.meta-row{
+  display:flex;
+  gap:14px;
+  justify-content:center;
+  flex-wrap:wrap;
+  margin-top:10px;
+  font-weight:700;
+}
+
+/* Pills */
+.meta-pill{
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.25);
+  padding:8px 12px;
+  border-radius:999px;
+  white-space:nowrap;           /* keep each pill on one line */
+}
+
+/* Mobile: turn into a horizontal scroll bar */
+@media (max-width: 640px){
+  .meta-row{
+    justify-content:flex-start; /* align to left for scroll */
+    gap:10px;
+    flex-wrap:nowrap;           /* single row */
+    overflow-x:auto;            /* horizontal scroll */
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type:x proximity;
+    padding:8px 2px;            /* room for edge-glow */
+    margin-left:-8px;           /* bleed to screen edge */
+    margin-right:-8px;
+  }
+  .meta-pill{
+    scroll-snap-align:center;
+    flex:0 0 auto;              /* don't shrink */
+    margin-left:8px;
+    margin-right:8px;
+  }
+  /* Optional: subtle fade edges on mobile */
+  .meta-row::before,
+  .meta-row::after{
+    content:"";
+    position:sticky;
+    top:0;
+    width:18px;
+    height:100%;
+    pointer-events:none;
+  }
+  .meta-row::before{
+    left:0;
+    background:linear-gradient(90deg, rgba(0,0,0,0.15), transparent);
+  }
+  .meta-row::after{
+    right:0;
+    background:linear-gradient(-90deg, rgba(0,0,0,0.15), transparent);
+  }
+}
+/* Make sure the row can position the hint */
+.meta-row { position: relative; }
+
+/* Mobile-only swipe hint */
+@media (max-width: 640px){
+  .meta-row--hint::after{
+    content: "← swipe →";
+    position: absolute;
+    left: 50%;
+    bottom: -18px;
+    transform: translateX(-50%);
+    font-size: 12px;
+    letter-spacing: .5px;
+    color: rgba(255,255,255,.85);     /* visible on burgundy hero */
+    text-shadow: 0 1px 2px rgba(0,0,0,.35);
+    opacity: 0;
+    animation: sb-hint-fade 2.8s ease forwards;
+    pointer-events: none;
+  }
+  @keyframes sb-hint-fade {
+    0%   { opacity: 0; transform: translateX(-50%) translateY(4px); }
+    15%  { opacity: 1; transform: translateX(-50%) translateY(0); }
+    70%  { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  /* Give a little extra space for the hint under the row */
+  .meta-row { margin-bottom: 10px; }
+}
+
+
+
+/* COUNTDOWN */
+.countdown {
+  background:#fff;
+  border:1px solid #eee;
+  margin:-28px auto 24px;
+  width:min(100%,900px);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:18px;
+  text-align:center;
+}
+
+.countdown strong { color:var(--burgundy); }
+
+/* GRID */
+.grid {
+  display:grid;
+  grid-template-columns:repeat(12,1fr);
+  gap:18px;
+}
+.col-7 { grid-column: span 7; }
+.col-5 { grid-column: span 5; }
+
+@media (max-width: 900px){
+  .col-7,.col-5 { grid-column:1 / -1; }
+}
+
+/* CARD / PRODUCT */
+.card {
+  background:var(--card);
+  border:1px solid #eee;
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+
+.card__media {
+  aspect-ratio: 16/10;
+  background:#ddd;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#666;
+  font-weight:700;
+}
+
+.card__body { padding:18px; }
+
+.h2 {
+  font-size:clamp(20px,3vw,28px);
+  margin:0 0 6px;
+}
+
+.muted { color:#555; }
+
+.bullets {
+  margin:10px 0 14px;
+  padding-left:18px;
+}
+
+.price {
+  font-size:20px;
+  font-weight:800;
+  margin:10px 0;
+}
+
+.row {
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+select,input[type="number"] {
+  padding:10px 12px;
+  border-radius:10px;
+  border:1px solid #ddd;
+  background:#fff;
+  min-width:120px;
+  font-weight:600;
+}
+
+.btn--burgundy {
+  background:var(--burgundy);
+  color:#fff;
+  border-color:#5f0019;
+}
+.btn--burgundy:hover { filter:brightness(1.05); }
+
+.stack { display:grid; gap:18px; }
+
+/* STORY */
+.story {
+  background:#fff;
+  border:1px solid #eee;
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:24px;
+}
+
+blockquote {
+  margin:0;
+  padding:0;
+  border-left:4px solid var(--burgundy);
+  padding-left:12px;
+  color:#342;
+  font-weight:700;
+}
+
+/* FOOTER CTA */
+.closer {
+  text-align:center;
+  padding:36px 24px;
+  border-top:1px dashed #e7e7e7;
+  margin-top:24px;
+}
+
+.closer .quote {
+  font-weight:800;
+  margin-bottom:10px;
+}
+/* put in vsop.css */
+.countdown.is-closed {
+  background:#fff7d9;           /* soft gold tint */
+  border-color:#f1d06a;
+  color:#111;
+}
+.countdown.is-closed strong { color:#800020; } /* burgundy accent */
+
+/* @media (prefers-reduced-motion: no-preference) {
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: #000;
+    pointer-events: none;
+    opacity: 1;
+    transition: opacity .6s ease;
+    z-index: 9999;
+  }
+  .js-ready body::before { opacity: 0; }
+
+  body { opacity: 0; transition: opacity .6s ease; }
+  .js-ready body { opacity: 1; }
+} */ 
+ /* put in vsop.css */
