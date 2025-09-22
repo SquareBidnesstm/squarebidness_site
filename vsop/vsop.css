@@ -27,27 +27,29 @@ body {
 /* HERO */
 /* HERO */
 .hero {
-  /* Fallback burgundy even if image fails */
   background-color: #800020;
-
-  /* Gradient overlay + image */
-background-image:
-  linear-gradient(135deg, rgba(128,0,32,.95), rgba(128,0,32,.85)),
-  url('assets/vsop-hero.jpg');
+  background-image: url('assets/vsop-hero.jpg');
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
-
-  color: #fff;
-  padding: 64px 24px;
-  text-align: center;
   position: relative;
-
-  /* Make sure it’s visibly tall */
-  min-height: 60vh;
 }
 
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(128,0,32,.95), rgba(128,0,32,.85));
+  z-index: 1;
+}
 
+.hero .container {
+  position: relative;
+  z-index: 2;
+}
 
 .btn {
   display:inline-block;
