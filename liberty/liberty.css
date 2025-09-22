@@ -1,0 +1,171 @@
+/* --- LIBERTY GALLERY (cinematic wide image) --- */
+.gallery{
+  display:grid;
+  grid-template-columns:repeat(12,1fr);
+  gap:16px;
+}
+
+/* 3-up grid for regular tiles on desktop */
+.tile{
+  grid-column: span 4;
+  background:var(--card);
+  border-radius:14px;
+  overflow:hidden;
+  border:1px solid #171b1e;
+  box-shadow:var(--shadow);
+}
+
+/* Make the wide tile full-width cinematic on desktop */
+.tile--wide{
+  grid-column: 1 / -1; /* span all 12 columns */
+}
+
+/* Nice letterbox feel for the wide shot */
+.tile--wide img{
+  width:100%;
+  height:auto;
+  display:block;
+  aspect-ratio: 21 / 9;  /* cinematic ratio */
+  object-fit: cover;     /* crop gracefully if needed */
+}
+/* Caption overlay for wide Liberty tile */
+.tile--wide {
+  position: relative;
+}
+
+.tile--wide::after {
+  content: "Liberty Collection — Hudson, NYC";
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.55);
+  color: #fff;
+  font-weight: 600;
+  font-size: clamp(12px, 2vw, 16px);
+  padding: 6px 12px;
+  border-radius: 8px;
+  opacity: 0;
+  transition: opacity .25s ease, transform .25s ease;
+  pointer-events: none;
+}
+
+.tile--wide:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-4px);
+}
+
+/* Tablet: switch regular tiles to 2-up, wide stays full-width */
+@media (max-width: 1024px){
+  .tile{ grid-column: span 6; }
+  .tile--wide{ grid-column: 1 / -1; }
+}
+
+/* Mobile: everything stacks, wide remains full-width */
+@media (max-width: 640px){
+  .tile{ grid-column: 1 / -1; }
+  .tile--wide{ grid-column: 1 / -1; }
+}
+:root{
+  --bg:#0a0b0c; --card:#0f1113; --accent:#1da084; --accent-2:#19b09b;
+  --radius:18px; --shadow:0 14px 40px rgba(0,0,0,.28);
+}
+*{box-sizing:border-box} html,body{margin:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Arial,sans-serif;color:#e8ecef;background:var(--bg)}
+.container{max-width:1200px;margin:0 auto;padding:24px}
+
+/* HERO with Liberty-green glow + image fallback */
+.hero{
+  min-height:60vh; position:relative; display:flex; align-items:flex-end;
+  background:
+    linear-gradient(180deg, rgba(10,11,12,0.2), rgba(10,11,12,0.75)),
+    url('assets/liberty-hero.jpg') center/cover no-repeat;
+}
+.hero__overlay{position:absolute; inset:0; background:radial-gradient(60% 60% at 50% 40%, rgba(25,176,155,.25), transparent 70%); pointer-events:none;}
+.hero__inner{position:relative; z-index:1; padding-bottom:36px}
+.badge{display:inline-block;margin-bottom:12px;padding:6px 10px;border-radius:999px;font-weight:800;font-size:12px;letter-spacing:.4px;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#08221d;box-shadow:0 6px 18px rgba(25,176,155,.35)}
+.hero h1{margin:0 0 6px;font-size:clamp(28px,6vw,56px);letter-spacing:.6px}
+.hero p{margin:0 0 16px;font-size:clamp(14px,2.8vw,18px);color:#d9f5ef;opacity:.95}
+.btn{display:inline-block;text-decoration:none;font-weight:800;padding:12px 16px;border-radius:999px;border:2px solid transparent;transition:transform .12s,box-shadow .2s,background .2s,color .2s,border-color .2s}
+.btn:hover{transform:translateY(-2px)}
+.btn--solid{background:var(--accent);color:#08221d;box-shadow:0 8px 22px rgba(25,176,155,.35)}
+.btn--solid:hover{background:var(--accent-2)}
+.btn--ghost{background:transparent;color:#d9f5ef;border-color:rgba(217,245,239,.35)}
+.btn--ghost:hover{border-color:#d9f5ef}
+
+/* STORY */
+.story{background:linear-gradient(180deg, rgba(29,160,132,.08), rgba(29,160,132,0));border:1px solid rgba(29,160,132,.18);border-radius:var(--radius);box-shadow:var(--shadow);color:#e6faf5}
+
+/* GALLERY grid + cinematic wide tile */
+.gallery{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+.tile{grid-column:span 4;background:var(--card);border-radius:14px;overflow:hidden;border:1px solid #171b1e;box-shadow:var(--shadow)}
+.tile img{width:100%;height:auto;display:block;transform:scale(1);transition:transform .25s ease,filter .25s ease}
+.tile:hover img{transform:scale(1.03);filter:contrast(1.02)}
+.tile--wide{grid-column:1 / -1; position:relative}
+.tile--wide img{width:100%;aspect-ratio:21 / 9;object-fit:cover}
+
+/* Caption overlay on cinematic tile */
+.tile--wide::after{
+  content:"Liberty Collection — Hudson, NYC";
+  position:absolute;left:50%;bottom:16px;transform:translateX(-50%);
+  background:rgba(0,0,0,.55);color:#fff;font-weight:600;font-size:clamp(12px,2vw,16px);
+  padding:6px 12px;border-radius:8px;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;
+}
+.tile--wide:hover::after{opacity:1;transform:translateX(-50%) translateY(-4px)}
+
+/* Responsive */
+@media (max-width:1024px){ .tile{grid-column:span 6} .tile--wide{grid-column:1 / -1} }
+@media (max-width:640px){ .tile{grid-column:1 / -1} }
+.note{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;background:linear-gradient(180deg, rgba(29,160,132,.08), rgba(29,160,132,0));border:1px solid rgba(29,160,132,.18);border-radius:var(--radius);box-shadow:var(--shadow)}
+.note .muted{color:#bfeae1} .note__cta{display:flex;gap:10px;flex-wrap:wrap}
+
+/* --- Liberty Tee Card --- */
+.liberty-tee { margin-top: 32px; }
+
+.product-card{
+  display:grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap:20px;
+  background:var(--card);
+  border:1px solid #171b1e;
+  border-radius:14px;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.product-card__media img{ display:block; width:100%; height:auto; }
+
+.product-card__body{ padding:20px; }
+.product-card .badge{
+  display:inline-block; margin-bottom:10px; padding:6px 10px;
+  border-radius:999px; font-weight:800; font-size:12px; letter-spacing:.4px;
+  background:linear-gradient(135deg, var(--accent), var(--accent-2));
+  color:#08221d;
+}
+.product-card .h2{ margin:4px 0 8px; font-size:clamp(22px, 3vw, 28px); }
+.product-card .muted{ color:#bfeae1; margin:0 0 10px; }
+.product-card .bullets{ margin:8px 0 14px; padding-left:18px; }
+.product-card .price{ font-weight:800; font-size:18px; margin:8px 0 12px; }
+
+.product-card .row{
+  display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:12px;
+}
+.product-card label{ display:flex; gap:6px; align-items:center; font-size:14px; }
+.product-card select, .product-card input{
+  background:#0b0d0f; border:1px solid #20252a; color:#e8ecef; border-radius:10px;
+  padding:8px 10px;
+}
+
+/* Button in Liberty green family */
+.btn--liberty{
+  background:linear-gradient(135deg, var(--accent), var(--accent-2));
+  color:#08221d; font-weight:800; border:2px solid transparent;
+  border-radius:999px; padding:12px 16px; display:inline-block; text-decoration:none;
+  box-shadow:0 8px 22px rgba(25,176,155,.35); transition:transform .12s, box-shadow .2s;
+}
+.btn--liberty:hover{ transform:translateY(-2px); box-shadow:0 10px 28px rgba(25,176,155,.45); }
+
+/* Responsive */
+@media (max-width: 900px){
+  .product-card{ grid-template-columns: 1fr; }
+  .product-card__media{ order: -1; } /* image first on mobile */
+}
