@@ -215,89 +215,68 @@
     });
   </script>
 
-  <!-- LIBERTY TEE PRODUCT CARD -->
-  <section class="container liberty-tee">
-    <div class="product-card">
-      <div class="product-card__media">
-        <img src="assets/liberty-tee.jpg"
-             alt="Liberty Green Supima Cotton Tee — Square Bidness"
-             width="1600" height="1067" loading="lazy">
-      </div>
-
-      <div class="product-card__body">
-        <div class="badge">Limited Run</div>
-        <h2 class="h2">Liberty Green Supima Cotton Tee</h2>
-        <p class="muted">Inspired by the Liberty Collection — premium Supima cotton in Liberty Green.</p>
-
-        <ul class="bullets">
-          <li>100% Supima cotton (soft hand, durable)</li>
-          <li>Classic Square Bidness fit</li>
-          <li>Color: Liberty Green</li>
-          <li>Ships fast from Louisiana</li>
-        </ul>
-
-        <div class="price">$<span id="liberty-tee-price">TBD</span></div>
-
-        <div class="row">
-          <label>Size
-            <select id="liberty-tee-size">
-              <option>S</option><option>M</option><option>L</option>
-              <option>XL</option><option>XXL</option>
-            </select>
-          </label>
-          <label>Qty
-            <input id="liberty-tee-qty" type="number" min="1" value="1">
-          </label>
-        </div>
-
-        <!-- Update CHECKOUT_URL when ready -->
-        <a class="btn btn--liberty" href="#" id="liberty-tee-checkout">Shop Liberty Tee</a>
-      </div>
+ <!-- LIBERTY TEE PRODUCT CARD -->
+<section class="container liberty-tee">
+  <div class="product-card">
+    <div class="product-card__media">
+      <img src="assets/liberty-tee.jpg"
+           alt="Liberty Green Supima Cotton Tee — Square Bidness"
+           width="1600" height="1067" loading="lazy">
     </div>
-  </section>
 
-  <!-- Single click handler (removed duplicate) -->
-  <script>
-    document.addEventListener('click', function(e){
-      const btn = e.target.closest('#liberty-tee-checkout');
-      if (!btn) return;
+    <div class="product-card__body">
+      <div class="badge">Limited Run</div>
+      <h2 class="h2">Liberty Green Supima Cotton Tee</h2>
+      <p class="muted">Inspired by the Liberty Collection — premium Supima cotton in Liberty Green.</p>
 
-      const size  = document.getElementById('liberty-tee-size')?.value || 'unknown';
-      const qty   = Number(document.getElementById('liberty-tee-qty')?.value || 1);
-      const price = Number((document.getElementById('liberty-tee-price')?.textContent || '0').replace(/[^0-9.]/g,''));
+      <ul class="bullets">
+        <li>100% Supima cotton (soft hand, durable)</li>
+        <li>Classic Square Bidness fit</li>
+        <li>Color: Liberty Green</li>
+        <li>Ships fast from Louisiana</li>
+      </ul>
 
-      // Push to GTM/GA4
-      window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push({
-        event: 'liberty_tee_click',
-        sku: 'liberty-tee',
-        size: size,
-        qty: String(qty),
-        price: String(price),
-        page: 'liberty'
-      });
+      <div class="price">$39.99</div> <!-- Update your price here -->
 
-      // Fire Meta Pixel if available
-      if (typeof fbq === 'function') {
-        fbq('track', 'InitiateCheckout', {
-          content_name: 'Liberty Green Supima Cotton Tee',
-          content_category: 'Liberty',
-          contents: [{ id: 'liberty-tee', quantity: qty }],
-          num_items: qty,
-          value: price * qty,
-          currency: 'USD'
-        });
-      }
+      <div class="row">
+        <label>Size
+          <select id="liberty-tee-size">
+            <option>S</option><option>M</option><option>L</option>
+            <option>XL</option><option>XXL</option>
+          </select>
+        </label>
+        <label>Qty
+          <input id="liberty-tee-qty" type="number" min="1" value="1">
+        </label>
+      </div>
 
-      // Redirect to checkout (SET THIS)
-      const CHECKOUT_URL = '#'; // TODO: set your Stripe/Cart link
-      if (CHECKOUT_URL === '#') {
-        alert('Add your checkout URL for the Liberty Tee.');
-        return;
-      }
-      const qs = new URLSearchParams({ size, qty: String(qty) });
-      window.location.href = CHECKOUT_URL + (qs.toString() ? '?' + qs.toString() : '');
-    });
-  </script>
+      <!-- Stripe Payment Link -->
+      <a class="btn btn--liberty" href="#" id="liberty-tee-checkout">Shop Liberty Tee</a>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('click', function(e){
+    const btn = e.target.closest('#liberty-tee-checkout');
+    if (!btn) return;
+
+    const size  = document.getElementById('liberty-tee-size')?.value || 'unknown';
+    const qty   = Number(document.getElementById('liberty-tee-qty')?.value || 1);
+
+    // Replace with your actual Stripe Payment Link
+    const CHECKOUT_URL = "https://buy.stripe.com/your-link-here";
+
+    if (!CHECKOUT_URL || CHECKOUT_URL === "#") {
+      alert('⚠️ Add your Stripe checkout link for the Liberty Tee.');
+      return;
+    }
+
+    // Append query parameters for size & qty
+    const qs = new URLSearchParams({ size, qty: String(qty) });
+    window.location.href = CHECKOUT_URL + (qs.toString() ? '?' + qs.toString() : '');
+  });
+</script>
+
 </body>
 </html>
