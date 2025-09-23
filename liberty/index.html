@@ -295,47 +295,32 @@
     });
   </script>
 
-<!-- LIBERTY TEE PRODUCT CARD -->
-<section class="container liberty-tee">
-  <div class="product-card">
-    <div class="product-card__media">
-      <img src="assets/liberty-tee.jpg"
-           alt="Liberty Green Supima Cotton Tee — Square Bidness"
-           width="1600" height="1067" loading="lazy">
+<!-- LIBERTY TEE – minimal inline option -->
+<section class="container" id="liberty-tee">
+  <div class="tee-bar">
+    <div class="tee-bar__left">
+      <strong>Liberty Tee (as worn above)</strong>
+      <span class="tee-bar__price">$35</span>
     </div>
 
-    <div class="product-card__body">
-      <div class="badge">Limited Run</div>
-      <h2 class="h2">Liberty Green Supima Cotton Tee</h2>
-      <p class="muted">Inspired by the Liberty Collection — premium Supima cotton in Liberty Green.</p>
+    <div class="tee-bar__right">
+      <label class="tee-bar__field">Size
+        <select id="liberty-tee-size">
+          <option value="XS">XS — Almost Gone</option>
+          <option value="S">S — Almost Gone</option>
+          <option value="M" disabled>Medium — Sold Out</option>
+          <option value="L" disabled>Large — Sold Out</option>
+          <option value="XL">XL — Almost Gone</option>
+          <option value="2X">2X — Almost Gone</option>
+          <option value="3X">3X — Almost Gone</option>
+        </select>
+      </label>
 
-      <ul class="bullets">
-        <li>100% Supima cotton (soft hand, durable)</li>
-        <li>Classic Square Bidness fit</li>
-        <li>Color: Liberty Green</li>
-        <li>Ships fast from Louisiana</li>
-      </ul>
+      <label class="tee-bar__field">Qty
+        <input id="liberty-tee-qty" type="number" min="1" max="2" value="1">
+      </label>
 
-      <div class="price">$35.00</div>
-
-      <div class="row">
-        <label>Size
-          <select id="liberty-tee-size">
-            <option value="XS">XS — Almost Gone</option>
-            <option value="S">S — Almost Gone</option>
-            <option value="M" disabled>Medium — Sold Out</option>
-            <option value="L" disabled>Large — Sold Out</option>
-            <option value="XL">XL — Almost Gone</option>
-            <option value="2X">2X — Almost Gone</option>
-            <option value="3X">3X — Almost Gone</option>
-          </select>
-        </label>
-        <label>Qty
-          <input id="liberty-tee-qty" type="number" min="1" max="2" value="1">
-        </label>
-      </div>
-
-      <a class="btn btn--liberty" href="#" id="liberty-tee-checkout">Shop Liberty Tee</a>
+      <a class="btn btn--liberty" href="#" id="liberty-tee-checkout">Shop Tee</a>
     </div>
   </div>
 </section>
@@ -348,10 +333,10 @@
     const size  = document.getElementById('liberty-tee-size')?.value || 'unknown';
     const qty   = Number(document.getElementById('liberty-tee-qty')?.value || 1);
 
-    // Stripe Payment Link
+    // Your Stripe Payment Link
     const CHECKOUT_URL = "https://buy.stripe.com/4gM28r2dp529gqx1cI8N20e";
 
-    // Pass details for tracking
+    // Optional: pass details for your tracking/notes
     const qs = new URLSearchParams({
       product: "Liberty Green Supima Cotton Tee",
       price: "35.00",
@@ -362,7 +347,6 @@
     window.location.href = CHECKOUT_URL + (qs.toString() ? '?' + qs.toString() : '');
   });
 </script>
-
 
 </body>
 </html>
