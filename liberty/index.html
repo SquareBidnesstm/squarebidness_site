@@ -236,21 +236,25 @@
         <li>Ships fast from Louisiana</li>
       </ul>
 
-      <div class="price">$39.99</div> <!-- Update your price here -->
+      <div class="price">$35.00</div>
 
       <div class="row">
         <label>Size
           <select id="liberty-tee-size">
-            <option>S</option><option>M</option><option>L</option>
-            <option>XL</option><option>XXL</option>
+            <option value="XS">XS (2 left)</option>
+            <option value="S">S (2 left)</option>
+            <option value="M" disabled>Medium — Sold Out</option>
+            <option value="L" disabled>Large — Sold Out</option>
+            <option value="XL">XL (2 left)</option>
+            <option value="2X">2X (2 left)</option>
+            <option value="3X">3X (2 left)</option>
           </select>
         </label>
         <label>Qty
-          <input id="liberty-tee-qty" type="number" min="1" value="1">
+          <input id="liberty-tee-qty" type="number" min="1" max="2" value="1">
         </label>
       </div>
 
-      <!-- Stripe Payment Link -->
       <a class="btn btn--liberty" href="#" id="liberty-tee-checkout">Shop Liberty Tee</a>
     </div>
   </div>
@@ -264,10 +268,10 @@
     const size  = document.getElementById('liberty-tee-size')?.value || 'unknown';
     const qty   = Number(document.getElementById('liberty-tee-qty')?.value || 1);
 
-    // Your live Stripe Payment Link
-    const CHECKOUT_URL = "https://buy.stripe.com/00wfZh7xJbqx1vD2gM8N20f";
+    // Stripe Payment Link
+    const CHECKOUT_URL = "https://buy.stripe.com/4gM28r2dp529gqx1cI8N20e";
 
-    // Send details along for your records
+    // Pass details for tracking
     const qs = new URLSearchParams({
       product: "Liberty Green Supima Cotton Tee",
       price: "35.00",
