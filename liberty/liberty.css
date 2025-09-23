@@ -19,26 +19,38 @@ body {
 /* --- HERO --- */
 .hero {
   position: relative;
-  min-height: 90vh;
+  min-height: 70vh;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
   color: #fff;
-
-  background-image:
-    linear-gradient(135deg, rgba(0,0,0,.55), rgba(0,0,0,.25)),
-    url('assets/og-liberty.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  overflow: hidden;
 }
+
+.hero__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 40%;
+  z-index: 0;
+  pointer-events: none;
+}
+
 .hero__overlay {
   position: absolute;
   inset: 0;
-  background: transparent;
+  background: linear-gradient(135deg, rgba(0,0,0,.55), rgba(0,0,0,.25));
+  z-index: 1;
 }
-.hero__inner { position: relative; z-index: 2; }
+
+.hero__inner {
+  position: relative;
+  z-index: 2;
+}
+
 .badge {
   display: inline-block;
   margin-bottom: 12px;
@@ -102,16 +114,14 @@ body {
   grid-template-columns: repeat(12, 1fr);
   gap: 16px;
 }
-
 .tile {
-  grid-column: span 4; /* 3-up on desktop */
+  grid-column: span 4;
   background: var(--card);
   border-radius: 14px;
   overflow: hidden;
   border: 1px solid #171b1e;
   box-shadow: var(--shadow);
 }
-
 .tile img {
   width: 100%;
   height: auto;
@@ -121,15 +131,13 @@ body {
   transition: transform .25s ease, filter .25s ease;
 }
 .tile:hover img { transform: scale(1.03); filter: contrast(1.02); }
-
-/* figcaptions under images */
 .tile figcaption {
   font-size: 13px;
   color: #bfeae1;
   padding: 8px 12px;
 }
 
-/* Full-width cinematic closer */
+/* Wide cinematic */
 .tile--wide {
   grid-column: 1 / -1;
   position: relative;
@@ -161,37 +169,11 @@ body {
 
 /* Responsive breakpoints */
 @media (max-width: 1024px) {
-  .tile { grid-column: span 6; } /* 2-up */
+  .tile { grid-column: span 6; }
   .tile--wide { grid-column: 1 / -1; }
 }
 @media (max-width: 640px) {
-  .tile { grid-column: 1 / -1; } /* stack */
+  .hero { min-height: 60vh; }
+  .tile { grid-column: 1 / -1; }
   .tile--wide { grid-column: 1 / -1; }
-}
-.hero__cta {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-top: 20px;
-}
-
-.note {
-  text-align: center;
-  padding: 40px 20px;
-  border-top: 1px solid #171b1e;
-  margin-top: 40px;
-}
-
-.note__cta {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-top: 20px;
-}
-
-.muted {
-  color: #888;
-  font-style: italic;
 }
