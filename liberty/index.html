@@ -264,20 +264,20 @@
     const size  = document.getElementById('liberty-tee-size')?.value || 'unknown';
     const qty   = Number(document.getElementById('liberty-tee-qty')?.value || 1);
 
-    // Replace with your actual Stripe Payment Link
-    const CHECKOUT_URL = "https://buy.stripe.com/your-link-here";
+    // Your live Stripe Payment Link
+    const CHECKOUT_URL = "https://buy.stripe.com/4gM28r2dp529gqx1cI8N20e";
 
-    if (!CHECKOUT_URL || CHECKOUT_URL === "#") {
-      alert('⚠️ Add your Stripe checkout link for the Liberty Tee.');
-      return;
-    }
+    // Send details along for your records
+    const qs = new URLSearchParams({
+      product: "Liberty Green Supima Cotton Tee",
+      price: "35.00",
+      size: size,
+      qty: String(qty)
+    });
 
-    // Append query parameters for size & qty
-    const qs = new URLSearchParams({ size, qty: String(qty) });
     window.location.href = CHECKOUT_URL + (qs.toString() ? '?' + qs.toString() : '');
   });
 </script>
-
 
 </body>
 </html>
