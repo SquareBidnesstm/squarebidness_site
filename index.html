@@ -66,30 +66,6 @@
       });
     });
   </script>
-  <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  "@id": "https://squarebidness.com/#website",
-  "url": "https://squarebidness.com/",
-  "name": "Square Bidness",
-  "publisher": {
-    "@type": "Organization",
-    "name": "Square Bidness Apparel, LLC",
-    "url": "https://squarebidness.com",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://squarebidness.com/assets/og-square-bidness.png"
-    }
-  },
-  "potentialAction": {
-    "@type": "SearchAction",
-    "target": "https://squarebidness.com/search?q={search_term_string}",
-    "query-input": "required name=search_term_string"
-  }
-}
-</script>
-
 </head>
 
 <body class="theme-dark" id="top">
@@ -125,10 +101,11 @@
 },
 
     vsop: {
-      text: `🔥 VSOP Preorders Live Now → 
-        <a href="https://squarebidness.com/vsop" target="_blank" rel="noopener">
-        squarebidness.com</a>`,
-      class: "sb-banner sb-banner--vsop",
+     text: `🔥 VSOP Preorders Live Now → 
+  <a href="https://squarebidness.com/vsop/" target="_blank" rel="noopener">
+  squarebidness.com/vsop</a>`,
+class: "sb-banner sb-banner--vsop",
+
     }
   };
 
@@ -245,51 +222,52 @@
 
         <div class="grid vsop-grid">
           <!-- Jacket card -->
-          <article class="card" data-product-id="vsop-jacket">
-            <div class="card__media">
-              <img loading="lazy" src="assets/vsop-jacket.jpg" alt="VSOP embroidered hooded jacket in burgundy and brown">
-              <span class="badge badge--coming-soon">Preorder Now</span>
-            </div>
-            <div class="card__content">
-              <h3>VSOP Hooded Jacket</h3>
-              <p class="card__description">Burgundy + Brown. Premium fabric. Embroidered.</p>
-              <p class="price">$129.99</p>
-            </div>
-            <div class="card__actions">
-              <a class="btn btn--gold btn--primary" href="product-vsop-jacket.html">
-                Preorder Now
-              </a>
-              <a class="btn btn--ghost btn--secondary" href="product-vsop-jacket.html">
-                View Details
-              </a>
-            </div>
-          </article>
+<article class="card" data-product-id="vsop-jacket">
+  <div class="card__media">
+    <img loading="lazy" src="assets/vsop-jacket.jpg" alt="VSOP embroidered hooded jacket in burgundy and brown">
+    <span class="badge" aria-live="polite">Preorder Now</span>
+  </div>
+  <div class="card__content">
+    <h3>VSOP Hooded Jacket</h3>
+    <p class="card__description">Burgundy + Brown. Premium fabric. Embroidered.</p>
+    <p class="price">$129.99</p>
+  </div>
+  <div class="card__actions">
+    <a class="btn btn--gold btn--primary" href="product-vsop-jacket.html">
+      Preorder Now
+    </a>
+    <a class="btn btn--ghost btn--secondary" href="product-vsop-jacket.html">
+      View Details
+    </a>
+  </div>
+</article>
 
-          <!-- Shorts card -->
-          <article class="card" data-product-id="vsop-shorts">
-            <div class="card__media">
-              <img loading="lazy" src="assets/vsop-shorts.jpg" alt="VSOP matching shorts in burgundy and brown">
-              <span class="badge badge--coming-soon">Preorder Now</span>
-            </div>
-            <div class="card__content">
-              <h3>VSOP Shorts</h3>
-              <p class="card__description">Burgundy + Brown. Embroidered mark. Athletic fit.</p>
-              <p class="price">$89.99</p>
-            </div>
-            <div class="card__actions">
-              <a class="btn btn--gold btn--primary" href="product-vsop-shorts.html">
-                Preorder Now
-              </a>
-              <a class="btn btn--ghost btn--secondary" href="product-vsop-shorts.html">
-                View Details
-              </a>
-            </div>
-          </article>
+<!-- Shorts card -->
+<article class="card" data-product-id="vsop-shorts">
+  <div class="card__media">
+    <img loading="lazy" src="assets/vsop-shorts.jpg" alt="VSOP matching shorts in burgundy and brown">
+    <span class="badge" aria-live="polite">Preorder Now</span>
+  </div>
+  <div class="card__content">
+    <h3>VSOP Shorts</h3>
+    <p class="card__description">Burgundy + Brown. Embroidered mark. Athletic fit.</p>
+    <p class="price">$89.99</p>
+  </div>
+  <div class="card__actions">
+    <a class="btn btn--gold btn--primary" href="product-vsop-shorts.html">
+      Preorder Now
+    </a>
+    <a class="btn btn--ghost btn--secondary" href="product-vsop-shorts.html">
+      View Details
+    </a>
+  </div>
+</article>
+
 
           <!-- Collection card -->
           <article class="card">
             <div class="card__media">
-              <img loading="lazy" src="assets/hero.jpg" alt="VSOP look — jacket with matching shorts">
+              <img loading="lazy" src="assets/vsop-hero.jpg" alt="VSOP look — jacket with matching shorts">
             </div>
             <div class="card__content">
               <h3>Full VSOP Look</h3>
@@ -339,59 +317,67 @@
   <!-- Scripts: load after HTML so selectors exist -->
   <script src="scripts/cart.js"></script>
   <script>
-    // Product data hydration
-    fetch("products.json")
-      .then(r => r.json())
-      .then(data => {
-        document.querySelectorAll("[data-product-id]").forEach(card => {
-          const id = card.getAttribute("data-product-id");
-          const p = data[id];
-          if (!p) return;
+  // Product data hydration
+  fetch("products.json")
+    .then(r => r.json())
+    .then(data => {
+      document.querySelectorAll("[data-product-id]").forEach(card => {
+        const id = card.getAttribute("data-product-id");
+        const p = data[id];
+        if (!p) return;
 
-          // Update content
-          const title = card.querySelector(".title a, h3 a, h3");
-          const desc = card.querySelector(".desc, .card__description");
-          const img = card.querySelector("img");
-          const price = card.querySelector(".price");
+        // Update content
+        const title = card.querySelector(".title a, h3 a, h3");
+        const desc = card.querySelector(".desc, .card__description");
+        const img = card.querySelector("img");
+        const price = card.querySelector(".price");
 
-          if (title && p.name) title.textContent = p.name;
-          if (desc && p.desc) desc.textContent = p.desc;
-          if (img && p.image) img.src = p.image;
-          if (price && typeof p.price === "number") price.textContent = `$${p.price.toFixed(2)}`;
+        if (title && p.name) title.textContent = p.name;
+        if (desc && p.desc) desc.textContent = p.desc;
+        if (img && p.image) img.src = p.image;
+        if (price && typeof p.price === "number") price.textContent = `$${p.price.toFixed(2)}`;
 
-          // Update stock badge and button states
-          const badge = card.querySelector(".badge");
-          const primaryBtn = card.querySelector(".btn--primary");
-          
-          if (badge && primaryBtn) {
-            // Remove all status classes
-            card.classList.remove("card--disabled");
-            badge.className = "badge";
-            
-            if (p.status === "in-stock") {
-              badge.textContent = "Multiple Sizes Available";
-              badge.classList.add("badge--available");
-              primaryBtn.textContent = "Choose Size & Add to Cart";
-            } else if (p.status === "low-stock") {
-              badge.textContent = `Only ${p.stock || 3} Left`;
-              badge.classList.add("badge--low-stock");
-              primaryBtn.textContent = "Choose Size & Add to Cart";
-            } else if (p.status === "sold-out") {
-              badge.textContent = "Sold Out";
-              badge.classList.add("badge--sold-out");
-              primaryBtn.textContent = "Out of Stock";
-              card.classList.add("card--disabled");
-            } else if (p.status === "coming-soon" || p.status === "preorder") {
-              badge.textContent = "Preorder Now";
-              badge.classList.add("badge--coming-soon");
-              primaryBtn.textContent = "Choose Size & Preorder";
-            }
+        // Update stock badge and button states
+        const badge = card.querySelector(".badge");
+        const primaryBtn = card.querySelector(".btn--primary");
+
+        if (badge) {
+          // Reset classes
+          card.classList.remove("card--disabled");
+          badge.className = "badge";
+
+          const status = (p.status || "").toLowerCase();
+
+          if (status === "in-stock") {
+            badge.textContent = "Multiple Sizes Available";
+            badge.classList.add("badge--available");
+            if (primaryBtn) primaryBtn.textContent = "Choose Size & Add to Cart";
+          } else if (status === "low-stock") {
+            badge.textContent = `Only ${p.stock || 3} Left`;
+            badge.classList.add("badge--low-stock");
+            if (primaryBtn) primaryBtn.textContent = "Choose Size & Add to Cart";
+          } else if (status === "sold-out") {
+            badge.textContent = "Sold Out";
+            badge.classList.add("badge--sold-out");
+            card.classList.add("card--disabled");
+            if (primaryBtn) primaryBtn.textContent = "Out of Stock";
+          } else if (status === "preorder") {
+            badge.textContent = "Preorder Now";
+            // Reuse your existing styling class for preorder
+            badge.classList.add("badge--coming-soon");
+            if (primaryBtn) primaryBtn.textContent = "Choose Size & Preorder";
+          } else {
+            // Fallback: treat unknown/blank as preorder (keeps “live” feel)
+            badge.textContent = "Preorder Now";
+            badge.classList.add("badge--coming-soon");
+            if (primaryBtn) primaryBtn.textContent = "Choose Size & Preorder";
           }
-        });
-      })
-      .catch(() => {/* ignore if file missing */});
-  </script>
-  <script src="scripts/banner.js"></script>
+        }
+      });
+    })
+    .catch(() => {/* ignore if file missing */});
+</script>
+
 
 </body>
 </html>
