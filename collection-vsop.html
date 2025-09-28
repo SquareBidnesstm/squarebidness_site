@@ -71,18 +71,8 @@
     "itemListOrder": "http://schema.org/ItemListOrderAscending",
     "numberOfItems": 2,
     "itemListElement": [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "url": "https://squarebidness.com/product-vsop-jacket.html",
-        "name": "VSOP Hooded Jacket — Burgundy + Brown"
-      },
-      {
-        "@type": "ListItem",
-        "position": 2,
-        "url": "https://squarebidness.com/product-vsop-shorts.html",
-        "name": "VSOP Shorts — Burgundy + Brown"
-      }
+      { "@type": "ListItem", "position": 1, "url": "https://squarebidness.com/product-vsop-jacket.html", "name": "VSOP Hooded Jacket — Burgundy + Brown" },
+      { "@type": "ListItem", "position": 2, "url": "https://squarebidness.com/product-vsop-shorts.html", "name": "VSOP Shorts — Burgundy + Brown" }
     ]
   }
   </script>
@@ -129,9 +119,11 @@
       <p class="section__lead">Burgundy + Brown. All embroidered. All Square.</p>
 
       <div class="grid vsop-grid">
-        <article class="card">
+        <!-- VSOP Jacket (hydrated from products.json) -->
+        <article class="card" data-product-id="vsop-jacket">
           <div class="card__media">
             <img loading="lazy" src="assets/vsop-jacket.jpg" alt="VSOP embroidered hooded jacket in burgundy and brown">
+            <span class="badge" aria-live="polite">Preorder Now</span>
           </div>
           <div class="card__content">
             <h3>VSOP Hooded Jacket</h3>
@@ -144,9 +136,11 @@
           </div>
         </article>
 
-        <article class="card">
+        <!-- VSOP Shorts (hydrated from products.json) -->
+        <article class="card" data-product-id="vsop-shorts">
           <div class="card__media">
             <img loading="lazy" src="assets/vsop-shorts.jpg" alt="VSOP matching shorts in burgundy and brown">
+            <span class="badge" aria-live="polite">Preorder Now</span>
           </div>
           <div class="card__content">
             <h3>VSOP Shorts</h3>
@@ -163,6 +157,57 @@
   </main>
 
   <div id="footer-placeholder"></div>
+
+  <!-- Hydration script (same logic you used on index) -->
+  <script>
+    fetch("products.json")
+      .then(r => r.json())
+      .then(data => {
+        document.querySelectorAll("[data-product-id]").forEach(card => {
+          const id = card.getAttribute("data-product-id");
+          const p = data[id];
+          if (!p) return;
+
+          const title = card.querySelector(".title a, h3 a, h3");
+          const desc = card.querySelector(".desc, .card__description");
+          const img = card.querySelector("img");
+          const price = card.querySelector(".price");
+          if (title && p.name) title.textContent = p.name;
+          if (desc && p.desc) desc.textContent = p.desc;
+          if (img && p.image) img.src = p.image;
+          if (price && typeof p.price === "number") price.textContent = `$${p.price.toFixed(2)}`;
+
+          const badge = card.querySelector(".badge");
+          const primaryBtn = card.querySelector(".btn--primary");
+          if (badge) {
+            card.classList.remove("card--disabled");
+            badge.className = "badge";
+
+            const status = (p.status || "").toLowerCase();
+            if (status === "in-stock") {
+              badge.textContent = "Multiple Sizes Available";
+              badge.classList.add("badge--available");
+              if (primaryBtn) primaryBtn.textContent = "Choose Size & Add to Cart";
+            } else if (status === "low-stock") {
+              badge.textContent = `Only ${p.stock || 3} Left`;
+              badge.classList.add("badge--low-stock");
+              if (primaryBtn) primaryBtn.textContent = "Choose Size & Add to Cart";
+            } else if (status === "sold-out") {
+              badge.textContent = "Sold Out";
+              badge.classList.add("badge--sold-out");
+              card.classList.add("card--disabled");
+              if (primaryBtn) primaryBtn.textContent = "Out of Stock";
+            } else if (status === "preorder" || status === "") {
+              // Treat blank as preorder to keep the page feeling live
+              badge.textContent = "Preorder Now";
+              badge.classList.add("badge--coming-soon");
+              if (primaryBtn) primaryBtn.textContent = "Choose Size & Preorder";
+            }
+          }
+        });
+      })
+      .catch(() => {/* ignore if file missing */});
+  </script>
 
   <!-- Optional site JS -->
   <script src="scripts/banner.js"></script>
