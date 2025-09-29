@@ -1,51 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=GT-PL3L8P53"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'GT-PL3L8P53');
-</script>
+  <!-- GA4 (use your valid ID) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-6Y22HBF1VJ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-6Y22HBF1VJ');
+  </script>
 
   <!-- Basics -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Your Cart — Square Bidness</title>
+  <title>Checkout — Square Bidness</title>
   <link rel="stylesheet" href="styles/style.css" />
 
-  <!-- Basic SEO -->
-  <meta name="description" content="Review your Square Bidness cart and complete your order. Secure checkout for apparel and exclusives.">
-
-  <!-- Open Graph -->
+  <!-- SEO / OG -->
+  <meta name="description" content="Secure checkout — review your order and complete payment." />
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Square Bidness">
-  <meta property="og:title" content="Your Cart — Square Bidness">
-  <meta property="og:description" content="Review your Square Bidness cart and complete your order.">
-  <meta property="og:url" content="https://squarebidness.com/cart.html">
+  <meta property="og:title" content="Checkout — Square Bidness">
+  <meta property="og:description" content="Secure checkout — review your order and complete payment.">
+  <meta property="og:url" content="https://squarebidness.com/checkout.html">
   <meta property="og:image" content="https://squarebidness.com/assets/og-square-bidness.png">
-
-  <!-- Favicons -->
+  <meta name="theme-color" content="#000000" />
   <link rel="icon" href="/favicon.ico" sizes="any">
-
-  <!-- Browser UI color -->
-  <meta name="theme-color" content="#000000">
-  <meta name="mobile-web-app-capable" content="yes">
 
   <!-- Load Nav + Footer -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       fetch("nav.html").then(r => r.text()).then(d => {
         document.getElementById("nav-placeholder").innerHTML = d;
-
-        // Highlight active cart link if it exists
-        const cartLink = document.querySelector('.main-nav a[href="cart.html"]');
-        if (cartLink) cartLink.classList.add("active");
       });
-
       fetch("footer.html").then(r => r.text()).then(d => {
         document.getElementById("footer-placeholder").innerHTML = d;
       });
@@ -54,24 +41,22 @@
 </head>
 
 <body class="theme-dark" id="top">
-
   <!-- NAV -->
   <div id="nav-placeholder"></div>
 
-  <!-- PAGE HERO -->
+  <!-- HERO -->
   <header class="page-hero">
     <div class="container">
-      <h1 class="page-title">Your Cart</h1>
-      <p class="page-subtitle">Review your items and complete your order</p>
+      <h1 class="page-title">Checkout</h1>
+      <p class="page-subtitle">Review your order and complete payment</p>
     </div>
   </header>
 
-  <!-- MAIN CONTENT -->
+  <!-- MAIN -->
   <main class="section">
-    <div class="container">
-
-      <!-- Cart Items Table -->
-      <div class="cart">
+    <div class="container" style="max-width:900px">
+      <!-- Order Items -->
+      <div class="order">
         <table class="cart-table">
           <thead>
             <tr>
@@ -79,130 +64,214 @@
               <th>Price</th>
               <th>Qty</th>
               <th>Line</th>
-              <th></th>
             </tr>
           </thead>
-          <tbody id="cart-items">
-            <!-- Cart items will be inserted here by cart.js -->
+          <tbody id="order-items">
+            <!-- filled by JS -->
           </tbody>
         </table>
       </div>
 
-      <!-- Cart Summary -->
-      <div class="summary" id="cart-summary" style="display:none; margin-top:1.5rem">
+      <!-- Summary -->
+      <div class="summary" id="order-summary" style="margin-top:1.5rem; display:none;">
         <table>
           <tr>
             <td>Subtotal</td>
-            <td class="right" id="cart-subtotal">$0.00</td>
+            <td class="right" id="order-subtotal">$0.00</td>
+          </tr>
+          <tr id="order-discount-row" style="display:none">
+            <td class="discount-code-label">Discount</td>
+            <td class="right" id="order-discount">-$0.00</td>
           </tr>
           <tr>
-            <td>Estimated Tax (8.5%)</td>
-            <td class="right" id="cart-tax">$0.00</td>
+            <td>Estimated Tax (9.45%)</td>
+            <td class="right" id="order-tax">$0.00</td>
           </tr>
           <tr class="total">
             <td>Total</td>
-            <td class="right" id="cart-total">$0.00</td>
+            <td class="right" id="order-total">$0.00</td>
           </tr>
         </table>
 
-        <button id="checkout-button" class="btn btn--gold" style="margin-top:1rem;" disabled>
-          Proceed to Checkout
-        </button>
+        <div style="display:flex; gap:.5rem; margin-top:1rem;">
+          <a href="cart.html" class="btn btn--ghost">Back to Cart</a>
+          <button id="pay-button" class="btn btn--gold">Pay Securely</button>
+        </div>
+
+        <p style="opacity:.8; margin-top:.75rem;">
+          🔒 Secure checkout powered by Stripe.
+        </p>
       </div>
 
-      <!-- Cart Actions -->
-      <div style="margin-top:1rem">
-        <button onclick="window.SB.clearCart()" class="btn btn--ghost">Clear Cart</button>
-        <a href="shop.html" class="btn btn--ghost">Continue Shopping</a>
+      <!-- Empty state -->
+      <div id="empty" style="text-align:center; padding:2rem; display:none;">
+        <p style="opacity:.85">Your cart is empty.</p>
+        <a class="btn btn--ghost" href="shop.html">Continue Shopping</a>
       </div>
-
-      <!-- Security Notice -->
-      <div class="security-notice" style="margin-top:2rem">
-        <p>🔒 Secure checkout powered by Stripe. Your payment information is encrypted and secure.</p>
-      </div>
-
     </div>
   </main>
 
   <!-- FOOTER -->
   <div id="footer-placeholder"></div>
 
-  <!-- Scripts: load after HTML so selectors exist -->
-  <script src="scripts/cart.js"></script>
-
-  <!-- Stripe.js for secure checkout -->
+  <!-- Stripe -->
   <script src="https://js.stripe.com/v3/"></script>
 
-  <!-- Checkout functionality -->
+  <!-- Checkout logic -->
   <script>
-    // Checkout endpoint configuration
-  
-const CHECKOUT_ENDPOINT = "https://sb-checkout-server.onrender.com/create-checkout-session";
-    document.addEventListener("DOMContentLoaded", () => {
-      // Setup checkout button
-      const btn = document.getElementById("checkout-button");
+  (function() {
+    // ---- Config (match cart.js) ----
+    const CART_KEY   = 'sb_cart';
+    const COUPON_KEY = 'sb_coupon';
+    const TAX_RATE   = 0.0945; // LA combined — adjust if needed
+
+    const moneyFmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+    const money = n => moneyFmt.format(Number(n || 0));
+
+    const readCart = () => {
+      try { return JSON.parse(localStorage.getItem(CART_KEY) || '[]'); }
+      catch { return []; }
+    };
+
+    const getCoupon = () => localStorage.getItem(COUPON_KEY);
+    const applyCoupon = (subtotal) => {
+      const code = getCoupon();
+      if (!code) return { discount: 0, code: null };
+      // Example rule: NYC25 = $25 off $200+
+      if (code === 'NYC25' && subtotal >= 200) return { discount: 25, code };
+      return { discount: 0, code };
+    };
+
+    function render() {
+      const items = readCart().filter(i => Number(i.qty) > 0);
+      const tbody = document.getElementById('order-items');
+      const summary = document.getElementById('order-summary');
+      const empty   = document.getElementById('empty');
+      const subEl   = document.getElementById('order-subtotal');
+      const taxEl   = document.getElementById('order-tax');
+      const totEl   = document.getElementById('order-total');
+      const discRow = document.getElementById('order-discount-row');
+      const discEl  = document.getElementById('order-discount');
+
+      if (!items.length) {
+        empty.style.display = '';
+        summary.style.display = 'none';
+        tbody.innerHTML = '';
+        return;
+      }
+
+      tbody.innerHTML = items.map(i => {
+        const line = Number(i.price || 0) * Number(i.qty || 1);
+        return `
+          <tr>
+            <td>
+              <img src="${i.image || ''}" alt="" style="width:54px;height:54px;object-fit:cover;border-radius:6px;vertical-align:middle;margin-right:.5rem">
+              ${i.name}
+            </td>
+            <td>${money(i.price)}</td>
+            <td>${i.qty}</td>
+            <td>${money(line)}</td>
+          </tr>
+        `;
+      }).join('');
+
+      const subtotal = items.reduce((s, i) => s + Number(i.price || 0) * Number(i.qty || 1), 0);
+      const { discount, code } = applyCoupon(subtotal);
+      const taxedBase = Math.max(0, subtotal - discount);
+      const tax = taxedBase * TAX_RATE;
+      const total = taxedBase + tax;
+
+      subEl.textContent = money(subtotal);
+      taxEl.textContent = money(tax);
+      totEl.textContent = money(total);
+
+      if (discount > 0) {
+        discRow.style.display = '';
+        discEl.textContent = `-${money(discount)}`;
+        const label = discRow.querySelector('.discount-code-label');
+        if (label) label.textContent = `Discount${code ? ` (${code})` : ''}`;
+      } else {
+        discRow.style.display = 'none';
+      }
+
+      summary.style.display = '';
+    }
+
+    async function pay() {
+      const btn = document.getElementById('pay-button');
       if (!btn) return;
 
-      btn.addEventListener("click", async () => {
-        if (btn.disabled) return;
+      const items = readCart().map(i => ({
+        id: i.id, name: i.name, price: Number(i.price)||0, qty: Number(i.qty)||1
+      })).filter(i => i.qty > 0);
 
-        // Build payload from localStorage cart
-        const raw = localStorage.getItem("sb_cart_v1") || "[]";
-        const items = JSON.parse(raw)
-          .filter(i => Number(i.qty) > 0 && Number(i.price) > 0)
-          .map(i => ({
-            id: i.id,
-            name: i.name,
-            price: Number(i.price),
-            qty: Number(i.qty)
-          }));
+      if (!items.length) return alert('Your cart is empty');
 
-        if (!items.length) {
-          alert("Your cart is empty");
+      // GA4 begin_checkout
+      try {
+        if (typeof gtag === 'function') {
+          const value = items.reduce((s, i) => s + (i.price * i.qty), 0);
+          gtag('event', 'begin_checkout', {
+            currency: 'USD',
+            value,
+            items: items.map(i => ({
+              item_id: i.id, item_name: i.name, price: i.price, quantity: i.qty
+            }))
+          });
+        }
+      } catch(_) {}
+
+      btn.disabled = true;
+      const old = btn.textContent;
+      btn.textContent = 'Processing...';
+
+      try {
+        // Send coupon too (optional)
+        const coupon = localStorage.getItem(COUPON_KEY) || null;
+        const body = { items, coupon };
+
+        const CHECKOUT_ENDPOINT = "https://sb-checkout-server.onrender.com/create-checkout-session";
+        const res = await fetch(CHECKOUT_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+
+        if (!res.ok) {
+          const txt = await res.text();
+          console.error('Checkout server error:', res.status, txt);
+          throw new Error('Checkout server error');
+        }
+
+        const data = await res.json();
+
+        // If server returns a direct URL, just go
+        if (data.url) {
+          location.assign(data.url);
           return;
         }
 
-        const oldText = btn.textContent;
-        btn.disabled = true;
-        btn.textContent = "Processing...";
-
-        try {
-          const res = await fetch(CHECKOUT_ENDPOINT, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ items })
-          });
-
-          if (!res.ok) {
-            const txt = await res.text();
-            console.error("Server responded", res.status, txt);
-            throw new Error("Checkout server error");
-          }
-
-          const data = await res.json();
-          
-          if (data.url) {
-            window.location = data.url;
-            return;
-          }
-
-          // Alternative flow if server returns sessionId
-          if (data.id && data.publishableKey && window.Stripe) {
-            const stripe = Stripe(data.publishableKey);
-            const { error } = await stripe.redirectToCheckout({ sessionId: data.id });
-            if (error) throw error;
-            return;
-          }
-
-          throw new Error("No checkout URL returned from server");
-        } catch (err) {
-          console.error("Checkout error:", err);
-          alert("Checkout failed. Please try again or contact support.");
-          btn.disabled = false;
-          btn.textContent = oldText;
+        // Or if it returns a sessionId + publishableKey, use Stripe redirect
+        if (data.id && data.publishableKey && window.Stripe) {
+          const stripe = Stripe(data.publishableKey);
+          const { error } = await stripe.redirectToCheckout({ sessionId: data.id });
+          if (error) throw error;
+          return;
         }
-      });
+
+        throw new Error('No checkout URL or sessionId returned');
+      } catch (e) {
+        console.error(e);
+        alert('Checkout failed. Please try again or contact support.');
+        btn.disabled = false; btn.textContent = old;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      render();
+      document.getElementById('pay-button')?.addEventListener('click', pay);
     });
+  })();
   </script>
 </body>
 </html>
