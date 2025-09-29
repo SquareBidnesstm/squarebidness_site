@@ -5,13 +5,36 @@
   // -------------------------
   // Config / helpers
   // -------------------------
-  const CART_KEY = "sb_cart_v1";
-  const TAX_RATE = 0.085;
-  const money = n => `$${Number(n || 0).toFixed(2)}`;
+  const CART_KEY = 'sb_cart';
+  const COUPON_KEY = 'sb_coupon';
+  const TAX_RATE = 0.0945; // Louisiana sales tax - adjust as needed
 
-  // Public namespace (only what pages might call inline)
+  const moneyFmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+  const money = n => moneyFmt.format(Number(n || 0));
+
+  const getCoupon = () => localStorage.getItem(COUPON_KEY);
+  const setCoupon = (code) => localStorage.setItem(COUPON_KEY, code);
+  const removeCoupon = () => localStorage.removeItem(COUPON_KEY);
+  
+  const applyCoupon = (subtotal) => {
+    const code = getCoupon();
+    if (!code) return { discount: 0, code: null };
+
+    // Example rule: NYC25 = $25 off $200+
+    if (code === 'NYC25' && subtotal >= 200) return { discount: 25, code };
+    return { discount: 0, code };
+  };
+
+  // Global namespace
   window.SB = window.SB || {};
-  window.SB.clearCart = clearCart; // used by Clear Cart button (inline onclick)
+  window.SB.clearCart = clearCart;
+  window.SB.addToCart = addToCart;
+  window.SB.readCart = readCart;
+  window.SB.setQty = setQty;
+  window.SB.removeFromCart = removeFromCart;
+  window.SB.setCoupon = setCoupon;
+  window.SB.removeCoupon = removeCoupon;
+  window.SB.showError = showError;
 
   // -------------------------
   // Storage
@@ -20,6 +43,7 @@
     try { return JSON.parse(localStorage.getItem(CART_KEY)) || []; }
     catch { return []; }
   }
+  
   function writeCart(items) {
     localStorage.setItem(CART_KEY, JSON.stringify(items));
     updateCartCount();
@@ -58,6 +82,7 @@
 
   function clearCart() {
     writeCart([]);
+    removeCoupon();
   }
 
   // -------------------------
@@ -93,6 +118,23 @@
       closeBtn.addEventListener('click', () => wrap.classList.remove('show'));
       closeBtn._bound = true;
     }
+  }
+
+  // -------------------------
+  // Error toast
+  // -------------------------
+  function showError(message) {
+    const toast = document.createElement('div');
+    toast.className = 'error-toast';
+    toast.textContent = message;
+    toast.style.cssText = `
+      position: fixed; top: 20px; right: 20px; 
+      background: #ef4444; color: white; 
+      padding: 1rem; border-radius: 8px; 
+      z-index: 10000; animation: slideIn 0.3s ease;
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
   }
 
   // -------------------------
@@ -169,15 +211,33 @@
       removeFromCart(btn.getAttribute("data-remove"));
     };
 
-    // Totals
+    // Calculate totals with coupon support
     const subtotal = items.reduce((s, i) => s + Number(i.price || 0) * Number(i.qty || 1), 0);
-    const tax = subtotal * TAX_RATE;
-    const total = subtotal + tax;
+    const { discount, code } = applyCoupon(subtotal);
+    const taxedBase = Math.max(0, subtotal - discount);
+    const tax = taxedBase * TAX_RATE;
+    const total = taxedBase + tax;
 
     subEl.textContent = money(subtotal);
     taxEl.textContent = money(tax);
     totEl.textContent = money(total);
-    summary.style.display = "";
+
+    // Show discount row if applicable
+    const discRow = document.getElementById('cart-discount-row');
+    const discEl  = document.getElementById('cart-discount');
+    if (discRow && discEl) {
+      if (discount > 0) {
+        discRow.style.display = '';
+        discEl.textContent = `-${money(discount)}`;
+        // Optional: show code name
+        if (code) {
+          const codeLabel = discRow.querySelector('.discount-code-label');
+          if (codeLabel) codeLabel.textContent = `Discount (${code})`;
+        }
+      } else {
+        discRow.style.display = 'none';
+      }
+    }
 
     // Checkout button state
     if (checkoutBtn) {
@@ -185,6 +245,9 @@
       checkoutBtn.disabled = !(items.length && hasPurchasable);
       checkoutBtn.textContent = checkoutBtn.disabled ? "Add items to checkout" : "Checkout";
     }
+
+    // Show summary
+    summary.style.display = "";
   }
 
   // -------------------------
@@ -215,17 +278,3 @@
     });
   }
 })();
-// Add this to your cart.js for better error handling
-function showError(message) {
-  const toast = document.createElement('div');
-  toast.className = 'error-toast';
-  toast.textContent = message;
-  toast.style.cssText = `
-    position: fixed; top: 20px; right: 20px; 
-    background: #ef4444; color: white; 
-    padding: 1rem; border-radius: 8px; 
-    z-index: 10000; animation: slideIn 0.3s ease;
-  `;
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 3000);
-}
