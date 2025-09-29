@@ -124,6 +124,7 @@
     const CART_KEY   = 'sb_cart';
     const COUPON_KEY = 'sb_coupon';
     const TAX_RATE   = 0.0945; // LA combined — adjust if needed
+    const CHECKOUT_ENDPOINT = "https://sb-checkout-server.onrender.com/create-checkout-session";
 
     const moneyFmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
     const money = n => moneyFmt.format(Number(n || 0));
@@ -226,11 +227,31 @@
       btn.textContent = 'Processing...';
 
       try {
-        // Send coupon too (optional)
+        // Send coupon too
         const coupon = localStorage.getItem(COUPON_KEY) || null;
+
+        // Snapshot order for thank-you page
+        const subtotal = items.reduce((s, i) => s + (i.price * i.qty), 0);
+        const discount = (coupon === 'NYC25' && subtotal >= 200) ? 25 : 0;
+        const tax = (subtotal - discount) * TAX_RATE;
+        const total = subtotal - discount + tax;
+        const orderId = 'SB-' + Date.now();
+
+        sessionStorage.setItem('sb_last_order', JSON.stringify({
+          orderId,
+          createdAt: Date.now(),
+          items, 
+          coupon,
+          subtotal, 
+          discount, 
+          tax, 
+          total,
+          shipping: 0
+        }));
+
+        // Request body to checkout server
         const body = { items, coupon };
 
-        const CHECKOUT_ENDPOINT = "https://sb-checkout-server.onrender.com/create-checkout-session";
         const res = await fetch(CHECKOUT_ENDPOINT, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -263,7 +284,8 @@
       } catch (e) {
         console.error(e);
         alert('Checkout failed. Please try again or contact support.');
-        btn.disabled = false; btn.textContent = old;
+        btn.disabled = false; 
+        btn.textContent = old;
       }
     }
 
