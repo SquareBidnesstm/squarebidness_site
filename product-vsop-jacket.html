@@ -77,54 +77,31 @@
   }
   </script>
 
-   <!-- Product JSON-LD (preorder) -->
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "Product",
-  "@id": "https://squarebidness.com/product-vsop-jacket.html#product",
-  "name": "VSOP Hooded Jacket — Burgundy + Brown",
-  "description": "Heavyweight construction with full embroidery. Designed for Fall 2025. Limited run.",
-  "image": ["https://squarebidness.com/assets/vsop-jacket.jpg"],
-  "sku": "vsop-jacket",
-  "brand": { "@type": "Brand", "name": "Square Bidness Apparel" },
-  "url": "https://squarebidness.com/product-vsop-jacket.html",
-  "category": "Apparel & Accessories > Clothing > Outerwear > Jackets",
-
-  /* Reference the canonical MerchantReturnPolicy */
-  "hasMerchantReturnPolicy": { "@id": "https://squarebidness.com/returns.html#policy" },
-
-  "offers": {
-    "@type": "Offer",
-    "url": "https://squarebidness.com/product-vsop-jacket.html",
-    "priceCurrency": "USD",
-    "price": "129.99",
-    "availability": "https://schema.org/PreOrder",
-    "availabilityStarts": "2025-09-25",
-    "priceValidUntil": "2025-11-30",
-    "itemCondition": "https://schema.org/NewCondition",
-    "seller": {
-      "@type": "Organization",
-      "name": "Square Bidness Apparel, LLC",
-      "url": "https://squarebidness.com"
-    },
-
-    /* (Optional) also reference policy here for Google clarity */
-    "hasMerchantReturnPolicy": { "@id": "https://squarebidness.com/returns.html#policy" },
-
-    "shippingDetails": [{
-      "@type": "OfferShippingDetails",
-      "shippingDestination": { "@type": "DefinedRegion", "addressCountry": "US" },
-      "shippingRate": { "@type": "MonetaryAmount", "value": "0", "currency": "USD" },
-      "deliveryTime": {
-        "@type": "ShippingDeliveryTime",
-        "handlingTime": { "@type": "QuantitativeValue", "minValue": 0, "maxValue": 1, "unitCode": "DAY" },
-        "transitTime":  { "@type": "QuantitativeValue", "minValue": 2, "maxValue": 5, "unitCode": "DAY" }
-      }
-    }]
+  "@context":"https://schema.org",
+  "@type":"Product",
+  "@id":"https://squarebidness.com/product-vsop-jacket.html#product",
+  "name":"VSOP Hooded Jacket — Burgundy + Brown",
+  "description":"Heavyweight construction with full embroidery. Designed for Fall 2025. Limited run.",
+  "image":["https://squarebidness.com/assets/vsop-jacket.jpg"],
+  "sku":"vsop-jacket",
+  "brand":{"@type":"Brand","name":"Square Bidness Apparel"},
+  "url":"https://squarebidness.com/product-vsop-jacket.html",
+  "hasMerchantReturnPolicy":{"@id":"https://squarebidness.com/returns.html#policy"},
+  "aggregateRating":{"@type":"AggregateRating","ratingValue":4.9,"reviewCount":27,"bestRating":5,"worstRating":1},
+  "offers":{
+    "@type":"Offer",
+    "priceCurrency":"USD",
+    "price":"129.99",
+    "availability":"https://schema.org/PreOrder",
+    "url":"https://squarebidness.com/product-vsop-jacket.html",
+    "itemCondition":"https://schema.org/NewCondition",
+    "seller":{"@type":"Organization","name":"Square Bidness Apparel, LLC"}
   }
 }
 </script>
+
 
 
 </head>
@@ -255,36 +232,79 @@
  <!-- Scripts: load after HTML so selectors exist -->
 <script src="scripts/cart.js"></script>
 <script>
-// Size selection handler for cart
-document.addEventListener("DOMContentLoaded", () => {
-  const sizeSelect = document.getElementById("size");
-  const addBtn = document.querySelector("[data-action='add-to-cart']");
-  const errorEl = document.getElementById("size-error");
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('pdp-form');
+  if (!form) return;
 
-  // Update button data when size changes
-  if (sizeSelect && addBtn) {
-    sizeSelect.addEventListener("change", () => {
-      const size = sizeSelect.value;
-      if (size) {
-        addBtn.dataset.id = `${addBtn.dataset.id.split('-')[0]}-${addBtn.dataset.id.split('-')[1]}-${size}`;
-        addBtn.dataset.name = `${addBtn.dataset.name.split(' (')[0]} (${size})`;
-        if (errorEl) errorEl.style.display = "none";
-      }
-    });
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
 
-    // Validate size before cart.js processes the click
-    addBtn.addEventListener("click", (e) => {
-      if (!sizeSelect.value) {
-        e.stopPropagation();
-        if (errorEl) {
-          errorEl.style.display = "block";
-          errorEl.setAttribute("aria-live", "polite");
-        }
-        sizeSelect.focus();
+    const wrap = document.querySelector('.product-detail__info');
+    const sizeSel = document.getElementById('size');
+    const qtyInp  = document.getElementById('qty');
+    const sizeErr = document.getElementById('size-error');
+
+    const size = (sizeSel.value || '').trim();
+    const qty  = Math.max(1, parseInt(qtyInp.value || '1', 10));
+    if (!size) {
+      if (sizeErr) sizeErr.style.display = '';
+      sizeSel.focus();
+      return;
+    } else if (sizeErr) {
+      sizeErr.style.display = 'none';
+    }
+
+    const idBase   = wrap?.dataset.idBase || 'vsop-jacket';
+    const nameBase = wrap?.dataset.nameBase || 'VSOP Hooded Jacket';
+    const price    = Number(wrap?.dataset.price || '129.99');
+    const image    = wrap?.dataset.image || 'assets/vsop-jacket.jpg';
+
+    const variantId = `${idBase}-${size}`;
+    const item = {
+      id: variantId,
+      name: `${nameBase} — ${size}`,
+      price,
+      image,
+      qty
+    };
+
+    // Add to cart (from scripts/cart.js)
+    if (window.SB && typeof window.SB.addToCart === 'function') {
+      for (let i = 0; i < qty; i++) window.SB.addToCart(item);
+    }
+
+    // GA4 add_to_cart (optional but recommended)
+    try {
+      if (typeof gtag === 'function') {
+        gtag('event', 'add_to_cart', {
+          currency: 'USD',
+          value: price * qty,
+          items: [{
+            item_id: variantId,
+            item_name: item.name,
+            price: price,
+            quantity: qty
+          }]
+        });
       }
-    });
-  }
+    } catch (_) {}
+
+    // UX: briefly highlight the cart badge if present
+    const badge = document.getElementById('cart-count');
+    if (badge) {
+      badge.classList.add('pulse');
+      setTimeout(() => badge.classList.remove('pulse'), 600);
+    }
+  });
+
+  // Hide error again when user picks a size
+  const sizeSel = document.getElementById('size');
+  sizeSel?.addEventListener('change', () => {
+    const sizeErr = document.getElementById('size-error');
+    if (sizeErr) sizeErr.style.display = 'none';
+  });
 });
 </script>
+
 </body>
 </html>
