@@ -588,3 +588,16 @@ blockquote::before {
   object-fit: contain !important;   /* beat .card__img { object-fit:cover } */
   display: block;
 }
+/* Grid should allow tracks to shrink */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr)); /* key */
+  gap: 18px;
+}
+
+/* Grid items must be allowed to shrink below intrinsic width */
+.col-7, .col-5 { min-width: 0; }
+
+/* Optional: vertical spacing helper for column stacks */
+.stack { display: flex; flex-direction: column; gap: 18px; }
+
