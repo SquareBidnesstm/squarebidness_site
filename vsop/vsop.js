@@ -1,168 +1,117 @@
-// ======== CONFIG ========
-console.log("✅ VSOP JS loaded and running");
- 
-const PREORDER_END = '2025-10-16T23:59:59';
+(function () {
+  // --- Countdown (closes Oct 25, 2025 23:59 local) ---
+  const end = new Date(2025, 9, 25, 23, 59, 59); // month is 0-indexed
+  const cdDays = document.getElementById('cd-days');
+  const cdHours = document.getElementById('cd-hours');
+  const cdMins = document.getElementById('cd-mins');
+  const cdWrap = document.getElementById('countdown');
 
-// Plug in your live checkout URLs (Stripe)
-const CHECKOUT_URLS = {
-  bundle: 'https://buy.stripe.com/8x29ATdW79ipfmt3kQ8N20b',
-  jacket: 'https://buy.stripe.com/14AbJ12dpcuBgqx6x28N20c',
-  shorts: 'https://buy.stripe.com/dRm14ncS38el0rz7B68N20d'
-};
-
-document.addEventListener('DOMContentLoaded', () => {
-  // ======== COUNTDOWN ========
-  const end = new Date(PREORDER_END).getTime();
-  const cdWrap  = document.getElementById('countdown');
-  const elDays  = document.getElementById('cd-days');
-  const elHours = document.getElementById('cd-hours');
-  const elMins  = document.getElementById('cd-mins');
-
-  // Preorder buttons
-  const bundleBtn = document.getElementById('bundle-checkout');
-  const jacketBtn = document.getElementById('jacket-checkout');
-  const shortsBtn = document.getElementById('shorts-checkout');
-
-  function closePreorderUI() {
-    console.warn("⚠️ VSOP Preorder window has ended!");
-
-    if (cdWrap) {
-      cdWrap.innerHTML = `
-        <strong style="color:#800020">Preorder Closed</strong> — 
-        follow <strong>@squarebidnesstm</strong> for the next drop.
-      `;
-      cdWrap.classList.add('is-closed');
-    }
-
-    [bundleBtn, jacketBtn, shortsBtn].forEach(btn => {
-      if (btn) {
-        btn.classList.add('disabled');
-        btn.setAttribute('aria-disabled', 'true');
-        btn.textContent = 'Preorder Closed';
-        btn.style.pointerEvents = 'none';
-        btn.style.opacity = '0.6';
-      }
-    });
-  }
-
-  function tick(){
-    const now  = Date.now();
-    const diff = end - now;
-
+  function tick() {
+    const now = new Date();
+    let diff = Math.max(0, end - now);
     if (diff <= 0) {
-      closePreorderUI();
+      if (cdWrap) cdWrap.classList.add('is-closed');
+      if (cdDays) cdDays.textContent = '00';
+      if (cdHours) cdHours.textContent = '00';
+      if (cdMins) cdMins.textContent = '00';
+      return;
+    }
+    const mins = Math.floor(diff / 60000);
+    const days = Math.floor(mins / (60 * 24));
+    const hours = Math.floor((mins % (60 * 24)) / 60);
+    const minutes = mins % 60;
+    if (cdDays) cdDays.textContent = String(days).padStart(2, '0');
+    if (cdHours) cdHours.textContent = String(hours).padStart(2, '0');
+    if (cdMins) cdMins.textContent = String(minutes).padStart(2, '0');
+  }
+  tick();
+  setInterval(tick, 30_000);
+
+  // --- Cart helpers (align with your latest cart.js using 'sb_cart') ---
+  const CART_KEY = 'sb_cart';
+  const readCart = () => {
+    try { return JSON.parse(localStorage.getItem(CART_KEY) || '[]'); } catch { return []; }
+  };
+  const writeCart = (items) => localStorage.setItem(CART_KEY, JSON.stringify(items));
+  const addItem = (item) => {
+    const cart = readCart();
+    const i = cart.findIndex(x => x.id === item.id);
+    if (i >= 0) cart[i].qty += item.qty || 1;
+    else cart.push({ ...item, qty: item.qty || 1 });
+    writeCart(cart);
+  };
+
+  // --- Catalog meta for quick enrichment (names, images, prices) ---
+  const CATALOG = {
+    'vsop-jacket': { name: 'VSOP Hooded Jacket — Burgundy + Brown', price: 129.99, image: '/vsop/assets/vsop-jacket.jpg' },
+    'vsop-shorts': { name: 'VSOP Shorts — Burgundy + Brown',       price:  89.99, image: '/vsop/assets/vsop-shorts.jpg' },
+    'vsop-set':    { name: 'VSOP Set (Jacket + Shorts)',            price: 199.99, image: '/vsop/assets/vsop-set.jpg' }
+  };
+
+  // --- Wire up buttons ---
+  document.addEventListener('click', (e) => {
+    // Bundle
+    const bundleBtn = e.target.closest('#bundle-checkout');
+    if (bundleBtn) {
+      e.preventDefault();
+      const jSize = (document.getElementById('bundle-jacket-size') || {}).value || 'M';
+      const sSize = (document.getElementById('bundle-shorts-size') || {}).value || 'M';
+      const qty = Math.max(1, parseInt((document.getElementById('bundle-qty') || {}).value || '1', 10));
+
+      // Add both line items
+      addItem({
+        id: `vsop-jacket:${jSize}`,
+        name: `${CATALOG['vsop-jacket'].name} — ${jSize}`,
+        price: CATALOG['vsop-jacket'].price,
+        image: CATALOG['vsop-jacket'].image,
+        qty
+      });
+      addItem({
+        id: `vsop-shorts:${sSize}`,
+        name: `${CATALOG['vsop-shorts'].name} — ${sSize}`,
+        price: CATALOG['vsop-shorts'].price,
+        image: CATALOG['vsop-shorts'].image,
+        qty
+      });
+      // Optional: add a virtual bundle item (commented out)
+      // addItem({ id:'vsop-set', name: CATALOG['vsop-set'].name, price: CATALOG['vsop-set'].price, image: CATALOG['vsop-set'].image, qty });
+
+      location.href = '/cart.html';
       return;
     }
 
-    const d = Math.floor(diff / (1000*60*60*24));
-    const h = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
-    const m = Math.floor((diff % (1000*60*60)) / (1000*60));
-    if (elDays)  elDays.textContent  = String(d);
-    if (elHours) elHours.textContent = String(h).padStart(2,'0');
-    if (elMins)  elMins.textContent  = String(m).padStart(2,'0');
-  }
-
-  tick();
-  setInterval(tick, 30000);
-});
-
-// === VSOP click tracking + checkout redirect (GA4 via GTM + Meta Pixel) ===
-(function () {
-  const PRICE_MAP = { bundle: 199.99, jacket: 129.99, shorts: 89.99 };
-
-  function pushDL(evt) {
-    try {
-      window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push(evt);
-    } catch (_) {}
-  }
-
-  function fireMetaInitiateCheckout(params) {
-    if (typeof fbq === 'function') {
-      fbq('track', 'InitiateCheckout', {
-        content_name: `VSOP ${params.sku.toUpperCase()}`,
-        content_category: 'VSOP',
-        contents: [{ id: 'vsop-' + params.sku, quantity: Number(params.qty || 1) }],
-        num_items: Number(params.qty || 1),
-        value: Number(params.price || 0) * Number(params.qty || 1),
-        currency: 'USD'
-      });
-    }
-  }
-
-  function getCheckoutUrl(key, fallbackHref) {
-    if (typeof CHECKOUT_URLS === 'object' && CHECKOUT_URLS && CHECKOUT_URLS[key]) {
-      return CHECKOUT_URLS[key];
-    }
-    return fallbackHref || '#';
-  }
-
-  function wireCheckout(buttonSelector, paramGetter, urlKey) {
-    const btn = document.querySelector(buttonSelector);
-    if (!btn) return;
-
-    btn.addEventListener('click', function (e) {
+    // Jacket
+    const jacketBtn = e.target.closest('#jacket-checkout');
+    if (jacketBtn) {
       e.preventDefault();
-
-      const p = paramGetter();
-      const url = getCheckoutUrl(urlKey, btn.getAttribute('href'));
-
-      // 1) dataLayer
-      pushDL({
-        event: 'preorder_click',
-        sku: p.sku,
-        size: p.size,
-        qty: String(p.qty),
-        price: String(p.price),
-        page: 'vsop'
+      const size = (document.getElementById('jacket-size') || {}).value || 'M';
+      const qty = Math.max(1, parseInt((document.getElementById('jacket-qty') || {}).value || '1', 10));
+      addItem({
+        id: `vsop-jacket:${size}`,
+        name: `${CATALOG['vsop-jacket'].name} — ${size}`,
+        price: CATALOG['vsop-jacket'].price,
+        image: CATALOG['vsop-jacket'].image,
+        qty
       });
+      location.href = '/cart.html';
+      return;
+    }
 
-      // 2) Meta Pixel
-      fireMetaInitiateCheckout(p);
-
-      // 3) Redirect
-      if (!url || url === '#') {
-        alert('⚠️ Connect this button to your Stripe/checkout URL.');
-        return;
-      }
-      const qs = new URLSearchParams({
-        sku: p.sku,
-        size: p.size || '',
-        qty: String(p.qty || 1)
+    // Shorts
+    const shortsBtn = e.target.closest('#shorts-checkout');
+    if (shortsBtn) {
+      e.preventDefault();
+      const size = (document.getElementById('shorts-size') || {}).value || 'M';
+      const qty = Math.max(1, parseInt((document.getElementById('shorts-qty') || {}).value || '1', 10));
+      addItem({
+        id: `vsop-shorts:${size}`,
+        name: `${CATALOG['vsop-shorts'].name} — ${size}`,
+        price: CATALOG['vsop-shorts'].price,
+        image: CATALOG['vsop-shorts'].image,
+        qty
       });
-      window.location.href = url + (qs.toString() ? '?' + qs.toString() : '');
-    });
-  }
-
-  // ------- PARAM GETTERS -------
-  function getBundleParams() {
-    const jacket = (document.getElementById('bundle-jacket-size') || {}).value || 'unknown';
-    const shorts = (document.getElementById('bundle-shorts-size') || {}).value || 'unknown';
-    const qty    = Number((document.getElementById('bundle-qty') || {}).value || 1);
-    return {
-      sku: 'bundle',
-      size: `jacket:${jacket}|shorts:${shorts}`,
-      qty,
-      price: PRICE_MAP.bundle
-    };
-  }
-
-  function getJacketParams() {
-    const size = (document.getElementById('jacket-size') || {}).value || 'unknown';
-    const qty  = Number((document.getElementById('jacket-qty') || {}).value || 1);
-    return { sku: 'jacket', size, qty, price: PRICE_MAP.jacket };
-  }
-
-  function getShortsParams() {
-    const size = (document.getElementById('shorts-size') || {}).value || 'unknown';
-    const qty  = Number((document.getElementById('shorts-qty') || {}).value || 1);
-    return { sku: 'shorts', size, qty, price: PRICE_MAP.shorts };
-  }
-
-  // ------- ATTACH LISTENERS -------
-  document.addEventListener('DOMContentLoaded', function () {
-    wireCheckout('#bundle-checkout', getBundleParams, 'bundle');
-    wireCheckout('#jacket-checkout', getJacketParams, 'jacket');
-    wireCheckout('#shorts-checkout', getShortsParams, 'shorts');
+      location.href = '/cart.html';
+      return;
+    }
   });
 })();
