@@ -33,6 +33,12 @@
       fetch("footer.html").then(r => r.text()).then(d => { document.getElementById("footer-placeholder").innerHTML = d; });
     });
   </script>
+<!-- In <head> if your API is NOT on /api/checkout-session -->
+<script>
+  // Example: Render
+  window.SB_API = "https://sb-checkout-server.onrender.com/api/checkout-session";
+</script>
+
 </head>
 <body class="theme-dark" id="top">
   <!-- NAV -->
@@ -276,5 +282,83 @@
     })();
   })();
   </script>
+<!-- ==== Google Customer Reviews Opt-in (Square Bidness) ==== -->
+<script>
+  // ---- Feature flag (flip to false to disable without removing code) ----
+  const GCR_ENABLED = true;
+
+  // ---- API endpoint: by default expect a path on your domain (/api/checkout-session).
+  // If your server is elsewhere (Render, etc.), set window.SB_API in <head>:
+  //   <script>window.SB_API = "https://YOUR-SERVER/api/checkout-session"</script>
+  const CHECKOUT_SESSION_API =
+    (typeof window.SB_API === "string" && window.SB_API) || "/api/checkout-session";
+
+  // ---- Helper: robust YYYY-MM-DD formatter ----
+  function fmtYYYYMMDD(date) {
+    const d = new Date(date);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }
+
+  // ---- Render the GCR opt-in (called once we have order data) ----
+  function renderGcrOptIn(order) {
+    if (!GCR_ENABLED) return;
+    if (!window.gapi) return;
+    window.gapi.load("surveyoptin", function () {
+      const payload = {
+        merchant_id: 5344711433,                 // Square Bidness GCR merchant ID
+        order_id: order.order_id,                // Stripe session id or your order #
+        email: order.email,                      // buyer email
+        delivery_country: order.country || "US", // ISO-2 code: US, CA, etc.
+        estimated_delivery_date: order.estimated_delivery_date
+      };
+      if (Array.isArray(order.products) && order.products.length) {
+        payload.products = order.products.map(gtin => ({ gtin }));
+      }
+      window.gapi.surveyoptin.render(payload);
+    });
+  }
+
+  // Google calls this when platform.js loads
+  window.renderOptIn = function () {
+    if (window.__GCR_ORDER__) renderGcrOptIn(window.__GCR_ORDER__);
+  };
+
+  // ---- Bootstrap: fetch Stripe session and prepare order payload ----
+  (async function initGCR() {
+    try {
+      const sid = new URLSearchParams(location.search).get("session_id");
+      if (!sid) return; // nothing to do if we didn't come from Stripe
+
+      const url = `${CHECKOUT_SESSION_API}?session_id=${encodeURIComponent(sid)}`;
+      const res = await fetch(url, { credentials: "omit" });
+      if (!res.ok) throw new Error("Session lookup failed");
+      const data = await res.json();
+
+      // VSOP preorder fixed date (adjust if you change your ship date)
+      const estimated = "2025-11-01";
+
+      window.__GCR_ORDER__ = {
+        order_id: data.order_id || sid,
+        email: data.email || "",
+        country: data.country || "US",
+        estimated_delivery_date: estimated,
+        // products: ["0123456789012"] // add GTINs later if you want product ratings
+      };
+
+      // If Google library is already ready, render now
+      if (window.gapi && window.gapi.load) renderGcrOptIn(window.__GCR_ORDER__);
+    } catch (err) {
+      console.warn("GCR init skipped:", err);
+    }
+  })();
+</script>
+
+<!-- Load Google's platform.js (triggers window.renderOptIn when ready) -->
+<script src="https://apis.google.com/js/platform.js?onload=renderOptIn" async defer></script>
+<!-- ==== /Google Customer Reviews Opt-in ==== -->
+
 </body>
 </html>
