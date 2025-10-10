@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- GA4 (use your valid ID) -->
+  <!-- GA4 -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-6Y22HBF1VJ"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -120,10 +120,10 @@
   <!-- Checkout logic -->
   <script>
   (function() {
-    // ---- Config (match cart.js) ----
-    const CART_KEY   = 'sb_cart';
+    // ---- IMPORTANT: align with window.SB (uses sb_cart_v1) ----
+    const CART_KEY   = 'sb_cart_v1';   // was 'sb_cart' before — this fixes the empty cart
     const COUPON_KEY = 'sb_coupon';
-    const TAX_RATE   = 0.0945; // LA combined — adjust if needed
+    const TAX_RATE   = 0.0945; // adjust if needed
     const CHECKOUT_ENDPOINT = "https://sb-checkout-server.onrender.com/create-checkout-session";
 
     const moneyFmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
@@ -138,7 +138,7 @@
     const applyCoupon = (subtotal) => {
       const code = getCoupon();
       if (!code) return { discount: 0, code: null };
-      // Example rule: NYC25 = $25 off $200+
+      // example rule
       if (code === 'NYC25' && subtotal >= 200) return { discount: 25, code };
       return { discount: 0, code };
     };
@@ -227,35 +227,26 @@
       btn.textContent = 'Processing...';
 
       try {
-        // Send coupon too
         const coupon = localStorage.getItem(COUPON_KEY) || null;
 
-        // Snapshot order for thank-you page
         const subtotal = items.reduce((s, i) => s + (i.price * i.qty), 0);
         const discount = (coupon === 'NYC25' && subtotal >= 200) ? 25 : 0;
         const tax = (subtotal - discount) * TAX_RATE;
         const total = subtotal - discount + tax;
         const orderId = 'SB-' + Date.now();
 
+        // store a snapshot for thank-you page (optional)
         sessionStorage.setItem('sb_last_order', JSON.stringify({
           orderId,
           createdAt: Date.now(),
-          items, 
-          coupon,
-          subtotal, 
-          discount, 
-          tax, 
-          total,
-          shipping: 0
+          items, coupon, subtotal, discount, tax, total, shipping: 0
         }));
 
-        // Request body to checkout server
-        const body = { items, coupon };
-
-        const res = await fetch(CHECKOUT_ENDPOINT, {
+        // call your checkout server
+        const res = await fetch("https://sb-checkout-server.onrender.com/create-checkout-session", {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
+          body: JSON.stringify({ items, coupon })
         });
 
         if (!res.ok) {
@@ -266,13 +257,11 @@
 
         const data = await res.json();
 
-        // If server returns a direct URL, just go
         if (data.url) {
           location.assign(data.url);
           return;
         }
 
-        // Or if it returns a sessionId + publishableKey, use Stripe redirect
         if (data.id && data.publishableKey && window.Stripe) {
           const stripe = Stripe(data.publishableKey);
           const { error } = await stripe.redirectToCheckout({ sessionId: data.id });
