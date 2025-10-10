@@ -5,7 +5,7 @@
   <script async src="https://www.googletagmanager.com/gtag/js?id=GT-PL3L8P53"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag(){ dataLayer.push(arguments); }
+    function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
     gtag('config', 'GT-PL3L8P53');
   </script>
@@ -13,82 +13,52 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Square Bidness — VSOP Preorder</title>
+  <meta name="description" content="Square Bidness — VSOP Collection preorder. Heat-reactive jacket + shorts. Limited run.">
+  <link rel="canonical" href="https://squarebidness.com/vsop/">
+  <meta name="theme-color" content="#000000" />
+  <meta name="mobile-web-app-capable" content="yes" />
 
-  <!-- Basic SEO -->
-  <meta name="description" content="Square Bidness — VSOP Collection preorder. Heat-reactive jacket + shorts. Limited run." />
-  <link rel="canonical" href="https://squarebidness.com/vsop/" />
-
-  <!-- Open Graph / Facebook -->
+  <!-- Open Graph / Twitter -->
   <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Square Bidness">
   <meta property="og:url" content="https://squarebidness.com/vsop/">
   <meta property="og:title" content="VSOP Collection — Preorders Live">
   <meta property="og:description" content="Very Superior. Original Principles. Limited preorder — burgundy & brown heat-reactive jacket + shorts.">
   <meta property="og:image" content="https://squarebidness.com/vsop/assets/vsop-hero.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-
-  <!-- Twitter / X -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="VSOP Collection — Preorders Live">
   <meta name="twitter:description" content="Very Superior. Original Principles. Limited preorder — burgundy & brown heat-reactive jacket + shorts.">
   <meta name="twitter:image" content="https://squarebidness.com/vsop/assets/vsop-hero.jpg">
   <meta name="twitter:site" content="@squarebidnesstm">
-<!-- load this in <head> or before other scripts that use window.SB -->
-<script>
-(function () {
-  const KEY = 'sb_cart_v1';
 
-  function getCart() {
-    try { return JSON.parse(localStorage.getItem(KEY) || '[]'); }
-    catch { return []; }
-  }
-  function setCart(cart) {
-    localStorage.setItem(KEY, JSON.stringify(cart));
-    updateBadge(cart);
-    dispatchEvent(new CustomEvent('sb:cart:update', { detail: { cart } }));
-  }
-  function updateBadge(cart = getCart()) {
-    const badge = document.getElementById('cart-count');
-    if (!badge) return;
-    const count = cart.reduce((n, it) => n + (Number(it.qty) || 0), 0);
-    badge.textContent = String(count);
-    badge.style.display = count > 0 ? '' : 'none';
-  }
+  <!-- Cart core (must be before anything that calls window.SB) -->
+  <script>
+    (function () {
+      const KEY = 'sb_cart_v1';
+      function getCart(){ try{ return JSON.parse(localStorage.getItem(KEY)||'[]'); }catch{ return []; } }
+      function setCart(cart){ localStorage.setItem(KEY, JSON.stringify(cart)); updateBadge(cart); dispatchEvent(new CustomEvent('sb:cart:update',{detail:{cart}})); }
+      function updateBadge(cart=getCart()){
+        const badge=document.getElementById('cart-count'); if(!badge) return;
+        const count=cart.reduce((n,i)=>n+(Number(i.qty)||0),0);
+        badge.textContent=String(count);
+        badge.style.display=count>0?'':'none';
+      }
+      const SB={
+        getCart, setCart,
+        clear(){ setCart([]); },
+        addToCart(item){ const c=getCart(); const i=c.findIndex(x=>x.id===item.id); if(i>=0){ c[i].qty+=Number(item.qty||1);} else { c.push({...item, qty:Number(item.qty||1)});} setCart(c); },
+        updateQty(id,qty){ const c=getCart().map(i=>i.id===id?{...i, qty:Math.max(0,Number(qty||0))}:i).filter(i=>i.qty>0); setCart(c); },
+        remove(id){ setCart(getCart().filter(i=>i.id!==id)); },
+        total(){ return getCart().reduce((s,i)=>s+Number(i.price||0)*Number(i.qty||0),0); }
+      };
+      window.SB=Object.freeze(SB);
+      document.addEventListener('DOMContentLoaded',()=>updateBadge());
+    })();
+  </script>
 
-  const SB = {
-    getCart,
-    setCart,
-    clear() { setCart([]); },
-    addToCart(item) {
-      // item = {id, name, price, image, qty}
-      const cart = getCart();
-      const idx = cart.findIndex(x => x.id === item.id);
-      if (idx >= 0) cart[idx].qty += Number(item.qty || 1);
-      else cart.push({ ...item, qty: Number(item.qty || 1) });
-      setCart(cart);
-    },
-    updateQty(id, qty) {
-      const cart = getCart().map(i => i.id === id ? { ...i, qty: Math.max(0, Number(qty||0)) } : i)
-                            .filter(i => i.qty > 0);
-      setCart(cart);
-    },
-    remove(id) {
-      setCart(getCart().filter(i => i.id !== id));
-    },
-    total() {
-      return getCart().reduce((sum, i) => sum + Number(i.price||0) * Number(i.qty||0), 0);
-    }
-  };
-
-  // expose globally
-  window.SB = Object.freeze(SB);
-
-  // ensure badge on first paint
-  document.addEventListener('DOMContentLoaded', () => updateBadge());
-})();
-</script>
-
-  <!-- JSON-LD (Collection + Product aggregate range + Website) -->
+  <!-- JSON-LD (Collection + Aggregate Offer + Website) -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org/",
@@ -191,9 +161,10 @@
   }
   </script>
 
-  <!-- CSS -->
+  <!-- Page CSS -->
   <link rel="stylesheet" href="/vsop/vsop.css">
 </head>
+
 
 <body>
   <!-- HERO -->
