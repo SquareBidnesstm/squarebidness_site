@@ -1,4 +1,4 @@
-const CART_KEY = 'sb_cart';
+const CART_KEY = 'sb_cart_v1';
 function getCart(){ try { return JSON.parse(localStorage.getItem(CART_KEY))||[] } catch(e){ return [] } }
 function setCart(c){ localStorage.setItem(CART_KEY, JSON.stringify(c)); }
 document.addEventListener('click', (e)=>{
