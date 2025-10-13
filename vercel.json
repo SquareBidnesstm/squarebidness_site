@@ -1,6 +1,24 @@
 {
   "trailingSlash": true,
+  "cleanUrls": true,
   "redirects": [
-    { "source": "/vsop", "destination": "/vsop/", "permanent": true }
+    // ---- Generic: .html  -> slash URL (e.g., /about.html -> /about/)
+    { "source": "/:path(.+)\\.html", "destination": "/:path/", "permanent": true },
+
+    // ---- Keep your existing VSOP redirect (optional; trailingSlash already enforces this)
+    { "source": "/vsop", "destination": "/vsop/", "permanent": true },
+
+    // ---- Filename fixes / typos -> correct paths
+    { "source": "/return", "destination": "/returns/", "permanent": true },
+    { "source": "/pruduct-vsop-set", "destination": "/product-vsop-set/", "permanent": true },
+
+    // Trailing-dot file names -> proper filenames (no slash because they're files)
+    { "source": "/robots.txt.", "destination": "/robots.txt", "permanent": true },
+    { "source": "/sitemap.xml.", "destination": "/sitemap.xml", "permanent": true },
+    { "source": "/products.csv.", "destination": "/products.csv", "permanent": true },
+
+    // Helpful one-offs if people hit old paths
+    { "source": "/community-spotlight.html", "destination": "/community-spotlight/", "permanent": true },
+    { "source": "/collection-vsop.html", "destination": "/vsop/", "permanent": true }
   ]
 }
