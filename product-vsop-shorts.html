@@ -18,7 +18,7 @@
 
   <!-- SEO -->
   <link rel="canonical" href="https://squarebidness.com/product-vsop-shorts.html" />
-  <meta name="description" content="VSOP Shorts in burgundy and brown. Athletic fit with embroidered mark. Fall 2025 limited run." />
+  <meta name="description" content="VSOP Shorts — Burgundy + Brown. Athletic fit with embroidered mark. Fall 2025 limited run." />
 
   <!-- Open Graph -->
   <meta property="og:type" content="product" />
@@ -44,19 +44,20 @@
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
+  <!-- Browser UI color -->
   <meta name="theme-color" content="#000000" />
   <meta name="mobile-web-app-capable" content="yes" />
 
   <!-- Load Nav + Footer -->
   <script defer>
     document.addEventListener("DOMContentLoaded", () => {
-      fetch("/nav.html").then(r => r.text()).then(d => {
+      fetch("nav.html").then(r => r.text()).then(d => {
         const slot = document.getElementById("nav-placeholder");
         if (slot) slot.innerHTML = d;
-        const shopLink = document.querySelector('.main-nav a[href="/shop.html"], .main-nav a[href="shop.html"]');
+        const shopLink = document.querySelector('.main-nav a[href="shop.html"]');
         if (shopLink) shopLink.classList.add("active");
       });
-      fetch("/footer.html").then(r => r.text()).then(d => {
+      fetch("footer.html").then(r => r.text()).then(d => {
         const slot = document.getElementById("footer-placeholder");
         if (slot) slot.innerHTML = d;
       });
@@ -75,18 +76,6 @@
     ]
   }
   </script>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "MerchantReturnPolicy",
-  "@id": "https://squarebidness.com/returns.html#policy",
-  "merchantReturnDays": 30,
-  "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
-  "returnMethod": "https://schema.org/ReturnByMail",
-  "returnFees": "https://schema.org/ReturnShippingFees",
-  "applicableCountry": "US"
-}
-</script>
 
   <!-- Product JSON-LD -->
   <script type="application/ld+json">
@@ -112,12 +101,9 @@
     }
   }
   </script>
-  <script src="/scripts/sb-cart.js" defer></script>
-
 </head>
 
 <body class="theme-dark" id="top">
-
   <!-- NAV -->
   <div id="nav-placeholder"></div>
 
@@ -125,7 +111,7 @@
   <header class="page-hero">
     <div class="container">
       <h1 class="page-title">VSOP Shorts</h1>
-      <p class="page-subtitle">Burgundy + Brown · Embroidered mark · Athletic fit</p>
+      <p class="page-subtitle">Burgundy + Brown · Athletic fit · Embroidered mark</p>
     </div>
   </header>
 
@@ -148,7 +134,7 @@
                  data-name-base="VSOP Shorts — Burgundy + Brown"
                  data-price="89.99"
                  data-image="/assets/vsop-shorts.jpg">
-          
+
           <h2 class="product-detail__title">VSOP Shorts</h2>
           <p class="product-detail__description">
             Matching shorts for the VSOP set. Comfortable, durable, and embroidered for the finish.
@@ -168,9 +154,6 @@
             <a href="/returns.html">30-day returns on unworn items</a> ·
             <a href="/returns.html#preorders">Preorder policy</a>
           </div>
-
-          <!-- Contact Snippet -->
-          <div id="contact-snippet"></div>
 
           <!-- Add to Cart Form -->
           <form id="pdp-form" class="product-form" novalidate>
@@ -214,11 +197,11 @@
             </ul>
           </div>
 
-          <!-- Related Products -->
+          <!-- Related -->
           <div class="product-related" style="margin-top:1rem">
             <h3>Complete the Look</h3>
-            <a href="/product-vsop-jacket.html" class="related-item">
-              <img loading="lazy" src="/assets/vsop-jacket.jpg" alt="VSOP Hooded Jacket">
+            <a href="product-vsop-jacket.html" class="related-item">
+              <img loading="lazy" src="/assets/vsop-jacket.jpg" alt="VSOP Hooded Jacket" style="width:90px;height:90px;object-fit:cover;border-radius:6px;">
               <span>VSOP Hooded Jacket — $129.99</span>
             </a>
           </div>
@@ -227,12 +210,11 @@
           <details class="product-returns" style="margin-top:.75rem">
             <summary style="cursor:pointer">Returns & Preorders (quick view)</summary>
             <div style="margin-top:.5rem; opacity:.9">
-              <p>Returns accepted within 30 days of delivery on unworn items with tags. 
+              <p>Returns accepted within 30 days of delivery on unworn items with tags.
               Preorders can be cancelled before shipment; after shipment, standard returns apply.</p>
               <p><a class="btn btn--ghost" href="/returns.html">Read full policy</a></p>
             </div>
           </details>
-
         </article>
       </div>
     </div>
@@ -241,8 +223,6 @@
   <!-- FOOTER -->
   <div id="footer-placeholder"></div>
 
-
-  
   <!-- Size/Stock Management -->
   <script>
   (function(){
@@ -254,13 +234,14 @@
     const stockMsg   = document.getElementById('stock-msg');
     const wrap       = document.querySelector('.product-detail__info');
 
+    // Match your products.json keys (S/M/L/XL/2XL/3XL)
     const FALLBACK = {
-      "S":   { status:"in-stock",  stock:12 },
-      "M":   { status:"in-stock",  stock:8  },
-      "L":   { status:"low-stock", stock:2  },
-      "XL":  { status:"in-stock",  stock:10 },
-      "2XL": { status:"preorder",  stock:null, ship:"2025-11-01" },
-      "3XL": { status:"coming-soon",stock:0, notify:true }
+      "S":   { status:"in-stock",   stock:12 },
+      "M":   { status:"in-stock",   stock:8  },
+      "L":   { status:"low-stock",  stock:2  },
+      "XL":  { status:"in-stock",   stock:10 },
+      "2XL": { status:"preorder",   stock:null, ship:"2025-11-01" },
+      "3XL": { status:"coming-soon",stock:0,   notify:true }
     };
 
     let sizeData = null;
@@ -271,14 +252,8 @@
       sizeData = await loadSizes();
       applyToSelect(sizeData);
       sizeSel.addEventListener('change', () => updateUIForSize(sizeSel.value, sizeData));
-      notifyBtn.addEventListener('click', onNotify);
+      if (notifyBtn) notifyBtn.addEventListener('click', onNotify); // guarded
       updateUIForSize(sizeSel.value, sizeData);
-      
-      // Load contact snippet
-      fetch('/contact-snippet.html').then(r => r.text()).then(d => {
-        const slot = document.getElementById('contact-snippet');
-        if (slot) slot.innerHTML = d;
-      }).catch(e => console.warn('Contact snippet failed to load:', e));
     }
 
     async function loadSizes(){
@@ -301,20 +276,19 @@
         if (!opt.value) continue;
         const meta = map[opt.value];
         if (!meta) { opt.disabled = true; continue; }
-
         opt.disabled = (meta.status === 'sold-out' || meta.status === 'coming-soon');
 
-        if (meta.status === 'low-stock')      opt.textContent = `${opt.value} — Only ${meta.stock} left`;
-        else if (meta.status === 'preorder')  opt.textContent = `${opt.value} — Preorder`;
-        else if (meta.status === 'sold-out')  opt.textContent = `${opt.value} — Sold Out`;
+        if (meta.status === 'low-stock')        opt.textContent = `${opt.value} — Only ${meta.stock} left`;
+        else if (meta.status === 'preorder')    opt.textContent = `${opt.value} — Preorder`;
+        else if (meta.status === 'sold-out')    opt.textContent = `${opt.value} — Sold Out`;
         else if (meta.status === 'coming-soon') opt.textContent = `${opt.value} — Coming Soon`;
-        else                                   opt.textContent = opt.value;
+        else                                    opt.textContent = opt.value;
       }
     }
 
     function updateUIForSize(size, map){
-      stockMsg.textContent = '';
-      notifyBtn.style.display = 'none';
+      if (stockMsg) stockMsg.textContent = '';
+      if (notifyBtn) { notifyBtn.style.display = 'none'; notifyBtn.disabled = false; }
       submitBtn.disabled = false;
 
       if (!size || !map[size]) {
@@ -329,18 +303,18 @@
           break;
         case 'low-stock':
           submitBtn.textContent = 'Add to Cart';
-          stockMsg.textContent = `Only ${meta.stock} left — don't wait.`;
+          if (stockMsg) stockMsg.textContent = `Only ${meta.stock} left — don't wait.`;
           break;
         case 'preorder':
           submitBtn.textContent = 'Preorder';
-          stockMsg.textContent = meta.ship ? `Preorder — ships ${formatDate(meta.ship)}` : 'Preorder open.';
+          if (stockMsg) stockMsg.textContent = meta.ship ? `Preorder — ships ${formatDate(meta.ship)}` : 'Preorder open.';
           break;
         case 'sold-out':
         case 'coming-soon':
           submitBtn.textContent = 'Unavailable';
           submitBtn.disabled = true;
-          notifyBtn.style.display = '';
-          stockMsg.textContent = (meta.status === 'sold-out')
+          if (notifyBtn) notifyBtn.style.display = '';
+          if (stockMsg) stockMsg.textContent = (meta.status === 'sold-out')
             ? 'Sold out — get notified when restocked.'
             : 'Coming soon — get notified when available.';
           break;
@@ -418,7 +392,7 @@
       if (window.SB && typeof window.SB.addToCart === 'function') {
         window.SB.addToCart(item);
       } else {
-        // Fallback
+        // Fallback if SB isn't loaded
         const KEY = 'sb_cart_v1';
         const cart = JSON.parse(localStorage.getItem(KEY) || '[]');
         const i = cart.findIndex(x => x.id === item.id);
@@ -426,7 +400,7 @@
         localStorage.setItem(KEY, JSON.stringify(cart));
       }
 
-      // GA4 tracking
+      // GA4
       try {
         if (typeof gtag === 'function') {
           gtag('event', 'add_to_cart', {
@@ -442,11 +416,11 @@
         }
       } catch (_) {}
 
-      // Redirect to cart with slight delay for toast
-      setTimeout(() => window.location.href = '/cart.html', 500);
+      // Redirect to cart
+      window.location.href = '/cart.html';
     });
 
-    // Hide error when user picks a size
+    // Hide error on change
     const sizeSel = document.getElementById('size');
     sizeSel?.addEventListener('change', () => {
       const sizeErr = document.getElementById('size-error');
@@ -466,11 +440,10 @@
         item_id: 'vsop-shorts',
         price: 89.99,
         item_category: 'Apparel > Shorts',
-        item_brand: 'Square Bidness Apparel'
+        item_brand: 'Square Bidness Apparel',
       }]
     }
   });
   </script>
-
 </body>
 </html>
