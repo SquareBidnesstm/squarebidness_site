@@ -500,6 +500,24 @@ window.dataLayer.push({
     });
   });
   </script>
+<script>
+document.getElementById('pdp-submit')?.addEventListener('click', (e) => {
+  e.preventDefault();
+  const size = document.getElementById('size').value;
+  const qty  = Math.max(1, parseInt(document.getElementById('qty').value || '1', 10));
+
+  const item = {
+    id:   `vsop-jacket-${size}`,
+    name: `VSOP Hooded Jacket (${size})`,
+    price: 129.99,
+    image: 'assets/vsop-jacket.jpg',
+    qty
+  };
+
+  window.SB.addToCart(item);
+  window.location.href = '/cart.html';
+});
+</script>
 
 </body>
 </html>
