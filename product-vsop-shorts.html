@@ -100,27 +100,6 @@
     }
   }
   </script>
-
-  <!-- GA4 View Item Event -->
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({
-      event: 'view_item',
-      ecommerce: {
-        items: [{
-          item_name: 'VSOP Shorts — Burgundy + Brown',
-          item_id: 'vsop-shorts',
-          price: 89.99,
-          item_category: 'Apparel > Shorts',
-          item_brand: 'Square Bidness Apparel'
-        }]
-      }
-    });
-  </script>
-  <!-- Include this file on every page: <script src="/scripts/sb-cart.js" defer></script> -->
-<!-- Site-wide cart core -->
-<script src="/scripts/sb-cart.js" defer></script>
-
 </head>
 
 <body class="theme-dark" id="top">
@@ -144,7 +123,7 @@
         <!-- Product Media -->
         <div class="product-detail__media">
           <img loading="lazy" 
-               src="assets/vsop-shorts.jpg"
+               src="/assets/vsop-shorts.jpg"
                alt="VSOP matching shorts in burgundy and brown"
                class="product-detail__image">
         </div>
@@ -154,7 +133,7 @@
                  data-id-base="vsop-shorts"
                  data-name-base="VSOP Shorts — Burgundy + Brown"
                  data-price="89.99"
-                 data-image="assets/vsop-shorts.jpg">
+                 data-image="/assets/vsop-shorts.jpg">
           
           <h2 class="product-detail__title">VSOP Shorts</h2>
           <p class="product-detail__description">
@@ -162,7 +141,7 @@
           </p>
           <p class="product-detail__price">$89.99</p>
 
-          <!-- Notices -->
+          <!-- Badges -->
           <p style="background:#8B0000;color:#fff;padding:.5rem .65rem;border-radius:6px;display:inline-block;margin:.5rem 0;font-weight:700">
             Preorder — ships Nov 1, 2025
           </p>
@@ -170,18 +149,14 @@
             Limited Production: 27 Sets Only
           </p>
 
-          <!-- Store note -->
-          <div class="store-note" style="margin:.25rem 0 .75rem; font-size:.95rem;">
-            <strong>Square Bidness Apparel, LLC — Louisiana</strong><br>
-            Questions? <a href="mailto:marcus@squarebidness.com">marcus@squarebidness.com</a> ·
-            <a href="tel:+19859747777">985-974-7777</a>
-          </div>
-
           <!-- Quick help/returns link -->
           <div class="product-help" style="margin:.5rem 0 .75rem; font-size:.95rem; opacity:.9">
             <a href="/returns.html">30-day returns on unworn items</a> ·
             <a href="/returns.html#preorders">Preorder policy</a>
           </div>
+
+          <!-- Contact Snippet -->
+          <div id="contact-snippet"></div>
 
           <!-- Add to Cart Form -->
           <form id="pdp-form" class="product-form" novalidate>
@@ -204,10 +179,11 @@
               <input id="qty" type="number" min="1" step="1" value="1" class="form-input" required>
             </div>
 
-            <p id="stock-msg" class="stock-msg" style="margin:.5rem 0; opacity:.9">Secure Stripe checkout • Taxes at checkout</p>
+            <p id="stock-msg" class="stock-msg" style="margin:.5rem 0; opacity:.9"></p>
 
             <div class="product-form__actions" style="display:flex; gap:.5rem; flex-wrap:wrap;">
-              <button id="pdp-submit" type="submit" class="btn btn--gold">Add to Cart — Preorder</button>
+              <button id="pdp-submit" type="submit" class="btn btn--gold">Add to Cart</button>
+              <button id="notify-btn" type="button" class="btn btn--ghost" style="display:none">Notify Me</button>
               <a class="btn btn--ghost" href="/shop.html">Back to Shop</a>
             </div>
           </form>
@@ -225,7 +201,7 @@
           </div>
 
           <!-- Related Products -->
-          <div class="product-related">
+          <div class="product-related" style="margin-top:1rem">
             <h3>Complete the Look</h3>
             <a href="/product-vsop-jacket.html" class="related-item">
               <img loading="lazy" src="/assets/vsop-jacket.jpg" alt="VSOP Hooded Jacket">
@@ -251,7 +227,7 @@
   <!-- FOOTER -->
   <div id="footer-placeholder"></div>
 
-  <!-- Cart core -->
+  <!-- Cart System -->
   <script src="/scripts/cart.js"></script>
   
   <!-- Size/Stock Management -->
@@ -261,17 +237,16 @@
     const sizeSel    = document.getElementById('size');
     const qtyInp     = document.getElementById('qty');
     const submitBtn  = document.getElementById('pdp-submit');
-    const notifyBtn  = document.getElementById('notify-btn'); // not shown on this page
+    const notifyBtn  = document.getElementById('notify-btn');
     const stockMsg   = document.getElementById('stock-msg');
     const wrap       = document.querySelector('.product-detail__info');
 
-    // Fallback size data
     const FALLBACK = {
       "S":   { status:"in-stock",  stock:12 },
       "M":   { status:"in-stock",  stock:8  },
       "L":   { status:"low-stock", stock:2  },
       "XL":  { status:"in-stock",  stock:10 },
-      "2XL": { status:"preorder",  stock:null, ship:"2025-10-15" },
+      "2XL": { status:"preorder",  stock:null, ship:"2025-11-01" },
       "3XL": { status:"coming-soon",stock:0, notify:true }
     };
 
@@ -283,7 +258,14 @@
       sizeData = await loadSizes();
       applyToSelect(sizeData);
       sizeSel.addEventListener('change', () => updateUIForSize(sizeSel.value, sizeData));
+      notifyBtn.addEventListener('click', onNotify);
       updateUIForSize(sizeSel.value, sizeData);
+      
+      // Load contact snippet
+      fetch('/contact-snippet.html').then(r => r.text()).then(d => {
+        const slot = document.getElementById('contact-snippet');
+        if (slot) slot.innerHTML = d;
+      }).catch(e => console.warn('Contact snippet failed to load:', e));
     }
 
     async function loadSizes(){
@@ -296,6 +278,7 @@
         return p.sizes;
       } catch(e){
         console.warn('Using FALLBACK sizes:', e.message);
+        if (stockMsg) stockMsg.textContent = 'Note: Using cached inventory data.';
         return FALLBACK;
       }
     }
@@ -303,25 +286,26 @@
     function applyToSelect(map){
       for (const opt of sizeSel.options) {
         if (!opt.value) continue;
-        const v = opt.value;
-        const meta = map[v];
+        const meta = map[opt.value];
         if (!meta) { opt.disabled = true; continue; }
 
         opt.disabled = (meta.status === 'sold-out' || meta.status === 'coming-soon');
-        if (meta.status === 'low-stock')      opt.textContent = `${v} — Only ${meta.stock} left`;
-        else if (meta.status === 'preorder')  opt.textContent = `${v} — Preorder`;
-        else if (meta.status === 'sold-out')  opt.textContent = `${v} — Sold Out`;
-        else if (meta.status === 'coming-soon') opt.textContent = `${v} — Coming Soon`;
-        else                                   opt.textContent = v;
+
+        if (meta.status === 'low-stock')      opt.textContent = `${opt.value} — Only ${meta.stock} left`;
+        else if (meta.status === 'preorder')  opt.textContent = `${opt.value} — Preorder`;
+        else if (meta.status === 'sold-out')  opt.textContent = `${opt.value} — Sold Out`;
+        else if (meta.status === 'coming-soon') opt.textContent = `${opt.value} — Coming Soon`;
+        else                                   opt.textContent = opt.value;
       }
     }
 
     function updateUIForSize(size, map){
       stockMsg.textContent = '';
+      notifyBtn.style.display = 'none';
       submitBtn.disabled = false;
 
       if (!size || !map[size]) {
-        submitBtn.textContent = 'Add to Cart — Preorder';
+        submitBtn.textContent = 'Add to Cart';
         return;
       }
 
@@ -336,15 +320,37 @@
           break;
         case 'preorder':
           submitBtn.textContent = 'Preorder';
-          stockMsg.textContent = meta.ship ? `Preorder — ships around ${formatDate(meta.ship)}` : 'Preorder open.';
+          stockMsg.textContent = meta.ship ? `Preorder — ships ${formatDate(meta.ship)}` : 'Preorder open.';
           break;
         case 'sold-out':
         case 'coming-soon':
           submitBtn.textContent = 'Unavailable';
           submitBtn.disabled = true;
-          stockMsg.textContent = (meta.status === 'sold-out') ? 'Sold out — join waitlist via email.' : 'Coming soon — join waitlist via email.';
+          notifyBtn.style.display = '';
+          stockMsg.textContent = (meta.status === 'sold-out')
+            ? 'Sold out — get notified when restocked.'
+            : 'Coming soon — get notified when available.';
           break;
       }
+    }
+
+    function onNotify(){
+      const size = sizeSel.value;
+      const qty  = Math.max(1, parseInt(qtyInp.value || '1', 10));
+      const nameBase = wrap?.dataset.nameBase || 'VSOP Shorts';
+      const subject = encodeURIComponent(`Notify Me — ${nameBase} (${size})`);
+      const lines = [
+        `Please notify me when this size is available:`,
+        ``,
+        `Product: ${nameBase}`,
+        `Size: ${size}`,
+        `Desired qty: ${qty}`,
+        ``,
+        `My name: `,
+        `My email: `
+      ];
+      const body = encodeURIComponent(lines.join('\n'));
+      location.href = `mailto:squarebidnessapparel@gmail.com?subject=${subject}&body=${body}`;
     }
 
     function formatDate(iso){
@@ -381,28 +387,26 @@
         sizeErr.style.display = 'none';
       }
 
-      const idBase   = wrap?.dataset.idBase || 'vsop-shorts';
-      const nameBase = wrap?.dataset.nameBase || 'VSOP Shorts — Burgundy + Brown';
+      const idBase   = (wrap?.dataset.idBase || 'vsop-shorts').replace(/[^a-zA-Z0-9-]/g, '');
+      const nameBase = wrap?.dataset.nameBase || 'VSOP Shorts';
       const price    = Number(wrap?.dataset.price || '89.99');
-
-      // ensure absolute image for feeds/carts
-      const imgRel   = (wrap?.dataset.image || 'assets/vsop-shorts.jpg').replace(/^\/?/,'');
-      const image    = imgRel.startsWith('http') ? imgRel : `https://squarebidness.com/${imgRel}`;
+      const image    = wrap?.dataset.image || '/assets/vsop-shorts.jpg';
 
       const variantId = `${idBase}-${size}`;
       const item = {
         id: variantId,
-        name: `${nameBase} — Size ${size}`,
+        name: `${nameBase} (${size})`,
         price,
         image,
         qty
       };
 
+      // Add to cart
       if (window.SB && typeof window.SB.addToCart === 'function') {
         window.SB.addToCart(item);
       } else {
-        // Fallback localStorage write
-        const KEY = 'sb_cart_v1';
+        // Fallback
+        const KEY = 'sb_cart';
         const cart = JSON.parse(localStorage.getItem(KEY) || '[]');
         const i = cart.findIndex(x => x.id === item.id);
         if (i >= 0) cart[i].qty += item.qty; else cart.push(item);
@@ -418,7 +422,6 @@
             items: [{
               item_id: variantId,
               item_name: item.name,
-              item_brand: 'Square Bidness Apparel',
               price: price,
               quantity: qty
             }]
@@ -426,8 +429,8 @@
         }
       } catch (_) {}
 
-      // Go to cart after add
-      window.location.href = '/cart.html';
+      // Redirect to cart with slight delay for toast
+      setTimeout(() => window.location.href = '/cart.html', 500);
     });
 
     // Hide error when user picks a size
@@ -436,6 +439,23 @@
       const sizeErr = document.getElementById('size-error');
       if (sizeErr) sizeErr.style.display = 'none';
     });
+  });
+  </script>
+
+  <!-- GA4 View Item Event -->
+  <script>
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({
+    event: 'view_item',
+    ecommerce: {
+      items: [{
+        item_name: 'VSOP Shorts — Burgundy + Brown',
+        item_id: 'vsop-shorts',
+        price: 89.99,
+        item_category: 'Apparel > Shorts',
+        item_brand: 'Square Bidness Apparel'
+      }]
+    }
   });
   </script>
 
