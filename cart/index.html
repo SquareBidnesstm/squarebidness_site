@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <!-- Performance: open connections early -->
+  <!-- Performance -->
   <link rel="preconnect" href="https://www.googletagmanager.com">
   <link rel="preconnect" href="https://www.google-analytics.com">
 
-  <!-- Google tag (gtag.js) -->
+  <!-- GA4 -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-5GB7FQ316G"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -14,35 +14,49 @@
     gtag('config', 'G-5GB7FQ316G');
   </script>
 
+  <!-- Basics -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Your Cart — Square Bidness</title>
   <link rel="stylesheet" href="/styles/style.css" />
+  <link rel="icon" href="/favicon.ico" sizes="any">
 
+  <!-- SEO -->
+  <link rel="canonical" href="https://www.squarebidness.com/cart/" />
+  <meta name="robots" content="noindex,nofollow" />
   <meta name="description" content="Your shopping cart — edit quantities, apply a code, and checkout securely." />
+  <meta name="theme-color" content="#000000" />
+
+  <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Square Bidness">
   <meta property="og:title" content="Your Cart — Square Bidness">
   <meta property="og:description" content="Your shopping cart — edit quantities, apply a code, and checkout securely.">
-  <meta property="og:url" content="https://www.squarebidness.com/cart.html">
+  <meta property="og:url" content="https://www.squarebidness.com/cart/">
   <meta property="og:image" content="https://www.squarebidness.com/assets/sb-social-card_1200.jpg">
-  <meta name="theme-color" content="#000000" />
-  <link rel="icon" href="/favicon.ico" sizes="any">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Your Cart — Square Bidness" />
+  <meta name="twitter:description" content="Your shopping cart — edit quantities, apply a code, and checkout securely." />
+  <meta name="twitter:image" content="https://www.squarebidness.com/assets/sb-social-card_1200.jpg" />
 
   <!-- Load Nav + Footer -->
- <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    fetch("/nav/").then(r => r.text()).then(d => {
-      document.getElementById("nav-placeholder").innerHTML = d;
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      fetch("/nav/", { cache: "no-store" })
+        .then(r => r.text())
+        .then(d => { document.getElementById("nav-placeholder").innerHTML = d; })
+        .catch(()=>{});
+      fetch("/footer/", { cache: "no-store" })
+        .then(r => r.text())
+        .then(d => { document.getElementById("footer-placeholder").innerHTML = d; })
+        .catch(()=>{});
     });
-    fetch("/footer/").then(r => r.text()).then(d => {
-      document.getElementById("footer-placeholder").innerHTML = d;
-    });
-  });
-</script>
+  </script>
 
+  <!-- Cart utilities shared site-wide -->
   <script src="/scripts/sb-cart.js" defer></script>
-
 </head>
 
 <body class="theme-dark" id="top">
@@ -105,7 +119,6 @@
               <a href="/shop/" class="btn btn--ghost">Continue Shopping</a>
               <a id="checkout-btn" href="/checkout/" class="btn btn--gold">Checkout</a>
             </div>
-
           </div>
         </div>
       </div>
@@ -124,7 +137,6 @@
   <!-- CART LOGIC -->
   <script>
   (function () {
-    // ALIGN WITH window.SB
     const CART_KEY   = 'sb_cart_v1';
     const COUPON_KEY = 'sb_coupon';
 
@@ -137,7 +149,6 @@
     }
     function writeCart(cart) {
       localStorage.setItem(CART_KEY, JSON.stringify(cart));
-      // ping any listeners (e.g., badge)
       dispatchEvent(new CustomEvent('sb:cart:update', { detail: { cart } }));
     }
     function setCoupon(code) {
@@ -190,13 +201,9 @@
         `;
       }).join('');
 
-      // summary
       const subtotal = items.reduce((s,i)=> s + Number(i.price||0)*Number(i.qty||0), 0);
       const code = getCoupon();
-      // cart page shows pre-checkout total (no tax/shipping)
-      // discount is displayed here only if your rule is clearly cart-applied; otherwise show at checkout.
-      // Example: just echo the code and $0 here; real discount applied on checkout.
-      const discount = 0;
+      const discount = 0; // cart shows pre-checkout total only
 
       $('#sum-subtotal').textContent = money(subtotal);
       $('#sum-total').textContent    = money(Math.max(0, subtotal - discount));
@@ -209,7 +216,6 @@
         $('#sum-discount-row').style.display = 'none';
       }
 
-      // wire per-row controls
       body.querySelectorAll('tr').forEach(row => {
         const id = decodeURIComponent(row.getAttribute('data-id') || '');
         const qty = row.querySelector('.qty');
@@ -223,7 +229,7 @@
             cart[i].qty = n;
             if (n === 0) cart.splice(i,1);
             writeCart(cart);
-            render(); // re-render totals + rows
+            render();
           }
         });
 
@@ -234,7 +240,6 @@
         });
       });
 
-      // preload coupon input
       const codeInput = $('#coupon');
       if (codeInput) codeInput.value = code || '';
     }
@@ -243,7 +248,6 @@
       const val = ($('#coupon')?.value || '').trim();
       setCoupon(val || null);
       render();
-      // light feedback
       try {
         if (typeof gtag === 'function' && val) {
           gtag('event', 'add_promotion', { promotion_name: val.toUpperCase() });
