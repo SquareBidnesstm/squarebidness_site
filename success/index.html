@@ -68,21 +68,28 @@
   </main>
 
   <div id="footer-placeholder"></div>
+<section class="container" style="margin-top:1rem">
+  <details id="session-container" style="display:none;">
+    <summary>Stripe session details</summary>
+    <p>Session ID: <code id="stripe-session-id"></code></p>
+  </details>
+</section>
 
-  <!-- Reveal session_id if present -->
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const params = new URLSearchParams(window.location.search);
-      const sessionId = params.get("session_id");
-      if (!sessionId) return;
+<script>
+  // Reveal session_id if Stripe appended it (?session_id=cs_test_...)
+  document.addEventListener("DOMContentLoaded", () => {
+    const params = new URLSearchParams(location.search);
+    const sessionId = params.get("session_id");
+    if (!sessionId) return;
 
-      const el = document.getElementById("stripe-session-id");
-      if (el) {
-        el.textContent = sessionId;
-        const wrap = document.getElementById("session-container");
-        if (wrap) wrap.style.display = "block";
-      }
-    });
-  </script>
+    const el = document.getElementById("stripe-session-id");
+    if (el) {
+      el.textContent = sessionId;
+      const wrap = document.getElementById("session-container");
+      if (wrap) wrap.style.display = "block";
+    }
+  });
+</script>
+
 </body>
 </html>
