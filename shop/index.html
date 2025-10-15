@@ -351,42 +351,23 @@
   </script>
   <script>
 (async () => {
-  const bust = `?v=${Date.now()}`; // simple cache-buster for dev
-
-  // Inject partial into a target element by id
+  const bust = `?v=${Date.now()}`;
   async function injectPartial(url, targetId) {
     try {
       const res = await fetch(url + bust, { credentials: 'same-origin' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const html = await res.text();
       const el = document.getElementById(targetId);
-      if (el) el.innerHTML = html;
+      if (el) { el.innerHTML = html; el.classList.add('fade-in'); }
       return el;
-    } catch (e) {
-      console.warn(`Failed to load ${url}:`, e);
-    }
+    } catch (e) { console.warn(`Failed to load ${url}:`, e); }
   }
-
-  // 1) NAV
   await injectPartial('/nav.html', 'nav-placeholder');
-
-  // Mark active link (works with absolute or relative hrefs)
-  const path = location.pathname.replace(/\/+$/, '') || '/';
-  document.querySelectorAll('#nav-placeholder a[href]').forEach(a => {
-    try {
-      const href = new URL(a.getAttribute('href'), location.origin).pathname.replace(/\/+$/, '') || '/';
-      // exact match or section starts-with (e.g. /shop/ marks /shop)
-      if (href === path || (href !== '/' && path.startsWith(href))) {
-        a.classList.add('is-active');
-        a.setAttribute('aria-current', 'page');
-      }
-    } catch {}
-  });
-
-  // 2) FOOTER
+  // ... your active-link code here ...
   await injectPartial('/footer.html', 'footer-placeholder');
 })();
 </script>
+
 
 </body>
 </html>
