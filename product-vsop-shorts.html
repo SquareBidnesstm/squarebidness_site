@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Google tag (gtag.js) -->
+  <!-- GA -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=GT-PL3L8P53"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -10,17 +10,16 @@
     gtag('config', 'GT-PL3L8P53');
   </script>
 
-  <!-- Basics -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>VSOP Shorts — Square Bidness</title>
-  <link rel="stylesheet" href="/styles/style.css" />
 
-  <!-- SEO -->
   <link rel="canonical" href="https://squarebidness.com/product-vsop-shorts.html" />
   <meta name="description" content="VSOP Shorts — Burgundy + Brown. Athletic fit with embroidered mark. Fall 2025 limited run." />
+  <meta name="theme-color" content="#000000" />
+  <meta name="mobile-web-app-capable" content="yes" />
 
-  <!-- Open Graph -->
+  <!-- OG / X -->
   <meta property="og:type" content="product" />
   <meta property="og:site_name" content="Square Bidness" />
   <meta property="og:title" content="VSOP Shorts — Square Bidness" />
@@ -32,39 +31,36 @@
   <meta property="og:image:alt" content="VSOP matching shorts in burgundy and brown" />
   <meta property="product:price:amount" content="89.99" />
   <meta property="product:price:currency" content="USD" />
-
-  <!-- Twitter / X -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:site" content="@squarebidnesstm" />
   <meta name="twitter:title" content="VSOP Shorts — Square Bidness" />
   <meta name="twitter:description" content="Athletic fit with embroidered mark. Burgundy + Brown. Fall 2025 limited run." />
   <meta name="twitter:image" content="https://squarebidness.com/assets/vsop-shorts.jpg" />
 
-  <!-- Favicons -->
+  <!-- Icons -->
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
-  <!-- Browser UI color -->
-  <meta name="theme-color" content="#000000" />
-  <meta name="mobile-web-app-capable" content="yes" />
+  <!-- CSS -->
+  <link rel="stylesheet" href="/styles/style.css" />
 
-  <!-- Load Nav + Footer -->
+  <!-- Nav/Footer loader (absolute paths prevent 404 on nested routes) -->
   <script defer>
     document.addEventListener("DOMContentLoaded", () => {
-      fetch("nav.html").then(r => r.text()).then(d => {
+      fetch("/nav.html").then(r => r.text()).then(d => {
         const slot = document.getElementById("nav-placeholder");
         if (slot) slot.innerHTML = d;
         const shopLink = document.querySelector('.main-nav a[href="shop.html"]');
         if (shopLink) shopLink.classList.add("active");
       });
-      fetch("footer.html").then(r => r.text()).then(d => {
+      fetch("/footer.html").then(r => r.text()).then(d => {
         const slot = document.getElementById("footer-placeholder");
         if (slot) slot.innerHTML = d;
       });
     });
   </script>
 
-  <!-- Breadcrumbs JSON-LD -->
+  <!-- JSON-LD (Breadcrumbs + Product) -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -76,8 +72,6 @@
     ]
   }
   </script>
-
-  <!-- Product JSON-LD -->
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
@@ -101,6 +95,9 @@
     }
   }
   </script>
+
+  <!-- Cart core (defines window.SB, shared across site) -->
+  <script src="/scripts/sb-cart.js" defer></script>
 </head>
 
 <body class="theme-dark" id="top">
@@ -115,20 +112,20 @@
     </div>
   </header>
 
-  <!-- MAIN CONTENT -->
+  <!-- MAIN -->
   <main class="section">
     <div class="container">
       <div class="product-detail">
-        
-        <!-- Product Media -->
+
+        <!-- Media -->
         <div class="product-detail__media">
-          <img loading="lazy" 
+          <img loading="lazy"
                src="/assets/vsop-shorts.jpg"
                alt="VSOP matching shorts in burgundy and brown"
                class="product-detail__image">
         </div>
 
-        <!-- Product Info -->
+        <!-- Info -->
         <article class="product-detail__info"
                  data-id-base="vsop-shorts"
                  data-name-base="VSOP Shorts — Burgundy + Brown"
@@ -149,13 +146,13 @@
             Limited Production: 27 Sets Only
           </p>
 
-          <!-- Quick help/returns link -->
+          <!-- Help -->
           <div class="product-help" style="margin:.5rem 0 .75rem; font-size:.95rem; opacity:.9">
             <a href="/returns.html">30-day returns on unworn items</a> ·
             <a href="/returns.html#preorders">Preorder policy</a>
           </div>
 
-          <!-- Add to Cart Form -->
+          <!-- Form -->
           <form id="pdp-form" class="product-form" novalidate>
             <div class="form-group">
               <label for="size" class="form-label">Size</label>
@@ -185,7 +182,7 @@
             </div>
           </form>
 
-          <!-- Product Details -->
+          <!-- Details -->
           <div class="product-details" style="margin-top:1rem">
             <h3>Details</h3>
             <ul>
@@ -200,13 +197,13 @@
           <!-- Related -->
           <div class="product-related" style="margin-top:1rem">
             <h3>Complete the Look</h3>
-            <a href="product-vsop-jacket.html" class="related-item">
+            <a href="/product-vsop-jacket.html" class="related-item">
               <img loading="lazy" src="/assets/vsop-jacket.jpg" alt="VSOP Hooded Jacket" style="width:90px;height:90px;object-fit:cover;border-radius:6px;">
               <span>VSOP Hooded Jacket — $129.99</span>
             </a>
           </div>
 
-          <!-- Returns / Preorder Expandable -->
+          <!-- Returns -->
           <details class="product-returns" style="margin-top:.75rem">
             <summary style="cursor:pointer">Returns & Preorders (quick view)</summary>
             <div style="margin-top:.5rem; opacity:.9">
@@ -223,7 +220,7 @@
   <!-- FOOTER -->
   <div id="footer-placeholder"></div>
 
-  <!-- Size/Stock Management -->
+  <!-- Size/Stock hydration from /products.json with FALLBACK -->
   <script>
   (function(){
     const PRODUCT_ID = 'vsop-shorts';
@@ -234,7 +231,6 @@
     const stockMsg   = document.getElementById('stock-msg');
     const wrap       = document.querySelector('.product-detail__info');
 
-    // Match your products.json keys (S/M/L/XL/2XL/3XL)
     const FALLBACK = {
       "S":   { status:"in-stock",   stock:12 },
       "M":   { status:"in-stock",   stock:8  },
@@ -252,7 +248,7 @@
       sizeData = await loadSizes();
       applyToSelect(sizeData);
       sizeSel.addEventListener('change', () => updateUIForSize(sizeSel.value, sizeData));
-      if (notifyBtn) notifyBtn.addEventListener('click', onNotify); // guarded
+      if (notifyBtn) notifyBtn.addEventListener('click', onNotify);
       updateUIForSize(sizeSel.value, sizeData);
     }
 
@@ -349,7 +345,7 @@
   })();
   </script>
 
-  <!-- Form Submission & Cart Integration -->
+  <!-- Add to Cart + GA -->
   <script>
   document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('pdp-form');
@@ -365,7 +361,7 @@
 
       const size = (sizeSel.value || '').trim();
       const qty  = Math.max(1, parseInt(qtyInp.value || '1', 10));
-      
+
       if (!size) {
         if (sizeErr) sizeErr.style.display = '';
         sizeSel.focus();
@@ -380,19 +376,12 @@
       const image    = wrap?.dataset.image || '/assets/vsop-shorts.jpg';
 
       const variantId = `${idBase}-${size}`;
-      const item = {
-        id: variantId,
-        name: `${nameBase} (${size})`,
-        price,
-        image,
-        qty
-      };
+      const item = { id: variantId, name: `${nameBase} (${size})`, price, image, qty };
 
-      // Add to cart
       if (window.SB && typeof window.SB.addToCart === 'function') {
         window.SB.addToCart(item);
       } else {
-        // Fallback if SB isn't loaded
+        // Fallback (same key!)
         const KEY = 'sb_cart_v1';
         const cart = JSON.parse(localStorage.getItem(KEY) || '[]');
         const i = cart.findIndex(x => x.id === item.id);
@@ -406,31 +395,23 @@
           gtag('event', 'add_to_cart', {
             currency: 'USD',
             value: price * qty,
-            items: [{
-              item_id: variantId,
-              item_name: item.name,
-              price: price,
-              quantity: qty
-            }]
+            items: [{ item_id: variantId, item_name: item.name, price, quantity: qty }]
           });
         }
-      } catch (_) {}
+      } catch(_) {}
 
-      // Redirect to cart
+      // Go to cart
       window.location.href = '/cart.html';
     });
 
-    // Hide error on change
-    const sizeSel = document.getElementById('size');
-    sizeSel?.addEventListener('change', () => {
+    // hide error when a size is picked
+    document.getElementById('size')?.addEventListener('change', () => {
       const sizeErr = document.getElementById('size-error');
       if (sizeErr) sizeErr.style.display = 'none';
     });
   });
-  </script>
 
-  <!-- GA4 View Item Event -->
-  <script>
+  // GA view_item
   window.dataLayer = window.dataLayer || [];
   window.dataLayer.push({
     event: 'view_item',
@@ -440,7 +421,7 @@
         item_id: 'vsop-shorts',
         price: 89.99,
         item_category: 'Apparel > Shorts',
-        item_brand: 'Square Bidness Apparel',
+        item_brand: 'Square Bidness Apparel'
       }]
     }
   });
