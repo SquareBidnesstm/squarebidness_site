@@ -222,6 +222,59 @@
   <!-- FOOTER include hook -->
   <div id="footer-placeholder"></div>
 
+ <script>
+(() => {
+  const $all = (s, r=document) => Array.from(r.querySelectorAll(s));
+
+  function addSkeleton(img) {
+    // mark as busy for a11y
+    img.setAttribute('aria-busy', 'true');
+
+    // apply skeleton class
+    img.classList.add('img-skeleton');
+
+    // if you provided a data-skeleton preset, ensure a height is visible
+    if (img.dataset.skeleton && !img.style.height) {
+      // heights come from CSS via [data-skeleton], so no inline style needed
+    }
+
+    // when the image finishes, remove skeleton
+    const done = () => {
+      img.classList.remove('img-skeleton');
+      img.removeAttribute('aria-busy');
+      img.removeEventListener('load', done);
+      img.removeEventListener('error', done); // also remove on error/placeholder swap
+    };
+
+    img.addEventListener('load', done);
+    img.addEventListener('error', done);
+
+    // if cached and complete, remove skeleton immediately
+    if (img.complete && img.naturalWidth > 0) done();
+  }
+
+  // observer to only skeletonize as images approach viewport
+  const io = ('IntersectionObserver' in window)
+    ? new IntersectionObserver((entries) => {
+        entries.forEach(({ isIntersecting, target }) => {
+          if (!isIntersecting) return;
+          io.unobserve(target);
+          addSkeleton(target);
+        });
+      }, { rootMargin: '200px 0px' })
+    : null;
+
+  // target product/hero images only (tweak selector as you like)
+  const imgs = $all('.card__media img, .product-card .thumb img, .page-hero img, .hero__media img');
+
+  imgs.forEach(img => {
+    // if already loaded (cache), skip skeleton; otherwise observe or apply
+    if (img.complete && img.naturalWidth > 0) return;
+    if (io) io.observe(img); else addSkeleton(img);
+  });
+})();
+</script>
+
   <!-- Scripts -->
   <script>
     // Simple filter functionality
