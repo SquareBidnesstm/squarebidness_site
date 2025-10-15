@@ -1,15 +1,36 @@
 {
-  "trailingSlash": true,
   "cleanUrls": true,
+  "trailingSlash": true,
+
   "redirects": [
-    { "source": "/:path(.+)\\.html", "destination": "/:path/", "permanent": true },
-    { "source": "/vsop", "destination": "/vsop/", "permanent": true },
-    { "source": "/return", "destination": "/returns/", "permanent": true },
-    { "source": "/pruduct-vsop-set", "destination": "/product-vsop-set/", "permanent": true },
-    { "source": "/robots.txt.", "destination": "/robots.txt", "permanent": true },
-    { "source": "/sitemap.xml.", "destination": "/sitemap.xml", "permanent": true },
-    { "source": "/products.csv.", "destination": "/products.csv", "permanent": true },
-    { "source": "/community-spotlight.html", "destination": "/community-spotlight/", "permanent": true },
-    { "source": "/collection-vsop.html", "destination": "/vsop/", "permanent": true }
+    { "source": "/cart.html",                "destination": "/cart/",                 "permanent": false },
+    { "source": "/checkout.html",            "destination": "/checkout/",             "permanent": false },
+    { "source": "/shop.html",                "destination": "/shop/",                 "permanent": true  },
+    { "source": "/product-vsop-jacket.html", "destination": "/product-vsop-jacket/",  "permanent": true  },
+    { "source": "/product-vsop-shorts.html", "destination": "/product-vsop-shorts/",  "permanent": true  },
+    { "source": "/collection-vsop.html",     "destination": "/collection-vsop/",      "permanent": true  },
+    { "source": "/nav.html",                 "destination": "/nav/",                  "permanent": true  },
+    { "source": "/footer.html",              "destination": "/footer/",               "permanent": true  }
+  ],
+
+  "headers": [
+    {
+      "source": "/nav/",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" }
+      ]
+    },
+    {
+      "source": "/footer/",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" }
+      ]
+    },
+    {
+      "source": "/products.json",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=300, must-revalidate" }
+      ]
+    }
   ]
 }
