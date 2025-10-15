@@ -287,71 +287,56 @@
   </script>
 
   <!-- GA4 ecommerce: view_item_list + select_item + add_to_cart -->
-  <script>
-  (() => {
-    // ---- helpers ----
-    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
-    const toPrice = el => Number((el?.textContent || '').replace(/[^0-9.]/g, '')) || 0;
+<script>
+(() => {
+  // ---- helpers ----
+  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+  const toPrice = el => Number((el?.textContent || '').replace(/[^0-9.]/g, '')) || 0;
 
-    // Build item object from a product card/article
-    const getItemFromCard = (card) => {
-      if (!card) return null;
-      const id = card.getAttribute('data-product-id') || 'unknown';
-      const name = card.querySelector('h3')?.textContent?.trim() || 'Unknown';
-      const price = toPrice(card.querySelector('.price'));
-      const category = card.getAttribute('data-category') || undefined;
-      return { item_id: id, item_name: name, price, item_category: category };
-    };
+  const getItemFromCard = (card) => {
+    if (!card) return null;
+    const id = card.getAttribute('data-product-id') || 'unknown';
+    const name = card.querySelector('h3')?.textContent?.trim() || 'Unknown';
+    const price = toPrice(card.querySelector('.price'));
+    const category = card.getAttribute('data-category') || undefined;
+    return { item_id: id, item_name: name, price, item_category: category };
+  };
 
-    // ---- 1) view_item_list on load ----
-    const cards = $$('.card, .product-card');
-    if (cards.length) {
-      const items = cards
-        .map(getItemFromCard)
-        .filter(Boolean)
-        .map((item, idx) => ({ ...item, index: idx + 1, quantity: 1 }));
+  // 1) view_item_list on load
+  const cards = $$('.card, .product-card');
+  if (cards.length) {
+    const items = cards.map(getItemFromCard).filter(Boolean)
+      .map((item, idx) => ({ ...item, index: idx + 1, quantity: 1 }));
+    window.gtag?.('event', 'view_item_list', { item_list_name: 'Shop Grid', items });
+  }
 
-      window.gtag?.('event', 'view_item_list', {
-        item_list_name: 'Shop Grid',
-        items
-      });
-    }
+  // 2) select_item for title / "View Details"
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('h3 a, .btn--secondary[data-product-id]');
+    if (!link) return;
+    const card = link.closest('[data-product-id], .card, article');
+    const item = getItemFromCard(card);
+    if (!item) return;
+    window.gtag?.('event', 'select_item', { item_list_name: 'Shop Grid', items: [{ ...item, quantity: 1 }] });
+  }, { passive: true });
 
-    // ---- 2) select_item for title or "View Details" clicks (event delegation) ----
-    document.addEventListener('click', (e) => {
-      const link = e.target.closest('h3 a, .btn--secondary[data-product-id]');
-      if (!link) return;
+  // 3) add_to_cart for primary CTA
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.btn--primary[data-product-id]');
+    if (!btn) return;
+    const card = btn.closest('[data-product-id], .card, article');
+    const item = getItemFromCard(card);
+    if (!item) return;
+    window.gtag?.('event', 'add_to_cart', { currency: 'USD', value: item.price || 0, items: [{ ...item, quantity: 1 }] });
+  }, { passive: true });
+})();
+</script>
 
-      const card = link.closest('[data-product-id], .card, article');
-      const item = getItemFromCard(card);
-      if (!item) return;
-
-      window.gtag?.('event', 'select_item', {
-        item_list_name: 'Shop Grid',
-        items: [{ ...item, quantity: 1 }]
-      });
-    }, { passive: true });
-
-    // ---- 3) add_to_cart intent from grid primary CTAs ----
-    document.addEventListener('click', (e) => {
-      const btn = e.target.closest('.btn--primary[data-product-id]');
-      if (!btn) return;
-
-      const card = btn.closest('[data-product-id], .card, article');
-      const item = getItemFromCard(card);
-      if (!item) return;
-
-      window.gtag?.('event', 'add_to_cart', {
-        currency: 'USD',
-        value: item.price || 0,
-        items: [{ ...item, quantity: 1 }]
-      });
-    }, { passive: true });
-  })();
-  </script>
-  <script>
+<!-- Inject nav/footer + mark active link -->
+<script>
 (async () => {
-  const bust = `?v=${Date.now()}`;
+  const bust = `?v=${Date.now()}`; // dev cache-buster; remove in production
+
   async function injectPartial(url, targetId) {
     try {
       const res = await fetch(url + bust, { credentials: 'same-origin' });
@@ -360,13 +345,34 @@
       const el = document.getElementById(targetId);
       if (el) { el.innerHTML = html; el.classList.add('fade-in'); }
       return el;
-    } catch (e) { console.warn(`Failed to load ${url}:`, e); }
+    } catch (e) {
+      console.warn(`Failed to load ${url}:`, e);
+      return null;
+    }
   }
-  await injectPartial('/nav.html', 'nav-placeholder');
-  // ... your active-link code here ...
+
+  // 1) NAV
+  const navEl = await injectPartial('/nav.html', 'nav-placeholder');
+
+  // 1a) Highlight current page
+  if (navEl) {
+    const current = location.pathname.replace(/\/+$/, '') || '/';
+    navEl.querySelectorAll('a[href]').forEach(a => {
+      try {
+        const href = new URL(a.getAttribute('href'), location.origin).pathname.replace(/\/+$/, '') || '/';
+        if (href === current || (href !== '/' && current.startsWith(href))) {
+          a.classList.add('is-active');
+          a.setAttribute('aria-current', 'page');
+        }
+      } catch {}
+    });
+  }
+
+  // 2) FOOTER
   await injectPartial('/footer.html', 'footer-placeholder');
 })();
 </script>
+
 
 
 </body>
