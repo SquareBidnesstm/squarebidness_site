@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=GT-PL3L8P53"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'GT-PL3L8P53');
-</script>
+  <!-- GA4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=GT-PL3L8P53"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'GT-PL3L8P53');
+  </script>
 
   <!-- Basics -->
   <meta charset="UTF-8" />
@@ -49,15 +49,15 @@
   <meta name="mobile-web-app-capable" content="yes" />
 
   <!-- Load Nav + Footer -->
-  <script defer>
+  <script>
     document.addEventListener("DOMContentLoaded", () => {
-      fetch("nav.html").then(r => r.text()).then(d => {
+      fetch("/nav.html").then(r => r.text()).then(d => {
         const slot = document.getElementById("nav-placeholder");
         if (slot) slot.innerHTML = d;
         const shopLink = document.querySelector('.main-nav a[href="shop.html"]');
         if (shopLink) shopLink.classList.add("active");
       });
-      fetch("footer.html").then(r => r.text()).then(d => {
+      fetch("/footer.html").then(r => r.text()).then(d => {
         const slot = document.getElementById("footer-placeholder");
         if (slot) slot.innerHTML = d;
       });
@@ -76,19 +76,6 @@
     ]
   }
   </script>
-  <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "MerchantReturnPolicy",
-  "@id": "https://squarebidness.com/returns.html#policy",
-  "merchantReturnDays": 30,
-  "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
-  "returnMethod": "https://schema.org/ReturnByMail",
-  "returnFees": "https://schema.org/ReturnShippingFees",
-  "applicableCountry": "US"
-}
-</script>
-
 
   <!-- Product JSON-LD -->
   <script type="application/ld+json">
@@ -114,8 +101,9 @@
     }
   }
   </script>
-  <script src="/scripts/sb-cart.js" defer></script>
 
+  <!-- Global Cart Core (make sure this exists at /scripts/sb-cart.js) -->
+  <script src="/scripts/sb-cart.js" defer></script>
 </head>
 
 <body class="theme-dark" id="top">
@@ -165,14 +153,11 @@
             Limited Production: 27 Sets Only
           </p>
 
-          <!-- Quick help/returns link -->
+          <!-- Help/returns -->
           <div class="product-help" style="margin:.5rem 0 .75rem; font-size:.95rem; opacity:.9">
             <a href="/returns.html">30-day returns on unworn items</a> ·
             <a href="/returns.html#preorders">Preorder policy</a>
           </div>
-
-          <!-- Contact Snippet -->
-          <div id="contact-snippet"></div>
 
           <!-- Add to Cart Form -->
           <form id="pdp-form" class="product-form" novalidate>
@@ -233,132 +218,131 @@
   <!-- FOOTER -->
   <div id="footer-placeholder"></div>
 
- 
+  <!-- Size/Stock Management (reads /products.json, falls back gracefully) -->
+  <script>
+  (function(){
+    const PRODUCT_ID = 'vsop-jacket';
+    const sizeSel    = document.getElementById('size');
+    const qtyInp     = document.getElementById('qty');
+    const submitBtn  = document.getElementById('pdp-submit');
+    const notifyBtn  = document.getElementById('notify-btn');
+    const stockMsg   = document.getElementById('stock-msg');
+    const wrap       = document.querySelector('.product-detail__info');
 
-  
-  <!-- Size/Stock Management -->
- <script>
-(function(){
-  const PRODUCT_ID = 'vsop-jacket'; // change to 'vsop-shorts' on the shorts page
-  const sizeSel    = document.getElementById('size');
-  const qtyInp     = document.getElementById('qty');
-  const submitBtn  = document.getElementById('pdp-submit');
-  const notifyBtn  = document.getElementById('notify-btn'); // may be absent on some pages
-  const stockMsg   = document.getElementById('stock-msg');
-  const wrap       = document.querySelector('.product-detail__info');
+    const FALLBACK = {
+      "S":   { status:"in-stock",   stock:15 },
+      "M":   { status:"low-stock",  stock:3  },
+      "L":   { status:"sold-out",   stock:0  },
+      "XL":  { status:"in-stock",   stock:8  },
+      "2XL": { status:"preorder",   stock:null, ship:"2025-11-01" },
+      "3XL": { status:"coming-soon",stock:0,   notify:true }
+    };
 
-  const FALLBACK = {
-    "S":   { status:"in-stock",   stock:15 },
-    "M":   { status:"low-stock",  stock:3  },
-    "L":   { status:"sold-out",   stock:0  },
-    "XL":  { status:"in-stock",   stock:8  },
-    "2XL": { status:"preorder",   stock:null, ship:"2025-11-01" },
-    "3XL": { status:"coming-soon",stock:0,   notify:true }
-  };
+    let sizeData = null;
 
-  let sizeData = null;
+    init();
 
-  init();
-
-  async function init(){
-    sizeData = await loadSizes();
-    applyToSelect(sizeData);
-    sizeSel.addEventListener('change', () => updateUIForSize(sizeSel.value, sizeData));
-    if (notifyBtn) notifyBtn.addEventListener('click', onNotify);  // <— guarded
-    updateUIForSize(sizeSel.value, sizeData);
-  }
-
-  async function loadSizes(){
-    try {
-      const r = await fetch('/products.json', { cache:'no-store' });
-      if (!r.ok) throw new Error('products.json not found');
-      const all = await r.json();
-      const p = all[PRODUCT_ID];
-      if (!p || !p.sizes) throw new Error('sizes missing');
-      return p.sizes;
-    } catch(e){
-      console.warn('Using FALLBACK sizes:', e.message);
-      if (stockMsg) stockMsg.textContent = 'Note: Using cached inventory data.';
-      return FALLBACK;
-    }
-  }
-
-  function applyToSelect(map){
-    for (const opt of sizeSel.options) {
-      if (!opt.value) continue;
-      const meta = map[opt.value];
-      if (!meta) { opt.disabled = true; continue; }
-      opt.disabled = (meta.status === 'sold-out' || meta.status === 'coming-soon');
-      if (meta.status === 'low-stock')       opt.textContent = `${opt.value} — Only ${meta.stock} left`;
-      else if (meta.status === 'preorder')   opt.textContent = `${opt.value} — Preorder`;
-      else if (meta.status === 'sold-out')   opt.textContent = `${opt.value} — Sold Out`;
-      else if (meta.status === 'coming-soon')opt.textContent = `${opt.value} — Coming Soon`;
-      else                                   opt.textContent = opt.value;
-    }
-  }
-
-  function updateUIForSize(size, map){
-    if (stockMsg) stockMsg.textContent = '';
-    if (notifyBtn) { notifyBtn.style.display = 'none'; notifyBtn.disabled = false; }
-    submitBtn.disabled = false;
-
-    if (!size || !map[size]) {
-      submitBtn.textContent = 'Add to Cart';
-      return;
+    async function init(){
+      sizeData = await loadSizes();
+      applyToSelect(sizeData);
+      sizeSel.addEventListener('change', () => updateUIForSize(sizeSel.value, sizeData));
+      if (notifyBtn) notifyBtn.addEventListener('click', onNotify);
+      updateUIForSize(sizeSel.value, sizeData);
     }
 
-    const meta = map[size];
-    switch (meta.status) {
-      case 'in-stock':
+    async function loadSizes(){
+      try {
+        const r = await fetch('/products.json', { cache:'no-store' });
+        if (!r.ok) throw new Error('products.json not found');
+        const all = await r.json();
+        const p = all[PRODUCT_ID];
+        if (!p || !p.sizes) throw new Error('sizes missing');
+        return p.sizes;
+      } catch(e){
+        console.warn('Using FALLBACK sizes:', e.message);
+        if (stockMsg) stockMsg.textContent = 'Note: Using cached inventory data.';
+        return FALLBACK;
+      }
+    }
+
+    function applyToSelect(map){
+      for (const opt of sizeSel.options) {
+        if (!opt.value) continue;
+        const meta = map[opt.value];
+        if (!meta) { opt.disabled = true; continue; }
+
+        opt.disabled = (meta.status === 'sold-out' || meta.status === 'coming-soon');
+
+        if (meta.status === 'low-stock')        opt.textContent = `${opt.value} — Only ${meta.stock} left`;
+        else if (meta.status === 'preorder')    opt.textContent = `${opt.value} — Preorder`;
+        else if (meta.status === 'sold-out')    opt.textContent = `${opt.value} — Sold Out`;
+        else if (meta.status === 'coming-soon') opt.textContent = `${opt.value} — Coming Soon`;
+        else                                     opt.textContent = opt.value;
+      }
+    }
+
+    function updateUIForSize(size, map){
+      stockMsg.textContent = '';
+      if (notifyBtn) { notifyBtn.style.display = 'none'; notifyBtn.disabled = false; }
+      submitBtn.disabled = false;
+
+      if (!size || !map[size]) {
         submitBtn.textContent = 'Add to Cart';
-        break;
-      case 'low-stock':
-        submitBtn.textContent = 'Add to Cart';
-        if (stockMsg) stockMsg.textContent = `Only ${meta.stock} left — don't wait.`;
-        break;
-      case 'preorder':
-        submitBtn.textContent = 'Preorder';
-        if (stockMsg) stockMsg.textContent = meta.ship ? `Preorder — ships ${formatDate(meta.ship)}` : 'Preorder open.';
-        break;
-      case 'sold-out':
-      case 'coming-soon':
-        submitBtn.textContent = 'Unavailable';
-        submitBtn.disabled = true;
-        if (notifyBtn) notifyBtn.style.display = '';
-        if (stockMsg) stockMsg.textContent = (meta.status === 'sold-out')
-          ? 'Sold out — get notified when restocked.'
-          : 'Coming soon — get notified when available.';
-        break;
+        return;
+      }
+
+      const meta = map[size];
+      switch (meta.status) {
+        case 'in-stock':
+          submitBtn.textContent = 'Add to Cart';
+          break;
+        case 'low-stock':
+          submitBtn.textContent = 'Add to Cart';
+          stockMsg.textContent = `Only ${meta.stock} left — don't wait.`;
+          break;
+        case 'preorder':
+          submitBtn.textContent = 'Preorder';
+          stockMsg.textContent = meta.ship ? `Preorder — ships ${formatDate(meta.ship)}` : 'Preorder open.';
+          break;
+        case 'sold-out':
+        case 'coming-soon':
+          submitBtn.textContent = 'Unavailable';
+          submitBtn.disabled = true;
+          if (notifyBtn) notifyBtn.style.display = '';
+          stockMsg.textContent = (meta.status === 'sold-out')
+            ? 'Sold out — get notified when restocked.'
+            : 'Coming soon — get notified when available.';
+          break;
+      }
     }
-  }
 
-  function onNotify(){
-    const size = sizeSel.value;
-    const qty  = Math.max(1, parseInt(qtyInp.value || '1', 10));
-    const nameBase = wrap?.dataset.nameBase || 'VSOP';
-    const subject = encodeURIComponent(`Notify Me — ${nameBase} (${size})`);
-    const lines = [
-      `Please notify me when this size is available:`,
-      ``,
-      `Product: ${nameBase}`,
-      `Size: ${size}`,
-      `Desired qty: ${qty}`,
-      ``,
-      `My name: `,
-      `My email: `
-    ];
-    const body = encodeURIComponent(lines.join('\n'));
-    location.href = `mailto:squarebidnessapparel@gmail.com?subject=${subject}&body=${body}`;
-  }
+    function onNotify(){
+      const size = sizeSel.value;
+      const qty  = Math.max(1, parseInt(qtyInp.value || '1', 10));
+      const nameBase = wrap?.dataset.nameBase || 'VSOP Hooded Jacket';
+      const subject = encodeURIComponent(`Notify Me — ${nameBase} (${size})`);
+      const lines = [
+        `Please notify me when this size is available:`,
+        ``,
+        `Product: ${nameBase}`,
+        `Size: ${size}`,
+        `Desired qty: ${qty}`,
+        ``,
+        `My name: `,
+        `My email: `
+      ];
+      const body = encodeURIComponent(lines.join('\n'));
+      location.href = `mailto:squarebidnessapparel@gmail.com?subject=${subject}&body=${body}`;
+    }
 
-  function formatDate(iso){
-    try {
-      const d = new Date(iso);
-      return d.toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' });
-    } catch { return iso; }
-  }
-})();
-</script>
+    function formatDate(iso){
+      try {
+        const d = new Date(iso);
+        return d.toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' });
+      } catch { return iso; }
+    }
+  })();
+  </script>
 
   <!-- Form Submission & Cart Integration -->
   <script>
@@ -399,19 +383,21 @@
         qty
       };
 
-      // Add to cart
+      // Add to cart via global SB (preferred)
       if (window.SB && typeof window.SB.addToCart === 'function') {
         window.SB.addToCart(item);
       } else {
-        // Fallback
+        // Fallback (same key as SB)
         const KEY = 'sb_cart_v1';
         const cart = JSON.parse(localStorage.getItem(KEY) || '[]');
         const i = cart.findIndex(x => x.id === item.id);
         if (i >= 0) cart[i].qty += item.qty; else cart.push(item);
         localStorage.setItem(KEY, JSON.stringify(cart));
+        // ping listeners (badge)
+        dispatchEvent(new CustomEvent('sb:cart:update', { detail: { cart } }));
       }
 
-      // GA4 tracking
+      // GA4 tracking (best effort)
       try {
         if (typeof gtag === 'function') {
           gtag('event', 'add_to_cart', {
@@ -427,33 +413,32 @@
         }
       } catch (_) {}
 
-      // Redirect to cart with slight delay for toast
-      setTimeout(() => window.location.href = '/cart.html', 500);
+      // Redirect to cart
+      window.location.href = '/cart.html';
     });
 
     // Hide error when user picks a size
-    const sizeSel = document.getElementById('size');
-    sizeSel?.addEventListener('change', () => {
+    document.getElementById('size')?.addEventListener('change', () => {
       const sizeErr = document.getElementById('size-error');
       if (sizeErr) sizeErr.style.display = 'none';
     });
-  });
-  </script>
 
-  <!-- GA4 View Item Event -->
-  <script>
-  window.dataLayer = window.dataLayer || [];
-  window.dataLayer.push({
-    event: 'view_item',
-    ecommerce: {
-      items: [{
-        item_name: 'VSOP Hooded Jacket — Burgundy + Brown',
-        item_id: 'vsop-jacket',
-        price: 129.99,
-        item_category: 'Apparel > Outerwear > Jackets',
-        item_brand: 'Square Bidness Apparel',
-      }]
-    }
+    // GA4 view_item (on load)
+    try {
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: 'view_item',
+        ecommerce: {
+          items: [{
+            item_name: 'VSOP Hooded Jacket — Burgundy + Brown',
+            item_id: 'vsop-jacket',
+            price: 129.99,
+            item_category: 'Apparel > Outerwear > Jackets',
+            item_brand: 'Square Bidness Apparel'
+          }]
+        }
+      });
+    } catch (_) {}
   });
   </script>
 
