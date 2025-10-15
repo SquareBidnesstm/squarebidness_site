@@ -1157,3 +1157,42 @@ img[src] {
   font-size: 0.9rem;
   color: #ccc;
 }
+/* ---- ACTIVE NAV LINK (matches JS .is-active) ---- */
+.main-nav a.is-active {
+  color: #fff;
+  text-shadow: 0 0 10px #f5d742;
+  position: relative;
+}
+.main-nav a.is-active::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: -3px;
+  width: 100%; height: 2px;
+  background: #f5d742;
+}
+
+/* Keep your existing rule working too */
+.nav-item.is-active::after { width: 100%; opacity: 1; }
+
+/* ---- BADGES: you use "coming soon" in markup ---- */
+.badge--coming-soon {
+  background: rgba(99, 102, 241, 0.9); /* indigo vibe */
+  color: #fff;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+/* ---- CARD DISABLED: your JS toggles .card--disabled ---- */
+.card--disabled {
+  opacity: 0.6;
+  filter: grayscale(0.15);
+}
+.card--disabled .btn--primary,
+.card--disabled .btn--secondary {
+  pointer-events: none;
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+/* ---- Smooth reveal for injected nav/footer (optional) ---- */
+.fade-in { opacity: 0; animation: fadeIn .24s ease-out forwards; }
+@keyframes fadeIn { to { opacity: 1; } }
