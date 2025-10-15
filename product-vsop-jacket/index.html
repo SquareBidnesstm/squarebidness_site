@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- GA4 -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=GT-PL3L8P53"></script>
+  <!-- Performance -->
+  <link rel="preconnect" href="https://www.googletagmanager.com">
+  <link rel="preconnect" href="https://www.google-analytics.com">
+
+  <!-- GA4 (unified) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-5GB7FQ316G"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
+    function gtag(){ dataLayer.push(arguments); }
     gtag('js', new Date());
-    gtag('config', 'GT-PL3L8P53');
+    gtag('config', 'G-5GB7FQ316G');
   </script>
 
   <!-- Basics -->
@@ -15,9 +19,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>VSOP Hooded Jacket — Square Bidness</title>
   <link rel="stylesheet" href="/styles/style.css" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="mobile-web-app-capable" content="yes" />
 
   <!-- SEO -->
-  <link rel="canonical" href="https://squarebidness.com/product-vsop-jacket.html" />
+  <link rel="canonical" href="https://www.squarebidness.com/product-vsop-jacket/" />
   <meta name="description" content="VSOP Hooded Jacket in burgundy and brown. Premium heavyweight construction with full embroidery. Fall 2025 limited run." />
 
   <!-- Open Graph -->
@@ -25,8 +33,8 @@
   <meta property="og:site_name" content="Square Bidness" />
   <meta property="og:title" content="VSOP Hooded Jacket — Square Bidness" />
   <meta property="og:description" content="Heavyweight construction with full embroidery. Burgundy + Brown. Fall 2025 limited run." />
-  <meta property="og:url" content="https://squarebidness.com/product-vsop-jacket.html" />
-  <meta property="og:image" content="https://squarebidness.com/assets/vsop-jacket.jpg" />
+  <meta property="og:url" content="https://www.squarebidness.com/product-vsop-jacket/" />
+  <meta property="og:image" content="https://www.squarebidness.com/assets/vsop-jacket.jpg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="1200" />
   <meta property="og:image:alt" content="VSOP embroidered hooded jacket in burgundy and brown" />
@@ -38,29 +46,24 @@
   <meta name="twitter:site" content="@squarebidnesstm" />
   <meta name="twitter:title" content="VSOP Hooded Jacket — Square Bidness" />
   <meta name="twitter:description" content="Heavyweight construction with full embroidery. Burgundy + Brown. Fall 2025 limited run." />
-  <meta name="twitter:image" content="https://squarebidness.com/assets/vsop-jacket.jpg" />
-
-  <!-- Favicons -->
-  <link rel="icon" href="/favicon.ico" sizes="any" />
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-
-  <!-- Browser UI color -->
-  <meta name="theme-color" content="#000000" />
-  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="twitter:image" content="https://www.squarebidness.com/assets/vsop-jacket.jpg" />
 
   <!-- Load Nav + Footer -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      fetch("/nav.html").then(r => r.text()).then(d => {
-        const slot = document.getElementById("nav-placeholder");
-        if (slot) slot.innerHTML = d;
-        const shopLink = document.querySelector('.main-nav a[href="shop.html"]');
-        if (shopLink) shopLink.classList.add("active");
-      });
-      fetch("/footer.html").then(r => r.text()).then(d => {
-        const slot = document.getElementById("footer-placeholder");
-        if (slot) slot.innerHTML = d;
-      });
+      fetch("/nav/", { cache: "no-store" })
+        .then(r => r.text()).then(d => {
+          const slot = document.getElementById("nav-placeholder");
+          if (slot) slot.innerHTML = d;
+          // highlight Shop
+          const shopLink = document.querySelector('.main-nav a[href="/shop/"]');
+          if (shopLink) { shopLink.classList.add("active"); shopLink.setAttribute("aria-current","page"); }
+        }).catch(()=>{});
+      fetch("/footer/", { cache: "no-store" })
+        .then(r => r.text()).then(d => {
+          const slot = document.getElementById("footer-placeholder");
+          if (slot) slot.innerHTML = d;
+        }).catch(()=>{});
     });
   </script>
 
@@ -70,9 +73,9 @@
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://squarebidness.com/" },
-      { "@type": "ListItem", "position": 2, "name": "Shop", "item": "https://squarebidness.com/shop.html" },
-      { "@type": "ListItem", "position": 3, "name": "VSOP Hooded Jacket", "item": "https://squarebidness.com/product-vsop-jacket.html" }
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.squarebidness.com/" },
+      { "@type": "ListItem", "position": 2, "name": "Shop", "item": "https://www.squarebidness.com/shop/" },
+      { "@type": "ListItem", "position": 3, "name": "VSOP Hooded Jacket", "item": "https://www.squarebidness.com/product-vsop-jacket/" }
     ]
   }
   </script>
@@ -82,32 +85,31 @@
   {
     "@context":"https://schema.org",
     "@type":"Product",
-    "@id":"https://squarebidness.com/product-vsop-jacket.html#product",
+    "@id":"https://www.squarebidness.com/product-vsop-jacket/#product",
     "name":"VSOP Hooded Jacket — Burgundy + Brown",
     "description":"Heavyweight construction with full embroidery. Designed for Fall 2025. Limited run.",
-    "image":["https://squarebidness.com/assets/vsop-jacket.jpg"],
+    "image":["https://www.squarebidness.com/assets/vsop-jacket.jpg"],
     "sku":"vsop-jacket",
     "brand":{"@type":"Brand","name":"Square Bidness Apparel"},
-    "url":"https://squarebidness.com/product-vsop-jacket.html",
-    "hasMerchantReturnPolicy":{"@id":"https://squarebidness.com/returns.html#policy"},
+    "url":"https://www.squarebidness.com/product-vsop-jacket/",
+    "hasMerchantReturnPolicy":{"@id":"https://www.squarebidness.com/returns.html#policy"},
     "offers":{
       "@type":"Offer",
       "priceCurrency":"USD",
       "price":"129.99",
       "availability":"https://schema.org/PreOrder",
-      "url":"https://squarebidness.com/product-vsop-jacket.html",
+      "url":"https://www.squarebidness.com/product-vsop-jacket/",
       "itemCondition":"https://schema.org/NewCondition",
       "seller":{"@type":"Organization","name":"Square Bidness Apparel, LLC"}
     }
   }
   </script>
 
-  <!-- Global Cart Core (make sure this exists at /scripts/sb-cart.js) -->
+  <!-- Global Cart Core -->
   <script src="/scripts/sb-cart.js" defer></script>
 </head>
 
 <body class="theme-dark" id="top">
-
   <!-- NAV -->
   <div id="nav-placeholder"></div>
 
@@ -123,13 +125,13 @@
   <main class="section">
     <div class="container">
       <div class="product-detail">
-        
         <!-- Product Media -->
         <div class="product-detail__media">
-          <img loading="lazy" 
-               src="/assets/vsop-jacket.jpg"
-               alt="VSOP embroidered hooded jacket in burgundy and brown"
-               class="product-detail__image">
+          <img
+            loading="lazy"
+            src="/assets/vsop-jacket.jpg"
+            alt="VSOP embroidered hooded jacket in burgundy and brown"
+            class="product-detail__image">
         </div>
 
         <!-- Product Info -->
@@ -185,7 +187,7 @@
             <div class="product-form__actions" style="display:flex; gap:.5rem; flex-wrap:wrap;">
               <button id="pdp-submit" type="submit" class="btn btn--gold">Add to Cart</button>
               <button id="notify-btn" type="button" class="btn btn--ghost" style="display:none">Notify Me</button>
-              <a class="btn btn--ghost" href="/shop.html">Back to Shop</a>
+              <a class="btn btn--ghost" href="/shop/">Back to Shop</a>
             </div>
           </form>
 
@@ -218,7 +220,7 @@
   <!-- FOOTER -->
   <div id="footer-placeholder"></div>
 
-  <!-- Size/Stock Management (reads /products.json, falls back gracefully) -->
+  <!-- Size/Stock Management -->
   <script>
   (function(){
     const PRODUCT_ID = 'vsop-jacket';
@@ -387,13 +389,12 @@
       if (window.SB && typeof window.SB.addToCart === 'function') {
         window.SB.addToCart(item);
       } else {
-        // Fallback (same key as SB)
+        // Fallback
         const KEY = 'sb_cart_v1';
         const cart = JSON.parse(localStorage.getItem(KEY) || '[]');
         const i = cart.findIndex(x => x.id === item.id);
         if (i >= 0) cart[i].qty += item.qty; else cart.push(item);
         localStorage.setItem(KEY, JSON.stringify(cart));
-        // ping listeners (badge)
         dispatchEvent(new CustomEvent('sb:cart:update', { detail: { cart } }));
       }
 
@@ -413,8 +414,8 @@
         }
       } catch (_) {}
 
-      // Redirect to cart
-      window.location.href = '/cart.html';
+      // Redirect to cart (folder route)
+      window.location.href = '/cart/';
     });
 
     // Hide error when user picks a size
@@ -441,6 +442,5 @@
     } catch (_) {}
   });
   </script>
-
 </body>
 </html>
