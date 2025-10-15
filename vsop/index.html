@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- GA -->
+  <!-- GA (keep or replace with your GA4 ID) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=GT-PL3L8P53"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
+    function gtag(){ dataLayer.push(arguments); }
     gtag('js', new Date());
     gtag('config', 'GT-PL3L8P53');
   </script>
 
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Square Bidness — VSOP Preorder</title>
-  <meta name="description" content="Square Bidness — VSOP Collection preorder. Heat-reactive jacket + shorts. Limited run.">
-  <link rel="canonical" href="https://squarebidness.com/vsop/">
+  <title>VSOP Collection — Square Bidness</title>
+  <meta name="description" content="VSOP Collection preorder — burgundy & brown heat-reactive jacket + shorts. Limited run." />
+  <link rel="canonical" href="https://squarebidness.com/vsop/" />
   <meta name="theme-color" content="#000000" />
   <meta name="mobile-web-app-capable" content="yes" />
 
@@ -24,7 +24,6 @@
   <meta property="og:url" content="https://squarebidness.com/vsop/">
   <meta property="og:title" content="VSOP Collection — Preorders Live">
   <meta property="og:description" content="Very Superior. Original Principles. Limited preorder — burgundy & brown heat-reactive jacket + shorts.">
-  <!-- If your hero is actually at /assets, switch to /assets/vsop-hero.jpg -->
   <meta property="og:image" content="https://squarebidness.com/vsop/assets/vsop-hero.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -34,22 +33,14 @@
   <meta name="twitter:image" content="https://squarebidness.com/vsop/assets/vsop-hero.jpg">
   <meta name="twitter:site" content="@squarebidnesstm">
 
-  <!-- JSON-LD blocks (unchanged, just verify image paths) -->
-  <!-- ... your three JSON-LD scripts here ... -->
-
-  <!-- Page CSS -->
+  <!-- CSS -->
   <link rel="stylesheet" href="/vsop/vsop.css">
 
-  <!-- SB Cart (global cart core) -->
+  <!-- Global SB cart (must exist and define window.SB using 'sb_cart_v1') -->
   <script src="/scripts/sb-cart.js" defer></script>
-
-  <!-- VSOP page logic (Stripe & countdown) -->
-  <script src="/vsop/vsop.js" defer></script>
 </head>
-
-
-
 <body>
+
   <!-- HERO -->
   <section class="hero">
     <div class="container hero__inner">
@@ -66,7 +57,7 @@
   </section>
 
   <!-- COUNTDOWN -->
-  <section class="countdown container" id="countdown">
+  <section class="countdown container" id="countdown" aria-live="polite">
     <strong>Preorder closes in:</strong>
     <span id="cd-days">--</span>d :
     <span id="cd-hours">--</span>h :
@@ -84,7 +75,7 @@
             <img
               class="card__img"
               src="/vsop/assets/vsop-set.jpg"
-              alt="Square Bidness VSOP Set — Jacket and Shorts in burgundy/brown"
+              alt="Square Bidness VSOP Set — jacket and shorts in burgundy/brown"
               loading="lazy"
               width="1600" height="1000"
               srcset="/vsop/assets/vsop-set_800.jpg 800w,
@@ -212,7 +203,96 @@
     <div class="muted">Ships <strong>November 2025</strong>. You'll receive email updates after checkout.</div>
   </div>
 
-  <!-- Optional: quick fade overlay for smooth load -->
+  <!-- Page JS: countdown + cart wiring -->
+  <script>
+  (function () {
+    // --- COUNTDOWN (Oct 25, 2025 23:59 local) ---
+    const end = new Date(2025, 9, 25, 23, 59, 59);
+    const cdDays  = document.getElementById('cd-days');
+    const cdHours = document.getElementById('cd-hours');
+    const cdMins  = document.getElementById('cd-mins');
+    const cdWrap  = document.getElementById('countdown');
+
+    function tick(){
+      const now = new Date();
+      const diff = Math.max(0, end - now);
+      if (diff <= 0) {
+        cdWrap && cdWrap.classList.add('is-closed');
+        if (cdDays)  cdDays.textContent  = '00';
+        if (cdHours) cdHours.textContent = '00';
+        if (cdMins)  cdMins.textContent  = '00';
+        return;
+      }
+      const mins  = Math.floor(diff / 60000);
+      const days  = Math.floor(mins / (60 * 24));
+      const hours = Math.floor((mins % (60 * 24)) / 60);
+      const m     = mins % 60;
+      if (cdDays)  cdDays.textContent  = String(days).padStart(2, '0');
+      if (cdHours) cdHours.textContent = String(hours).padStart(2, '0');
+      if (cdMins)  cdMins.textContent  = String(m).padStart(2, '0');
+    }
+    tick(); setInterval(tick, 30000);
+
+    // --- Catalog meta (adjust image paths if needed) ---
+    const CATALOG = {
+      'vsop-jacket': { name: 'VSOP Hooded Jacket — Burgundy + Brown', price: 129.99, image: '/vsop/assets/vsop-jacket.jpg' },
+      'vsop-shorts': { name: 'VSOP Shorts — Burgundy + Brown',       price:  89.99, image: '/vsop/assets/vsop-shorts.jpg' }
+    };
+
+    function addItem(item) {
+      if (window.SB && typeof SB.addToCart === 'function') {
+        SB.addToCart(item);
+      } else {
+        const KEY = 'sb_cart_v1';
+        const cart = JSON.parse(localStorage.getItem(KEY) || '[]');
+        const i = cart.findIndex(x => x.id === item.id);
+        if (i >= 0) cart[i].qty += Number(item.qty || 1);
+        else cart.push({ ...item, qty: Number(item.qty || 1) });
+        localStorage.setItem(KEY, JSON.stringify(cart));
+        dispatchEvent(new CustomEvent('sb:cart:update', { detail: { cart } }));
+      }
+    }
+
+    // --- Wire up buttons (delegated) ---
+    document.addEventListener('click', (e) => {
+      // Bundle
+      if (e.target.closest('#bundle-checkout')) {
+        e.preventDefault();
+        const jSize = (document.getElementById('bundle-jacket-size') || {}).value || 'M';
+        const sSize = (document.getElementById('bundle-shorts-size') || {}).value || 'M';
+        const qty   = Math.max(1, parseInt((document.getElementById('bundle-qty') || {}).value || '1', 10));
+
+        addItem({ id:`vsop-jacket-${jSize}`, name:`${CATALOG['vsop-jacket'].name} — ${jSize}`, price: CATALOG['vsop-jacket'].price, image: CATALOG['vsop-jacket'].image, qty });
+        addItem({ id:`vsop-shorts-${sSize}`, name:`${CATALOG['vsop-shorts'].name} — ${sSize}`, price: CATALOG['vsop-shorts'].price, image: CATALOG['vsop-shorts'].image, qty });
+
+        location.href = '/cart.html';
+        return;
+      }
+
+      // Jacket
+      if (e.target.closest('#jacket-checkout')) {
+        e.preventDefault();
+        const size = (document.getElementById('jacket-size') || {}).value || 'M';
+        const qty  = Math.max(1, parseInt((document.getElementById('jacket-qty') || {}).value || '1', 10));
+        addItem({ id:`vsop-jacket-${size}`, name:`${CATALOG['vsop-jacket'].name} — ${size}`, price: CATALOG['vsop-jacket'].price, image: CATALOG['vsop-jacket'].image, qty });
+        location.href = '/cart.html';
+        return;
+      }
+
+      // Shorts
+      if (e.target.closest('#shorts-checkout')) {
+        e.preventDefault();
+        const size = (document.getElementById('shorts-size') || {}).value || 'M';
+        const qty  = Math.max(1, parseInt((document.getElementById('shorts-qty') || {}).value || '1', 10));
+        addItem({ id:`vsop-shorts-${size}`, name:`${CATALOG['vsop-shorts'].name} — ${size}`, price: CATALOG['vsop-shorts'].price, image: CATALOG['vsop-shorts'].image, qty });
+        location.href = '/cart.html';
+        return;
+      }
+    });
+  })();
+  </script>
+
+  <!-- Optional fade overlay for smooth load -->
   <script>
     (function () {
       var ov = document.createElement('div');
@@ -234,8 +314,5 @@
       });
     })();
   </script>
-
-  <!-- Page JS -->
-  <script src="/vsop/vsop.js" defer></script>
 </body>
 </html>
