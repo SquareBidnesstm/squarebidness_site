@@ -1,17 +1,26 @@
-<!-- Logo -->
+<!-- nav/index.html -->
 <div class="logo-wrapper">
   <a href="/">
     <img src="/assets/cleantextlogo.png" alt="Square Bidness Logo" class="logo-img" />
   </a>
 </div>
 
-<!-- Navigation Links -->
 <nav class="main-nav">
   <a href="/" class="nav-item">Home</a>
   <a href="/shop/" class="nav-item">Shop</a>
-  <a href="/linkme/" class="nav-item nav-item--pill">Link Me</a>
-
-  <a href="/cart/" class="nav-cart">
-     Cart <span id="nav-cart-count" class="cart-badge" style="display:none">0</span>
-  </a>
+  <a href="/vsop/" class="nav-item">VSOP</a>
+  <a href="/liberty/" class="nav-item">Liberty</a>
+  <a href="/cart/" class="nav-cart">Cart <span id="cart-count" class="cart-badge" style="display:none">0</span></a>
 </nav>
+<script>
+  // highlight active
+  (function(){
+    const cur=(location.pathname.replace(/\/+$/,'')||'/');
+    document.querySelectorAll('.main-nav a[href]').forEach(a=>{
+      try{
+        const p=new URL(a.getAttribute('href'), location.origin).pathname.replace(/\/+$/,'')||'/';
+        if(p===cur || (p!=='/' && cur.startsWith(p))){ a.classList.add('active'); a.setAttribute('aria-current','page'); }
+      }catch{}
+    });
+  })();
+</script>
