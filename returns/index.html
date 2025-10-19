@@ -1,14 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- GA4 -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-6Y22HBF1VJ"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){ dataLayer.push(arguments); }
-    gtag('js', new Date());
-    gtag('config', 'G-6Y22HBF1VJ');
-  </script>
+  <!-- Sitewide GA loader -->
+  <script defer src="/scripts/ga.js"></script>
 
   <!-- Basics -->
   <meta charset="UTF-8" />
@@ -18,63 +12,50 @@
 
   <!-- SEO -->
   <meta name="description" content="Square Bidness returns & exchanges policy. Start a return within 30 days on unworn items with tags. Preorder details, defects, and refund timing inside." />
-  <link rel="canonical" href="https://squarebidness.com/returns" />
+  <link rel="canonical" href="https://www.squarebidness.com/returns/" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Square Bidness">
   <meta property="og:title" content="Returns & Exchanges — Square Bidness">
   <meta property="og:description" content="Start a return or exchange. 30-day window on unworn items with tags. Preorder and defect guidance included.">
-  <meta property="og:url" content="https://squarebidness.com/returns.html">
-  <meta property="og:image" content="https://squarebidness.com/assets/og-square-bidness.png">
+  <meta property="og:url" content="https://www.squarebidness.com/returns/">
+  <meta property="og:image" content="https://www.squarebidness.com/assets/og-square-bidness.png">
 
   <!-- Favicons / UI -->
   <link rel="icon" href="/favicon.ico" sizes="any">
   <meta name="theme-color" content="#000000">
   <meta name="mobile-web-app-capable" content="yes">
 
-  <!-- Load Nav + Footer -->
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      fetch("nav.html").then(r => r.text()).then(d => {
-        document.getElementById("nav-placeholder").innerHTML = d;
-        const link = document.querySelector('.main-nav a[href="returns.html"]');
-        if (link) link.classList.add("active");
-      });
-      fetch("footer.html").then(r => r.text()).then(d => {
-        document.getElementById("footer-placeholder").innerHTML = d;
-      });
-    });
-  </script>
-
-  <!-- JSON-LD (WebPage + FAQ) -->
+  <!-- JSON-LD (WebPage) -->
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
     "@type":"WebPage",
-    "@id":"https://squarebidness.com/returns.html#webpage",
-    "url":"https://squarebidness.com/returns.html",
+    "@id":"https://www.squarebidness.com/returns/#webpage",
+    "url":"https://www.squarebidness.com/returns/",
     "name":"Returns & Exchanges — Square Bidness",
     "description":"Square Bidness returns & exchanges policy and start-a-return instructions."
   }
   </script>
- <!-- Merchant Return Policy (canonical) -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "MerchantReturnPolicy",
-  "@id": "https://squarebidness.com/returns.html#policy",
-  "name": "Square Bidness Returns & Exchanges",
-  "url": "https://squarebidness.com/returns.html",
-  "merchantReturnDays": 30,
-  "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
-  "itemCondition": "https://schema.org/NewCondition",
-  "returnMethod": "https://schema.org/ReturnByMail",
-  "returnFees": "https://schema.org/ReturnShippingFees",
-  "inStoreReturnsOffered": false,
-  "applicableCountry": "US"
-}
-</script>
+
+  <!-- Merchant Return Policy (canonical) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "MerchantReturnPolicy",
+    "@id": "https://www.squarebidness.com/returns/#policy",
+    "name": "Square Bidness Returns & Exchanges",
+    "url": "https://www.squarebidness.com/returns/",
+    "merchantReturnDays": 30,
+    "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+    "itemCondition": "https://schema.org/NewCondition",
+    "returnMethod": "https://schema.org/ReturnByMail",
+    "returnFees": "https://schema.org/ReturnShippingFees",
+    "inStoreReturnsOffered": false,
+    "applicableCountry": "US"
+  }
+  </script>
 </head>
 
 <body class="theme-dark" id="top">
@@ -95,7 +76,10 @@
 
       <!-- Policy -->
       <section class="card" style="padding:1.25rem">
-        <p style="opacity:.8;margin:0 0 .75rem 0">Effective date: <strong>September 29, 2025</strong> • Contact: <a href="mailto:squarebidnessapparel@gmail.com">squarebidnessapparel@gmail.com</a></p>
+        <p style="opacity:.8;margin:0 0 .75rem 0">
+          Effective date: <strong>September 29, 2025</strong> • Contact:
+          <a href="mailto:squarebidnessapparel@gmail.com">squarebidnessapparel@gmail.com</a>
+        </p>
 
         <h2>1) Overview</h2>
         <ul>
@@ -179,15 +163,15 @@
             <textarea id="rf-notes" name="notes" rows="4" placeholder="Tell us what’s up. For defects, describe the issue and where it appears."></textarea>
           </div>
 
-          <div style="display:flex; gap:.5rem; margin-top:1rem;">
+          <div style="display:flex; gap:.5rem; margin-top:1rem; flex-wrap:wrap;">
             <button class="btn btn--gold" type="submit">Generate Email</button>
             <a class="btn btn--ghost" href="mailto:squarebidnessapparel@gmail.com?subject=Return%20Request&body=Order%20%23:%0AReason:%0ADetails:" rel="nofollow">Email Us Directly</a>
-            <a class="btn btn--ghost" href="shop.html">Back to Shop</a>
+            <a class="btn btn--ghost" href="/shop/">Back to Shop</a>
           </div>
           <p id="rf-hint" style="opacity:.75; margin-top:.5rem">Your default email app will open with your details. Attach photos there if needed.</p>
         </form>
 
-        <!-- Optional: Switch to a hosted form service later (e.g., Formspree) and POST there instead of mailto:. -->
+        <!-- Optional: switch to a hosted form later (Formspree, Tally, etc.) and POST there instead of mailto:. -->
       </section>
 
       <section class="card" style="padding:1.25rem; margin-top:1rem">
@@ -201,43 +185,56 @@
   <!-- FOOTER -->
   <div id="footer-placeholder"></div>
 
-  <!-- Page JS: mailto helper -->
+  <!-- Page JS: nav/footer includes + mailto helper -->
   <script>
-  const SBReturn = {
-    mailtoSubmit(e) {
-      e.preventDefault();
-      const name = (document.getElementById('rf-name').value || '').trim();
-      const email = (document.getElementById('rf-email').value || '').trim();
-      const order = (document.getElementById('rf-order').value || '').trim();
-      const reason = (document.getElementById('rf-reason').value || '').trim();
-      const notes = (document.getElementById('rf-notes').value || '').trim();
+    // Include shared nav/footer (root-absolute avoids 404s from nested routes)
+    document.addEventListener("DOMContentLoaded", async () => {
+      try {
+        const nav = await fetch("/nav/").then(r => r.ok ? r.text() : "");
+        document.getElementById("nav-placeholder").innerHTML = nav;
+        // mark nav active if you have a returns link in nav
+        const link = document.querySelector('.main-nav a[href="/returns/"], .main-nav a[href="returns.html"]');
+        if (link) link.classList.add("active");
+      } catch {}
+      try {
+        const footer = await fetch("/footer/").then(r => r.ok ? r.text() : "");
+        document.getElementById("footer-placeholder").innerHTML = footer;
+      } catch {}
+    });
 
-      const to = 'squarebidnessapparel@gmail.com';
-      const subject = encodeURIComponent(`Return Request — Order #${order || ''}`);
-      const bodyLines = [
-        'Return request details:',
-        '',
-        `Name: ${name}`,
-        `Email: ${email}`,
-        `Order #: ${order}`,
-        `Reason: ${reason}`,
-        '',
-        'Notes:',
-        notes || '(none)',
-        '',
-        'Photos: (attach in your email composer)'
-      ];
-      const body = encodeURIComponent(bodyLines.join('\n'));
+    // Minimal mailto flow
+    const SBReturn = {
+      mailtoSubmit(e) {
+        e.preventDefault();
+        const name = (document.getElementById('rf-name').value || '').trim();
+        const email = (document.getElementById('rf-email').value || '').trim();
+        const order = (document.getElementById('rf-order').value || '').trim();
+        const reason = (document.getElementById('rf-reason').value || '').trim();
+        const notes = (document.getElementById('rf-notes').value || '').trim();
 
-      // Open default mail app
-      window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+        const to = 'squarebidnessapparel@gmail.com';
+        const subject = encodeURIComponent(`Return Request — Order #${order || ''}`);
+        const bodyLines = [
+          'Return request details:',
+          '',
+          `Name: ${name}`,
+          `Email: ${email}`,
+          `Order #: ${order}`,
+          `Reason: ${reason}`,
+          '',
+          'Notes:',
+          notes || '(none)',
+          '',
+          'Photos: (attach in your email composer)'
+        ];
+        const body = encodeURIComponent(bodyLines.join('\n'));
+        window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
 
-      // Gentle UX hint
-      const hint = document.getElementById('rf-hint');
-      if (hint) hint.textContent = 'If your email app did not open, please click "Email Us Directly" above.';
-      return false;
-    }
-  };
+        const hint = document.getElementById('rf-hint');
+        if (hint) hint.textContent = 'If your email app did not open, please click "Email Us Directly" above.';
+        return false;
+      }
+    };
   </script>
 </body>
 </html>
