@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- shared head -->
+  <link rel="preconnect" href="https://www.googletagmanager.com">
+  <link rel="preconnect" href="https://www.google-analytics.com">
+  <script defer src="/scripts/ga.js"></script>
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Search — Square Bidness</title>
+  <link rel="canonical" href="https://www.squarebidness.com/search/" />
+  <meta name="description" content="Search Square Bidness products and posts." />
+  <meta name="theme-color" content="#000000" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="stylesheet" href="/styles/style.css" />
+
+  <!-- JSON-LD: WebSite + SearchAction -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"WebSite",
+    "@id":"https://www.squarebidness.com/#website",
+    "url":"https://www.squarebidness.com/",
+    "name":"Square Bidness",
+    "potentialAction":{
+      "@type":"SearchAction",
+      "target":"https://www.squarebidness.com/search/?q={search_term_string}",
+      "query-input":"required name=search_term_string"
+    }
+  }
+  </script>
+
+  <style>
+    .search-wrap{max-width:900px;margin:1.5rem auto;padding:0 16px}
+    .search-bar{display:flex;gap:.5rem}
+    .search-bar input{flex:1;padding:.7rem .9rem;border-radius:8px;border:1px solid #2a2a2a;background:#0f0f0f;color:#eee}
+    .search-bar button{padding:.7rem 1rem;border-radius:8px;border:1px solid #444;background:#c9a227;color:#111;font-weight:700}
+    .results{margin-top:1rem;display:grid;gap:.75rem}
+    .result{border:1px solid #1f1f1f;border-radius:12px;padding:12px;background:#0e0e0e}
+    .result h3{margin:.2rem 0}
+    .result small{opacity:.8}
+    .pill{display:inline-block;border:1px solid #333;border-radius:999px;padding:.15rem .5rem;font-size:.75rem;margin-right:.35rem;opacity:.9}
+    .muted{opacity:.8}
+  </style>
+</head>
+<body class="theme-dark">
+  <div id="nav-placeholder"></div>
+
+  <main class="search-wrap">
+    <h1>Search</h1>
+    <form class="search-bar" id="search-form" role="search">
+      <input id="q" name="q" type="search" placeholder="Search products, posts…" autocomplete="off" />
+      <button type="submit">Search</button>
+    </form>
+
+    <div id="stats" class="muted" style="margin-top:.5rem"></div>
+    <section id="results" class="results" aria-live="polite"></section>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script>
+    // Load site chrome
+    document.addEventListener("DOMContentLoaded", async () => {
+      try { document.getElementById("nav-placeholder").innerHTML = await (await fetch("/nav/")).text(); } catch {}
+      try { document.getElementById("footer-placeholder").innerHTML = await (await fetch("/footer/")).text(); } catch {}
+    });
+
+    const $q = document.getElementById('q');
+    const $form = document.getElementById('search-form');
+    const $results = document.getElementById('results');
+    const $stats = document.getElementById('stats');
+
+    // Simple in-page blog index (add as you publish)
+    const BLOG = [
+      {
+        title: "Innovation Fest 2025: From Louisiana to NYC",
+        url: "/blog/post/innovation-fest-2025/",
+        desc: "Four days in NYC, key takeaways, and what’s next for Square Bidness."
+      }
+      // Add more posts here…
+    ];
+
+    async function loadProducts(){
+      try {
+        const r = await fetch('/products.json', { cache: 'no-store' });
+        if (!r.ok) return {};
+        return r.json();
+      } catch { return {}; }
+    }
+
+    function norm(s){ return (s||'').toString().toLowerCase(); }
+    function match(hay, needle){ hay = norm(hay); needle = norm(needle); return hay.includes(needle); }
+
+    function card(item, kind){
+      const url = item.url || (kind === 'product' ? (item.path || '#') : item.url);
+      const price = (item.price != null) ? `$${Number(item.price).toFixed(2)}` : '';
+      const badge = kind === 'product' ? '<span class="pill">Product</span>' : '<span class="pill">Post</span>';
+      return `
+        <article class="result">
+          ${badge}
+          <h3><a href="${url}">${item.name || item.title}</a></h3>
+          ${price ? `<div><strong>${price}</strong></div>` : ``}
+          ${item.desc ? `<p class="muted">${item.desc}</p>` : ``}
+          ${item.sku ? `<small class="muted">SKU: ${item.sku}</small>` : ``}
+        </article>
+      `;
+    }
+
+    async function search(q){
+      if (!q) { $results.innerHTML = ""; $stats.textContent = ""; return; }
+      const needle = norm(q);
+
+      // Products
+      const productsIndex = await loadProducts();
+      const productHits = Object.keys(productsIndex || {}).map(k => productsIndex[k])
+        .filter(p => match(p.name, needle) || match(p.desc, needle) || match(p.sku, needle))
+        .map(p => {
+          // best-guess product page path if not provided in JSON
+          if (!p.url && !p.path && p.sku) p.path = `/product-${p.sku.replace(/^sb-?/,'')}.html`;
+          return p;
+        });
+
+      // Blog
+      const blogHits = BLOG.filter(b => match(b.title, needle) || match(b.desc, needle));
+
+      // Render
+      const html = [
+        ...productHits.map(p => card(p, 'product')),
+        ...blogHits.map(b => card(b, 'post'))
+      ].join('');
+
+      $results.innerHTML = html || `<p class="muted">No results for “${q}”.</p>`;
+      $stats.textContent = `${productHits.length + blogHits.length} result${(productHits.length + blogHits.length)===1?'':'s'} for “${q}”`;
+    }
+
+    // wire up
+    $form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const val = $q.value.trim();
+      const url = new URL(location.href);
+      url.searchParams.set('q', val);
+      history.replaceState(null, '', url.toString());
+      search(val);
+    });
+
+    // hydrate from ?q=
+    const initial = new URL(location.href).searchParams.get('q') || '';
+    if (initial) { $q.value = initial; search(initial); }
+  </script>
+</body>
+</html>
