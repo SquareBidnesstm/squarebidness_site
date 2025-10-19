@@ -5,22 +5,25 @@
   <link rel="preconnect" href="https://www.googletagmanager.com">
   <link rel="preconnect" href="https://www.google-analytics.com">
 
+  <!-- GA4 (site-wide) -->
   <script defer src="/scripts/ga.js"></script>
-
 
   <!-- Basics -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>VSOP Hooded Jacket — Square Bidness</title>
-  <link rel="stylesheet" href="/styles/style.css" />
-  <link rel="icon" href="/favicon.ico" sizes="any" />
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <meta name="description" content="VSOP Hooded Jacket in burgundy and brown. Premium heavyweight construction with full embroidery. Fall 2025 limited run." />
+  <link rel="canonical" href="https://www.squarebidness.com/product-vsop-jacket/" />
   <meta name="theme-color" content="#000000" />
   <meta name="mobile-web-app-capable" content="yes" />
 
-  <!-- SEO -->
-  <link rel="canonical" href="https://www.squarebidness.com/product-vsop-jacket/" />
-  <meta name="description" content="VSOP Hooded Jacket in burgundy and brown. Premium heavyweight construction with full embroidery. Fall 2025 limited run." />
+  <!-- CSS -->
+  <link rel="stylesheet" href="/styles/style.css" />
+
+  <!-- Icons / PWA -->
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" href="/assets/icons/icon-180.png" />
+  <link rel="manifest" href="/site.webmanifest" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="product" />
@@ -42,23 +45,28 @@
   <meta name="twitter:description" content="Heavyweight construction with full embroidery. Burgundy + Brown. Fall 2025 limited run." />
   <meta name="twitter:image" content="https://www.squarebidness.com/assets/vsop-jacket.jpg" />
 
-  <!-- Load Nav + Footer -->
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      fetch("/nav/", { cache: "no-store" })
-        .then(r => r.text()).then(d => {
-          const slot = document.getElementById("nav-placeholder");
-          if (slot) slot.innerHTML = d;
-          // highlight Shop
-          const shopLink = document.querySelector('.main-nav a[href="/shop/"]');
-          if (shopLink) { shopLink.classList.add("active"); shopLink.setAttribute("aria-current","page"); }
-        }).catch(()=>{});
-      fetch("/footer/", { cache: "no-store" })
-        .then(r => r.text()).then(d => {
-          const slot = document.getElementById("footer-placeholder");
-          if (slot) slot.innerHTML = d;
-        }).catch(()=>{});
-    });
+  <!-- Organization JSON-LD (site-wide) -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"Organization",
+    "name":"Square Bidness Apparel",
+    "url":"https://www.squarebidness.com/",
+    "logo":"https://www.squarebidness.com/assets/cleantextlogo.png",
+    "sameAs":[
+      "https://instagram.com/squarebidnesstm",
+      "https://www.tiktok.com/@squarebidnesstm",
+      "https://www.facebook.com/squarebidnessapparel",
+      "https://bsky.app/profile/squarebidnesstm.bsky.social",
+      "https://www.linkedin.com/company/square-bidness-apparel"
+    ],
+    "contactPoint":[{
+      "@type":"ContactPoint",
+      "contactType":"customer support",
+      "email":"squarebidnessapparel@gmail.com",
+      "areaServed":"US"
+    }]
+  }
   </script>
 
   <!-- Breadcrumbs JSON-LD -->
@@ -86,7 +94,7 @@
     "sku":"vsop-jacket",
     "brand":{"@type":"Brand","name":"Square Bidness Apparel"},
     "url":"https://www.squarebidness.com/product-vsop-jacket/",
-    "hasMerchantReturnPolicy":{"@id":"https://www.squarebidness.com/returns.html#policy"},
+    "hasMerchantReturnPolicy":{"@id":"https://www.squarebidness.com/returns/#policy"},
     "offers":{
       "@type":"Offer",
       "priceCurrency":"USD",
@@ -99,9 +107,30 @@
   }
   </script>
 
+  <!-- Load Nav + Footer (same pattern site-wide) -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      fetch("/nav/", { cache: "no-store" })
+        .then(r => r.text())
+        .then(d => {
+          const slot = document.getElementById("nav-placeholder");
+          if (slot) slot.innerHTML = d;
+          const shopLink = document.querySelector('.main-nav a[href="/shop/"]');
+          if (shopLink) { shopLink.classList.add("active"); shopLink.setAttribute("aria-current","page"); }
+        }).catch(()=>{});
+      fetch("/footer/", { cache: "no-store" })
+        .then(r => r.text())
+        .then(d => {
+          const slot = document.getElementById("footer-placeholder");
+          if (slot) slot.innerHTML = d;
+        }).catch(()=>{});
+    });
+  </script>
+
   <!-- Global Cart Core -->
   <script src="/scripts/sb-cart.js" defer></script>
 </head>
+
 
 <body class="theme-dark" id="top">
   <!-- NAV -->
