@@ -5,9 +5,10 @@
   <link rel="preconnect" href="https://www.googletagmanager.com">
   <link rel="preconnect" href="https://www.google-analytics.com">
 
+  <!-- GA4 (site-wide) -->
   <script defer src="/scripts/ga.js"></script>
 
-
+  <!-- Basics -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>VSOP Shorts — Square Bidness</title>
@@ -17,6 +18,14 @@
   <meta name="description" content="VSOP Shorts — Burgundy + Brown. Athletic fit with embroidered mark. Fall 2025 limited run." />
   <meta name="theme-color" content="#000000" />
   <meta name="mobile-web-app-capable" content="yes" />
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/styles/style.css" />
+
+  <!-- Icons / PWA -->
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" href="/assets/icons/icon-180.png" />
+  <link rel="manifest" href="/site.webmanifest" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="product" />
@@ -38,27 +47,30 @@
   <meta name="twitter:description" content="Athletic fit with embroidered mark. Burgundy + Brown. Fall 2025 limited run." />
   <meta name="twitter:image" content="https://www.squarebidness.com/assets/vsop-shorts.jpg" />
 
-  <!-- Icons -->
-  <link rel="icon" href="/favicon.ico" sizes="any" />
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-
-  <!-- CSS -->
-  <link rel="stylesheet" href="/styles/style.css" />
-
-  <!-- Nav/Footer loader -->
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      fetch("/nav/", { cache: "no-store" }).then(r => r.text()).then(d => {
-        const slot = document.getElementById("nav-placeholder");
-        if (slot) slot.innerHTML = d;
-        const shopLink = document.querySelector('.main-nav a[href="/shop/"]');
-        if (shopLink) { shopLink.classList.add("active"); shopLink.setAttribute("aria-current","page"); }
-      }).catch(()=>{});
-      fetch("/footer/", { cache: "no-store" }).then(r => r.text()).then(d => {
-        const slot = document.getElementById("footer-placeholder");
-        if (slot) slot.innerHTML = d;
-      }).catch(()=>{});
-    });
+  <!-- Organization JSON-LD (site-wide) -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"Organization",
+    "name":"Square Bidness Apparel",
+    "url":"https://www.squarebidness.com/",
+    "logo":"https://www.squarebidness.com/assets/cleantextlogo.png",
+    "sameAs":[
+      "https://instagram.com/squarebidnesstm",
+      "https://www.tiktok.com/@squarebidnesstm",
+      "https://www.facebook.com/squarebidnessapparel",
+      "https://bsky.app/profile/squarebidnesstm.bsky.social",
+      "https://www.linkedin.com/company/square-bidness-apparel"
+    ],
+    "contactPoint":[
+      {
+        "@type":"ContactPoint",
+        "contactType":"customer support",
+        "email":"squarebidnessapparel@gmail.com",
+        "areaServed":"US"
+      }
+    ]
+  }
   </script>
 
   <!-- JSON-LD (Breadcrumbs + Product) -->
@@ -73,6 +85,7 @@
     ]
   }
   </script>
+
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
@@ -84,7 +97,7 @@
     "sku":"vsop-shorts",
     "brand":{"@type":"Brand","name":"Square Bidness Apparel"},
     "url":"https://www.squarebidness.com/product-vsop-shorts/",
-    "hasMerchantReturnPolicy":{"@id":"https://www.squarebidness.com/returns.html#policy"},
+    "hasMerchantReturnPolicy":{"@id":"https://www.squarebidness.com/returns/#policy"},
     "offers":{
       "@type":"Offer",
       "priceCurrency":"USD",
@@ -97,9 +110,30 @@
   }
   </script>
 
+  <!-- Nav/Footer loader -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      fetch("/nav/", { cache: "no-store" })
+        .then(r => r.text())
+        .then(d => {
+          const slot = document.getElementById("nav-placeholder");
+          if (slot) slot.innerHTML = d;
+          const shopLink = document.querySelector('.main-nav a[href="/shop/"]');
+          if (shopLink) { shopLink.classList.add("active"); shopLink.setAttribute("aria-current","page"); }
+        }).catch(()=>{});
+      fetch("/footer/", { cache: "no-store" })
+        .then(r => r.text())
+        .then(d => {
+          const slot = document.getElementById("footer-placeholder");
+          if (slot) slot.innerHTML = d;
+        }).catch(()=>{});
+    });
+  </script>
+
   <!-- Cart core -->
   <script src="/scripts/sb-cart.js" defer></script>
 </head>
+
 
 <body class="theme-dark" id="top">
   <!-- NAV -->
