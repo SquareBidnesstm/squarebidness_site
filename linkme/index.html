@@ -123,5 +123,16 @@
       } catch(_) {}
     });
   </script>
+  <div id="credit-placeholder"></div>
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const html = await fetch('/partials/credit.html', { cache: 'no-store' }).then(r => r.text());
+      const slot = document.getElementById('credit-placeholder');
+      if (slot) slot.innerHTML = html;
+    } catch {}
+  });
+</script>
+
 </body>
 </html>
