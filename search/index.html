@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- shared head -->
+  <!-- shared head bits -->
   <link rel="preconnect" href="https://www.googletagmanager.com">
   <link rel="preconnect" href="https://www.google-analytics.com">
   <script defer src="/scripts/ga.js"></script>
@@ -42,6 +42,8 @@
     .result small{opacity:.8}
     .pill{display:inline-block;border:1px solid #333;border-radius:999px;padding:.15rem .5rem;font-size:.75rem;margin-right:.35rem;opacity:.9}
     .muted{opacity:.8}
+    .site-bottom {margin:2rem auto 3rem;max-width:900px;padding:0 16px;text-align:center;opacity:.8}
+    .site-bottom a{color:#c9a227}
   </style>
 </head>
 <body class="theme-dark">
@@ -50,15 +52,19 @@
   <main class="search-wrap">
     <h1>Search</h1>
     <form class="search-bar" id="search-form" role="search">
-      <input id="q" name="q" type="search" placeholder="Search products, posts…" autocomplete="off" />
+      <input id="search-input" name="q" type="search" placeholder="Search products, posts…" autocomplete="off" />
       <button type="submit">Search</button>
     </form>
 
-    <div id="stats" class="muted" style="margin-top:.5rem"></div>
-    <section id="results" class="results" aria-live="polite"></section>
+    <div id="search-stats" class="muted" style="margin-top:.5rem"></div>
+    <section id="search-results" class="results" aria-live="polite"></section>
   </main>
 
   <div id="footer-placeholder"></div>
+
+  <div class="site-bottom">
+    © 2025 Square Bidness Tech Lab — <a href="/linkme/">Link Me</a>
+  </div>
 
   <script>
     // Load site chrome
@@ -67,87 +73,160 @@
       try { document.getElementById("footer-placeholder").innerHTML = await (await fetch("/footer/")).text(); } catch {}
     });
 
-    const $q = document.getElementById('q');
-    const $form = document.getElementById('search-form');
-    const $results = document.getElementById('results');
-    const $stats = document.getElementById('stats');
+    // ===== DOM =====
+    const $form    = document.querySelector('#search-form');
+    const $q       = document.querySelector('#search-input');
+    const $results = document.querySelector('#search-results');
+    const $stats   = document.querySelector('#search-stats');
 
-    // Simple in-page blog index (add as you publish)
-    const BLOG = [
-      {
-        title: "Innovation Fest 2025: From Louisiana to NYC",
-        url: "/blog/post/innovation-fest-2025/",
-        desc: "Four days in NYC, key takeaways, and what’s next for Square Bidness."
-      }
-      // Add more posts here…
-    ];
+    // ===== Helpers =====
+    const norm  = s => (s||'').toString().toLowerCase();
+    const match = (hay, needle) => norm(hay).includes(norm(needle));
+    const esc   = s => (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 
-    async function loadProducts(){
+    function pill(txt){ return `<span class="pill">${esc(txt)}</span>`; }
+    function money(n){ try { return `$${Number(n).toFixed(2)}` } catch { return '' } }
+
+    // ===== Data loaders =====
+    async function loadProducts() {
       try {
         const r = await fetch('/products.json', { cache: 'no-store' });
         if (!r.ok) return {};
-        return r.json();
+        return await r.json(); // { sku: { name, desc, price, url?, path? } }
       } catch { return {}; }
     }
 
-    function norm(s){ return (s||'').toString().toLowerCase(); }
-    function match(hay, needle){ hay = norm(hay); needle = norm(needle); return hay.includes(needle); }
+    async function loadBlog() {
+      // Fallback minimal inline list in case /blog/index.json is missing
+      const FALLBACK = [
+        {
+          title: "Innovation Fest 2025: From Louisiana to NYC",
+          url: "/blog/post/innovation-fest-2025/",
+          desc: "Four days in NYC, key takeaways, and what’s next for Square Bidness.",
+          date: "2025-09-24"
+        }
+      ];
+      try {
+        const r = await fetch('/blog/index.json', { cache: 'no-store' });
+        if (!r.ok) return FALLBACK;
+        return await r.json(); // [ { title, url, desc, date? } ]
+      } catch { return FALLBACK; }
+    }
 
-    function card(item, kind){
-      const url = item.url || (kind === 'product' ? (item.path || '#') : item.url);
-      const price = (item.price != null) ? `$${Number(item.price).toFixed(2)}` : '';
-      const badge = kind === 'product' ? '<span class="pill">Product</span>' : '<span class="pill">Post</span>';
+    // ===== Cards =====
+    function productCard(p) {
+      const url   = p.url || p.path || (p.sku ? `/product-${p.sku.replace(/^sb-?/,'')}.html` : '#');
+      const price = (p.price != null) ? money(p.price) : '';
       return `
         <article class="result">
-          ${badge}
-          <h3><a href="${url}">${item.name || item.title}</a></h3>
-          ${price ? `<div><strong>${price}</strong></div>` : ``}
-          ${item.desc ? `<p class="muted">${item.desc}</p>` : ``}
-          ${item.sku ? `<small class="muted">SKU: ${item.sku}</small>` : ``}
+          ${pill('Product')}
+          <h3><a href="${esc(url)}">${esc(p.name || p.title || p.sku || 'Product')}</a></h3>
+          ${price ? `<div><strong>${esc(price)}</strong></div>` : ``}
+          ${p.desc ? `<p class="muted">${esc(p.desc)}</p>` : ``}
+          ${p.sku ? `<small class="muted">SKU: ${esc(p.sku)}</small></small>` : ``}
         </article>
       `;
     }
 
-    async function search(q){
-      if (!q) { $results.innerHTML = ""; $stats.textContent = ""; return; }
-      const needle = norm(q);
-
-      // Products
-      const productsIndex = await loadProducts();
-      const productHits = Object.keys(productsIndex || {}).map(k => productsIndex[k])
-        .filter(p => match(p.name, needle) || match(p.desc, needle) || match(p.sku, needle))
-        .map(p => {
-          // best-guess product page path if not provided in JSON
-          if (!p.url && !p.path && p.sku) p.path = `/product-${p.sku.replace(/^sb-?/,'')}.html`;
-          return p;
-        });
-
-      // Blog
-      const blogHits = BLOG.filter(b => match(b.title, needle) || match(b.desc, needle));
-
-      // Render
-      const html = [
-        ...productHits.map(p => card(p, 'product')),
-        ...blogHits.map(b => card(b, 'post'))
-      ].join('');
-
-      $results.innerHTML = html || `<p class="muted">No results for “${q}”.</p>`;
-      $stats.textContent = `${productHits.length + blogHits.length} result${(productHits.length + blogHits.length)===1?'':'s'} for “${q}”`;
+    function postCard(post) {
+      return `
+        <article class="result">
+          ${pill('Post')}
+          <h3><a href="${esc(post.url || '#')}">${esc(post.title || 'Post')}</a></h3>
+          ${post.desc ? `<p class="muted">${esc(post.desc)}</p>` : ``}
+          ${post.date ? `<small class="muted">${new Date(post.date).toLocaleDateString()}</small>` : ``}
+        </article>
+      `;
     }
 
-    // wire up
-    $form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const val = $q.value.trim();
-      const url = new URL(location.href);
-      url.searchParams.set('q', val);
-      history.replaceState(null, '', url.toString());
-      search(val);
-    });
+    // ===== Search core =====
+    async function runSearch(q) {
+      const needle = norm(q);
+      if (!needle) {
+        $results.innerHTML = '';
+        $stats.textContent = '';
+        return;
+      }
 
-    // hydrate from ?q=
-    const initial = new URL(location.href).searchParams.get('q') || '';
-    if (initial) { $q.value = initial; search(initial); }
+      const [productsIdx, blogIdx] = await Promise.all([loadProducts(), loadBlog()]);
+
+      // Products (object -> array)
+      const products = Object.keys(productsIdx || {}).map(k => productsIdx[k] || {});
+      const productHits = products.filter(p =>
+        match(p.name, needle) || match(p.desc, needle) || match(p.sku, needle)
+      );
+
+      // Posts
+      const postHits = (blogIdx || []).filter(b =>
+        match(b.title, needle) || match(b.desc, needle)
+      );
+
+      const total = productHits.length + postHits.length;
+      $stats.textContent = total ? `${total} result${total===1?'':'s'} for “${q}”` : `No results for “${q}”`;
+
+      if (!total) {
+        $results.innerHTML = `<div class="empty"><p>No results. Try “VSOP”, “jacket”, “shorts”, or “innovation”.</p></div>`;
+        return;
+      }
+
+      const blocks = [];
+      if (productHits.length) {
+        blocks.push(`
+          <h4 class="group-title">Products (${productHits.length})</h4>
+          <div class="results-grid">
+            ${productHits.map(productCard).join('')}
+          </div>
+        `);
+      }
+      if (postHits.length) {
+        blocks.push(`
+          <h4 class="group-title">Posts (${postHits.length})</h4>
+          <div class="results-grid">
+            ${postHits.map(postCard).join('')}
+          </div>
+        `);
+      }
+
+      $results.innerHTML = blocks.join('\n');
+    }
+
+    // ===== URL param <-> input wiring =====
+    function getQueryFromURL() {
+      const u = new URL(location.href);
+      return u.searchParams.get('q') || '';
+    }
+    function setQueryInURL(q) {
+      const u = new URL(location.href);
+      if (q) { u.searchParams.set('q', q); } else { u.searchParams.delete('q'); }
+      history.replaceState(null, '', u.toString());
+    }
+
+    // Debounce
+    let t = null;
+    function debouncedSearch(q) {
+      clearTimeout(t);
+      t = setTimeout(() => runSearch(q), 150);
+    }
+
+    // ===== Init =====
+    (function init() {
+      const q = getQueryFromURL();
+      if ($q) $q.value = q;
+      if (q) runSearch(q);
+
+      $q?.addEventListener('input', (e) => {
+        const v = e.target.value.trim();
+        setQueryInURL(v);
+        debouncedSearch(v);
+      });
+
+      $form?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const v = ($q?.value || '').trim();
+        setQueryInURL(v);
+        runSearch(v);
+      });
+    })();
   </script>
 </body>
 </html>
