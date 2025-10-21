@@ -1,48 +1,50 @@
 {
   "cleanUrls": true,
   "trailingSlash": true,
+
   "redirects": [
     { "source": "/checkout.html", "destination": "/checkout/", "permanent": false },
     { "source": "/cart.html",     "destination": "/cart/",     "permanent": false },
     { "source": "/shop.html",     "destination": "/shop/",     "permanent": false },
-    { "source": "/blog.html",     "destination": "/blog/",     "permanent": false }
+    { "source": "/blog.html",     "destination": "/blog/",     "permanent": false },
+
+    { "source": "/:path*.html",   "destination": "/:path*/",   "permanent": true }
   ],
+
   "rewrites": [
-    { "source": "/nav",    "destination": "/nav/index.html" },
-    { "source": "/footer", "destination": "/footer/index.html" }
-  ]
-}
-{
+    { "source": "/nav",       "destination": "/nav/index.html" },
+    { "source": "/nav/",      "destination": "/nav/index.html" },
+    { "source": "/footer",    "destination": "/footer/index.html" },
+    { "source": "/footer/",   "destination": "/footer/index.html" }
+  ],
+
   "headers": [
-    { "source": "/assets/(.*)",
+    {
+      "source": "/assets/(.*)",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
       ]
     },
-    { "source": "/blog/(.*)\\.(xml|rss)",
+    {
+      "source": "/blog/(.*)\\.(xml|rss)",
       "headers": [
         { "key": "Content-Type", "value": "application/rss+xml; charset=utf-8" },
         { "key": "Cache-Control", "value": "public, max-age=900" }
       ]
     },
-    { "source": "/sitemap.xml",
+    {
+      "source": "/sitemap.xml",
       "headers": [
         { "key": "Content-Type", "value": "application/xml; charset=utf-8" },
         { "key": "Cache-Control", "value": "public, max-age=3600" }
       ]
     },
-    { "source": "/robots.txt",
+    {
+      "source": "/robots.txt",
       "headers": [
         { "key": "Content-Type", "value": "text/plain; charset=utf-8" }
       ]
-    }
-  ],
-  "redirects": [
-    { "source": "/:path*.html", "destination": "/:path*/", "permanent": true }
-  ]
-}
-{
-  "headers": [
+    },
     {
       "source": "/site.webmanifest",
       "headers": [
@@ -52,4 +54,3 @@
     }
   ]
 }
-
