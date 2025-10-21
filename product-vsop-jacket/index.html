@@ -186,68 +186,156 @@
             <a href="/returns.html#preorders">Preorder policy</a>
           </div>
 
-          <!-- Add to Cart Form -->
-          <form id="pdp-form" class="product-form" novalidate>
-            <div class="form-group">
-              <label for="size" class="form-label">Size</label>
-              <select id="size" class="form-select" required>
-                <option value="" disabled selected>Select size</option>
-                <option value="S">S</option>
-                <option value="M">M</option>
-                <option value="L">L</option>
-                <option value="XL">XL</option>
-                <option value="2XL">2XL</option>
-                <option value="3XL">3XL</option>
-              </select>
-              <span id="size-error" class="form-error" style="display:none">Please select a size.</span>
-            </div>
+         <!-- BUY BOX (replaces the old #pdp-form) -->
+<section class="buybox"
+  data-sku-base="vsop-jacket"
+  data-name="VSOP Hooded Jacket — Burgundy + Brown"
+  data-price="129.99"
+  data-image="/assets/vsop-jacket.jpg">
 
-            <div class="form-group">
-              <label for="qty" class="form-label">Quantity</label>
-              <input id="qty" type="number" min="1" step="1" value="1" class="form-input" required>
-            </div>
+  <div class="buybox__row">
+    <label for="size" class="buybox__label">Size</label>
+    <select id="size" class="buybox__select" required>
+      <option value="">Select size</option>
+      <option value="S">S</option>
+      <option value="M">M</option>
+      <option value="L">L</option>
+      <option value="XL">XL</option>
+      <option value="2XL">2XL</option>
+      <option value="3XL">3XL</option>
+    </select>
+  </div>
 
-            <p id="stock-msg" class="stock-msg" style="margin:.5rem 0; opacity:.9"></p>
-
-            <div class="product-form__actions" style="display:flex; gap:.5rem; flex-wrap:wrap;">
-              <button id="pdp-submit" type="submit" class="btn btn--gold">Add to Cart</button>
-              <button id="notify-btn" type="button" class="btn btn--ghost" style="display:none">Notify Me</button>
-              <a class="btn btn--ghost" href="/shop/">Back to Shop</a>
-            </div>
-          </form>
-
-          <!-- Product Details -->
-          <div class="product-details" style="margin-top:1rem">
-            <h3>Details</h3>
-            <ul>
-              <li>Premium heavyweight fabric</li>
-              <li>Full embroidered design</li>
-              <li>Burgundy and brown colorway</li>
-              <li>Fall 2025 limited edition</li>
-              <li>Unisex sizing</li>
-            </ul>
-          </div>
-
-          <!-- Returns / Preorder Expandable -->
-          <details class="product-returns" style="margin-top:.75rem">
-            <summary style="cursor:pointer">Returns & Preorders (quick view)</summary>
-            <div style="margin-top:.5rem; opacity:.9">
-              <p>Returns accepted within 30 days of delivery on unworn items with tags.
-              Preorders can be cancelled before shipment; after shipment, standard returns apply.</p>
-              <p><a class="btn btn--ghost" href="/returns.html">Read full policy</a></p>
-            </div>
-          </details>
-        </article>
-      </div>
+  <div class="buybox__row">
+    <label for="qty" class="buybox__label">Quantity</label>
+    <div class="buybox__qty">
+      <button type="button" class="qty-btn" data-delta="-1" aria-label="Decrease quantity">−</button>
+      <input id="qty" type="number" min="1" value="1" inputmode="numeric" />
+      <button type="button" class="qty-btn" data-delta="1" aria-label="Increase quantity">+</button>
     </div>
-  </main>
-  <!-- Reviews block (auto-populates) -->
-        <section class="product-reviews" id="reviews"
-         data-sku="vsop-jacket"
-         data-product-name="VSOP Hooded Jacket"
-         style="margin-top:1.25rem">
-        <!-- JS will render content here -->
-        </section>
+  </div>
+
+  <div class="buybox__actions">
+    <button id="add-to-cart" class="btn btn--gold">Add to Cart</button>
+    <a class="btn btn--ghost" href="/shop/">Back to Shop</a>
+  </div>
+
+  <p id="buybox-msg" class="buybox__msg" role="status" aria-live="polite"></p>
+</section>
+
+<style>
+  .buybox{margin:1rem 0;padding:1rem;border:1px solid #1f1f1f;border-radius:12px;background:#0e0e0e}
+  .buybox__row{display:grid;gap:.4rem;margin:.6rem 0}
+  .buybox__label{font-weight:700}
+  .buybox__select,.buybox__qty input{
+    background:#0f0f0f;border:1px solid #2a2a2a;border-radius:10px;color:#eee;padding:.6rem .7rem
+  }
+  .buybox__qty{display:flex;gap:.4rem;align-items:center;max-width:180px}
+  .qty-btn{width:2.2rem;height:2.2rem;border-radius:10px;border:1px solid #2a2a2a;background:#151515;color:#eee;font-size:1rem}
+  .buybox__actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem}
+  .buybox__msg{margin:.5rem 0 0;opacity:.9}
+</style>
+
+<script>
+(function(){
+  const box = document.querySelector('.buybox');
+  if (!box) return;
+
+  const els = {
+    size: box.querySelector('#size'),
+    qty: box.querySelector('#qty'),
+    add: box.querySelector('#add-to-cart'),
+    msg: box.querySelector('#buybox-msg')
+  };
+
+  // Build SKU suffix from size
+  const SFX = { "S":"-s","M":"-m","L":"-l","XL":"-xl","2XL":"-2xl","3XL":"-3xl" };
+
+  // Quantity buttons
+  box.querySelectorAll('.qty-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const delta = Number(btn.getAttribute('data-delta')||0);
+      const v = Math.max(1, (Number(els.qty.value)||1) + delta);
+      els.qty.value = v;
+    });
+  });
+
+  function toast(msg, ok=true){
+    els.msg.textContent = msg;
+    els.msg.style.color = ok ? '#9BEF9B' : '#ff9b9b';
+  }
+
+  async function addToCart(item){
+    // Preferred: your global cart helper
+    if (window.SB?.cart?.add) return window.SB.cart.add(item);
+    if (window.SB?.add)        return window.SB.add(item);
+    if (window.SB_CART?.add)   return window.SB_CART.add(item);
+
+    // Fallback: localStorage mini-cart
+    try {
+      const KEY = 'sb_cart_v1';
+      const data = JSON.parse(localStorage.getItem(KEY) || '[]');
+      const idx = data.findIndex(x => x.id === item.id);
+      if (idx >= 0) data[idx].quantity += item.quantity;
+      else data.push(item);
+      localStorage.setItem(KEY, JSON.stringify(data));
+    } catch(e) {}
+  }
+
+  els.add.addEventListener('click', async ()=>{
+    const size = els.size.value;
+    const qty  = Math.max(1, Number(els.qty.value)||1);
+    if (!size) { toast('Please select a size.', false); els.size.focus(); return; }
+
+    const base  = box.getAttribute('data-sku-base');     // vsop-jacket
+    const name  = box.getAttribute('data-name');
+    const price = Number(box.getAttribute('data-price'));
+    const image = box.getAttribute('data-image') || '';
+
+    const id = `sb-${base}${SFX[size]||''}`; // sb-vsop-jacket-xl
+
+    const line = {
+      id,
+      sku: id,
+      name: `${name} — ${size}`,
+      price,
+      quantity: qty,
+      image,
+      url: location.pathname,
+      options: { size }
+    };
+
+    try {
+      await addToCart(line);
+      toast('Added to cart.');
+      // Optional GA4
+      if (typeof gtag === 'function') {
+        gtag('event','add_to_cart',{
+          currency: 'USD',
+          value: price * qty,
+          items: [{
+            item_id: id,
+            item_name: name,
+            item_variant: size,
+            price: price,
+            quantity: qty
+          }]
+        });
+      }
+      // Update cart count in nav if present
+      const badge = document.querySelector('#cart-count');
+      if (badge) {
+        const current = Number(badge.textContent || '0') + qty;
+        badge.textContent = current;
+        badge.style.display = current > 0 ? 'inline-block' : 'none';
+      }
+    } catch(e) {
+      console.warn('Add to cart failed', e);
+      toast('Could not add to cart. Try again.', false);
+    }
+  });
+})();
+</script>
 
   <!-- FOOTER -->
   <div id="footer-placeholder"></div>
