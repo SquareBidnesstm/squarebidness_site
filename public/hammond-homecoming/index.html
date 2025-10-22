@@ -5,44 +5,42 @@
   <link rel="preconnect" href="https://www.googletagmanager.com">
   <link rel="preconnect" href="https://www.google-analytics.com">
 
-  <!-- GA4 site-wide -->
+  <!-- GA4 (site-wide) -->
   <script defer src="/scripts/ga.js"></script>
 
   <!-- Basics -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Hammond Homecoming Week — $20 Hat | Square Bidness</title>
-  <meta name="description" content="Limited Hammond Homecoming Week hat — just $20. While supplies last." />
+  <title>Hammond Homecoming Week — $20 Hats | Square Bidness</title>
+  <meta name="description" content="Hammond Homecoming Week special — Square Bidness Hats for $20. Limited quantities. Pull up and grab yours." />
   <link rel="canonical" href="https://www.squarebidness.com/hammond-homecoming/" />
-  <meta name="robots" content="index,follow" />
 
   <!-- CSS -->
   <link rel="stylesheet" href="/styles/style.css" />
 
   <!-- Icons / PWA -->
-  <link rel="icon" href="/assets/icons/icon-180.png" sizes="any">
+  <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="apple-touch-icon" href="/assets/icons/icon-180.png" />
   <link rel="manifest" href="/site.webmanifest" />
   <meta name="theme-color" content="#000000" />
 
-  <!-- Open Graph (absolute URLs required) -->
-  <meta property="og:type" content="product" />
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Square Bidness" />
-  <meta property="og:title" content="Hammond Homecoming Week — $20 Hat" />
-  <meta property="og:description" content="Limited drop for Homecoming Week. Grab the hat for $20 while supplies last." />
+  <meta property="og:title" content="Hammond Homecoming Week — $20 Hats" />
+  <meta property="og:description" content="Homecoming Week special. $20 hats from Square Bidness. Limited quantities — get yours." />
   <meta property="og:url" content="https://www.squarebidness.com/hammond-homecoming/" />
-  <!-- Use the 1200×630 crop if you made it; otherwise your 1200 will still render -->
-  <meta property="og:image" content="https://www.squarebidness.com/hammond-homecoming/assets/og-hoco_1200x630.jpg" />
+  <meta property="og:image" content="https://www.squarebidness.com/hammond-homecoming/og-hoco_1200x630.jpg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="product:price:amount" content="20.00" />
-  <meta property="product:price:currency" content="USD" />
+  <meta property="og:image:alt" content="Square Bidness — Hammond Homecoming Week hats" />
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Hammond Homecoming Week — $20 Hat" />
-  <meta name="twitter:description" content="Limited drop for Homecoming Week. $20 while supplies last." />
-  <meta name="twitter:image" content="https://www.squarebidness.com/hammond-homecoming/assets/og-hoco_1200x630.jpg" />
+  <meta name="twitter:title" content="Hammond Homecoming Week — $20 Hats" />
+  <meta name="twitter:description" content="Homecoming Week special. $20 hats from Square Bidness. Limited quantities — get yours." />
+  <meta name="twitter:image" content="https://www.squarebidness.com/hammond-homecoming/og-hoco_1200x630.jpg" />
+  <meta name="twitter:site" content="@squarebidnesstm" />
 
   <!-- Organization JSON-LD (site-wide) -->
   <script type="application/ld+json">
@@ -51,7 +49,20 @@
     "@type":"Organization",
     "name":"Square Bidness Apparel",
     "url":"https://www.squarebidness.com/",
-    "logo":"https://www.squarebidness.com/assets/cleantextlogo.png"
+    "logo":"https://www.squarebidness.com/assets/cleantextlogo.png",
+    "sameAs":[
+      "https://instagram.com/squarebidnesstm",
+      "https://www.tiktok.com/@squarebidnesstm",
+      "https://www.facebook.com/squarebidnessapparel",
+      "https://bsky.app/profile/squarebidnesstm.bsky.social",
+      "https://www.linkedin.com/company/square-bidness-apparel"
+    ],
+    "contactPoint":[{
+      "@type":"ContactPoint",
+      "contactType":"customer support",
+      "email":"squarebidnessapparel@gmail.com",
+      "areaServed":"US"
+    }]
   }
   </script>
 
@@ -60,12 +71,10 @@
   {
     "@context":"https://schema.org",
     "@type":"Product",
-    "@id":"https://www.squarebidness.com/hammond-homecoming/#product",
-    "name":"Hammond Homecoming Hat",
-    "description":"Limited Hammond Homecoming Week hat.",
-    "image":[
-      "https://www.squarebidness.com/hammond-homecoming/assets/og-hoco_1200x630.jpg"
-    ],
+    "@id":"https://www.squarebidness.com/hammond-homecoming/#hat",
+    "name":"Homecoming Hat",
+    "description":"Hammond Homecoming Week special — classic Square Bidness cap.",
+    "image":["https://www.squarebidness.com/hammond-homecoming/og-hoco_1200x630.jpg"],
     "sku":"hoco-hat",
     "brand":{"@type":"Brand","name":"Square Bidness Apparel"},
     "url":"https://www.squarebidness.com/hammond-homecoming/",
@@ -81,33 +90,50 @@
   }
   </script>
 
-  <!-- Load Nav + Footer -->
+  <!-- Nav/Footer loader -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       fetch("/nav/", { cache: "no-store" })
-        .then(r => r.text()).then(d => { const slot = document.getElementById("nav-placeholder"); if (slot) slot.innerHTML = d; })
+        .then(r => r.text())
+        .then(d => { const slot = document.getElementById("nav-placeholder"); if (slot) slot.innerHTML = d; })
         .catch(()=>{});
       fetch("/footer/", { cache: "no-store" })
-        .then(r => r.text()).then(d => { const slot = document.getElementById("footer-placeholder"); if (slot) slot.innerHTML = d; })
+        .then(r => r.text())
+        .then(d => { const slot = document.getElementById("footer-placeholder"); if (slot) slot.innerHTML = d; })
         .catch(()=>{});
     });
   </script>
 
-  <!-- Cart core -->
+  <!-- Cart Core (global helper if present) -->
   <script defer src="/scripts/sb-cart.js"></script>
 
+  <!-- Page styles (lightweight) -->
   <style>
-    .hoco-hero{position:relative;overflow:hidden}
-    .hoco-hero__media img{width:100%;height:auto;display:block;border-radius:16px}
-    .hoco-hero__copy{margin-top:1rem}
+    .hero-hoco{
+      position:relative; overflow:hidden; border-radius:16px;
+      background:#0c0c0c; border:1px solid #1f1f1f; margin:1rem 0;
+    }
+    .hero-hoco img{ width:100%; height:auto; display:block; object-fit:cover; }
+    .hero-copy{ padding:1rem 1.25rem; }
+    .hero-copy h1{ margin:.25rem 0 .5rem; }
+    .grid { display:grid; gap:16px; }
+    @media (min-width: 880px){ .grid-2 { grid-template-columns: 1.3fr 1fr; } }
+
     .buybox{margin:1rem 0;padding:1rem;border:1px solid #1f1f1f;border-radius:12px;background:#0e0e0e}
     .buybox__row{display:grid;gap:.4rem;margin:.6rem 0}
-    .buybox__qty{display:flex;gap:.4rem;align-items:center;max-width:180px}
-    .buybox__qty input{background:#0f0f0f;border:1px solid #2a2a2a;border-radius:10px;color:#eee;padding:.6rem .7rem;width:5.5rem;text-align:center}
+    .buybox__label{font-weight:700}
+    .buybox__qty{display:flex;gap:.4rem;align-items:center;max-width:200px}
+    .buybox__qty input{
+      background:#0f0f0f;border:1px solid #2a2a2a;border-radius:10px;color:#eee;padding:.6rem .7rem; width:100%;
+    }
     .qty-btn{width:2.2rem;height:2.2rem;border-radius:10px;border:1px solid #2a2a2a;background:#151515;color:#eee;font-size:1rem}
     .buybox__actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem}
     .buybox__msg{margin:.5rem 0 0;opacity:.9}
-    .badge{display:inline-block;background:#8B0000;color:#fff;padding:.4rem .55rem;border-radius:8px;font-weight:800;border:1px solid #a22;margin:.5rem 0}
+    .badge-live{
+      display:inline-block;background:#ffd54d;color:#111;border:1px solid #e0bf37;
+      padding:.35rem .6rem;border-radius:999px;font-weight:800; letter-spacing:.3px;
+    }
+    .callout{background:#103713;color:#e7ffe7;border:1px solid #1d5c1d;padding:.6rem .8rem;border-radius:10px;margin:.75rem 0;font-weight:700}
   </style>
 </head>
 
@@ -116,134 +142,179 @@
 
   <main class="section">
     <div class="container">
-      <!-- HERO -->
-      <section class="hoco-hero">
-        <picture class="hoco-hero__media" aria-hidden="true">
-          <!-- use your existing sizes -->
-          <source srcset="/hammond-homecoming/assets/og-hoco_1600.jpg" media="(min-width: 1000px)">
-          <source srcset="/hammond-homecoming/assets/og-hoco_1200.jpg" media="(min-width: 700px)">
-          <img src="/hammond-homecoming/assets/og-hoco_800.jpg" alt="Hammond Homecoming Week hat — Square Bidness">
-        </picture>
-
-        <div class="hoco-hero__copy">
-          <h1>Hammond Homecoming Week</h1>
-          <p class="tagline">Limited Hat — <strong>$20</strong></p>
-          <p class="badge">In Stock • Local Pickup Available</p>
+      <div class="hero-hoco">
+        <img src="/hammond-homecoming/assets/hero.jpg" alt="Square Bidness — Hammond Homecoming Week">
+        <div class="hero-copy">
+          <span class="badge-live">Homecoming Week</span>
+          <h1>Hammond Homecoming — $20 Hats</h1>
+          <p class="muted">Limited quantities. Perfect for the week’s events — pull up and grab yours.</p>
         </div>
-      </section>
+      </div>
 
-      <!-- BUY BOX (one-size) -->
-      <section class="buybox"
-        data-sku-base="hoco-hat"
-        data-name="Hammond Homecoming Hat"
-        data-price="20.00"
-        data-image="/hammond-homecoming/assets/og-hoco_1200.jpg">
+      <div class="grid grid-2">
+        <!-- Left: details -->
+        <section>
+          <h2>The Hat</h2>
+          <p>Classic Square Bidness cap. Clean, comfortable, ready for the stands and the strolls.</p>
+          <ul>
+            <li>One size (adjustable)</li>
+            <li>Colorways vary by drop — first come, first served</li>
+            <li>Pick-up friendly, ships if needed</li>
+          </ul>
+          <div class="callout">Special: Homecoming Week only — $20 flat.</div>
 
-        <div class="buybox__row">
-          <label class="buybox__label" for="qty">Quantity</label>
-          <div class="buybox__qty">
-            <button type="button" class="qty-btn" data-delta="-1" aria-label="Decrease quantity">−</button>
-            <input id="qty" type="number" min="1" value="1" inputmode="numeric" />
-            <button type="button" class="qty-btn" data-delta="1" aria-label="Increase quantity">+</button>
-          </div>
-        </div>
+          <h3>Spread the Word</h3>
+          <p class="muted">Share this link: <strong>squarebidness.com/hammond-homecoming/</strong></p>
+        </section>
 
-        <div class="buybox__actions">
-          <button id="add-to-cart" class="btn btn--gold">Add to Cart — $20</button>
-          <a class="btn btn--ghost" href="/shop/">Back to Shop</a>
-        </div>
+        <!-- Right: buy box -->
+        <section aria-label="Buy Homecoming Hat">
+          <article class="buybox"
+                   data-sku-base="hoco-hat"
+                   data-name="Homecoming Hat"
+                   data-price="20.00"
+                   data-image="/hammond-homecoming/og-hoco_1200x630.jpg">
+            <h2 class="sr-only">Buy</h2>
 
-        <p id="buybox-msg" class="buybox__msg" role="status" aria-live="polite"></p>
-      </section>
+            <div class="buybox__row">
+              <label for="qty" class="buybox__label">Quantity</label>
+              <div class="buybox__qty">
+                <button type="button" class="qty-btn" data-delta="-1" aria-label="Decrease quantity">−</button>
+                <input id="qty" type="number" min="1" value="1" inputmode="numeric" />
+                <button type="button" class="qty-btn" data-delta="1" aria-label="Increase quantity">+</button>
+              </div>
+            </div>
 
-      <section class="section">
-        <h3>Details</h3>
-        <ul>
-          <li>Classic fit, adjustable strap</li>
-          <li>Embroidered mark</li>
-          <li>Homecoming Week limited run</li>
-        </ul>
-      </section>
+            <p style="font-weight:800;margin:.25rem 0 0">$20.00</p>
+
+            <div class="buybox__actions">
+              <button id="add-to-cart" class="btn btn--gold">Add to Cart</button>
+              <a class="btn btn--ghost" href="/shop/">Back to Shop</a>
+            </div>
+
+            <p id="buybox-msg" class="buybox__msg" role="status" aria-live="polite"></p>
+          </article>
+
+          <p class="muted" style="margin-top:.5rem">
+            Need a bulk pull for your crew or org? <a href="mailto:squarebidnessapparel@gmail.com?subject=Homecoming%20Hats%20Bulk%20Order">Email us</a>.
+          </p>
+        </section>
+      </div>
     </div>
   </main>
 
   <div id="footer-placeholder"></div>
 
-  <!-- Buybox script -->
+  <!-- Buybox logic (mini) -->
   <script>
   (function(){
     const box = document.querySelector('.buybox');
     if (!box) return;
 
-    const qtyInp = box.querySelector('#qty');
-    const addBtn = box.querySelector('#add-to-cart');
-    const msg    = box.querySelector('#buybox-msg');
+    const els = {
+      qty: box.querySelector('#qty'),
+      add: box.querySelector('#add-to-cart'),
+      msg: box.querySelector('#buybox-msg')
+    };
 
-    // qty +/- buttons
+    // Qty buttons
     box.querySelectorAll('.qty-btn').forEach(btn=>{
       btn.addEventListener('click', ()=>{
-        const d = Number(btn.getAttribute('data-delta')||0);
-        qtyInp.value = Math.max(1, (Number(qtyInp.value)||1) + d);
+        const delta = Number(btn.getAttribute('data-delta')||0);
+        const v = Math.max(1, (Number(els.qty.value)||1) + delta);
+        els.qty.value = v;
       });
     });
 
-    function toast(t, ok=true){ msg.textContent = t; msg.style.color = ok ? '#9BEF9B' : '#ff9b9b'; }
+    function toast(msg, ok=true){
+      els.msg.textContent = msg;
+      els.msg.style.color = ok ? '#9BEF9B' : '#ff9b9b';
+    }
 
-    async function addToCart(line){
-      if (window.SB?.cart?.add) return window.SB.cart.add(line);
-      if (window.SB?.add)        return window.SB.add(line);
-      if (window.SB_CART?.add)   return window.SB_CART.add(line);
+    async function addToCart(item){
+      // Prefer your global cart helper if present
+      if (window.SB?.cart?.add) return window.SB.cart.add(item);
+      if (window.SB?.add)        return window.SB.add(item);
+      if (window.SB_CART?.add)   return window.SB_CART.add(item);
+
+      // Fallback: localStorage cart
       try {
         const KEY = 'sb_cart_v1';
         const data = JSON.parse(localStorage.getItem(KEY) || '[]');
-        const i = data.findIndex(x => x.id === line.id);
-        if (i >= 0) data[i].quantity += line.quantity; else data.push(line);
+        const idx = data.findIndex(x => x.id === item.id);
+        if (idx >= 0) data[idx].quantity += item.quantity;
+        else data.push(item);
         localStorage.setItem(KEY, JSON.stringify(data));
-      } catch(e){}
+      } catch(e) {}
     }
 
-    addBtn.addEventListener('click', async ()=>{
-      const base  = box.getAttribute('data-sku-base'); // hoco-hat
-      const name  = box.getAttribute('data-name');
-      const price = Number(box.getAttribute('data-price'));
-      const image = box.getAttribute('data-image') || '';
-      const qty   = Math.max(1, Number(qtyInp.value)||1);
+    els.add.addEventListener('click', async ()=>{
+      const qty  = Math.max(1, Number(els.qty.value)||1);
 
-      const id = `sb-${base}`; // single-size
-      const line = { id, sku:id, name, price, quantity:qty, image, url:location.pathname };
+      const base  = box.getAttribute('data-sku-base');     // hoco-hat
+      const name  = box.getAttribute('data-name');         // Homecoming Hat
+      const price = Number(box.getAttribute('data-price'));// 20.00
+      const image = box.getAttribute('data-image') || '';
+
+      const id = `sb-${base}`; // sb-hoco-hat (no size variants)
+
+      const line = {
+        id,
+        sku: id,
+        name,
+        price,
+        quantity: qty,
+        image,
+        url: location.pathname
+      };
 
       try {
         await addToCart(line);
         toast('Added to cart.');
+
         // GA4 add_to_cart
         if (typeof gtag === 'function') {
           gtag('event','add_to_cart',{
-            currency:'USD',
+            currency: 'USD',
             value: price * qty,
-            items:[{ item_id:id, item_name:name, price, quantity:qty }]
+            items: [{
+              item_id: id,
+              item_name: name,
+              price: price,
+              quantity: qty
+            }]
           });
         }
-        // Optional: update nav badge
+
+        // Update nav badge if present
         const badge = document.querySelector('#cart-count');
         if (badge) {
           const current = Number(badge.textContent || '0') + qty;
           badge.textContent = current;
           badge.style.display = current > 0 ? 'inline-block' : 'none';
         }
-      } catch(e){
-        console.warn(e);
+      } catch(e) {
+        console.warn('Add to cart failed', e);
         toast('Could not add to cart. Try again.', false);
       }
     });
 
-    // GA4 view_item on load
+    // GA4 view_item
     try {
       window.dataLayer = window.dataLayer || [];
       window.dataLayer.push({
-        event:'view_item',
-        ecommerce:{ items:[{ item_id:'sb-hoco-hat', item_name:'Hammond Homecoming Hat', price:20.00, item_category:'Accessories > Hats', item_brand:'Square Bidness Apparel' }] }
+        event: 'view_item',
+        ecommerce: {
+          items: [{
+            item_name: 'Homecoming Hat',
+            item_id: 'hoco-hat',
+            price: 20.00,
+            item_category: 'Accessories > Hats',
+            item_brand: 'Square Bidness Apparel'
+          }]
+        }
       });
-    } catch(_){}
+    } catch(_) {}
   })();
   </script>
 </body>
