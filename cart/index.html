@@ -1,267 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Performance -->
-  <link rel="preconnect" href="https://www.googletagmanager.com">
-  <link rel="preconnect" href="https://www.google-analytics.com">
-
-  <!-- GA4 (site-wide) -->
-  <script defer src="/scripts/ga.js"></script>
-
-  <!-- Basics -->
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Your Cart — Square Bidness</title>
-  <link rel="stylesheet" href="/styles/style.css" />
-
-  <!-- Icons / PWA -->
-  <link rel="icon" href="/favicon.ico" sizes="any">
-  <link rel="apple-touch-icon" href="/assets/icons/icon-180.png">
-  <link rel="manifest" href="/site.webmanifest">
-  <meta name="theme-color" content="#000000" />
-
-  <!-- SEO -->
   <link rel="canonical" href="https://www.squarebidness.com/cart/" />
-  <meta name="robots" content="noindex,nofollow" />
-  <meta name="description" content="Your shopping cart — edit quantities, apply a code, and checkout securely." />
-
-  <!-- Open Graph -->
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Square Bidness">
-  <meta property="og:title" content="Your Cart — Square Bidness">
-  <meta property="og:description" content="Your shopping cart — edit quantities, apply a code, and checkout securely.">
-  <meta property="og:url" content="https://www.squarebidness.com/cart/">
-  <meta property="og:image" content="https://www.squarebidness.com/assets/sb-social-card_1200.jpg">
-
-  <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Your Cart — Square Bidness" />
-  <meta name="twitter:description" content="Your shopping cart — edit quantities, apply a code, and checkout securely." />
-  <meta name="twitter:image" content="https://www.squarebidness.com/assets/sb-social-card_1200.jpg" />
-  <meta name="twitter:site" content="@squarebidnesstm" />
-
-  <!-- Load Nav + Footer -->
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      fetch("/nav/", { cache: "no-store" })
-        .then(r => r.text())
-        .then(d => { document.getElementById("nav-placeholder").innerHTML = d; })
-        .catch(()=>{});
-      fetch("/footer/", { cache: "no-store" })
-        .then(r => r.text())
-        .then(d => { document.getElementById("footer-placeholder").innerHTML = d; })
-        .catch(()=>{});
-    });
-  </script>
-
-  <!-- Cart utilities shared site-wide -->
-  <script src="/scripts/sb-cart.js" defer></script>
+  <link rel="stylesheet" href="/styles/style.css" />
 </head>
-
-<body class="theme-dark" id="top">
-  <!-- NAV -->
+<body class="theme-dark">
   <div id="nav-placeholder"></div>
-
-  <!-- HERO -->
-  <header class="page-hero">
-    <div class="container">
-      <h1 class="page-title">Your Cart</h1>
-      <p class="page-subtitle">Review items and proceed to checkout</p>
-    </div>
-  </header>
-
-  <!-- MAIN -->
   <main class="section">
-    <div class="container" style="max-width:1000px">
-      <div id="cart-wrap" style="display:none;">
-        <table class="cart-table">
-          <thead>
-            <tr>
-              <th style="text-align:left;">Item</th>
-              <th>Price</th>
-              <th style="width:110px;">Qty</th>
-              <th>Line</th>
-              <th style="width:60px;"></th>
-            </tr>
-          </thead>
-          <tbody id="cart-items"><!-- filled by JS --></tbody>
-        </table>
-
-        <!-- Coupon + Summary -->
-        <div class="cart-flex" style="display:flex; gap:1rem; flex-wrap:wrap; margin-top:1rem;">
-          <div class="coupon" style="flex:1; min-width:260px;">
-            <label for="coupon" style="display:block; font-weight:700; margin-bottom:.35rem;">Discount code</label>
-            <div style="display:flex; gap:.5rem;">
-              <input id="coupon" class="form-input" type="text" placeholder="Enter code" style="flex:1;">
-              <button id="apply-coupon" class="btn btn--ghost" type="button">Apply</button>
-            </div>
-            <small style="opacity:.8; display:block; margin-top:.35rem;">Example active rule on checkout: <code>NYC25</code> = $25 off $200+</small>
-          </div>
-
-          <div class="summary" style="flex:1; min-width:280px;">
-            <table style="width:100%;">
-              <tr>
-                <td>Subtotal</td>
-                <td class="right" id="sum-subtotal">$0.00</td>
-              </tr>
-              <tr id="sum-discount-row" style="display:none;">
-                <td id="sum-discount-label">Discount</td>
-                <td class="right" id="sum-discount">-$0.00</td>
-              </tr>
-              <tr class="total">
-                <td>Total (before tax & shipping)</td>
-                <td class="right" id="sum-total">$0.00</td>
-              </tr>
-            </table>
-
-            <div style="display:flex; gap:.5rem; margin-top:1rem; justify-content:flex-end;">
-              <a href="/shop/" class="btn btn--ghost">Continue Shopping</a>
-              <a id="checkout-btn" href="/checkout/" class="btn btn--gold">Checkout</a>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Empty -->
-      <div id="empty" style="text-align:center; padding:2rem; display:none;">
-        <p style="opacity:.85">Your cart is empty.</p>
+    <div class="container">
+      <h1>Your Cart</h1>
+      <div id="cart"></div>
+      <div class="cta-row" style="margin-top:1rem">
+        <a class="btn btn--gold" id="checkout" href="/checkout/">Proceed to Checkout</a>
         <a class="btn btn--ghost" href="/shop/">Continue Shopping</a>
       </div>
     </div>
   </main>
-
-  <!-- FOOTER -->
   <div id="footer-placeholder"></div>
 
-  <!-- CART LOGIC -->
   <script>
-  (function () {
-    const CART_KEY   = 'sb_cart_v1';
-    const COUPON_KEY = 'sb_coupon';
+  document.addEventListener("DOMContentLoaded", async () => {
+    try { document.getElementById("nav-placeholder").innerHTML = await (await fetch("/nav/")).text() } catch {}
+    try { document.getElementById("footer-placeholder").innerHTML = await (await fetch("/footer/")).text() } catch {}
 
-    const $ = sel => document.querySelector(sel);
-    const money = n => new Intl.NumberFormat('en-US', { style:'currency', currency:'USD' }).format(Number(n||0));
+    const el = document.getElementById('cart');
+    const cart = JSON.parse(localStorage.getItem('sb_cart_v1') || '[]');
+    if (!cart.length) { el.innerHTML = '<p class="muted">Your cart is empty.</p>'; return; }
 
-    function readCart() {
-      try { return JSON.parse(localStorage.getItem(CART_KEY) || '[]'); }
-      catch { return []; }
-    }
-    function writeCart(cart) {
-      localStorage.setItem(CART_KEY, JSON.stringify(cart));
-      dispatchEvent(new CustomEvent('sb:cart:update', { detail: { cart } }));
-    }
-    function setCoupon(code) {
-      if (!code) localStorage.removeItem(COUPON_KEY);
-      else localStorage.setItem(COUPON_KEY, code.toUpperCase().trim());
-    }
-    function getCoupon() {
-      return (localStorage.getItem(COUPON_KEY) || '').toUpperCase().trim() || null;
-    }
-
-    function render() {
-      const items = readCart().filter(i => Number(i.qty) > 0);
-      const empty = $('#empty');
-      const wrap  = $('#cart-wrap');
-      const body  = $('#cart-items');
-
-      if (!items.length) {
-        empty.style.display = '';
-        wrap.style.display  = 'none';
-        body.innerHTML = '';
-        return;
-      }
-
-      empty.style.display = 'none';
-      wrap.style.display  = '';
-
-      body.innerHTML = items.map(i => {
-        const line = Number(i.price||0) * Number(i.qty||0);
-        const idEsc = encodeURIComponent(i.id);
-        return `
-          <tr data-id="${idEsc}">
-            <td>
-              <div style="display:flex; gap:.65rem; align-items:center;">
-                <img src="${i.image||''}" alt="" style="width:54px;height:54px;object-fit:cover;border-radius:6px;">
-                <div>
-                  <div style="font-weight:700">${i.name||''}</div>
-                  <div style="opacity:.75; font-size:.9rem">${i.id||''}</div>
-                </div>
-              </div>
-            </td>
-            <td>${money(i.price)}</td>
-            <td>
-              <input type="number" class="qty" min="0" step="1" value="${Number(i.qty||1)}" style="width:80px; text-align:center;">
-            </td>
-            <td class="line">${money(line)}</td>
-            <td>
-              <button class="btn btn--ghost remove" type="button">Remove</button>
-            </td>
-          </tr>
-        `;
-      }).join('');
-
-      const subtotal = items.reduce((s,i)=> s + Number(i.price||0)*Number(i.qty||0), 0);
-      const code = getCoupon();
-      const discount = 0; // cart shows pre-checkout total only
-
-      $('#sum-subtotal').textContent = money(subtotal);
-      $('#sum-total').textContent    = money(Math.max(0, subtotal - discount));
-
-      if (code) {
-        $('#sum-discount-row').style.display = '';
-        $('#sum-discount').textContent = `-${money(discount)}`;
-        $('#sum-discount-label').textContent = `Discount (${code})`;
-      } else {
-        $('#sum-discount-row').style.display = 'none';
-      }
-
-      body.querySelectorAll('tr').forEach(row => {
-        const id = decodeURIComponent(row.getAttribute('data-id') || '');
-        const qty = row.querySelector('.qty');
-        const btn = row.querySelector('.remove');
-
-        qty.addEventListener('change', () => {
-          const n = Math.max(0, parseInt(qty.value || '0', 10));
-          const cart = readCart();
-          const i = cart.findIndex(x => x.id === id);
-          if (i >= 0) {
-            cart[i].qty = n;
-            if (n === 0) cart.splice(i,1);
-            writeCart(cart);
-            render();
-          }
-        });
-
-        btn.addEventListener('click', () => {
-          const cart = readCart().filter(x => x.id !== id);
-          writeCart(cart);
-          render();
-        });
-      });
-
-      const codeInput = $('#coupon');
-      if (codeInput) codeInput.value = code || '';
-    }
-
-    function applyCouponClick() {
-      const val = ($('#coupon')?.value || '').trim();
-      setCoupon(val || null);
-      render();
-      try {
-        if (typeof gtag === 'function' && val) {
-          gtag('event', 'add_promotion', { promotion_name: val.toUpperCase() });
-        }
-      } catch(_) {}
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      render();
-      $('#apply-coupon')?.addEventListener('click', applyCouponClick);
-      $('#coupon')?.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); applyCouponClick(); }
-      });
-    });
-  })();
+    const rows = cart.map(it => `
+      <div class="cart-line" style="display:flex;gap:.75rem;align-items:center;border:1px solid #1f1f1f;border-radius:10px;padding:.5rem .75rem;margin:.4rem 0">
+        ${it.image ? `<img src="${it.image}" alt="" style="width:56px;height:56px;object-fit:cover;border-radius:8px" />` : ``}
+        <div style="flex:1">
+          <div><strong>${it.name || it.sku || it.id}</strong></div>
+          <div class="muted">$${Number(it.price||0).toFixed(2)} × ${Number(it.quantity||it.qty||1)}</div>
+        </div>
+        <div><strong>$${(Number(it.price||0) * Number(it.quantity||it.qty||1)).toFixed(2)}</strong></div>
+      </div>
+    `).join('');
+    const total = cart.reduce((n,it)=> n + Number(it.price||0) * Number(it.quantity||it.qty||1), 0);
+    el.innerHTML = rows + `<p style="text-align:right;margin-top:.5rem"><strong>Total: $${total.toFixed(2)}</strong></p>`;
+  });
   </script>
+  <script defer src="/scripts/global.js"></script>
 </body>
 </html>
