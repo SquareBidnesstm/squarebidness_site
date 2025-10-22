@@ -262,6 +262,15 @@
        data-track="stripe-link" data-item="hoco-hat" data-price="20.00">Buy</a>
   </div>
 
+<div id="footer-placeholder"></div>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    fetch("/footer/", { cache: "no-store" })
+      .then(r => r.text())
+      .then(html => { const slot = document.getElementById("footer-placeholder"); if (slot) slot.innerHTML = html; })
+      .catch(()=>{});
+  });
+</script>
 
 
   <!-- Buybox qty controls + GA view_item -->
