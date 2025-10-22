@@ -25,12 +25,12 @@
   <meta name="theme-color" content="#000000" />
 
   <!-- Open Graph -->
-  <meta property="og:type" content="website" />
+  <meta property="og:type" content="product" />
   <meta property="og:site_name" content="Square Bidness" />
   <meta property="og:title" content="Hammond Homecoming Week — $20 Hats" />
   <meta property="og:description" content="Homecoming Week special. $20 hats from Square Bidness. Limited quantities — get yours." />
   <meta property="og:url" content="https://www.squarebidness.com/hammond-homecoming/" />
-  <meta property="og:image" content="https://www.squarebidness.com/hammond-homecoming/og-hoco_1200x630.jpg" />
+  <meta property="og:image" content="https://www.squarebidness.com/hammond-homecoming/assets/og-hoco_1200x630.jpg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:image:alt" content="Square Bidness — Hammond Homecoming Week hats" />
@@ -39,7 +39,7 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Hammond Homecoming Week — $20 Hats" />
   <meta name="twitter:description" content="Homecoming Week special. $20 hats from Square Bidness. Limited quantities — get yours." />
-  <meta name="twitter:image" content="https://www.squarebidness.com/hammond-homecoming/og-hoco_1200x630.jpg" />
+  <meta name="twitter:image" content="https://www.squarebidness.com/hammond-homecoming/assets/og-hoco_1200x630.jpg" />
   <meta name="twitter:site" content="@squarebidnesstm" />
 
   <!-- Organization JSON-LD (site-wide) -->
@@ -74,7 +74,7 @@
     "@id":"https://www.squarebidness.com/hammond-homecoming/#hat",
     "name":"Homecoming Hat",
     "description":"Hammond Homecoming Week special — classic Square Bidness cap.",
-    "image":["https://www.squarebidness.com/hammond-homecoming/og-hoco_1200x630.jpg"],
+    "image":["https://www.squarebidness.com/hammond-homecoming/assets/og-hoco_1200x630.jpg"],
     "sku":"hoco-hat",
     "brand":{"@type":"Brand","name":"Square Bidness Apparel"},
     "url":"https://www.squarebidness.com/hammond-homecoming/",
@@ -83,7 +83,7 @@
       "priceCurrency":"USD",
       "price":"20.00",
       "availability":"https://schema.org/InStock",
-      "url":"https://www.squarebidness.com/hammond-homecoming/",
+      "url":"https://buy.stripe.com/7sY9ATaJV529del8Fa8N20h",
       "itemCondition":"https://schema.org/NewCondition",
       "seller":{"@type":"Organization","name":"Square Bidness Apparel, LLC"}
     }
@@ -103,9 +103,6 @@
         .catch(()=>{});
     });
   </script>
-
-  <!-- Cart Core (global helper if present) -->
-  <script defer src="/scripts/sb-cart.js"></script>
 
   <!-- Page styles (lightweight) -->
   <style>
@@ -134,6 +131,11 @@
       padding:.35rem .6rem;border-radius:999px;font-weight:800; letter-spacing:.3px;
     }
     .callout{background:#103713;color:#e7ffe7;border:1px solid #1d5c1d;padding:.6rem .8rem;border-radius:10px;margin:.75rem 0;font-weight:700}
+
+    /* Sticky mobile buy bar */
+    .buybar{position:sticky;bottom:0;left:0;right:0;display:flex;gap:.6rem;
+      align-items:center;justify-content:space-between;padding:.6rem .9rem;
+      background:#0e0e0e;border-top:1px solid #222;z-index:50}
   </style>
 </head>
 
@@ -148,6 +150,16 @@
           <span class="badge-live">Homecoming Week</span>
           <h1>Hammond Homecoming — $20 Hats</h1>
           <p class="muted">Limited quantities. Perfect for the week’s events — pull up and grab yours.</p>
+
+          <!-- Hero CTA (Stripe Payment Link) -->
+          <div class="cta-row" style="margin-top:.5rem">
+            <a class="btn btn--gold"
+               href="https://buy.stripe.com/7sY9ATaJV529del8Fa8N20h"
+               target="_blank" rel="noopener noreferrer"
+               data-track="stripe-link" data-item="hoco-hat" data-price="20.00">
+              Buy Now — $20
+            </a>
+          </div>
         </div>
       </div>
 
@@ -167,13 +179,13 @@
           <p class="muted">Share this link: <strong>squarebidness.com/hammond-homecoming/</strong></p>
         </section>
 
-        <!-- Right: buy box -->
+        <!-- Right: buy box (Stripe link; qty for GA only) -->
         <section aria-label="Buy Homecoming Hat">
           <article class="buybox"
                    data-sku-base="hoco-hat"
                    data-name="Homecoming Hat"
                    data-price="20.00"
-                   data-image="/hammond-homecoming/og-hoco_1200x630.jpg">
+                   data-image="/hammond-homecoming/assets/og-hoco_1200.jpg">
             <h2 class="sr-only">Buy</h2>
 
             <div class="buybox__row">
@@ -188,7 +200,12 @@
             <p style="font-weight:800;margin:.25rem 0 0">$20.00</p>
 
             <div class="buybox__actions">
-              <button id="add-to-cart" class="btn btn--gold">Add to Cart</button>
+              <a id="buy-link" class="btn btn--gold"
+                 href="https://buy.stripe.com/7sY9ATaJV529del8Fa8N20h"
+                 target="_blank" rel="noopener noreferrer"
+                 data-track="stripe-link" data-item="hoco-hat" data-price="20.00">
+                Buy Now — $20
+              </a>
               <a class="btn btn--ghost" href="/shop/">Back to Shop</a>
             </div>
 
@@ -203,100 +220,30 @@
     </div>
   </main>
 
+  <!-- Sticky mobile buy bar -->
+  <div class="buybar">
+    <span>$20 — Hammond Homecoming Hat</span>
+    <a class="btn btn--gold"
+       href="https://buy.stripe.com/7sY9ATaJV529del8Fa8N20h"
+       target="_blank" rel="noopener noreferrer"
+       data-track="stripe-link" data-item="hoco-hat" data-price="20.00">Buy</a>
+  </div>
+
   <div id="footer-placeholder"></div>
 
-  <!-- Buybox logic (mini) -->
+  <!-- Buybox qty controls + GA view_item -->
   <script>
   (function(){
     const box = document.querySelector('.buybox');
     if (!box) return;
+    const qty = box.querySelector('#qty');
 
-    const els = {
-      qty: box.querySelector('#qty'),
-      add: box.querySelector('#add-to-cart'),
-      msg: box.querySelector('#buybox-msg')
-    };
-
-    // Qty buttons
+    // Qty +/- buttons
     box.querySelectorAll('.qty-btn').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         const delta = Number(btn.getAttribute('data-delta')||0);
-        const v = Math.max(1, (Number(els.qty.value)||1) + delta);
-        els.qty.value = v;
+        qty.value = Math.max(1, (Number(qty.value)||1) + delta);
       });
-    });
-
-    function toast(msg, ok=true){
-      els.msg.textContent = msg;
-      els.msg.style.color = ok ? '#9BEF9B' : '#ff9b9b';
-    }
-
-    async function addToCart(item){
-      // Prefer your global cart helper if present
-      if (window.SB?.cart?.add) return window.SB.cart.add(item);
-      if (window.SB?.add)        return window.SB.add(item);
-      if (window.SB_CART?.add)   return window.SB_CART.add(item);
-
-      // Fallback: localStorage cart
-      try {
-        const KEY = 'sb_cart_v1';
-        const data = JSON.parse(localStorage.getItem(KEY) || '[]');
-        const idx = data.findIndex(x => x.id === item.id);
-        if (idx >= 0) data[idx].quantity += item.quantity;
-        else data.push(item);
-        localStorage.setItem(KEY, JSON.stringify(data));
-      } catch(e) {}
-    }
-
-    els.add.addEventListener('click', async ()=>{
-      const qty  = Math.max(1, Number(els.qty.value)||1);
-
-      const base  = box.getAttribute('data-sku-base');     // hoco-hat
-      const name  = box.getAttribute('data-name');         // Homecoming Hat
-      const price = Number(box.getAttribute('data-price'));// 20.00
-      const image = box.getAttribute('data-image') || '';
-
-      const id = `sb-${base}`; // sb-hoco-hat (no size variants)
-
-      const line = {
-        id,
-        sku: id,
-        name,
-        price,
-        quantity: qty,
-        image,
-        url: location.pathname
-      };
-
-      try {
-        await addToCart(line);
-        toast('Added to cart.');
-
-        // GA4 add_to_cart
-        if (typeof gtag === 'function') {
-          gtag('event','add_to_cart',{
-            currency: 'USD',
-            value: price * qty,
-            items: [{
-              item_id: id,
-              item_name: name,
-              price: price,
-              quantity: qty
-            }]
-          });
-        }
-
-        // Update nav badge if present
-        const badge = document.querySelector('#cart-count');
-        if (badge) {
-          const current = Number(badge.textContent || '0') + qty;
-          badge.textContent = current;
-          badge.style.display = current > 0 ? 'inline-block' : 'none';
-        }
-      } catch(e) {
-        console.warn('Add to cart failed', e);
-        toast('Could not add to cart. Try again.', false);
-      }
     });
 
     // GA4 view_item
@@ -316,6 +263,29 @@
       });
     } catch(_) {}
   })();
+  </script>
+
+  <!-- GA4 lightweight click tracking for Stripe link(s) -->
+  <script>
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a[data-track="stripe-link"]');
+    if (!a) return;
+    try {
+      const price = Number(a.dataset.price || 20);
+      const item  = a.dataset.item || 'hoco-hat';
+      const qtyEl = document.getElementById('qty');
+      const qty   = Math.max(1, Number(qtyEl?.value || 1));
+
+      if (typeof gtag === 'function') {
+        gtag('event','select_promotion',{
+          promotion_id: 'stripe_payment_link',
+          promotion_name: 'Hammond Homecoming Hat',
+          creative_name: 'Buy Button',
+          items: [{ item_id: item, item_name: 'Hammond Homecoming Hat', price, quantity: qty }]
+        });
+      }
+    } catch(_) {}
+  });
   </script>
 </body>
 </html>
