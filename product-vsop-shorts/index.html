@@ -134,7 +134,6 @@
   <script src="/scripts/sb-cart.js" defer></script>
 </head>
 
-
 <body class="theme-dark" id="top">
   <!-- NAV -->
   <div id="nav-placeholder"></div>
@@ -156,7 +155,7 @@
         <div class="product-detail__media">
           <img loading="lazy"
                src="/assets/vsop-shorts.jpg"
-               alt="VSOP matching shorts in burgundy and brown"
+                alt="VSOP matching shorts in burgundy and brown"
                class="product-detail__image">
         </div>
 
@@ -172,386 +171,244 @@
             Matching shorts for the VSOP set. Comfortable, durable, and embroidered for the finish.
           </p>
           <p class="product-detail__price">$89.99</p>
-          
 
-          <!-- Badges -->
+          <!-- Badge -->
           <p style="background:#8B0000;color:#fff;padding:.5rem .65rem;border-radius:6px;display:inline-block;margin:.5rem 0;font-weight:700">
             Preorder — ships Nov 1, 2025
           </p>
-         
 
           <!-- Help -->
           <div class="product-help" style="margin:.5rem 0 .75rem; font-size:.95rem; opacity:.9">
-            <a href="/returns.html">30-day returns on unworn items</a> ·
-            <a href="/returns.html#preorders">Preorder policy</a>
+            <a href="/returns/#policy">30-day returns on unworn items</a> ·
+            <a href="/returns/#preorders">Preorder policy</a>
           </div>
 
-        <!-- BUY BOX (replaces #pdp-form) -->
-<section class="buybox"
-  data-sku-base="vsop-shorts"
-  data-name="VSOP Shorts — Burgundy + Brown"
-  data-price="89.99"
-  data-image="/assets/vsop-shorts.jpg">
+          <!-- BUY BOX -->
+          <section class="buybox"
+            data-sku-base="vsop-shorts"
+            data-name="VSOP Shorts — Burgundy + Brown"
+            data-price="89.99"
+            data-image="/assets/vsop-shorts.jpg">
 
-  <div class="buybox__row">
-    <label for="size" class="buybox__label">Size</label>
-    <select id="size" class="buybox__select" required>
-      <option value="">Select size</option>
-      <option value="S">S</option>
-      <option value="M">M</option>
-      <option value="L">L</option>
-      <option value="XL">XL</option>
-      <option value="2XL">2XL</option>
-      <option value="3XL">3XL</option>
-    </select>
-  </div>
-
-  <div class="buybox__row">
-    <label for="qty" class="buybox__label">Quantity</label>
-    <div class="buybox__qty">
-      <button type="button" class="qty-btn" data-delta="-1" aria-label="Decrease quantity">−</button>
-      <input id="qty" type="number" min="1" value="1" inputmode="numeric" />
-      <button type="button" class="qty-btn" data-delta="1" aria-label="Increase quantity">+</button>
-    </div>
-  </div>
-
-  <div class="buybox__actions">
-    <button id="add-to-cart" class="btn btn--gold">Add to Cart</button>
-    <a class="btn btn--ghost" href="/shop/">Back to Shop</a>
-  </div>
-
-  <p id="buybox-msg" class="buybox__msg" role="status" aria-live="polite"></p>
-</section>
-
-<style>
-  .buybox{margin:1rem 0;padding:1rem;border:1px solid #1f1f1f;border-radius:12px;background:#0e0e0e}
-  .buybox__row{display:grid;gap:.4rem;margin:.6rem 0}
-  .buybox__label{font-weight:700}
-  .buybox__select,.buybox__qty input{
-    background:#0f0f0f;border:1px solid #2a2a2a;border-radius:10px;color:#eee;padding:.6rem .7rem
-  }
-  .buybox__qty{display:flex;gap:.4rem;align-items:center;max-width:180px}
-  .qty-btn{width:2.2rem;height:2.2rem;border-radius:10px;border:1px solid #2a2a2a;background:#151515;color:#eee;font-size:1rem}
-  .buybox__actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem}
-  .buybox__msg{margin:.5rem 0 0;opacity:.9}
-</style>
-
-<script>
-(function(){
-  const box = document.querySelector('.buybox');
-  if (!box) return;
-
-  const els = {
-    size: box.querySelector('#size'),
-    qty: box.querySelector('#qty'),
-    add: box.querySelector('#add-to-cart'),
-    msg: box.querySelector('#buybox-msg')
-  };
-
-  // Size suffix mapping for SKU
-  const SFX = { "S":"-s","M":"-m","L":"-l","XL":"-xl","2XL":"-2xl","3XL":"-3xl" };
-
-  // Quantity +/- buttons
-  box.querySelectorAll('.qty-btn').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const delta = Number(btn.getAttribute('data-delta')||0);
-      const v = Math.max(1, (Number(els.qty.value)||1) + delta);
-      els.qty.value = v;
-    });
-  });
-
-  function toast(msg, ok=true){
-    els.msg.textContent = msg;
-    els.msg.style.color = ok ? '#9BEF9B' : '#ff9b9b';
-  }
-
-  async function addToCart(item){
-    // Prefer your global cart helper if present
-    if (window.SB?.cart?.add) return window.SB.cart.add(item);
-    if (window.SB?.add)        return window.SB.add(item);
-    if (window.SB_CART?.add)   return window.SB_CART.add(item);
-
-    // Fallback: localStorage cart
-    try {
-      const KEY = 'sb_cart_v1';
-      const data = JSON.parse(localStorage.getItem(KEY) || '[]');
-      const idx = data.findIndex(x => x.id === item.id);
-      if (idx >= 0) data[idx].quantity += item.quantity;
-      else data.push(item);
-      localStorage.setItem(KEY, JSON.stringify(data));
-    } catch(e) {}
-  }
-
-  els.add.addEventListener('click', async ()=>{
-    const size = els.size.value;
-    const qty  = Math.max(1, Number(els.qty.value)||1);
-    if (!size) { toast('Please select a size.', false); els.size.focus(); return; }
-
-    const base  = box.getAttribute('data-sku-base');     // vsop-shorts
-    const name  = box.getAttribute('data-name');
-    const price = Number(box.getAttribute('data-price'));
-    const image = box.getAttribute('data-image') || '';
-
-    const id = `sb-${base}${SFX[size]||''}`; // sb-vsop-shorts-xl
-
-    const line = {
-      id,
-      sku: id,
-      name: `${name} — ${size}`,
-      price,
-      quantity: qty,
-      image,
-      url: location.pathname,
-      options: { size }
-    };
-
-    try {
-      await addToCart(line);
-      toast('Added to cart.');
-      // Optional GA4 event
-      if (typeof gtag === 'function') {
-        gtag('event','add_to_cart',{
-          currency: 'USD',
-          value: price * qty,
-          items: [{
-            item_id: id,
-            item_name: name,
-            item_variant: size,
-            price: price,
-            quantity: qty
-          }]
-        });
-      }
-      // Update cart badge if present
-      const badge = document.querySelector('#cart-count');
-      if (badge) {
-        const current = Number(badge.textContent || '0') + qty;
-        badge.textContent = current;
-        badge.style.display = current > 0 ? 'inline-block' : 'none';
-      }
-    } catch(e) {
-      console.warn('Add to cart failed', e);
-      toast('Could not add to cart. Try again.', false);
-    }
-  });
-})();
-</script>
-
-          <!-- Returns -->
-          <details class="product-returns" style="margin-top:.75rem">
-            <summary style="cursor:pointer">Returns & Preorders (quick view)</summary>
-            <div style="margin-top:.5rem; opacity:.9">
-              <p>Returns accepted within 30 days of delivery on unworn items with tags.
-              Preorders can be cancelled before shipment; after shipment, standard returns apply.</p>
-              <p><a class="btn btn--ghost" href="/returns.html">Read full policy</a></p>
+            <div class="buybox__row">
+              <label for="size" class="buybox__label">Size</label>
+              <select id="size" class="buybox__select" required>
+                <option value="">Select size</option>
+                <option value="S">S</option>
+                <option value="M">M</option>
+                <option value="L">L</option>
+                <option value="XL">XL</option>
+                <option value="2XL">2XL</option>
+                <option value="3XL">3XL</option>
+              </select>
             </div>
-          </details>
+
+            <div class="buybox__row">
+              <label for="qty" class="buybox__label">Quantity</label>
+              <div class="buybox__qty">
+                <button type="button" class="qty-btn" data-delta="-1" aria-label="Decrease quantity">−</button>
+                <input id="qty" type="number" min="1" value="1" inputmode="numeric" />
+                <button type="button" class="qty-btn" data-delta="1" aria-label="Increase quantity">+</button>
+              </div>
+            </div>
+
+            <div class="buybox__actions">
+              <button id="add-to-cart" class="btn btn--gold">Add to Cart</button>
+              <a class="btn btn--ghost" href="/shop/">Back to Shop</a>
+            </div>
+
+            <p id="buybox-msg" class="buybox__msg" role="status" aria-live="polite"></p>
+          </section>
+
+          <style>
+            .buybox{margin:1rem 0;padding:1rem;border:1px solid #1f1f1f;border-radius:12px;background:#0e0e0e}
+            .buybox__row{display:grid;gap:.4rem;margin:.6rem 0}
+            .buybox__label{font-weight:700}
+            .buybox__select,.buybox__qty input{
+              background:#0f0f0f;border:1px solid #2a2a2a;border-radius:10px;color:#eee;padding:.6rem .7rem
+            }
+            .buybox__qty{display:flex;gap:.4rem;align-items:center;max-width:180px}
+            .qty-btn{width:2.2rem;height:2.2rem;border-radius:10px;border:1px solid #2a2a2a;background:#151515;color:#eee;font-size:1rem}
+            .buybox__actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem}
+            .buybox__msg{margin:.5rem 0 0;opacity:.9}
+          </style>
+
         </article>
       </div>
     </div>
   </main>
+
   <!-- Reviews block (auto-populates) -->
-        <section class="product-reviews" id="reviews"
-         data-sku="vsop-shorts"
-         data-product-name="VSOP Shorts"
-         style="margin-top:1.25rem">
-        <!-- JS will render content here -->
+  <section class="product-reviews" id="reviews"
+    data-sku="vsop-shorts"
+    data-product-name="VSOP Shorts"
+    style="margin-top:1.25rem">
+  </section>
 
   <!-- FOOTER -->
   <div id="footer-placeholder"></div>
 
-  <!-- Size/Stock hydration -->
+  <!-- Buybox Logic + GA4 event + size/stock hydration -->
   <script>
   (function(){
-    const PRODUCT_ID = 'vsop-shorts';
-    const sizeSel    = document.getElementById('size');
-    const qtyInp     = document.getElementById('qty');
-    const submitBtn  = document.getElementById('pdp-submit');
-    const notifyBtn  = document.getElementById('notify-btn');
-    const stockMsg   = document.getElementById('stock-msg');
-    const wrap       = document.querySelector('.product-detail__info');
+    const box = document.querySelector('.buybox');
+    if (!box) return;
 
-    const FALLBACK = {
+    const els = {
+      size: box.querySelector('#size'),
+      qty:  box.querySelector('#qty'),
+      add:  box.querySelector('#add-to-cart'),
+      msg:  box.querySelector('#buybox-msg')
+    };
+
+    // Size suffix mapping for SKU
+    const SFX = { "S":"-s","M":"-m","L":"-l","XL":"-xl","2XL":"-2xl","3XL":"-3xl" };
+
+    // Quantity +/- buttons
+    box.querySelectorAll('.qty-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const delta = Number(btn.getAttribute('data-delta')||0);
+        const v = Math.max(1, (Number(els.qty.value)||1) + delta);
+        els.qty.value = v;
+      });
+    });
+
+    function toast(msg, ok=true){
+      els.msg.textContent = msg;
+      els.msg.style.color = ok ? '#9BEF9B' : '#ff9b9b';
+    }
+
+    async function addToCart(item){
+      // Prefer your global cart helper if present
+      if (window.SB?.cart?.add) return window.SB.cart.add(item);
+      if (window.SB?.add)        return window.SB.add(item);
+      if (window.SB_CART?.add)   return window.SB_CART.add(item);
+
+      // Fallback: localStorage cart
+      try {
+        const KEY = 'sb_cart_v1';
+        const data = JSON.parse(localStorage.getItem(KEY) || '[]');
+        const idx = data.findIndex(x => x.id === item.id);
+        if (idx >= 0) data[idx].quantity += item.quantity;
+        else data.push(item);
+        localStorage.setItem(KEY, JSON.stringify(data));
+      } catch(e) {}
+    }
+
+    // Optional size state enhancements from products.json (safe fallback included)
+    const FALLBACK_SIZES = {
       "S":   { status:"in-stock",   stock:12 },
       "M":   { status:"in-stock",   stock:8  },
       "L":   { status:"low-stock",  stock:2  },
       "XL":  { status:"in-stock",   stock:10 },
       "2XL": { status:"preorder",   stock:null, ship:"2025-11-01" },
-      "3XL": { status:"coming-soon",stock:0,   notify:true }
+      "3XL": { status:"coming-soon",stock:0 }
     };
 
-    let sizeData = null;
-
-    init();
-
-    async function init(){
-      sizeData = await loadSizes();
-      applyToSelect(sizeData);
-      sizeSel.addEventListener('change', () => updateUIForSize(sizeSel.value, sizeData));
-      if (notifyBtn) notifyBtn.addEventListener('click', onNotify);
-      updateUIForSize(sizeSel.value, sizeData);
-    }
-
-    async function loadSizes(){
+    (async function initSizes(){
+      let map = FALLBACK_SIZES;
       try {
         const r = await fetch('/products.json', { cache:'no-store' });
-        if (!r.ok) throw new Error('products.json not found');
-        const all = await r.json();
-        const p = all[PRODUCT_ID];
-        if (!p || !p.sizes) throw new Error('sizes missing');
-        return p.sizes;
-      } catch(e){
-        console.warn('Using FALLBACK sizes:', e.message);
-        if (stockMsg) stockMsg.textContent = 'Note: Using cached inventory data.';
-        return FALLBACK;
-      }
-    }
+        if (r.ok) {
+          const all = await r.json();
+          if (all && all['vsop-shorts'] && all['vsop-shorts'].sizes) {
+            map = all['vsop-shorts'].sizes;
+          }
+        }
+      } catch(_) {}
 
-    function applyToSelect(map){
-      for (const opt of sizeSel.options) {
+      // apply labels / disabled
+      for (const opt of els.size.options) {
         if (!opt.value) continue;
         const meta = map[opt.value];
         if (!meta) { opt.disabled = true; continue; }
         opt.disabled = (meta.status === 'sold-out' || meta.status === 'coming-soon');
-
         if (meta.status === 'low-stock')        opt.textContent = `${opt.value} — Only ${meta.stock} left`;
         else if (meta.status === 'preorder')    opt.textContent = `${opt.value} — Preorder`;
         else if (meta.status === 'sold-out')    opt.textContent = `${opt.value} — Sold Out`;
         else if (meta.status === 'coming-soon') opt.textContent = `${opt.value} — Coming Soon`;
         else                                    opt.textContent = opt.value;
       }
-    }
 
-    function updateUIForSize(size, map){
-      if (stockMsg) stockMsg.textContent = '';
-      if (notifyBtn) { notifyBtn.style.display = 'none'; notifyBtn.disabled = false; }
-      submitBtn.disabled = false;
+      els.size.addEventListener('change', ()=>{
+        const v = els.size.value;
+        if (!v || !map[v]) { els.msg.textContent = ''; return; }
+        const meta = map[v];
+        if (meta.status === 'low-stock') els.msg.textContent = `Only ${meta.stock} left — don't wait.`;
+        else if (meta.status === 'preorder') els.msg.textContent = meta.ship ? `Preorder — ships ${new Date(meta.ship).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})}` : 'Preorder open.';
+        else els.msg.textContent = '';
+      });
+    })();
 
-      if (!size || !map[size]) {
-        submitBtn.textContent = 'Add to Cart';
-        return;
-      }
+    // Add to cart
+    els.add.addEventListener('click', async ()=>{
+      const size = els.size.value;
+      const qty  = Math.max(1, Number(els.qty.value)||1);
+      if (!size) { toast('Please select a size.', false); els.size.focus(); return; }
 
-      const meta = map[size];
-      switch (meta.status) {
-        case 'in-stock':
-          submitBtn.textContent = 'Add to Cart';
-          break;
-        case 'low-stock':
-          submitBtn.textContent = 'Add to Cart';
-          if (stockMsg) stockMsg.textContent = `Only ${meta.stock} left — don't wait.`;
-          break;
-        case 'preorder':
-          submitBtn.textContent = 'Preorder';
-          if (stockMsg) stockMsg.textContent = meta.ship ? `Preorder — ships ${formatDate(meta.ship)}` : 'Preorder open.';
-          break;
-        case 'sold-out':
-        case 'coming-soon':
-          submitBtn.textContent = 'Unavailable';
-          submitBtn.disabled = true;
-          if (notifyBtn) notifyBtn.style.display = '';
-          if (stockMsg) stockMsg.textContent = (meta.status === 'sold-out')
-            ? 'Sold out — get notified when restocked.'
-            : 'Coming soon — get notified when available.';
-          break;
-      }
-    }
+      const base  = box.getAttribute('data-sku-base');     // vsop-shorts
+      const name  = box.getAttribute('data-name');
+      const price = Number(box.getAttribute('data-price'));
+      const image = box.getAttribute('data-image') || '';
 
-    function onNotify(){
-      const size = sizeSel.value;
-      const qty  = Math.max(1, parseInt(qtyInp.value || '1', 10));
-      const nameBase = wrap?.dataset.nameBase || 'VSOP Shorts';
-      const subject = encodeURIComponent(`Notify Me — ${nameBase} (${size})`);
-      const lines = [
-        `Please notify me when this size is available:`,
-        ``,
-        `Product: ${nameBase}`,
-        `Size: ${size}`,
-        `Desired qty: ${qty}`,
-        ``,
-        `My name: `,
-        `My email: `
-      ];
-      const body = encodeURIComponent(lines.join('\n'));
-      location.href = `mailto:squarebidnessapparel@gmail.com?subject=${subject}&body=${body}`;
-    }
+      const id = `sb-${base}${SFX[size]||''}`; // sb-vsop-shorts-xl
 
-    function formatDate(iso){
+      const line = {
+        id,
+        sku: id,
+        name: `${name} — ${size}`,
+        price,
+        quantity: qty,
+        image,
+        url: location.pathname,
+        options: { size }
+      };
+
       try {
-        const d = new Date(iso);
-        return d.toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' });
-      } catch { return iso; }
-    }
-  })();
-  </script>
+        await addToCart(line);
 
-  <!-- Add to Cart + GA -->
-  <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('pdp-form');
-    if (!form) return;
+        // Custom event (for any global listeners)
+        window.dispatchEvent(new CustomEvent('sb:add_to_cart', {
+          detail: {
+            item_id: id,
+            item_name: name,
+            variant: size,
+            price: price,
+            quantity: qty
+          }
+        }));
 
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-
-      const wrap = document.querySelector('.product-detail__info');
-      const sizeSel = document.getElementById('size');
-      const qtyInp  = document.getElementById('qty');
-      const sizeErr = document.getElementById('size-error');
-
-      const size = (sizeSel.value || '').trim();
-      const qty  = Math.max(1, parseInt(qtyInp.value || '1', 10));
-
-      if (!size) {
-        if (sizeErr) sizeErr.style.display = '';
-        sizeSel.focus();
-        return;
-      } else if (sizeErr) {
-        sizeErr.style.display = 'none';
-      }
-
-      const idBase   = (wrap?.dataset.idBase || 'vsop-shorts').replace(/[^a-zA-Z0-9-]/g, '');
-      const nameBase = wrap?.dataset.nameBase || 'VSOP Shorts';
-      const price    = Number(wrap?.dataset.price || '89.99');
-      const image    = wrap?.dataset.image || '/assets/vsop-shorts.jpg';
-
-      const variantId = `${idBase}-${size}`;
-      const item = { id: variantId, name: `${nameBase} (${size})`, price, image, qty };
-
-      if (window.SB && typeof window.SB.addToCart === 'function') {
-        window.SB.addToCart(item);
-      } else {
-        // Fallback (same key as SB)
-        const KEY = 'sb_cart_v1';
-        const cart = JSON.parse(localStorage.getItem(KEY) || '[]');
-        const i = cart.findIndex(x => x.id === item.id);
-        if (i >= 0) cart[i].qty += item.qty; else cart.push(item);
-        localStorage.setItem(KEY, JSON.stringify(cart));
-        dispatchEvent(new CustomEvent('sb:cart:update', { detail: { cart } }));
-      }
-
-      // GA4
-      try {
+        // GA4 (optional direct fire)
         if (typeof gtag === 'function') {
-          gtag('event', 'add_to_cart', {
+          gtag('event','add_to_cart',{
             currency: 'USD',
             value: price * qty,
-            items: [{ item_id: variantId, item_name: item.name, price, quantity: qty }]
+            items: [{
+              item_id: id,
+              item_name: name,
+              item_variant: size,
+              price: price,
+              quantity: qty
+            }]
           });
         }
-      } catch(_) {}
 
-      // Go to cart (folder route)
-      window.location.href = '/cart/';
+        toast('Added to cart.');
+
+        // Update cart badge if present
+        const badge = document.querySelector('#cart-count');
+        if (badge) {
+          const current = Number(badge.textContent || '0') + qty;
+          badge.textContent = current;
+          badge.style.display = current > 0 ? 'inline-block' : 'none';
+        }
+      } catch(e) {
+        console.warn('Add to cart failed', e);
+        toast('Could not add to cart. Try again.', false);
+      }
     });
 
-    // hide error when a size is picked
-    document.getElementById('size')?.addEventListener('change', () => {
-      const sizeErr = document.getElementById('size-error');
-      if (sizeErr) sizeErr.style.display = 'none';
-    });
-
-    // GA view_item
+    // GA4 view_item on load
     try {
       window.dataLayer = window.dataLayer || [];
       window.dataLayer.push({
@@ -567,9 +424,10 @@
         }
       });
     } catch(_) {}
-  });
+  })();
   </script>
-  <script defer src="/scripts/reviews.js"></script>
 
+  <!-- Reviews renderer (optional) -->
+  <script defer src="/scripts/reviews.js"></script>
 </body>
 </html>
