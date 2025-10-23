@@ -13,7 +13,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Checkout — Square Bidness</title>
 
-  <!-- Primary SEO -->
+  <!-- SEO (noindex checkout) -->
   <meta name="description" content="Secure checkout — review your order and complete payment." />
   <link rel="canonical" href="https://www.squarebidness.com/checkout/" />
   <meta name="robots" content="noindex,nofollow" />
@@ -43,11 +43,12 @@
   <link rel="manifest" href="/site.webmanifest">
   <meta name="theme-color" content="#000000">
 
-  <!-- Organization JSON-LD (site-wide) -->
+  <!-- Org JSON-LD (site-wide) -->
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
     "@type":"Organization",
+    "@id":"https://www.squarebidness.com/#org",
     "name":"Square Bidness Apparel",
     "url":"https://www.squarebidness.com/",
     "logo":"https://www.squarebidness.com/assets/cleantextlogo.png",
@@ -58,21 +59,24 @@
       "https://bsky.app/profile/squarebidnesstm.bsky.social",
       "https://www.linkedin.com/company/square-bidness-apparel"
     ],
-    "contactPoint":[
-      {
-        "@type":"ContactPoint",
-        "contactType":"customer support",
-        "email":"squarebidnessapparel@gmail.com",
-        "areaServed":"US"
-      }
-    ]
+    "contactPoint":[{ "@type":"ContactPoint", "contactType":"customer support", "email":"squarebidnessapparel@gmail.com", "areaServed":"US" }]
   }
   </script>
 
   <!-- Global cart helpers -->
   <script src="/scripts/sb-cart.js" defer></script>
-</head>
 
+  <!-- Stripe.js (for server checkout sessions) -->
+  <script src="https://js.stripe.com/v3/"></script>
+
+  <!-- Inject nav/footer -->
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      try { document.getElementById("nav-placeholder").innerHTML = await (await fetch("/nav/")).text(); } catch {}
+      try { document.getElementById("footer-placeholder").innerHTML = await (await fetch("/footer/")).text(); } catch {}
+    });
+  </script>
+</head>
 
 <body class="theme-dark" id="top">
   <!-- NAV -->
@@ -100,7 +104,7 @@
               <th>Line</th>
             </tr>
           </thead>
-          <tbody id="order-items"><!-- filled by JS --></tbody>
+          <tbody id="order-items"><!-- JS fills --></tbody>
         </table>
       </div>
 
@@ -108,7 +112,7 @@
       <div class="summary" id="order-summary" style="margin-top:1.5rem; display:none;">
         <table>
           <tr><td>Subtotal</td><td class="right" id="order-subtotal">$0.00</td></tr>
-        <tr id="order-discount-row" style="display:none">
+          <tr id="order-discount-row" style="display:none">
             <td class="discount-code-label">Discount</td>
             <td class="right" id="order-discount">-$0.00</td>
           </tr>
@@ -117,7 +121,7 @@
         </table>
 
         <div style="display:flex; gap:.5rem; margin-top:1rem; flex-wrap:wrap;">
-          <a href="/cart.html" class="btn btn--ghost">Back to Cart</a>
+          <a href="/cart/" class="btn btn--ghost">Back to Cart</a>
           <button id="pay-button" class="btn btn--gold">Pay Securely</button>
         </div>
 
@@ -127,16 +131,13 @@
       <!-- Empty state -->
       <div id="empty" style="text-align:center; padding:2rem; display:none;">
         <p style="opacity:.85">Your cart is empty.</p>
-        <a class="btn btn--ghost" href="/shop.html">Continue Shopping</a>
+        <a class="btn btn--ghost" href="/shop/">Continue Shopping</a>
       </div>
     </div>
   </main>
 
   <!-- FOOTER -->
   <div id="footer-placeholder"></div>
-
-  <!-- Stripe -->
-  <script src="https://js.stripe.com/v3/"></script>
 
   <!-- Checkout logic -->
   <script>
@@ -146,15 +147,13 @@
     const COUPON_KEY = 'sb_coupon';
     const TAX_RATE   = 0.0945;
     const CHECKOUT_ENDPOINT = "https://sb-checkout-server.vercel.app/api/create-checkout-session";
+    // Optional direct Payment Link short-circuit (pure hat cart)
+    const STRIPE_LINKS = { "sb-hoco-hat": "https://buy.stripe.com/7sY9ATaJV529del8Fa8N20h" };
 
     const moneyFmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
     const money = n => moneyFmt.format(Number(n || 0));
 
-    const readCart = () => {
-      try { return JSON.parse(localStorage.getItem(CART_KEY) || '[]'); }
-      catch { return []; }
-    };
-
+    const readCart = () => { try { return JSON.parse(localStorage.getItem(CART_KEY) || '[]'); } catch { return []; } };
     const getCoupon = () => (localStorage.getItem(COUPON_KEY) || "").trim().toUpperCase();
 
     function applyCoupon(subtotal) {
@@ -166,7 +165,7 @@
     }
 
     function render() {
-      const items = readCart().filter(i => Number(i.qty) > 0);
+      const items = readCart().filter(i => Number(i.quantity ?? i.qty ?? 0) > 0);
       const tbody = document.getElementById('order-items');
       const summary = document.getElementById('order-summary');
       const empty   = document.getElementById('empty');
@@ -184,21 +183,22 @@
       }
 
       tbody.innerHTML = items.map(i => {
-        const line = Number(i.price || 0) * Number(i.qty || 1);
+        const q = Number(i.quantity ?? i.qty ?? 1);
+        const line = Number(i.price || 0) * q;
         return `
           <tr>
             <td>
-              <img src="${i.image || ''}" alt="" style="width:54px;height:54px;object-fit:cover;border-radius:6px;vertical-align:middle;margin-right:.5rem">
-              ${i.name}
+              ${i.image ? `<img src="${i.image}" alt="" style="width:54px;height:54px;object-fit:cover;border-radius:6px;vertical-align:middle;margin-right:.5rem">` : ``}
+              ${i.name || i.id}
             </td>
             <td>${money(i.price)}</td>
-            <td>${i.qty}</td>
+            <td>${q}</td>
             <td>${money(line)}</td>
           </tr>
         `;
       }).join('');
 
-      const subtotal = items.reduce((s, i) => s + Number(i.price || 0) * Number(i.qty || 1), 0);
+      const subtotal = items.reduce((s,i)=> s + Number(i.price||0) * Number(i.quantity ?? i.qty ?? 1), 0);
       const { discount, code } = applyCoupon(subtotal);
       const taxedBase = Math.max(0, subtotal - discount);
       const tax = taxedBase * TAX_RATE;
@@ -225,11 +225,21 @@
       if (!btn) return;
 
       const items = readCart().map(i => ({
-        id: i.id, name: i.name, price: Number(i.price)||0, qty: Number(i.qty)||1
+        id: i.id,
+        name: i.name,
+        price: Number(i.price) || 0,
+        qty: Number(i.quantity ?? i.qty ?? 1)
       })).filter(i => i.qty > 0);
 
       if (!items.length) return alert('Your cart is empty');
 
+      // Short-circuit: direct Payment Link for a pure hat cart
+      if (items.length === 1) {
+        const link = STRIPE_LINKS[items[0].id || ""];
+        if (link) { location.assign(link); return; }
+      }
+
+      // GA4 begin_checkout (best effort)
       try {
         if (typeof gtag === 'function') {
           const value = items.reduce((s, i) => s + (i.price * i.qty), 0);
@@ -260,6 +270,7 @@
           orderId, createdAt: Date.now(), items, coupon, subtotal, discount, tax, total, shipping: 0
         }));
 
+        // Create checkout session via server
         const res = await fetch(CHECKOUT_ENDPOINT, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -299,3 +310,4 @@
   </script>
 </body>
 </html>
+
