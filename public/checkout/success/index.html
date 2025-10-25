@@ -1,421 +1,143 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Performance -->
-  <link rel="preconnect" href="https://www.googletagmanager.com">
-  <link rel="preconnect" href="https://www.google-analytics.com">
-
-  <!-- GA4 site-wide -->
-  <script defer src="/scripts/ga.js"></script>
-
-  <!-- Meta basics -->
+  <!-- Basic head -->
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Order Confirmed — Square Bidness</title>
 
-  <!-- SEO -->
-  <meta name="description" content="Your order is confirmed. Thank you for supporting Square Bidness." />
+  <meta name="description" content="Thank you for your order from Square Bidness." />
   <link rel="canonical" href="https://www.squarebidness.com/checkout/success/" />
   <meta name="robots" content="noindex,nofollow" />
 
-  <!-- Open Graph -->
-  <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="Square Bidness" />
-  <meta property="og:title" content="Order Confirmed — Square Bidness" />
-  <meta property="og:description" content="Thank you for your order. We'll update you when it ships." />
-  <meta property="og:url" content="https://www.squarebidness.com/checkout/success/" />
-  <meta property="og:image" content="https://www.squarebidness.com/assets/sb-social-card_1200.jpg" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
-
-  <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Order Confirmed — Square Bidness" />
-  <meta name="twitter:description" content="Thank you for your order. We'll update you when it ships." />
-  <meta name="twitter:image" content="https://www.squarebidness.com/assets/sb-social-card_1200.jpg" />
-  <meta name="twitter:site" content="@squarebidnesstm" />
-
-  <!-- Theme / Icons -->
-  <meta name="theme-color" content="#000000" />
-  <link rel="icon" href="/favicon.ico" sizes="any" />
-  <link rel="apple-touch-icon" href="/assets/icons/icon-180.png" />
-  <link rel="manifest" href="/site.webmanifest" />
-
-  <!-- CSS -->
   <link rel="stylesheet" href="/styles/style.css" />
+  <meta name="theme-color" content="#000000" />
 
-  <!-- Org JSON-LD -->
-  <script type="application/ld+json">
-  {
-    "@context":"https://schema.org",
-    "@type":"Organization",
-    "@id":"https://www.squarebidness.com/#org",
-    "name":"Square Bidness Apparel",
-    "url":"https://www.squarebidness.com/",
-    "logo":"https://www.squarebidness.com/assets/cleantextlogo.png",
-    "sameAs":[
-      "https://instagram.com/squarebidnesstm",
-      "https://www.tiktok.com/@squarebidnesstm",
-      "https://www.facebook.com/squarebidnessapparel",
-      "https://bsky.app/profile/squarebidnesstm.bsky.social",
-      "https://www.linkedin.com/company/square-bidness-apparel"
-    ],
-    "contactPoint":[{
-      "@type":"ContactPoint",
-      "contactType":"customer support",
-      "email":"squarebidnessapparel@gmail.com",
-      "areaServed":"US"
-    }]
-  }
-  </script>
-
-  <!-- Nav/Footer loader -->
+  <!-- Nav/Footer auto-load -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       fetch("/nav/", { cache: "no-store" })
         .then(r => r.text())
-        .then(html => {
-          const slot = document.getElementById("nav-placeholder");
-          if (slot) slot.innerHTML = html;
-        })
+        .then(html => { const slot = document.getElementById("nav-placeholder"); if (slot) slot.innerHTML = html; })
         .catch(()=>{});
-
       fetch("/footer/", { cache: "no-store" })
         .then(r => r.text())
-        .then(html => {
-          const slot = document.getElementById("footer-placeholder");
-          if (slot) slot.innerHTML = html;
-        })
+        .then(html => { const slot = document.getElementById("footer-placeholder"); if (slot) slot.innerHTML = html; })
         .catch(()=>{});
     });
   </script>
-
-  <style>
-    .confirm-wrapper{
-      max-width:900px;
-      margin:2rem auto;
-      background:#0e0e0e;
-      border:1px solid #1f1f1f;
-      border-radius:16px;
-      padding:1.25rem 1rem;
-    }
-    @media(min-width:720px){
-      .confirm-wrapper{padding:2rem;}
-    }
-
-    .confirm-header{
-      display:flex;
-      flex-direction:column;
-      gap:.5rem;
-      border-bottom:1px solid #222;
-      padding-bottom:1rem;
-      margin-bottom:1rem;
-    }
-    .confirm-header .status-pill{
-      display:inline-block;
-      background:#103713;
-      color:#e7ffe7;
-      border:1px solid #1d5c1d;
-      font-weight:700;
-      border-radius:999px;
-      font-size:.8rem;
-      padding:.35rem .6rem;
-      width:fit-content;
-    }
-
-    .order-meta{
-      font-size:.9rem;
-      opacity:.9;
-      line-height:1.4;
-    }
-
-    table.order-lines{
-      width:100%;
-      border-collapse:collapse;
-      margin-top:1rem;
-      font-size:.95rem;
-    }
-    table.order-lines th{
-      text-align:left;
-      font-weight:600;
-      padding:.5rem .25rem;
-      color:#ddd;
-      border-bottom:1px solid #222;
-    }
-    table.order-lines td{
-      vertical-align:top;
-      padding:.6rem .25rem;
-      border-bottom:1px solid #1a1a1a;
-    }
-    table.order-lines img{
-      width:54px;
-      height:54px;
-      border-radius:6px;
-      object-fit:cover;
-      margin-right:.5rem;
-      vertical-align:middle;
-    }
-
-    .summary-box{
-      background:#0f0f0f;
-      border:1px solid #2a2a2a;
-      border-radius:12px;
-      padding:1rem;
-      margin-top:1.5rem;
-      max-width:360px;
-    }
-    .summary-box table{
-      width:100%;
-      font-size:.95rem;
-      border-collapse:collapse;
-    }
-    .summary-box td{
-      padding:.4rem 0;
-    }
-    .summary-box td.right{
-      text-align:right;
-      font-variant-numeric:tabular-nums;
-    }
-    .summary-box .total-row td{
-      padding-top:.6rem;
-      border-top:1px solid #2a2a2a;
-      font-weight:700;
-      font-size:1rem;
-    }
-
-    .next-steps{
-      margin-top:1.5rem;
-      font-size:.95rem;
-      line-height:1.5;
-      opacity:.9;
-    }
-    .next-steps a{
-      color:#c9a227;
-      text-decoration:underline;
-      font-weight:600;
-    }
-    .next-steps a:hover{
-      text-decoration:none;
-    }
-
-    .actions-row{
-      display:flex;
-      flex-wrap:wrap;
-      gap:.5rem;
-      margin-top:1rem;
-    }
-
-    .empty-state{
-      text-align:center;
-      padding:3rem 1rem;
-      max-width:420px;
-      margin:2rem auto;
-      background:#0e0e0e;
-      border:1px solid #1f1f1f;
-      border-radius:16px;
-    }
-  </style>
-
 </head>
 <body class="theme-dark" id="top">
-
-  <!-- NAV -->
   <div id="nav-placeholder"></div>
 
-  <!-- HERO -->
-  <header class="page-hero">
-    <div class="container">
-      <h1 class="page-title">Thank you</h1>
-      <p class="page-subtitle">Your order is confirmed.</p>
-    </div>
-  </header>
-
-  <!-- MAIN -->
   <main class="section">
-    <div class="container">
+    <div class="container" style="max-width:800px">
+      <header style="margin-bottom:1.5rem;">
+        <h1>Thank you for your order</h1>
+        <p class="muted">You’re locked in. We'll email you details soon.</p>
+      </header>
 
-      <!-- success content -->
-      <section id="confirm-block" class="confirm-wrapper" style="display:none;">
-        <header class="confirm-header">
-          <div class="status-pill">Paid</div>
-          <div>
-            <h2 style="margin:0;font-size:1.25rem;font-weight:700;color:#fff;">
-              Order <span id="order-id"></span>
-            </h2>
-          </div>
-          <div class="order-meta">
-            <div>Placed: <span id="order-date"></span></div>
-            <div>Total: <span id="order-total"></span></div>
-          </div>
-        </header>
+      <section id="order-block" style="border:1px solid #1f1f1f;border-radius:12px;background:#0e0e0e;padding:1rem 1.25rem;">
+        <p><strong>Order ID:</strong> <span id="order-id">—</span></p>
+        <p><strong>Total Paid:</strong> <span id="order-total">—</span></p>
+        <p style="margin-top:.5rem;font-size:.9rem;opacity:.8;">
+          Screenshot this for pickup if this was a local/homecoming buy.
+        </p>
 
-        <!-- line items table -->
-        <table class="order-lines" aria-describedby="order-id">
+        <h2 style="margin-top:1rem;font-size:1rem;">Your Items</h2>
+        <table style="width:100%;border-collapse:collapse;font-size:.9rem;">
           <thead>
-            <tr>
-              <th scope="col">Item</th>
-              <th scope="col">Price</th>
-              <th scope="col">Qty</th>
-              <th scope="col">Line</th>
+            <tr style="text-align:left;border-bottom:1px solid #2a2a2a;">
+              <th style="padding:.5rem 0;">Item</th>
+              <th style="padding:.5rem 0;">Qty</th>
+              <th style="padding:.5rem 0;">Price</th>
             </tr>
           </thead>
-          <tbody id="order-lines-body"><!-- JS fills --></tbody>
+          <tbody id="order-lines"></tbody>
         </table>
 
-        <!-- summary -->
-        <aside class="summary-box" aria-label="Order summary">
-          <table>
-            <tr>
-              <td>Subtotal</td>
-              <td class="right" id="sum-subtotal">$0.00</td>
-            </tr>
-            <tr id="sum-discount-row" style="display:none;">
-              <td>Discount</td>
-              <td class="right" id="sum-discount">-$0.00</td>
-            </tr>
-            <tr>
-              <td>Tax</td>
-              <td class="right" id="sum-tax">$0.00</td>
-            </tr>
-            <tr>
-              <td>Shipping</td>
-              <td class="right" id="sum-shipping">$0.00</td>
-            </tr>
-            <tr class="total-row">
-              <td>Total</td>
-              <td class="right" id="sum-total">$0.00</td>
-            </tr>
-          </table>
-        </aside>
-
-        <!-- next steps -->
-        <div class="next-steps">
-          <p>We’ll email you shipping updates. If you need anything, hit us at
-            <a href="mailto:squarebidnessapparel@gmail.com">squarebidnessapparel@gmail.com</a>.
-          </p>
-
-          <div class="actions-row">
-            <a class="btn btn--gold" href="/shop/">Keep Shopping</a>
-            <a class="btn btn--ghost" href="/returns/">Returns &amp; Preorder Policy</a>
+        <div style="margin-top:1rem;font-size:.9rem;">
+          <div><strong>Subtotal:</strong> <span id="sum-subtotal">$0.00</span></div>
+          <div id="sum-discount-row" style="display:none;">
+            <strong>Discount:</strong> <span id="sum-discount">-$0.00</span>
           </div>
+          <div><strong>Tax:</strong> <span id="sum-tax">$0.00</span></div>
+          <div><strong>Shipping:</strong> <span id="sum-shipping">$0.00</span></div>
+          <div style="font-weight:700;margin-top:.5rem;"><strong>Total:</strong> <span id="sum-total">$0.00</span></div>
         </div>
       </section>
 
-      <!-- fallback content -->
-      <section id="empty-block" class="empty-state" style="display:none;">
-        <h2 style="margin:0 0 .5rem;font-size:1.25rem;font-weight:700;">No order found</h2>
-        <p style="opacity:.8;margin:0 0 1rem;">
-          Looks like this page was opened without a recent purchase.
-        </p>
-        <a class="btn btn--gold" href="/shop/">Shop Products</a>
-      </section>
+      <div style="margin-top:1.5rem;display:flex;flex-wrap:wrap;gap:.75rem;">
+        <a class="btn btn--gold" href="/shop/">Continue Shopping</a>
+        <a class="btn btn--ghost" href="/returns/">Returns & Policy</a>
+      </div>
 
+      <p style="font-size:.8rem;opacity:.6;margin-top:2rem;">
+        Questions? Email
+        <a href="mailto:squarebidnessapparel@gmail.com" style="color:#c9a227;text-decoration:underline;">
+          squarebidnessapparel@gmail.com
+        </a>
+      </p>
     </div>
   </main>
 
-  <!-- FOOTER -->
   <div id="footer-placeholder"></div>
 
-  <!-- SUCCESS PAGE LOGIC -->
   <script>
-  (function(){
-    // Same keys / tax logic we used in checkout page
-    const TAX_RATE = 0.0945;
-    const moneyFmt = new Intl.NumberFormat('en-US',{
-      style:'currency',currency:'USD'
-    });
-    const money = n => moneyFmt.format(Number(n||0));
+    (function(){
+      function money(n){
+        return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(n||0));
+      }
 
-    // pull the snapshot we saved in checkout.js before redirecting to Stripe
-    let snap = null;
-    try {
-      snap = JSON.parse(sessionStorage.getItem('sb_last_order') || 'null');
-    } catch(e){
-      snap = null;
-    }
+      let data = null;
+      try {
+        data = JSON.parse(sessionStorage.getItem('sb_last_order') || 'null');
+      } catch(_) {}
 
-    const $confirm = document.getElementById('confirm-block');
-    const $empty   = document.getElementById('empty-block');
+      if (!data) {
+        // no stored data, show minimal
+        document.getElementById('order-id').textContent = 'Unavailable';
+        document.getElementById('order-total').textContent = '$0.00';
+        document.getElementById('order-lines').innerHTML = '<tr><td colspan="3" style="padding:.5rem 0;">No line items.</td></tr>';
+        return;
+      }
 
-    if (!snap || !snap.items || !snap.items.length){
-      // no data -> show fallback
-      $empty.style.display = '';
-      return;
-    }
+      const {
+        orderId,
+        items,
+        subtotal,
+        discount,
+        tax,
+        total,
+        shipping
+      } = data;
 
-    // show confirm block
-    $confirm.style.display = '';
+      document.getElementById('order-id').textContent = orderId || '—';
+      document.getElementById('order-total').textContent = money(total);
 
-    // fill header meta
-    const orderIdEl   = document.getElementById('order-id');
-    const orderDateEl = document.getElementById('order-date');
-    const orderTotalEl= document.getElementById('order-total');
-
-    const placedDate = new Date(snap.createdAt || Date.now());
-    if (orderIdEl)   orderIdEl.textContent   = snap.orderId || '—';
-    if (orderDateEl) orderDateEl.textContent = placedDate.toLocaleString(undefined,{
-      year:'numeric',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'
-    });
-    if (orderTotalEl)orderTotalEl.textContent= money(snap.total);
-
-    // render lines
-    const tbody = document.getElementById('order-lines-body');
-    if (tbody){
-      tbody.innerHTML = snap.items.map(i=>{
-        const lineTotal = (Number(i.price)||0) * (Number(i.qty)||1);
+      // lines
+      const tbody = document.getElementById('order-lines');
+      tbody.innerHTML = (items||[]).map(i=>{
         return `
-          <tr>
-            <td>
-              <img src="${i.image||''}" alt="">
-              ${i.name || i.id || 'Item'}
-            </td>
-            <td>${money(i.price)}</td>
-            <td>${i.qty}</td>
-            <td>${money(lineTotal)}</td>
+          <tr style="border-bottom:1px solid #2a2a2a;">
+            <td style="padding:.5rem 0;">${i.name}</td>
+            <td style="padding:.5rem 0;">${i.qty}</td>
+            <td style="padding:.5rem 0;">${money(i.price)}</td>
           </tr>
         `;
       }).join('');
-    }
 
-    // summary box
-    const subEl       = document.getElementById('sum-subtotal');
-    const discRow     = document.getElementById('sum-discount-row');
-    const discEl      = document.getElementById('sum-discount');
-    const taxEl       = document.getElementById('sum-tax');
-    const shipEl      = document.getElementById('sum-shipping');
-    const totalEl     = document.getElementById('sum-total');
+      // summary
+      document.getElementById('sum-subtotal').textContent = money(subtotal);
+      document.getElementById('sum-tax').textContent      = money(tax);
+      document.getElementById('sum-total').textContent    = money(total);
+      document.getElementById('sum-shipping').textContent = money(shipping||0);
 
-    if (subEl)   subEl.textContent   = money(snap.subtotal);
-    if (taxEl)   taxEl.textContent   = money(snap.tax ?? (snap.subtotal - (snap.discount||0))*TAX_RATE);
-    if (shipEl)  shipEl.textContent  = money(snap.shipping || 0);
-    if (totalEl) totalEl.textContent = money(snap.total);
-
-    if (snap.discount && snap.discount > 0){
-      if (discRow) discRow.style.display = '';
-      if (discEl)  discEl.textContent = '-' + money(snap.discount);
-    }
-
-    // Fire GA4 "purchase" event best-effort
-    try {
-      const value = Number(snap.total||0);
-      if (typeof gtag === 'function'){
-        gtag('event','purchase',{
-          transaction_id: snap.orderId || ('SB-' + Date.now()),
-          currency: 'USD',
-          value,
-          tax: Number(snap.tax||0),
-          shipping: Number(snap.shipping||0),
-          coupon: snap.coupon || undefined,
-          items: snap.items.map(i => ({
-            item_id: i.id,
-            item_name: i.name,
-            price: Number(i.price)||0,
-            quantity: Number(i.qty)||1
-          }))
-        });
+      if (discount && Number(discount) > 0){
+        document.getElementById('sum-discount').textContent = '-' + money(discount);
+        document.getElementById('sum-discount-row').style.display = '';
       }
-    } catch(_) {}
-  })();
+    })();
   </script>
 </body>
 </html>
