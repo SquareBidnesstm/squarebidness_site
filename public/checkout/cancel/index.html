@@ -1,1 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Performance -->
+  <link rel="preconnect" href="https://www.googletagmanager.com">
+  <link rel="preconnect" href="https://www.google-analytics.com">
+
+  <!-- GA4 (site-wide) -->
+  <script defer src="/scripts/ga.js"></script>
+
+  <!-- Basics -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Checkout Not Completed — Square Bidness</title>
+
+  <!-- SEO -->
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="description" content="Your checkout session was not completed. Your items are still in your cart." />
+  <link rel="canonical" href="https://www.squarebidness.com/checkout/cancel/" />
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/styles/style.css" />
+
+  <!-- Icons / PWA -->
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/assets/icons/icon-180.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#000000">
+
+  <!-- Small inline styles for this page -->
+  <style>
+    .cancel-wrap{
+      max-width:700px;
+      margin:2rem auto;
+      padding:1rem;
+    }
+    .cancel-card{
+      border:1px solid #1f1f1f;
+      background:#0f0f0f;
+      border-radius:14px;
+      padding:1.25rem 1rem;
+    }
+    .cancel-card h1{
+      margin-top:0;
+      margin-bottom:.5rem;
+      font-size:1.4rem;
+      line-height:1.2;
+    }
+    .muted{opacity:.8}
+    .cart-preview-table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:1rem;
+    }
+    .cart-preview-table th,
+    .cart-preview-table td{
+      padding:.6rem .4rem;
+      border-bottom:1px solid #1f1f1f;
+      vertical-align:top;
+    }
+    .cart-preview-table th{
+      text-align:left;
+      opacity:.85;
+      font-weight:600;
+      font-size:.9rem;
+    }
+    .right{text-align:right}
+    .actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:.5rem;
+      margin-top:1rem;
+    }
+    .totals{
+      width:100%;
+      margin-top:1rem;
+    }
+    .totals td{
+      padding:.3rem 0;
+    }
+    .totals .total-row{
+      border-top:1px solid #1f1f1f;
+      padding-top:.5rem;
+      font-size:1.1rem;
+      font-weight:700;
+    }
+  </style>
+</head>
+
+<body class="theme-dark" id="top">
+  <!-- Nav slot -->
+  <div id="nav-placeholder"></div>
+
+  <main class="cancel-wrap">
+    <section class="cancel-card">
+      <h1>Checkout not finished</h1>
+      <p class="muted">
+        No stress — you didn’t get charged. Your items are still in your cart.
+      </p>
+
+      <table class="cart-preview-table">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th class="right">Price</th>
+            <th class="right">Qty</th>
+            <th class="right">Line</th>
+          </tr>
+        </thead>
+        <tbody id="cart-rows">
+          <tr><td colspan="4" class="muted">Loading cart…</td></tr>
+        </tbody>
+      </table>
+
+      <table class="totals">
+        <tr>
+          <td>Estimated Subtotal</td>
+          <td class="right" id="subtotal">$0.00</td>
+        </tr>
+        <tr>
+          <td>Estimated Tax (9.45%)</td>
+          <td class="right" id="tax">$0.00</td>
+        </tr>
+        <tr class="total-row">
+          <td>Total (est.)</td>
+          <td class="right" id="total">$0.00</td>
+        </tr>
+      </table>
+
+      <div class="actions">
+        <a class="btn btn--gold" href="/checkout/">Return to Checkout</a>
+        <a class="btn btn--ghost" href="/cart/">View Cart</a>
+        <a class="btn btn--ghost" href="/shop/">Keep Shopping</a>
+      </div>
+
+      <p class="muted" style="margin-top:.75rem">
+        Got a question or need to change your order? <a href="mailto:squarebidnessapparel@gmail.com?subject=Question%20about%20my%20cart">Email support</a>.
+      </p>
+    </section>
+  </main>
+
+  <!-- Footer slot -->
+  <div id="footer-placeholder"></div>
+
+  <script>
+  // Load nav + footer
+  document.addEventListener("DOMContentLoaded", () => {
+    fetch("/nav/", { cache: "no-store" })
+      .then(r => r.text())
+      .then(html => {
+        const slot = document.getElementById("nav-placeholder");
+        if (slot) slot.innerHTML = html;
+      })
+      .catch(()=>{});
+
+    fetch("/footer/", { cache: "no-store" })
+      .then(r => r.text())
+      .then(html => {
+        const slot = document.getElementById("footer-placeholder");
+        if (slot) slot.innerHTML = html;
+      })
+      .catch(()=>{});
+  });
+
+  // Render cart preview + GA abandon event
+  (function(){
+    const CART_KEY = 'sb_cart_v1';
+    const TAX_RATE = 0.0945;
+    const moneyFmt = new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'});
+    const money = n => moneyFmt.format(Number(n||0));
+
+    function readCart(){
+      try{
+        return JSON.parse(localStorage.getItem(CART_KEY) || '[]');
+      }catch(_){
+        return [];
+      }
+    }
+
+    function renderCart(){
+      const tbody = document.getElementById('cart-rows');
+      const subEl = document.getElementById('subtotal');
+      const taxEl = document.getElementById('tax');
+      const totEl = document.getElementById('total');
+
+      const items = readCart().filter(i => Number(i.qty) > 0);
+
+      if (!items.length){
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4" class="muted" style="text-align:center;padding:1rem 0;">
+              Your cart is empty.
+            </td>
+          </tr>`;
+        subEl.textContent = money(0);
+        taxEl.textContent = money(0);
+        totEl.textContent = money(0);
+        return;
+      }
+
+      tbody.innerHTML = items.map(i => {
+        const lineTotal = Number(i.price||0) * Number(i.qty||1);
+        return `
+          <tr>
+            <td>
+              <img src="${i.image || ''}" alt="" style="width:54px;height:54px;object-fit:cover;border-radius:6px;vertical-align:middle;margin-right:.5rem">
+              ${i.name || i.id || 'Item'}
+            </td>
+            <td class="right">${money(i.price)}</td>
+            <td class="right">${i.qty}</td>
+            <td class="right">${money(lineTotal)}</td>
+          </tr>
+        `;
+      }).join('');
+
+      const subtotal = items.reduce((sum,i)=> sum + (Number(i.price||0)*Number(i.qty||1)), 0);
+      const tax = subtotal * TAX_RATE;
+      const total = subtotal + tax;
+
+      subEl.textContent = money(subtotal);
+      taxEl.textContent = money(tax);
+      totEl.textContent = money(total);
+
+      // GA4 "abandoned" style ping (best-effort, no pressure)
+      try {
+        if (typeof gtag === 'function') {
+          gtag('event','checkout_abandon', {
+            currency: 'USD',
+            value: total,
+            items: items.map(i => ({
+              item_id: i.id,
+              item_name: i.name,
+              price: Number(i.price||0),
+              quantity: Number(i.qty||1)
+            }))
+          });
+        }
+      } catch(_) {}
+    }
+
+    document.addEventListener('DOMContentLoaded', renderCart);
+  })();
+  </script>
+</body>
+</html>
 
