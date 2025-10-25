@@ -1,55 +1,206 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Basics -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Press — Square Bidness</title>
+  <title>Press — Square Bidness Apparel</title>
   <meta name="description" content="Square Bidness Apparel press mentions, interviews, and features." />
   <link rel="canonical" href="https://www.squarebidness.com/press/" />
-  <link rel="stylesheet" href="/styles/style.css" />
+
+  <!-- Brand / Icons / PWA -->
   <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" href="/assets/icons/icon-180.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <meta name="theme-color" content="#000000" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="/styles/style.css" />
+
+  <!-- Open Graph -->
   <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Square Bidness" />
   <meta property="og:title" content="Press — Square Bidness" />
+  <meta property="og:description" content="Articles, interviews, and features on Square Bidness Apparel." />
+  <meta property="og:url" content="https://www.squarebidness.com/press/" />
   <meta property="og:image" content="https://www.squarebidness.com/assets/sb-social-card_1200.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Square Bidness Apparel" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Press — Square Bidness" />
+  <meta name="twitter:description" content="Articles, interviews, and features on Square Bidness Apparel." />
+  <meta name="twitter:image" content="https://www.squarebidness.com/assets/sb-social-card_1200.jpg" />
+  <meta name="twitter:site" content="@squarebidnesstm" />
+
+  <!-- Org JSON-LD (same pattern as other pages) -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"Organization",
+    "@id":"https://www.squarebidness.com/#org",
+    "name":"Square Bidness Apparel",
+    "url":"https://www.squarebidness.com/",
+    "logo":"https://www.squarebidness.com/assets/cleantextlogo.png",
+    "sameAs":[
+      "https://instagram.com/squarebidnesstm",
+      "https://www.tiktok.com/@squarebidnesstm",
+      "https://www.facebook.com/squarebidnessapparel",
+      "https://bsky.app/profile/squarebidnesstm.bsky.social",
+      "https://www.linkedin.com/company/square-bidness-apparel"
+    ],
+    "contactPoint":[{
+      "@type":"ContactPoint",
+      "contactType":"customer support",
+      "email":"squarebidnessapparel@gmail.com",
+      "areaServed":"US"
+    }]
+  }
+  </script>
+
+  <!-- Perf / GA4 -->
+  <link rel="preconnect" href="https://www.googletagmanager.com">
+  <link rel="preconnect" href="https://www.google-analytics.com">
+  <script defer src="/scripts/ga.js"></script>
+
+  <!-- Nav/Footer loader -->
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      try {
+        const navHTML = await (await fetch("/nav/", {cache:"no-store"})).text();
+        const navSlot = document.getElementById("nav-placeholder");
+        if (navSlot) navSlot.innerHTML = navHTML;
+      } catch {}
+
+      try {
+        const footerHTML = await (await fetch("/footer/", {cache:"no-store"})).text();
+        const footerSlot = document.getElementById("footer-placeholder");
+        if (footerSlot) footerSlot.innerHTML = footerHTML;
+      } catch {}
+    });
+  </script>
+
+  <style>
+    .press-page-header {
+      margin-bottom: 1.5rem;
+    }
+    .press-page-header h1 {
+      margin: 0 0 .25rem;
+      font-size: 1.75rem;
+      font-weight: 800;
+    }
+    .press-page-header .muted {
+      color: #999;
+      font-size: .95rem;
+    }
+
+    .press-list {
+      list-style: none;
+      padding: 0;
+      margin: 1rem 0 2rem;
+      display: grid;
+      gap: 1rem;
+    }
+
+    .press-item a {
+      display: block;
+      background: #0e0e0e;
+      border: 1px solid #1f1f1f;
+      border-radius: 10px;
+      padding: .9rem 1rem;
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+    .press-item a:hover {
+      background: #1a1a1a;
+      border-color: #2a2a2a;
+    }
+
+    .media-kit {
+      margin-top: 2rem;
+      background: #0e0e0e;
+      border: 1px solid #1f1f1f;
+      border-radius: 10px;
+      padding: 1rem 1rem 1.25rem;
+    }
+    .media-kit h2 {
+      margin: 0 0 .5rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+    .media-kit p {
+      margin: 0;
+      color: #ccc;
+      font-size: .95rem;
+      line-height: 1.4;
+    }
+    .media-kit a {
+      color: #c9a227;
+      font-weight: 600;
+      text-decoration: underline;
+    }
+    .media-kit a:hover {
+      text-decoration: none;
+    }
+  </style>
 </head>
-<body class="theme-dark">
+
+<body class="theme-dark" id="top">
+  <!-- NAV -->
   <div id="nav-placeholder"></div>
 
   <main class="section">
     <div class="container">
-      <h1>Press</h1>
-      <p class="muted">Stories, interviews, shoutouts.</p>
+
+      <header class="press-page-header">
+        <h1>Press</h1>
+        <p class="muted">Stories, interviews, shoutouts.</p>
+      </header>
 
       <ul class="press-list">
         <li class="press-item">
-          <a href="https://boldjourney.com/meet-marcus-buckner?utm_source=squarebidness.com&utm_medium=press_page" target="_blank" rel="noopener">
+          <a
+            href="https://boldjourney.com/meet-marcus-buckner?utm_source=squarebidness.com&utm_medium=press_page"
+            target="_blank" rel="noopener noreferrer">
             Bold Journey — Meet Marcus Buckner
           </a>
         </li>
+
         <li class="press-item">
-          <a href="https://shoutouthtx.com/meet-marcus-buckner-square-bidness-apparel-designer-and-marketer/?utm_source=squarebidness.com&utm_medium=press_page" target="_blank" rel="noopener">
+          <a
+            href="https://shoutouthtx.com/meet-marcus-buckner-square-bidness-apparel-designer-and-marketer/?utm_source=squarebidness.com&utm_medium=press_page"
+            target="_blank" rel="noopener noreferrer">
             Shoutout HTX — Square Bidness Apparel
           </a>
         </li>
+
         <li class="press-item">
-          <a href="https://canvasrebel.com/meet-marcus-buckner/?utm_source=squarebidness.com&utm_medium=press_page" target="_blank" rel="noopener">
+          <a
+            href="https://canvasrebel.com/meet-marcus-buckner/?utm_source=squarebidness.com&utm_medium=press_page"
+            target="_blank" rel="noopener noreferrer">
             Canvas Rebel — Interview
           </a>
         </li>
       </ul>
 
-      <hr class="hr" />
-      <h2>Media Kit</h2>
-      <p class="muted">Need assets or quotes? Email <a href="mailto:squarebidnessapparel@gmail.com">squarebidnessapparel@gmail.com</a>.</p>
+      <section class="media-kit" aria-labelledby="media-kit-heading">
+        <h2 id="media-kit-heading">Media / Collab / Speaking</h2>
+        <p class="muted">
+          Need logos, approved photos, or a quote? Email
+          <a href="mailto:squarebidnessapparel@gmail.com">
+            squarebidnessapparel@gmail.com
+          </a>.
+        </p>
+      </section>
+
     </div>
   </main>
 
+  <!-- FOOTER -->
   <div id="footer-placeholder"></div>
-  <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-      try { document.getElementById("nav-placeholder").innerHTML = await (await fetch("/nav/")).text() } catch {}
-      try { document.getElementById("footer-placeholder").innerHTML = await (await fetch("/footer/")).text() } catch {}
-    });
-  </script>
 </body>
 </html>
