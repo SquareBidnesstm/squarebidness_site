@@ -1,104 +1,110 @@
+<!-- /nav/index.html -->
 <header class="site-header">
-  <div class="site-header__inner container"
-       style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:.75rem 0;">
+  <div class="container nav-inner" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.75rem 0;">
+    
+    <!-- Brand / Home -->
+    <a href="/" class="brand" style="font-weight:800;line-height:1;display:flex;align-items:center;gap:.5rem;color:#fff;text-decoration:none;">
+      <img src="/assets/cleantextlogo.png"
+           alt="Square Bidness"
+           style="height:32px;width:auto;object-fit:contain;">
+      <span class="sr-only">Square Bidness</span>
+    </a>
 
-    <!-- Left: brand / home -->
-    <div class="brand" style="display:flex;align-items:center;gap:.5rem;">
-      <a href="/" class="brand__link"
-         style="display:flex;align-items:center;gap:.5rem;text-decoration:none;color:#fff;font-weight:700;">
-        <!-- Swap this src if you want a different logo -->
-        <img src="/assets/cleantextlogo.png"
-             alt="Square Bidness"
-             style="height:32px;width:auto;object-fit:contain;image-rendering:auto;">
-        <span class="brand__name" style="font-size:1rem;line-height:1">Square Bidness</span>
-      </a>
-    </div>
+    <!-- Nav links -->
+    <nav class="main-nav" aria-label="Main Navigation">
+      <ul style="display:flex;flex-wrap:wrap;gap:1rem;align-items:center;margin:0;padding:0;list-style:none;">
+        <li>
+          <a href="/shop/" class="main-nav__link" style="color:#fff;text-decoration:none;font-weight:600;">
+            Shop
+          </a>
+        </li>
 
-    <!-- Center: nav links -->
-    <nav class="main-nav" aria-label="Primary"
-         style="display:flex;flex-wrap:wrap;gap:1rem;font-size:.95rem;font-weight:600;">
-      <a href="/shop/" class="main-nav__link" style="color:#fff;text-decoration:none;">
-        Shop
-      </a>
-      <a href="/shop/#vsop" class="main-nav__link" style="color:#fff;text-decoration:none;">
-        VSOP
-      </a>
+        <li>
+          <a href="/shop/#vsop" class="main-nav__link" style="color:#fff;text-decoration:none;font-weight:600;">
+            VSOP Collection
+          </a>
+        </li>
+
+        <li>
+          <a href="/cart/" class="main-nav__link" style="color:#fff;text-decoration:none;font-weight:600;position:relative;display:inline-flex;align-items:center;">
+            Cart
+            <span id="cart-count"
+                  style="display:none;margin-left:.4rem;background:#c9a227;color:#111;border-radius:999px;padding:.15rem .45rem;font-size:.75rem;font-weight:700;line-height:1;">
+              0
+            </span>
+          </a>
+        </li>
+      </ul>
     </nav>
-
-    <!-- Right: cart -->
-    <div class="header-cart" style="display:flex;align-items:center;gap:.75rem;">
-      <a href="/cart/" class="cart-link"
-         style="color:#fff;text-decoration:none;display:flex;align-items:center;gap:.4rem;position:relative;font-weight:600;">
-        <span aria-hidden="true"
-              style="display:inline-block;width:20px;height:20px;border:1px solid #fff;border-radius:4px;line-height:18px;text-align:center;font-size:.7rem;font-weight:700;">
-          🛒
-        </span>
-        <span style="line-height:1;">Cart</span>
-
-        <!-- dynamic badge -->
-        <span id="cart-count"
-              style="display:none;position:absolute;top:-8px;right:-10px;background:#c9a227;color:#111;border-radius:999px;padding:2px 6px;font-size:.7rem;font-weight:700;line-height:1;">
-          0
-        </span>
-      </a>
-    </div>
-
   </div>
 
   <style>
     .site-header{
-      background:#0e0e0e;
+      background:#000;
       border-bottom:1px solid #1f1f1f;
     }
-
-    @media(min-width:768px){
-      .main-nav__link:hover{
-        color:#c9a227;
-      }
-      .main-nav__link.active,
-      .main-nav__link[aria-current="page"]{
-        color:#c9a227;
-      }
+    @media(max-width:480px){
+      .main-nav__link{font-size:.9rem;}
+    }
+    .main-nav a.active{
+      color:#c9a227;
+      text-decoration:underline;
+      text-underline-offset:3px;
     }
   </style>
 
   <script>
-  (function initCartBadge(){
-    // read cart from localStorage and update #cart-count
-    const KEY = 'sb_cart_v1';
-    const badge = document.getElementById('cart-count');
-    if (!badge) return;
+    (function(){
+      // normalize current path like "/shop/"
+      const here = location.pathname.replace(/\/+$/,'/') || '/';
 
-    function getCount() {
+      // add "active" state to current page link
+      document.querySelectorAll('.main-nav a').forEach(a=>{
+        const href = a.getAttribute('href') || '';
+        if (!href) return;
+        const norm = href.replace(/\/+$/,'/') || '/';
+
+        // rule:
+        // - if link is "/" then only match homepage
+        // - else highlight if current path starts with link path
+        const isHome    = norm === '/';
+        const isMatch   = isHome ? (here === '/') : here.startsWith(norm);
+
+        if (isMatch) {
+          a.classList.add('active');
+          a.setAttribute('aria-current','page');
+        }
+      });
+
+      // hydrate cart badge from localStorage
       try {
-        const cart = JSON.parse(localStorage.getItem(KEY) || '[]');
-        return cart.reduce((sum, line) => {
-          // support either .qty (our PDPs) or .quantity (buybox)
-          const n1 = Number(line.qty || 0);
-          const n2 = Number(line.quantity || 0);
-          return sum + (n1 || n2 || 0);
-        }, 0);
-      } catch {
-        return 0;
-      }
-    }
+        const KEY   = 'sb_cart_v1';
+        const badge = document.getElementById('cart-count');
+        if (!badge) return;
 
-    function renderCount() {
-      const count = getCount();
-      if (count > 0) {
-        badge.textContent = count;
-        badge.style.display = 'inline-block';
-      } else {
-        badge.textContent = '0';
-        badge.style.display = 'none';
-      }
-    }
+        function updateBadge(cartArr){
+          const totalQty = cartArr.reduce((sum,i)=> {
+            const q = Number(i.qty ?? i.quantity ?? 0);
+            return sum + (isNaN(q) ? 0 : q);
+          }, 0);
 
-    // render now
-    renderCount();
+          if (totalQty > 0){
+            badge.textContent = totalQty;
+            badge.style.display = 'inline-block';
+          } else {
+            badge.style.display = 'none';
+          }
+        }
 
-    // listen for global cart update events (PDP add-to-cart, buybox add, etc.)
-    window.addEventListener('sb:cart:update', renderCount);
-  })();
+        const cartNow = JSON.parse(localStorage.getItem(KEY) || '[]');
+        updateBadge(cartNow);
+
+        // listen for cart update events (our add-to-cart scripts dispatch these)
+        window.addEventListener('sb:cart:update', e=>{
+          const latestCart = e.detail?.cart || [];
+          updateBadge(latestCart);
+        });
+      } catch(e){}
+    })();
   </script>
 </header>
