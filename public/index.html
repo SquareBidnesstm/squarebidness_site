@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Page basics (page-specific) -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Square Bidness – Home</title>
+  <meta name="description" content="Veteran-owned Louisiana lifestyle brand. Apparel built on principles, morals, and business done right. Shop the VSOP Collection." />
+  <link rel="canonical" href="https://www.squarebidness.com/" />
+
+  <!-- Open Graph (page-specific) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Square Bidness" />
+  <meta property="og:title" content="Square Bidness — Principles. Morals. Business Done Right." />
+  <meta property="og:description" content="Veteran-owned Louisiana lifestyle brand. Apparel built on principles, morals, and business done right." />
+  <meta property="og:url" content="https://www.squarebidness.com/" />
+  <meta property="og:image" content="https://www.squarebidness.com/assets/sb-social-card_1200.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Square Bidness - Principles. Morals. Business Done Right." />
+
+  <!-- Twitter (page-specific) -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@squarebidnesstm" />
+  <meta name="twitter:title" content="Square Bidness — Principles. Morals. Business Done Right." />
+  <meta name="twitter:description" content="Veteran-owned Louisiana lifestyle brand. Apparel built on principles, morals, and business done right." />
+  <meta name="twitter:image" content="https://www.squarebidness.com/assets/sb-social-card_1200.jpg" />
+
+  <!-- BEGIN: SHARED HEAD PARTIAL -->
+  <!-- Perf -->
+  <link rel="preconnect" href="https://www.googletagmanager.com">
+  <link rel="preconnect" href="https://www.google-analytics.com">
+
+  <!-- GA4 (site-wide) -->
+  <script defer src="/scripts/ga.js"></script>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/styles/style.css" />
+
+  <!-- Icons / PWA -->
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/assets/icons/icon-180.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#000000">
+
+  <!-- Organization JSON-LD (site-wide) -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"Organization",
+    "@id": "https://www.squarebidness.com/#org",
+    "name":"Square Bidness Apparel",
+    "url":"https://www.squarebidness.com/",
+    "logo":"https://www.squarebidness.com/assets/cleantextlogo.png",
+    "sameAs":[
+      "https://instagram.com/squarebidnesstm",
+      "https://www.tiktok.com/@squarebidnesstm",
+      "https://www.facebook.com/squarebidnessapparel",
+      "https://bsky.app/profile/squarebidnesstm.bsky.social",
+      "https://www.linkedin.com/company/square-bidness-apparel"
+    ],
+    "contactPoint":[
+      {
+        "@type":"ContactPoint",
+        "contactType":"customer support",
+        "email":"squarebidnessapparel@gmail.com",
+        "areaServed":"US"
+      }
+    ]
+  }
+  </script>
+  <!-- END: SHARED HEAD PARTIAL -->
+
+  <!-- Nav/Footer loader (so we pull in nav + shared footer partials) -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      fetch("/nav/", { cache: "no-store" })
+        .then(r => r.text())
+        .then(d => {
+          const slot = document.getElementById("nav-placeholder");
+          if (slot) slot.innerHTML = d;
+        })
+        .catch(()=>{});
+      fetch("/footer/", { cache: "no-store" })
+        .then(r => r.text())
+        .then(d => {
+          const slot = document.getElementById("footer-placeholder");
+          if (slot) slot.innerHTML = d;
+        })
+        .catch(()=>{});
+    });
+  </script>
+
+  <!-- Site cart helpers -->
+  <script src="/scripts/sb-cart.js" defer></script>
+
+  <style>
+    /* Banner styling */
+    .sb-banner {
+      background: linear-gradient(135deg, #f5d742, #e6c533);
+      color: #111;
+      text-align: center;
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 0.6rem 1rem;
+      border-bottom: 1px solid #ccc;
+      letter-spacing: 0.5px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      position: relative;
+      z-index: 999;
+    }
+    .sb-banner a {
+      color: #111;
+      text-decoration: underline;
+    }
+    .sb-banner a:hover {
+      color: #000;
+      text-decoration: none;
+    }
+    .sb-banner--vsop {
+      background-color: #800020; /* Burgundy */
+      color: #FFD700; /* Gold */
+    }
+    .sb-banner--vsop a {
+      color: #FFD700;
+      font-weight: bold;
+      text-decoration: underline;
+    }
+    .sb-banner--vsop a:hover {
+      color: #ffffff;
+      text-decoration: none;
+    }
+    .sb-banner--live {
+      background-color: #222;
+      color: #fff;
+    }
+    .sb-banner--thanks {
+      background-color: #f4f4f4;
+      color: #111;
+    }
+    .sb-banner--thanks a {
+      color: #111;
+      font-weight: bold;
+    }
+
+    /* Press strip quick styles (relies mostly on your global style.css classes) */
+    .press {
+      background:#0e0e0e;
+      border-top:1px solid #1f1f1f;
+      border-bottom:1px solid #1f1f1f;
+      padding:1rem 0;
+      text-align:center;
+    }
+    .press__inner {
+      display:flex;
+      flex-direction:column;
+      gap:.75rem;
+      align-items:center;
+      justify-content:center;
+    }
+    .press__label {
+      font-size:.8rem;
+      font-weight:600;
+      text-transform:uppercase;
+      letter-spacing:.05em;
+      opacity:.7;
+    }
+    .press__logos {
+      list-style:none;
+      padding:0;
+      margin:0;
+      display:flex;
+      flex-wrap:wrap;
+      gap:1.5rem;
+      align-items:center;
+      justify-content:center;
+    }
+    .press__logos img {
+      max-height:40px;
+      width:auto;
+      height:auto;
+      display:block;
+      filter:brightness(0) invert(1);
+      opacity:.8;
+    }
+    .press__logos img:hover {
+      opacity:1;
+    }
+
+    /* minimal hero tweak if needed */
+    .hero__inner {
+      display:grid;
+      gap:1rem;
+    }
+    @media(min-width:768px){
+      .hero__inner {
+        grid-template-columns:1fr 1fr;
+        align-items:center;
+      }
+    }
+    .hero__media img {
+      width:100%;
+      height:auto;
+      border-radius:12px;
+      border:1px solid #1f1f1f;
+      background:#0f0f0f;
+      object-fit:cover;
+      display:block;
+    }
+    .hero__copy .brand {
+      font-size:2rem;
+      font-weight:800;
+      margin:0 0 .5rem;
+      color:#fff;
+    }
+    .hero__copy .tagline {
+      font-size:1rem;
+      color:#ccc;
+      margin:0 0 1rem;
+    }
+    .cta-row {
+      display:flex;
+      flex-wrap:wrap;
+      gap:.5rem;
+    }
+
+    /* VSOP grid */
+    .vsop-grid {
+      display:grid;
+      gap:1rem;
+    }
+    @media(min-width:768px){
+      .vsop-grid {
+        grid-template-columns:repeat(3,1fr);
+      }
+    }
+    .card {
+      background:#0e0e0e;
+      border:1px solid #1f1f1f;
+      border-radius:12px;
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+    }
+    .card__media {
+      position:relative;
+    }
+    .card__media img {
+      width:100%;
+      height:auto;
+      display:block;
+      object-fit:cover;
+      background:#111;
+    }
+    .badge {
+      position:absolute;
+      left:.5rem;
+      top:.5rem;
+      background:#800020;
+      color:#FFD700;
+      border-radius:8px;
+      padding:.3rem .5rem;
+      font-size:.75rem;
+      font-weight:700;
+      border:1px solid rgba(255,215,0,0.4);
+    }
+    .card__content {
+      padding:.75rem .75rem 0;
+    }
+    .card__content h3 {
+      margin:0 0 .4rem;
+      font-size:1rem;
+      font-weight:700;
+      color:#fff;
+    }
+    .card__description {
+      margin:0 0 .5rem;
+      font-size:.9rem;
+      line-height:1.4;
+      color:#ccc;
+    }
+    .price {
+      color:#fff;
+      font-weight:700;
+      font-size:1rem;
+      margin:0 0 .75rem;
+    }
+    .card__actions {
+      display:flex;
+      flex-wrap:wrap;
+      gap:.5rem;
+      padding:0 .75rem .75rem;
+    }
+
+    /* Footer mini */
+    .site-footer-home {
+      border-top:1px solid #1f1f1f;
+      background:#0e0e0e;
+      color:#d7dae0;
+      text-align:center;
+      font-size:.9rem;
+      padding:2rem 1rem;
+    }
+    .site-footer-home a {
+      color:#c9a227;
+      font-weight:700;
+      text-decoration:underline;
+    }
+    .site-footer-home a:hover {
+      text-decoration:none;
+    }
+  </style>
+
+  <script>
+    // Banner rotation logic
+    (() => {
+      const CONFIG = {
+        live: {
+          text: `🚀 Square Bidness is LIVE at 
+            <a href="https://events.fastcompany.com/innovationfestival" target="_blank" rel="noopener">
+            Innovation Fest 2025</a> — tap in with us in NYC!`,
+          class: "sb-banner sb-banner--live",
+        },
+        thanks: {
+          text: `🙏🏼 Thank you, NYC! We are thankful for the opportunity to be part of 
+            <a href="https://events.fastcompany.com/innovationfestival" target="_blank" rel="noopener">
+            Innovation Fest 2025</a>. See you again soon.`,
+          class: "sb-banner sb-banner--thanks",
+        },
+        vsop: {
+          text: `VSOP Preorders Live Now → 
+            <a href="https://www.squarebidness.com/vsop" target="_blank" rel="noopener">
+            squarebidness.com/vsop</a>`,
+          class: "sb-banner sb-banner--vsop",
+        }
+      };
+
+      const start      = new Date(2025, 8, 15);  // Sept 15, 2025
+      const end        = new Date(2025, 8, 18);  // Sept 18, 2025
+      const vsopStart  = new Date(2025, 8, 25);  // Sept 25, 2025
+      const now        = new Date();
+
+      function pick() {
+        if (now >= start && now <= end) return CONFIG.live;
+        if (now > end && now < vsopStart) return CONFIG.thanks;
+        if (now >= vsopStart) return CONFIG.vsop;
+        // default to vsop promo until dates hit
+        return CONFIG.vsop;
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        const bar = document.querySelector('.sb-banner');
+        const chosen = pick();
+        if (bar && chosen) {
+          bar.innerHTML = chosen.text;
+          bar.className = chosen.class;
+        }
+      });
+    })();
+  </script>
+</head>
+
+
+<body class="theme-dark" id="top">
+
+  <!-- TOP BANNER / ANNOUNCEMENT -->
+  <div class="sb-banner">
+    <!-- Will be replaced by JS above -->
+    VSOP Preorders Live Now →
+    <a href="https://www.squarebidness.com/vsop" target="_blank" rel="noopener">
+      squarebidness.com/vsop
+    </a>
+  </div>
+
+  <!-- NAV -->
+  <div id="nav-placeholder"></div>
+
+  <!-- HERO -->
+  <header class="hero hero--dark">
+    <div class="container hero__inner">
+      <picture class="hero__media" aria-hidden="true">
+        <img loading="lazy" decoding="async" src="/assets/hero.jpg" alt="">
+      </picture>
+
+      <div class="hero__copy">
+        <h1 class="brand">Square Bidness</h1>
+        <p class="tagline">Principles. Morals. Business Done Right.</p>
+        <div class="cta-row">
+          <a class="btn btn--gold" href="/shop/" aria-label="Visit the Shop">Shop Now</a>
+          <a class="btn btn--ghost" href="#story">Learn More</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- VSOP COLLECTION FEATURE -->
+    <section class="section section--band" id="vsop">
+      <div class="container">
+        <h2 class="section__title">VSOP Collection — Fall 2025</h2>
+        <p class="section__lead">
+          Burgundy + Brown. Hooded jacket and matching shorts. All embroidered. All Square.
+        </p>
+
+        <div class="grid vsop-grid">
+
+          <!-- Jacket card -->
+          <article class="card" data-product-id="vsop-jacket">
+            <div class="card__media">
+              <img loading="lazy" src="/assets/vsop-jacket.jpg" alt="VSOP embroidered hooded jacket in burgundy and brown">
+              <span class="badge" aria-live="polite">Preorder Now</span>
+            </div>
+            <div class="card__content">
+              <h3>VSOP Hooded Jacket</h3>
+              <p class="card__description">Burgundy + Brown. Premium fabric. Embroidered.</p>
+              <p class="price">$129.99</p>
+            </div>
+            <div class="card__actions">
+              <a class="btn btn--gold btn--primary" href="/product-vsop-jacket/">
+                Preorder Now
+              </a>
+              <a class="btn btn--ghost btn--secondary" href="/product-vsop-jacket/">
+                View Details
+              </a>
+            </div>
+          </article>
+
+          <!-- Shorts card -->
+          <article class="card" data-product-id="vsop-shorts">
+            <div class="card__media">
+              <img loading="lazy" src="/assets/vsop-shorts.jpg" alt="VSOP matching shorts in burgundy and brown">
+              <span class="badge" aria-live="polite">Preorder Now</span>
+            </div>
+            <div class="card__content">
+              <h3>VSOP Shorts</h3>
+              <p class="card__description">Burgundy + Brown. Embroidered mark. Athletic fit.</p>
+              <p class="price">$89.99</p>
+            </div>
+            <div class="card__actions">
+              <a class="btn btn--gold btn--primary" href="/product-vsop-shorts/">
+                Preorder Now
+              </a>
+              <a class="btn btn--ghost btn--secondary" href="/product-vsop-shorts/">
+                View Details
+              </a>
+            </div>
+          </article>
+
+          <!-- Collection card -->
+          <article class="card">
+            <div class="card__media">
+              <img loading="lazy" src="/assets/vsop-hero.jpg" alt="VSOP look — jacket with matching shorts">
+            </div>
+            <div class="card__content">
+              <h3>Full VSOP Look</h3>
+              <p class="card__description">Complete the set with both pieces</p>
+            </div>
+            <div class="card__actions">
+              <a class="btn btn--gold btn--primary" href="/collection-vsop/">
+                Preorder Collection
+              </a>
+            </div>
+          </article>
+
+        </div>
+
+        <div class="section__cta">
+          <a class="btn btn--gold" href="/collection-vsop/">Preorder VSOP</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRESS STRIP -->
+    <section class="press press--invert press--pill" aria-label="Press features">
+      <div class="container press__inner">
+        <span class="press__label">As featured in</span>
+        <ul class="press__logos">
+          <li>
+            <a
+              href="https://boldjourney.com/meet-marcus-buckner?utm_source=squarebidness.com&utm_medium=press_strip&utm_campaign=boldjourney"
+              target="_blank" rel="noopener" aria-label="Bold Journey"
+            >
+              <img
+                loading="lazy"
+                src="/assets/press/bold-journey.png"
+                alt="Bold Journey"
+                width="320"
+                height="56"
+              >
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="https://shoutouthtx.com/meet-marcus-buckner-square-bidness-apparel-designer-and-marketer/?utm_source=squarebidness.com&utm_medium=press_strip&utm_campaign=shoutout_htx"
+              target="_blank" rel="noopener" aria-label="Shoutout HTX"
+            >
+              <img
+                loading="lazy"
+                src="/assets/press/shoutout-htx.png"
+                alt="Shoutout HTX"
+                width="320"
+                height="56"
+              >
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="https://canvasrebel.com/meet-marcus-buckner/?utm_source=squarebidness.com&utm_medium=press_strip&utm_campaign=canvas_rebel"
+              target="_blank" rel="noopener" aria-label="Canvas Rebel"
+            >
+              <img
+                loading="lazy"
+                src="/assets/press/canvas-rebel.png"
+                alt="Canvas Rebel"
+                width="320"
+                height="56"
+              >
+            </a>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- STORY ANCHOR -->
+    <section class="section" id="story">
+      <div class="container">
+        <h2 class="section__title">The Square Bidness Way</h2>
+        <p class="section__lead">Veteran-owned. American-made. Louisiana-raised.</p>
+        <div class="section__cta">
+          <a class="btn btn--ghost" href="/community/">See Community Work</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER PARTIAL SLOT -->
+  <div id="footer-placeholder"></div>
+
+  <!-- Fallback mini footer (shows if JS footer partial doesn't load) -->
+  <footer class="site-footer-home">
+    <p><strong>&copy; 2025 Square Bidness Tech Lab</strong></p>
+    <p>
+      <a href="/privacy/">Privacy</a> ·
+      <a href="/terms/">Terms</a> ·
+      <a href="/returns/">Returns</a> ·
+      <a href="/linkme/">Link Me</a> ·
+      <a href="/press/">Press</a>
+    </p>
+  </footer>
+
+  <!-- Optional hydration of product cards from /products.json -->
+  <script>
+  fetch("/products.json", { cache: "no-store" })
+    .then(r => r.json())
+    .then(data => {
+      document.querySelectorAll("[data-product-id]").forEach(card => {
+        const id = card.getAttribute("data-product-id");
+        const p  = data[id];
+        if (!p) return;
+
+        const title = card.querySelector("h3");
+        const desc  = card.querySelector(".card__description");
+        const img   = card.querySelector("img");
+        const price = card.querySelector(".price");
+        const badge = card.querySelector(".badge");
+        const primaryBtn = card.querySelector(".btn--primary");
+
+        if (title && p.name) title.textContent = p.name;
+        if (desc && p.desc) desc.textContent = p.desc;
+        if (img && p.image) img.src = p.image;
+        if (price && typeof p.price === "number") {
+          price.textContent = `$${p.price.toFixed(2)}`;
+        }
+
+        if (badge) {
+          badge.className = "badge";
+          const status = (p.status || "").toLowerCase();
+
+          if (status === "in-stock") {
+            badge.textContent = "Multiple Sizes Available";
+            badge.classList.add("badge--available");
+            if (primaryBtn) primaryBtn.textContent = "Choose Size & Add to Cart";
+          } else if (status === "low-stock") {
+            badge.textContent = `Only ${p.stock || 3} Left`;
+            badge.classList.add("badge--low-stock");
+            if (primaryBtn) primaryBtn.textContent = "Choose Size & Add to Cart";
+          } else if (status === "sold-out") {
+            badge.textContent = "Sold Out";
+            badge.classList.add("badge--sold-out");
+            if (primaryBtn) primaryBtn.textContent = "Out of Stock";
+          } else if (status === "preorder") {
+            badge.textContent = "Preorder Now";
+            badge.classList.add("badge--coming-soon");
+            if (primaryBtn) primaryBtn.textContent = "Choose Size & Preorder";
+          } else {
+            badge.textContent = "Preorder Now";
+            badge.classList.add("badge--coming-soon");
+            if (primaryBtn) primaryBtn.textContent = "Choose Size & Preorder";
+          }
+        }
+      });
+    })
+    .catch(() => { /* ignore if products.json missing */ });
+  </script>
+
+</body>
+</html>
