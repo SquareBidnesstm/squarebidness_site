@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Performance -->
+  <link rel="preconnect" href="https://www.googletagmanager.com">
+  <link rel="preconnect" href="https://www.google-analytics.com">
+
+  <!-- GA4 (site-wide) -->
+  <script defer src="/scripts/ga.js"></script>
+
+  <!-- Basics -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Order Confirmed — Square Bidness</title>
+  <meta name="description" content="Thank you for your purchase. Your order has been received." />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="canonical" href="https://www.squarebidness.com/checkout/success/" />
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/styles/style.css" />
+
+  <!-- Icons / PWA -->
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/assets/icons/icon-180.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#000000">
+
+  <!-- Minimal styles just for the receipt card -->
+  <style>
+    .receipt{max-width:900px;margin:1.5rem auto;padding:1rem}
+    .receipt-card{border:1px solid #1f1f1f;background:#0f0f0f;border-radius:14px;padding:1rem}
+    .receipt-header{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+    .receipt-items{width:100%;border-collapse:collapse;margin-top:1rem}
+    .receipt-items th,.receipt-items td{padding:.6rem;border-bottom:1px solid #1f1f1f}
+    .receipt-items th{text-align:left;opacity:.85}
+    .right{text-align:right}
+    .totals{margin-top:1rem;width:100%}
+    .totals td{padding:.3rem 0}
+    .totals .total{font-size:1.15rem;font-weight:800;border-top:1px solid #1f1f1f;padding-top:.6rem}
+    .actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1rem}
+    .muted{opacity:.8}
+  </style>
+</head>
+
+<body class="theme-dark" id="top">
+  <div id="nav-placeholder"></div>
+
+  <main class="receipt">
+    <h1>Thank you!</h1>
+    <p class="muted">Your order is confirmed. A receipt has been sent if you completed payment with Stripe.</p>
+
+    <section class="receipt-card" id="receipt">
+      <div class="receipt-header">
+        <div>
+          <strong>Order</strong><br>
+          <span id="order-id">—</span>
+        </div>
+        <div class="right">
+          <strong>Date</strong><br>
+          <span id="order-date">—</span>
+        </div>
+      </div>
+
+      <table class="receipt-items" id="item-table">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th class="right">Price</th>
+            <th class="right">Qty</th>
+            <th class="right">Line</th>
+          </tr>
+        </thead>
+        <tbody id="item-rows"><tr><td colspan="4" class="muted">Loading…</td></tr></tbody>
+      </table>
+
+      <table class="totals">
+        <tr><td>Subtotal</td><td class="right" id="subtotal">$0.00</td></tr>
+        <tr id="discount-row" style="display:none"><td>Discount <span id="discount-code" class="muted"></span></td><td class="right" id="discount">-$0.00</td></tr>
+        <tr><td>Tax</td><td class="right" id="tax">$0.00</td></tr>
+        <tr><td>Shipping</td><td class="right" id="shipping">$0.00</td></tr>
+        <tr class="total"><td><strong>Total</strong></td><td class="right" id="total"><strong>$0.00</strong></td></tr>
+      </table>
+
+      <div class="actions">
+        <a class="btn btn--gold" href="/shop/">Continue Shopping</a>
+        <a class="btn btn--ghost" href="/">Back to Home</a>
+      </div>
+
+      <p class="muted" style="margin-top:.75rem">
+        Questions? <a href="mailto:squarebidnessapparel@gmail.com?subject=Order%20Support">Email support</a>.
+      </p>
+    </section>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script>
+  // Load nav/footer
+  document.addEventListener("DOMContentLoaded", () => {
+    fetch("/nav/", { cache: "no-store" }).then(r=>r.text()).then(html=>{document.getElementById("nav-placeholder").innerHTML=html}).catch(()=>{});
+    fetch("/footer/", { cache: "no-store" }).then(r=>r.text()).then(html=>{document.getElementById("footer-placeholder").innerHTML=html}).catch(()=>{});
+  });
+
+  // Render receipt from sessionStorage + fire GA4 purchase
+  (function(){
+    const fmt = new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'});
+    const money = n => fmt.format(Number(n||0));
+
+    function readOrder(){
+      try { return JSON.parse(sessionStorage.getItem('sb_last_order')||'null'); }
+      catch { return null; }
+    }
+
+    function clearCartBadge(){
+      const badge = document.querySelector('#cart-count');
+      if (badge){ badge.textContent='0'; badge.style.display='none'; }
+    }
+
+    function clearCartStorage(){
+      try { localStorage.setItem('sb_cart_v1','[]'); } catch {}
+    }
+
+    function render(){
+      const o = readOrder();
+      const rows = document.getElementById('item-rows');
+      if (!o || !Array.isArray(o.items) || !o.items.length){
+        rows.innerHTML = '<tr><td colspan="4" class="muted">No order details found. If you completed payment, your receipt was emailed by Stripe.</td></tr>';
+        return;
+      }
+
+      // Header
+      document.getElementById('order-id').textContent   = o.orderId || 'Pending';
+      document.getElementById('order-date').textContent = new Date(o.createdAt||Date.now()).toLocaleString();
+
+      // Items
+      rows.innerHTML = o.items.map(i=>{
+        const line = Number(i.price||0) * Number(i.qty||1);
+        return `
+          <tr>
+            <td>${(i.name||i.id||'Item')}</td>
+            <td class="right">${money(i.price)}</td>
+            <td class="right">${i.qty}</td>
+            <td class="right">${money(line)}</td>
+          </tr>
+        `;
+      }).join('');
+
+      // Totals
+      document.getElementById('subtotal').textContent = money(o.subtotal||0);
+      document.getElementById('tax').textContent      = money(o.tax||0);
+      document.getElementById('shipping').textContent = money(o.shipping||0);
+      document.getElementById('total').textContent    = money(o.total||0);
+
+      if (o.discount && o.discount > 0){
+        document.getElementById('discount-row').style.display = '';
+        document.getElementById('discount').textContent = '-' + money(o.discount);
+        if (o.coupon){ document.getElementById('discount-code').textContent = '('+o.coupon+')'; }
+      }
+
+      // GA4 purchase (best-effort)
+      try {
+        if (typeof gtag === 'function'){
+          gtag('event','purchase',{
+            transaction_id: o.orderId || ('SB-'+Date.now()),
+            currency: 'USD',
+            value: Number(o.total||0),
+            tax: Number(o.tax||0),
+            shipping: Number(o.shipping||0),
+            coupon: o.coupon || undefined,
+            items: (o.items||[]).map(i=>({
+              item_id: i.id,
+              item_name: i.name,
+              price: Number(i.price||0),
+              quantity: Number(i.qty||1)
+            }))
+          });
+        }
+      } catch(_) {}
+
+      // Clean up local cart + badge
+      clearCartStorage();
+      clearCartBadge();
+
+      // Optional: prevent re-firing on refresh
+      try { sessionStorage.removeItem('sb_last_order'); } catch {}
+    }
+
+    document.addEventListener('DOMContentLoaded', render);
+  })();
+  </script>
+</body>
+</html>
