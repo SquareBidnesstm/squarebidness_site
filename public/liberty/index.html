@@ -39,7 +39,7 @@
   <link rel="manifest" href="/site.webmanifest">
   <meta name="theme-color" content="#000000">
 
-  <!-- Organization JSON-LD (site-wide) -->
+  <!-- Org JSON-LD -->
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
@@ -113,7 +113,7 @@
   <!-- Page CSS -->
   <link rel="stylesheet" href="/liberty/liberty.css">
   <style>
-    /* Upgrade CTA styling + sticky bar feel inside the buy module */
+    /* BUY MODULE / CHECKOUT BAR */
     .tee-bar {
       position: relative;
       z-index: 2;
@@ -145,7 +145,7 @@
       gap:.25rem;
     }
 
-    .tee-left-headline .price-row {
+    .price-row {
       display:flex;
       flex-wrap:wrap;
       align-items:baseline;
@@ -327,9 +327,10 @@
   <!-- STORY -->
   <section class="container story">
     <p>
-      <strong>Square Bidness.</strong> From Louisiana to New York City — this is discipline, presence, and doing business the right way.  
-      The Liberty Collection is a visual statement: movement with purpose.  
-      The Liberty Tee is cut from real Supima cotton, the top ~1% of American-grown cotton fibers. Softer feel. Stronger fabric. Color that holds.
+      <strong>Square Bidness.</strong> From Louisiana to New York City — this is discipline, presence, and doing business the right way.
+      The Liberty Collection is a visual statement: movement with purpose.
+      The Liberty Tee is cut from real Supima cotton, the top ~1% of American-grown cotton fibers.
+      Softer feel. Stronger fabric. Color that holds.
     </p>
   </section>
 
@@ -462,7 +463,14 @@
 
           <div class="tee-field">
             <label for="liberty-tee-qty">Qty</label>
-            <input id="liberty-tee-qty" type="number" min="1" max="2" value="1" />
+            <input
+              id="liberty-tee-qty"
+              type="number"
+              min="1"
+              max="2"
+              value="1"
+              autocomplete="off"
+            />
           </div>
 
           <!-- Checkout button -->
@@ -470,7 +478,7 @@
              id="liberty-tee-checkout"
              href="https://buy.stripe.com/cNi00j8BNcuB5LT3kQ8N20g"
              target="_blank"
-             rel="nofollow noopener"
+             rel="nofollow noopener noreferrer"
              data-track="stripe-liberty">
             <span>Checkout Securely →</span>
             <small>Stripe Pay</small>
@@ -503,7 +511,7 @@
       const btn = e.target.closest('#liberty-tee-checkout');
       if (!btn) return;
 
-      // basic GA event
+      // analytics
       try {
         if (typeof gtag === 'function') {
           const size  = document.getElementById('liberty-tee-size')?.value || 'unknown';
@@ -523,11 +531,11 @@
         }
       } catch(_) {}
 
-      // build URL with size + qty
+      // build Stripe checkout URL with size + qty
       const size  = document.getElementById('liberty-tee-size')?.value || 'unknown';
       const qty   = Number(document.getElementById('liberty-tee-qty')?.value || 1);
 
-      const base = btn.getAttribute('href');
+      const base = "https://buy.stripe.com/cNi00j8BNcuB5LT3kQ8N20g";
       const qs = new URLSearchParams({ size, qty });
       btn.setAttribute('href', base + (qs.toString() ? `?${qs}` : ''));
     });
