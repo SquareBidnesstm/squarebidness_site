@@ -1,1 +1,563 @@
+# Project structure
+
+```
+/steakhouse
+  ├─ index.html
+  ├─ /menu/index.html
+  ├─ /private-events/index.html
+  ├─ /about/index.html
+  ├─ /contact/index.html
+  ├─ /styles/steakhouse.css
+  └─ /assets/ (place images here: og.jpg, hero.jpg, steak.jpg, cocktail.jpg, interior.jpg)
+```
+
+> Notes
+>
+> * Replace placeholder images under `/assets/` with approved photos. Use lightweight JPGs (1500–2000px wide).
+> * Update any special hours/promos in both the hero bar and JSON-LD if they change.
+> * All links are relative, so this folder can be dropped directly at `squarebidness.com/steakhouse/`.
+
+---
+
+## `/steakhouse/index.html`
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The SteaKhouse — Hammond, LA</title>
+  <meta name="description" content="USDA Choice steaks, Louisiana seafood, craft cocktails. Reservations recommended. Private events Mon–Sun." />
+  <link rel="canonical" href="https://squarebidness.com/steakhouse/" />
+  <meta property="og:title" content="The SteaKhouse — Hammond, LA" />
+  <meta property="og:description" content="Downtown steak & seafood. Reserve your table." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://squarebidness.com/steakhouse/" />
+  <meta property="og:image" content="https://squarebidness.com/steakhouse/assets/og.jpg" />
+  <link rel="stylesheet" href="./styles/steakhouse.css" />
+</head>
+<body>
+  <header class="sh-head">
+    <div class="sh-topbar">
+      <span>Open Tue–Sat · Reservations recommended</span>
+      <a class="btn--small" href="https://www.opentable.com/r/the-steakhouse-hammond" rel="noopener" target="_blank">Reserve</a>
+    </div>
+    <div class="sh-hero" style="background-image:url('./assets/hero.jpg');">
+      <div class="wrap">
+        <h1>The SteaKhouse</h1>
+        <p>USDA Choice steaks, Louisiana seafood, and a proper martini.</p>
+        <div class="sh-ctas">
+          <a class="btn" href="https://www.opentable.com/r/the-steakhouse-hammond" rel="noopener" target="_blank">Reserve Table</a>
+          <a class="btn btn--ghost" href="tel:+19856625090">(985) 662-5090</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="sh-hours wrap">
+      <h2>Hours</h2>
+      <ul class="hours">
+        <li><strong>Tue</strong> 5–8p</li>
+        <li><strong>Wed–Thu</strong> 5–9p</li>
+        <li><strong>Fri</strong> 5–10p</li>
+        <li><strong>Sat</strong> 3–10p</li>
+        <li><strong>Sun–Mon</strong> Closed</li>
+      </ul>
+      <p class="muted">200 SW Railroad Ave, Hammond, LA 70401</p>
+    </section>
+
+    <section class="sh-menu wrap">
+      <h2>Menu Highlights</h2>
+      <div class="cards">
+        <article class="card">
+          <img src="./assets/steak.jpg" alt="Steak on a grill">
+          <h3>Steaks & Chops</h3>
+          <p>USDA Choice cuts, grilled to order.</p>
+        </article>
+        <article class="card">
+          <img src="./assets/seafood.jpg" alt="Seafood platter">
+          <h3>Seafood</h3>
+          <p>Gulf classics and seasonal features.</p>
+        </article>
+        <article class="card">
+          <img src="./assets/cocktail.jpg" alt="Classic martini">
+          <h3>Appetizers & Salads</h3>
+          <p>House favorites to start.</p>
+        </article>
+      </div>
+      <p><a class="btn" href="./menu/">See Full Menu</a></p>
+    </section>
+
+    <section class="sh-events wrap">
+      <h2>Private Events</h2>
+      <p>From birthdays to business dinners, we host private parties <strong>Mon–Sun</strong>.</p>
+      <a class="btn" href="./private-events/">Request Event</a>
+    </section>
+
+    <section class="sh-visit wrap">
+      <h2>Visit</h2>
+      <p><strong>200 SW Railroad Ave</strong>, Hammond, LA 70401</p>
+      <div class="map-embed">
+        <iframe title="Map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+          src="https://www.google.com/maps?q=200+SW+Railroad+Ave+Hammond+LA+70401&output=embed"></iframe>
+      </div>
+    </section>
+      <section class="wrap">
+      <h2>Reserve a Table</h2>
+      <div class="ot-embed">
+        <iframe src="https://www.opentable.com/widget/reservation/canvas?rid=1390426&theme=standard&color=1&dark=false&iframe=true&domain=com&lang=en-US"
+                title="Reserve at The SteaKhouse" loading="lazy" style="width:100%;height:520px;border:0;"></iframe>
+      </div>
+    </section>
+      <section>
+      <h2>Reserve a Table</h2>
+      <div class="ot-embed">
+        <iframe src="https://www.opentable.com/widget/reservation/canvas?rid=1390426&theme=standard&color=1&dark=false&iframe=true&domain=com&lang=en-US"
+                title="Reserve at The SteaKhouse" loading="lazy" style="width:100%;height:520px;border:0;"></iframe>
+      </div>
+    </section>
+  </main>
+
+  <footer class="sh-foot">
+    <nav class="wrap foot-links">
+      <a href="./menu/">Menu</a>
+      <a href="./private-events/">Private Events</a>
+      <a href="./about/">About</a>
+      <a href="./contact/">Contact</a>
+    </nav>
+    <p class="muted wrap">© The SteaKhouse, Hammond LA</p>
+  </footer>
+
+  <!-- LocalBusiness / Restaurant JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Restaurant",
+    "name": "The SteaKhouse",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "200 SW Railroad Ave",
+      "addressLocality": "Hammond",
+      "addressRegion": "LA",
+      "postalCode": "70401",
+      "addressCountry": "US"
+    },
+    "telephone": "+1-985-662-5090",
+    "url": "https://squarebidness.com/steakhouse",
+    "sameAs": [
+      "https://www.facebook.com/SteaKhouse985/",
+      "https://www.instagram.com/thesteakhouse/"
+    ],
+    "servesCuisine": ["Steakhouse", "Seafood", "American"],
+    "priceRange": "$$$",
+    "openingHoursSpecification": [
+      {"@type":"OpeningHoursSpecification","dayOfWeek":["Tuesday"],"opens":"17:00","closes":"20:00"},
+      {"@type":"OpeningHoursSpecification","dayOfWeek":["Wednesday","Thursday"],"opens":"17:00","closes":"21:00"},
+      {"@type":"OpeningHoursSpecification","dayOfWeek":["Friday"],"opens":"17:00","closes":"22:00"},
+      {"@type":"OpeningHoursSpecification","dayOfWeek":["Saturday"],"opens":"15:00","closes":"22:00"}
+    ],
+    "acceptsReservations": "https://www.opentable.com/r/the-steakhouse-hammond",
+    "menu": "https://squarebidness.com/steakhouse/menu"
+  }
+  </script>
+</body>
+</html>
+```
+
+---
+
+## `/steakhouse/styles/steakhouse.css`
+
+```css
+/* Base */
+:root{--bg:#0d0d0d;--text:#f5f5f5;--muted:#b3b3b3;--gold:#b38b2b;--card:#171717;--accent:#ffffff;}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;}
+img{max-width:100%;display:block}
+a{color:var(--accent);text-decoration:none}
+.wrap{width:min(1100px,92%);margin:auto}
+.muted{color:var(--muted)}
+
+/* Buttons */
+.btn,.btn--small{display:inline-block;border:1px solid var(--accent);padding:.9rem 1.2rem;border-radius:999px;font-weight:600}
+.btn:hover{background:var(--accent);color:#000}
+.btn--ghost{border-color:var(--text);color:var(--text)}
+.btn--ghost:hover{background:var(--text);color:#000}
+.btn--small{padding:.45rem .8rem;font-size:.9rem}
+
+/* Header */
+.sh-topbar{display:flex;justify-content:space-between;align-items:center;padding:.6rem 1rem;background:#101010;border-bottom:1px solid #1f1f1f;position:sticky;top:0;z-index:50}
+.sh-hero{min-height:54vh;display:grid;place-items:center;text-align:center;background-size:cover;background-position:center;}
+.sh-hero .wrap{padding:5rem 1rem}
+.sh-hero h1{font-size:clamp(2rem,6vw,4rem);margin:.2rem 0}
+.sh-hero p{color:var(--muted);max-width:48ch;margin:.5rem auto 1.5rem}
+.sh-ctas{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+
+/* Sections */
+section{padding:3rem 0;border-top:1px solid #1a1a1a}
+section h2{font-size:1.6rem;margin:0 0 1rem}
+.hours{list-style:none;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.4rem .8rem}
+@media(min-width:720px){.hours{grid-template-columns:repeat(3,minmax(0,1fr));}}
+
+.cards{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.card{background:var(--card);border:1px solid #1f1f1f;border-radius:16px;overflow:hidden}
+.card h3{margin:.8rem 1rem}
+.card p{margin:.2rem 1rem 1rem;color:var(--muted)}
+.card img{aspect-ratio:4/3;object-fit:cover}
+
+/* Map */
+.map-embed iframe{width:100%;height:320px;border:0;border-radius:12px}
+
+/* Footer */
+.sh-foot{padding:2rem 0;background:#0b0b0b;border-top:1px solid #1a1a1a}
+.foot-links{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;margin-bottom:.6rem}
+
+/* Utility */
+.small{font-size:.92rem}
+```
+
+---
+
+## `/steakhouse/menu/index.html`
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Menu — The SteaKhouse</title>
+  <meta name="description" content="Appetizers, steaks & chops, seafood, and salads at The SteaKhouse in downtown Hammond." />
+  <link rel="canonical" href="https://squarebidness.com/steakhouse/menu/" />
+  <meta property="og:title" content="Menu — The SteaKhouse" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://squarebidness.com/steakhouse/menu/" />
+  <meta property="og:image" content="https://squarebidness.com/steakhouse/assets/og.jpg" />
+  <link rel="stylesheet" href="../styles/steakhouse.css" />
+</head>
+<body>
+  <header class="sh-head">
+    <div class="sh-topbar">
+      <span>Open Tue–Sat · Reservations recommended</span>
+      <a class="btn--small" href="https://www.opentable.com/r/the-steakhouse-hammond" rel="noopener" target="_blank">Reserve</a>
+    </div>
+    <div class="wrap"><h1>Menu</h1></div>
+  </header>
+
+  <main class="wrap">
+    <section>
+      <h2>Appetizers</h2>
+      <ul>
+        <li>Crab Cakes</li>
+        <li>Seared Ahi Tuna</li>
+        <li>Stuffed Mushrooms</li>
+      </ul>
+    </section>
+    <section>
+      <h2>Steaks & Chops</h2>
+      <ul>
+        <li>Ribeye</li>
+        <li>Filet</li>
+        <li>New York Strip</li>
+        <li>Pork Chop</li>
+      </ul>
+    </section>
+    <section>
+      <h2>Seafood</h2>
+      <ul>
+        <li>Gulf Redfish</li>
+        <li>Grilled Salmon</li>
+        <li>Shrimp & Grits</li>
+      </ul>
+    </section>
+    <section>
+      <h2>Salads</h2>
+      <ul>
+        <li>House</li>
+        <li>Caesar</li>
+        <li>Steak Salad</li>
+      </ul>
+    </section>
+
+    <p class="muted">* Menu items subject to change based on season and availability.</p>
+  </main>
+
+  <footer class="sh-foot">
+    <nav class="wrap foot-links">
+      <a href="../">Home</a>
+      <a href="../private-events/">Private Events</a>
+      <a href="../about/">About</a>
+      <a href="../contact/">Contact</a>
+    </nav>
+  </footer>
+</body>
+</html>
+```
+
+---
+
+## `/steakhouse/private-events/index.html`
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Private Events — The SteaKhouse</title>
+  <meta name="description" content="Book private dining at The SteaKhouse: birthdays, business dinners, and celebrations, available Monday–Sunday." />
+  <link rel="canonical" href="https://squarebidness.com/steakhouse/private-events/" />
+  <meta property="og:title" content="Private Events — The SteaKhouse" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://squarebidness.com/steakhouse/private-events/" />
+  <meta property="og:image" content="https://squarebidness.com/steakhouse/assets/og.jpg" />
+  <link rel="stylesheet" href="../styles/steakhouse.css" />
+</head>
+<body>
+  <header class="sh-head">
+    <div class="sh-topbar">
+      <span>Open Tue–Sat · Reservations recommended</span>
+      <a class="btn--small" href="https://www.opentable.com/r/the-steakhouse-hammond" rel="noopener" target="_blank">Reserve</a>
+    </div>
+    <div class="wrap"><h1>Private Events</h1></div>
+  </header>
+
+  <main class="wrap">
+    <section>
+      <p>From intimate dinners to milestone celebrations, we host private events <strong>seven days a week</strong>. Share your details and we’ll tailor the menu and service.</p>
+      <h2>Request an Event</h2>
+      <form class="event-form" action="mailto:info@thesteakhousehammond.com" method="post" enctype="text/plain">
+        <label>Full Name
+          <input required type="text" name="name" placeholder="Your name" />
+        </label>
+        <label>Email
+          <input required type="email" name="email" placeholder="you@example.com" />
+        </label>
+        <label>Phone
+          <input required type="tel" name="phone" placeholder="(985) 555-1234" />
+        </label>
+        <label>Preferred Date
+          <input required type="date" name="date" />
+        </label>
+        <label>Guest Count
+          <input required type="number" name="guests" min="2" step="1" />
+        </label>
+        <label>Notes
+          <textarea name="notes" rows="5" placeholder="Occasion, menu preferences, time, etc."></textarea>
+        </label>
+        <button class="btn" type="submit">Send Request</button>
+      </form>
+      <p class="muted">Prefer to call? Reach us at <a href="tel:+19856625090">(985) 662-5090</a>.</p>
+    </section>
+  </main>
+
+  <footer class="sh-foot">
+    <nav class="wrap foot-links">
+      <a href="../">Home</a>
+      <a href="../menu/">Menu</a>
+      <a href="../about/">About</a>
+      <a href="../contact/">Contact</a>
+    </nav>
+  </footer>
+</body>
+</html>
+```
+
+---
+
+## `/steakhouse/about/index.html`
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>About — The SteaKhouse</title>
+  <meta name="description" content="The SteaKhouse is a downtown Hammond steak & seafood house known for USDA Choice steaks and Gulf seafood." />
+  <link rel="canonical" href="https://squarebidness.com/steakhouse/about/" />
+  <meta property="og:title" content="About — The SteaKhouse" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://squarebidness.com/steakhouse/about/" />
+  <meta property="og:image" content="https://squarebidness.com/steakhouse/assets/og.jpg" />
+  <link rel="stylesheet" href="../styles/steakhouse.css" />
+</head>
+<body>
+  <header class="sh-head">
+    <div class="sh-topbar">
+      <span>Open Tue–Sat · Reservations recommended</span>
+      <a class="btn--small" href="https://www.opentable.com/r/the-steakhouse-hammond" rel="noopener" target="_blank">Reserve</a>
+    </div>
+    <div class="wrap"><h1>About</h1></div>
+  </header>
+
+  <main class="wrap">
+    <section>
+      <p>Located on SW Railroad Ave in the heart of downtown Hammond, The SteaKhouse serves classic steakhouse fare with Louisiana roots—USDA Choice steaks, Gulf seafood, and a well-made cocktail.</p>
+      <p>Add the ownership/chef story here (2–3 short paragraphs) plus one hero interior photo.</p>
+    </section>
+  </main>
+
+  <footer class="sh-foot">
+    <nav class="wrap foot-links">
+      <a href="../">Home</a>
+      <a href="../menu/">Menu</a>
+      <a href="../private-events/">Private Events</a>
+      <a href="../contact/">Contact</a>
+    </nav>
+  </footer>
+</body>
+</html>
+```
+
+---
+
+## `/steakhouse/contact/index.html`
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Contact — The SteaKhouse</title>
+  <meta name="description" content="Contact The SteaKhouse in downtown Hammond for reservations, private events, and general inquiries." />
+  <link rel="canonical" href="https://squarebidness.com/steakhouse/contact/" />
+  <meta property="og:title" content="Contact — The SteaKhouse" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://squarebidness.com/steakhouse/contact/" />
+  <meta property="og:image" content="https://squarebidness.com/steakhouse/assets/og.jpg" />
+  <link rel="stylesheet" href="../styles/steakhouse.css" />
+</head>
+<body>
+  <header class="sh-head">
+    <div class="sh-topbar">
+      <span>Open Tue–Sat · Reservations recommended</span>
+      <a class="btn--small" href="https://www.opentable.com/r/the-steakhouse-hammond" rel="noopener" target="_blank">Reserve</a>
+    </div>
+    <div class="wrap"><h1>Contact</h1></div>
+  </header>
+
+  <main class="wrap">
+    <section>
+      <h2>Call</h2>
+      <p><a href="tel:+19856625090">(985) 662-5090</a></p>
+    </section>
+
+    <section>
+      <h2>Visit</h2>
+      <p>200 SW Railroad Ave, Hammond, LA 70401</p>
+      <div class="map-embed">
+        <iframe title="Map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+          src="https://www.google.com/maps?q=200+SW+Railroad+Ave+Hammond+LA+70401&output=embed"></iframe>
+      </div>
+    </section>
+
+    <section>
+      <h2>Social</h2>
+      <ul>
+        <li><a href="https://www.facebook.com/SteaKhouse985/" target="_blank" rel="noopener">Facebook</a></li>
+        <li><a href="https://www.instagram.com/thesteakhouse/" target="_blank" rel="noopener">Instagram</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="sh-foot">
+    <nav class="wrap foot-links">
+      <a href="../">Home</a>
+      <a href="../menu/">Menu</a>
+      <a href="../private-events/">Private Events</a>
+      <a href="../about/">About</a>
+    </nav>
+  </footer>
+</body>
+</html>
+```
+
+---
+
+### Optional snippets (drop-in)
+
+**OpenTable embed (already wired into Home + Contact, keep for reference):**
+
+```html
+<div class="wrap" style="padding:2rem 0;">
+  <iframe src="https://www.opentable.com/widget/reservation/canvas?rid=1390426&theme=standard&color=1&dark=false&iframe=true&domain=com&lang=en-US"
+          title="Reserve at The SteaKhouse"
+          style="width:100%;height:480px;border:0;" loading="lazy"></iframe>
+</div>
+```
+
+**Martini special banner (Tue/Wed 5–7p):**
+
+```html
+<!-- Add inside .sh-topbar -->
+<span class="hide-sm">$5 Martinis Tue & Wed · 5–7p</span>
+```
+
+**Printable QR for /steakhouse:**
+
+1. Quick download (hi‑res PNG): open this URL, right‑click save as `qr-steakhouse.png` into `/steakhouse/assets/` —
+
+```
+https://api.qrserver.com/v1/create-qr-code/?size=1200x1200&data=https%3A%2F%2Fsquarebidness.com%2Fsteakhouse
+```
+
+2. Then you can place it anywhere, e.g. on a flyer or the site:
+
+```html
+<img src="../assets/qr-steakhouse.png" alt="QR to squarebidness.com/steakhouse" width="300" />
+```
+
+**One‑page printable flyer (8.5x11) with QR:**
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The SteaKhouse — QR Flyer</title>
+  <style>
+    @page { size: letter; margin: 0.75in; }
+    html,body{margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif;color:#111}
+    .wrap{max-width:7.5in;margin:0 auto}
+    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;border-bottom:2px solid #222;padding-bottom:.5rem}
+    h1{font-size:40px;margin:0}
+    .sub{color:#444;margin:.2rem 0 0}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:center;margin-top:1rem}
+    .qr{justify-self:end}
+    img{max-width:100%;height:auto}
+    .footer{margin-top:1rem;color:#555;font-size:12px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>The SteaKhouse</h1>
+        <p class="sub">USDA Choice steaks · Louisiana seafood · Downtown Hammond</p>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div>
+        <h2>Reserve your table</h2>
+        <p>Scan the code or visit <strong>squarebidness.com/steakhouse</strong></p>
+        <p><strong>Hours:</strong> Tue 5–8p · Wed–Thu 5–9p · Fri 5–10p · Sat 3–10p</p>
+        <p><strong>Address:</strong> 200 SW Railroad Ave, Hammond, LA 70401</p>
+        <p><strong>Phone:</strong> (985) 662‑5090</p>
+      </div>
+      <div class="qr">
+        <img src="./qr-steakhouse.png" alt="QR to squarebidness.com/steakhouse" width="420" />
+      </div>
+    </div>
+
+    <p class="footer">© The SteaKhouse — squarebidness.com/steakhouse</p>
+  </div>
+</body>
+</html>
+```
 
