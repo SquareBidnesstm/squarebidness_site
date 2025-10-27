@@ -96,13 +96,13 @@
     "brand": { "@type": "Brand", "name": "Square Bidness Apparel" },
     "sku": "liberty-tee",
     "offers": [
-      { "@type": "Offer", "sku": "liberty-tee-xs", "size": "XS", "price": "35.00", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "url": "https://buy.stripe.com/4gM28r2dp529gqx1cI8N20e" },
-      { "@type": "Offer", "sku": "liberty-tee-s",  "size": "S",  "price": "35.00", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "url": "https://buy.stripe.com/4gM28r2dp529gqx1cI8N20e" },
-      { "@type": "Offer", "sku": "liberty-tee-m",  "size": "M",  "price": "35.00", "priceCurrency": "USD", "availability": "https://schema.org/OutOfStock", "url": "https://buy.stripe.com/4gM28r2dp529gqx1cI8N20e" },
-      { "@type": "Offer", "sku": "liberty-tee-l",  "size": "L",  "price": "35.00", "priceCurrency": "USD", "availability": "https://schema.org/OutOfStock", "url": "https://buy.stripe.com/4gM28r2dp529gqx1cI8N20e" },
-      { "@type": "Offer", "sku": "liberty-tee-xl", "size": "XL", "price": "35.00", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "url": "https://buy.stripe.com/4gM28r2dp529gqx1cI8N20e" },
-      { "@type": "Offer", "sku": "liberty-tee-2x", "size": "2X", "price": "35.00", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "url": "https://buy.stripe.com/4gM28r2dp529gqx1cI8N20e" },
-      { "@type": "Offer", "sku": "liberty-tee-3x", "size": "3X", "price": "35.00", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "url": "https://buy.stripe.com/4gM28r2dp529gqx1cI8N20e" }
+      { "@type": "Offer", "sku": "liberty-tee-xs", "size": "XS", "price": "35.00", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "url": "https://buy.stripe.com/cNi00j8BNcuB5LT3kQ8N20g" },
+      { "@type": "Offer", "sku": "liberty-tee-s",  "size": "S",  "price": "35.00", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "url": "https://buy.stripe.com/cNi00j8BNcuB5LT3kQ8N20g" },
+      { "@type": "Offer", "sku": "liberty-tee-m",  "size": "M",  "price": "35.00", "priceCurrency": "USD", "availability": "https://schema.org/OutOfStock", "url": "https://buy.stripe.com/cNi00j8BNcuB5LT3kQ8N20g" },
+      { "@type": "Offer", "sku": "liberty-tee-l",  "size": "L",  "price": "35.00", "priceCurrency": "USD", "availability": "https://schema.org/OutOfStock", "url": "https://buy.stripe.com/cNi00j8BNcuB5LT3kQ8N20g" },
+      { "@type": "Offer", "sku": "liberty-tee-xl", "size": "XL", "price": "35.00", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "url": "https://buy.stripe.com/cNi00j8BNcuB5LT3kQ8N20g" },
+      { "@type": "Offer", "sku": "liberty-tee-2x", "size": "2X", "price": "35.00", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "url": "https://buy.stripe.com/cNi00j8BNcuB5LT3kQ8N20g" },
+      { "@type": "Offer", "sku": "liberty-tee-3x", "size": "3X", "price": "35.00", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "url": "https://buy.stripe.com/cNi00j8BNcuB5LT3kQ8N20g" }
     ]
   }
   </script>
@@ -207,6 +207,7 @@
       justify-content:center;
       gap:.5rem;
       cursor:pointer;
+      white-space:nowrap;
     }
     .btn--checkout small {
       font-size:.7rem;
@@ -254,7 +255,9 @@
       box-shadow:0 30px 80px rgba(0,0,0,.9);
     }
 
-    .hero__cta .btn { position:relative; z-index:2; }
+    /* keep hero CTA above overlay */
+    .hero__cta .btn,
+    .hero__cta .btn--checkout { position:relative; z-index:2; }
   </style>
 
   <!-- Cart helper (optional global) -->
@@ -281,7 +284,18 @@
       <div class="badge">Exclusive • Limited Run • Supima Cotton Tee</div>
       <h1>🗽 Liberty Collection</h1>
       <p>Louisiana mindset in New York motion. Principles over shortcuts.</p>
-      <div class="hero__cta">
+
+      <div class="hero__cta" style="display:flex;flex-wrap:wrap;gap:.5rem;">
+        <!-- NEW: direct checkout from hero -->
+        <a class="btn--checkout liberty-hero-checkout"
+           href="https://buy.stripe.com/cNi00j8BNcuB5LT3kQ8N20g"
+           target="_blank"
+           rel="nofollow noopener noreferrer"
+           data-track="stripe-liberty-hero">
+          <span>Buy Liberty Tee — $35 →</span>
+          <small>Supima / Secure Checkout</small>
+        </a>
+
         <a href="/vsop/" class="btn btn--solid">VSOP Preorders</a>
         <a href="/" class="btn btn--ghost">Back to Home</a>
       </div>
@@ -448,6 +462,7 @@
             />
           </div>
 
+          <!-- Checkout button (same ID we already target in JS) -->
           <a class="btn--checkout"
              id="liberty-tee-checkout"
              href="https://buy.stripe.com/cNi00j8BNcuB5LT3kQ8N20g"
@@ -479,17 +494,25 @@
     });
   </script>
 
-  <!-- Stripe button enhancer -->
+  <!-- Stripe button enhancer (hero + bottom share logic) -->
   <script>
     document.addEventListener('click', function(e){
-      const btn = e.target.closest('#liberty-tee-checkout');
+      // either hero button (.liberty-hero-checkout) or bottom button (#liberty-tee-checkout)
+      const heroBtn = e.target.closest('.liberty-hero-checkout');
+      const bottomBtn = e.target.closest('#liberty-tee-checkout');
+      const btn = heroBtn || bottomBtn;
       if (!btn) return;
 
+      // pull size/qty from the selectors in the buy module
+      const sizeEl = document.getElementById('liberty-tee-size');
+      const qtyEl  = document.getElementById('liberty-tee-qty');
+
+      const size = sizeEl ? sizeEl.value : 'XS';
+      const qty  = qtyEl ? Math.max(1, Number(qtyEl.value)||1) : 1;
+
+      // GA ping
       try {
         if (typeof gtag === 'function') {
-          const size  = document.getElementById('liberty-tee-size')?.value || 'unknown';
-          const qty   = Number(document.getElementById('liberty-tee-qty')?.value || 1);
-
           gtag('event', 'begin_checkout', {
             currency: 'USD',
             value: 35 * qty,
@@ -504,9 +527,7 @@
         }
       } catch(_) {}
 
-      const size  = document.getElementById('liberty-tee-size')?.value || 'unknown';
-      const qty   = Number(document.getElementById('liberty-tee-qty')?.value || 1);
-
+      // build Stripe link with params
       const base = "https://buy.stripe.com/cNi00j8BNcuB5LT3kQ8N20g";
       const qs = new URLSearchParams({ size, qty });
       btn.setAttribute('href', base + (qs.toString() ? `?${qs}` : ''));
