@@ -660,6 +660,26 @@
       btn.setAttribute('href', base + (qs.toString() ? `?${qs}` : ''));
     });
   </script>
+  <script>
+  document.addEventListener("DOMContentLoaded", async () => {
+    // nav (optional – only if you have /nav/ set up)
+    try {
+      const navSlot = document.getElementById("nav-placeholder");
+      if (navSlot) {
+        navSlot.innerHTML = await (await fetch("/nav/")).text();
+      }
+    } catch {}
+
+    // footer
+    try {
+      const footSlot = document.getElementById("footer-placeholder");
+      if (footSlot) {
+        footSlot.innerHTML = await (await fetch("/footer/")).text();
+      }
+    } catch {}
+  });
+</script>
+
    <!-- FOOTER PARTIAL SLOT -->
   <div id="footer-placeholder"></div>
 </body>
