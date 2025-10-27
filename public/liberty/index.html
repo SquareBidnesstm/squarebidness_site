@@ -63,7 +63,7 @@
   }
   </script>
 
-  <!-- Structured Data: Collection -->
+  <!-- Collection structured data -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org/",
@@ -85,7 +85,7 @@
   }
   </script>
 
-  <!-- Liberty Tee product structured data -->
+  <!-- Product structured data -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org/",
@@ -107,9 +107,8 @@
   }
   </script>
 
-  <!-- Page-specific CSS -->
+  <!-- Page CSS -->
   <link rel="stylesheet" href="/liberty/liberty.css" />
-
   <style>
     .tee-bar {
       position: relative;
@@ -127,6 +126,7 @@
     @media(min-width:700px){
       .tee-bar { grid-template-columns:1fr auto; align-items:flex-start; }
     }
+
     .tee-left-headline {
       font-weight:700;
       font-size:1rem;
@@ -153,6 +153,7 @@
       padding:.3rem .6rem;
       line-height:1.2;
     }
+
     .tee-bullets {
       color:#aaa;
       font-size:.8rem;
@@ -220,6 +221,7 @@
       background:#d8b63b;
       border-color:#d8b63b;
     }
+
     .checkout-note {
       font-size:.7rem;
       line-height:1.4;
@@ -255,6 +257,50 @@
       box-shadow:0 30px 80px rgba(0,0,0,.9);
     }
 
+    /* hero layout overrides */
+    .hero__cta { display:flex; flex-wrap:wrap; gap:.75rem; }
+    .hero__inlineform {
+      display:flex;
+      flex-wrap:wrap;
+      gap:.75rem 1rem;
+      align-items:flex-end;
+      justify-content:flex-start;
+      background:rgba(0,0,0,.55);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:12px;
+      padding:.75rem 1rem;
+      box-shadow:0 20px 40px rgba(0,0,0,.8);
+      max-width:480px;
+    }
+    .hero__field {
+      display:grid;
+      gap:.4rem;
+      font-size:.8rem;
+      color:#fff;
+      min-width:90px;
+    }
+    .hero__field label {
+      font-weight:600;
+      color:#fff;
+      font-size:.8rem;
+      line-height:1.2;
+    }
+    .hero__field select,
+    .hero__field input {
+      background:#0f0f0f;
+      border:1px solid #2a2a2a;
+      border-radius:10px;
+      color:#eee;
+      padding:.6rem .7rem;
+      font-size:.9rem;
+      min-width:80px;
+    }
+
+    .hero__field select.error {
+      border-color:#c0392b;
+      box-shadow:0 0 6px rgba(192,57,43,.6);
+    }
+
     /* keep hero CTA above overlay */
     .hero__cta .btn,
     .hero__cta .btn--checkout { position:relative; z-index:2; }
@@ -269,9 +315,9 @@
   <section class="hero">
     <img
       src="/liberty/assets/liberty-3.jpg"
-      srcset="/liberty/assets/liberty-3_800.jpg 800w,
-              /liberty/assets/liberty-3_1200.jpg 1200w,
-              /liberty/assets/liberty-3.jpg 1600w"
+        srcset="/liberty/assets/liberty-3_800.jpg 800w,
+                /liberty/assets/liberty-3_1200.jpg 1200w,
+                /liberty/assets/liberty-3.jpg 1600w"
       sizes="100vw"
       alt="Liberty Collection — Exclusive Editorial Hero"
       class="hero__bg"
@@ -285,9 +331,28 @@
       <h1>🗽 Liberty Collection</h1>
       <p>Louisiana mindset in New York motion. Principles over shortcuts.</p>
 
-      <div class="hero__cta" style="display:flex;flex-wrap:wrap;gap:.5rem;">
-        <!-- NEW: direct checkout from hero -->
-        <a class="btn--checkout liberty-hero-checkout"
+      <!-- HERO BUY STRIP -->
+      <div class="hero__inlineform" id="hero-buy">
+        <div class="hero__field">
+          <label for="hero-size">Size</label>
+          <select id="hero-size">
+            <option value="">Select size…</option>
+            <option value="XS">XS — Limited</option>
+            <option value="S">S — Limited</option>
+            <option value="M" disabled>Medium — Sold Out</option>
+            <option value="L" disabled>Large — Sold Out</option>
+            <option value="XL">XL — Limited</option>
+            <option value="2X">2X — Limited</option>
+            <option value="3X">3X — Limited</option>
+          </select>
+        </div>
+
+        <div class="hero__field">
+          <label for="hero-qty">Qty</label>
+          <input id="hero-qty" type="number" min="1" max="2" value="1" autocomplete="off" />
+        </div>
+
+        <a class="btn--checkout liberty-checkout-btn"
            href="https://buy.stripe.com/cNi00j8BNcuB5LT3kQ8N20g"
            target="_blank"
            rel="nofollow noopener noreferrer"
@@ -295,7 +360,10 @@
           <span>Buy Liberty Tee — $35 →</span>
           <small>Supima / Secure Checkout</small>
         </a>
+      </div>
 
+      <!-- extra nav ctas -->
+      <div class="hero__cta">
         <a href="/vsop/" class="btn btn--solid">VSOP Preorders</a>
         <a href="/" class="btn btn--ghost">Back to Home</a>
       </div>
@@ -341,10 +409,10 @@
 
     <figure class="tile">
       <img
-         src="/liberty/assets/liberty-3.jpg"
-      srcset="/liberty/assets/liberty-3_800.jpg 800w,
-              /liberty/assets/liberty-3_1200.jpg 1200w,
-              /liberty/assets/liberty-3.jpg 1600w"
+        src="/liberty/assets/liberty-3.jpg"
+        srcset="/liberty/assets/liberty-3_800.jpg 800w,
+                /liberty/assets/liberty-3_1200.jpg 1200w,
+                /liberty/assets/liberty-3.jpg 1600w"
         sizes="(max-width: 900px) 100vw, 33vw"
         alt="Liberty Collection — profile with skyline and cranes"
         loading="lazy" width="1600" height="1067">
@@ -415,7 +483,7 @@
     </div>
   </section>
 
-  <!-- LIBERTY TEE BUY MODULE -->
+  <!-- BUY MODULE -->
   <section class="container" id="liberty-tee">
     <div class="tee-bar">
 
@@ -440,6 +508,7 @@
           <div class="tee-field">
             <label for="liberty-tee-size">Size</label>
             <select id="liberty-tee-size">
+              <option value="">Select size…</option>
               <option value="XS">XS — Limited</option>
               <option value="S">S — Limited</option>
               <option value="M" disabled>Medium — Sold Out</option>
@@ -462,13 +531,11 @@
             />
           </div>
 
-          <!-- Checkout button (same ID we already target in JS) -->
-          <a class="btn--checkout"
-             id="liberty-tee-checkout"
+          <a class="btn--checkout liberty-checkout-btn"
              href="https://buy.stripe.com/cNi00j8BNcuB5LT3kQ8N20g"
              target="_blank"
              rel="nofollow noopener noreferrer"
-             data-track="stripe-liberty">
+             data-track="stripe-liberty-bottom">
             <span>Checkout Securely →</span>
             <small>Stripe Pay</small>
           </a>
@@ -481,7 +548,7 @@
     </div>
   </section>
 
-  <!-- zoom lightbox -->
+  <!-- lightbox -->
   <script>
     document.addEventListener('click', function(e){
       const img = e.target.closest('.tile img');
@@ -494,23 +561,83 @@
     });
   </script>
 
-  <!-- Stripe button enhancer (hero + bottom share logic) -->
+  <!-- checkout logic -->
   <script>
+    // sync hero <-> bottom selectors so they mirror
+    function syncField(srcEl, destEl) {
+      if (!srcEl || !destEl) return;
+      destEl.value = srcEl.value;
+    }
+
+    function getSize() {
+      // prefer hero if set, else bottom
+      const heroSize = document.getElementById('hero-size');
+      const bottomSize = document.getElementById('liberty-tee-size');
+      const valHero = heroSize ? heroSize.value : "";
+      const valBottom = bottomSize ? bottomSize.value : "";
+      return valHero || valBottom || "";
+    }
+
+    function getQty() {
+      const heroQty = document.getElementById('hero-qty');
+      const bottomQty = document.getElementById('liberty-tee-qty');
+      const valHero = heroQty ? Number(heroQty.value||1) : 1;
+      const valBottom = bottomQty ? Number(bottomQty.value||1) : 1;
+      return valHero || valBottom || 1;
+    }
+
+    // when hero changes, push to bottom
+    document.addEventListener('input', function(e){
+      if (e.target.id === 'hero-size') {
+        syncField(e.target, document.getElementById('liberty-tee-size'));
+      }
+      if (e.target.id === 'hero-qty') {
+        syncField(e.target, document.getElementById('liberty-tee-qty'));
+      }
+    });
+
+    // when bottom changes, push to hero
+    document.addEventListener('input', function(e){
+      if (e.target.id === 'liberty-tee-size') {
+        syncField(e.target, document.getElementById('hero-size'));
+      }
+      if (e.target.id === 'liberty-tee-qty') {
+        syncField(e.target, document.getElementById('hero-qty'));
+      }
+    });
+
+    // block checkout unless size chosen
     document.addEventListener('click', function(e){
-      // either hero button (.liberty-hero-checkout) or bottom button (#liberty-tee-checkout)
-      const heroBtn = e.target.closest('.liberty-hero-checkout');
-      const bottomBtn = e.target.closest('#liberty-tee-checkout');
-      const btn = heroBtn || bottomBtn;
+      const btn = e.target.closest('.liberty-checkout-btn');
       if (!btn) return;
 
-      // pull size/qty from the selectors in the buy module
-      const sizeEl = document.getElementById('liberty-tee-size');
-      const qtyEl  = document.getElementById('liberty-tee-qty');
+      // pull final size/qty
+      const sizeSelectHero   = document.getElementById('hero-size');
+      const sizeSelectBottom = document.getElementById('liberty-tee-size');
+      const qtyHero          = document.getElementById('hero-qty');
+      const qtyBottom        = document.getElementById('liberty-tee-qty');
 
-      const size = sizeEl ? sizeEl.value : 'XS';
-      const qty  = qtyEl ? Math.max(1, Number(qtyEl.value)||1) : 1;
+      const size = getSize(); // "" if nothing picked
+      const qty  = Math.max(1, getQty());
 
-      // GA ping
+      // if no size selected (""), stop and highlight, don't go to Stripe
+      if (!size) {
+        e.preventDefault();
+
+        // red outline on both size dropdowns so they know
+        if (sizeSelectHero)   sizeSelectHero.classList.add('error');
+        if (sizeSelectBottom) sizeSelectBottom.classList.add('error');
+
+        // auto-remove error style after a sec so it doesn't stick forever
+        setTimeout(() => {
+          if (sizeSelectHero)   sizeSelectHero.classList.remove('error');
+          if (sizeSelectBottom) sizeSelectBottom.classList.remove('error');
+        }, 1500);
+
+        return;
+      }
+
+      // analytics
       try {
         if (typeof gtag === 'function') {
           gtag('event', 'begin_checkout', {
