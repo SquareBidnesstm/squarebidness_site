@@ -1,36 +1,17 @@
 {
   "cleanUrls": true,
   "trailingSlash": true,
+
   "redirects": [
     { "source": "/:path*.html", "destination": "/:path*/", "permanent": true },
-    { "source": "/checkout.html", "destination": "/checkout/", "permanent": false },
-    { "source": "/cart.html", "destination": "/cart/", "permanent": false },
-    { "source": "/shop.html", "destination": "/shop/", "permanent": false },
-    { "source": "/blog.html", "destination": "/blog/", "permanent": false },
     { "source": "/favicon.ico", "destination": "/assets/icons/icon-180.png", "permanent": false }
   ],
-  "rewrites": [
-    { "source": "/nav", "destination": "/public/nav/index.html" },
-    { "source": "/footer", "destination": "/public/footer/index.html" }
-  ],
+
   "headers": [
     {
-      "source": "/assets/(.*)",
+      "source": "/(.*)\\.(jpg|jpeg|png|webp|gif|svg|ico|css|js|woff2|json|xml)",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
-      ]
-    },
-    {
-      "source": "/(.*)\\.(jpg|jpeg|png|webp|gif|svg|ico|css|js|woff2)",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
-      ]
-    },
-    {
-      "source": "/blog/(.*)\\.(xml|rss)",
-      "headers": [
-        { "key": "Content-Type", "value": "application/rss+xml; charset=utf-8" },
-        { "key": "Cache-Control", "value": "public, max-age=900" }
       ]
     },
     {
