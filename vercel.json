@@ -1,9 +1,56 @@
 {
+  "cleanUrls": true,
+  "trailingSlash": true,
+
+  "redirects": [
+    { "source": "/:path*.html", "destination": "/:path*/", "permanent": true },
+
+    { "source": "/checkout.html", "destination": "/checkout/", "permanent": false },
+    { "source": "/cart.html",     "destination": "/cart/",     "permanent": false },
+    { "source": "/shop.html",     "destination": "/shop/",     "permanent": false },
+    { "source": "/blog.html",     "destination": "/blog/",     "permanent": false },
+
+    { "source": "/favicon.ico",   "destination": "/assets/icons/icon-180.png", "permanent": false }
+  ],
+
+  "rewrites": [
+    // if you ever want to serve nav/footer as partials from /public, keep these:
+    { "source": "/nav",    "destination": "/public/nav/index.html" },
+    { "source": "/footer", "destination": "/public/footer/index.html" }
+    // ⬆️ NOTICE: no catch-all "/(.*)" → "/public/$1" anymore
+  ],
+
   "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
     {
       "source": "/(.*)\\.(jpg|jpeg|png|webp|gif|svg|ico|css|js|woff2)",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/blog/(.*)\\.(xml|rss)",
+      "headers": [
+        { "key": "Content-Type", "value": "application/rss+xml; charset=utf-8" },
+        { "key": "Cache-Control", "value": "public, max-age=900" }
+      ]
+    },
+    {
+      "source": "/sitemap.xml",
+      "headers": [
+        { "key": "Content-Type", "value": "application/xml; charset=utf-8" },
+        { "key": "Cache-Control", "value": "public, max-age=3600" }
+      ]
+    },
+    {
+      "source": "/robots.txt",
+      "headers": [
+        { "key": "Content-Type", "value": "text/plain; charset=utf-8" }
       ]
     },
     {
