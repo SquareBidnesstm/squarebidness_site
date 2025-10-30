@@ -1,39 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Returns & Preorders — Square Bidness</title>
   <meta name="description" content="Return policy and preorder info for Square Bidness Apparel." />
   <link rel="canonical" href="https://www.squarebidness.com/returns/" />
-  <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
+  <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
+
+  <!-- Perf -->
+  <link rel="preconnect" href="https://www.googletagmanager.com" />
+  <link rel="preconnect" href="https://www.google-analytics.com" />
+  <script defer src="/scripts/ga.js"></script>
+
+  <!-- Styles -->
   <link rel="stylesheet" href="/styles/style.css" />
+
+  <!-- Icons / PWA -->
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" href="/assets/icons/icon-180.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <meta name="theme-color" content="#000000" />
+
+  <!-- OG -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Square Bidness" />
+  <meta property="og:title" content="Returns & Preorders" />
+  <meta property="og:description" content="How we handle returns, exchanges, and preorder shipments." />
+  <meta property="og:url" content="https://www.squarebidness.com/returns/" />
+  <meta property="og:image" content="https://www.squarebidness.com/assets/sb-social-card_1200.jpg" />
+
+  <!-- Org JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"Organization",
+    "@id":"https://www.squarebidness.com/#org",
+    "name":"Square Bidness Apparel",
+    "url":"https://www.squarebidness.com/",
+    "logo":"https://www.squarebidness.com/assets/cleantextlogo.png",
+    "sameAs":[
+      "https://instagram.com/squarebidnesstm",
+      "https://www.tiktok.com/@squarebidnesstm",
+      "https://www.facebook.com/squarebidnessapparel",
+      "https://bsky.app/profile/squarebidnesstm.bsky.social",
+      "https://www.linkedin.com/company/square-bidness-apparel"
+    ],
+    "contactPoint":[{
+      "@type":"ContactPoint",
+      "contactType":"customer support",
+      "email":"squarebidnessapparel@gmail.com",
+      "areaServed":"US"
+    }]
+  }
+  </script>
 </head>
 <body class="theme-dark">
+  <!-- NAV -->
   <div id="nav-placeholder"></div>
+
   <main class="section">
     <div class="container" id="policy">
-      <h1>Returns & Preorders</h1>
+      <h1>Returns &amp; Preorders</h1>
       <p>Returns accepted within <strong>30 days</strong> of delivery on unworn items with tags.</p>
       <ul>
         <li>Customer covers return shipping unless item is defective or incorrect.</li>
         <li>Refunds issued to original payment method after inspection.</li>
       </ul>
+
       <h2 id="preorders">Preorders</h2>
       <ul>
         <li>Preorders can be cancelled <strong>before shipment</strong>.</li>
         <li>Estimated ship dates are shown on each product page.</li>
       </ul>
+
       <p>Questions? <a href="mailto:squarebidnessapparel@gmail.com">Email support</a>.</p>
     </div>
   </main>
+
+  <!-- FOOTER -->
   <div id="footer-placeholder"></div>
+
+  <!-- Inject /public nav + footer -->
   <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-      try { nav.placeholder.innerHTML = await (await fetch("/nav/")).text() } catch {}
-      try { footer.placeholder.innerHTML = await (await fetch("/footer/")).text() } catch {}
-    });
-    const nav = { placeholder: document.getElementById("nav-placeholder") };
-    const footer = { placeholder: document.getElementById("footer-placeholder") };
+  (async () => {
+    const bust = `?v=${Date.now()}`;
+
+    async function inject(url, slotId) {
+      try {
+        const res = await fetch(url + bust, { credentials: "same-origin" });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const html = await res.text();
+        const slot = document.getElementById(slotId);
+        if (slot) {
+          slot.innerHTML = html;
+          slot.classList.add("fade-in");
+        }
+      } catch (err) {
+        console.warn("Partial failed:", url, err);
+      }
+    }
+
+    await inject("/public/nav/index.html", "nav-placeholder");
+    await inject("/public/footer/index.html", "footer-placeholder");
+  })();
   </script>
 </body>
 </html>
