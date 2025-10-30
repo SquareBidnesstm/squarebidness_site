@@ -1,13 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Your Cart — Square Bidness</title>
   <link rel="canonical" href="https://www.squarebidness.com/cart/" />
+
+  <!-- Perf -->
+  <link rel="preconnect" href="https://www.googletagmanager.com" />
+  <link rel="preconnect" href="https://www.google-analytics.com" />
+  <script defer src="/scripts/ga.js"></script>
+
+  <!-- Styles -->
   <link rel="stylesheet" href="/styles/style.css" />
+
+  <!-- Icons / PWA -->
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" href="/assets/icons/icon-180.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <meta name="theme-color" content="#000000" />
+
+  <!-- OG -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Square Bidness" />
+  <meta property="og:title" content="Your Cart — Square Bidness" />
+  <meta property="og:description" content="Review items in your Square Bidness cart and proceed to checkout." />
+  <meta property="og:url" content="https://www.squarebidness.com/cart/" />
+  <meta property="og:image" content="https://www.squarebidness.com/assets/sb-social-card_1200.jpg" />
+
+  <!-- Org JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"Organization",
+    "@id":"https://www.squarebidness.com/#org",
+    "name":"Square Bidness Apparel",
+    "url":"https://www.squarebidness.com/",
+    "logo":"https://www.squarebidness.com/assets/cleantextlogo.png",
+    "sameAs":[
+      "https://instagram.com/squarebidnesstm",
+      "https://www.tiktok.com/@squarebidnesstm",
+      "https://www.facebook.com/squarebidnessapparel",
+      "https://bsky.app/profile/squarebidnesstm.bsky.social",
+      "https://www.linkedin.com/company/square-bidness-apparel"
+    ],
+    "contactPoint":[{
+      "@type":"ContactPoint",
+      "contactType":"customer support",
+      "email":"squarebidnessapparel@gmail.com",
+      "areaServed":"US"
+    }]
+  }
+  </script>
 </head>
 <body class="theme-dark">
+  <!-- NAV -->
   <div id="nav-placeholder"></div>
+
   <main class="section">
     <div class="container">
       <h1>Your Cart</h1>
@@ -18,16 +67,40 @@
       </div>
     </div>
   </main>
+
+  <!-- FOOTER -->
   <div id="footer-placeholder"></div>
 
   <script>
-  document.addEventListener("DOMContentLoaded", async () => {
-    try { document.getElementById("nav-placeholder").innerHTML = await (await fetch("/nav/")).text() } catch {}
-    try { document.getElementById("footer-placeholder").innerHTML = await (await fetch("/footer/")).text() } catch {}
+  (async () => {
+    const bust = `?v=${Date.now()}`;
 
-    const el = document.getElementById('cart');
-    const cart = JSON.parse(localStorage.getItem('sb_cart_v1') || '[]');
-    if (!cart.length) { el.innerHTML = '<p class="muted">Your cart is empty.</p>'; return; }
+    async function inject(url, slotId) {
+      try {
+        const res = await fetch(url + bust, { credentials: "same-origin" });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const html = await res.text();
+        const slot = document.getElementById(slotId);
+        if (slot) {
+          slot.innerHTML = html;
+          slot.classList.add("fade-in");
+        }
+      } catch (err) {
+        console.warn("Partial failed:", url, err);
+      }
+    }
+
+    // inject nav/footer from /public
+    await inject("/public/nav/index.html", "nav-placeholder");
+    await inject("/public/footer/index.html", "footer-placeholder");
+
+    // CART RENDER
+    const el = document.getElementById("cart");
+    const cart = JSON.parse(localStorage.getItem("sb_cart_v1") || "[]");
+    if (!cart.length) {
+      el.innerHTML = '<p class="muted">Your cart is empty.</p>';
+      return;
+    }
 
     const rows = cart.map(it => `
       <div class="cart-line" style="display:flex;gap:.75rem;align-items:center;border:1px solid #1f1f1f;border-radius:10px;padding:.5rem .75rem;margin:.4rem 0">
@@ -38,11 +111,15 @@
         </div>
         <div><strong>$${(Number(it.price||0) * Number(it.quantity||it.qty||1)).toFixed(2)}</strong></div>
       </div>
-    `).join('');
-    const total = cart.reduce((n,it)=> n + Number(it.price||0) * Number(it.quantity||it.qty||1), 0);
+    `).join("");
+
+    const total = cart.reduce((n, it) => n + Number(it.price||0) * Number(it.quantity||it.qty||1), 0);
+
     el.innerHTML = rows + `<p style="text-align:right;margin-top:.5rem"><strong>Total: $${total.toFixed(2)}</strong></p>`;
-  });
+  })();
   </script>
+
+  <!-- global helpers -->
   <script defer src="/scripts/global.js"></script>
 </body>
 </html>
