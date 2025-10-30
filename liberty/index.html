@@ -15,13 +15,12 @@
   <!-- Global CSS (root, the good one) -->
   <link rel="stylesheet" href="/styles/style.css" />
 
-  <!-- Page CSS (lives under /liberty/) -->
+  <!-- PAGE CSS (make sure this file really exists: /liberty/liberty.css) -->
   <link rel="stylesheet" href="/liberty/liberty.css" />
 
   <!-- PWA / icons -->
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="apple-touch-icon" href="/assets/icons/icon-180.png">
-  <!-- your shared files are in /public -->
   <link rel="manifest" href="/public/site.webmanifest">
   <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
   <meta name="theme-color" content="#000000" />
@@ -127,12 +126,103 @@
 </head>
 
 <body class="theme-dark">
-
-  <!-- optional nav slot -->
+  <!-- NAV -->
   <div id="nav-placeholder"></div>
 
-  <!-- HERO -->
-  <!-- ... keep ALL your body content exactly like you had it ... -->
+  <!-- MAIN CONTENT -->
+  <main class="liberty-page">
+    <!-- HERO / INTRO -->
+    <section class="liberty-hero">
+      <div class="liberty-hero__img">
+        <img src="/liberty/assets/liberty-3.jpg" alt="Square Bidness Liberty Collection shot in NYC" loading="lazy" />
+      </div>
+      <div class="liberty-hero__copy">
+        <p class="eyebrow">Liberty Collection</p>
+        <h1>Supima Cotton. Louisiana Discipline. NYC Motion.</h1>
+        <p>Shot in New York, built in Louisiana, owned by the people who handle business right. This is the Liberty Tee — real Supima, limited run.</p>
+        <div class="buybox">
+          <label for="hero-size">Select size</label>
+          <select id="hero-size" name="size">
+            <option value="">Select…</option>
+            <option value="XS">XS — In Stock</option>
+            <option value="S">S — In Stock</option>
+            <option value="M">M — Sold Out</option>
+            <option value="L">L — Sold Out</option>
+            <option value="XL">XL — In Stock</option>
+            <option value="2X">2X — In Stock</option>
+            <option value="3X">3X — In Stock</option>
+          </select>
+
+          <label for="hero-qty">Quantity</label>
+          <input id="hero-qty" type="number" min="1" value="1" />
+
+          <a
+            href="https://buy.stripe.com/cNi00j8BNcuB5LT3kQ8N20g"
+            class="btn btn--gold liberty-checkout-btn"
+          >
+            Checkout — $35
+          </a>
+          <p class="muted" style="margin-top:.5rem;">Ships from Louisiana · 1–3 day handling · $5 U.S. shipping</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PHOTO GRID -->
+    <section class="liberty-grid">
+      <article class="tile">
+        <img src="/liberty/assets/liberty-1.jpg" alt="Waterfront walk flex" loading="lazy" />
+      </article>
+      <article class="tile">
+        <img src="/liberty/assets/liberty-2.jpg" alt="Reflective moment NYC" loading="lazy" />
+      </article>
+      <article class="tile">
+        <img src="/liberty/assets/liberty-4.jpg" alt="Profile with skyline" loading="lazy" />
+      </article>
+      <article class="tile">
+        <img src="/liberty/assets/liberty-5.jpg" alt="Mosaic backdrop" loading="lazy" />
+      </article>
+      <article class="tile">
+        <img src="/liberty/assets/liberty-6.jpg" alt="Battery Park City signage" loading="lazy" />
+      </article>
+      <article class="tile">
+        <img src="/liberty/assets/liberty-8.jpg" alt="Night shot above city traffic" loading="lazy" />
+      </article>
+    </section>
+
+    <!-- SECOND BUY BOX (bottom) -->
+    <section class="liberty-bottom">
+      <div class="card">
+        <h2>Liberty Tee — Supima Cotton</h2>
+        <p>Same tee, just lower on the page. In case you scrolled fast.</p>
+        <div class="buybox">
+          <label for="liberty-tee-size">Select size</label>
+          <select id="liberty-tee-size" name="size">
+            <option value="">Select…</option>
+            <option value="XS">XS — In Stock</option>
+            <option value="S">S — In Stock</option>
+            <option value="M">M — Sold Out</option>
+            <option value="L">L — Sold Out</option>
+            <option value="XL">XL — In Stock</option>
+            <option value="2X">2X — In Stock</option>
+            <option value="3X">3X — In Stock</option>
+          </select>
+
+          <label for="liberty-tee-qty">Quantity</label>
+          <input id="liberty-tee-qty" type="number" min="1" value="1" />
+
+          <a
+            href="https://buy.stripe.com/cNi00j8BNcuB5LT3kQ8N20g"
+            class="btn btn--gold liberty-checkout-btn"
+          >
+            Checkout — $35
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER SLOT -->
+  <div id="footer-placeholder"></div>
 
   <!-- lightbox -->
   <script>
@@ -166,7 +256,6 @@
       return h || b || 1;
     }
 
-    // sync hero -> bottom and bottom -> hero
     document.addEventListener('input', function(e){
       if (e.target.id === 'hero-size') {
         syncField(e.target, document.getElementById('liberty-tee-size'));
@@ -189,7 +278,6 @@
       const size = getSize();
       const qty  = Math.max(1, getQty());
 
-      // require size
       if (!size) {
         e.preventDefault();
         const heroSize = document.getElementById('hero-size');
@@ -203,7 +291,6 @@
         return;
       }
 
-      // GA
       try {
         if (typeof gtag === 'function') {
           gtag('event', 'begin_checkout', {
@@ -226,7 +313,7 @@
     });
   </script>
 
-  <!-- load nav/footer from the place you actually put them -->
+  <!-- load nav/footer from /public -->
   <script>
   document.addEventListener("DOMContentLoaded", async () => {
     try {
@@ -243,12 +330,5 @@
     } catch {}
   });
   </script>
-
-  <!-- FAQs (yours) -->
-  <!-- ... keep your FAQ section + JSON-LD ... -->
-
-  <!-- FOOTER SLOT -->
-  <div id="footer-placeholder"></div>
-
 </body>
 </html>
