@@ -6,7 +6,7 @@
   <link rel="preconnect" href="https://www.google-analytics.com">
 
   <!-- GA4 (site-wide loader) -->
-  <script defer src="/scripts/ga.js"></script>
+  <script defer src="/public/scripts/ga.js"></script>
 
   <!-- Basics -->
   <meta charset="UTF-8" />
@@ -14,7 +14,9 @@
   <title>Shop — Square Bidness Apparel</title>
   <link rel="canonical" href="https://www.squarebidness.com/shop/" />
   <base href="/" /> <!-- forces relative URLs to resolve from site root -->
-  <link rel="stylesheet" href="/styles/style.css" />
+
+  <!-- GLOBAL CSS (you actually stored it under /public) -->
+  <link rel="stylesheet" href="/public/styles/style.css" />
 
   <!-- SEO -->
   <meta name="description" content="Shop the latest drops from Square Bidness Apparel. Explore exclusive collections, premium fabrics, and limited-run pieces like the VSOP Collection." />
@@ -41,7 +43,8 @@
   <!-- PWA / theming -->
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="apple-touch-icon" href="/assets/icons/icon-180.png">
-  <link rel="manifest" href="/site.webmanifest">
+  <!-- you moved this into /public/ -->
+  <link rel="manifest" href="/public/site.webmanifest">
   <meta name="theme-color" content="#000000">
 
   <!-- Organization JSON-LD (site-wide) -->
@@ -71,9 +74,8 @@
   </script>
 
   <!-- Site-wide cart core -->
-  <script src="/scripts/sb-cart.js" defer></script>
+  <script src="/public/scripts/sb-cart.js" defer></script>
 </head>
-
 
 <body class="theme-dark" id="top">
   <!-- LOGO + NAV -->
@@ -82,8 +84,6 @@
       <img src="/assets/cleantextlogo.png" alt="Square Bidness Logo" class="logo-img" />
     </a>
   </div>
-
-  
 
   <!-- PAGE HERO -->
   <header class="page-hero">
@@ -239,58 +239,39 @@
   <!-- FOOTER include hook -->
   <div id="footer-placeholder"></div>
 
- <script>
-(() => {
-  const $all = (s, r=document) => Array.from(r.querySelectorAll(s));
-
-  function addSkeleton(img) {
-    // mark as busy for a11y
-    img.setAttribute('aria-busy', 'true');
-
-    // apply skeleton class
-    img.classList.add('img-skeleton');
-
-    // if you provided a data-skeleton preset, ensure a height is visible
-    if (img.dataset.skeleton && !img.style.height) {
-      // heights come from CSS via [data-skeleton], so no inline style needed
+  <!-- Skeleton script (unchanged) -->
+  <script>
+  (() => {
+    const $all = (s, r=document) => Array.from(r.querySelectorAll(s));
+    function addSkeleton(img) {
+      img.setAttribute('aria-busy', 'true');
+      img.classList.add('img-skeleton');
+      const done = () => {
+        img.classList.remove('img-skeleton');
+        img.removeAttribute('aria-busy');
+        img.removeEventListener('load', done);
+        img.removeEventListener('error', done);
+      };
+      img.addEventListener('load', done);
+      img.addEventListener('error', done);
+      if (img.complete && img.naturalWidth > 0) done();
     }
-
-    // when the image finishes, remove skeleton
-    const done = () => {
-      img.classList.remove('img-skeleton');
-      img.removeAttribute('aria-busy');
-      img.removeEventListener('load', done);
-      img.removeEventListener('error', done); // also remove on error/placeholder swap
-    };
-
-    img.addEventListener('load', done);
-    img.addEventListener('error', done);
-
-    // if cached and complete, remove skeleton immediately
-    if (img.complete && img.naturalWidth > 0) done();
-  }
-
-  // observer to only skeletonize as images approach viewport
-  const io = ('IntersectionObserver' in window)
-    ? new IntersectionObserver((entries) => {
-        entries.forEach(({ isIntersecting, target }) => {
-          if (!isIntersecting) return;
-          io.unobserve(target);
-          addSkeleton(target);
-        });
-      }, { rootMargin: '200px 0px' })
-    : null;
-
-  // target product/hero images only (tweak selector as you like)
-  const imgs = $all('.card__media img, .product-card .thumb img, .page-hero img, .hero__media img');
-
-  imgs.forEach(img => {
-    // if already loaded (cache), skip skeleton; otherwise observe or apply
-    if (img.complete && img.naturalWidth > 0) return;
-    if (io) io.observe(img); else addSkeleton(img);
-  });
-})();
-</script>
+    const io = ('IntersectionObserver' in window)
+      ? new IntersectionObserver((entries) => {
+          entries.forEach(({ isIntersecting, target }) => {
+            if (!isIntersecting) return;
+            io.unobserve(target);
+            addSkeleton(target);
+          });
+        }, { rootMargin: '200px 0px' })
+      : null;
+    const imgs = $all('.card__media img, .product-card .thumb img, .page-hero img, .hero__media img');
+    imgs.forEach(img => {
+      if (img.complete && img.naturalWidth > 0) return;
+      if (io) io.observe(img); else addSkeleton(img);
+    });
+  })();
+  </script>
 
   <!-- Scripts -->
   <script>
@@ -303,14 +284,13 @@
         const filter = chip.dataset.filter;
         const cards = document.querySelectorAll('.card, .product-card');
         cards.forEach(card => {
-          // Use empty string to revert to CSS display instead of forcing 'block'
           card.style.display = (filter === 'all' || card.dataset.category === filter) ? '' : 'none';
         });
       });
     });
 
     // Product data hydration
-    fetch('/products.json')
+    fetch('/public/products.json')
       .then(r => r.ok ? r.json() : Promise.reject(r.status))
       .then(data => {
         document.querySelectorAll('[data-product-id]').forEach(card => {
@@ -358,94 +338,87 @@
       .catch(() => { /* ignore if file missing */ });
   </script>
 
-  <!-- GA4 ecommerce: view_item_list + select_item + add_to_cart -->
-<script>
-(() => {
-  // ---- helpers ----
-  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
-  const toPrice = el => Number((el?.textContent || '').replace(/[^0-9.]/g, '')) || 0;
+  <!-- GA4 ecommerce (unchanged) -->
+  <script>
+  (() => {
+    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+    const toPrice = el => Number((el?.textContent || '').replace(/[^0-9.]/g, '')) || 0;
 
-  const getItemFromCard = (card) => {
-    if (!card) return null;
-    const id = card.getAttribute('data-product-id') || 'unknown';
-    const name = card.querySelector('h3')?.textContent?.trim() || 'Unknown';
-    const price = toPrice(card.querySelector('.price'));
-    const category = card.getAttribute('data-category') || undefined;
-    return { item_id: id, item_name: name, price, item_category: category };
-  };
+    const getItemFromCard = (card) => {
+      if (!card) return null;
+      const id = card.getAttribute('data-product-id') || 'unknown';
+      const name = card.querySelector('h3')?.textContent?.trim() || 'Unknown';
+      const price = toPrice(card.querySelector('.price'));
+      const category = card.getAttribute('data-category') || undefined;
+      return { item_id: id, item_name: name, price, item_category: category };
+    };
 
-  // 1) view_item_list on load
-  const cards = $$('.card, .product-card');
-  if (cards.length) {
-    const items = cards.map(getItemFromCard).filter(Boolean)
-      .map((item, idx) => ({ ...item, index: idx + 1, quantity: 1 }));
-    window.gtag?.('event', 'view_item_list', { item_list_name: 'Shop Grid', items });
-  }
-
-  // 2) select_item for title / "View Details"
-  document.addEventListener('click', (e) => {
-    const link = e.target.closest('h3 a, .btn--secondary[data-product-id]');
-    if (!link) return;
-    const card = link.closest('[data-product-id], .card, article');
-    const item = getItemFromCard(card);
-    if (!item) return;
-    window.gtag?.('event', 'select_item', { item_list_name: 'Shop Grid', items: [{ ...item, quantity: 1 }] });
-  }, { passive: true });
-
-  // 3) add_to_cart for primary CTA
-  document.addEventListener('click', (e) => {
-    const btn = e.target.closest('.btn--primary[data-product-id]');
-    if (!btn) return;
-    const card = btn.closest('[data-product-id], .card, article');
-    const item = getItemFromCard(card);
-    if (!item) return;
-    window.gtag?.('event', 'add_to_cart', { currency: 'USD', value: item.price || 0, items: [{ ...item, quantity: 1 }] });
-  }, { passive: true });
-})();
-</script>
-
-<!-- Inject nav/footer + mark active link -->
-<script>
-(async () => {
-  const bust = `?v=${Date.now()}`; // dev cache-buster; remove in production
-
-  async function injectPartial(url, targetId) {
-    try {
-      const res = await fetch(url + bust, { credentials: 'same-origin' });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const html = await res.text();
-      const el = document.getElementById(targetId);
-      if (el) { el.innerHTML = html; el.classList.add('fade-in'); }
-      return el;
-    } catch (e) {
-      console.warn(`Failed to load ${url}:`, e);
-      return null;
+    const cards = $$('.card, .product-card');
+    if (cards.length) {
+      const items = cards.map(getItemFromCard).filter(Boolean)
+        .map((item, idx) => ({ ...item, index: idx + 1, quantity: 1 }));
+      window.gtag?.('event', 'view_item_list', { item_list_name: 'Shop Grid', items });
     }
-  }
 
-  // 1) NAV
-  const navEl = await injectPartial('/nav.html', 'nav-placeholder');
+    document.addEventListener('click', (e) => {
+      const link = e.target.closest('h3 a, .btn--secondary[data-product-id]');
+      if (!link) return;
+      const card = link.closest('[data-product-id], .card, article');
+      const item = getItemFromCard(card);
+      if (!item) return;
+      window.gtag?.('event', 'select_item', { item_list_name: 'Shop Grid', items: [{ ...item, quantity: 1 }] });
+    }, { passive: true });
 
-  // 1a) Highlight current page
-  if (navEl) {
-    const current = location.pathname.replace(/\/+$/, '') || '/';
-    navEl.querySelectorAll('a[href]').forEach(a => {
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('.btn--primary[data-product-id]');
+      if (!btn) return;
+      const card = btn.closest('[data-product-id], .card, article');
+      const item = getItemFromCard(card);
+      if (!item) return;
+      window.gtag?.('event', 'add_to_cart', { currency: 'USD', value: item.price || 0, items: [{ ...item, quantity: 1 }] });
+    }, { passive: true });
+  })();
+  </script>
+
+  <!-- Inject nav/footer + mark active link -->
+  <script>
+  (async () => {
+    const bust = `?v=${Date.now()}`;
+
+    async function injectPartial(url, targetId) {
       try {
-        const href = new URL(a.getAttribute('href'), location.origin).pathname.replace(/\/+$/, '') || '/';
-        if (href === current || (href !== '/' && current.startsWith(href))) {
-          a.classList.add('is-active');
-          a.setAttribute('aria-current', 'page');
-        }
-      } catch {}
-    });
-  }
+        const res = await fetch(url + bust, { credentials: 'same-origin' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const html = await res.text();
+        const el = document.getElementById(targetId);
+        if (el) { el.innerHTML = html; el.classList.add('fade-in'); }
+        return el;
+      } catch (e) {
+        console.warn(`Failed to load ${url}:`, e);
+        return null;
+      }
+    }
 
-  // 2) FOOTER
-  await injectPartial('/footer.html', 'footer-placeholder');
-})();
-</script>
+    // NAV (you put it under /public/nav/index.html)
+    const navEl = await injectPartial('/public/nav/index.html', 'nav-placeholder');
 
+    if (navEl) {
+      const current = location.pathname.replace(/\/+$/, '') || '/';
+      navEl.querySelectorAll('a[href]').forEach(a => {
+        try {
+          const href = new URL(a.getAttribute('href'), location.origin).pathname.replace(/\/+$/, '') || '/';
+          if (href === current || (href !== '/' && current.startsWith(href))) {
+            a.classList.add('is-active');
+            a.setAttribute('aria-current', 'page');
+          }
+        } catch {}
+      });
+    }
 
+    // FOOTER (you put it under /public/footer/index.html)
+    await injectPartial('/public/footer/index.html', 'footer-placeholder');
+  })();
+  </script>
 
 </body>
 </html>
