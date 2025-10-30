@@ -72,25 +72,34 @@
   </script>
   <!-- END: SHARED HEAD PARTIAL -->
 
-  <!-- Nav/Footer loader (so we pull in nav + shared footer partials) -->
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      fetch("/nav/", { cache: "no-store" })
-        .then(r => r.text())
-        .then(d => {
-          const slot = document.getElementById("nav-placeholder");
-          if (slot) slot.innerHTML = d;
-        })
-        .catch(()=>{});
-      fetch("/footer/", { cache: "no-store" })
-        .then(r => r.text())
-        .then(d => {
-          const slot = document.getElementById("footer-placeholder");
-          if (slot) slot.innerHTML = d;
-        })
-        .catch(()=>{});
-    });
-  </script>
+<!-- Nav/Footer loader (shared from /public) -->
+<script>
+(async () => {
+  const bust = `?v=${Date.now()}`;
+
+  async function injectPartial(url, targetId) {
+    try {
+      const res = await fetch(url + bust, { credentials: 'same-origin' });
+      if (!res.ok) return;
+      const html = await res.text();
+      const slot = document.getElementById(targetId);
+      if (slot) {
+        slot.innerHTML = html;
+        slot.classList.add('fade-in');
+      }
+    } catch (e) {
+      console.warn('Failed to load partial:', url, e);
+    }
+  }
+
+  // NAV
+  await injectPartial('/public/nav/index.html', 'nav-placeholder');
+
+  // FOOTER
+  await injectPartial('/public/footer/index.html', 'footer-placeholder');
+})();
+</script>
+
 
   <!-- Site cart helpers -->
   <script src="/scripts/sb-cart.js" defer></script>
