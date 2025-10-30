@@ -1,74 +1,34 @@
-// =======================
-//  Square Bidness Service Worker
-//  Caches pages, assets, and images for offline use.
-// =======================
-
-const CACHE_NAME = "squarebidness-cache-v1";
-const ASSETS = [
-  "/", 
+const CACHE_NAME = "squarebidness-v6";
+const CORE_ASSETS = [
+  "/",
   "/index.html",
-  "/styles/style.css",
-  "/scripts/global.js",
-  "/site.webmanifest",
-  "/assets/cleantextlogo.png",
-  "/assets/icons/icon-192.png",
-  "/assets/icons/icon-512.png",
-  "/assets/icons/maskable-192.png",
-  "/assets/icons/maskable-512.png",
-  // Add key pages
-  "/vsop/",
-  "/liberty/",
-  "/phomatic/",
-  "/blog/",
-  "/shop/",
-  "/returns/",
-  "/shipping/",
   "/offline.html",
+  "/styles/style.css",
+  "/styles/phomatic.min.css",
+  "/styles/liberty.css",
+  "/public/nav/index.html",
+  "/public/footer/index.html",
+
+  // Pho-Matic
+  "/phomatic/",
+  "/phomatic/assets/hero-1200x630.jpg",
+  "/phomatic/assets/gieno-1_800.jpg",
+  "/phomatic/assets/gieno-1_1200.jpg",
+  "/phomatic/assets/gieno-2_800.jpg",
+  "/phomatic/assets/gieno-2_1200.jpg",
+
+  // Liberty
+  "/liberty/",
+  "/liberty/assets/liberty-1.jpg",
+  "/liberty/assets/liberty-2.jpg",
+  "/liberty/assets/liberty-3.jpg",
+  "/liberty/assets/liberty-4.jpg",
+  "/liberty/assets/liberty-5.jpg",
+  "/liberty/assets/liberty-6.jpg",
+  "/liberty/assets/liberty-8.jpg",
+  "/liberty/assets/liberty-tee.jpg",
+
+  // Brand core
+  "/assets/vsop-jacket.jpg",
+  "/assets/vsop-shorts.jpg"
 ];
-
-// Install: pre-cache core assets
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS);
-    })
-  );
-  self.skipWaiting();
-});
-
-// Activate: clear old caches
-self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys
-          .filter((key) => key !== CACHE_NAME)
-          .map((key) => caches.delete(key))
-      )
-    )
-  );
-  self.clients.claim();
-});
-
-// Fetch: respond with cache first, then network
-self.addEventListener("fetch", (event) => {
-  const { request } = event;
-  if (request.method !== "GET") return;
-
-  event.respondWith(
-    caches.match(request).then((cached) => {
-      const networkFetch = fetch(request)
-        .then((response) => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-          return response;
-        })
-        .catch(async () => {
-          // fallback: cached page or offline screen
-          if (cached) return cached;
-          return await caches.match("/offline.html");
-        });
-      return cached || networkFetch;
-    })
-  );
-});
