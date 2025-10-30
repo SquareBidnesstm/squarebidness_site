@@ -47,6 +47,7 @@
   {
     "@context":"https://schema.org",
     "@type":"Organization",
+    "@id":"https://www.squarebidness.com/#org",
     "name":"Square Bidness Apparel",
     "url":"https://www.squarebidness.com/",
     "logo":"https://www.squarebidness.com/assets/cleantextlogo.png",
@@ -71,8 +72,9 @@
       "@type":"Organization",
       "name":"Square Bidness Apparel"
     },
-    "image":"https://www.squarebidness.com/liberty/assets/liberty-4.jpg",
+    "datePublished":"2025-10-29",
     "mainEntityOfPage":"https://www.squarebidness.com/blog/supima/",
+    "image":"https://www.squarebidness.com/liberty/assets/liberty-4.jpg",
     "publisher":{
       "@type":"Organization",
       "name":"Square Bidness Apparel",
@@ -236,8 +238,6 @@
       min-width:160px;
       display:inline-block;
     }
-
-    /* simple hr spacing */
     .article-body hr {
       border:0;
       border-top:1px solid #1f1f1f;
@@ -248,7 +248,7 @@
 
 <body class="theme-dark">
 
-  <!-- optional shared nav -->
+  <!-- NAV SLOT -->
   <div id="nav-placeholder"></div>
 
   <!-- HERO TEXT -->
@@ -266,7 +266,6 @@
 
   <!-- BODY -->
   <main class="article-body">
-
     <p>
       Let’s say this first: <strong>Square Bidness is not fast fashion.</strong>
       We don’t cut corners to get something “out.” We gone take our time and get this thing right.
@@ -315,8 +314,7 @@
     <div class="pull-quote">
       “If it’s stamped with ‘Square Bidness,’ that means you can wear it in public
        and still feel like you handled business.”
-    <small>That’s the standard. That’s why we chose Supima.</small>
-
+      <small>That’s the standard. That’s why we chose Supima.</small>
     </div>
 
     <h2>Why this matters for us (and you)</h2>
@@ -349,22 +347,16 @@
     <hr />
 
     <section class="cta-card" aria-labelledby="cta-liberty-tee">
-  <h2 id="cta-liberty-tee">Own the Liberty Tee — $35</h2>
-  <p>
-    Supima cotton. Liberty Green. Limited run.
-    Ships from Louisiana. Secure checkout through Stripe.
-  </p>
-
-  <div class="cta-flex">
-    <a class="btn-gold" href="/liberty/">
-      See the Liberty Tee
-    </a>
-    <a class="btn-ghost" href="/vsop/">
-      VSOP Preorders
-    </a>
-  </div>
-</section>
-
+      <h2 id="cta-liberty-tee">Own the Liberty Tee — $35</h2>
+      <p>
+        Supima cotton. Liberty Green. Limited run.
+        Ships from Louisiana. Secure checkout through Stripe.
+      </p>
+      <div class="cta-flex">
+        <a class="btn-gold" href="/liberty/">See the Liberty Tee</a>
+        <a class="btn-ghost" href="/vsop/">VSOP Preorders</a>
+      </div>
+    </section>
 
     <p style="font-size:.8rem;color:#555;text-align:center;line-height:1.4;">
       Square Bidness. Principles. Morals. Business Done Right.
@@ -374,7 +366,7 @@
   <!-- FOOTER SLOT -->
   <div id="footer-placeholder"></div>
 
-  <!-- zoom lightbox for inline article images (same pattern as Liberty page) -->
+  <!-- image lightbox -->
   <script>
     document.addEventListener('click', function(e){
       const img = e.target.closest('.inline-img img');
@@ -387,23 +379,32 @@
     });
   </script>
 
-  <!-- inject nav + footer -->
+  <!-- inject nav + footer from /public -->
   <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-      try {
-        const navSlot = document.getElementById("nav-placeholder");
-        if (navSlot) {
-          navSlot.innerHTML = await (await fetch("/nav/")).text();
-        }
-      } catch {}
+  (async () => {
+    const bust = `?v=${Date.now()}`;
 
+    async function inject(url, id) {
       try {
-        const footSlot = document.getElementById("footer-placeholder");
-        if (footSlot) {
-          footSlot.innerHTML = await (await fetch("/footer/")).text();
+        const res = await fetch(url + bust, { credentials: "same-origin" });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const html = await res.text();
+        const slot = document.getElementById(id);
+        if (slot) {
+          slot.innerHTML = html;
+          slot.classList.add("fade-in");
         }
-      } catch {}
-    });
+      } catch (err) {
+        console.warn("Partial failed", url, err);
+      }
+    }
+
+    // nav
+    await inject("/public/nav/index.html", "nav-placeholder");
+
+    // footer
+    await inject("/public/footer/index.html", "footer-placeholder");
+  })();
   </script>
 </body>
 </html>
