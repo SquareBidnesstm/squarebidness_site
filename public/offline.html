@@ -7,12 +7,11 @@
   <meta name="description" content="You're offline. Square Bidness — Veteran-owned Louisiana streetwear. Cached Liberty Collection preview." />
   <meta name="theme-color" content="#000000" />
   <link rel="icon" href="/favicon.ico" sizes="any" />
+
   <style>
     :root {
       --gold: #c9a227;
       --bg: #000;
-      --card: #0f0f0f;
-      --border: rgba(201,162,39,.35);
       --muted: #9ca3af;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -23,33 +22,17 @@
       color: #fff;
       text-align: center;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      flex-direction: column;
       padding: 1rem;
     }
 
-    header {
-      margin-bottom: 2rem;
-    }
-    header img {
-      width: 120px;
-      opacity: 0.9;
-    }
-    h1 {
-      font-size: 1.5rem;
-      font-weight: 800;
-      margin-top: .6rem;
-      letter-spacing: .5px;
-    }
-    p {
-      font-size: .95rem;
-      color: var(--muted);
-      margin: .5rem auto 2rem;
-      max-width: 22rem;
-    }
+    header { margin-bottom: 2rem; }
+    header img { width: 120px; opacity: 0; animation: fadeInLogo 1s ease forwards; }
+    h1 { font-size: 1.5rem; font-weight: 800; margin-top: .6rem; letter-spacing: .5px; opacity: 0; animation: fadeInLogo 1s ease forwards .3s; }
+    p { font-size: .95rem; color: var(--muted); margin: .5rem auto 2rem; max-width: 22rem; }
 
-    /* LIBERTY PREVIEW BLOCK */
     .offline-banner {
       background: radial-gradient(circle at top, rgba(201,162,39,.25), rgba(0,0,0,.9) 60%);
       border: 1px solid rgba(201,162,39,.3);
@@ -58,14 +41,10 @@
       margin: 0 auto 2.5rem;
       padding: 1.25rem;
       box-shadow: 0 18px 40px rgba(0,0,0,.55);
+      opacity: 0;
+      animation: fadeInUp 1.2s ease forwards .8s;
     }
-    .offline-banner__inner {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1rem;
-      text-align: center;
-    }
+    .offline-banner__inner { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
     .offline-banner__inner img {
       width: 100%;
       max-width: 420px;
@@ -73,20 +52,10 @@
       border: 1px solid rgba(255,255,255,.1);
       box-shadow: 0 8px 25px rgba(0,0,0,.5);
     }
-    .offline-banner__text h2 {
-      font-size: 1.2rem;
-      margin: .2rem 0;
-      font-weight: 700;
-    }
-    .offline-banner__text p {
-      font-size: .9rem;
-      color: #d1d5db;
-      margin: 0 0 .4rem;
-    }
-    .offline-banner__text small {
-      color: #a3a3a3;
-      font-size: .75rem;
-    }
+    .offline-banner__text h2 { font-size: 1.2rem; margin: .2rem 0; font-weight: 700; }
+    .offline-banner__text p { font-size: .9rem; color: #d1d5db; margin: 0 0 .4rem; }
+    .offline-banner__text small { color: #a3a3a3; font-size: .75rem; }
+
     .reload-btn {
       background: var(--gold);
       color: #111;
@@ -97,22 +66,40 @@
       margin-top: .75rem;
       cursor: pointer;
       box-shadow: 0 8px 24px rgba(201,162,39,.3);
-      transition: transform .15s ease, box-shadow .2s ease;
+      transition: transform .15s ease, box-shadow .2s ease, background .3s ease;
+      animation: goldPulse 2.5s ease-in-out infinite;
     }
-    .reload-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 10px 28px rgba(201,162,39,.4);
+    .reload-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 28px rgba(201,162,39,.4); }
+    .reload-btn:active { transform: scale(0.97); box-shadow: 0 0 28px rgba(255,215,0,.6); }
+
+    footer { font-size: .75rem; color: #777; margin-top: 2rem; opacity: .8; }
+
+    .reconnect-msg {
+      font-size: .8rem;
+      color: var(--muted);
+      margin-top: .5rem;
+      opacity: 0;
+      transition: opacity .6s ease;
     }
 
-    footer {
-      font-size: .75rem;
-      color: #777;
-      margin-top: 2rem;
-      opacity: .8;
+    /* Gold flash overlay */
+    .flash-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(255,215,0,.9) 0%, rgba(0,0,0,0) 80%);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 9999;
+      transition: opacity .4s ease-out;
+    }
+
+    @keyframes fadeInLogo { from {opacity:0; transform:translateY(-6px);} to {opacity:1; transform:translateY(0);} }
+    @keyframes fadeInUp { from {opacity:0; transform:translateY(20px);} to {opacity:1; transform:translateY(0);} }
+    @keyframes goldPulse {
+      0%,100% { box-shadow: 0 0 0 rgba(201,162,39,0); }
+      50% { box-shadow: 0 0 20px rgba(201,162,39,.45); }
     }
   </style>
-  <link rel="stylesheet" href="/styles/offline-light.css" />
-
 </head>
 
 <body>
@@ -124,17 +111,13 @@
 
   <section class="offline-banner">
     <div class="offline-banner__inner">
-      <img 
-        src="/liberty/assets/liberty-3.jpg" 
-        alt="Liberty Collection — Supima Cotton Tee" 
-        loading="lazy" 
-        decoding="async" 
-      />
+      <img src="/liberty/assets/liberty-3.jpg" alt="Liberty Collection — Supima Cotton Tee" loading="lazy" decoding="async" />
       <div class="offline-banner__text">
         <h2>Square Bidness · Liberty Collection</h2>
         <p>Supima cotton · Built in Louisiana · Captured in NYC</p>
         <small>You’re viewing offline — limited content cached for preview.</small>
         <button class="reload-btn">Return Online</button>
+        <div class="reconnect-msg">Trying to reconnect...</div>
       </div>
     </div>
   </section>
@@ -143,46 +126,71 @@
     &copy; <span id="year"></span> Square Bidness Apparel, LLC. All Rights Reserved.
   </footer>
 
+  <!-- Gold Flash Overlay -->
+  <div class="flash-overlay" id="flash"></div>
+
   <script>
-    document.getElementById('year').textContent = new Date().getFullYear();
-    document.querySelector('.reload-btn').addEventListener('click', () => {
-      window.location.reload(true);
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  const btn = document.querySelector('.reload-btn');
+  const msg = document.querySelector('.reconnect-msg');
+  const flash = document.getElementById('flash');
+
+  if (btn) {
+    btn.addEventListener('click', () => {
+      btn.style.background = "#ffd700";
+      btn.style.boxShadow = "0 0 20px rgba(255,215,0,0.9)";
+      if (navigator.vibrate) navigator.vibrate([40]);
+
+      // Reconnect sound
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(660, ctx.currentTime);
+        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.5);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 1.5);
+      } catch {}
+
+      // Text fade in/out
+      if (msg) {
+        msg.style.opacity = 1;
+        setTimeout(() => msg.style.opacity = 0, 700);
+      }
+
+      // Gold flash overlay
+      if (flash) {
+        flash.style.opacity = 1;
+        setTimeout(() => flash.style.opacity = 0, 700);
+      }
+
+      // Reload
+      setTimeout(() => window.location.reload(true), 1000);
     });
+  }
+
+  // Offline entry cue
+  document.addEventListener("DOMContentLoaded", () => {
+    if (navigator.vibrate) navigator.vibrate([30, 60, 30]);
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(440, ctx.currentTime);
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.8);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 2);
+    } catch (err) {}
+  });
   </script>
-  <script>
-/* =====================================================
-   Square Bidness — Offline Haptic & Audio Feedback
-   -------------------------------------------------
-   Subtle cue so users *feel* when they go offline.
-===================================================== */
-
-document.addEventListener("DOMContentLoaded", () => {
-  // --- HAPTIC FEEDBACK ---
-  if (navigator.vibrate) {
-    // short dual pulse (mobile only)
-    navigator.vibrate([30, 60, 30]);
-  }
-
-  // --- FADE SOUND (Web Audio API) ---
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(440, ctx.currentTime); // A4 tone
-    gain.gain.setValueAtTime(0.08, ctx.currentTime);    // very soft
-    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.8);
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + 2);
-  } catch (err) {
-    console.warn("Offline cue skipped:", err);
-  }
-});
-</script>
-
 </body>
 </html>
