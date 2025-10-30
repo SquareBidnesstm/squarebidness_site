@@ -1,4 +1,8 @@
-/* /scripts/global.js */
+/* =====================================================
+   Square Bidness — Global JS
+   Analytics · Year update · Mailchimp · Service Worker
+===================================================== */
+
 // ---- GA4 helpers ----
 window.SB = window.SB || {};
 SB.ga = {
@@ -9,7 +13,7 @@ SB.ga = {
   add_to_cart: (data) => SB.ga.evt('add_to_cart', data),
   begin_checkout: (data) => SB.ga.evt('begin_checkout', data),
   purchase: (data) => SB.ga.evt('purchase', data),
-  subscribe: (where='footer') => SB.ga.evt('generate_lead', { method: `mailchimp_${where}` }),
+  subscribe: (where = 'footer') => SB.ga.evt('generate_lead', { method: `mailchimp_${where}` }),
   search: (q) => SB.ga.evt('search', { search_term: q || '' })
 };
 
@@ -29,9 +33,7 @@ document.addEventListener('submit', (e) => {
   SB.ga.subscribe('footer');
 });
 
-// ---- Track “Add to Cart” buttons if your PDP fires a custom event ----
-// Example: dispatch this somewhere in PDP after adding:
-// window.dispatchEvent(new CustomEvent('sb:add_to_cart', { detail: { item_id:'vsop-jacket', item_name:'VSOP Hooded Jacket', price:129.99, quantity:1 } }));
+// ---- Track “Add to Cart” custom event ----
 window.addEventListener('sb:add_to_cart', (e) => {
   const d = e.detail || {};
   SB.ga.add_to_cart({
@@ -41,9 +43,19 @@ window.addEventListener('sb:add_to_cart', (e) => {
   });
 });
 
-// ---- Track site search (works with /search/ page’s ?q=) ----
+// ---- Track site search (?q=) ----
 (function trackSearchFromURL(){
   const u = new URL(location.href);
   const q = u.searchParams.get('q');
   if (q) SB.ga.search(q);
 })();
+
+// ---- Register Service Worker ----
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('/public/service-worker.js')
+      .then(() => console.log('✅ Square Bidness Service Worker active'))
+      .catch((err) => console.warn('SW registration failed:', err));
+  });
+}
