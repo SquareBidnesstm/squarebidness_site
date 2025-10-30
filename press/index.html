@@ -8,10 +8,15 @@
   <meta name="description" content="Square Bidness Apparel press mentions, interviews, and features." />
   <link rel="canonical" href="https://www.squarebidness.com/press/" />
 
+  <!-- Perf / GA4 -->
+  <link rel="preconnect" href="https://www.googletagmanager.com">
+  <link rel="preconnect" href="https://www.google-analytics.com">
+  <script defer src="/public/scripts/ga.js"></script>
+
   <!-- Brand / Icons / PWA -->
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="apple-touch-icon" href="/assets/icons/icon-180.png" />
-  <link rel="manifest" href="/site.webmanifest" />
+  <link rel="manifest" href="/public/site.webmanifest" />
   <meta name="theme-color" content="#000000" />
 
   <!-- Styles -->
@@ -35,7 +40,7 @@
   <meta name="twitter:image" content="https://www.squarebidness.com/assets/sb-social-card_1200.jpg" />
   <meta name="twitter:site" content="@squarebidnesstm" />
 
-  <!-- Org JSON-LD (same pattern as other pages) -->
+  <!-- Org JSON-LD -->
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
@@ -60,39 +65,33 @@
   }
   </script>
 
-  <!-- Perf / GA4 -->
-  <link rel="preconnect" href="https://www.googletagmanager.com">
-  <link rel="preconnect" href="https://www.google-analytics.com">
-  <script defer src="/scripts/ga.js"></script>
+  <!-- Nav/Footer loader (shared from /public) -->
+  <script>
+  (async () => {
+    const bust = `?v=${Date.now()}`;
 
-<!-- Nav/Footer loader (shared from /public) -->
-<script>
-(async () => {
-  const bust = `?v=${Date.now()}`;
-
-  async function injectPartial(url, targetId) {
-    try {
-      const res = await fetch(url + bust, { credentials: 'same-origin' });
-      if (!res.ok) return;
-      const html = await res.text();
-      const slot = document.getElementById(targetId);
-      if (slot) {
-        slot.innerHTML = html;
-        slot.classList.add('fade-in');
+    async function injectPartial(url, targetId) {
+      try {
+        const res = await fetch(url + bust, { credentials: 'same-origin' });
+        if (!res.ok) return;
+        const html = await res.text();
+        const slot = document.getElementById(targetId);
+        if (slot) {
+          slot.innerHTML = html;
+          slot.classList.add('fade-in');
+        }
+      } catch (e) {
+        console.warn('Failed to load partial:', url, e);
       }
-    } catch (e) {
-      console.warn('Failed to load partial:', url, e);
     }
-  }
 
-  // NAV
-  await injectPartial('/public/nav/index.html', 'nav-placeholder');
+    // NAV
+    await injectPartial('/public/nav/index.html', 'nav-placeholder');
 
-  // FOOTER
-  await injectPartial('/public/footer/index.html', 'footer-placeholder');
-})();
-</script>
-
+    // FOOTER
+    await injectPartial('/public/footer/index.html', 'footer-placeholder');
+  })();
+  </script>
 
   <style>
     .press-page-header {
@@ -126,6 +125,13 @@
       text-decoration: none;
       font-weight: 600;
       line-height: 1.4;
+    }
+    .press-item a span {
+      display: block;
+      font-size: .75rem;
+      color: #aaa;
+      font-weight: 400;
+      margin-top: .25rem;
     }
     .press-item a:hover {
       background: #1a1a1a;
@@ -162,7 +168,7 @@
 </head>
 
 <body class="theme-dark" id="top">
-  <!-- NAV -->
+  <!-- NAV SLOT -->
   <div id="nav-placeholder"></div>
 
   <main class="section">
@@ -179,6 +185,7 @@
             href="https://boldjourney.com/meet-marcus-buckner?utm_source=squarebidness.com&utm_medium=press_page"
             target="_blank" rel="noopener noreferrer">
             Bold Journey — Meet Marcus Buckner
+            <span>Longform interview on foundation, vision, and community.</span>
           </a>
         </li>
 
@@ -187,6 +194,7 @@
             href="https://shoutouthtx.com/meet-marcus-buckner-square-bidness-apparel-designer-and-marketer/?utm_source=squarebidness.com&utm_medium=press_page"
             target="_blank" rel="noopener noreferrer">
             Shoutout HTX — Square Bidness Apparel
+            <span>Creative brand building and doing business the right way.</span>
           </a>
         </li>
 
@@ -195,6 +203,7 @@
             href="https://canvasrebel.com/meet-marcus-buckner/?utm_source=squarebidness.com&utm_medium=press_page"
             target="_blank" rel="noopener noreferrer">
             Canvas Rebel — Interview
+            <span>Entrepreneurship, community ties, and Louisiana roots.</span>
           </a>
         </li>
       </ul>
@@ -212,7 +221,7 @@
     </div>
   </main>
 
-  <!-- FOOTER -->
+  <!-- FOOTER SLOT -->
   <div id="footer-placeholder"></div>
 </body>
 </html>
