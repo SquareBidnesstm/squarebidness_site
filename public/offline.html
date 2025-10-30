@@ -1,116 +1,151 @@
-/* =====================================================
-   Square Bidness — PWA Service Worker (Offline Ready)
-   -----------------------------------------------------
-   Static pre-cache + dynamic image caching
-   Includes custom offline.html fallback.
-===================================================== */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Offline — Square Bidness</title>
+  <meta name="description" content="You're offline. Square Bidness — Veteran-owned Louisiana streetwear. Cached Liberty Collection preview." />
+  <meta name="theme-color" content="#000000" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <style>
+    :root {
+      --gold: #c9a227;
+      --bg: #000;
+      --card: #0f0f0f;
+      --border: rgba(201,162,39,.35);
+      --muted: #9ca3af;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: #fff;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 1rem;
+    }
 
-const CACHE_NAME = "squarebidness-v5";
-const CORE_ASSETS = [
-  "/",
-  "/index.html",
-  "/offline.html",
-  "/styles/style.css",
-  "/styles/phomatic.min.css",
-  "/public/nav/index.html",
-  "/public/footer/index.html",
-  "/phomatic/",
-  "/phomatic/assets/hero-1200x630.jpg",
-  "/phomatic/assets/gieno-1_800.jpg",
-  "/phomatic/assets/gieno-1_1200.jpg",
-  "/phomatic/assets/gieno-2_800.jpg",
-  "/phomatic/assets/gieno-2_1200.jpg",
-  "/assets/vsop-jacket.jpg",
-  "/assets/vsop-shorts.jpg"
-];
+    header {
+      margin-bottom: 2rem;
+    }
+    header img {
+      width: 120px;
+      opacity: 0.9;
+    }
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-top: .6rem;
+      letter-spacing: .5px;
+    }
+    p {
+      font-size: .95rem;
+      color: var(--muted);
+      margin: .5rem auto 2rem;
+      max-width: 22rem;
+    }
 
-/* ------------------------------
-   INSTALL — Precache core assets
------------------------------- */
-self.addEventListener("install", (e) => {
-  e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE_ASSETS))
-  );
-  self.skipWaiting();
-});
+    /* LIBERTY PREVIEW BLOCK */
+    .offline-banner {
+      background: radial-gradient(circle at top, rgba(201,162,39,.25), rgba(0,0,0,.9) 60%);
+      border: 1px solid rgba(201,162,39,.3);
+      border-radius: 16px;
+      max-width: 680px;
+      margin: 0 auto 2.5rem;
+      padding: 1.25rem;
+      box-shadow: 0 18px 40px rgba(0,0,0,.55);
+    }
+    .offline-banner__inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      text-align: center;
+    }
+    .offline-banner__inner img {
+      width: 100%;
+      max-width: 420px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.1);
+      box-shadow: 0 8px 25px rgba(0,0,0,.5);
+    }
+    .offline-banner__text h2 {
+      font-size: 1.2rem;
+      margin: .2rem 0;
+      font-weight: 700;
+    }
+    .offline-banner__text p {
+      font-size: .9rem;
+      color: #d1d5db;
+      margin: 0 0 .4rem;
+    }
+    .offline-banner__text small {
+      color: #a3a3a3;
+      font-size: .75rem;
+    }
+    .reload-btn {
+      background: var(--gold);
+      color: #111;
+      border: none;
+      border-radius: 999px;
+      padding: .6rem 1.25rem;
+      font-weight: 700;
+      margin-top: .75rem;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(201,162,39,.3);
+      transition: transform .15s ease, box-shadow .2s ease;
+    }
+    .reload-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 28px rgba(201,162,39,.4);
+    }
 
-/* ------------------------------
-   ACTIVATE — Clean old caches
------------------------------- */
-self.addEventListener("activate", (e) => {
-  e.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))
-      )
-    )
-  );
-  self.clients.claim();
-});
+    footer {
+      font-size: .75rem;
+      color: #777;
+      margin-top: 2rem;
+      opacity: .8;
+    }
+  </style>
+</head>
 
-/* ------------------------------
-   FETCH — Cache & Offline Logic
------------------------------- */
-self.addEventListener("fetch", (e) => {
-  const { request } = e;
-  if (request.method !== "GET") return;
+<body>
+  <header>
+    <img src="/assets/cleantextlogo.png" alt="Square Bidness Logo" loading="lazy" decoding="async" />
+    <h1>You're Offline</h1>
+    <p>Don’t worry — Square Bidness is still here. Some pages are available offline for preview.</p>
+  </header>
 
-  const url = new URL(request.url);
+  <section class="offline-banner">
+    <div class="offline-banner__inner">
+      <img 
+        src="/liberty/assets/liberty-3.jpg" 
+        alt="Liberty Collection — Supima Cotton Tee" 
+        loading="lazy" 
+        decoding="async" 
+      />
+      <div class="offline-banner__text">
+        <h2>Square Bidness · Liberty Collection</h2>
+        <p>Supima cotton · Built in Louisiana · Captured in NYC</p>
+        <small>You’re viewing offline — limited content cached for preview.</small>
+        <button class="reload-btn">Return Online</button>
+      </div>
+    </div>
+  </section>
 
-  // HTML requests — network first
-  if (request.headers.get("accept")?.includes("text/html")) {
-    e.respondWith(
-      fetch(request)
-        .then((res) => {
-          const clone = res.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-          return res;
-        })
-        .catch(() => caches.match(request).then((r) => r || caches.match("/offline.html")))
-    );
-    return;
-  }
+  <footer>
+    &copy; <span id="year"></span> Square Bidness Apparel, LLC. All Rights Reserved.
+  </footer>
 
-  // Image or asset requests — cache first, then network
-  if (
-    url.pathname.startsWith("/phomatic/") ||
-    url.pathname.startsWith("/assets/")
-  ) {
-    e.respondWith(
-      caches.match(request).then((cached) => {
-        if (cached) return cached;
-        return fetch(request)
-          .then((res) => {
-            const clone = res.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-            return res;
-          })
-          .catch(() => caches.match("/offline.html"));
-      })
-    );
-    return;
-  }
-
-  // Default — try cache first, then network
-  e.respondWith(
-    caches.match(request).then((cached) => {
-      return (
-        cached ||
-        fetch(request)
-          .then((res) => {
-            const clone = res.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-            return res;
-          })
-          .catch(() => caches.match("/offline.html"))
-      );
-    })
-  );
-});
-
-/* ------------------------------
-   MESSAGE — Manual skipWaiting
------------------------------- */
-self.addEventListener("message", (e) => {
-  if (e.data === "skipWaiting") self.skipWaiting();
-});
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+    document.querySelector('.reload-btn').addEventListener('click', () => {
+      window.location.reload(true);
+    });
+  </script>
+</body>
+</html>
