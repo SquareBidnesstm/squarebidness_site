@@ -1,94 +1,116 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Offline — Square Bidness</title>
-  <meta name="theme-color" content="#000000" />
-  <link rel="icon" href="/favicon.ico" sizes="any" />
-  <link rel="apple-touch-icon" href="/assets/icons/icon-180.png" />
-  <link rel="stylesheet" href="/styles/style.css" />
+/* =====================================================
+   Square Bidness — PWA Service Worker (Offline Ready)
+   -----------------------------------------------------
+   Static pre-cache + dynamic image caching
+   Includes custom offline.html fallback.
+===================================================== */
 
-  <style>
-    body {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      height: 100vh;
-      margin: 0;
-      background: radial-gradient(circle at 50% 30%, #1a0f0f 0%, #000 80%);
-      color: #fff;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
-      text-align: center;
-      overflow: hidden;
-      position: relative;
-    }
+const CACHE_NAME = "squarebidness-v5";
+const CORE_ASSETS = [
+  "/",
+  "/index.html",
+  "/offline.html",
+  "/styles/style.css",
+  "/styles/phomatic.min.css",
+  "/public/nav/index.html",
+  "/public/footer/index.html",
+  "/phomatic/",
+  "/phomatic/assets/hero-1200x630.jpg",
+  "/phomatic/assets/gieno-1_800.jpg",
+  "/phomatic/assets/gieno-1_1200.jpg",
+  "/phomatic/assets/gieno-2_800.jpg",
+  "/phomatic/assets/gieno-2_1200.jpg",
+  "/assets/vsop-jacket.jpg",
+  "/assets/vsop-shorts.jpg"
+];
 
-    /* Faded Scorpion watermark */
-    .bg-logo {
-      position: absolute;
-      inset: 0;
-      background: url("/assets/scorpion.png") center center no-repeat;
-      background-size: 400px auto;
-      opacity: 0.04;
-      filter: grayscale(100%);
-      pointer-events: none;
-    }
+/* ------------------------------
+   INSTALL — Precache core assets
+------------------------------ */
+self.addEventListener("install", (e) => {
+  e.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE_ASSETS))
+  );
+  self.skipWaiting();
+});
 
-    h1 {
-      font-size: clamp(1.8rem, 4vw, 2.5rem);
-      margin: 0 0 0.75rem;
-      font-weight: 800;
-      color: #c9a227;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
+/* ------------------------------
+   ACTIVATE — Clean old caches
+------------------------------ */
+self.addEventListener("activate", (e) => {
+  e.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(
+        keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))
+      )
+    )
+  );
+  self.clients.claim();
+});
 
-    p {
-      font-size: 1rem;
-      color: #d0d0d0;
-      margin: 0 0 1.8rem;
-      line-height: 1.5;
-      max-width: 24rem;
-    }
+/* ------------------------------
+   FETCH — Cache & Offline Logic
+------------------------------ */
+self.addEventListener("fetch", (e) => {
+  const { request } = e;
+  if (request.method !== "GET") return;
 
-    .btn {
-      background: #c9a227;
-      color: #111;
-      padding: 0.7rem 1.2rem;
-      border-radius: 12px;
-      font-weight: 700;
-      text-decoration: none;
-      box-shadow: 0 8px 24px rgba(201,162,39,0.35), 0 2px 5px rgba(0,0,0,0.7);
-      transition: background 0.25s, transform 0.25s;
-    }
-    .btn:hover {
-      background: #d8b63b;
-      transform: translateY(-2px);
-    }
+  const url = new URL(request.url);
 
-    footer {
-      position: absolute;
-      bottom: 20px;
-      font-size: 0.75rem;
-      color: #666;
-      letter-spacing: 0.05em;
-    }
-  </style>
-</head>
-<body>
-  <div class="bg-logo"></div>
+  // HTML requests — network first
+  if (request.headers.get("accept")?.includes("text/html")) {
+    e.respondWith(
+      fetch(request)
+        .then((res) => {
+          const clone = res.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          return res;
+        })
+        .catch(() => caches.match(request).then((r) => r || caches.match("/offline.html")))
+    );
+    return;
+  }
 
-  <h1>You're Offline</h1>
-  <p>
-    But the mission don’t stop.<br>
-    Square Bidness stays solid — reconnect and handle business.
-  </p>
-  <a href="/" class="btn">Back Online</a>
+  // Image or asset requests — cache first, then network
+  if (
+    url.pathname.startsWith("/phomatic/") ||
+    url.pathname.startsWith("/assets/")
+  ) {
+    e.respondWith(
+      caches.match(request).then((cached) => {
+        if (cached) return cached;
+        return fetch(request)
+          .then((res) => {
+            const clone = res.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+            return res;
+          })
+          .catch(() => caches.match("/offline.html"));
+      })
+    );
+    return;
+  }
 
-  <footer>
-    © <script>document.write(new Date().getFullYear())</script> Square Bidness Apparel LLC · Principles. Morals. Business Done Right.
-  </footer>
-</body>
-</html>
+  // Default — try cache first, then network
+  e.respondWith(
+    caches.match(request).then((cached) => {
+      return (
+        cached ||
+        fetch(request)
+          .then((res) => {
+            const clone = res.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+            return res;
+          })
+          .catch(() => caches.match("/offline.html"))
+      );
+    })
+  );
+});
+
+/* ------------------------------
+   MESSAGE — Manual skipWaiting
+------------------------------ */
+self.addEventListener("message", (e) => {
+  if (e.data === "skipWaiting") self.skipWaiting();
+});
