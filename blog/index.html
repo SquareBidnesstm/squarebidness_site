@@ -6,7 +6,7 @@
   <link rel="preconnect" href="https://www.google-analytics.com">
 
   <!-- GA4 (site-wide) -->
-  <script defer src="/scripts/ga.js"></script>
+  <script defer src="/public/scripts/ga.js"></script>
 
   <!-- Basics -->
   <meta charset="UTF-8" />
@@ -20,11 +20,11 @@
   <!-- Icons / PWA -->
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="apple-touch-icon" href="/assets/icons/icon-180.png">
-  <link rel="manifest" href="/site.webmanifest">
+  <link rel="manifest" href="/public/site.webmanifest">
   <meta name="theme-color" content="#000000">
 
   <!-- Canonical -->
-  <link rel="canonical" href="https://squarebidness.com/blog/" />
+  <link rel="canonical" href="https://www.squarebidness.com/blog/" />
 
   <!-- SEO -->
   <meta name="description" content="Square Bidness blog — stories, insights, and updates from Louisiana. Principles, morals, and business done right.">
@@ -34,8 +34,8 @@
   <meta property="og:site_name" content="Square Bidness">
   <meta property="og:title" content="Blog — Square Bidness">
   <meta property="og:description" content="Stories, insights, and updates from Square Bidness. Louisiana principles in action.">
-  <meta property="og:url" content="https://squarebidness.com/blog/">
-  <meta property="og:image" content="https://squarebidness.com/assets/sb-social-card_1200.jpg">
+  <meta property="og:url" content="https://www.squarebidness.com/blog/">
+  <meta property="og:image" content="https://www.squarebidness.com/assets/sb-social-card_1200.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
 
@@ -43,7 +43,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Blog — Square Bidness">
   <meta name="twitter:description" content="Stories, insights, and updates from Square Bidness. Louisiana principles in action.">
-  <meta name="twitter:image" content="https://squarebidness.com/assets/sb-social-card_1200.jpg">
+  <meta name="twitter:image" content="https://www.squarebidness.com/assets/sb-social-card_1200.jpg">
   <meta name="twitter:site" content="@squarebidnesstm">
 
   <!-- Organization JSON-LD (site-wide) -->
@@ -51,6 +51,7 @@
   {
     "@context":"https://schema.org",
     "@type":"Organization",
+    "@id":"https://www.squarebidness.com/#org",
     "name":"Square Bidness Apparel",
     "url":"https://www.squarebidness.com/",
     "logo":"https://www.squarebidness.com/assets/cleantextlogo.png",
@@ -71,9 +72,38 @@
     ]
   }
   </script>
+
+  <!-- Blog Collection JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "url": "https://www.squarebidness.com/blog/",
+    "name": "Square Bidness Blog",
+    "blogPost": [
+      {
+        "@type": "BlogPosting",
+        "headline": "Innovation Fest 2025: From Louisiana to NYC",
+        "url": "https://www.squarebidness.com/blog/post/innovation-fest-2025/",
+        "datePublished": "2025-09-24",
+        "image": "https://www.squarebidness.com/blog/assets/innovation-fest-hero_1200.jpg",
+        "author": { "@type": "Organization", "name": "Square Bidness Apparel" }
+      },
+      {
+        "@type": "BlogPosting",
+        "headline": "Why Supima Cotton for the Liberty Tee",
+        "url": "https://www.squarebidness.com/blog/supima/",
+        "datePublished": "2025-10-29",
+        "image": "https://www.squarebidness.com/liberty/assets/liberty-4.jpg",
+        "author": { "@type": "Organization", "name": "Square Bidness Apparel" }
+      }
+    ]
+  }
+  </script>
 </head>
 
 <body class="theme-dark" id="top">
+  <!-- NAV -->
   <div id="nav-placeholder"></div>
 
   <header class="page-hero">
@@ -86,6 +116,8 @@
   <main class="section">
     <div class="container">
       <div class="blog-grid">
+
+        <!-- Featured / latest -->
         <article class="blog-post blog-post--featured">
           <div class="blog-post__image">
             <img 
@@ -107,17 +139,61 @@
             <a href="/blog/post/innovation-fest-2025/" class="blog-post__link">Read More</a>
           </div>
         </article>
+
+        <!-- Supima / Liberty post -->
+        <article class="blog-post">
+          <div class="blog-post__image">
+            <img 
+              src="/liberty/assets/liberty-4.jpg"
+              srcset="/liberty/assets/liberty-4_800.jpg 800w,
+                      /liberty/assets/liberty-4_1200.jpg 1200w,
+                      /liberty/assets/liberty-4.jpg 1600w"
+              sizes="(max-width: 768px) 100vw, 450px"
+              alt="Liberty Collection — sculptural mosaic backdrop" loading="lazy">
+            <span class="blog-badge blog-badge--cat">Liberty</span>
+          </div>
+          <div class="blog-post__content">
+            <time class="blog-post__date">Oct 29, 2025</time>
+            <h2 class="blog-post__title">
+              <a href="/blog/supima/">Why Supima Cotton for the Liberty Tee</a>
+            </h2>
+            <p class="blog-post__excerpt">
+              Supima is the top ~1% of U.S. cotton — softer, stronger, and it keeps color. That’s why we used it on the Liberty Tee we shot in New York.
+            </p>
+            <a href="/blog/supima/" class="blog-post__link">Read Story</a>
+          </div>
+        </article>
+
       </div>
     </div>
   </main>
 
+  <!-- FOOTER -->
   <div id="footer-placeholder"></div>
 
+  <!-- load nav/footer from /public just like index -->
   <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-      try { document.getElementById("nav-placeholder").innerHTML = await (await fetch("/nav/")).text(); } catch {}
-      try { document.getElementById("footer-placeholder").innerHTML = await (await fetch("/footer/")).text(); } catch {}
-    });
+  (async () => {
+    const bust = `?v=${Date.now()}`;
+
+    async function inject(url, id) {
+      try {
+        const res = await fetch(url + bust, { credentials: "same-origin" });
+        if (!res.ok) return;
+        const html = await res.text();
+        const el = document.getElementById(id);
+        if (el) {
+          el.innerHTML = html;
+          el.classList.add("fade-in");
+        }
+      } catch (e) {
+        console.warn("partial load failed:", url, e);
+      }
+    }
+
+    await inject("/public/nav/index.html", "nav-placeholder");
+    await inject("/public/footer/index.html", "footer-placeholder");
+  })();
   </script>
 </body>
 </html>
