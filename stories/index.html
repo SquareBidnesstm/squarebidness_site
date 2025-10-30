@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Stories — Square Bidness</title>
-  <meta name="description" content="Square Bidness stories: behind the product, behind the discipline.">
+  <meta name="description" content="Square Bidness stories: behind the product, behind the discipline." />
   <link rel="canonical" href="https://www.squarebidness.com/stories/" />
 
   <!-- RSS -->
@@ -13,19 +13,56 @@
 
   <!-- social -->
   <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Square Bidness" />
   <meta property="og:title" content="Square Bidness Stories" />
   <meta property="og:description" content="Liberty Collection: Supima cotton, discipline, New York motion." />
-  <meta property="og:image" content="https://www.squarebidness.com/liberty/assets/liberty-8.jpg" />
   <meta property="og:url" content="https://www.squarebidness.com/stories/" />
+  <meta property="og:image" content="https://www.squarebidness.com/liberty/assets/liberty-8.jpg" />
+  <meta property="og:image:width" content="1600" />
+  <meta property="og:image:height" content="900" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Square Bidness Stories" />
   <meta name="twitter:description" content="Liberty Collection: Supima cotton, discipline, New York motion." />
   <meta name="twitter:image" content="https://www.squarebidness.com/liberty/assets/liberty-8.jpg" />
+  <meta name="twitter:site" content="@squarebidnesstm" />
 
-  <!-- styles -->
+  <!-- Perf -->
+  <link rel="preconnect" href="https://www.googletagmanager.com">
+  <link rel="preconnect" href="https://www.google-analytics.com">
+
+  <!-- global CSS (root; this is the one that works) -->
   <link rel="stylesheet" href="/styles/style.css" />
+
+  <!-- Icons / PWA -->
   <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" href="/assets/icons/icon-180.png" />
+  <link rel="manifest" href="/public/site.webmanifest" />
   <meta name="theme-color" content="#000000" />
+
+  <!-- Org JSON-LD (same across site) -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"Organization",
+    "@id":"https://www.squarebidness.com/#org",
+    "name":"Square Bidness Apparel",
+    "url":"https://www.squarebidness.com/",
+    "logo":"https://www.squarebidness.com/assets/cleantextlogo.png",
+    "sameAs":[
+      "https://instagram.com/squarebidnesstm",
+      "https://www.tiktok.com/@squarebidnesstm",
+      "https://www.facebook.com/squarebidnessapparel",
+      "https://bsky.app/profile/squarebidnesstm.bsky.social",
+      "https://www.linkedin.com/company/square-bidness-apparel"
+    ],
+    "contactPoint":[{
+      "@type":"ContactPoint",
+      "contactType":"customer support",
+      "email":"squarebidnessapparel@gmail.com",
+      "areaServed":"US"
+    }]
+  }
+  </script>
 
   <!-- Stories structured data -->
   <script type="application/ld+json">
@@ -40,27 +77,33 @@
       "name": "Square Bidness",
       "url": "https://www.squarebidness.com/"
     },
-    "blogPost": [{
-      "@type": "BlogPosting",
-      "headline": "Why Supima Cotton",
-      "description": "Supima cotton is the top ~1% of U.S. cotton — softer, stronger, longer-lasting. Why we used it for the Liberty Tee.",
-      "url": "https://www.squarebidness.com/blog/supima/",
-      "mainEntityOfPage": "https://www.squarebidness.com/blog/supima/",
-      "image": "https://www.squarebidness.com/liberty/assets/liberty-4.jpg",
-      "datePublished": "2025-10-29",
-      "author": { "@type": "Organization", "name": "Square Bidness Apparel" },
-      "publisher": {
-        "@type": "Organization",
-        "name": "Square Bidness Apparel",
-        "logo": {
-          "@type": "ImageObject",
-          "url": "https://www.squarebidness.com/assets/cleantextlogo.png"
+    "blogPost": [
+      {
+        "@type": "BlogPosting",
+        "headline": "Why Supima Cotton",
+        "description": "Supima cotton is the top ~1% of U.S. cotton — softer, stronger, longer-lasting. Why we used it for the Liberty Tee.",
+        "url": "https://www.squarebidness.com/blog/supima/",
+        "mainEntityOfPage": "https://www.squarebidness.com/blog/supima/",
+        "image": "https://www.squarebidness.com/liberty/assets/liberty-4.jpg",
+        "datePublished": "2025-10-29",
+        "author": { "@type": "Organization", "name": "Square Bidness Apparel" },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Square Bidness Apparel",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.squarebidness.com/assets/cleantextlogo.png"
+          }
         }
       }
-    }]
+    ]
   }
   </script>
 
+  <!-- GA4 (you moved scripts under /public) -->
+  <script defer src="/public/scripts/ga.js"></script>
+
+  <!-- Page-only styles -->
   <style>
     body {
       background:#000;
@@ -188,12 +231,9 @@
       line-height:1.2;
     }
   </style>
-
-  <script defer src="/scripts/ga.js"></script>
 </head>
-<body class="theme-dark">
-
-  <!-- (optional) nav slot -->
+<body class="theme-dark" id="top">
+  <!-- NAV -->
   <div id="nav-placeholder"></div>
 
   <main class="stories-wrap">
@@ -239,21 +279,38 @@
     </article>
   </main>
 
-  <!-- footer slot -->
+  <!-- FOOTER -->
   <div id="footer-placeholder"></div>
 
+  <!-- load nav/footer from /public just like index -->
   <script>
-    // pull nav and footer partials if they exist
-    document.addEventListener("DOMContentLoaded", async () => {
+  (async () => {
+    const bust = `?v=${Date.now()}`;
+
+    async function inject(url, id) {
       try {
-        const navHTML = await (await fetch("/nav/")).text();
-        document.getElementById("nav-placeholder").innerHTML = navHTML;
-      } catch(e) {}
-      try {
-        const footerHTML = await (await fetch("/footer/")).text();
-        document.getElementById("footer-placeholder").innerHTML = footerHTML;
-      } catch(e) {}
-    });
+        const res = await fetch(url + bust, { credentials: "same-origin" });
+        if (!res.ok) return;
+        const html = await res.text();
+        const slot = document.getElementById(id);
+        if (slot) {
+          slot.innerHTML = html;
+          slot.classList.add("fade-in");
+        }
+      } catch (e) {
+        console.warn("partial load failed:", url, e);
+      }
+    }
+
+    // NAV from /public
+    await inject("/public/nav/index.html", "nav-placeholder");
+
+    // FOOTER from /public
+    await inject("/public/footer/index.html", "footer-placeholder");
+  })();
   </script>
+
+  <!-- cart / other shared scripts if needed -->
+  <script src="/public/scripts/sb-cart.js" defer></script>
 </body>
 </html>
