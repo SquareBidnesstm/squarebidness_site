@@ -65,22 +65,51 @@
   <link rel="preconnect" href="https://www.google-analytics.com">
   <script defer src="/scripts/ga.js"></script>
 
-  <!-- Nav/Footer loader -->
-  <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-      try {
-        const navHTML = await (await fetch("/nav/", {cache:"no-store"})).text();
-        const navSlot = document.getElementById("nav-placeholder");
-        if (navSlot) navSlot.innerHTML = navHTML;
-      } catch {}
+<!-- NAV + FOOTER loader (shared) -->
+<div id="footer-placeholder"></div>
+<script>
+(async () => {
+  const bust = `?v=${Date.now()}`;
 
+  async function injectPartial(url, targetId) {
+    try {
+      const res = await fetch(url + bust, { credentials: 'same-origin' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const html = await res.text();
+      const el = document.getElementById(targetId);
+      if (el) {
+        el.innerHTML = html;
+        el.classList.add('fade-in');
+      }
+      return el;
+    } catch (err) {
+      console.warn('Partial failed:', url, err);
+      return null;
+    }
+  }
+
+  // 1) NAV from /public
+  const navEl = await injectPartial('/public/nav/index.html', 'nav-placeholder');
+
+  // 1a) highlight current page
+  if (navEl) {
+    const current = location.pathname.replace(/\/+$/, '') || '/';
+    navEl.querySelectorAll('a[href]').forEach(a => {
       try {
-        const footerHTML = await (await fetch("/footer/", {cache:"no-store"})).text();
-        const footerSlot = document.getElementById("footer-placeholder");
-        if (footerSlot) footerSlot.innerHTML = footerHTML;
-      } catch {}
+        const href = new URL(a.getAttribute('href'), location.origin).pathname.replace(/\/+$/, '') || '/';
+        if (href === current || (href !== '/' && current.startsWith(href))) {
+          a.classList.add('is-active');
+          a.setAttribute('aria-current', 'page');
+        }
+      } catch (_) {}
     });
-  </script>
+  }
+
+  // 2) FOOTER from /public
+  await injectPartial('/public/footer/index.html', 'footer-placeholder');
+})();
+</script>
+
 
   <style>
     .press-page-header {
