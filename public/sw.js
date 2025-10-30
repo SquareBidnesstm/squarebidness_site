@@ -1,12 +1,11 @@
 /* =====================================================
-   Square Bidness — Service Worker
-   PWA Cache for Pho-Matic + Core Pages
+   Square Bidness — PWA Service Worker (Dynamic Edition)
    -----------------------------------------------------
-   Caches CSS, images, nav/footer, and page shells.
-   Auto-updates when version changes.
+   Static pre-cache + dynamic runtime caching
+   for Pho-Matic, VSOP, nav/footer, and global CSS.
 ===================================================== */
 
-const CACHE_NAME = "squarebidness-v3";
+const CACHE_NAME = "squarebidness-v4";
 const CORE_ASSETS = [
   "/", 
   "/index.html",
@@ -35,7 +34,7 @@ self.addEventListener("install", (e) => {
 });
 
 /* ------------------------------
-   ACTIVATE — Clean old caches
+   ACTIVATE — Remove old caches
 ------------------------------ */
 self.addEventListener("activate", (e) => {
   e.waitUntil(
@@ -49,26 +48,69 @@ self.addEventListener("activate", (e) => {
 });
 
 /* ------------------------------
-   FETCH — Serve cache first
+   FETCH — Hybrid cache strategy
 ------------------------------ */
 self.addEventListener("fetch", (e) => {
   const { request } = e;
   if (request.method !== "GET") return;
 
-  e.respondWith(
-    caches.match(request).then((cached) => {
-      if (cached) return cached;
-      return fetch(request)
-        .then((res) => {
-          // Cache fresh copy
-          const clone = res.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-          return res;
-        })
-        .catch(() => caches.match("/index.html"));
-    })
-  );
+  const url = new URL(request.url);
+
+  // Strategy: Cache First for core assets, Network First for pages
+  if (CORE_ASSETS.some((asset) => url.pathname.startsWith(asset))) {
+    e.respondWith(cacheFirst(request));
+  } else if (
+    url.pathname.startsWith("/phomatic/") ||
+    url.pathname.startsWith("/assets/")
+  ) {
+    e.respondWith(dynamicCache(request));
+  } else {
+    e.respondWith(networkFirst(request));
+  }
 });
+
+/* ------------------------------
+   STRATEGIES
+------------------------------ */
+async function cacheFirst(request) {
+  const cached = await caches.match(request);
+  if (cached) return cached;
+  const response = await fetch(request);
+  const cache = await caches.open(CACHE_NAME);
+  cache.put(request, response.clone());
+  return response;
+}
+
+async function networkFirst(request) {
+  try {
+    const response = await fetch(request);
+    const cache = await caches.open(CACHE_NAME);
+    cache.put(request, response.clone());
+    return response;
+  } catch {
+    return caches.match(request) || caches.match("/index.html");
+  }
+}
+
+/* ------------------------------
+   DYNAMIC CACHE — Images & Assets
+------------------------------ */
+async function dynamicCache(request) {
+  const cache = await caches.open(CACHE_NAME);
+  const cached = await cache.match(request);
+  if (cached) return cached;
+
+  try {
+    const response = await fetch(request);
+    if (response.ok && response.type === "basic") {
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch {
+    // fallback: placeholder or offline shell
+    return caches.match("/index.html");
+  }
+}
 
 /* ------------------------------
    MESSAGE — Manual skipWaiting
