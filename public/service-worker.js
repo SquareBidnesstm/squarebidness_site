@@ -23,6 +23,7 @@ const ASSETS = [
   "/shop/",
   "/returns/",
   "/shipping/",
+  "/offline.html",
 ];
 
 // Install: pre-cache core assets
@@ -52,19 +53,21 @@ self.addEventListener("activate", (event) => {
 // Fetch: respond with cache first, then network
 self.addEventListener("fetch", (event) => {
   const { request } = event;
-  // Ignore non-GET requests
   if (request.method !== "GET") return;
 
   event.respondWith(
     caches.match(request).then((cached) => {
       const networkFetch = fetch(request)
         .then((response) => {
-          // Cache new pages dynamically
           const clone = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
           return response;
         })
-        .catch(() => cached || caches.match("/index.html"));
+        .catch(async () => {
+          // fallback: cached page or offline screen
+          if (cached) return cached;
+          return await caches.match("/offline.html");
+        });
       return cached || networkFetch;
     })
   );
