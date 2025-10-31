@@ -1,160 +1,426 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Perf -->
+  <link rel="preconnect" href="https://www.googletagmanager.com">
+  <link rel="preconnect" href="https://www.google-analytics.com">
+
+  <!-- GA -->
+  <script defer src="/public/scripts/ga.js"></script>
+
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Liberty Collection — Square Bidness</title>
-  <meta name="description" content="Liberty Collection — Supima cotton, built in Louisiana, captured in NYC. A statement of freedom and craftsmanship from Square Bidness Apparel." />
   <link rel="canonical" href="https://www.squarebidness.com/liberty/" />
+  <meta name="description" content="Square Bidness Liberty Collection — Supima cotton, Louisiana discipline, shot in New York. Limited run." />
   <meta name="theme-color" content="#000000" />
 
   <!-- CSS -->
   <link rel="stylesheet" href="/styles/style.css" />
-  <link rel="stylesheet" href="/styles/liberty.css" />
 
-  <!-- Icons / PWA -->
-  <link rel="icon" href="/favicon.ico" />
-  <link rel="apple-touch-icon" href="/assets/icons/icon-180.png" />
-  <link rel="manifest" href="/public/site.webmanifest" />
+  <!-- PWA -->
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/assets/icons/icon-180.png">
+  <link rel="manifest" href="/public/site.webmanifest">
 
-  <!-- Social -->
-  <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="Square Bidness Apparel" />
-  <meta property="og:title" content="Liberty Collection — Square Bidness" />
-  <meta property="og:description" content="Supima cotton · Built in Louisiana · Captured in NYC" />
-  <meta property="og:image" content="https://www.squarebidness.com/assets/liberty-3_1200.jpg" />
-  <meta property="og:url" content="https://www.squarebidness.com/liberty/" />
+  <!-- OG -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Square Bidness">
+  <meta property="og:title" content="Liberty Collection — Square Bidness">
+  <meta property="og:description" content="Supima cotton. Built in Louisiana. Captured in NYC." />
+  <meta property="og:url" content="https://www.squarebidness.com/liberty/">
+  <meta property="og:image" content="https://www.squarebidness.com/liberty/assets/liberty-3_1200.jpg">
 
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Liberty Collection — Square Bidness" />
-  <meta name="twitter:description" content="Supima cotton · Built in Louisiana · Captured in NYC" />
-  <meta name="twitter:image" content="https://www.squarebidness.com/assets/liberty-3_1200.jpg" />
+  <!-- JSON-LD (collection) -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"CollectionPage",
+    "name":"Liberty Collection",
+    "url":"https://www.squarebidness.com/liberty/",
+    "description":"Square Bidness Liberty Collection — movement from Louisiana to NYC.",
+    "hasPart":[
+      {"@type":"ImageObject","contentUrl":"https://www.squarebidness.com/liberty/assets/liberty-3_1200.jpg"},
+      {"@type":"ImageObject","contentUrl":"https://www.squarebidness.com/liberty/assets/liberty-4_1200.jpg"},
+      {"@type":"ImageObject","contentUrl":"https://www.squarebidness.com/liberty/assets/liberty-7_1200.jpg"},
+      {"@type":"ImageObject","contentUrl":"https://www.squarebidness.com/liberty/assets/liberty-8_1200.jpg"}
+    ]
+  }
+  </script>
 
-  <!-- Analytics + Cart -->
-  <script defer src="/public/scripts/ga.js"></script>
-  <script defer src="/public/scripts/sb-cart.js"></script>
+  <style>
+    :root {
+      --sb-bg: #000;
+      --sb-surface: rgba(10,10,10,0.65);
+      --sb-border: rgba(255,255,255,.06);
+      --sb-gold: #c9a227;
+      --sb-muted: #a1a1aa;
+      --sb-radius: 18px;
+      --sb-shadow: 0 20px 55px rgba(0,0,0,.55);
+    }
+    body.theme-dark {
+      background: radial-gradient(circle at top, rgba(201,162,39,.21) 0%, #000 42%);
+      color: #fff;
+      min-height: 100vh;
+    }
+    .liberty-shell {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 1.5rem 1rem 4rem;
+    }
+
+    /* hero */
+    .liberty-hero {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(201,162,39,.45);
+      border-radius: 20px;
+      background: linear-gradient(140deg, rgba(0,0,0,.95) 0%, rgba(0,0,0,.25) 55%, rgba(0,0,0,.85) 100%), url("/liberty/assets/liberty-3_1200.jpg") center/cover no-repeat;
+      min-height: 58vh;
+      display: grid;
+      place-items: center;
+      box-shadow: var(--sb-shadow);
+      margin-bottom: 2.5rem;
+    }
+    .liberty-hero__inner {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      max-width: 48rem;
+      padding: 2.9rem 1.1rem 3.25rem;
+    }
+    .eyebrow {
+      display: inline-flex;
+      gap: .35rem;
+      align-items: center;
+      background: rgba(201,162,39,.08);
+      border: 1px solid rgba(201,162,39,.4);
+      border-radius: 999px;
+      padding: .3rem .9rem .35rem;
+      font-size: .68rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: .75rem;
+    }
+    .liberty-title {
+      font-size: clamp(2rem, 4.3vw, 3.05rem);
+      font-weight: 800;
+      line-height: .99;
+      letter-spacing: -.01em;
+      margin-bottom: .55rem;
+    }
+    .liberty-sub {
+      max-width: 38rem;
+      margin: 0 auto 1.4rem;
+      color: #e5e7eb;
+    }
+    .liberty-cta-row {
+      display: flex;
+      gap: .6rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform .12s ease-out, box-shadow .12s ease-out;
+    }
+    .btn--gold {
+      background: var(--sb-gold);
+      color: #141414;
+      padding: .6rem 1.1rem .65rem;
+      border-color: rgba(201,162,39,.35);
+      box-shadow: 0 12px 35px rgba(201,162,39,.3);
+    }
+    .btn--ghost {
+      background: rgba(0,0,0,.35);
+      border: 1px solid rgba(255,255,255,.12);
+      color: #fff;
+      padding: .6rem 1rem .65rem;
+    }
+    .btn:hover { transform: translateY(-1px); }
+
+    /* buybar */
+    .liberty-buybar {
+      background: rgba(12,12,12,.75);
+      border: 1px solid rgba(201,162,39,.25);
+      border-radius: 18px;
+      padding: 1.1rem 1.1rem 1.1rem;
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin-bottom: 2.35rem;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 20px 45px rgba(0,0,0,.28);
+    }
+    .liberty-buybar__left h2 { margin: 0; font-size: 1.02rem; }
+    .liberty-buybar__left p { margin: .35rem 0 0; color: #d4d4d8; font-size: .78rem; }
+    .liberty-buybar__right { display:flex; gap:.5rem; flex-wrap:wrap; }
+    .liberty-buybar select,
+    .liberty-buybar input {
+      background: rgba(0,0,0,.28);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 12px;
+      color: #fff;
+      padding: .45rem .55rem;
+      min-width: 6rem;
+    }
+
+    /* image grid */
+    .liberty-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.2rem;
+      margin-bottom: 2.5rem;
+    }
+    .liberty-card {
+      background: rgba(11,11,11,.55);
+      border: 1px solid rgba(255,255,255,.03);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 16px 38px rgba(0,0,0,.35);
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+    }
+    .liberty-card__media picture,
+    .liberty-card__media img {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: #0d0d0d;
+    }
+    .liberty-card__body {
+      padding: .55rem .75rem .65rem;
+    }
+    .liberty-card__title {
+      font-weight: 700;
+      font-size: .8rem;
+      margin-bottom: .25rem;
+    }
+    .liberty-card__meta {
+      font-size: .7rem;
+      color: #a1a1aa;
+    }
+    .liberty-tag {
+      display: inline-flex;
+      gap: .25rem;
+      align-items: center;
+      padding: .25rem .55rem .3rem;
+      background: rgba(201,162,39,.08);
+      border: 1px solid rgba(201,162,39,.35);
+      border-radius: 999px;
+      font-size: .6rem;
+      text-transform: uppercase;
+      letter-spacing: .02em;
+      margin-bottom: .4rem;
+    }
+    .liberty-card--wide {
+      grid-column: span 2;
+    }
+
+    /* story */
+    .liberty-story {
+      background: radial-gradient(circle at top, rgba(201,162,39,.08), rgba(0,0,0,0) 50%), rgba(13,13,13,.7);
+      border: 1px solid rgba(255,255,255,.03);
+      border-radius: 16px;
+      padding: 1.4rem 1.3rem 1.35rem;
+      line-height: 1.6;
+      color: #e5e7eb;
+    }
+    .liberty-story h2 {
+      font-size: 1rem;
+      margin-bottom: .35rem;
+    }
+    .liberty-story small {
+      display: block;
+      margin-top: .65rem;
+      color: #a1a1aa;
+      font-size: .7rem;
+    }
+
+    /* nav + footer containers */
+    #nav-placeholder,
+    #footer-placeholder {
+      min-height: 10px;
+    }
+
+    @media (max-width: 820px) {
+      .liberty-hero { min-height: auto; }
+      .liberty-buybar { flex-direction: column; align-items: flex-start; }
+      .liberty-card--wide { grid-column: span 1; }
+    }
+  </style>
 </head>
 
-<body class="theme-dark" id="top">
-  <!-- NAV -->
+<body class="theme-dark">
+  <!-- NAV SLOT -->
   <div id="nav-placeholder"></div>
 
-  <!-- HERO -->
-  <header class="page-hero liberty-hero">
-    <div class="container">
-      <h1 class="page-title">Liberty Collection</h1>
-      <p class="page-subtitle">Supima cotton · Built in Louisiana · Captured in NYC</p>
-    </div>
-  </header>
-
-  <!-- MAIN -->
-  <main class="section">
-    <div class="container liberty-layout">
-
-      <!-- INTRO -->
-      <section class="liberty-intro fade-in-on-scroll">
-        <picture>
-          <source srcset="/assets/liberty-3_1200.jpg" media="(min-width:768px)">
-          <source srcset="/assets/liberty-3_800.jpg"  media="(max-width:767px)">
-          <img src="/assets/liberty-3_800.jpg"
-               width="800" height="1000"
-               alt="Square Bidness Liberty Collection — Supima cotton look"
-               loading="lazy" decoding="async" />
-        </picture>
-        <div class="liberty-copy">
-          <h2>Freedom in Fabric</h2>
-          <p>Premium Supima cotton cut and sewn for lasting comfort and confidence. Built in Louisiana, captured in New York City energy.</p>
-          <a href="/shop/" class="btn btn--gold">Shop Collection</a>
+  <main class="liberty-shell">
+    <!-- HERO -->
+    <section class="liberty-hero">
+      <div class="liberty-hero__inner">
+        <span class="eyebrow">Liberty · NYC session</span>
+        <h1 class="liberty-title">Supima Cotton · Liberty Green</h1>
+        <p class="liberty-sub">
+          Louisiana discipline, New York motion. Shot on the water with Lady Liberty in the back — this is Square Bidness outside the state.
+        </p>
+        <div class="liberty-cta-row">
+          <a class="btn btn--gold liberty-checkout-btn" href="https://buy.stripe.com/cNi00j8BNcuB5LT3kQ8N20g">Checkout — $35</a>
+          <a class="btn btn--ghost" href="/phomatic/">Shot by Pho-Matic</a>
         </div>
-      </section>
-
-      <!-- GALLERY -->
-      <section class="liberty-gallery">
-        <figure class="liberty-photo fade-in-on-scroll">
-          <picture>
-            <source srcset="/assets/liberty-4_1200.jpg" media="(min-width:768px)">
-            <source srcset="/assets/liberty-4_800.jpg"  media="(max-width:767px)">
-            <img src="/assets/liberty-4_800.jpg"
-                 width="800" height="1000"
-                 alt="Liberty Collection look — Daylight studio capture"
-                 loading="lazy" decoding="async" />
-          </picture>
-        </figure>
-
-        <figure class="liberty-photo fade-in-on-scroll">
-          <picture>
-            <source srcset="/assets/liberty-7_1200.jpg" media="(min-width:768px)">
-            <source srcset="/assets/liberty-7_800.jpg"  media="(max-width:767px)">
-            <img src="/assets/liberty-7_800.jpg"
-                 width="800" height="1000"
-                 alt="Liberty Collection look — New York streetscape"
-                 loading="lazy" decoding="async" />
-          </picture>
-        </figure>
-
-        <figure class="liberty-photo fade-in-on-scroll">
-          <picture>
-            <source srcset="/assets/liberty-8_1200.jpg" media="(min-width:768px)">
-            <source srcset="/assets/liberty-8_800.jpg"  media="(max-width:767px)">
-            <img src="/assets/liberty-8_800.jpg"
-                 width="1200" height="800"
-                 alt="Liberty Collection — NYC night backdrop"
-                 loading="lazy" decoding="async" />
-          </picture>
-        </figure>
-      </section>
-
-      <!-- CTA -->
-      <div class="section__cta">
-        <a href="/shop/" class="btn btn--ghost">⬅ Back to Shop</a>
       </div>
-    </div>
+    </section>
+
+    <!-- BUY BAR -->
+    <section class="liberty-buybar" aria-label="Buy Liberty Tee">
+      <div class="liberty-buybar__left">
+        <h2>Liberty Tee — Supima Cotton</h2>
+        <p>Soft hand · Color holds · Ships from Louisiana · $35</p>
+      </div>
+      <div class="liberty-buybar__right">
+        <select id="liberty-size">
+          <option value="">Select size…</option>
+          <option value="XS">XS — In stock</option>
+          <option value="S">S — In stock</option>
+          <option value="M">M — Sold out</option>
+          <option value="L">L — Sold out</option>
+          <option value="XL">XL — In stock</option>
+          <option value="2X">2X — In stock</option>
+          <option value="3X">3X — In stock</option>
+        </select>
+        <input id="liberty-qty" type="number" min="1" value="1" aria-label="Quantity">
+        <a class="btn btn--gold liberty-checkout-btn" href="https://buy.stripe.com/cNi00j8BNcuB5LT3kQ8N20g">Buy Now</a>
+      </div>
+    </section>
+
+    <!-- IMAGE GRID -->
+    <section class="liberty-grid" aria-label="Liberty Session Gallery">
+      <!-- 3 -->
+      <article class="liberty-card liberty-card--wide">
+        <div class="liberty-card__media">
+          <picture>
+            <source srcset="/liberty/assets/liberty-3_1200.jpg" media="(min-width:768px)">
+            <img src="/liberty/assets/liberty-3_800.jpg"
+                 alt="Liberty tee with Statue of Liberty in background"
+                 loading="lazy" decoding="async" />
+          </picture>
+        </div>
+        <div class="liberty-card__body">
+          <span class="liberty-tag">Battery Park City · Golden hour</span>
+          <h3 class="liberty-card__title">New York shot · Louisiana energy</h3>
+          <p class="liberty-card__meta">Supima Liberty tee, shot against water. This is the image we’ll reuse for marketing.</p>
+        </div>
+      </article>
+
+      <!-- 4 -->
+      <article class="liberty-card">
+        <div class="liberty-card__media">
+          <picture>
+            <source srcset="/liberty/assets/liberty-4_1200.jpg" media="(min-width:768px)">
+            <img src="/liberty/assets/liberty-4_800.jpg"
+                 alt="Liberty tee being put on in front of mosaic structure"
+                 loading="lazy" decoding="async" />
+          </picture>
+        </div>
+        <div class="liberty-card__body">
+          <span class="liberty-tag">Movement</span>
+          <h3 class="liberty-card__title">Pull-on shot</h3>
+          <p class="liberty-card__meta">Shows drape + front graphic. Good for IG carousel.</p>
+        </div>
+      </article>
+
+      <!-- 7 -->
+      <article class="liberty-card">
+        <div class="liberty-card__media">
+          <picture>
+            <source srcset="/liberty/assets/liberty-7_1200.jpg" media="(min-width:768px)">
+            <img src="/liberty/assets/liberty-7_800.jpg"
+                 alt="Liberty tee walking shot in Battery Park City"
+                 loading="lazy" decoding="async" />
+          </picture>
+        </div>
+        <div class="liberty-card__body">
+          <span class="liberty-tag">Location stamp</span>
+          <h3 class="liberty-card__title">Battery Park City</h3>
+          <p class="liberty-card__meta">Subway sign in frame — proves shoot location.</p>
+        </div>
+      </article>
+
+      <!-- 8 -->
+      <article class="liberty-card liberty-card--wide">
+        <div class="liberty-card__media">
+          <picture>
+            <source srcset="/liberty/assets/liberty-8_1200.jpg" media="(min-width:768px)">
+            <img src="/liberty/assets/liberty-8_800.jpg"
+                 alt="Liberty tee night shot over the highway"
+                 loading="lazy" decoding="async" />
+          </picture>
+        </div>
+        <div class="liberty-card__body">
+          <span class="liberty-tag">Night cut</span>
+          <h3 class="liberty-card__title">NYC Overpass · After hours</h3>
+          <p class="liberty-card__meta">This one feels editorial — use for stories, reels covers, press.</p>
+        </div>
+      </article>
+    </section>
+
+    <!-- STORY -->
+    <section class="liberty-story" aria-label="Square Bidness Liberty story">
+      <h2>Why “Liberty”?</h2>
+      <p>
+        Because it’s freedom to build how we want. We left Louisiana, touched New York, kept the same principles, and shot it like
+        a brand that’s already international — not local. Supima cotton, clean stitching, SB mark on top. That’s the difference.
+      </p>
+      <small>Square Bidness Tech Lab · 2025</small>
+    </section>
   </main>
 
   <!-- FOOTER -->
   <div id="footer-placeholder"></div>
 
-  <!-- Inject Nav/Footer -->
+  <!-- Inject nav + footer -->
   <script>
-  (async()=>{
-    const bust=`?v=${Date.now()}`;
-    const inject=async(u,id)=>{
-      try{
-        const r=await fetch(u+bust);
-        if(!r.ok)throw 0;
-        const h=await r.text();
-        document.getElementById(id).innerHTML=h;
-      }catch(e){console.warn('fail',u);}
-    };
-    await inject('/public/nav/index.html','nav-placeholder');
-    await inject('/public/footer/index.html','footer-placeholder');
-  })();
-  </script>
-  <script>
-  // Fade-in on scroll for .fade-in-on-scroll elements
-  (function() {
-    const els = document.querySelectorAll('.fade-in-on-scroll');
-    if (!('IntersectionObserver' in window)) {
-      // fallback: just show them
-      els.forEach(el => el.classList.add('is-visible'));
+  document.addEventListener("DOMContentLoaded", async () => {
+    const bust = `?v=${Date.now()}`;
+    async function put(url, id) {
+      try {
+        const res = await fetch(url + bust, { credentials: "same-origin" });
+        if (!res.ok) return;
+        const html = await res.text();
+        const slot = document.getElementById(id);
+        if (slot) slot.innerHTML = html;
+      } catch (err) { console.warn("nav/footer load failed", err); }
+    }
+    await put("/public/nav/index.html", "nav-placeholder");
+    await put("/public/footer/index.html", "footer-placeholder");
+  });
+
+  // make checkout respect size/qty
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest(".liberty-checkout-btn");
+    if (!btn) return;
+    const size = document.getElementById("liberty-size")?.value || "";
+    const qty  = document.getElementById("liberty-qty")?.value || "1";
+    if (!size) {
+      e.preventDefault();
+      document.getElementById("liberty-size").style.outline = "2px solid #f97316";
+      setTimeout(() => document.getElementById("liberty-size").style.outline = "", 1200);
       return;
     }
-
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add('is-visible');
-        io.unobserve(entry.target);
-      });
-    }, {
-      root: null,
-      rootMargin: '0px 0px -8% 0px',
-      threshold: 0.35
-    });
-
-    els.forEach(el => io.observe(el));
-  })();
-</script>
-
+    const base = "https://buy.stripe.com/cNi00j8BNcuB5LT3kQ8N20g";
+    const qs   = new URLSearchParams({ size, qty });
+    btn.href   = `${base}?${qs.toString()}`;
+  });
+  </script>
 </body>
 </html>
