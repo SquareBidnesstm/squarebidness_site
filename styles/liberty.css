@@ -1,281 +1,205 @@
 /* =========================================================
-   SQUARE BIDNESS — LIBERTY COLLECTION
-   ---------------------------------------------------------
-   Supima cotton. Louisiana discipline. NYC motion.
-   Minimal, editorial style focused on real imagery.
+   Square Bidness — LIBERTY COLLECTION
+   Fresh, photo-first layout
+   Path: /styles/liberty.css
+   Works with: /liberty/index.html (nav/footer injected)
 ========================================================= */
 
 :root {
-  --page-bg: #000;
-  --surface: #0f0f0f;
-  --border: #1f1f1f;
-  --gold: #c9a227;
-  --muted: #9ca3af;
-  --radius: 16px;
-  --shadow: 0 18px 40px rgba(0,0,0,.45);
+  --lib-bg: #000;
+  --lib-surface: #0f0f0f;
+  --lib-border: rgba(255,255,255,.05);
+  --lib-gold: #c9a227;
+  --lib-muted: #9ca3af;
+  --lib-radius: 16px;
 }
 
-* { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; }
-
-body.theme-dark {
-  background: var(--page-bg);
+body.liberty-page,
+.liberty-page {
+  background: var(--lib-bg);
   color: #fff;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-  line-height: 1.6;
 }
 
-/* ------------------------------
-   CONTAINER
------------------------------- */
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 1.5rem 1rem 4rem;
-}
-
-/* ------------------------------
-   HERO SECTION
------------------------------- */
+/* ---------------------------
+   HERO from the HTML
+--------------------------- */
 .liberty-hero {
-  position: relative;
+  background: radial-gradient(circle at top, rgba(201,162,39,.08), rgba(0,0,0,1) 48%);
+  border-bottom: 1px solid rgba(255,255,255,.03);
+  padding-bottom: 1rem;
+}
+.liberty-hero .page-title {
+  margin-bottom: .25rem;
+}
+.liberty-hero .page-subtitle {
+  color: rgba(255,255,255,.68);
+}
+
+/* ---------------------------
+   MAIN LAYOUT WRAPPER
+--------------------------- */
+.liberty-layout {
   display: grid;
-  grid-template-columns: 1fr;
-  text-align: center;
-  padding: 3.5rem 1.25rem 3rem;
-  border-bottom: 1px solid var(--border);
+  gap: 2rem;
+  margin-top: 2.25rem;
 }
 
-.liberty-hero__img {
-  position: relative;
-  z-index: 0;
-  max-height: 70vh;
-  overflow: hidden;
-  border-radius: var(--radius);
-  margin-bottom: 1.5rem;
-}
-
-.liberty-hero__img img {
-  width: 100%;
-  height: auto;
-  object-fit: cover;
-  object-position: center 40%;
-  display: block;
-  transition: transform .35s ease;
-}
-
-.liberty-hero__img img:hover {
-  transform: scale(1.02);
-}
-
-.liberty-hero__copy {
-  position: relative;
-  z-index: 2;
-  max-width: 46rem;
-  margin: 0 auto;
-}
-
-.liberty-hero__copy .eyebrow {
-  display: inline-block;
-  background: rgba(201,162,39,.12);
-  border: 1px solid rgba(201,162,39,.35);
-  color: #fff;
-  border-radius: 999px;
-  padding: .4rem .85rem .45rem;
-  font-size: .7rem;
-  font-weight: 700;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  margin-bottom: .75rem;
-}
-
-.liberty-hero__copy h1 {
-  font-size: clamp(2.1rem, 5vw, 3rem);
-  font-weight: 800;
-  line-height: 1.1;
-  margin: 0 0 1rem;
-}
-
-.liberty-hero__copy p {
-  font-size: 1rem;
-  color: #e5e7eb;
-  margin: 0 auto 1.5rem;
-  max-width: 38rem;
-}
-
-/* ------------------------------
-   BUYBOX / CTA
------------------------------- */
-.buybox {
-  display: flex;
-  flex-direction: column;
+/* ---------------------------
+   INTRO BLOCK (image + copy)
+--------------------------- */
+.liberty-intro {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr);
   align-items: center;
-  gap: .5rem;
-  margin-top: 1rem;
+  background: radial-gradient(circle at 12% 10%, rgba(201,162,39,.22), rgba(0,0,0,0) 38%), #050505;
+  border: 1px solid rgba(255,255,255,.04);
+  border-radius: 18px;
+  padding: 1.4rem 1.25rem 1.5rem;
+  box-shadow: 0 18px 38px rgba(0,0,0,.35);
 }
 
-.buybox label {
-  font-size: .8rem;
-  color: var(--muted);
+.liberty-intro picture,
+.liberty-intro img {
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.04);
+  background: #090909;
+  display: block;
 }
 
-.buybox select,
-.buybox input {
-  background: rgba(0,0,0,.35);
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 10px;
-  color: #fff;
-  padding: .45rem .6rem;
-  width: 160px;
+.liberty-copy h2 {
+  font-size: 1.35rem;
+  margin-bottom: .35rem;
+  font-weight: 700;
 }
-
-.btn {
+.liberty-copy p {
+  color: rgba(255,255,255,.7);
+  max-width: 32rem;
+  margin-bottom: .7rem;
+  line-height: 1.55;
+}
+.liberty-copy .btn {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: .4rem;
-  font-weight: 700;
+  gap: .35rem;
+}
+
+.btn.btn--gold {
+  background: var(--lib-gold);
+  color: #111;
+  border: 1px solid rgba(255,215,0,.35);
   border-radius: 999px;
-  border: 1px solid transparent;
-  cursor: pointer;
+  padding: .55rem 1.05rem .6rem;
+  font-weight: 700;
   text-decoration: none;
   transition: transform .12s ease-out, box-shadow .12s ease-out;
 }
-
-.btn--gold {
-  background: var(--gold);
-  color: #111;
-  padding: .7rem 1.05rem;
-  border-color: rgba(201,162,39,.4);
-  box-shadow: 0 12px 35px rgba(201,162,39,.28);
-}
-
-.btn--gold:hover {
+.btn.btn--gold:hover {
   transform: translateY(-1px);
+  box-shadow: 0 12px 32px rgba(201,162,39,.35);
 }
 
-.btn--ghost {
-  background: rgba(0,0,0,.35);
-  border-color: rgba(255,255,255,.08);
-  color: #fff;
-  padding: .7rem 1rem;
-}
-
-/* ------------------------------
+/* ---------------------------
    GALLERY GRID
------------------------------- */
-.liberty-grid {
+   uses liberty-1, -2, and -8
+--------------------------- */
+.liberty-gallery {
   display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: 1rem;
-  margin-top: 2.75rem;
-  padding: 0 1rem;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
 }
 
-.tile {
-  grid-column: span 4;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
+.liberty-photo {
+  background: #0b0b0b;
+  border: 1px solid rgba(255,255,255,.03);
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: var(--shadow);
+  box-shadow: 0 12px 28px rgba(0,0,0,.35);
   position: relative;
+  min-height: 240px;
 }
 
-.tile img {
+.liberty-photo picture,
+.liberty-photo img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
   display: block;
-  transition: transform .25s ease, filter .25s ease;
+  object-fit: cover;
 }
 
-.tile:hover img {
-  transform: scale(1.035);
-  filter: saturate(1.05);
+/* first two are half-width on desktop */
+.liberty-gallery .liberty-photo:nth-child(1),
+.liberty-gallery .liberty-photo:nth-child(2) {
+  grid-column: span 6;
 }
 
-/* Wide version if used later */
-.tile--wide {
+/* third one — use liberty-8.jpg, make it wide */
+.liberty-gallery .liberty-photo:nth-child(3) {
   grid-column: 1 / -1;
+  min-height: 280px;
 }
-
-.tile figcaption {
-  padding: .55rem .7rem .65rem;
-  font-size: .7rem;
-  color: #d1d5db;
-}
-
-/* ------------------------------
-   SECONDARY BUYBOX
------------------------------- */
-.liberty-bottom {
-  padding: 2rem 1rem 4rem;
-}
-
-.liberty-bottom .card {
-  background: radial-gradient(circle at top, rgba(201,162,39,.28), rgba(0,0,0,0) 50%), rgba(14,14,14,1);
-  border: 1px solid rgba(201,162,39,.25);
-  border-radius: var(--radius);
-  padding: 1.25rem 1.5rem;
-  box-shadow: 0 20px 50px rgba(0,0,0,.4);
-}
-
-.liberty-bottom .card h2 {
-  margin: 0 0 .25rem;
-  font-size: 1.1rem;
-}
-
-.liberty-bottom .card p {
-  margin: 0 0 .8rem;
-  color: #d1d5db;
-  font-size: .9rem;
-}
-
-/* ------------------------------
-   LIGHTBOX
------------------------------- */
-.lightbox {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.9);
-  display: grid;
-  place-items: center;
-  z-index: 999;
-}
-
-.lightbox__img {
-  max-width: min(92vw, 1200px);
-  max-height: 92vh;
-  border-radius: var(--radius);
+.liberty-gallery .liberty-photo:nth-child(3)::after {
+  content: "Liberty · NYC Run · Shot on location";
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  background: rgba(0,0,0,.4);
   border: 1px solid rgba(255,255,255,.12);
+  border-radius: 999px;
+  padding: .35rem .85rem .45rem;
+  font-size: .7rem;
+  backdrop-filter: blur(4px);
 }
 
-/* ------------------------------
+/* ---------------------------
+   FADE-IN HOOKS
+--------------------------- */
+.fade-in-on-scroll {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity .6s ease-out, transform .6s ease-out;
+}
+.fade-in-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ---------------------------
+   CTA bottom
+--------------------------- */
+.section__cta {
+  margin-top: 1.75rem;
+  text-align: center;
+}
+
+/* ---------------------------
    RESPONSIVE
------------------------------- */
-@media (max-width: 1024px) {
-  .tile { grid-column: span 6; }
+--------------------------- */
+@media (max-width: 992px) {
+  .liberty-intro {
+    grid-template-columns: 1fr;
+  }
+  .liberty-gallery {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  .liberty-gallery .liberty-photo:nth-child(1),
+  .liberty-gallery .liberty-photo:nth-child(2) {
+    grid-column: 1 / -1;
+  }
+  .liberty-gallery .liberty-photo:nth-child(3) {
+    grid-column: 1 / -1;
+  }
 }
 
-@media (max-width: 720px) {
-  .liberty-hero { padding: 2.5rem 1rem 3rem; }
-  .liberty-hero__img { max-height: 54vh; }
-  .liberty-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
-  .tile, .tile--wide { grid-column: 1 / -1; }
-  .liberty-bottom .card { padding: 1rem; }
-  .liberty-hero__copy h1 { font-size: clamp(1.8rem, 9vw, 2.4rem); }
-}
-
-/* ------------------------------
-   ANIMATION
------------------------------- */
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.liberty-hero__copy,
-.tile img {
-  animation: fadeInUp 0.8s ease both;
+@media (max-width: 640px) {
+  .liberty-intro {
+    padding: 1.1rem .85rem 1.15rem;
+  }
+  .liberty-copy h2 {
+    font-size: 1.15rem;
+  }
+  .liberty-gallery {
+    gap: .85rem;
+  }
 }
