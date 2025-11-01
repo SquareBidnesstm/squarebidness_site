@@ -33,7 +33,6 @@
   <!-- Icons / PWA -->
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="apple-touch-icon" href="/assets/icons/icon-180.png" />
-  <!-- match the rest of site -->
   <link rel="manifest" href="/public/site.webmanifest" />
 
   <!-- Org JSON-LD (site-wide) -->
@@ -104,7 +103,7 @@
   </script>
 
   <!-- GA4 -->
-  <script defer src="/scripts/ga.js"></script>
+  <script defer src="/public/scripts/ga.js"></script>
 
   <style>
     /* Page-local light styling that plays nice with /styles/style.css */
@@ -127,7 +126,7 @@
   </style>
 </head>
 
-<body class="theme-dark" id="top">
+<body class="theme-dark">
   <!-- NAV -->
   <div id="nav-placeholder"></div>
 
@@ -184,6 +183,7 @@
         alt="Conversations with buyers and partners at Innovation Fest">
     </div>
 
+    <!-- your injected block -->
     <h2>Why NYC matters for a Louisiana brand</h2>
     <p>
       The room is bigger, the questions are sharper, and the standard sits higher. That matches how we
@@ -222,9 +222,7 @@
       </div>
     </section>
 
-    <p style="font-size:.85rem;color:#9ca0aa;text-align:center;">
-      Square Bidness. Principles. Morals. Business Done Right.
-    </p>
+    <p style="font-size:.85rem;color:#9ca0aa;text-align:center;">Square Bidness. Principles. Morals. Business Done Right.</p>
   </main>
 
   <!-- FOOTER -->
@@ -232,24 +230,23 @@
 
   <!-- Inject nav + footer -->
   <script>
-  (async () => {
-    const bust = `?v=${Date.now()}`;
-
-    async function inject(url, id) {
-      try {
-        const res = await fetch(url + bust, { cache: "no-store" });
-        if (!res.ok) return;
-        const html = await res.text();
-        const el = document.getElementById(id);
-        if (el) el.innerHTML = html;
-      } catch (e) {
-        console.warn("partial load failed:", url, e);
+    (async () => {
+      const bust = `?v=${Date.now()}`;
+      async function inject(url, id) {
+        try {
+          const res = await fetch(url + bust, { cache: "no-store" });
+          if (!res.ok) return;
+          const html = await res.text();
+          const el = document.getElementById(id);
+          if (el) el.innerHTML = html;
+        } catch (e) {
+          console.warn("partial load failed:", url, e);
+        }
       }
-    }
-
-    await inject("/public/nav/index.html", "nav-placeholder");
-    await inject("/public/footer/index.html", "footer-placeholder");
-  })();
+      // nav and footer in /public
+      await inject("/public/nav/index.html", "nav-placeholder");
+      await inject("/public/footer/index.html", "footer-placeholder");
+    })();
   </script>
 </body>
 </html>
