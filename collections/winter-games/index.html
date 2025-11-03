@@ -15,217 +15,47 @@
 
   <!-- CSS -->
   <link rel="stylesheet" href="/styles/style.css" />
-  <!-- optional: drop this in /styles/winter-games.css if you want separate file -->
+
   <style>
-    :root {
-      --wg-gold: #c9a227;
-      --wg-surface: rgba(12,12,12,.75);
-      --wg-border: rgba(255,255,255,.04);
+    :root { --wg-gold:#c9a227; }
+    body.theme-dark.wintergames-body{
+      background:radial-gradient(circle at top,rgba(201,162,39,.055) 0%,#000 54%);
+      color:#fff;min-height:100vh;
     }
-    body.theme-dark.wintergames-body {
-      background: radial-gradient(circle at top, rgba(201,162,39,.055) 0%, #000 54%);
-      color: #fff;
-      min-height: 100vh;
-    }
-    .wg-shell {
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 1.5rem 1rem 4rem;
-    }
-    .wg-hero {
-      display: grid;
-      grid-template-columns: minmax(280px, 460px) minmax(0, 1fr);
-      gap: 1.5rem;
-      background: #0a0a0a;
-      border: 1px solid rgba(255,255,255,.035);
-      border-radius: 18px;
-      overflow: hidden;
-      box-shadow: 0 24px 42px rgba(0,0,0,.35);
-      margin-bottom: 1.8rem;
-    }
-    .wg-hero__media img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-    .wg-hero__content {
-      padding: 2.3rem 1.8rem 2.4rem 0;
-      max-width: 540px;
-    }
-    .wg-eyebrow {
-      display: inline-block;
-      background: rgba(0,0,0,.45);
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 999px;
-      padding: .25rem .7rem .35rem;
-      font-size: .65rem;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      margin-bottom: .6rem;
-      color: #fff;
-    }
-    .wg-title {
-      font-size: clamp(1.9rem, 3.4vw, 2.55rem);
-      font-weight: 800;
-      line-height: 1.04;
-      margin-bottom: .4rem;
-    }
-    .wg-sub {
-      color: #e5e7eb;
-      max-width: 30rem;
-      margin-bottom: 1rem;
-    }
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: .35rem;
-      border-radius: 999px;
-      border: 1px solid transparent;
-      font-weight: 700;
-      text-decoration: none;
-      cursor: pointer;
-      transition: transform .12s ease-out;
-    }
-    .btn--gold {
-      background: var(--wg-gold);
-      color: #171717;
-      padding: .6rem 1.05rem .65rem;
-      border-color: rgba(201,162,39,.55);
-      box-shadow: 0 14px 32px rgba(201,162,39,.35);
-    }
-    .btn--ghost {
-      background: rgba(0,0,0,.45);
-      border: 1px solid rgba(255,255,255,.08);
-      color: #fff;
-      padding: .6rem 1rem .65rem;
-    }
-    .btn:hover { transform: translateY(-1px); }
-
-    .wg-buybar {
-      background: rgba(11,11,11,.7);
-      border: 1px solid rgba(255,255,255,.035);
-      border-radius: 14px;
-      padding: .9rem 1.2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      margin-bottom: 1.6rem;
-    }
-    .wg-buybar__left h2 {
-      margin: 0;
-      font-size: .98rem;
-    }
-    .wg-buybar__left p {
-      margin: .35rem 0 0;
-      color: #d4d4d8;
-      font-size: .78rem;
-    }
-    .wg-buybar__right {
-      display: flex;
-      gap: .5rem;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    .wg-buybar select {
-      background: rgba(0,0,0,.45);
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 10px;
-      color: #fff;
-      padding: .45rem .55rem;
-      min-width: 7rem;
-    }
-
-    .wg-grid {
-      max-width: 960px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: repeat(3, minmax(190px, 1fr));
-      gap: 1rem;
-    }
-    .wg-card {
-      background: rgba(12,12,12,1);
-      border: 1px solid rgba(255,255,255,.03);
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 14px 35px rgba(0,0,0,.35);
-    }
-    .wg-card img {
-      width: 100%;
-      display: block;
-      object-fit: cover;
-      min-height: 180px;
-    }
-    .wg-card__body {
-      padding: .6rem .75rem .8rem;
-    }
-    .wg-tag {
-      display: inline-block;
-      background: rgba(201,162,39,.06);
-      border: 1px solid rgba(201,162,39,.25);
-      border-radius: 999px;
-      padding: .2rem .6rem .28rem;
-      font-size: .63rem;
-      text-transform: uppercase;
-      letter-spacing: .04em;
-      margin-bottom: .35rem;
-    }
-    .wg-card__title {
-      font-size: .85rem;
-      font-weight: 700;
-      margin-bottom: .25rem;
-    }
-    .wg-card__meta {
-      font-size: .7rem;
-      color: #9ca3af;
-    }
-
-    .wg-card--hero {
-      grid-column: 1 / -1;
-      width: min(960px, 100%);
-      margin: 2.1rem auto 0;
-      border-radius: 18px;
-      overflow: hidden;
-      position: relative;
-    }
-    .wg-card--hero img {
-      width: 100%;
-      display: block;
-      object-fit: cover;
-      min-height: 260px;
-    }
-    .wg-card--hero .wg-hero-caption {
-      position: absolute;
-      bottom: 1.2rem;
-      left: 1.2rem;
-      right: 1.2rem;
-      background: rgba(0,0,0,.45);
-      backdrop-filter: blur(4px);
-      padding: .9rem 1.25rem 1rem;
-      border-radius: 14px;
-    }
-
-    .wg-story {
-      max-width: 720px;
-      margin: 2.7rem auto 0;
-      text-align: center;
-      line-height: 1.55;
-      color: #d1d5db;
-    }
-    .wg-story h2 {
-      font-size: 1rem;
-      margin-bottom: .4rem;
-      color: #fff;
-    }
-
-    @media (max-width: 900px) {
-      .wg-hero { grid-template-columns: 1fr; }
-      .wg-hero__content { padding: 1.5rem 1rem 1.8rem; }
-      .wg-buybar { flex-direction: column; align-items: flex-start; }
-      .wg-grid { grid-template-columns: 1fr; max-width: 360px; }
-      .wg-card--hero { width: 100%; }
+    .wg-shell{max-width:1180px;margin:0 auto;padding:1.5rem 1rem 4rem;}
+    .wg-hero{display:grid;grid-template-columns:minmax(280px,460px) minmax(0,1fr);gap:1.5rem;background:#0a0a0a;border:1px solid rgba(255,255,255,.035);border-radius:18px;overflow:hidden;box-shadow:0 24px 42px rgba(0,0,0,.35);margin-bottom:1.8rem;}
+    .wg-hero__media img{width:100%;height:100%;object-fit:cover;display:block;}
+    .wg-hero__content{padding:2.3rem 1.8rem 2.4rem 0;max-width:540px;}
+    .wg-eyebrow{display:inline-block;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.08);border-radius:999px;padding:.25rem .7rem .35rem;font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.6rem;}
+    .wg-title{font-size:clamp(1.9rem,3.4vw,2.55rem);font-weight:800;line-height:1.04;margin-bottom:.4rem;}
+    .wg-sub{color:#e5e7eb;max-width:30rem;margin-bottom:1rem;}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.35rem;border-radius:999px;border:1px solid transparent;font-weight:700;text-decoration:none;cursor:pointer;transition:transform .12s ease-out;}
+    .btn--gold{background:var(--wg-gold);color:#171717;padding:.6rem 1.05rem .65rem;border-color:rgba(201,162,39,.55);box-shadow:0 14px 32px rgba(201,162,39,.35);}
+    .btn--ghost{background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.08);color:#fff;padding:.6rem 1rem .65rem;}
+    .btn:hover{transform:translateY(-1px);}
+    .wg-buybar{background:rgba(11,11,11,.7);border:1px solid rgba(255,255,255,.035);border-radius:14px;padding:.9rem 1.2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1.6rem;}
+    .wg-buybar__left h2{margin:0;font-size:.98rem;}
+    .wg-buybar__left p{margin:.35rem 0 0;color:#d4d4d8;font-size:.78rem;}
+    .wg-buybar__right{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;}
+    .wg-buybar select{background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.08);border-radius:10px;color:#fff;padding:.45rem .55rem;min-width:7rem;}
+    .wg-grid{max-width:960px;margin:0 auto;display:grid;grid-template-columns:repeat(3,minmax(190px,1fr));gap:1rem;}
+    .wg-card{background:rgba(12,12,12,1);border:1px solid rgba(255,255,255,.03);border-radius:16px;overflow:hidden;box-shadow:0 14px 35px rgba(0,0,0,.35);}
+    .wg-card img{width:100%;display:block;object-fit:cover;min-height:180px;}
+    .wg-card__body{padding:.6rem .75rem .8rem;}
+    .wg-tag{display:inline-block;background:rgba(201,162,39,.06);border:1px solid rgba(201,162,39,.25);border-radius:999px;padding:.2rem .6rem .28rem;font-size:.63rem;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.35rem;}
+    .wg-card__title{font-size:.85rem;font-weight:700;margin-bottom:.25rem;}
+    .wg-card__meta{font-size:.7rem;color:#9ca3af;}
+    .wg-card--hero{grid-column:1/-1;width:min(960px,100%);margin:2.1rem auto 0;border-radius:18px;overflow:hidden;position:relative;}
+    .wg-card--hero img{width:100%;display:block;object-fit:cover;min-height:260px;}
+    .wg-card--hero .wg-hero-caption{position:absolute;bottom:1.2rem;left:1.2rem;right:1.2rem;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);padding:.9rem 1.25rem 1rem;border-radius:14px;}
+    .wg-story{max-width:720px;margin:2.7rem auto 0;text-align:center;line-height:1.55;color:#d1d5db;}
+    .wg-story h2{font-size:1rem;margin-bottom:.4rem;color:#fff;}
+    @media (max-width:900px){
+      .wg-hero{grid-template-columns:1fr;}
+      .wg-hero__content{padding:1.5rem 1rem 1.8rem;}
+      .wg-buybar{flex-direction:column;align-items:flex-start;}
+      .wg-grid{grid-template-columns:1fr;max-width:360px;}
+      .wg-card--hero{width:100%;}
     }
   </style>
 
@@ -234,7 +64,7 @@
   <link rel="apple-touch-icon" href="/assets/icons/icon-180.png">
   <link rel="manifest" href="/public/site.webmanifest">
 
-  <!-- OG / Twitter (using the one you just made) -->
+  <!-- OG / Twitter -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Square Bidness" />
   <meta property="og:title" content="Winter Games Collection — Square Bidness" />
@@ -249,27 +79,6 @@
   <meta name="twitter:description" content="Organic Cotton. Louisiana winter energy. Worn by OG Lil Soulja Slim." />
   <meta name="twitter:image" content="https://www.squarebidness.com/assets/winter-games/og-lil-soulja-slim_1200x630.jpg" />
   <meta name="twitter:site" content="@squarebidnesstm" />
-
-  <!-- Org JSON-LD -->
-  <script type="application/ld+json">
-  {
-    "@context":"https://schema.org",
-    "@type":"CollectionPage",
-    "name":"Winter Games Collection",
-    "image":"https://www.squarebidness.com/assets/winter-games/og-lil-soulja-slim_1200x630.jpg",
-    "url":"https://www.squarebidness.com/collections/winter-games/",
-    "isPartOf":{
-      "@type":"WebSite",
-      "name":"Square Bidness",
-      "url":"https://www.squarebidness.com/"
-    },
-    "about":[
-      {"@type":"Thing","name":"Organic Cotton"},
-      {"@type":"Thing","name":"Limited Run"},
-      {"@type":"Thing","name":"Louisiana Brand"}
-    ]
-  }
-  </script>
 
   <!-- GA4 -->
   <script defer src="/public/scripts/ga.js"></script>
@@ -287,8 +96,8 @@
           <source srcset="/assets/winter-games/og-lil-soulja-slim_1200.jpg" media="(min-width: 768px)">
           <img src="/assets/winter-games/og-lil-soulja-slim_800.jpg"
                alt="OG Lil Soulja Slim in Square Bidness Winter Games Collection"
-               loading="eager"
-               decoding="async">
+               loading="eager" decoding="async"
+               onerror="this.onerror=null;this.src='/assets/placeholder.png';">
         </picture>
       </div>
       <div class="wg-hero__content">
@@ -309,7 +118,7 @@
     <section class="wg-buybar">
       <div class="wg-buybar__left">
         <h2>Winter Games Crew — Organic Cotton</h2>
-        <p>Inventory is low. You said you need to count — page can stay live.</p>
+        <p>Inventory is low. When you’re done counting, we’ll wire Stripe like Liberty/VSOP.</p>
       </div>
       <div class="wg-buybar__right">
         <select id="wg-size">
@@ -327,7 +136,8 @@
       <article class="wg-card">
         <img src="/assets/winter-games/og-lil-soulja-slim_800.jpg"
              alt="OG Lil Soulja Slim in SB Winter Games crewneck"
-             loading="lazy">
+             loading="lazy"
+             onerror="this.onerror=null;this.src='/assets/placeholder.png';">
         <div class="wg-card__body">
           <span class="wg-tag">Event night</span>
           <p class="wg-card__title">Organic cotton in the wild.</p>
@@ -338,7 +148,8 @@
       <article class="wg-card">
         <img src="/assets/winter-games/og-lil-soulja-slim_800.jpg"
              alt="Square Bidness patch detail"
-             loading="lazy">
+             loading="lazy"
+             onerror="this.onerror=null;this.src='/assets/placeholder.png';">
         <div class="wg-card__body">
           <span class="wg-tag">Patchwork</span>
           <p class="wg-card__title">Season badge stitched clean.</p>
@@ -349,7 +160,8 @@
       <article class="wg-card">
         <img src="/assets/winter-games/og-lil-soulja-slim_800.jpg"
              alt="Square Bidness Winter Games crowd shot"
-             loading="lazy">
+             loading="lazy"
+             onerror="this.onerror=null;this.src='/assets/placeholder.png';">
         <div class="wg-card__body">
           <span class="wg-tag">Louisiana</span>
           <p class="wg-card__title">Worn where people know him.</p>
@@ -360,7 +172,9 @@
       <!-- CLOSER / HERO -->
       <article class="wg-card wg-card--hero">
         <img src="/assets/winter-games/og-lil-soulja-slim_1200.jpg"
-             alt="OG Lil Soulja Slim in Square Bidness Winter Games Collection — wide shot" loading="lazy">
+             alt="OG Lil Soulja Slim in Square Bidness Winter Games Collection — wide shot"
+             loading="lazy"
+             onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';">
         <div class="wg-hero-caption">
           <p class="wg-tag">Proof of concept</p>
           <p class="wg-card__meta">If legacy families are rocking it, we doing it right.</p>
@@ -373,8 +187,7 @@
       <h2>Why it matters</h2>
       <p>
         This one was about respect — taking a Louisiana brand, putting it on somebody the whole city
-        recognizes, and letting the piece speak. That’s Winter Games. When you finish your count,
-        we update sizes and turn on Stripe like the others.
+        recognizes, and letting the piece talk. Count inventory and we’ll flip checkout on.
       </p>
     </section>
   </main>
@@ -382,7 +195,7 @@
   <!-- FOOTER -->
   <div id="footer-placeholder"></div>
 
-  <!-- Inject nav/footer (same pattern as the other pages) -->
+  <!-- Inject nav/footer -->
   <script>
   (async () => {
     const bust = `?v=${Date.now()}`;
