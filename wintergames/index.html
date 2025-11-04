@@ -102,7 +102,7 @@
             <option value="M" disabled>M — Sold out</option>
           </select>
 
-          <a id="wg-checkout" class="btn btn--gold" href="#" aria-disabled="true">Select size</a>
+          <a id="wg-checkout" class="btn btn--gold" href="#" aria-disabled="true" target="_blank" rel="noopener">Select size</a>
           <a class="btn btn--ghost" href="/shop/">Back to Shop</a>
         </div>
       </div>
@@ -132,32 +132,26 @@
   })();
   </script>
 
-  <!-- Wire per-size Stripe links -->
+  <!-- Single Stripe link; append size + UTM for your records -->
   <script>
   (() => {
-    // TODO: Replace these with your real per-size Stripe payment links.
-    const LINKS = {
-      "S":   "https://buy.stripe.com/PASTE_S_LINK",
-      "L":   "https://buy.stripe.com/PASTE_L_LINK",
-      "XL":  "https://buy.stripe.com/PASTE_XL_LINK",
-      "2XL": "https://buy.stripe.com/PASTE_2XL_LINK"
-      // "M": sold out
-    };
+    const BASE = "https://buy.stripe.com/14A7sL8BNamtfmt08E8N20k"; // your live Payment Link
 
     const sizeEl = document.getElementById('wg-size');
     const btn    = document.getElementById('wg-checkout');
 
     function updateLink() {
       const size = sizeEl?.value || "";
-      const base = LINKS[size];
-      if (!size || !base) {
+      if (!size) {
         btn.href = "#";
         btn.setAttribute('aria-disabled','true');
         btn.textContent = 'Select size';
         return;
       }
-      const u = new URL(base);
-      u.searchParams.set('size', size);
+      const u = new URL(BASE);
+      u.searchParams.set('size', size);                      // for your records (Stripe ignores)
+      u.searchParams.set('utm_source', 'site');              // optional tracking
+      u.searchParams.set('utm_campaign', 'wintergames');     // optional tracking
       btn.href = u.toString();
       btn.removeAttribute('aria-disabled');
       btn.textContent = 'Checkout — $90';
