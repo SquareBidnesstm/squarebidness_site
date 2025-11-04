@@ -60,8 +60,10 @@
   <style>
     /* Local styles to complement /styles/style.css */
     :root { --gold:#c9a227; }
+
     body.theme-dark.press-body { background:#000; color:#fff; }
     .press-shell { max-width:1100px; margin:0 auto; padding:1.5rem 1rem 4rem; }
+
     .press-hero {
       display:grid; gap:1.25rem;
       grid-template-columns:minmax(280px, 460px) minmax(0,1fr);
@@ -72,6 +74,7 @@
     @media (max-width:880px){ .press-hero{ grid-template-columns:1fr; } }
     .press-hero__media img { width:100%; height:100%; object-fit:cover; display:block; }
     .press-hero__body { padding:2rem 1.6rem; }
+
     .eyebrow {
       display:inline-block; padding:.3rem .7rem; border-radius:999px;
       background:rgba(201,162,39,.08); border:1px solid rgba(201,162,39,.4);
@@ -79,6 +82,7 @@
     }
     .press-title { font-size:clamp(1.9rem,3.6vw,2.6rem); font-weight:800; margin:.6rem 0 .35rem; }
     .press-sub   { color:#d1d5db; max-width:38rem; }
+
     .btn { display:inline-flex; align-items:center; justify-content:center; gap:.35rem; border-radius:999px; border:1px solid transparent; text-decoration:none; font-weight:700; cursor:pointer; }
     .btn--gold { background:var(--gold); color:#141414; padding:.6rem 1rem; border-color:rgba(201,162,39,.45); box-shadow:0 12px 35px rgba(201,162,39,.25); }
     .btn--ghost{ background:rgba(0,0,0,.45); color:#fff; padding:.6rem 1rem; border:1px solid rgba(255,255,255,.12); }
@@ -88,12 +92,48 @@
     .press-bodycopy { max-width:860px; margin:1.8rem auto 0; color:#d7dae0; line-height:1.6; padding:0 0.25rem; }
     .press-bodycopy h2 { font-size:1.05rem; margin:1.6rem 0 .5rem; color:#fff; }
     .press-footerlinks { display:flex; gap:.6rem; flex-wrap:wrap; margin-top:1rem; }
+
+    /* ===== BIG VSOP CTA ===== */
+    .vsop-banner{
+      position:sticky; top:0; z-index:40;
+      display:flex; justify-content:center; align-items:center;
+      padding:.6rem .9rem;
+      background:linear-gradient(90deg,#c9a227 0%, #ffef9a 50%, #c9a227 100%);
+      border-bottom:1px solid rgba(0,0,0,.65);
+      box-shadow:0 8px 24px rgba(201,162,39,.25);
+    }
+    .vsop-banner__btn{
+      display:inline-flex; align-items:center; gap:.5rem;
+      background:#000; color:#fff; text-decoration:none; font-weight:800;
+      letter-spacing:.02em; padding:.6rem 1rem; border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      box-shadow:0 10px 30px rgba(0,0,0,.45), 0 0 0 4px rgba(0,0,0,.15) inset;
+      transition:transform .15s ease, box-shadow .15s ease;
+    }
+    .vsop-banner__btn:hover{ transform:translateY(-1px); box-shadow:0 14px 34px rgba(0,0,0,.55), 0 0 0 4px rgba(0,0,0,.18) inset; }
+    .vsop-banner__spark{ font-size:1.1rem; }
+
+    /* Hero CTA variant that really pops */
+    .btn--vsop{
+      background:linear-gradient(135deg,#ffef9a 0%, #ffd04d 40%, #c9a227 100%);
+      color:#111; padding:.7rem 1.05rem; border:1px solid rgba(0,0,0,.2);
+      box-shadow:0 12px 36px rgba(201,162,39,.35), 0 0 0 3px rgba(255,255,255,.06) inset;
+      text-transform:uppercase; letter-spacing:.04em;
+    }
+    .btn--vsop:hover{ transform:translateY(-1px); }
   </style>
 </head>
 
 <body class="theme-dark press-body" id="top">
   <!-- NAV -->
   <div id="nav-placeholder"></div>
+
+  <!-- Sticky VSOP promo bar -->
+  <div class="vsop-banner" role="region" aria-label="Shop VSOP">
+    <a class="vsop-banner__btn" href="/vsop/">
+      <span class="vsop-banner__spark">✨</span> Shop VSOP
+    </a>
+  </div>
 
   <main class="press-shell">
     <!-- HERO -->
@@ -107,6 +147,7 @@
         <h1 class="press-title">Marcus Buckner — Full Interview with Gangsta Williams</h1>
         <p class="press-sub">Legacy, discipline, and building Square Bidness from Louisiana to the world. A conversation about quality, community, and doing business the right way with Terrance Gangsta Williams.</p>
         <div class="cta-row">
+          <a class="btn btn--vsop" href="/vsop/">Shop VSOP</a>
           <a class="btn btn--gold" href="#watch">Watch Now</a>
           <a class="btn btn--ghost" href="https://youtu.be/o2eKkE8NmFY" target="_blank" rel="noopener">Open on YouTube</a>
         </div>
@@ -161,3 +202,4 @@
   </script>
 </body>
 </html>
+
