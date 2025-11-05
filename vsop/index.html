@@ -1,17 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Page-specific SEO -->
+  <!-- Core SEO -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>VSOP Collection — Square Bidness</title>
-  <link rel="preload" as="image" href="/vsop/assets/vsop-hero.jpg">
   <meta name="description" content="VSOP Collection preorder — burgundy & brown heat-reactive jacket + shorts. Limited run." />
   <link rel="canonical" href="https://squarebidness.com/vsop/" />
   <meta name="theme-color" content="#000000" />
   <meta name="mobile-web-app-capable" content="yes" />
 
-  <!-- Open Graph / Twitter -->
+  <!-- Social -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Square Bidness">
   <meta property="og:url" content="https://squarebidness.com/vsop/">
@@ -26,13 +25,15 @@
   <meta name="twitter:image" content="https://squarebidness.com/vsop/assets/vsop-hero_1200x630.jpg">
   <meta name="twitter:site" content="@squarebidnesstm">
 
-  <!-- Performance -->
-  <link rel="preconnect" href="https://www.googletagmanager.com">
-  <link rel="preconnect" href="https://www.google-analytics.com">
-  <script defer src="/scripts/ga.js"></script>
+  <!-- Hints & preload -->
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+  <link rel="preconnect" href="https://www.google-analytics.com" crossorigin>
+  <link rel="preload" as="image" href="/vsop/assets/vsop-hero.jpg" imagesrcset="/vsop/assets/vsop-hero_1200x630.jpg 1200w, /vsop/assets/vsop-hero.jpg 1600w" imagesizes="100vw">
 
   <!-- Styles -->
   <link rel="stylesheet" href="/vsop/vsop.css">
+
+  <!-- Icons / Manifest -->
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="apple-touch-icon" href="/assets/icons/icon-180.png">
   <link rel="manifest" href="/site.webmanifest">
@@ -56,30 +57,13 @@
   }
   </script>
 
-  <style>
-    /* Floating Shop button (uses same look as in /vsop/vsop.css but inlined as safety) */
-    .vsop-top-cta{
-      position:fixed; top:12px; right:12px; z-index:9999;
-      display:inline-flex; align-items:center; gap:.5rem;
-      padding:.72rem 1.05rem;
-      background:linear-gradient(135deg,#ffef9a 0%, #ffd04d 40%, #c9a227 100%);
-      color:#111; font-weight:900; letter-spacing:.05em; text-transform:uppercase;
-      border:1px solid rgba(0,0,0,.25); border-radius:999px; text-decoration:none;
-      box-shadow:0 14px 36px rgba(201,162,39,.4), 0 0 0 3px rgba(255,255,255,.08) inset;
-      transition:transform .15s ease, box-shadow .15s ease, opacity .2s ease;
-    }
-    .vsop-top-cta:hover{ transform:translateY(-1px); box-shadow:0 18px 44px rgba(201,162,39,.5), 0 0 0 3px rgba(255,255,255,.12) inset; }
-    .vsop-top-cta__spark{ font-size:1.05rem; }
-    @media (max-width:480px){ .vsop-top-cta{ padding:.6rem .9rem; font-size:.9rem; top:10px; right:10px; } }
-  </style>
+  <!-- GA (deferred) -->
+  <script defer src="/scripts/ga.js"></script>
 </head>
 
 <body>
-
-  <!-- ALWAYS-VISIBLE SHOP BUTTON -->
-  <a class="vsop-top-cta" href="#order" aria-label="Shop VSOP now">
-    <span class="vsop-top-cta__spark">✨</span> Shop VSOP
-  </a>
+  <!-- Floating “Shop VSOP” -->
+  <a class="vsop-top-cta" href="#order" aria-label="Shop VSOP now"><span aria-hidden="true">✨</span> Shop VSOP</a>
 
   <!-- HERO -->
   <section class="hero">
@@ -96,12 +80,22 @@
     </div>
   </section>
 
-  <!-- COUNTDOWN -->
-  <section class="countdown container" id="countdown" aria-live="polite">
-    <strong>Preorder closes in:</strong>
-    <span id="cd-days">--</span>d :
-    <span id="cd-hours">--</span>h :
-    <span id="cd-mins">--</span>m
+  <!-- COUNTDOWN (Nov 15, 2025 @ 23:59:59) -->
+  <section
+    class="countdown container"
+    id="countdown"
+    aria-live="polite"
+    data-end="2025-11-15T23:59:59">
+    <div class="cd-live">
+      <strong>Preorder closes in:</strong>
+      <span class="cd-row" role="group" aria-label="Time remaining">
+        <span class="cd-badge" id="cd-days">--</span><span class="cd-label" aria-hidden="true">d</span>
+        <span class="cd-badge" id="cd-hours">--</span><span class="cd-label" aria-hidden="true">h</span>
+        <span class="cd-badge" id="cd-mins">--</span><span class="cd-label" aria-hidden="true">m</span>
+      </span>
+    </div>
+    <div class="cd-closed" id="cd-closed">Preorder window closed — join the list to get updates.</div>
+    <div class="cd-progress" aria-hidden="true"><span id="cd-progress-bar"></span></div>
   </section>
 
   <!-- PRODUCT GRID -->
@@ -243,13 +237,11 @@
     <div class="muted">Ships <strong>November 2025</strong>. You'll receive email updates after checkout.</div>
   </div>
 
-  <!-- FOOTER / TECH LAB CREDIT -->
+  <!-- Footer -->
   <footer class="site-footer" style="border-top:1px solid #1f1f1f;background:#000;color:#d7dae0;padding:2rem 0 3rem;margin-top:3rem;">
     <div class="footer__inner" style="max-width:1200px;margin:0 auto;padding:0 16px;display:grid;gap:1.5rem;font-size:.9rem;line-height:1.5;">
       <div>
-        <p style="margin:0 0 .5rem 0;">
-          &copy; 2025 Square Bidness Tech Lab
-        </p>
+        <p style="margin:0 0 .5rem 0;">&copy; 2025 Square Bidness Tech Lab</p>
         <p style="margin:0 0 .5rem 0;">
           <a href="/privacy/" style="color:#fff;text-decoration:none;">Privacy</a> ·
           <a href="/terms/" style="color:#fff;text-decoration:none;">Terms</a> ·
@@ -260,60 +252,76 @@
     </div>
   </footer>
 
-  <!-- PAGE JS -->
+  <!-- JS: one block at the end -->
   <script>
   (function () {
-    // Countdown (Oct 25, 2025 23:59 local)
-    const end = new Date(2025, 9, 25, 23, 59, 59);
-    const cd = {
-      wrap:  document.getElementById('countdown'),
-      days:  document.getElementById('cd-days'),
-      hours: document.getElementById('cd-hours'),
-      mins:  document.getElementById('cd-mins')
-    };
-    function tick(){
-      const diff = Math.max(0, end - new Date());
-      if (diff <= 0) {
-        cd.wrap && cd.wrap.classList.add('is-closed');
-        if (cd.days)  cd.days.textContent  = '00';
-        if (cd.hours) cd.hours.textContent = '00';
-        if (cd.mins)  cd.mins.textContent  = '00';
-        return;
-      }
-      const mins  = Math.floor(diff / 60000);
-      const days  = Math.floor(mins / (60 * 24));
-      const hours = Math.floor((mins % (60 * 24)) / 60);
-      const m     = mins % 60;
-      if (cd.days)  cd.days.textContent  = String(days).padStart(2, '0');
-      if (cd.hours) cd.hours.textContent = String(hours).padStart(2, '0');
-      if (cd.mins)  cd.mins.textContent  = String(m).padStart(2, '0');
-    }
-    tick(); setInterval(tick, 30000);
+    // -------- COUNTDOWN (data-driven) --------
+    const wrap = document.getElementById('countdown');
+    if (wrap) {
+      const iso = wrap.getAttribute('data-end') || '2025-11-15T23:59:59';
+      const KEY='vsop_cd_start';
+      let start = localStorage.getItem(KEY);
+      if (!start) { start = new Date().toISOString(); localStorage.setItem(KEY, start); }
+      const startDate = new Date(start);
+      const endDate   = new Date(iso);
 
-    // Stripe links
+      const D = document.getElementById('cd-days');
+      const H = document.getElementById('cd-hours');
+      const M = document.getElementById('cd-mins');
+      const bar = document.getElementById('cd-progress-bar');
+
+      const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
+
+      function tick(){
+        const now = new Date();
+        const total = Math.max(1, endDate - startDate);
+        const left  = Math.max(0, endDate - now);
+
+        if (left <= 0) {
+          wrap.classList.add('is-closed');
+          D && (D.textContent='00'); H && (H.textContent='00'); M && (M.textContent='00');
+        } else {
+          const mins  = Math.floor(left / 60000);
+          const days  = Math.floor(mins / (60*24));
+          const hours = Math.floor((mins % (60*24)) / 60);
+          const mm    = mins % 60;
+          D && (D.textContent = String(days).padStart(2,'0'));
+          H && (H.textContent = String(hours).padStart(2,'0'));
+          M && (M.textContent = String(mm).padStart(2,'0'));
+        }
+
+        if (bar) {
+          const prog = clamp(1 - (left / total), 0, 1);
+          bar.style.width = (prog * 100).toFixed(2) + '%';
+        }
+      }
+      tick();
+      const interval = setInterval(tick, 30000);
+      window.addEventListener('pagehide', () => clearInterval(interval));
+    }
+
+    // -------- STRIPE LINKS --------
     const LINKS = {
       set:    "https://buy.stripe.com/14AbJ12dpcuBgqx6x28N20c", // $199.99 bundle
       jacket: "https://buy.stripe.com/dRm14ncS38el0rz7B68N20d", // $129.99 jacket
       shorts: "https://buy.stripe.com/8x29ATdW79ipfmt3kQ8N20b"  // $89.99 shorts
     };
 
-    // Helper: build link + append size for your visibility
+    const $ = (id) => document.getElementById(id);
     function withSize(baseUrl, size, qty) {
       try {
         const u = new URL(baseUrl);
         if (size) u.searchParams.set('size', size);
-        if (qty && qty > 1) u.searchParams.set('qty', String(qty)); // informational only
+        if (qty && qty > 1) u.searchParams.set('qty', String(qty));
         return u.toString();
       } catch(_) { return baseUrl; }
     }
 
-    // Wire buttons
-    document.getElementById('bundle-checkout')?.addEventListener('click', function(e){
+    $('bundle-checkout')?.addEventListener('click', (e) => {
       e.preventDefault();
-      const jSize = document.getElementById('bundle-jacket-size')?.value || 'M';
-      const sSize = document.getElementById('bundle-shorts-size')?.value || 'M';
-      const qty   = Math.max(1, parseInt(document.getElementById('bundle-qty')?.value || '1', 10));
-      // For the bundle we’ll pass both sizes in query for your records
+      const jSize = $('bundle-jacket-size')?.value || 'M';
+      const sSize = $('bundle-shorts-size')?.value || 'M';
+      const qty   = Math.max(1, parseInt($('bundle-qty')?.value || '1', 10));
       const u = new URL(LINKS.set);
       u.searchParams.set('jacket', jSize);
       u.searchParams.set('shorts', sSize);
@@ -321,27 +329,27 @@
       location.href = u.toString();
     });
 
-    document.getElementById('jacket-checkout')?.addEventListener('click', function(e){
+    $('jacket-checkout')?.addEventListener('click', (e) => {
       e.preventDefault();
-      const size = document.getElementById('jacket-size')?.value || 'M';
-      const qty  = Math.max(1, parseInt(document.getElementById('jacket-qty')?.value || '1', 10));
+      const size = $('jacket-size')?.value || 'M';
+      const qty  = Math.max(1, parseInt($('jacket-qty')?.value || '1', 10));
       location.href = withSize(LINKS.jacket, size, qty);
     });
 
-    document.getElementById('shorts-checkout')?.addEventListener('click', function(e){
+    $('shorts-checkout')?.addEventListener('click', (e) => {
       e.preventDefault();
-      const size = document.getElementById('shorts-size')?.value || 'M';
-      const qty  = Math.max(1, parseInt(document.getElementById('shorts-qty')?.value || '1', 10));
+      const size = $('shorts-size')?.value || 'M';
+      const qty  = Math.max(1, parseInt($('shorts-qty')?.value || '1', 10));
       location.href = withSize(LINKS.shorts, size, qty);
     });
 
-    // Smooth scroll & UTM on floating CTA
-    document.querySelector('.vsop-top-cta')?.addEventListener('click', function(e){
+    // -------- TOP CTA: smooth scroll + simple UTM tag --------
+    document.querySelector('.vsop-top-cta')?.addEventListener('click', (e) => {
       e.preventDefault();
       const url = new URL(window.location.href);
-      if (!url.searchParams.has('utm_source')) url.searchParams.set('utm_source','vsop_topbtn');
-      if (!url.searchParams.has('utm_medium')) url.searchParams.set('utm_medium','site');
-      if (!url.searchParams.has('utm_campaign')) url.searchParams.set('utm_campaign','vsop_launch');
+      url.searchParams.set('utm_source','vsop_topbtn');
+      url.searchParams.set('utm_medium','site');
+      url.searchParams.set('utm_campaign','vsop_launch');
       history.replaceState({}, '', url.toString());
       document.getElementById('order')?.scrollIntoView({ behavior:'smooth', block:'start' });
       try{ if (typeof gtag === 'function'){ gtag('event','click',{event_category:'cta',event_label:'vsop_top_btn',value:1}); }}catch(_){}
