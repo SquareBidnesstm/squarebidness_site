@@ -221,25 +221,31 @@
   <!-- FOOTER SLOT -->
   <div id="footer-placeholder"></div>
 
-  <!-- Inject nav/footer -->
-  <script>
+ <!-- Inject nav/footer (fixed) -->
+<script>
   (async () => {
     const bust = `?v=${Date.now()}`;
+
     async function inject(url, id) {
       try {
-        const res = await fetch(url + bust, { cache: "no-store" });
+        const res = await fetch(url + bust, {
+          cache: "no-store",
+          credentials: "same-origin"
+        });
         if (!res.ok) return;
         const html = await res.text();
         const el = document.getElementById(id);
         if (el) el.innerHTML = html;
       } catch (e) {
-        console.warn("inject failed", url);
+        console.warn("inject failed:", url, e);
       }
     }
+
     await inject("/public/nav/index.html", "nav-placeholder");
     await inject("/public/footer/index.html", "footer-placeholder");
   })();
-  </script>
+</script>
+
 
   <!-- Sync checkout -->
   <script>
