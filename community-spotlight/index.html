@@ -1,19 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <script defer src="/scripts/ga.js"></script>
-
+  <!-- GA / Perf -->
+  <script defer src="/scripts/ga.js"></script>
 
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Community Spotlight — Marquesha Baham | Square Bidness</title>
 
-  <!-- Canonical (slash URL since this is a dedicated page folder) -->
+  <!-- Canonical -->
   <link rel="canonical" href="https://squarebidness.com/community-spotlight/" />
   <meta name="description" content="Community Spotlight: Marquesha Baham — 18 (Oct 11), Southern University student and entrepreneur. From flyers, party treats, and hair to rising 985 party host—wearing a one-of-one Square Bidness 2 piece denim set and working toward opening a child care facility." />
   <meta name="theme-color" content="#000000" />
   <link rel="manifest" href="/site.webmanifest">
-
 
   <!-- Open Graph / X -->
   <meta property="og:type" content="article" />
@@ -21,7 +20,6 @@
   <meta property="og:title" content="October Spotlight — Marquesha Baham" />
   <meta property="og:description" content="Entrepreneur and rising Tangipahoa parish party host. One-of-one Square Bidness Apparel custom set. Goal: build a child care facility." />
   <meta property="og:url" content="https://squarebidness.com/community-spotlight/" />
-  <!-- Use your 1200×630 social crop here -->
   <meta property="og:image" content="https://squarebidness.com/assets/community/marquesha-1-social-1200x630.jpg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -31,7 +29,7 @@
   <meta name="twitter:description" content="Entrepreneur and rising 985 party host. One-of-one Square Bidness Apparel denim set. Goal: build a child care facility." />
   <meta name="twitter:image" content="https://squarebidness.com/assets/community/marquesha-1-social-1200x630.jpg" />
 
-  <!-- Breadcrumbs JSON-LD (optional but good) -->
+  <!-- Breadcrumbs JSON-LD -->
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
@@ -69,6 +67,7 @@
   }
   </script>
 
+  <!-- Styles -->
   <style>
     :root { --bg:#0b0b0b; --fg:#f4f4f4; --muted:#b9b9b9; --gold:#c9a227; --card:#151515; }
     *{box-sizing:border-box}
@@ -87,7 +86,6 @@
     .btn{display:inline-block;border:1px solid var(--gold);color:var(--gold);padding:.7rem 1rem;border-radius:12px;text-decoration:none;font-weight:700}
     .btn:hover{background:var(--gold);color:#000}
 
-    /* Full image, no crop — strong overrides */
     .spotlight-media{display:block}
     .spotlight-img{
       display:block; width:100%;
@@ -95,7 +93,6 @@
       object-fit:contain !important; object-position:center center !important;
       aspect-ratio:auto !important; border-radius:14px;
     }
-    /* If any ancestor tries to clip, defeat it */
     .card{height:auto !important; max-height:none !important; overflow:visible !important}
 
     footer{color:var(--muted);text-align:center;padding:24px 0}
@@ -103,6 +100,9 @@
 </head>
 
 <body class="theme-dark" id="top">
+  <!-- NAV PLACEHOLDER -->
+  <div id="nav-placeholder" role="navigation" aria-label="Primary"></div>
+
   <!-- HERO -->
   <section class="hero">
     <div class="container">
@@ -115,7 +115,7 @@
   <!-- BODY -->
   <main class="container">
     <div class="grid">
-      <!-- IMAGE (JPG only, responsive) -->
+      <!-- IMAGE -->
       <div class="card">
         <img
           class="spotlight-img"
@@ -141,7 +141,6 @@
         <h3 style="margin:1rem 0 .3rem">What’s Next</h3>
         <p>Beyond the spotlight, Marquesha is <strong>working toward opening a child care facility</strong>—channeling her hustle into long-term service for families in the community.</p>
 
-        <!-- Single CTA to VSOP only -->
         <p style="margin-top:1rem">
           <a class="btn" href="/vsop/">Explore the VSOP Collection</a>
         </p>
@@ -153,11 +152,48 @@
     </section>
   </main>
 
-  <!-- Minimal footer (no nav/footer includes) -->
-  <footer>
-    © <span id="2025"></span> Square Bidness Apparel, LLC. All rights reserved.
-  </footer>
+  <!-- CREDIT STRIP (kept) -->
+  <div class="container" style="max-width:1200px;margin-top:12px;padding:0 16px;">
+    <div class="credit-strip" style="
+      margin:0 auto;
+      padding:10px 14px;
+      border:1px solid #1f1f1f;
+      border-radius:12px;
+      background:#0e0e0e;
+      color:#d7dae0;
+      text-align:center;
+      font-size:.9rem;">
+      © 2025 Square Bidness Tech Lab —
+      <a href="/linkme/" style="color:#c9a227;text-decoration:underline;font-weight:700;">Link Me</a>
+    </div>
+  </div>
 
-  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+  <!-- FOOTER PLACEHOLDER -->
+  <div id="footer-placeholder" role="contentinfo" aria-label="Site footer"></div>
+
+  <!-- Inject nav/footer -->
+  <script>
+    (async () => {
+      const bust = `?v=${Date.now()}`; // cache-bust to avoid stale partials
+
+      async function inject(url, id) {
+        try {
+          const res = await fetch(url + bust, {
+            cache: "no-store",
+            credentials: "same-origin"
+          });
+          if (!res.ok) return;
+          const html = await res.text();
+          const el = document.getElementById(id);
+          if (el) el.innerHTML = html;
+        } catch (e) {
+          console.warn("inject failed:", url, e);
+        }
+      }
+
+      await inject("/public/nav/index.html", "nav-placeholder");
+      await inject("/public/footer/index.html", "footer-placeholder");
+    })();
+  </script>
 </body>
 </html>
