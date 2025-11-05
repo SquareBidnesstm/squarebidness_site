@@ -26,22 +26,18 @@
   <meta name="twitter:image" content="https://squarebidness.com/vsop/assets/vsop-hero_1200x630.jpg">
   <meta name="twitter:site" content="@squarebidnesstm">
 
-  <!-- Shared partial (once only) -->
+  <!-- Performance -->
   <link rel="preconnect" href="https://www.googletagmanager.com">
   <link rel="preconnect" href="https://www.google-analytics.com">
-
-  <!-- GA4 (site-wide loader) -->
   <script defer src="/scripts/ga.js"></script>
 
-  <!-- Base CSS -->
-  <link rel="stylesheet" href="/styles/style.css" />
-
-  <!-- Icons / Manifest -->
+  <!-- Styles -->
+  <link rel="stylesheet" href="/vsop/vsop.css">
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="apple-touch-icon" href="/assets/icons/icon-180.png">
   <link rel="manifest" href="/site.webmanifest">
 
-  <!-- Organization JSON-LD (site-wide) -->
+  <!-- Organization JSON-LD -->
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
@@ -60,35 +56,21 @@
   }
   </script>
 
-  <!-- Page-specific CSS (after base so it can override) -->
-  <link rel="stylesheet" href="/vsop/vsop.css">
-
-  <!-- Site cart core -->
-  <script src="/scripts/sb-cart.js" defer></script>
-
-  <!-- *** BIG “SHOP VSOP” TOP BUTTON *** -->
   <style>
-    :root { --vsop-gold:#c9a227; }
+    /* Floating Shop button (uses same look as in /vsop/vsop.css but inlined as safety) */
     .vsop-top-cta{
       position:fixed; top:12px; right:12px; z-index:9999;
       display:inline-flex; align-items:center; gap:.5rem;
       padding:.72rem 1.05rem;
       background:linear-gradient(135deg,#ffef9a 0%, #ffd04d 40%, #c9a227 100%);
       color:#111; font-weight:900; letter-spacing:.05em; text-transform:uppercase;
-      border:1px solid rgba(0,0,0,.25); border-radius:999px;
-      text-decoration:none;
+      border:1px solid rgba(0,0,0,.25); border-radius:999px; text-decoration:none;
       box-shadow:0 14px 36px rgba(201,162,39,.4), 0 0 0 3px rgba(255,255,255,.08) inset;
       transition:transform .15s ease, box-shadow .15s ease, opacity .2s ease;
     }
     .vsop-top-cta:hover{ transform:translateY(-1px); box-shadow:0 18px 44px rgba(201,162,39,.5), 0 0 0 3px rgba(255,255,255,.12) inset; }
-    .vsop-top-cta:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
     .vsop-top-cta__spark{ font-size:1.05rem; }
-    @media (max-width:480px){
-      .vsop-top-cta{ padding:.6rem .9rem; font-size:.9rem; top:10px; right:10px; }
-    }
-    @media (prefers-reduced-motion:reduce){
-      .vsop-top-cta{ transition:none; }
-    }
+    @media (max-width:480px){ .vsop-top-cta{ padding:.6rem .9rem; font-size:.9rem; top:10px; right:10px; } }
   </style>
 </head>
 
@@ -104,7 +86,7 @@
     <div class="container hero__inner">
       <h1>VSOP Collection — Very Superior. Original Principles.</h1>
       <p>Limited Preorder. Burgundy &amp; Brown heat-reactive jacket + shorts.</p>
-      <a href="#order" class="btn"> Preorder Now</a>
+      <a href="#order" class="btn">Preorder Now</a>
 
       <div class="meta-row meta-row--hint">
         <div class="meta-pill">Heat-Reactive Nylon / Suede</div>
@@ -261,95 +243,6 @@
     <div class="muted">Ships <strong>November 2025</strong>. You'll receive email updates after checkout.</div>
   </div>
 
-  <!-- Page JS: countdown + cart wiring -->
-  <script>
-  (function () {
-    // --- COUNTDOWN (Oct 25, 2025 23:59 local) ---
-    const end = new Date(2025, 9, 25, 23, 59, 59);
-    const cdDays  = document.getElementById('cd-days');
-    const cdHours = document.getElementById('cd-hours');
-    const cdMins  = document.getElementById('cd-mins');
-    const cdWrap  = document.getElementById('countdown');
-
-    function tick(){
-      const now = new Date();
-      const diff = Math.max(0, end - now);
-      if (diff <= 0) {
-        cdWrap && cdWrap.classList.add('is-closed');
-        if (cdDays)  cdDays.textContent  = '00';
-        if (cdHours) cdHours.textContent = '00';
-        if (cdMins)  cdMins.textContent  = '00';
-        return;
-      }
-      const mins  = Math.floor(diff / 60000);
-      const days  = Math.floor(mins / (60 * 24));
-      const hours = Math.floor((mins % (60 * 24)) / 60);
-      const m     = mins % 60;
-      if (cdDays)  cdDays.textContent  = String(days).padStart(2, '0');
-      if (cdHours) cdHours.textContent = String(hours).padStart(2, '0');
-      if (cdMins)  cdMins.textContent  = String(m).padStart(2, '0');
-    }
-    tick(); setInterval(tick, 30000);
-
-    // --- Catalog meta (adjust image paths if needed) ---
-    const CATALOG = {
-      'vsop-jacket': { name: 'VSOP Hooded Jacket — Burgundy + Brown', price: 129.99, image: '/vsop/assets/vsop-jacket.jpg' },
-      'vsop-shorts': { name: 'VSOP Shorts — Burgundy + Brown',       price:  89.99, image: '/vsop/assets/vsop-shorts.jpg' }
-    };
-
-    function addItem(item) {
-      if (window.SB && typeof SB.addToCart === 'function') {
-        SB.addToCart(item);
-      } else {
-        const KEY = 'sb_cart_v1';
-        const cart = JSON.parse(localStorage.getItem(KEY) || '[]');
-        const i = cart.findIndex(x => x.id === item.id);
-        if (i >= 0) cart[i].qty += Number(item.qty || 1);
-        else cart.push({ ...item, qty: Number(item.qty || 1) });
-        localStorage.setItem(KEY, JSON.stringify(cart));
-        dispatchEvent(new CustomEvent('sb:cart:update', { detail: { cart } }));
-      }
-    }
-
-    // --- Wire up buttons (delegated) ---
-    document.addEventListener('click', (e) => {
-      // Bundle
-      if (e.target.closest('#bundle-checkout')) {
-        e.preventDefault();
-        const jSize = (document.getElementById('bundle-jacket-size') || {}).value || 'M';
-        const sSize = (document.getElementById('bundle-shorts-size') || {}).value || 'M';
-        const qty   = Math.max(1, parseInt((document.getElementById('bundle-qty') || {}).value || '1', 10));
-
-        addItem({ id:`vsop-jacket-${jSize}`, name:`${CATALOG['vsop-jacket'].name} — ${jSize}`, price: CATALOG['vsop-jacket'].price, image: CATALOG['vsop-jacket'].image, qty });
-        addItem({ id:`vsop-shorts-${sSize}`, name:`${CATALOG['vsop-shorts'].name} — ${sSize}`, price: CATALOG['vsop-shorts'].price, image: CATALOG['vsop-shorts'].image, qty });
-
-        location.href = '/cart.html';
-        return;
-      }
-
-      // Jacket
-      if (e.target.closest('#jacket-checkout')) {
-        e.preventDefault();
-        const size = (document.getElementById('jacket-size') || {}).value || 'M';
-        const qty  = Math.max(1, parseInt((document.getElementById('jacket-qty') || {}).value || '1', 10));
-        addItem({ id:`vsop-jacket-${size}`, name:`${CATALOG['vsop-jacket'].name} — ${size}`, price: CATALOG['vsop-jacket'].price, image: CATALOG['vsop-jacket'].image, qty });
-        location.href = '/cart.html';
-        return;
-      }
-
-      // Shorts
-      if (e.target.closest('#shorts-checkout')) {
-        e.preventDefault();
-        const size = (document.getElementById('shorts-size') || {}).value || 'M';
-        const qty  = Math.max(1, parseInt((document.getElementById('shorts-qty') || {}).value || '1', 10));
-        addItem({ id:`vsop-shorts-${size}`, name:`${CATALOG['vsop-shorts'].name} — ${size}`, price: CATALOG['vsop-shorts'].price, image: CATALOG['vsop-shorts'].image, qty });
-        location.href = '/cart.html';
-        return;
-      }
-    });
-  })();
-  </script>
-
   <!-- FOOTER / TECH LAB CREDIT -->
   <footer class="site-footer" style="border-top:1px solid #1f1f1f;background:#000;color:#d7dae0;padding:2rem 0 3rem;margin-top:3rem;">
     <div class="footer__inner" style="max-width:1200px;margin:0 auto;padding:0 16px;display:grid;gap:1.5rem;font-size:.9rem;line-height:1.5;">
@@ -367,5 +260,93 @@
     </div>
   </footer>
 
+  <!-- PAGE JS -->
+  <script>
+  (function () {
+    // Countdown (Oct 25, 2025 23:59 local)
+    const end = new Date(2025, 9, 25, 23, 59, 59);
+    const cd = {
+      wrap:  document.getElementById('countdown'),
+      days:  document.getElementById('cd-days'),
+      hours: document.getElementById('cd-hours'),
+      mins:  document.getElementById('cd-mins')
+    };
+    function tick(){
+      const diff = Math.max(0, end - new Date());
+      if (diff <= 0) {
+        cd.wrap && cd.wrap.classList.add('is-closed');
+        if (cd.days)  cd.days.textContent  = '00';
+        if (cd.hours) cd.hours.textContent = '00';
+        if (cd.mins)  cd.mins.textContent  = '00';
+        return;
+      }
+      const mins  = Math.floor(diff / 60000);
+      const days  = Math.floor(mins / (60 * 24));
+      const hours = Math.floor((mins % (60 * 24)) / 60);
+      const m     = mins % 60;
+      if (cd.days)  cd.days.textContent  = String(days).padStart(2, '0');
+      if (cd.hours) cd.hours.textContent = String(hours).padStart(2, '0');
+      if (cd.mins)  cd.mins.textContent  = String(m).padStart(2, '0');
+    }
+    tick(); setInterval(tick, 30000);
+
+    // Stripe links
+    const LINKS = {
+      set:    "https://buy.stripe.com/14AbJ12dpcuBgqx6x28N20c", // $199.99 bundle
+      jacket: "https://buy.stripe.com/dRm14ncS38el0rz7B68N20d", // $129.99 jacket
+      shorts: "https://buy.stripe.com/8x29ATdW79ipfmt3kQ8N20b"  // $89.99 shorts
+    };
+
+    // Helper: build link + append size for your visibility
+    function withSize(baseUrl, size, qty) {
+      try {
+        const u = new URL(baseUrl);
+        if (size) u.searchParams.set('size', size);
+        if (qty && qty > 1) u.searchParams.set('qty', String(qty)); // informational only
+        return u.toString();
+      } catch(_) { return baseUrl; }
+    }
+
+    // Wire buttons
+    document.getElementById('bundle-checkout')?.addEventListener('click', function(e){
+      e.preventDefault();
+      const jSize = document.getElementById('bundle-jacket-size')?.value || 'M';
+      const sSize = document.getElementById('bundle-shorts-size')?.value || 'M';
+      const qty   = Math.max(1, parseInt(document.getElementById('bundle-qty')?.value || '1', 10));
+      // For the bundle we’ll pass both sizes in query for your records
+      const u = new URL(LINKS.set);
+      u.searchParams.set('jacket', jSize);
+      u.searchParams.set('shorts', sSize);
+      if (qty > 1) u.searchParams.set('qty', String(qty));
+      location.href = u.toString();
+    });
+
+    document.getElementById('jacket-checkout')?.addEventListener('click', function(e){
+      e.preventDefault();
+      const size = document.getElementById('jacket-size')?.value || 'M';
+      const qty  = Math.max(1, parseInt(document.getElementById('jacket-qty')?.value || '1', 10));
+      location.href = withSize(LINKS.jacket, size, qty);
+    });
+
+    document.getElementById('shorts-checkout')?.addEventListener('click', function(e){
+      e.preventDefault();
+      const size = document.getElementById('shorts-size')?.value || 'M';
+      const qty  = Math.max(1, parseInt(document.getElementById('shorts-qty')?.value || '1', 10));
+      location.href = withSize(LINKS.shorts, size, qty);
+    });
+
+    // Smooth scroll & UTM on floating CTA
+    document.querySelector('.vsop-top-cta')?.addEventListener('click', function(e){
+      e.preventDefault();
+      const url = new URL(window.location.href);
+      if (!url.searchParams.has('utm_source')) url.searchParams.set('utm_source','vsop_topbtn');
+      if (!url.searchParams.has('utm_medium')) url.searchParams.set('utm_medium','site');
+      if (!url.searchParams.has('utm_campaign')) url.searchParams.set('utm_campaign','vsop_launch');
+      history.replaceState({}, '', url.toString());
+      document.getElementById('order')?.scrollIntoView({ behavior:'smooth', block:'start' });
+      try{ if (typeof gtag === 'function'){ gtag('event','click',{event_category:'cta',event_label:'vsop_top_btn',value:1}); }}catch(_){}
+    });
+  })();
+  </script>
 </body>
 </html>
