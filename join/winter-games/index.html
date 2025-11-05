@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Join the Notify List — Winter Games | Square Bidness</title>
+  <meta name="description" content="Get an email when Winter Games restocks or opens checkout. No holds — just a clean alert." />
+  <link rel="canonical" href="https://www.squarebidness.com/join/winter-games/" />
+  <meta name="theme-color" content="#000000" />
+
+  <link rel="preconnect" href="https://www.googletagmanager.com">
+  <link rel="preconnect" href="https://www.google-analytics.com">
+  <script defer src="/public/scripts/ga.js"></script>
+
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/assets/icons/icon-180.png">
+  <link rel="manifest" href="/public/site.webmanifest">
+
+  <link rel="stylesheet" href="/styles/style.css" />
+  <style>
+    :root { --gold:#c9a227; --card:#0e0e0e; }
+    body.theme-dark{ background:#000; color:#fff; }
+    .shell{max-width:760px;margin:0 auto;padding:2rem 1rem 3rem;}
+    .eyebrow{display:inline-block;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:rgba(201,162,39,.08);border:1px solid rgba(201,162,39,.35);border-radius:999px;padding:.25rem .6rem;margin-bottom:.6rem}
+    .title{font-size:clamp(1.6rem,3.2vw,2.1rem);font-weight:800;margin:.15rem 0 .35rem}
+    .muted{color:#c9c9c9}
+    .card{background:var(--card);border:1px solid #1f1f1f;border-radius:16px;padding:1rem 1rem 1.2rem;box-shadow:0 18px 36px rgba(0,0,0,.35)}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+    @media (max-width:720px){ .row{grid-template-columns:1fr} }
+    label{display:block;font-size:.85rem;margin:.25rem 0 .35rem;color:#d5d5d5}
+    .in{width:100%;padding:.75rem .85rem;background:#111;border:1px solid #222;border-radius:10px;color:#fff}
+    select.in{appearance:none}
+    .btn{display:inline-flex;align-items:center;gap:.4rem;border-radius:999px;font-weight:800;text-decoration:none;cursor:pointer}
+    .btn--gold{background:var(--gold);color:#111;border:1px solid var(--gold);padding:.7rem 1rem;box-shadow:0 14px 32px rgba(201,162,39,.35)}
+    .ok{display:none;margin-top:1rem;background:#092;border:1px solid #174;color:#dff;border-radius:12px;padding:.8rem 1rem}
+  </style>
+</head>
+<body class="theme-dark" id="top">
+  <div id="nav-placeholder"></div>
+
+  <main class="shell">
+    <span class="eyebrow">Winter Games</span>
+    <h1 class="title">Join the Notify List</h1>
+    <p class="muted">No holds — when it’s ready, you’ll be first to know.</p>
+
+    <!-- Mailchimp embed: uses your existing audience action URL -->
+    <form id="notifyForm" class="card"
+      action="https://squarebidness.us17.list-manage.com/subscribe/post?u=5bd034178e2a9f629a8b787e2&amp;id=72ce5c4999&amp;f_id=00c365e0f0"
+      method="post" target="_blank" novalidate>
+      <div class="row">
+        <div>
+          <label for="mce-EMAIL">Email</label>
+          <input id="mce-EMAIL" name="EMAIL" type="email" class="in" placeholder="you@example.com" required autocomplete="email">
+        </div>
+        <div>
+          <label for="wg-size">Size (optional)</label>
+          <select id="wg-size" name="WG_SIZE" class="in">
+            <option value="">Any</option>
+            <option>M">M</option>
+            <option>L">L</option>
+            <option>XL">XL</option>
+            <option>2X">2X</option>
+            <option>3X">3X</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Hidden meta (Mailchimp will ignore if fields not mapped; safe to keep) -->
+      <input type="hidden" name="PRODUCT" value="WinterGames">
+      <input type="hidden" name="INTENT"  value="notify">
+      <!-- Honeypot -->
+      <div style="position:absolute;left:-5000px" aria-hidden="true">
+        <input type="text" name="b_5bd034178e2a9f629a8b787e2_72ce5c4999" tabindex="-1" value="">
+      </div>
+
+      <button class="btn btn--gold" type="submit">Notify Me</button>
+      <div id="ok" class="ok" role="status" aria-live="polite">You’re on the list. Check your email.</div>
+    </form>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script>
+  (async () => {
+    const bust = `?v=${Date.now()}`;
+    async function inject(url, id){
+      try{
+        const r = await fetch(url + bust, {cache:'no-store', credentials:'same-origin'});
+        if (!r.ok) return;
+        const html = await r.text();
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = html;
+      }catch(e){}
+    }
+    await inject('/public/nav/index.html','nav-placeholder');
+    await inject('/public/footer/index.html','footer-placeholder');
+  })();
+
+  // GA event on submit (opens MC in new tab)
+  (function(){
+    const f = document.getElementById('notifyForm');
+    const ok = document.getElementById('ok');
+    f.addEventListener('submit', function(){
+      try{
+        if (typeof gtag === 'function') {
+          const sz = document.getElementById('wg-size')?.value || 'any';
+          gtag('event','submit',{event_category:'notify', event_label:`wintergames_${sz}`});
+        }
+      }catch(_){}
+      ok.style.display = 'block';
+    });
+  })();
+  </script>
+</body>
+</html>
