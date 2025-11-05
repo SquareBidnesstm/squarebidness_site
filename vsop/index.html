@@ -444,5 +444,41 @@
     });
   })();
   </script>
+  <script>
+(function(){
+  // CLICK events (buttons already exist on your page)
+  function send(evt, data){ try{ if (typeof gtag==='function') gtag('event', evt, data||{}); }catch(_){ } }
+
+  // Preorder buttons
+  document.getElementById('bundle-checkout')?.addEventListener('click', () => {
+    const j = document.getElementById('bundle-jacket-size')?.value || '(n/a)';
+    const s = document.getElementById('bundle-shorts-size')?.value || '(n/a)';
+    send('vsop_preorder_click', { item:'bundle', jacket_size:j, shorts_size:s });
+  });
+  document.getElementById('jacket-checkout')?.addEventListener('click', () => {
+    const size = document.getElementById('jacket-size')?.value || '(n/a)';
+    send('vsop_preorder_click', { item:'jacket', size });
+  });
+  document.getElementById('shorts-checkout')?.addEventListener('click', () => {
+    const size = document.getElementById('shorts-size')?.value || '(n/a)';
+    send('vsop_preorder_click', { item:'shorts', size });
+  });
+
+  // Join-the-List panel (this button id exists in the version I gave you)
+  document.getElementById('joinlist-btn')?.addEventListener('click', () => {
+    const email = (document.getElementById('joinlist-email')||{}).value || '';
+    send('vsop_joinlist_click', { email_present: email ? 'yes' : 'no' });
+  });
+
+  // When countdown flips closed (we dispatch this in the countdown script already)
+  window.addEventListener('vsop:countdown_closed', () => {
+    send('vsop_preorder_closed');
+  });
+
+  // Page view marker for funnel
+  send('vsop_page_view', { section: 'index' });
+})();
+</script>
+
 </body>
 </html>
