@@ -27,7 +27,7 @@ body {
 /* HERO */
 .hero {
   background-color:#800020;
-  background-image:url('assets/vsop-hero.jpg'); /* resolves to /vsop/assets/... */
+  background-image:url('/vsop/assets/vsop-hero.jpg'); /* ensure this path exists */
   background-position:center;
   background-size:cover;
   background-repeat:no-repeat;
@@ -57,6 +57,37 @@ body {
   background:linear-gradient(135deg, var(--burgundy) 0%, #a0002a 100%);
   color:#fff; border:none; padding:14px 28px; border-radius:12px; font-weight:700;
   text-transform:uppercase; letter-spacing:.02em; width:100%; margin-top:auto;
+}
+
+/* Stripe-style gold button (for external links) */
+.btn--stripe{
+  background:linear-gradient(135deg,#ffef9a 0%, #ffd04d 40%, #c9a227 100%);
+  color:#111; font-weight:900; letter-spacing:.02em;
+  border:1px solid rgba(0,0,0,.25); border-radius:999px;
+  text-decoration:none; padding:.65rem 1.05rem;
+  box-shadow:0 12px 30px rgba(201,162,39,.35);
+  display:inline-flex; align-items:center; gap:.4rem;
+  transition:transform .12s ease, box-shadow .12s ease;
+}
+.btn--stripe:hover{ transform:translateY(-1px); box-shadow:0 16px 40px rgba(201,162,39,.45); }
+
+/* Always-visible “Shop VSOP” */
+.vsop-top-cta{
+  position:fixed; top:12px; right:12px; z-index:9999;
+  display:inline-flex; align-items:center; gap:.5rem;
+  padding:.72rem 1.05rem;
+  background:linear-gradient(135deg,#ffef9a 0%, #ffd04d 40%, #c9a227 100%);
+  color:#111; font-weight:900; letter-spacing:.05em; text-transform:uppercase;
+  border:1px solid rgba(0,0,0,.25); border-radius:999px;
+  text-decoration:none;
+  box-shadow:0 14px 36px rgba(201,162,39,.4), 0 0 0 3px rgba(255,255,255,.08) inset;
+  transition:transform .15s ease, box-shadow .15s ease, opacity .2s ease;
+}
+.vsop-top-cta:hover{ transform:translateY(-1px); box-shadow:0 18px 44px rgba(201,162,39,.5), 0 0 0 3px rgba(255,255,255,.12) inset; }
+.vsop-top-cta:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
+.vsop-top-cta__spark{ font-size:1.05rem; }
+@media (max-width:480px){
+  .vsop-top-cta{ padding:.6rem .9rem; font-size:.9rem; top:10px; right:10px; }
 }
 
 /* Meta pills */
@@ -100,11 +131,11 @@ body {
 .card:hover{ transform:translateY(-8px); box-shadow:0 20px 40px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9); border-color:rgba(128,0,32,0.2); }
 
 .card__media{
-  position:relative; aspect-ratio:3/2; /* match your 1200x800 images */
-  overflow:hidden; background:#fff; /* white to avoid grey bars */
+  position:relative; aspect-ratio:3/2; /* 1200x800 images */
+  overflow:hidden; background:#fff;
 }
 .card__img{
-  width:100%; height:100% !important; object-fit:contain !important; display:block; /* show FULL image, no crop */
+  width:100%; height:100% !important; object-fit:contain !important; display:block;
   transition:transform .6s cubic-bezier(.25,.46,.45,.94);
   filter:contrast(1.05) saturate(1.08);
 }
@@ -128,13 +159,8 @@ select, input[type="number"]{
   padding:12px 16px; border:2px solid #e9ecef; border-radius:12px; background:rgba(255,255,255,.9);
   font:inherit; color:#343a40; transition:all .3s ease; backdrop-filter:blur(10px);
 }
-select:focus, input[type="number"]:focus{ outline:none; border-color:var(--burgundy); background:#fff; box-shadow:0 0 0 3px rgba(128,0,32,0.1); }
-
-@media (max-width:768px){
-  .card__body{ padding:20px 18px; }
-  .row{ flex-direction:column; gap:16px; }
-  .row label{ flex:none; }
-}
+select:focus, input[type="number"]{ outline:none; border-color:var(--burgundy); background:#fff; box-shadow:0 0 0 3px rgba(128,0,32,0.1); }
+input[type="number"]:focus{ outline:none; }
 
 /* Footer note */
 .closer{ text-align:center; padding:36px 24px; border-top:1px dashed #e7e7e7; margin-top:24px; }
