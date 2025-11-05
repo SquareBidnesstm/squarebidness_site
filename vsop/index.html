@@ -1,49 +1,447 @@
-<script>
-(function () {
-  /* ... keep the countdown + cart wiring above as-is ... */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Page-specific SEO -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VSOP Collection — Square Bidness</title>
+  <link rel="preload" as="image" href="/vsop/assets/vsop-hero.jpg">
+  <meta name="description" content="VSOP Collection preorder — burgundy & brown heat-reactive jacket + shorts. Limited run." />
+  <link rel="canonical" href="https://squarebidness.com/vsop/" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="mobile-web-app-capable" content="yes" />
 
-  // --- Stripe Fast Checkout links (Bundle, Jacket, Shorts)
-  const STRIPE = {
-    bundle: "https://buy.stripe.com/14AbJ12dpcuBgqx6x28N20c", // $199.99 Set
-    jacket: "https://buy.stripe.com/dRm14ncS38el0rz7B68N20d", // $129.99 Jacket
-    shorts: "https://buy.stripe.com/8x29ATdW79ipfmt3kQ8N20b"  // $89.99 Shorts
-  };
+  <!-- Open Graph / Twitter -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Square Bidness">
+  <meta property="og:url" content="https://squarebidness.com/vsop/">
+  <meta property="og:title" content="VSOP Collection — Preorders Live">
+  <meta property="og:description" content="Very Superior. Original Principles. Limited preorder — burgundy & brown heat-reactive jacket + shorts.">
+  <meta property="og:image" content="https://squarebidness.com/vsop/assets/vsop-hero_1200x630.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="VSOP Collection — Preorders Live">
+  <meta name="twitter:description" content="Very Superior. Original Principles. Limited preorder — burgundy & brown heat-reactive jacket + shorts.">
+  <meta name="twitter:image" content="https://squarebidness.com/vsop/assets/vsop-hero_1200x630.jpg">
+  <meta name="twitter:site" content="@squarebidnesstm">
 
-  const UTM = { utm_source:'vsop', utm_medium:'site', utm_campaign:'vsop_stripe' };
+  <!-- Performance -->
+  <link rel="preconnect" href="https://www.googletagmanager.com">
+  <link rel="preconnect" href="https://www.google-analytics.com">
+  <!-- GA4 -->
+  <script defer src="/scripts/ga.js"></script>
 
-  function withUTM(url) {
-    try {
-      const u = new URL(url);
-      Object.entries(UTM).forEach(([k,v]) => u.searchParams.set(k,v));
-      return u.toString();
-    } catch { return url; }
+  <!-- Base CSS -->
+  <link rel="stylesheet" href="/styles/style.css" />
+
+  <!-- Icons / Manifest -->
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/assets/icons/icon-180.png">
+  <link rel="manifest" href="/site.webmanifest">
+
+  <!-- Organization JSON-LD (site-wide) -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"Organization",
+    "name":"Square Bidness Apparel",
+    "url":"https://www.squarebidness.com/",
+    "logo":"https://www.squarebidness.com/assets/cleantextlogo.png",
+    "sameAs":[
+      "https://instagram.com/squarebidnesstm",
+      "https://www.tiktok.com/@squarebidnesstm",
+      "https://www.facebook.com/squarebidnessapparel",
+      "https://bsky.app/profile/squarebidnesstm.bsky.social",
+      "https://www.linkedin.com/company/square-bidness-apparel"
+    ],
+    "contactPoint":[{"@type":"ContactPoint","contactType":"customer support","email":"squarebidnessapparel@gmail.com","areaServed":"US"}]
   }
+  </script>
 
-  function wireStripe(elId, url, label){
-    const el = document.getElementById(elId);
-    if (!el) return;
-    el.addEventListener('click', () => {
-      el.href = withUTM(url);
-      try {
-        if (typeof gtag === 'function') {
-          gtag('event','click',{event_category:'stripe',event_label:label,value:1});
-        }
-      } catch {}
+  <!-- Page-specific CSS (after base so it can override) -->
+  <link rel="stylesheet" href="/vsop/vsop.css">
+
+  <!-- Site cart core -->
+  <script src="/scripts/sb-cart.js" defer></script>
+
+  <!-- Inline enhancements -->
+  <style>
+    :root { --vsop-gold:#c9a227; --vsop-deep:#141414; }
+
+    /* BIG always-visible "Shop VSOP" button */
+    .vsop-top-cta{
+      position:fixed; top:12px; right:12px; z-index:9999;
+      display:inline-flex; align-items:center; gap:.5rem;
+      padding:.72rem 1.05rem;
+      background:linear-gradient(135deg,#ffef9a 0%, #ffd04d 40%, #c9a227 100%);
+      color:#111; font-weight:900; letter-spacing:.05em; text-transform:uppercase;
+      border:1px solid rgba(0,0,0,.25); border-radius:999px;
+      text-decoration:none;
+      box-shadow:0 14px 36px rgba(201,162,39,.4), 0 0 0 3px rgba(255,255,255,.08) inset;
+      transition:transform .15s ease, box-shadow .15s ease, opacity .2s ease;
+    }
+    .vsop-top-cta:hover{ transform:translateY(-1px); box-shadow:0 18px 44px rgba(201,162,39,.5), 0 0 0 3px rgba(255,255,255,.12) inset; }
+    .vsop-top-cta__spark{ font-size:1.05rem; }
+    @media (max-width:480px){ .vsop-top-cta{ padding:.6rem .9rem; font-size:.9rem; top:10px; right:10px; } }
+
+    /* Stripe-style CTA (gold, locked, high contrast) */
+    .btn--stripe{
+      background:linear-gradient(180deg,#ffe08a 0%, #ffcc53 55%, #c9a227 100%);
+      color:#111;border:1px solid rgba(0,0,0,.35);
+      border-radius:999px; padding:.65rem 1.05rem; font-weight:900; letter-spacing:.02em;
+      box-shadow:0 12px 34px rgba(201,162,39,.35);
+      text-decoration:none; display:inline-flex; align-items:center; gap:.45rem;
+      transition:transform .15s ease, box-shadow .15s ease;
+      white-space:nowrap;
+    }
+    .btn--stripe:hover{ transform:translateY(-1px); box-shadow:0 16px 44px rgba(201,162,39,.5); }
+
+    /* Mobile sticky fast checkout bar */
+    .vsop-sticky-cta{
+      position:sticky; bottom:0; inset-inline:0; z-index:999;
+      background:rgba(0,0,0,.86); backdrop-filter:saturate(140%) blur(8px);
+      border-top:1px solid #2a2a2a; padding:.75rem .9rem; display:none;
+    }
+
+    /* Small helper row for hero buttons */
+    .cta-duo{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin-top:.6rem;}
+  </style>
+</head>
+
+<body>
+
+  <!-- ALWAYS-VISIBLE SHOP BUTTON -->
+  <a class="vsop-top-cta" href="#order" aria-label="Shop VSOP now">
+    <span class="vsop-top-cta__spark">✨</span> Shop VSOP
+  </a>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container hero__inner">
+      <h1>VSOP Collection — Very Superior. Original Principles.</h1>
+      <p>Limited Preorder. Burgundy &amp; Brown heat-reactive jacket + shorts.</p>
+
+      <div class="cta-duo">
+        <a href="#order" class="btn">Preorder Now</a>
+        <!-- Stripe Fast Checkout (Bundle) -->
+        <a id="vsop-stripe-hero" class="btn btn--stripe"
+           href="https://buy.stripe.com/14AbJ12dpcuBgqx6x28N20c"
+           aria-label="Fast checkout on Stripe for VSOP Set">
+          🔒 Fast Checkout — VSOP Set $199.99
+        </a>
+      </div>
+
+      <div class="meta-row meta-row--hint">
+        <div class="meta-pill">Heat-Reactive Nylon / Suede</div>
+        <div class="meta-pill">Embroidered Logo</div>
+        <div class="meta-pill">Limited Run</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COUNTDOWN -->
+  <section class="countdown container" id="countdown" aria-live="polite">
+    <strong>Preorder closes in:</strong>
+    <span id="cd-days">--</span>d :
+    <span id="cd-hours">--</span>h :
+    <span id="cd-mins">--</span>m
+  </section>
+
+  <!-- PRODUCT GRID -->
+  <section class="container" id="order">
+    <div class="grid">
+      <!-- LEFT: Bundle + Story -->
+      <div class="col-7 stack">
+        <!-- BUNDLE -->
+        <div class="card">
+          <div class="card__media">
+            <img
+              class="card__img"
+              src="/vsop/assets/vsop-set.jpg"
+              alt="Square Bidness VSOP Set — jacket and shorts in burgundy/brown"
+              loading="lazy"
+              width="1600" height="1000"
+              srcset="/vsop/assets/vsop-set_800.jpg 800w,
+                      /vsop/assets/vsop-set_1200.jpg 1200w,
+                      /vsop/assets/vsop-set.jpg 1600w"
+              sizes="(max-width: 900px) 100vw, 60vw"
+            />
+          </div>
+          <div class="card__body">
+            <h2 class="h2">VSOP Set</h2>
+            <p class="muted">Burgundy &amp; Brown • Heat-reactive • Embroidered</p>
+            <ul class="bullets">
+              <li>Heat-reactive nylon / suede blend</li>
+              <li>Embroidered Square Bidness logo</li>
+              <li>Designed for durability + everyday luxury</li>
+              <li>Limited run — preorder only</li>
+            </ul>
+            <div class="price">Bundle: $199.99</div>
+            <div class="row">
+              <label>Jacket Size
+                <select id="bundle-jacket-size">
+                  <option>S</option><option>M</option><option>L</option>
+                  <option>XL</option><option>2XL</option><option>3XL</option>
+                </select>
+              </label>
+              <label>Shorts Size
+                <select id="bundle-shorts-size">
+                  <option>S</option><option>M</option><option>L</option>
+                  <option>XL</option><option>2XL</option><option>3XL</option>
+                </select>
+              </label>
+              <label>Qty
+                <input id="bundle-qty" type="number" min="1" value="1" />
+              </label>
+            </div>
+            <a class="btn btn--burgundy" href="#" id="bundle-checkout">Preorder Bundle (Cart)</a>
+
+            <!-- Stripe Fast Checkout for Bundle -->
+            <div style="margin-top:.6rem;display:flex;gap:.5rem;flex-wrap:wrap;">
+              <a id="vsop-stripe-bundle" class="btn btn--stripe"
+                 href="https://buy.stripe.com/14AbJ12dpcuBgqx6x28N20c">
+                 🔒 Fast Checkout — VSOP Set $199.99
+              </a>
+              <small style="opacity:.75;">Secure Stripe payment. Email updates follow checkout.</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- STORY -->
+        <div class="story">
+          <p><strong>From Louisiana to Moët Hennessy — US HQ</strong><br>
+          The VSOP Collection is more than apparel. It's legacy in motion. It's luxury rooted in Louisiana.
+          Square Bidness stands on principles, morals, and business done right.</p>
+          <blockquote>"Principles. Morals. Business Done Right. That's Square Bidness."</blockquote>
+        </div>
+      </div>
+
+      <!-- RIGHT: Jacket + Shorts -->
+      <div class="col-5 stack">
+        <!-- Jacket -->
+        <div class="card">
+          <div class="card__media">
+            <img
+              class="card__img"
+              src="/vsop/assets/vsop-jacket.jpg"
+              alt="Square Bidness VSOP Jacket — burgundy/brown, embroidered logo"
+              loading="lazy"
+              width="1200" height="800"
+              srcset="/vsop/assets/vsop-jacket_800.jpg 800w,
+                      /vsop/assets/vsop-jacket_1200.jpg 1200w,
+                      /vsop/assets/vsop-jacket.jpg 1600w"
+              sizes="(max-width: 900px) 100vw, 40vw"
+            />
+          </div>
+          <div class="card__body">
+            <h2 class="h2">VSOP Jacket</h2>
+            <p class="muted">Heat-reactive • Embroidered • Limited preorder</p>
+            <div class="price">$129.99</div>
+            <div class="row">
+              <label>Size
+                <select id="jacket-size">
+                  <option>S</option><option>M</option><option>L</option>
+                  <option>XL</option><option>2XL</option><option>3XL</option>
+                </select>
+              </label>
+              <label>Qty
+                <input id="jacket-qty" type="number" min="1" value="1" />
+              </label>
+            </div>
+            <a class="btn btn--burgundy" href="#" id="jacket-checkout">Preorder Jacket</a>
+          </div>
+        </div>
+
+        <!-- Shorts -->
+        <div class="card">
+          <div class="card__media">
+            <img
+              class="card__img"
+              src="/vsop/assets/vsop-shorts.jpg"
+              alt="Square Bidness VSOP Shorts — burgundy/brown, embroidered logo"
+              loading="lazy"
+              width="1200" height="800"
+              srcset="/vsop/assets/vsop-shorts_800.jpg 800w,
+                      /vsop/assets/vsop-shorts_1200.jpg 1200w,
+                      /vsop/assets/vsop-shorts.jpg 1600w"
+              sizes="(max-width: 900px) 100vw, 40vw"
+            />
+          </div>
+          <div class="card__body">
+            <h2 class="h2">VSOP Shorts</h2>
+            <p class="muted">Heat-reactive • Embroidered • Limited preorder</p>
+            <div class="price">$89.99</div>
+            <div class="row">
+              <label>Size
+                <select id="shorts-size">
+                  <option>S</option><option>M</option><option>L</option>
+                  <option>XL</option><option>2XL</option><option>3XL</option>
+                </select>
+              </label>
+              <label>Qty
+                <input id="shorts-qty" type="number" min="1" value="1" />
+              </label>
+            </div>
+            <a class="btn btn--burgundy" href="#" id="shorts-checkout">Preorder Shorts</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Clarifier so customers know Stripe = bundle -->
+    <p class="muted" style="margin-top:.75rem;">
+      <strong>Note:</strong> Fast Checkout via Stripe is for the <strong>VSOP Set ($199.99)</strong>. Jacket and shorts can be preordered as individual items via the cart.
+    </p>
+  </section>
+
+  <!-- SHIPPING NOTE -->
+  <div class="closer">
+    <div class="quote">Transparent timelines. It's all Square Bidness.</div>
+    <div class="muted">Ships <strong>November 2025</strong>. You'll receive email updates after checkout.</div>
+  </div>
+
+  <!-- Mobile sticky Stripe fast checkout -->
+  <div class="vsop-sticky-cta">
+    <div style="display:flex;gap:.6rem;align-items:center;justify-content:space-between;">
+      <span style="font-weight:700;">VSOP Set — $199.99</span>
+      <a id="vsop-stripe-sticky" class="btn btn--stripe"
+         href="https://buy.stripe.com/14AbJ12dpcuBgqx6x28N20c">Fast Checkout — Stripe</a>
+    </div>
+  </div>
+
+  <!-- Page JS: countdown + cart wiring + Stripe UTM/GA -->
+  <script>
+  (function () {
+    // --- COUNTDOWN (Oct 25, 2025 23:59 local) ---
+    const end = new Date(2025, 9, 25, 23, 59, 59);
+    const cdDays  = document.getElementById('cd-days');
+    const cdHours = document.getElementById('cd-hours');
+    const cdMins  = document.getElementById('cd-mins');
+    const cdWrap  = document.getElementById('countdown');
+
+    function tick(){
+      const now = new Date();
+      const diff = Math.max(0, end - now);
+      if (diff <= 0) {
+        cdWrap && cdWrap.classList.add('is-closed');
+        if (cdDays)  cdDays.textContent  = '00';
+        if (cdHours) cdHours.textContent = '00';
+        if (cdMins)  cdMins.textContent  = '00';
+        return;
+      }
+      const mins  = Math.floor(diff / 60000);
+      const days  = Math.floor(mins / (60 * 24));
+      const hours = Math.floor((mins % (60 * 24)) / 60);
+      const m     = mins % 60;
+      if (cdDays)  cdDays.textContent  = String(days).padStart(2, '0');
+      if (cdHours) cdHours.textContent = String(hours).padStart(2, '0');
+      if (cdMins)  cdMins.textContent  = String(m).padStart(2, '0');
+    }
+    tick(); setInterval(tick, 30000);
+
+    // --- Catalog meta (adjust image paths if needed) ---
+    const CATALOG = {
+      'vsop-jacket': { name: 'VSOP Hooded Jacket — Burgundy + Brown', price: 129.99, image: '/vsop/assets/vsop-jacket.jpg' },
+      'vsop-shorts': { name: 'VSOP Shorts — Burgundy + Brown',       price:  89.99, image: '/vsop/assets/vsop-shorts.jpg' }
+    };
+
+    function addItem(item) {
+      if (window.SB && typeof SB.addToCart === 'function') {
+        SB.addToCart(item);
+      } else {
+        const KEY = 'sb_cart_v1';
+        const cart = JSON.parse(localStorage.getItem(KEY) || '[]');
+        const i = cart.findIndex(x => x.id === item.id);
+        if (i >= 0) cart[i].qty += Number(item.qty || 1);
+        else cart.push({ ...item, qty: Number(item.qty || 1) });
+        localStorage.setItem(KEY, JSON.stringify(cart));
+        dispatchEvent(new CustomEvent('sb:cart:update', { detail: { cart } }));
+      }
+    }
+
+    // --- Wire up buttons (delegated) ---
+    document.addEventListener('click', (e) => {
+      // Bundle -> cart flow
+      if (e.target.closest('#bundle-checkout')) {
+        e.preventDefault();
+        const jSize = (document.getElementById('bundle-jacket-size') || {}).value || 'M';
+        const sSize = (document.getElementById('bundle-shorts-size') || {}).value || 'M';
+        const qty   = Math.max(1, parseInt((document.getElementById('bundle-qty') || {}).value || '1', 10));
+
+        addItem({ id:`vsop-jacket-${jSize}`, name:`${CATALOG['vsop-jacket'].name} — ${jSize}`, price: CATALOG['vsop-jacket'].price, image: CATALOG['vsop-jacket'].image, qty });
+        addItem({ id:`vsop-shorts-${sSize}`, name:`${CATALOG['vsop-shorts'].name} — ${sSize}`, price: CATALOG['vsop-shorts'].price, image: CATALOG['vsop-shorts'].image, qty });
+
+        location.href = '/cart.html';
+        return;
+      }
+
+      // Jacket
+      if (e.target.closest('#jacket-checkout')) {
+        e.preventDefault();
+        const size = (document.getElementById('jacket-size') || {}).value || 'M';
+        const qty  = Math.max(1, parseInt((document.getElementById('jacket-qty') || {}).value || '1', 10));
+        addItem({ id:`vsop-jacket-${size}`, name:`${CATALOG['vsop-jacket'].name} — ${size}`, price: CATALOG['vsop-jacket'].price, image: CATALOG['vsop-jacket'].image, qty });
+        location.href = '/cart.html';
+        return;
+      }
+
+      // Shorts
+      if (e.target.closest('#shorts-checkout')) {
+        e.preventDefault();
+        const size = (document.getElementById('shorts-size') || {}).value || 'M';
+        const qty  = Math.max(1, parseInt((document.getElementById('shorts-qty') || {}).value || '1', 10));
+        addItem({ id:`vsop-shorts-${size}`, name:`${CATALOG['vsop-shorts'].name} — ${size}`, price: CATALOG['vsop-shorts'].price, image: CATALOG['vsop-shorts'].image, qty });
+        location.href = '/cart.html';
+        return;
+      }
     });
-  }
 
-  // Hook up all Stripe buttons
-  wireStripe('vsop-stripe-hero',   STRIPE.bundle, 'vsop_bundle_hero');
-  wireStripe('vsop-stripe-bundle', STRIPE.bundle, 'vsop_bundle_card');
-  wireStripe('vsop-stripe-sticky', STRIPE.bundle, 'vsop_bundle_sticky');
-  wireStripe('vsop-stripe-jacket', STRIPE.jacket, 'vsop_jacket');
-  wireStripe('vsop-stripe-shorts', STRIPE.shorts, 'vsop_shorts');
+    // --- Stripe Fast Checkout UTM + GA tagging (bundle only)
+    const STRIPE_URL = "https://buy.stripe.com/14AbJ12dpcuBgqx6x28N20c";
+    const UTM = { utm_source:'vsop', utm_medium:'site', utm_campaign:'vsop_set' };
 
-  // Show sticky Stripe bar on mobile only (keeps your existing logic)
-  if (window.matchMedia('(max-width: 768px)').matches) {
-    const bar = document.querySelector('.vsop-sticky-cta');
-    if (bar) bar.style.display = 'block';
-  }
-})();
-</script>
+    function withUTM(url) {
+      try { const u = new URL(url); Object.entries(UTM).forEach(([k,v])=>u.searchParams.set(k,v)); return u.toString(); }
+      catch { return url; }
+    }
 
+    function wireStripe(id,label){
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('click', (ev) => {
+        // ensure UTMs are present
+        el.href = withUTM(STRIPE_URL);
+        // GA event (safe)
+        try { if (typeof gtag === 'function') gtag('event','click',{event_category:'cta',event_label:label,value:1}); } catch {}
+      });
+    }
+
+    ['vsop-stripe-hero','vsop-stripe-bundle','vsop-stripe-sticky'].forEach(id=>wireStripe(id,id));
+
+    // Show sticky Stripe bar on mobile only
+    if (window.matchMedia('(max-width: 768px)').matches) {
+      const bar = document.querySelector('.vsop-sticky-cta');
+      if (bar) bar.style.display = 'block';
+    }
+  })();
+  </script>
+
+  <!-- FOOTER / TECH LAB CREDIT -->
+  <footer class="site-footer" style="border-top:1px solid #1f1f1f;background:#000;color:#d7dae0;padding:2rem 0 3rem;margin-top:3rem;">
+    <div class="footer__inner" style="max-width:1200px;margin:0 auto;padding:0 16px;display:grid;gap:1.5rem;font-size:.9rem;line-height:1.5;">
+      <div>
+        <p style="margin:0 0 .5rem 0;">
+          &copy; 2025 Square Bidness Tech Lab
+        </p>
+        <p style="margin:0 0 .5rem 0;">
+          <a href="/privacy/" style="color:#fff;text-decoration:none;">Privacy</a> ·
+          <a href="/terms/" style="color:#fff;text-decoration:none;">Terms</a> ·
+          <a href="/returns/" style="color:#fff;text-decoration:none;">Returns</a> ·
+          <a href="/linkme/" style="color:#fff;text-decoration:none;">Link Me</a>
+        </p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
