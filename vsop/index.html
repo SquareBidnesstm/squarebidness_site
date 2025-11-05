@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Core SEO -->
+  <!-- Page-specific SEO -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>VSOP Collection — Square Bidness</title>
+  <link rel="preload" as="image" href="/vsop/assets/vsop-hero.jpg">
   <meta name="description" content="VSOP Collection preorder — burgundy & brown heat-reactive jacket + shorts. Limited run." />
   <link rel="canonical" href="https://squarebidness.com/vsop/" />
   <meta name="theme-color" content="#000000" />
   <meta name="mobile-web-app-capable" content="yes" />
 
-  <!-- Social -->
+  <!-- Open Graph / Twitter -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Square Bidness">
   <meta property="og:url" content="https://squarebidness.com/vsop/">
@@ -25,15 +26,13 @@
   <meta name="twitter:image" content="https://squarebidness.com/vsop/assets/vsop-hero_1200x630.jpg">
   <meta name="twitter:site" content="@squarebidnesstm">
 
-  <!-- Hints & preload -->
-  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
-  <link rel="preconnect" href="https://www.google-analytics.com" crossorigin>
-  <link rel="preload" as="image" href="/vsop/assets/vsop-hero.jpg" imagesrcset="/vsop/assets/vsop-hero_1200x630.jpg 1200w, /vsop/assets/vsop-hero.jpg 1600w" imagesizes="100vw">
+  <!-- Performance -->
+  <link rel="preconnect" href="https://www.googletagmanager.com">
+  <link rel="preconnect" href="https://www.google-analytics.com">
+  <script defer src="/scripts/ga.js"></script>
 
-  <!-- Styles -->
+  <!-- Base styles for the page -->
   <link rel="stylesheet" href="/vsop/vsop.css">
-
-  <!-- Icons / Manifest -->
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="apple-touch-icon" href="/assets/icons/icon-180.png">
   <link rel="manifest" href="/site.webmanifest">
@@ -57,13 +56,68 @@
   }
   </script>
 
-  <!-- GA (deferred) -->
-  <script defer src="/scripts/ga.js"></script>
+  <!-- Small inlined additions (CTA + waitlist styles) -->
+  <style>
+    :root { --vsop-gold:#c9a227; }
+    /* Floating “Shop VSOP” button */
+    .vsop-top-cta{
+      position:fixed; top:12px; right:12px; z-index:9999;
+      display:inline-flex; align-items:center; gap:.5rem;
+      padding:.72rem 1.05rem;
+      background:linear-gradient(135deg,#ffef9a 0%, #ffd04d 40%, #c9a227 100%);
+      color:#111; font-weight:900; letter-spacing:.05em; text-transform:uppercase;
+      border:1px solid rgba(0,0,0,.25); border-radius:999px; text-decoration:none;
+      box-shadow:0 14px 36px rgba(201,162,39,.4), 0 0 0 3px rgba(255,255,255,.08) inset;
+      transition:transform .15s ease, box-shadow .15s ease, opacity .2s ease;
+    }
+    .vsop-top-cta:hover{ transform:translateY(-1px); box-shadow:0 18px 44px rgba(201,162,39,.5), 0 0 0 3px rgba(255,255,255,.12) inset; }
+    .vsop-top-cta__spark{ font-size:1.05rem; }
+    @media (max-width:480px){ .vsop-top-cta{ padding:.6rem .9rem; font-size:.9rem; top:10px; right:10px; } }
+
+    /* Countdown closed state */
+    .countdown.is-closed{ background:#fff7d9; border-color:#f1d06a; color:#111; }
+
+    /* Waitlist panel */
+    .waitlist{
+      margin: 18px auto 28px;
+      background:#ffffff;
+      border:1px solid #e8eaed;
+      border-radius:18px;
+      box-shadow:0 10px 30px rgba(0,0,0,.08);
+      padding:18px;
+      text-align:center;
+      max-width:900px;
+    }
+    .waitlist__title{ margin:.25rem 0; font-size:1.15rem; font-weight:800; color:#111; }
+    .waitlist__sub{ margin:.25rem 0 .75rem; color:#555; }
+    .waitlist__form{ display:flex; gap:10px; justify-content:center; align-items:center; flex-wrap:wrap; }
+    .waitlist__form input[type="email"]{
+      min-width:260px; padding:12px 14px; border:2px solid #e9ecef; border-radius:12px;
+      font:inherit; background:#fff;
+    }
+    .waitlist__form input[type="email"]:focus{
+      outline:none; border-color:#800020; box-shadow:0 0 0 3px rgba(128,0,32,.10);
+    }
+    .waitlist__note{ display:block; width:100%; margin-top:.5rem; color:#6c757d; font-size:.85rem; }
+    .waitlist__success{
+      padding:12px 14px; background:#eaffea; border:1px solid #a7e0a7; border-radius:12px;
+      color:#155724; font-weight:700;
+    }
+
+    /* Screen reader helper */
+    .sr-only{
+      position:absolute !important; width:1px; height:1px; padding:0; margin:-1px;
+      overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+    }
+  </style>
 </head>
 
 <body>
-  <!-- Floating “Shop VSOP” -->
-  <a class="vsop-top-cta" href="#order" aria-label="Shop VSOP now"><span aria-hidden="true">✨</span> Shop VSOP</a>
+
+  <!-- ALWAYS-VISIBLE SHOP BUTTON -->
+  <a class="vsop-top-cta" href="#order" aria-label="Shop VSOP now">
+    <span class="vsop-top-cta__spark">✨</span> Shop VSOP
+  </a>
 
   <!-- HERO -->
   <section class="hero">
@@ -80,22 +134,30 @@
     </div>
   </section>
 
-  <!-- COUNTDOWN (Nov 15, 2025 @ 23:59:59) -->
-  <section
-    class="countdown container"
-    id="countdown"
-    aria-live="polite"
-    data-end="2025-11-15T23:59:59">
-    <div class="cd-live">
-      <strong>Preorder closes in:</strong>
-      <span class="cd-row" role="group" aria-label="Time remaining">
-        <span class="cd-badge" id="cd-days">--</span><span class="cd-label" aria-hidden="true">d</span>
-        <span class="cd-badge" id="cd-hours">--</span><span class="cd-label" aria-hidden="true">h</span>
-        <span class="cd-badge" id="cd-mins">--</span><span class="cd-label" aria-hidden="true">m</span>
-      </span>
+  <!-- COUNTDOWN -->
+  <section class="countdown container" id="countdown" aria-live="polite">
+    <strong>Preorder closes in:</strong>
+    <span id="cd-days">--</span>d :
+    <span id="cd-hours">--</span>h :
+    <span id="cd-mins">--</span>m
+  </section>
+
+  <!-- VSOP Waitlist (hidden until countdown closes) -->
+  <section id="vsop-list" class="waitlist container" hidden>
+    <h2 class="waitlist__title">Preorder window closed — join the list</h2>
+    <p class="waitlist__sub">Get an email if we reopen or do a second run.</p>
+
+    <form id="vsop-list-form" class="waitlist__form" autocomplete="on">
+      <label class="sr-only" for="wl-email">Email</label>
+      <input id="wl-email" name="email" type="email" inputmode="email" required
+             placeholder="you@example.com" aria-label="Your email" />
+      <button class="btn btn--burgundy" type="submit">Join the List</button>
+      <small class="waitlist__note">We’ll only email about VSOP restock or updates.</small>
+    </form>
+
+    <div id="vsop-list-success" class="waitlist__success" hidden>
+      You’re on the list. Respect. 🫡
     </div>
-    <div class="cd-closed" id="cd-closed">Preorder window closed — join the list to get updates.</div>
-    <div class="cd-progress" aria-hidden="true"><span id="cd-progress-bar"></span></div>
   </section>
 
   <!-- PRODUCT GRID -->
@@ -237,11 +299,13 @@
     <div class="muted">Ships <strong>November 2025</strong>. You'll receive email updates after checkout.</div>
   </div>
 
-  <!-- Footer -->
+  <!-- FOOTER / TECH LAB CREDIT -->
   <footer class="site-footer" style="border-top:1px solid #1f1f1f;background:#000;color:#d7dae0;padding:2rem 0 3rem;margin-top:3rem;">
     <div class="footer__inner" style="max-width:1200px;margin:0 auto;padding:0 16px;display:grid;gap:1.5rem;font-size:.9rem;line-height:1.5;">
       <div>
-        <p style="margin:0 0 .5rem 0;">&copy; 2025 Square Bidness Tech Lab</p>
+        <p style="margin:0 0 .5rem 0;">
+          &copy; 2025 Square Bidness Tech Lab
+        </p>
         <p style="margin:0 0 .5rem 0;">
           <a href="/privacy/" style="color:#fff;text-decoration:none;">Privacy</a> ·
           <a href="/terms/" style="color:#fff;text-decoration:none;">Terms</a> ·
@@ -252,76 +316,98 @@
     </div>
   </footer>
 
-  <!-- JS: one block at the end -->
+  <!-- PAGE JS -->
   <script>
   (function () {
-    // -------- COUNTDOWN (data-driven) --------
-    const wrap = document.getElementById('countdown');
-    if (wrap) {
-      const iso = wrap.getAttribute('data-end') || '2025-11-15T23:59:59';
-      const KEY='vsop_cd_start';
-      let start = localStorage.getItem(KEY);
-      if (!start) { start = new Date().toISOString(); localStorage.setItem(KEY, start); }
-      const startDate = new Date(start);
-      const endDate   = new Date(iso);
+    // -----------------------------------
+    // COUNTDOWN: closes Nov 15, 2025 23:59:59 local time
+    // -----------------------------------
+    const end = new Date(2025, 10, 15, 23, 59, 59); // month is 0-based (10 = November)
+    const cdWrap  = document.getElementById('countdown');
+    const cdDays  = document.getElementById('cd-days');
+    const cdHours = document.getElementById('cd-hours');
+    const cdMins  = document.getElementById('cd-mins');
 
-      const D = document.getElementById('cd-days');
-      const H = document.getElementById('cd-hours');
-      const M = document.getElementById('cd-mins');
-      const bar = document.getElementById('cd-progress-bar');
+    function tick(){
+      const diff = Math.max(0, end - new Date());
+      const mins  = Math.floor(diff / 60000);
+      const days  = Math.floor(mins / (60 * 24));
+      const hours = Math.floor((mins % (60 * 24)) / 60);
+      const m     = mins % 60;
 
-      const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
-
-      function tick(){
-        const now = new Date();
-        const total = Math.max(1, endDate - startDate);
-        const left  = Math.max(0, endDate - now);
-
-        if (left <= 0) {
-          wrap.classList.add('is-closed');
-          D && (D.textContent='00'); H && (H.textContent='00'); M && (M.textContent='00');
-        } else {
-          const mins  = Math.floor(left / 60000);
-          const days  = Math.floor(mins / (60*24));
-          const hours = Math.floor((mins % (60*24)) / 60);
-          const mm    = mins % 60;
-          D && (D.textContent = String(days).padStart(2,'0'));
-          H && (H.textContent = String(hours).padStart(2,'0'));
-          M && (M.textContent = String(mm).padStart(2,'0'));
-        }
-
-        if (bar) {
-          const prog = clamp(1 - (left / total), 0, 1);
-          bar.style.width = (prog * 100).toFixed(2) + '%';
-        }
+      if (diff <= 0) {
+        cdWrap && cdWrap.classList.add('is-closed');
+        if (cdDays)  cdDays.textContent  = '00';
+        if (cdHours) cdHours.textContent = '00';
+        if (cdMins)  cdMins.textContent  = '00';
+      } else {
+        if (cdDays)  cdDays.textContent  = String(days).padStart(2, '0');
+        if (cdHours) cdHours.textContent = String(hours).padStart(2, '0');
+        if (cdMins)  cdMins.textContent  = String(m).padStart(2, '0');
       }
-      tick();
-      const interval = setInterval(tick, 30000);
-      window.addEventListener('pagehide', () => clearInterval(interval));
+
+      revealWaitlistIfClosed();
+    }
+    tick();
+    setInterval(tick, 30000);
+
+    // -----------------------------------
+    // WAITLIST: reveal when countdown closed
+    // -----------------------------------
+    const wlWrap  = document.getElementById('vsop-list');
+    const wlForm  = document.getElementById('vsop-list-form');
+    const wlEmail = document.getElementById('wl-email');
+    const wlOK    = document.getElementById('vsop-list-success');
+    const WL_KEY  = 'vsop_waitlist_joined';
+
+    function revealWaitlistIfClosed(){
+      const closed = cdWrap?.classList.contains('is-closed');
+      const already = localStorage.getItem(WL_KEY) === '1';
+      if (wlWrap) wlWrap.hidden = !(closed && !already);
+      if (wlOK)   wlOK.hidden   = !already;
+      if (wlForm) wlForm.hidden = already;
     }
 
-    // -------- STRIPE LINKS --------
+    wlForm?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = (wlEmail?.value || '').trim();
+      if (!email) return;
+
+      // Mailto fallback (no backend required)
+      const mail = new URL('mailto:squarebidnessapparel@gmail.com');
+      mail.searchParams.set('subject','VSOP Waitlist');
+      mail.searchParams.set('body', `Please add me to the VSOP waitlist.\n\nEmail: ${email}\nSource: /vsop/`);
+      window.location.href = mail.toString();
+
+      try { localStorage.setItem(WL_KEY, '1'); } catch(_) {}
+      revealWaitlistIfClosed();
+      if (wlOK) wlOK.hidden = false;
+      if (wlForm) wlForm.hidden = true;
+    });
+
+    // -----------------------------------
+    // STRIPE LINKS
+    // -----------------------------------
     const LINKS = {
       set:    "https://buy.stripe.com/14AbJ12dpcuBgqx6x28N20c", // $199.99 bundle
       jacket: "https://buy.stripe.com/dRm14ncS38el0rz7B68N20d", // $129.99 jacket
       shorts: "https://buy.stripe.com/8x29ATdW79ipfmt3kQ8N20b"  // $89.99 shorts
     };
 
-    const $ = (id) => document.getElementById(id);
     function withSize(baseUrl, size, qty) {
       try {
         const u = new URL(baseUrl);
         if (size) u.searchParams.set('size', size);
-        if (qty && qty > 1) u.searchParams.set('qty', String(qty));
+        if (qty && qty > 1) u.searchParams.set('qty', String(qty)); // informational only
         return u.toString();
       } catch(_) { return baseUrl; }
     }
 
-    $('bundle-checkout')?.addEventListener('click', (e) => {
+    document.getElementById('bundle-checkout')?.addEventListener('click', function(e){
       e.preventDefault();
-      const jSize = $('bundle-jacket-size')?.value || 'M';
-      const sSize = $('bundle-shorts-size')?.value || 'M';
-      const qty   = Math.max(1, parseInt($('bundle-qty')?.value || '1', 10));
+      const jSize = document.getElementById('bundle-jacket-size')?.value || 'M';
+      const sSize = document.getElementById('bundle-shorts-size')?.value || 'M';
+      const qty   = Math.max(1, parseInt(document.getElementById('bundle-qty')?.value || '1', 10));
       const u = new URL(LINKS.set);
       u.searchParams.set('jacket', jSize);
       u.searchParams.set('shorts', sSize);
@@ -329,27 +415,29 @@
       location.href = u.toString();
     });
 
-    $('jacket-checkout')?.addEventListener('click', (e) => {
+    document.getElementById('jacket-checkout')?.addEventListener('click', function(e){
       e.preventDefault();
-      const size = $('jacket-size')?.value || 'M';
-      const qty  = Math.max(1, parseInt($('jacket-qty')?.value || '1', 10));
+      const size = document.getElementById('jacket-size')?.value || 'M';
+      const qty  = Math.max(1, parseInt(document.getElementById('jacket-qty')?.value || '1', 10));
       location.href = withSize(LINKS.jacket, size, qty);
     });
 
-    $('shorts-checkout')?.addEventListener('click', (e) => {
+    document.getElementById('shorts-checkout')?.addEventListener('click', function(e){
       e.preventDefault();
-      const size = $('shorts-size')?.value || 'M';
-      const qty  = Math.max(1, parseInt($('shorts-qty')?.value || '1', 10));
+      const size = document.getElementById('shorts-size')?.value || 'M';
+      const qty  = Math.max(1, parseInt(document.getElementById('shorts-qty')?.value || '1', 10));
       location.href = withSize(LINKS.shorts, size, qty);
     });
 
-    // -------- TOP CTA: smooth scroll + simple UTM tag --------
-    document.querySelector('.vsop-top-cta')?.addEventListener('click', (e) => {
+    // -----------------------------------
+    // Floating CTA: add UTMs + smooth scroll
+    // -----------------------------------
+    document.querySelector('.vsop-top-cta')?.addEventListener('click', function(e){
       e.preventDefault();
       const url = new URL(window.location.href);
-      url.searchParams.set('utm_source','vsop_topbtn');
-      url.searchParams.set('utm_medium','site');
-      url.searchParams.set('utm_campaign','vsop_launch');
+      if (!url.searchParams.has('utm_source')) url.searchParams.set('utm_source','vsop_topbtn');
+      if (!url.searchParams.has('utm_medium')) url.searchParams.set('utm_medium','site');
+      if (!url.searchParams.has('utm_campaign')) url.searchParams.set('utm_campaign','vsop_launch');
       history.replaceState({}, '', url.toString());
       document.getElementById('order')?.scrollIntoView({ behavior:'smooth', block:'start' });
       try{ if (typeof gtag === 'function'){ gtag('event','click',{event_category:'cta',event_label:'vsop_top_btn',value:1}); }}catch(_){}
