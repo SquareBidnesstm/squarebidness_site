@@ -27,7 +27,6 @@
   <meta name="twitter:site" content="@squarebidnesstm">
 
   <!-- Shared partial (once only) -->
-  <!-- Performance -->
   <link rel="preconnect" href="https://www.googletagmanager.com">
   <link rel="preconnect" href="https://www.google-analytics.com">
 
@@ -66,9 +65,39 @@
 
   <!-- Site cart core -->
   <script src="/scripts/sb-cart.js" defer></script>
+
+  <!-- *** BIG “SHOP VSOP” TOP BUTTON *** -->
+  <style>
+    :root { --vsop-gold:#c9a227; }
+    .vsop-top-cta{
+      position:fixed; top:12px; right:12px; z-index:9999;
+      display:inline-flex; align-items:center; gap:.5rem;
+      padding:.72rem 1.05rem;
+      background:linear-gradient(135deg,#ffef9a 0%, #ffd04d 40%, #c9a227 100%);
+      color:#111; font-weight:900; letter-spacing:.05em; text-transform:uppercase;
+      border:1px solid rgba(0,0,0,.25); border-radius:999px;
+      text-decoration:none;
+      box-shadow:0 14px 36px rgba(201,162,39,.4), 0 0 0 3px rgba(255,255,255,.08) inset;
+      transition:transform .15s ease, box-shadow .15s ease, opacity .2s ease;
+    }
+    .vsop-top-cta:hover{ transform:translateY(-1px); box-shadow:0 18px 44px rgba(201,162,39,.5), 0 0 0 3px rgba(255,255,255,.12) inset; }
+    .vsop-top-cta:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
+    .vsop-top-cta__spark{ font-size:1.05rem; }
+    @media (max-width:480px){
+      .vsop-top-cta{ padding:.6rem .9rem; font-size:.9rem; top:10px; right:10px; }
+    }
+    @media (prefers-reduced-motion:reduce){
+      .vsop-top-cta{ transition:none; }
+    }
+  </style>
 </head>
 
 <body>
+
+  <!-- ALWAYS-VISIBLE SHOP BUTTON -->
+  <a class="vsop-top-cta" href="#order" aria-label="Shop VSOP now">
+    <span class="vsop-top-cta__spark">✨</span> Shop VSOP
+  </a>
 
   <!-- HERO -->
   <section class="hero">
@@ -321,33 +350,9 @@
   })();
   </script>
 
-  <!-- Optional fade overlay for smooth load -->
-  <script>
-    (function () {
-      var ov = document.createElement('div');
-      ov.style.position = 'fixed';
-      ov.style.inset = '0';
-      ov.style.background = '#000';
-      ov.style.opacity = '1';
-      ov.style.pointerEvents = 'none';
-      ov.style.transition = 'opacity .6s ease';
-      ov.style.zIndex = '9999';
-      document.body.appendChild(ov);
-      window.addEventListener('load', function () {
-        requestAnimationFrame(function () {
-          ov.style.opacity = '0';
-          setTimeout(function () {
-            if (ov && ov.parentNode) ov.parentNode.removeChild(ov);
-          }, 700);
-        });
-      });
-    })();
-  </script>
-    <!-- FOOTER / TECH LAB CREDIT -->
+  <!-- FOOTER / TECH LAB CREDIT -->
   <footer class="site-footer" style="border-top:1px solid #1f1f1f;background:#000;color:#d7dae0;padding:2rem 0 3rem;margin-top:3rem;">
     <div class="footer__inner" style="max-width:1200px;margin:0 auto;padding:0 16px;display:grid;gap:1.5rem;font-size:.9rem;line-height:1.5;">
-
-      <!-- Legal / nav-y links -->
       <div>
         <p style="margin:0 0 .5rem 0;">
           &copy; 2025 Square Bidness Tech Lab
@@ -359,11 +364,61 @@
           <a href="/linkme/" style="color:#fff;text-decoration:none;">Link Me</a>
         </p>
       </div>
-
-     
-
-     
+    </div>
   </footer>
+<script>
+(() => {
+  const cta = document.querySelector('.vsop-top-cta');
+  if (!cta) return;
+
+  const UTM = {
+    utm_source: 'vsop_topbtn',
+    utm_medium: 'site',
+    utm_campaign: 'vsop_launch'
+  };
+
+  function ensureUtmsInUrl() {
+    const url = new URL(window.location.href);
+    let changed = false;
+    for (const [k, v] of Object.entries(UTM)) {
+      if (!url.searchParams.has(k)) {
+        url.searchParams.set(k, v);
+        changed = true;
+      }
+    }
+    if (changed) {
+      // Add UTMs without reloading
+      history.replaceState({}, '', url.toString());
+    }
+  }
+
+  cta.addEventListener('click', (e) => {
+    e.preventDefault();
+
+    // 1) Put UTMs on the current URL (no reload)
+    ensureUtmsInUrl();
+
+    // 2) Fire a GA event safely if available
+    try {
+      if (typeof gtag === 'function') {
+        gtag('event', 'click', {
+          event_category: 'cta',
+          event_label: 'vsop_top_btn',
+          value: 1
+        });
+      }
+    } catch (_) {}
+
+    // 3) Jump to the order section (smooth if supported)
+    const target = document.getElementById('order');
+    if (target && 'scrollIntoView' in target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      location.hash = '#order';
+    }
+  });
+})();
+</script>
 
 </body>
 </html>
