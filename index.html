@@ -234,42 +234,32 @@
 (async () => {
   const bust = `?v=${Date.now()}`;
 
-  async function fetchFirstAvailable(urls) {
-    for (const u of urls) {
-      try {
-        const res = await fetch(u + bust, { credentials: 'same-origin', cache: 'no-store' });
-        if (res.ok) return res.text();
-        console.warn('[partials] not ok:', u, res.status);
-      } catch (err) {
-        console.warn('[partials] fetch fail:', u, err);
+  async function injectPartial(url, targetId) {
+    try {
+      const res = await fetch(url + bust, { credentials: 'same-origin', cache: 'no-store' });
+      if (!res.ok) {
+        console.warn('[partials] not ok:', url, res.status);
+        return null;
       }
-    }
-    return null;
-  }
-
-  async function injectPartial(urlCandidates, targetId) {
-    const html = await fetchFirstAvailable(urlCandidates);
-    const el = document.getElementById(targetId);
-    if (!el) {
-      console.warn('[partials] missing target:', targetId);
+      const html = await res.text();
+      const el = document.getElementById(targetId);
+      if (!el) {
+        console.warn('[partials] missing target:', targetId);
+        return null;
+      }
+      el.innerHTML = html;
+      el.classList.add('fade-in');
+      return el;
+    } catch (err) {
+      console.warn('[partials] fetch fail:', url, err);
       return null;
     }
-    if (!html) {
-      console.warn('[partials] no partial loaded for', targetId);
-      return null;
-    }
-    el.innerHTML = html;
-    el.classList.add('fade-in');
-    return el;
   }
 
-  // NAV (try both paths just in case)
-  const navEl = await injectPartial(
-    ['/nav/index.html', '/public/nav/index.html'],
-    'nav-placeholder'
-  );
+  // NAV — your repo serves it at /public/nav/index.html
+  const navEl = await injectPartial('/public/nav/index.html', 'nav-placeholder');
 
-  // highlight current
+  // highlight current link
   if (navEl) {
     const current = location.pathname.replace(/\/+$/, '') || '/';
     navEl.querySelectorAll('a[href]').forEach(a => {
@@ -283,11 +273,8 @@
     });
   }
 
-  // FOOTER (try both paths)
-  await injectPartial(
-    ['/footer/index.html', '/public/footer/index.html'],
-    'footer-placeholder'
-  );
+  // FOOTER — served at /public/footer/index.html
+  await injectPartial('/public/footer/index.html', 'footer-placeholder');
 })();
 </script>
 
