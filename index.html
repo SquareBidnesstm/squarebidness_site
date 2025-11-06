@@ -230,48 +230,67 @@
   </script>
 
   <!-- NAV + FOOTER loader (served from /public/nav and /public/footer) -->
-  <script>
-  (async () => {
-    const bust = `?v=${Date.now()}`;
+<script>
+(async () => {
+  const bust = `?v=${Date.now()}`;
 
-    async function injectPartial(url, targetId) {
+  async function fetchFirstAvailable(urls) {
+    for (const u of urls) {
       try {
-        const res = await fetch(url + bust, { credentials: 'same-origin' });
-        if (!res.ok) return null;
-        const html = await res.text();
-        const el = document.getElementById(targetId);
-        if (el) {
-          el.innerHTML = html;
-          el.classList.add('fade-in');
-        }
-        return el;
+        const res = await fetch(u + bust, { credentials: 'same-origin', cache: 'no-store' });
+        if (res.ok) return res.text();
+        console.warn('[partials] not ok:', u, res.status);
       } catch (err) {
-        console.warn('Partial failed:', url, err);
-        return null;
+        console.warn('[partials] fetch fail:', u, err);
       }
     }
+    return null;
+  }
 
-    // NAV (url maps to /public/nav/index.html)
-    const navEl = await injectPartial('/nav/index.html', 'nav-placeholder');
-
-    // highlight current
-    if (navEl) {
-      const current = location.pathname.replace(/\/+$/, '') || '/';
-      navEl.querySelectorAll('a[href]').forEach(a => {
-        try {
-          const href = new URL(a.getAttribute('href'), location.origin).pathname.replace(/\/+$/, '') || '/';
-          if (href === current || (href !== '/' && current.startsWith(href))) {
-            a.classList.add('is-active');
-            a.setAttribute('aria-current', 'page');
-          }
-        } catch (_) {}
-      });
+  async function injectPartial(urlCandidates, targetId) {
+    const html = await fetchFirstAvailable(urlCandidates);
+    const el = document.getElementById(targetId);
+    if (!el) {
+      console.warn('[partials] missing target:', targetId);
+      return null;
     }
+    if (!html) {
+      console.warn('[partials] no partial loaded for', targetId);
+      return null;
+    }
+    el.innerHTML = html;
+    el.classList.add('fade-in');
+    return el;
+  }
 
-    // FOOTER (url maps to /public/footer/index.html)
-    await injectPartial('/footer/index.html', 'footer-placeholder');
-  })();
-  </script>
+  // NAV (try both paths just in case)
+  const navEl = await injectPartial(
+    ['/nav/index.html', '/public/nav/index.html'],
+    'nav-placeholder'
+  );
+
+  // highlight current
+  if (navEl) {
+    const current = location.pathname.replace(/\/+$/, '') || '/';
+    navEl.querySelectorAll('a[href]').forEach(a => {
+      try {
+        const href = new URL(a.getAttribute('href'), location.origin).pathname.replace(/\/+$/, '') || '/';
+        if (href === current || (href !== '/' && current.startsWith(href))) {
+          a.classList.add('is-active');
+          a.setAttribute('aria-current', 'page');
+        }
+      } catch (_) {}
+    });
+  }
+
+  // FOOTER (try both paths)
+  await injectPartial(
+    ['/footer/index.html', '/public/footer/index.html'],
+    'footer-placeholder'
+  );
+})();
+</script>
+
 
   <script>
   document.addEventListener('click', (e) => {
