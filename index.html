@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!--
+  QUICK FIX NOTES
+  - On Vercel, files in /public are served from "/" — do NOT prefix URLs with "/public".
+  - Move images to: public/assets/...  → reference as: /assets/...
+  - Move JS to:     public/scripts/... → reference as: /scripts/...
+  - Keep products.json at public/products.json → fetch("/products.json")
+  -->
+
   <!-- Page basics -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -36,7 +44,7 @@
   <!-- Icons / PWA -->
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="apple-touch-icon" href="/assets/icons/icon-180.png">
-  <link rel="manifest" href="/public/site.webmanifest">
+  <link rel="manifest" href="/site.webmanifest">
   <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
   <meta name="theme-color" content="#000000">
 
@@ -67,11 +75,10 @@
   }
   </script>
 
-  <!-- Site scripts from /public -->
-  <script defer src="/public/scripts/ga.js"></script>
-  <script defer src="/public/scripts/sb-cart.js"></script>
-  <!-- optional -->
-  <script defer src="/public/scripts/global.js"></script>
+  <!-- Site scripts (served from /public/scripts as /scripts) -->
+  <script defer src="/scripts/ga.js"></script>
+  <script defer src="/scripts/sb-cart.js"></script>
+  <script defer src="/scripts/global.js"></script>
 
   <!-- Page-specific styles (you can move to style.css later) -->
   <style>
@@ -113,7 +120,8 @@
   <header class="hero hero--dark">
     <div class="container hero__inner">
       <picture class="hero__media" aria-hidden="true">
-        <img loading="lazy" src="/public/assets/hero.jpg" alt="">
+        <!-- was /public/assets/hero.jpg -->
+        <img loading="lazy" src="/assets/hero.jpg" alt="">
       </picture>
       <div class="hero__copy">
         <h1 class="brand">Square Bidness</h1>
@@ -168,7 +176,8 @@
 
           <article class="card">
             <div class="card__media">
-              <img src="/public/assets/vsop-hero.jpg" alt="VSOP look — jacket with matching shorts">
+              <!-- was /public/assets/vsop-hero.jpg -->
+              <img src="/assets/vsop-hero.jpg" alt="VSOP look — jacket with matching shorts">
             </div>
             <div class="card__content">
               <h3>Full VSOP Look</h3>
@@ -197,7 +206,7 @@
   <!-- FOOTER SLOT -->
   <div id="footer-placeholder"></div>
 
-  <!-- Product hydration (optional) -->
+  <!-- Product hydration (expects public/products.json) -->
   <script>
   fetch("/products.json", { cache: "no-store" })
     .then(r => r.ok ? r.json() : null)
@@ -220,7 +229,7 @@
     .catch(() => {});
   </script>
 
-  <!-- NAV + FOOTER loader (shared from /public) -->
+  <!-- NAV + FOOTER loader (served from /public/nav and /public/footer) -->
   <script>
   (async () => {
     const bust = `?v=${Date.now()}`;
@@ -242,8 +251,8 @@
       }
     }
 
-    // NAV
-    const navEl = await injectPartial('/public/nav/index.html', 'nav-placeholder');
+    // NAV (url maps to /public/nav/index.html)
+    const navEl = await injectPartial('/nav/index.html', 'nav-placeholder');
 
     // highlight current
     if (navEl) {
@@ -259,19 +268,19 @@
       });
     }
 
-    // FOOTER
-    await injectPartial('/public/footer/index.html', 'footer-placeholder');
+    // FOOTER (url maps to /public/footer/index.html)
+    await injectPartial('/footer/index.html', 'footer-placeholder');
   })();
   </script>
-  <script>
-document.addEventListener('click', (e) => {
-  const a = e.target.closest('a[href="/vsop/"]');
-  if (!a) return;
-  try { if (typeof gtag === 'function') {
-    gtag('event','click',{event_category:'nav',event_label:'vsop_home_link',value:1});
-  }} catch(_) {}
-});
-</script>
 
+  <script>
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a[href="/vsop/"]');
+    if (!a) return;
+    try { if (typeof gtag === 'function') {
+      gtag('event','click',{event_category:'nav',event_label:'vsop_home_link',value:1});
+    }} catch(_) {}
+  });
+  </script>
 </body>
 </html>
