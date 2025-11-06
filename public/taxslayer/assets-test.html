@@ -1,0 +1,40 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Taxslayer Assets Test</title>
+<style>
+  body{font:14px/1.4 system-ui;margin:20px;background:#0b0b0b;color:#fff}
+  .ok{color:#9f9}
+  .bad{color:#f99}
+  img{max-width:360px;display:block;margin:8px 0;border:1px solid #222;border-radius:8px;background:#111}
+  code{background:#111;padding:2px 6px;border-radius:6px}
+</style>
+<h1>Taxslayer Assets Test</h1>
+<div id="out"></div>
+<script>
+const paths = [
+  '/taxslayer/assets/taxslayer_800.jpg',
+  '/taxslayer/assets/taxslayer_1200.jpg',
+  '/taxslayer/assets/taxslayer_1200x630.jpg'
+];
+const out = document.getElementById('out');
+(async () => {
+  for (const p of paths) {
+    const row = document.createElement('div');
+    row.innerHTML = `<p><code>${p}</code> … checking</p>`;
+    out.appendChild(row);
+    try {
+      const r = await fetch(p, { cache: 'no-store' });
+      if (r.ok) {
+        row.innerHTML = `<p class="ok">200 OK — <code>${p}</code></p>`;
+        const img = document.createElement('img');
+        img.src = p + '?t=' + Date.now();
+        row.appendChild(img);
+      } else {
+        row.innerHTML = `<p class="bad">${r.status} — <code>${p}</code></p>`;
+      }
+    } catch (e) {
+      row.innerHTML = `<p class="bad">Fetch error — <code>${p}</code></p>`;
+    }
+  }
+})();
+</script>
