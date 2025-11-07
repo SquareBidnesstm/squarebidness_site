@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SB Tech Lab — B2 Power Design (Eaton)</title>
+<meta name="description" content="Square Bidness Tech Lab — B2 hardwired UPS (240 V) to 30A PDU plan and checklist.">
+<style>
+  :root { --ink:#111; --muted:#555; --accent:#0a84ff; --bg:#fff; }
+  *{box-sizing:border-box} html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;line-height:1.45}
+  .wrap{max-width:920px;margin:0 auto;padding:24px}
+  h1{font-size:28px;margin:0 0 6px 0}
+  h2{font-size:18px;margin:22px 0 8px}
+  h3{font-size:16px;margin:16px 0 6px}
+  p{margin:6px 0}
+  .meta{color:var(--muted)}
+  .btns{display:flex;gap:10px;margin:12px 0 18px}
+  .btn{display:inline-block;border:1px solid #ddd;border-radius:10px;padding:8px 12px;background:#f7f7f7;color:#000;text-decoration:none;font-weight:600}
+  .btn:hover{background:#eee}
+  table{width:100%;border-collapse:collapse;margin:8px 0;border:1px solid #ddd}
+  th,td{padding:8px 10px;border-top:1px solid #eee;vertical-align:top}
+  th{background:#f7f7f7;text-align:left}
+  code,pre{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+  .mono{white-space:pre-wrap;background:#fafafa;border:1px solid #eee;border-radius:8px;padding:10px}
+  ul{margin:6px 0 6px 18px}
+  .note{color:var(--muted)}
+  @media print {
+    .btns{display:none}
+    a{color:inherit;text-decoration:none}
+    body{color:#000}
+    .wrap{padding:0}
+    table,th,td{border-color:#aaa}
+    th{background:#f0f0f0}
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Square Bidness Tech Lab — B2 Power Design (Eaton)</h1>
+    <p class="meta">Hardwired UPS (240 V) → 30A PDU — Rack Power Plan &amp; Checklist</p>
+    <div class="btns">
+      <a class="btn" href="#" onclick="window.print()">🖨️ Print</a>
+    </div>
+
+    <p><strong>Location:</strong> 46331 N Baptist Rd, Hammond, LA • <strong>Circuit:</strong> B2 (Room B — Compute)</p>
+    <p><strong>Goal:</strong> Clean, scalable 240 V power with Eaton UPS (hardwire I/O) feeding a 30A metered PDU.</p>
+
+    <h2>Power Summary</h2>
+    <table>
+      <tr><th>Branch Circuit</th><td>2-pole 30 A @ 240 V (10 AWG Cu) to UPS input (hardwire)</td></tr>
+      <tr><th>UPS</th><td>Eaton <strong>9PX 6 kVA</strong> (online/double-conversion), hardwire input &amp; output, 200–240 V (add Network-M2 card)</td></tr>
+      <tr><th>UPS Output</th><td>Hardwire to wall <strong>L6-30R</strong> (10 AWG Cu) with output OCP per UPS manual</td></tr>
+      <tr><th>Rack PDU</th><td>30 A, 200–240 V, <strong>L6-30P</strong> input, <strong>metered</strong>, C13/C19 outlet mix (Eaton ePDU G3 Metered)</td></tr>
+      <tr><th>Design Load</th><td>≈ 1.5 kW average now (GPU + standard server + network), plenty of headroom</td></tr>
+    </table>
+
+    <h2>Recommended Eaton Gear</h2>
+    <p><strong>UPS:</strong> Eaton 9PX 6 kVA Rack (online/double-conversion), <em>hardwire input/output</em>; add <strong>Network-M2</strong> for SNMP/Web UI.</p>
+    <p><strong>PDU:</strong> Eaton ePDU G3 <em>Metered</em>, 30 A, 200–240 V, <strong>L6-30P</strong> input, C13/C19 outlet mix.</p>
+    <p><strong>Wall Receptacle:</strong> NEMA <strong>L6-30R</strong> (locking, 30 A, 250 V) — Hubbell HBL2620 or equivalent.</p>
+
+    <h2>Plug Chain (B2)</h2>
+    <pre class="mono">Main Panel (2P-30A, 10 AWG Cu, 240 V)
+→ Eaton 9PX UPS (hardwire input)
+→ UPS hardwire output (10 AWG Cu, with output OCP per manual)
+→ Wall box: NEMA L6-30R (label: “B2 UPS OUTPUT”)
+→ Rack PDU: L6-30P input (Eaton ePDU G3 Metered)
+→ Servers/Network: IEC C13/C19 cords</pre>
+
+    <h2>Power Budget (Reality Check)</h2>
+    <ul>
+      <li>Circuit continuous ceiling: 30 A × 240 V × 80% = <strong>5,760 W usable</strong>.</li>
+      <li>Design target for comfort: ≤ <strong>4.8 kW</strong> on this PDU.</li>
+      <li>Starting plan (GPU + standard + network): ≈ <strong>1.5 kW</strong> (≈ 6.3 A @ 240 V).</li>
+    </ul>
+
+    <h2>Breakers, Wire, Protection</h2>
+    <ul>
+      <li><strong>UPS input:</strong> 2-pole 30 A breaker (match panel brand), 10 AWG copper, H-H-G (no neutral).</li>
+      <li><strong>UPS output → L6-30R:</strong> 10 AWG copper; confirm UPS internal output OCP or add a small 2-pole 30 A OCP/disconnect before the receptacle.</li>
+      <li>Bedrooms: AFCI typically for 120 V general receptacles; dedicated 240 V compute circuits usually exempt — confirm with your electrician/local AHJ.</li>
+    </ul>
+
+    <h2>Labels (Print &amp; Tape)</h2>
+    <ul>
+      <li>Panel: “Room B — Compute <strong>B2</strong> (UPS INPUT) • 2P-30A • 240 V • 10 Cu”</li>
+      <li>Wall box: “<strong>B2 UPS OUTPUT</strong> — L6-30R — 240 V / 30 A (Supplies <strong>B2-PDU-1</strong>)”</li>
+      <li>Rack PDU: “<strong>B2-PDU-1</strong> — 30 A, 200–240 V (L6-30P input) — Set alarm @ 24 A (80%)”</li>
+    </ul>
+
+    <h2>Bill of Materials (B2)</h2>
+    <ul>
+      <li>Eaton 9PX 6 kVA online UPS, rackmount, hardwire input/output + Network-M2 card</li>
+      <li>Eaton ePDU G3 Metered, 30 A, 200–240 V, L6-30P input, C13/C19 outlets (select outlet mix)</li>
+      <li>NEMA L6-30R receptacle (e.g., Hubbell HBL2620) + deep box + industrial plate</li>
+      <li>2-pole 30 A breaker (match panel), 10 AWG copper (H-H-G) — input &amp; output runs</li>
+      <li>IEC cords: C14→C13 (15A/250 V) and C20→C19 (20A/250 V), 10–12 ft</li>
+      <li>Labels for panel, wall box, PDU, and rack gear</li>
+    </ul>
+
+    <h2>Turn-Up Checklist</h2>
+    <ul>
+      <li>Install UPS input: 2P-30A breaker, 10 AWG Cu landed to UPS; torque to spec.</li>
+      <li>Configure Eaton 9PX for 200–240 V output; install Network-M2; set alert emails.</li>
+      <li>Hardwire UPS output to L6-30R wall box; verify output OCP path (UPS internal or external).</li>
+      <li>Mount ePDU G3 (L6-30P) and plug into L6-30R; verify voltage and PDU metering.</li>
+      <li>Connect servers/network via C13/C19; record idle/peak watts and amps at PDU display.</li>
+      <li>Set PDU alarm at 24 A; test UPS graceful shutdown; label everything.</li>
+      <li>Verify room cooling capacity (≥ 9–12k BTU for ~1.5–2 kW loads).</li>
+    </ul>
+
+    <p class="note">Notes: Mirror this plan for A1 when ready. Confirm exact Eaton SKUs for hardwire I/O and battery runtime. Follow Eaton manuals for lugs, torque, and OCP.</p>
+  </div>
+</body>
+</html>
