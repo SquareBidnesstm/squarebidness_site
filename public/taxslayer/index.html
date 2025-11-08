@@ -1,28 +1,65 @@
 <!doctype html>
 <html lang="en">
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Tax Slayer — Income Tax Filing</title>
-<style>
-  body{margin:0;background:#0b0b0b;color:#fff;font:16px/1.4 system-ui}
-  .wrap{max-width:900px;margin:0 auto;padding:24px}
-  img{display:block;max-width:520px;width:100%;height:auto;border-radius:12px;border:1px solid #222;background:#111}
-  a.btn{display:inline-block;margin-top:12px;padding:12px 16px;border-radius:12px;font-weight:700;background:#fff;color:#000;text-decoration:none}
-  .muted{color:#bbb}
-</style>
-<div class="wrap">
-  <h1>Tax Slayer — Fast, Accurate Tax Prep & E-File</h1>
-  <p class="muted">W-2 • 1099 • Small Business • Amendments</p>
+<head>
+  <meta charset="utf-8" />
+  <script>
+    (async () => {
+      try {
+        const html = await fetch('/partials/head.html', {cache:'no-cache'}).then(r=>r.text());
+        document.head.insertAdjacentHTML('afterbegin', html);
+      } catch(e){ console.warn('head include failed', e); }
+    })();
+  </script>
 
-  <img src="/taxslayer/assets/taxslayer_800.jpg"
-       srcset="/taxslayer/assets/taxslayer_800.jpg 800w,
-               /taxslayer/assets/taxslayer_1200.jpg 1200w"
-       sizes="(max-width: 900px) 100vw, 520px"
-       alt="Tax Slayer storefront" onerror="this.style.display='none'">
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tax Slayer — Income Tax Filing | Square Bidness</title>
+  <meta name="description" content="Fast, accurate tax prep and same-day e-file. W-2, 1099, small business, credits & deductions. Book online.">
+  <link rel="canonical" href="https://www.squarebidness.com/taxslayer/">
 
-  <p>
-    <a class="btn" href="tel:+10000000000">Call</a>
-    <a class="btn" href="sms:+10000000000?body=I%27d%20like%20to%20book">Text</a>
-    <a class="btn" href="mailto:info@example.com?subject=Tax%20Appointment">Email</a>
-  </p>
-</div>
+  <meta property="og:title" content="Tax Slayer — Income Tax Filing">
+  <meta property="og:description" content="Free consult · Same-day e-file · W-2 · 1099 · Small business.">
+  <meta property="og:url" content="https://www.squarebidness.com/taxslayer/">
+  <meta property="og:image" content="/taxslayer/assets/taxslayer_1200x630.jpg">
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <main class="wrap">
+    <section style="display:grid;gap:18px;grid-template-columns:1.1fr .9fr;align-items:center">
+      <div>
+        <h1 style="margin:6px 0">Fast, Accurate Tax Preparation & E-File</h1>
+        <p style="color:#bdbdbd;max-width:65ch">
+          W-2, 1099, small business, credits & deductions, prior-year fixes, and refund tracking.
+        </p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+          <a class="btn" href="#book" style="background:#fff;color:#000;padding:12px 14px;border-radius:12px;font-weight:800;text-decoration:none">Book an Appointment</a>
+          <a class="btn" href="tel:+10000000000" style="border:1px solid #222;border-radius:12px;padding:12px 14px;text-decoration:none;color:#fff">Call</a>
+          <a class="btn" href="sms:+10000000000?body=Hi%20Tax%20Slayer%2C%20I%27d%20like%20to%20book." style="border:1px solid #222;border-radius:12px;padding:12px 14px;text-decoration:none;color:#fff">Text</a>
+        </div>
+      </div>
+      <div style="border:1px solid #222;border-radius:16px;overflow:hidden;background:#111">
+        <img src="/taxslayer/assets/taxslayer_1200.jpg"
+             srcset="/taxslayer/assets/taxslayer_800.jpg 800w, /taxslayer/assets/taxslayer_1200.jpg 1200w"
+             sizes="(max-width: 900px) 100vw, 520px"
+             alt="Tax office team / storefront"
+             loading="eager" style="display:block;width:100%;height:auto" />
+      </div>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script>
+    (async () => {
+      try {
+        const [h,f] = await Promise.all([
+          fetch('/partials/header.html',{cache:'no-cache'}).then(r=>r.text()),
+          fetch('/partials/footer.html',{cache:'no-cache'}).then(r=>r.text())
+        ]);
+        document.getElementById('site-header').outerHTML = h;
+        document.getElementById('site-footer').outerHTML = f;
+      } catch(e){ console.warn('partials failed', e); }
+    })();
+  </script>
+</body>
+</html>
