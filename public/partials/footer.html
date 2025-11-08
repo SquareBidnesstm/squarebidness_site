@@ -1,17 +1,17 @@
-<footer style="border-top:1px solid #222;background:#0b0b0b">
-  <div style="max-width:980px;margin:0 auto;padding:14px 16px;color:#bdbdbd;font-family:system-ui,Segoe UI,Roboto,Arial;display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap">
-    <div>© 2025 Square Bidness Tech Lab — Louisiana</div>
+<footer class="site" style="border-top:1px solid #222;background:#0b0b0b">
+  <div class="wrap" style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:#bdbdbd">
+    <div>© 2025 Square Bidness — Louisiana</div>
     <div id="site-credit"></div>
   </div>
 </footer>
 <script>
-  // load credit partial into #site-credit if present
+  // Load credit partial if present
   (async () => {
-    const el = document.getElementById('site-credit');
-    if(!el) return;
     try {
-      const html = await fetch('/partials/credit.html', {cache:'no-cache'}).then(r=>r.ok?r.text():'');
+      const el = document.getElementById('site-credit');
+      if (!el) return;
+      const html = await fetch('/partials/credit.html', { cache: 'no-cache' }).then(r => r.ok ? r.text() : '');
       if (html) el.innerHTML = html;
-    } catch(e){}
+    } catch {}
   })();
 </script>
