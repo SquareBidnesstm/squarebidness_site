@@ -45,20 +45,87 @@
              loading="eager" style="display:block;width:100%;height:auto" />
       </div>
     </section>
+
+    <section id="book" style="margin-top:22px;display:grid;gap:16px;grid-template-columns:1fr .9fr">
+      <form method="post" action="/taxslayer/book" style="background:#121212;border:1px solid #222;border-radius:16px;padding:16px">
+        <h2>Book Your Appointment</h2>
+        <p style="color:#bdbdbd;font-size:14px;margin-top:-6px">Pick a preferred time — we’ll confirm and send prep instructions.</p>
+        <div style="display:grid;gap:12px;grid-template-columns:1fr 1fr">
+          <div>
+            <label for="name" style="color:#bdbdbd;font-size:14px">Full Name</label>
+            <input id="name" name="name" type="text" placeholder="First & Last" required style="width:100%;padding:12px;border-radius:12px;border:1px solid #222;background:#0f0f0f;color:#fff" />
+          </div>
+          <div>
+            <label for="phone" style="color:#bdbdbd;font-size:14px">Phone</label>
+            <input id="phone" name="phone" type="tel" placeholder="(xxx) xxx-xxxx" required style="width:100%;padding:12px;border-radius:12px;border:1px solid #222;background:#0f0f0f;color:#fff" />
+          </div>
+          <div>
+            <label for="email" style="color:#bdbdbd;font-size:14px">Email (optional)</label>
+            <input id="email" name="email" type="email" placeholder="you@example.com" style="width:100%;padding:12px;border-radius:12px;border:1px solid #222;background:#0f0f0f;color:#fff" />
+          </div>
+          <div>
+            <label for="date" style="color:#bdbdbd;font-size:14px">Preferred Date</label>
+            <input id="date" name="date" type="date" style="width:100%;padding:12px;border-radius:12px;border:1px solid #222;background:#0f0f0f;color:#fff" />
+          </div>
+          <div>
+            <label for="service" style="color:#bdbdbd;font-size:14px">Service</label>
+            <select id="service" name="service" required style="width:100%;padding:12px;border-radius:12px;border:1px solid #222;background:#0f0f0f;color:#fff">
+              <option value="">Choose one…</option>
+              <option>Individual Return (W-2)</option>
+              <option>Self-Employed / 1099</option>
+              <option>Small Business</option>
+              <option>Amendment / Prior Year</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div>
+            <label for="mode" style="color:#bdbdbd;font-size:14px">Visit Type</label>
+            <select id="mode" name="mode" style="width:100%;padding:12px;border-radius:12px;border:1px solid #222;background:#0f0f0f;color:#fff">
+              <option>In-Office</option>
+              <option>Virtual</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-top:12px">
+          <label for="notes" style="color:#bdbdbd;font-size:14px">Notes</label>
+          <textarea id="notes" name="notes" placeholder="Tell us about your tax situation." style="width:100%;padding:12px;border-radius:12px;border:1px solid #222;background:#0f0f0f;color:#fff;min-height:110px;resize:vertical"></textarea>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+          <button type="submit" style="padding:12px 14px;border-radius:12px;background:#fff;color:#000;font-weight:800;border:0">Request Booking</button>
+          <a href="tel:+10000000000" style="border:1px solid #222;border-radius:12px;padding:12px 14px;text-decoration:none;color:#fff">Call Instead</a>
+        </div>
+        <p style="color:#bdbdbd;font-size:12px;margin-top:8px">This submits your request; we reply with confirmation and next steps.</p>
+      </form>
+
+      <div style="background:#121212;border:1px solid #222;border-radius:16px;padding:16px">
+        <h3>Transparent Pricing</h3>
+        <ul style="margin:10px 0 0 18px;color:#bdbdbd">
+          <li>Free 10-minute consult</li>
+          <li>Flat-rate quotes before e-file</li>
+          <li>Pay in office or online</li>
+          <li>Year-round support</li>
+        </ul>
+        <div style="border:1px solid #222;border-radius:12px;overflow:hidden;background:#111;margin-top:14px">
+          <img src="/taxslayer/assets/taxslayer_800.jpg" alt="Team at the Tax Slayer office" loading="lazy" style="display:block;width:100%;height:auto" />
+        </div>
+      </div>
+    </section>
   </main>
 
   <div id="site-footer"></div>
 
+  <script src="/partials/loader.js"></script>
   <script>
-    (async () => {
-      try {
-        const [h,f] = await Promise.all([
-          fetch('/partials/header.html',{cache:'no-cache'}).then(r=>r.text()),
-          fetch('/partials/footer.html',{cache:'no-cache'}).then(r=>r.text())
-        ]);
-        document.getElementById('site-header').outerHTML = h;
-        document.getElementById('site-footer').outerHTML = f;
-      } catch(e){ console.warn('partials failed', e); }
+    // simple required validation guard
+    (function(){
+      const form = document.querySelector('form[action="/taxslayer/book"]');
+      if(!form) return;
+      form.addEventListener('submit', (e) => {
+        const req = form.querySelectorAll('[required]');
+        for (const el of req) {
+          if (!el.value || !el.value.trim()) { alert('Please complete required fields.'); e.preventDefault(); return; }
+        }
+      });
     })();
   </script>
 </body>
