@@ -1,0 +1,16 @@
+<div id="site-header"></div>
+<!-- your page content -->
+<div id="site-footer"></div>
+
+<script>
+  (async () => {
+    try {
+      const [h,f] = await Promise.all([
+        fetch('/partials/header.html',{cache:'no-cache'}).then(r=>r.text()),
+        fetch('/partials/footer.html',{cache:'no-cache'}).then(r=>r.text())
+      ]);
+      document.getElementById('site-header').outerHTML = h;
+      document.getElementById('site-footer').outerHTML = f;
+    } catch(e){ console.warn('partials failed', e); }
+  })();
+</script>
