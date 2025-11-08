@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Square Bidness — Assets Check</title>
+<meta name="description" content="Quick tester for images and files to catch 404s or cache issues." />
+<style>
+  :root{--bg:#0b0b0b;--fg:#fff;--muted:#bdbdbd;--card:#121212;--stroke:#222;--ok:#1db954;--bad:#e63946}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,Segoe UI,Roboto,Arial}
+  .wrap{max-width:980px;margin:0 auto;padding:20px}
+  h1{margin:0 0 8px}
+  .muted{color:var(--muted)}
+  .grid{display:grid;gap:14px;grid-template-columns:1fr}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  textarea{width:100%;min-height:180px;padding:12px;border-radius:12px;border:1px solid var(--stroke);background:#0f0f0f;color:#fff}
+  button{padding:10px 14px;border-radius:12px;font-weight:800;border:1px solid var(--stroke);background:#fff;color:#000;cursor:pointer}
+  button.alt{background:transparent;color:#fff}
+  .card{background:var(--card);border:1px solid var(--stroke);border-radius:12px;padding:12px}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:8px 10px;border-bottom:1px solid var(--stroke);font-size:14px;vertical-align:top}
+  .ok{color:var(--ok);font-weight:700}
+  .bad{color:var(--bad);font-weight:700}
+  code{background:#111;padding:2px 6px;border-radius:6px;border:1px solid var(--stroke)}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Assets Check</h1>
+    <p class="muted">Test multiple URLs for 200/404 and cache issues. Adds a cache-buster automatically.</p>
+
+    <div class="grid">
+      <div class="card">
+        <div class="row" style="justify-content:space-between;align-items:center">
+          <strong>URLs to test (one per line)</strong>
+          <div class="row">
+            <button id="loadDefaults" class="alt">Load defaults</button>
+            <button id="clearList" class="alt">Clear</button>
+          </div>
+        </div>
+        <textarea id="urls"></textarea>
+        <div class="row" style="margin-top:10px">
+          <button id="checkAll">Check All</button>
+          <button id="copyBad" class="alt">Copy FAILs</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <strong>Results</strong>
+        <table id="results">
+          <thead>
+            <tr><th style="width:55%">URL</th><th style="width:10%">Status</th><th>Notes</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="muted" style="font-size:13px">
+        Tip: If something is cached by a service worker, this tool appends <code>?v=TIMESTAMP</code> and uses <code>cache:"no-cache"</code>.
+      </div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  const $ = (s, d=document)=>d.querySelector(s);
+  const $$ = (s, d=document)=>Array.from(d.querySelectorAll(s));
+
+  const defaults = [
+    // Root icons (keep at site root)
+    "https://www.squarebidness.com/favicon.ico",
+    "https://www.squarebidness.com/favicon-32.png",
+    "https://www.squarebidness.com/favicon-16.png",
+    "https://www.squarebidness.com/icon_180.png",
+
+    // Courageaux page assets
+    "https://www.squarebidness.com/courageaux/assets/courageaux_800.jpg",
+    "https://www.squarebidness.com/courageaux/assets/courageaux_1200.jpg",
+    "https://www.squarebidness.com/courageaux/assets/courageaux_1200x630.jpg",
+    "https://www.squarebidness.com/courageaux/assets/logo_courageaux_white.svg",
+    "https://www.squarebidness.com/courageaux/assets/logo_courageaux_black.svg",
+
+    // Tax Slayer page assets
+    "https://www.squarebidness.com/taxslayer/assets/taxslayer_800.jpg",
+    "https://www.squarebidness.com/taxslayer/assets/taxslayer_1200.jpg",
+    "https://www.squarebidness.com/taxslayer/assets/taxslayer_1200x630.jpg",
+
+    // Optional shared OG default (if you use one)
+    "https://www.squarebidness.com/assets/og-default-1200x630.jpg"
+  ];
+
+  const urlsTA = $("#urls");
+  const resultsBody = $("#results tbody");
+  const btnDefaults = $("#loadDefaults");
+  const btnClear = $("#clearList");
+  const btnCheck = $("#checkAll");
+  const btnCopyBad = $("#copyBad");
+
+  btnDefaults.addEventListener("click", ()=>{
+    urlsTA.value = defaults.join("\n");
+  });
+
+  btnClear.addEventListener("click", ()=>{
+    urlsTA.value = "";
+    resultsBody.innerHTML = "";
+  });
+
+  btnCopyBad.addEventListener("click", ()=>{
+    const bads = $$(".bad-url").map(td=>td.dataset.url).join("\n");
+    if (!bads.trim()) { alert("No FAILs to copy."); return; }
+    navigator.clipboard.writeText(bads).then(()=>alert("Copied FAIL URLs to clipboard."));
+  });
+
+  btnCheck.addEventListener("click", async ()=>{
+    resultsBody.innerHTML = "";
+    const list = urlsTA.value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+    if (!list.length){ alert("Add at least one URL."); return; }
+
+    for (const raw of list) {
+      const url = addBuster(raw);
+      addRow(raw, "…", "Checking…");
+      try {
+        const res = await fetch(url, {cache:"no-cache",mode:"no-cors"}).catch(()=>null);
+        // Try a CORS-friendly HEAD if possible
+        let status = "";
+        try {
+          const headRes = await fetch(url, {method:"HEAD", cache:"no-cache"});
+          status = headRes.status || "";
+          finalize(raw, status, headRes.ok ? "OK" : "FAIL");
+        } catch {
+          // no-cors fallback: if we got here at all, assume reachable
+          finalize(raw, "—", "OK (no-cors)");
+        }
+      } catch (e){
+        finalize(raw, "ERR", "FAIL");
+      }
+    }
+  });
+
+  function addBuster(u){
+    try{
+      const url = new URL(u);
+      url.searchParams.set("v", Date.now().toString());
+      return url.toString();
+    }catch{
+      // Not absolute? Treat as path on current host
+      const base = new URL(location.origin);
+      base.pathname = u;
+      base.searchParams.set("v", Date.now().toString());
+      return base.toString();
+    }
+  }
+
+  function addRow(url, status, notes){
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><code>${escapeHTML(url)}</code></td>
+      <td class="status">${status}</td>
+      <td class="notes">${notes}</td>
+    `;
+    resultsBody.appendChild(tr);
+  }
+
+  function finalize(url, status, note){
+    const tr = resultsBody.querySelectorAll("tr")[resultsBody.rows.length-1] || resultsBody.lastElementChild;
+    const st = tr.querySelector(".status");
+    const nt = tr.querySelector(".notes");
+
+    st.textContent = status;
+    nt.textContent = note;
+
+    // Mark row OK/FAIL for quick scanning
+    if (/^2\d\d$/.test(String(status)) || /OK/.test(note)) {
+      st.classList.add("ok");
+    } else {
+      st.classList.add("bad");
+      // store URL for copy-bad feature
+      nt.classList.add("bad-url");
+      nt.dataset.url = tr.querySelector("code").textContent;
+    }
+  }
+
+  function escapeHTML(s){ return s.replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m])); }
+})();
+</script>
+</body>
+</html>
