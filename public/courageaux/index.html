@@ -2,166 +2,68 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <script>
+    (async () => {
+      try {
+        const html = await fetch('/partials/head.html', {cache:'no-cache'}).then(r=>r.text());
+        document.head.insertAdjacentHTML('afterbegin', html);
+      } catch(e){ console.warn('head include failed', e); }
+    })();
+  </script>
+
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>November Spotlight — Courageaux Aesthetics | Square Bidness</title>
+  <meta name="description" content="Clean, calm, confident skin. Book a facial with Amari Wilford — Albany/Hammond, LA.">
   <link rel="canonical" href="https://www.squarebidness.com/courageaux/">
-  <meta name="description" content="November Spotlight: Courageaux Aesthetics — clean, calm, confident skin. Book a facial and see our ladies Supima Square Bidness tee in action.">
-  <meta name="theme-color" content="#000000">
 
-  <!-- Favicons -->
-  <link rel="icon" type="image/png" sizes="32x32" href="/courageaux/assets/favicon-32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/courageaux/assets/favicon-16.png">
-  <link rel="shortcut icon" href="/courageaux/assets/favicon.ico">
-  <link rel="apple-touch-icon" href="/courageaux/assets/icon_180.png">
-
-  <!-- Performance: Preload LCP image (single file to avoid 404s) -->
-  <link rel="preload" as="image"
-        href="/courageaux/assets/courageaux_1200x630.jpg"
-        imagesizes="(max-width: 900px) 100vw, 520px">
-
-  <!-- Open Graph / Twitter (absolute image URLs) -->
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Square Bidness">
-  <meta property="og:title" content="November Spotlight — Courageaux Aesthetics">
-  <meta property="og:description" content="Expert facial care. Tap to book.">
+  <meta property="og:title" content="Courageaux Aesthetics — November Spotlight">
+  <meta property="og:description" content="Clean, calm, confident skin. Free consult · Book online.">
   <meta property="og:url" content="https://www.squarebidness.com/courageaux/">
-  <meta property="og:image" content="https://www.squarebidness.com/courageaux/assets/courageaux_1200x630.jpg">
-  <meta property="og:image:alt" content="Courageaux Aesthetics wearing a Square Bidness ladies Supima tee">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="November Spotlight — Courageaux Aesthetics">
-  <meta name="twitter:description" content="Expert facial care. Tap to book.">
-  <meta name="twitter:image" content="https://www.squarebidness.com/courageaux/assets/courageaux_1200x630.jpg">
-
-  <style>
-    :root{--bg:#0b0b0b;--fg:#fff;--muted:#bdbdbd;--stroke:#222;--card:#131313;--accent:#f5b301}
-    *{box-sizing:border-box}
-    html,body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif}
-    .wrap{max-width:1100px;margin:0 auto;padding:24px}
-    .nav{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--stroke);padding:10px 0}
-    .brand img{height:28px;vertical-align:middle}
-    .pill{border:1px solid var(--stroke);border-radius:999px;padding:4px 10px;color:var(--muted);font-size:12px}
-    .hero{display:grid;gap:20px;grid-template-columns:1.1fr .9fr;align-items:center;padding:28px 0 10px}
-    .hero h1{font-size:clamp(28px,4vw,44px);margin:8px 0}
-    .hero p{color:var(--muted);max-width:60ch}
-    .badge{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--stroke);color:#fff;padding:6px 12px;border-radius:999px;font-weight:700}
-    .badge::before{content:"★"; color:var(--accent)}
-    .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px}
-    .btn{display:inline-block;padding:14px 18px;border-radius:14px;background:var(--fg);color:#000;font-weight:800;text-decoration:none}
-    .btn.alt{background:var(--card);color:var(--fg);border:1px solid var(--stroke)}
-    .hero-img{overflow:hidden;border-radius:18px;border:1px solid var(--stroke);background:#111}
-    .hero-img img{display:block;width:100%;height:auto}
-    .cards{display:grid;gap:20px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin-top:18px}
-    .card{background:var(--card);border:1px solid var(--stroke);border-radius:18px;padding:18px}
-    .card h3{margin:0 0 6px 0;font-size:18px}
-    .list{margin:10px 0 0 0;padding-left:18px;color:var(--muted)}
-    .footer{margin:40px 0 20px;border-top:1px solid var(--stroke);padding-top:16px;color:var(--muted);font-size:14px}
-    .contact ul{list-style:none;margin:0;padding:0;color:var(--muted)}
-    .contact li{margin:6px 0}
-    .contact a{color:#fff}
-    /* Mobile: stack hero columns */
-    @media (max-width: 880px){ .hero{grid-template-columns:1fr} }
-  </style>
-
-  <!-- JSON-LD (valid JSON, no trailing commas) -->
-  <script type="application/ld+json">
-  {
-    "@context":"https://schema.org",
-    "@type":"BeautySalon",
-    "name":"Courageaux Aesthetics",
-    "description":"Professional facial care and aesthetics services.",
-    "telephone":"+1-985-351-2750",
-    "address":{
-      "@type":"PostalAddress",
-      "streetAddress":"15073 W Club Deluxe Rd, Unit 1",
-      "addressLocality":"Hammond",
-      "addressRegion":"LA",
-      "postalCode":"70403",
-      "addressCountry":"US"
-    },
-    "image":[
-      "https://www.squarebidness.com/courageaux/assets/courageaux_1200x630.jpg"
-    ],
-    "url":"https://www.squarebidness.com/courageaux/",
-    "sameAs": ["https://instagram.com/courageauxaesthetics"],
-    "areaServed":"Hammond, LA"
-  }
-  </script>
+  <meta property="og:image" content="/courageaux/assets/courageaux_1200x630.jpg">
 </head>
 <body>
-  <header class="wrap nav">
-    <div class="brand">
-      <!-- Temporarily removed missing SVG logo to avoid 404 -->
-      <!-- <img src="/courageaux/assets/logo_courageaux_white.svg" alt="Courageaux Aesthetics"> -->
-      <span style="font-weight:800;letter-spacing:.04em">Courageaux Aesthetics</span>
-    </div>
-    <div class="pill">Partner Feature • Square Bidness</div>
-  </header>
+  <div id="site-header"></div>
 
   <main class="wrap">
-    <section class="hero">
+    <section style="display:grid;gap:18px;grid-template-columns:1.1fr .9fr;align-items:center">
       <div>
-        <span class="badge">November Spotlight</span>
-        <h1>Clean, Calm, Confident Skin</h1>
-        <p>Featuring <strong>Courageaux Aesthetics</strong> — expert facial care and gentle treatments. She’s rocking our ladies <em>Supima cotton</em> Square Bidness tee in the hero.</p>
-        <div class="cta">
-          <a class="btn" href="https://courageauxaesthetics.glossgenius.com/services?utm_source=squarebidness&utm_medium=spotlight&utm_campaign=nov-2025" target="_blank" rel="noopener noreferrer">Book a Facial</a>
-          <a class="btn alt" href="https://courageauxaesthetics.glossgenius.com/?utm_source=squarebidness&utm_medium=spotlight&utm_campaign=nov-2025" target="_blank" rel="noopener noreferrer">Visit Website</a>
-          <a class="btn alt" href="/">Back to Square Bidness</a>
+        <h1 style="margin:6px 0">Courageaux Aesthetics — November Spotlight</h1>
+        <p style="color:#bdbdbd;max-width:65ch">
+          Facials, exfoliation, and glow — by <strong>Amari Wilford</strong>. Albany/Hammond LA.
+          Call <a href="tel:+19853512750" style="text-decoration:underline;color:#fff">(985) 351-2750</a>.
+        </p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+          <a href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" class="btn" style="background:#fff;color:#000;padding:12px 14px;border-radius:12px;font-weight:800;text-decoration:none">View Services</a>
+          <a href="sms:+19853512750?body=Hi%20Amari%2C%20I%27d%20like%20to%20book." class="btn" style="border:1px solid #222;border-radius:12px;padding:12px 14px;text-decoration:none;color:#fff">Text</a>
+          <a href="https://instagram.com/courageauxaesthetics" target="_blank" class="btn" style="border:1px solid #222;border-radius:12px;padding:12px 14px;text-decoration:none;color:#fff">@courageauxaesthetics</a>
+        </div>
+        <div style="margin-top:12px;color:#bdbdbd;font-size:14px">
+          15073 W Club Deluxe Rd, Unit 1 — Hammond, LA 70403
         </div>
       </div>
-      <div class="hero-img">
-        <img
-          src="/courageaux/assets/courageaux_1200x630.jpg"
-          width="1200" height="630"
-          alt="Courageaux Aesthetics wearing a Square Bidness ladies Supima tee">
-      </div>
-    </section>
-
-    <section class="cards">
-      <div class="card">
-        <h3>Signature Services</h3>
-        <ul class="list">
-          <li>Deep cleanse + exfoliation</li>
-          <li>Hydrating/soothing facials</li>
-          <li>Targeted treatments (texture, T-zone)</li>
-          <li>Home-care routine guidance</li>
-        </ul>
-      </div>
-
-      <div class="card contact">
-        <h3>Contact & Location</h3>
-        <ul>
-          <li><strong>Amari Wilford</strong>, Esthetician</li>
-          <li><a href="tel:+19853512750">985-351-2750</a></li>
-          <li><a href="https://maps.google.com/?q=15073%20W%20Club%20Deluxe%20Rd%2C%20Unit%201%2C%20Hammond%2C%20LA%2070403" target="_blank" rel="noopener noreferrer">
-            15073 W Club Deluxe Rd, Unit 1, Hammond, LA 70403</a></li>
-          <li><a href="https://instagram.com/courageauxaesthetics" target="_blank" rel="noopener noreferrer">@courageauxaesthetics</a></li>
-        </ul>
-      </div>
-
-      <div class="card">
-        <h3>The Tee</h3>
-        <ul class="list">
-          <li>Ladies Supima cotton</li>
-          <li>Soft hand, durable finish</li>
-          <li>Clean, minimal mark</li>
-          <li>Limited partner drop</li>
-        </ul>
-      </div>
-    </section>
-
-    <!-- November Offer -->
-    <section class="card" style="margin-top:18px;background:#111009;border:1px dashed #3a2d10">
-      <h3 style="margin:0 0 6px 0">November Offer</h3>
-      <p class="list">Use code <strong>SB-NOV-15</strong> for $15 off any facial in November. Show your code at check-in.</p>
-      <div class="cta" style="margin-top:8px">
-        <a class="btn" href="/courageaux/qr/">Get the QR Code</a>
+      <div style="border:1px solid #222;border-radius:16px;overflow:hidden;background:#111">
+        <img src="/courageaux/assets/courageaux_1200.jpg"
+             srcset="/courageaux/assets/courageaux_800.jpg 800w, /courageaux/assets/courageaux_1200.jpg 1200w"
+             sizes="(max-width: 900px) 100vw, 520px"
+             alt="Courageaux Aesthetics storefront / brand image"
+             loading="eager" style="display:block;width:100%;height:auto" />
       </div>
     </section>
   </main>
 
-  <footer class="wrap footer">
-    © 2025 Square Bidness • Credit: Square Bidness Tech Lab
-  </footer>
+  <div id="site-footer"></div>
+
+  <script>
+    (async () => {
+      try {
+        const [h,f] = await Promise.all([
+          fetch('/partials/header.html',{cache:'no-cache'}).then(r=>r.text()),
+          fetch('/partials/footer.html',{cache:'no-cache'}).then(r=>r.text())
+        ]);
+        document.getElementById('site-header').outerHTML = h;
+        document.getElementById('site-footer').outerHTML = f;
+      } catch(e){ console.warn('partials failed', e); }
+    })();
+  </script>
 </body>
 </html>
