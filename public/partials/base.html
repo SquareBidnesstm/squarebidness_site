@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <!-- Inject shared HEAD defaults (icons, OG defaults, base styles) -->
+  <script>
+    (async () => {
+      try {
+        const html = await fetch('/partials/head.html', {cache:'no-cache'}).then(r=>r.text());
+        document.head.insertAdjacentHTML('afterbegin', html);
+      } catch(e){ console.warn('head include failed', e); }
+    })();
+  </script>
+
+  <!-- Page-specific meta (override defaults below) -->
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title><!-- SET: Page Title -->Square Bidness — Page Title</title>
+  <meta name="description" content="<!-- SET: Short description for SEO and previews. -->">
+  <link rel="canonical" href="<!-- SET: https://www.squarebidness.com/path/ -->" />
+
+  <!-- Open Graph (per-page) -->
+  <meta property="og:title" content="<!-- SET: OG Title -->Square Bidness — Page Title">
+  <meta property="og:description" content="<!-- SET: OG Description -->">
+  <meta property="og:url" content="<!-- SET: https://www.squarebidness.com/path/ -->">
+  <!-- Optional: override image. If omitted, default from head.html is used -->
+  <!-- <meta property="og:image" content="/path/to/og-1200x630.jpg"> -->
+</head>
+<body>
+  <!-- Header / nav -->
+  <div id="site-header"></div>
+
+  <!-- Main content starts -->
+  <main class="wrap">
+    <h1><!-- SET: Visible page H1 -->Page Title</h1>
+    <p><!-- Your content goes here. --></p>
+  </main>
+  <!-- Main content ends -->
+
+  <!-- Footer -->
+  <div id="site-footer"></div>
+
+  <!-- Partials loader (injects header/footer; safe to leave on all pages) -->
+  <script src="/partials/loader.js"></script>
+</body>
+</html>
