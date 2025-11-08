@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Square Bidness — Assets Check</title>
-<meta name="description" content="Quick tester for images and files to catch 404s or cache issues." />
+<title>SB — Assets Check (DEV)</title>
+<meta name="description" content="Quick tester for images/files to catch 404s or cache issues.">
+<meta name="robots" content="noindex, nofollow" />
 <style>
   :root{--bg:#0b0b0b;--fg:#fff;--muted:#bdbdbd;--card:#121212;--stroke:#222;--ok:#1db954;--bad:#e63946}
   *{box-sizing:border-box}
@@ -27,8 +28,8 @@
 </head>
 <body>
   <div class="wrap">
-    <h1>Assets Check</h1>
-    <p class="muted">Test multiple URLs for 200/404 and cache issues. Adds a cache-buster automatically.</p>
+    <h1>Assets Check (DEV)</h1>
+    <p class="muted">Not indexed. Use direct URL only.</p>
 
     <div class="grid">
       <div class="card">
@@ -57,7 +58,7 @@
       </div>
 
       <div class="muted" style="font-size:13px">
-        Tip: If something is cached by a service worker, this tool appends <code>?v=TIMESTAMP</code> and uses <code>cache:"no-cache"</code>.
+        Uses a cache-buster (<code>?v=TIMESTAMP</code>) and <code>cache:"no-cache"</code> to dodge SW caching.
       </div>
     </div>
   </div>
@@ -74,19 +75,19 @@
     "https://www.squarebidness.com/favicon-16.png",
     "https://www.squarebidness.com/icon_180.png",
 
-    // Courageaux page assets
+    // Courageaux assets
     "https://www.squarebidness.com/courageaux/assets/courageaux_800.jpg",
     "https://www.squarebidness.com/courageaux/assets/courageaux_1200.jpg",
     "https://www.squarebidness.com/courageaux/assets/courageaux_1200x630.jpg",
     "https://www.squarebidness.com/courageaux/assets/logo_courageaux_white.svg",
     "https://www.squarebidness.com/courageaux/assets/logo_courageaux_black.svg",
 
-    // Tax Slayer page assets
+    // Tax Slayer assets
     "https://www.squarebidness.com/taxslayer/assets/taxslayer_800.jpg",
     "https://www.squarebidness.com/taxslayer/assets/taxslayer_1200.jpg",
     "https://www.squarebidness.com/taxslayer/assets/taxslayer_1200x630.jpg",
 
-    // Optional shared OG default (if you use one)
+    // Optional shared OG default
     "https://www.squarebidness.com/assets/og-default-1200x630.jpg"
   ];
 
@@ -97,19 +98,13 @@
   const btnCheck = $("#checkAll");
   const btnCopyBad = $("#copyBad");
 
-  btnDefaults.addEventListener("click", ()=>{
-    urlsTA.value = defaults.join("\n");
-  });
-
-  btnClear.addEventListener("click", ()=>{
-    urlsTA.value = "";
-    resultsBody.innerHTML = "";
-  });
+  btnDefaults.addEventListener("click", ()=>{ urlsTA.value = defaults.join("\n"); });
+  btnClear.addEventListener("click", ()=>{ urlsTA.value = ""; resultsBody.innerHTML = ""; });
 
   btnCopyBad.addEventListener("click", ()=>{
     const bads = $$(".bad-url").map(td=>td.dataset.url).join("\n");
     if (!bads.trim()) { alert("No FAILs to copy."); return; }
-    navigator.clipboard.writeText(bads).then(()=>alert("Copied FAIL URLs to clipboard."));
+    navigator.clipboard.writeText(bads).then(()=>alert("Copied FAIL URLs."));
   });
 
   btnCheck.addEventListener("click", async ()=>{
@@ -121,19 +116,17 @@
       const url = addBuster(raw);
       addRow(raw, "…", "Checking…");
       try {
-        const res = await fetch(url, {cache:"no-cache",mode:"no-cors"}).catch(()=>null);
-        // Try a CORS-friendly HEAD if possible
-        let status = "";
+        // Try HEAD first for status code
+        const headRes = await fetch(url, {method:"HEAD", cache:"no-cache"});
+        finalize(raw, headRes.status || "", headRes.ok ? "OK" : "FAIL");
+      } catch {
+        // Fallback: opaque fetch (no-cors) — if it returns, assume OK
         try {
-          const headRes = await fetch(url, {method:"HEAD", cache:"no-cache"});
-          status = headRes.status || "";
-          finalize(raw, status, headRes.ok ? "OK" : "FAIL");
-        } catch {
-          // no-cors fallback: if we got here at all, assume reachable
+          await fetch(url, {cache:"no-cache", mode:"no-cors"});
           finalize(raw, "—", "OK (no-cors)");
+        } catch {
+          finalize(raw, "ERR", "FAIL");
         }
-      } catch (e){
-        finalize(raw, "ERR", "FAIL");
       }
     }
   });
@@ -144,7 +137,6 @@
       url.searchParams.set("v", Date.now().toString());
       return url.toString();
     }catch{
-      // Not absolute? Treat as path on current host
       const base = new URL(location.origin);
       base.pathname = u;
       base.searchParams.set("v", Date.now().toString());
@@ -166,16 +158,13 @@
     const tr = resultsBody.querySelectorAll("tr")[resultsBody.rows.length-1] || resultsBody.lastElementChild;
     const st = tr.querySelector(".status");
     const nt = tr.querySelector(".notes");
-
     st.textContent = status;
     nt.textContent = note;
 
-    // Mark row OK/FAIL for quick scanning
     if (/^2\d\d$/.test(String(status)) || /OK/.test(note)) {
       st.classList.add("ok");
     } else {
       st.classList.add("bad");
-      // store URL for copy-bad feature
       nt.classList.add("bad-url");
       nt.dataset.url = tr.querySelector("code").textContent;
     }
