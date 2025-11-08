@@ -14,13 +14,12 @@
   <link rel="shortcut icon" href="/courageaux/assets/favicon.ico">
   <link rel="apple-touch-icon" href="/courageaux/assets/icon_180.png">
 
-  <!-- Performance: Preload LCP image -->
+  <!-- Performance: Preload LCP image (single file to avoid 404s) -->
   <link rel="preload" as="image"
         href="/courageaux/assets/courageaux_1200x630.jpg"
-        imagesrcset="/courageaux/assets/courageaux_800.jpg 800w, /courageaux/assets/courageaux_1200.jpg 1200w"
         imagesizes="(max-width: 900px) 100vw, 520px">
 
-  <!-- Open Graph / Twitter -->
+  <!-- Open Graph / Twitter (absolute image URLs) -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Square Bidness">
   <meta property="og:title" content="November Spotlight — Courageaux Aesthetics">
@@ -59,14 +58,11 @@
     .contact ul{list-style:none;margin:0;padding:0;color:var(--muted)}
     .contact li{margin:6px 0}
     .contact a{color:#fff}
-
     /* Mobile: stack hero columns */
-    @media (max-width: 880px){
-      .hero{grid-template-columns:1fr}
-    }
+    @media (max-width: 880px){ .hero{grid-template-columns:1fr} }
   </style>
 
-  <!-- JSON-LD -->
+  <!-- JSON-LD (valid JSON, no trailing commas) -->
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
@@ -83,8 +79,7 @@
       "addressCountry":"US"
     },
     "image":[
-      "https://www.squarebidness.com/courageaux/assets/courageaux_1200x630.jpg",
-      "https://www.squarebidness.com/courageaux/assets/logo_courageaux_white.svg"
+      "https://www.squarebidness.com/courageaux/assets/courageaux_1200x630.jpg"
     ],
     "url":"https://www.squarebidness.com/courageaux/",
     "sameAs": ["https://instagram.com/courageauxaesthetics"],
@@ -95,7 +90,9 @@
 <body>
   <header class="wrap nav">
     <div class="brand">
-      <img src="/courageaux/assets/logo_courageaux_white.svg" alt="Courageaux Aesthetics">
+      <!-- Temporarily removed missing SVG logo to avoid 404 -->
+      <!-- <img src="/courageaux/assets/logo_courageaux_white.svg" alt="Courageaux Aesthetics"> -->
+      <span style="font-weight:800;letter-spacing:.04em">Courageaux Aesthetics</span>
     </div>
     <div class="pill">Partner Feature • Square Bidness</div>
   </header>
@@ -113,12 +110,8 @@
         </div>
       </div>
       <div class="hero-img">
-        <!-- Safe placeholder using the OG image; swap to 800/1200 set when ready -->
         <img
           src="/courageaux/assets/courageaux_1200x630.jpg"
-          srcset="/courageaux/assets/courageaux_800.jpg 800w,
-                  /courageaux/assets/courageaux_1200.jpg 1200w"
-          sizes="(max-width: 900px) 100vw, 520px"
           width="1200" height="630"
           alt="Courageaux Aesthetics wearing a Square Bidness ladies Supima tee">
       </div>
