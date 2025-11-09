@@ -33,7 +33,7 @@
   <!-- Icons / PWA -->
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="apple-touch-icon" href="/assets/icons/icon-180.png" />
-  <link rel="manifest" href="/public/site.webmanifest" />
+  <link rel="manifest" href="/site.webmanifest" />
 
   <!-- Org JSON-LD (site-wide) -->
   <script type="application/ld+json">
@@ -103,7 +103,7 @@
   </script>
 
   <!-- GA4 -->
-  <script defer src="/public/scripts/ga.js"></script>
+  <script defer src="/scripts/ga.js"></script>
 
   <style>
     /* Page-local light styling that plays nice with /styles/style.css */
@@ -126,7 +126,7 @@
   </style>
 </head>
 
-<body class="theme-dark">
+<body class="theme-dark" id="top">
   <!-- NAV -->
   <div id="nav-placeholder"></div>
 
@@ -230,23 +230,42 @@
 
   <!-- Inject nav + footer -->
   <script>
-    (async () => {
-      const bust = `?v=${Date.now()}`;
-      async function inject(url, id) {
-        try {
-          const res = await fetch(url + bust, { cache: "no-store" });
-          if (!res.ok) return;
-          const html = await res.text();
-          const el = document.getElementById(id);
-          if (el) el.innerHTML = html;
-        } catch (e) {
-          console.warn("partial load failed:", url, e);
-        }
+  (async () => {
+    const bust = `?v=${Date.now()}`;
+
+    async function inject(url, id) {
+      try {
+        const res = await fetch(url + bust, { cache: "no-store", credentials: "same-origin" });
+        if (!res.ok) return null;
+        const html = await res.text();
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = html;
+        return el;
+      } catch (e) {
+        console.warn("partial load failed:", url, e);
+        return null;
       }
-      // nav and footer in /public
-      await inject("/public/nav/index.html", "nav-placeholder");
-      await inject("/public/footer/index.html", "footer-placeholder");
-    })();
+    }
+
+    // NAV
+    const nav = await inject("/nav/index.html", "nav-placeholder");
+    if (nav) {
+      const current = location.pathname.replace(/\/+$/, "") || "/";
+      nav.querySelectorAll("a[href]").forEach(a => {
+        try {
+          const href = new URL(a.getAttribute("href"), location.origin)
+            .pathname.replace(/\/+$/, "") || "/";
+          if (href === current || (href !== "/" && current.startsWith(href))) {
+            a.classList.add("is-active");
+            a.setAttribute("aria-current", "page");
+          }
+        } catch {}
+      });
+    }
+
+    // FOOTER
+    await inject("/footer/index.html", "footer-placeholder");
+  })();
   </script>
 </body>
 </html>
