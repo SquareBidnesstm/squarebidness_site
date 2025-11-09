@@ -6,7 +6,7 @@
   <link rel="preconnect" href="https://www.google-analytics.com">
 
   <!-- GA4 (site-wide) -->
-  <script defer src="/public/scripts/ga.js"></script>
+  <script defer src="/scripts/ga.js"></script>
 
   <!-- Basics -->
   <meta charset="UTF-8" />
@@ -20,7 +20,7 @@
   <!-- Icons / PWA -->
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="apple-touch-icon" href="/assets/icons/icon-180.png">
-  <link rel="manifest" href="/public/site.webmanifest">
+  <link rel="manifest" href="/site.webmanifest">
   <meta name="theme-color" content="#000000">
 
   <!-- Canonical -->
@@ -171,30 +171,46 @@
   <!-- FOOTER -->
   <div id="footer-placeholder"></div>
 
-  <!-- load nav/footer from /public just like index -->
+  <!-- load nav/footer -->
   <script>
   (async () => {
     const bust = `?v=${Date.now()}`;
 
     async function inject(url, id) {
       try {
-        const res = await fetch(url + bust, { credentials: "same-origin" });
-        if (!res.ok) return;
+        const res = await fetch(url + bust, { cache: "no-store", credentials: "same-origin" });
+        if (!res.ok) return null;
         const html = await res.text();
         const el = document.getElementById(id);
         if (el) {
           el.innerHTML = html;
           el.classList.add("fade-in");
         }
+        return el;
       } catch (e) {
         console.warn("partial load failed:", url, e);
+        return null;
       }
     }
 
     // NAV
-    const nav = await inject("/public/nav/index.html", "nav-placeholder");
+    const nav = await inject("/nav/index.html", "nav-placeholder");
+    if (nav) {
+      const current = location.pathname.replace(/\/+$/, "") || "/";
+      nav.querySelectorAll("a[href]").forEach(a => {
+        try {
+          const href = new URL(a.getAttribute("href"), location.origin)
+            .pathname.replace(/\/+$/, "") || "/";
+          if (href === current || (href !== "/" && current.startsWith(href))) {
+            a.classList.add("is-active");
+            a.setAttribute("aria-current", "page");
+          }
+        } catch {}
+      });
+    }
+
     // FOOTER
-    await inject("/public/footer/index.html", "footer-placeholder");
+    await inject("/footer/index.html", "footer-placeholder");
   })();
   </script>
 </body>
