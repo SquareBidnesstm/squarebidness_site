@@ -11,12 +11,12 @@
   <!-- Perf / GA4 -->
   <link rel="preconnect" href="https://www.googletagmanager.com">
   <link rel="preconnect" href="https://www.google-analytics.com">
-  <script defer src="/public/scripts/ga.js"></script>
+  <script defer src="/scripts/ga.js"></script>
 
   <!-- Brand / Icons / PWA -->
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="apple-touch-icon" href="/assets/icons/icon-180.png" />
-  <link rel="manifest" href="/public/site.webmanifest" />
+  <link rel="manifest" href="/site.webmanifest" />
   <meta name="theme-color" content="#000000" />
 
   <!-- Styles -->
@@ -89,24 +89,6 @@
   }
   </script>
 
-  <!-- Nav/Footer loader (shared from /public) -->
-  <script>
-  (async () => {
-    const bust = `?v=${Date.now()}`;
-    async function injectPartial(url, targetId) {
-      try {
-        const res = await fetch(url + bust, { credentials: 'same-origin' });
-        if (!res.ok) return;
-        const html = await res.text();
-        const slot = document.getElementById(targetId);
-        if (slot) { slot.innerHTML = html; slot.classList.add('fade-in'); }
-      } catch (e) { console.warn('Failed to load partial:', url, e); }
-    }
-    await injectPartial('/public/nav/index.html', 'nav-placeholder');
-    await injectPartial('/public/footer/index.html', 'footer-placeholder');
-  })();
-  </script>
-
   <style>
     .press-page-header{margin-bottom:1.5rem}
     .press-page-header h1{margin:0 0 .25rem;font-size:1.75rem;font-weight:800}
@@ -149,14 +131,14 @@
       </header>
 
       <!-- Press links list -->
-      <li class="press-item">
-  <a href="/vsop/">
-    VSOP Collection — Preorders Live
-    <span>Limited preorder: heat-reactive jacket + shorts (burgundy &amp; brown).</span>
-  </a>
-</li>
-
       <ul class="press-list">
+        <li class="press-item">
+          <a href="/vsop/">
+            VSOP Collection — Preorders Live
+            <span>Limited preorder: heat-reactive jacket + shorts (burgundy &amp; brown).</span>
+          </a>
+        </li>
+
         <li class="press-item">
           <a href="https://boldjourney.com/meet-marcus-buckner?utm_source=squarebidness.com&utm_medium=press_page" target="_blank" rel="noopener noreferrer">
             Bold Journey — Meet Marcus Buckner
@@ -204,7 +186,7 @@
             </p>
             <div class="press-card__cta">
               <a class="btn btn--gold" href="/press/youtube-interview/">Watch on Site</a>
-              <a class="btn btn--ghost" href="https://youtu.be/o2eKkE8NmFY" target="_blank" rel="noopener">Open on YouTube</a>
+              <a class="btn btn--ghost" href="https://youtu.be/o2eKkE8NmFY" target="_blank" rel="noopener noreferrer">Open on YouTube</a>
             </div>
           </div>
         </article>
@@ -223,15 +205,64 @@
 
   <!-- FOOTER SLOT -->
   <div id="footer-placeholder"></div>
+
+  <!-- VSOP click tracking from press page -->
   <script>
-document.addEventListener('click', (e) => {
-  const a = e.target.closest('a[href="/vsop/"]');
-  if (!a) return;
-  try { if (typeof gtag === 'function') {
-    gtag('event','click',{event_category:'press',event_label:'vsop_press_link',value:1});
-  }} catch(_) {}
-});
-</script>
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a[href="/vsop/"]');
+    if (!a) return;
+    try {
+      if (typeof gtag === 'function') {
+        gtag('event','click',{
+          event_category:'press',
+          event_label:'vsop_press_link',
+          value:1
+        });
+      }
+    } catch(_) {}
+  });
+  </script>
+
+  <!-- Inject nav/footer -->
+  <script>
+  (async () => {
+    const bust = `?v=${Date.now()}`;
+
+    async function injectPartial(url, targetId) {
+      try {
+        const res = await fetch(url + bust, { cache: 'no-store', credentials: 'same-origin' });
+        if (!res.ok) return null;
+        const html = await res.text();
+        const slot = document.getElementById(targetId);
+        if (slot) {
+          slot.innerHTML = html;
+          slot.classList.add('fade-in');
+        }
+        return slot;
+      } catch (e) {
+        console.warn('Failed to load partial:', url, e);
+        return null;
+      }
+    }
+
+    const nav = await injectPartial('/nav/index.html', 'nav-placeholder');
+    if (nav) {
+      const current = location.pathname.replace(/\/+$/, '') || '/';
+      nav.querySelectorAll('a[href]').forEach(a => {
+        try {
+          const href = new URL(a.getAttribute('href'), location.origin)
+            .pathname.replace(/\/+$/, '') || '/';
+          if (href === current || (href !== '/' && current.startsWith(href))) {
+            a.classList.add('is-active');
+            a.setAttribute('aria-current', 'page');
+          }
+        } catch {}
+      });
+    }
+
+    await injectPartial('/footer/index.html', 'footer-placeholder');
+  })();
+  </script>
 
 </body>
 </html>
