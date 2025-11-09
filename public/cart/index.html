@@ -77,7 +77,7 @@
 
     async function inject(url, slotId) {
       try {
-        const res = await fetch(url + bust, { credentials: "same-origin" });
+        const res = await fetch(url + bust, { cache: "no-store", credentials: "same-origin" });
         if (!res.ok) throw new Error("HTTP " + res.status);
         const html = await res.text();
         const slot = document.getElementById(slotId);
@@ -85,14 +85,30 @@
           slot.innerHTML = html;
           slot.classList.add("fade-in");
         }
+        return slot;
       } catch (err) {
         console.warn("Partial failed:", url, err);
+        return null;
       }
     }
 
-    // inject nav/footer from /public
-    await inject("/public/nav/index.html", "nav-placeholder");
-    await inject("/public/footer/index.html", "footer-placeholder");
+    // inject nav/footer (no /public prefix — these live under /public in the repo)
+    const nav = await inject("/nav/index.html", "nav-placeholder");
+    if (nav) {
+      const current = location.pathname.replace(/\/+$/, "") || "/";
+      nav.querySelectorAll("a[href]").forEach(a => {
+        try {
+          const href = new URL(a.getAttribute("href"), location.origin)
+            .pathname.replace(/\/+$/, "") || "/";
+          if (href === current || (href !== "/" && current.startsWith(href))) {
+            a.classList.add("is-active");
+            a.setAttribute("aria-current", "page");
+          }
+        } catch {}
+      });
+    }
+
+    await inject("/footer/index.html", "footer-placeholder");
 
     // CART RENDER
     const el = document.getElementById("cart");
