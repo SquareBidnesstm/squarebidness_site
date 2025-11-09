@@ -6,7 +6,7 @@
   <link rel="preconnect" href="https://www.google-analytics.com">
 
   <!-- GA4 -->
-  <script defer src="/public/scripts/ga.js"></script>
+  <script defer src="/scripts/ga.js"></script>
 
   <!-- Basics -->
   <meta charset="UTF-8" />
@@ -42,7 +42,7 @@
   <!-- PWA -->
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="apple-touch-icon" href="/assets/icons/icon-180.png">
-  <link rel="manifest" href="/public/site.webmanifest">
+  <link rel="manifest" href="/site.webmanifest">
   <meta name="theme-color" content="#000000">
 
   <!-- JSON-LD -->
@@ -60,11 +60,19 @@
       "https://bsky.app/profile/squarebidnesstm.bsky.social",
       "https://www.linkedin.com/company/square-bidness-apparel"
     ],
-    "contactPoint":[{"@type":"ContactPoint","contactType":"customer support","email":"squarebidnessapparel@gmail.com","areaServed":"US"}]
+    "contactPoint":[
+      {
+        "@type":"ContactPoint",
+        "contactType":"customer support",
+        "email":"squarebidnessapparel@gmail.com",
+        "areaServed":"US"
+      }
+    ]
   }
   </script>
 
-  <script src="/public/scripts/sb-cart.js" defer></script>
+  <!-- Cart / shop logic -->
+  <script src="/scripts/sb-cart.js" defer></script>
 </head>
 
 <body class="theme-dark" id="top">
@@ -178,6 +186,7 @@
   <script>
   (async () => {
     const bust = `?v=${Date.now()}`;
+
     async function injectPartial(url, id) {
       try {
         const res = await fetch(url + bust);
@@ -186,15 +195,20 @@
         const el = document.getElementById(id);
         if (el) el.innerHTML = html;
         return el;
-      } catch (e) { console.warn('Failed to load', url, e); return null; }
+      } catch (e) {
+        console.warn('Failed to load', url, e);
+        return null;
+      }
     }
 
-    const nav = await injectPartial('/public/nav/index.html', 'nav-placeholder');
+    // NOTE: no /public prefix here — these live in /public/nav and /public/footer in the repo
+    const nav = await injectPartial('/nav/index.html', 'nav-placeholder');
     if (nav) {
       const current = location.pathname.replace(/\/+$/, '') || '/';
       nav.querySelectorAll('a[href]').forEach(a => {
         try {
-          const href = new URL(a.getAttribute('href'), location.origin).pathname.replace(/\/+$/, '') || '/';
+          const href = new URL(a.getAttribute('href'), location.origin)
+            .pathname.replace(/\/+$/, '') || '/';
           if (href === current || (href !== '/' && current.startsWith(href))) {
             a.classList.add('is-active');
             a.setAttribute('aria-current', 'page');
@@ -202,7 +216,8 @@
         } catch {}
       });
     }
-    await injectPartial('/public/footer/index.html', 'footer-placeholder');
+
+    await injectPartial('/footer/index.html', 'footer-placeholder');
   })();
   </script>
 
