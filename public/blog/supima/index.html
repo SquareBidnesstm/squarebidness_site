@@ -246,7 +246,7 @@
   </style>
 </head>
 
-<body class="theme-dark">
+<body class="theme-dark" id="top">
 
   <!-- NAV SLOT -->
   <div id="nav-placeholder"></div>
@@ -379,14 +379,14 @@
     });
   </script>
 
-  <!-- inject nav + footer from /public -->
+  <!-- inject nav + footer -->
   <script>
   (async () => {
     const bust = `?v=${Date.now()}`;
 
     async function inject(url, id) {
       try {
-        const res = await fetch(url + bust, { credentials: "same-origin" });
+        const res = await fetch(url + bust, { cache: "no-store", credentials: "same-origin" });
         if (!res.ok) throw new Error("HTTP " + res.status);
         const html = await res.text();
         const slot = document.getElementById(id);
@@ -394,16 +394,31 @@
           slot.innerHTML = html;
           slot.classList.add("fade-in");
         }
+        return slot;
       } catch (err) {
         console.warn("Partial failed", url, err);
+        return null;
       }
     }
 
     // nav
-    await inject("/public/nav/index.html", "nav-placeholder");
+    const nav = await inject("/nav/index.html", "nav-placeholder");
+    if (nav) {
+      const current = location.pathname.replace(/\/+$/, "") || "/";
+      nav.querySelectorAll("a[href]").forEach(a => {
+        try {
+          const href = new URL(a.getAttribute("href"), location.origin)
+            .pathname.replace(/\/+$/, "") || "/";
+          if (href === current || (href !== "/" && current.startsWith(href))) {
+            a.classList.add("is-active");
+            a.setAttribute("aria-current", "page");
+          }
+        } catch {}
+      });
+    }
 
     // footer
-    await inject("/public/footer/index.html", "footer-placeholder");
+    await inject("/footer/index.html", "footer-placeholder");
   })();
   </script>
 </body>
