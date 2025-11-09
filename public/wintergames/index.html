@@ -104,11 +104,14 @@
     <!-- Single Image Card -->
     <article class="wg-card" aria-label="Winter Games hero">
       <picture>
-        <source srcset="/wintergames/assets/og-lil-soulja-slim_1200.jpg" media="(min-width: 768px)">
-        <img src="/wintergames/assets/og-lil-soulja-slim_800.jpg"
-             alt="Lil Soulja Slim in Winter Games Collection"
-             loading="eager" decoding="async"
-             onerror="this.onerror=null;this.src='/assets/placeholder.png';">
+        <!-- relative to /wintergames/ -->
+        <source srcset="assets/og-lil-soulja-slim_1200.jpg" media="(min-width: 768px)">
+        <img
+          src="assets/og-lil-soulja-slim_800.jpg"
+          alt="Lil Soulja Slim in Winter Games Collection"
+          loading="eager"
+          decoding="async"
+          onerror="this.onerror=null;this.src='/assets/placeholder.png';">
       </picture>
     </article>
 
@@ -146,7 +149,7 @@
   <!-- FOOTER -->
   <div id="footer-placeholder"></div>
 
-  <!-- Inject nav/footer -->
+  <!-- Inject nav/footer from root -->
   <script>
   (async () => {
     const bust = `?v=${Date.now()}`;
@@ -165,7 +168,7 @@
       }
     }
 
-    // NAV from root
+    // NAV
     const nav = await inject("/nav/index.html", "nav-placeholder");
     if (nav) {
       const current = location.pathname.replace(/\/+$/, "") || "/";
@@ -181,15 +184,15 @@
       });
     }
 
-    // FOOTER from root
+    // FOOTER
     await inject("/footer/index.html", "footer-placeholder");
   })();
   </script>
 
-  <!-- Single Stripe link; append size + UTM for your records -->
+  <!-- Stripe link; append size + UTM -->
   <script>
   (() => {
-    const BASE = "https://buy.stripe.com/14A7sL8BNamtfmt08E8N20k"; // live Payment Link
+    const BASE = "https://buy.stripe.com/14A7sL8BNamtfmt08E8N20k";
 
     const sizeEl = document.getElementById('wg-size');
     const btn    = document.getElementById('wg-checkout');
