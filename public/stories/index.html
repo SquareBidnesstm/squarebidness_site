@@ -30,13 +30,13 @@
   <link rel="preconnect" href="https://www.googletagmanager.com">
   <link rel="preconnect" href="https://www.google-analytics.com">
 
-  <!-- global CSS (root; this is the one that works) -->
+  <!-- global CSS -->
   <link rel="stylesheet" href="/styles/style.css" />
 
   <!-- Icons / PWA -->
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="apple-touch-icon" href="/assets/icons/icon-180.png" />
-  <link rel="manifest" href="/public/site.webmanifest" />
+  <link rel="manifest" href="/site.webmanifest" />
   <meta name="theme-color" content="#000000" />
 
   <!-- Org JSON-LD (same across site) -->
@@ -100,8 +100,8 @@
   }
   </script>
 
-  <!-- GA4 (you moved scripts under /public) -->
-  <script defer src="/public/scripts/ga.js"></script>
+  <!-- GA4 -->
+  <script defer src="/scripts/ga.js"></script>
 
   <!-- Page-only styles -->
   <style>
@@ -282,35 +282,50 @@
   <!-- FOOTER -->
   <div id="footer-placeholder"></div>
 
-  <!-- load nav/footer from /public just like index -->
+  <!-- nav/footer inject -->
   <script>
   (async () => {
     const bust = `?v=${Date.now()}`;
 
     async function inject(url, id) {
       try {
-        const res = await fetch(url + bust, { credentials: "same-origin" });
-        if (!res.ok) return;
+        const res = await fetch(url + bust, { cache: "no-store", credentials: "same-origin" });
+        if (!res.ok) return null;
         const html = await res.text();
         const slot = document.getElementById(id);
         if (slot) {
           slot.innerHTML = html;
           slot.classList.add("fade-in");
         }
+        return slot;
       } catch (e) {
         console.warn("partial load failed:", url, e);
+        return null;
       }
     }
 
-    // NAV from /public
-    await inject("/public/nav/index.html", "nav-placeholder");
+    // NAV
+    const nav = await inject("/nav/index.html", "nav-placeholder");
+    if (nav) {
+      const current = location.pathname.replace(/\/+$/, "") || "/";
+      nav.querySelectorAll("a[href]").forEach(a => {
+        try {
+          const href = new URL(a.getAttribute("href"), location.origin)
+            .pathname.replace(/\/+$/, "") || "/";
+          if (href === current || (href !== "/" && current.startsWith(href))) {
+            a.classList.add("is-active");
+            a.setAttribute("aria-current", "page");
+          }
+        } catch {}
+      });
+    }
 
-    // FOOTER from /public
-    await inject("/public/footer/index.html", "footer-placeholder");
+    // FOOTER
+    await inject("/footer/index.html", "footer-placeholder");
   })();
   </script>
 
   <!-- cart / other shared scripts if needed -->
-  <script src="/public/scripts/sb-cart.js" defer></script>
+  <script src="/scripts/sb-cart.js" defer></script>
 </body>
 </html>
