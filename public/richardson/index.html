@@ -215,6 +215,55 @@
       font-size:.85rem;
       color:#c7cad2;
     }
+
+    /* Wedding form */
+    .rf-form {
+      margin-top:1rem;
+      border-top:1px solid #1f1f1f;
+      padding-top:1rem;
+    }
+    .rf-form-grid {
+      display:grid;
+      gap:.8rem;
+    }
+    @media(min-width:720px){
+      .rf-form-grid--2 {
+        grid-template-columns:1fr 1fr;
+      }
+    }
+    .rf-field label {
+      display:block;
+      font-size:.8rem;
+      color:#e5e7eb;
+      margin-bottom:.2rem;
+    }
+    .rf-field input,
+    .rf-field textarea,
+    .rf-field select {
+      width:100%;
+      background:#050505;
+      border:1px solid #27272a;
+      border-radius:10px;
+      color:#f9fafb;
+      padding:.55rem .7rem;
+      font-size:.9rem;
+      font-family:inherit;
+    }
+    .rf-field textarea {
+      min-height:80px;
+      resize:vertical;
+    }
+    .rf-form-footer {
+      display:flex;
+      flex-wrap:wrap;
+      gap:.6rem;
+      align-items:center;
+      margin-top:.9rem;
+    }
+    .rf-form-note {
+      font-size:.75rem;
+      color:#6b7280;
+    }
   </style>
 
   <!-- Inject shared nav/footer from /public -->
@@ -350,15 +399,62 @@
         <li><strong>Step 3:</strong> Come back for final tweaks so everything fits right before the big day.</li>
       </ul>
       <p class="rf-note">
-        Best practice: book your wedding appointment <strong>3–4 weeks before</strong> the event so there’s time for alterations and last-minute changes.  
-        Details (deposits, packages, photos) can be updated once he’s ready.
+        Best practice: book your wedding appointment <strong>3–4 weeks before</strong> the event so there’s time for alterations and last-minute changes.
       </p>
-      <div style="margin-top:.85rem;display:flex;flex-wrap:wrap;gap:.6rem;">
-        <a class="btn btn--gold" href="tel:+19856625819">Call to Reserve a Wedding Slot</a>
-        <a class="btn btn--ghost" href="mailto:squarebidnessapparel@gmail.com?subject=Wedding%20Appointment%20Inquiry%20for%20Richardson%20Fashion">
-          Email Wedding Details
-        </a>
-      </div>
+
+      <!-- Wedding inquiry form -->
+      <form
+        id="wedding-form"
+        class="rf-form"
+        action="mailto:squarebidnessapparel@gmail.com"
+        method="post"
+        enctype="text/plain"
+      >
+        <div class="rf-form-grid rf-form-grid--2">
+          <div class="rf-field">
+            <label for="wf-name">Your Name</label>
+            <input id="wf-name" name="name" type="text" required placeholder="Full name" />
+          </div>
+          <div class="rf-field">
+            <label for="wf-role">Role in Wedding</label>
+            <input id="wf-role" name="role" type="text" placeholder="Groom, groomsman, parent, etc." />
+          </div>
+        </div>
+
+        <div class="rf-form-grid rf-form-grid--2" style="margin-top:.6rem;">
+          <div class="rf-field">
+            <label for="wf-phone">Phone</label>
+            <input id="wf-phone" name="phone" type="tel" required placeholder="Best number to reach you" />
+          </div>
+          <div class="rf-field">
+            <label for="wf-email">Email</label>
+            <input id="wf-email" name="email" type="email" placeholder="Optional email" />
+          </div>
+        </div>
+
+        <div class="rf-form-grid rf-form-grid--2" style="margin-top:.6rem;">
+          <div class="rf-field">
+            <label for="wf-date">Wedding Date</label>
+            <input id="wf-date" name="wedding_date" type="date" />
+          </div>
+          <div class="rf-field">
+            <label for="wf-party-size">How Many Men Need Suits?</label>
+            <input id="wf-party-size" name="party_size" type="number" min="1" placeholder="e.g. 5" />
+          </div>
+        </div>
+
+        <div class="rf-field" style="margin-top:.6rem;">
+          <label for="wf-notes">Details (colors, budget, questions)</label>
+          <textarea id="wf-notes" name="details" placeholder="Share colors, budget, and anything he should know before you come in."></textarea>
+        </div>
+
+        <div class="rf-form-footer">
+          <button type="submit" class="btn btn--gold">Send Wedding Request</button>
+          <span class="rf-form-note">
+            Form opens your email app with everything filled in, then you hit send.
+          </span>
+        </div>
+      </form>
     </section>
 
     <!-- LOOKBOOK / SAMPLE FITS -->
@@ -400,5 +496,41 @@
 
   <!-- FOOTER SLOT -->
   <div id="footer-placeholder"></div>
+
+  <!-- Wedding form helper (build mailto body nicely) -->
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("wedding-form");
+    if (!form) return;
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const data = new FormData(form);
+      const subject = encodeURIComponent("Wedding Appointment Request — Richardson Fashion");
+
+      const lines = [
+        "Wedding Appointment Request (Richardson Fashion)",
+        "",
+        "Name: " + (data.get("name") || ""),
+        "Role in wedding: " + (data.get("role") || ""),
+        "Phone: " + (data.get("phone") || ""),
+        "Email: " + (data.get("email") || ""),
+        "Wedding date: " + (data.get("wedding_date") || ""),
+        "How many men need suits: " + (data.get("party_size") || ""),
+        "",
+        "Details:",
+        (data.get("details") || "")
+      ];
+
+      const body = encodeURIComponent(lines.join("\\n"));
+
+      // TODO: change this to his direct email if different
+      const to = "squarebidnessapparel@gmail.com";
+
+      window.location.href = "mailto:" + to + "?subject=" + subject + "&body=" + body;
+    });
+  });
+  </script>
 </body>
 </html>
