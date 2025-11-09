@@ -69,7 +69,7 @@
 
 <body class="theme-dark" id="top">
 
-  <!-- optional: reuse site nav/footer -->
+  <!-- NAV (injected) -->
   <div id="nav-placeholder"></div>
 
   <main class="section">
@@ -93,49 +93,45 @@
         <a class="btn btn--ghost btn--full" href="/blog/"> Blog</a>
         <a class="btn btn--ghost btn--full" href="/phomatic/"> Pho-Matic</a>
         <a class="btn btn--ghost btn--full" href="/hammond-homecoming/"> Hammond Homecoming</a>
+
         <!-- SUPPORT -->
         <a class="btn btn--ghost btn--full" href="/shipping/"> Shipping Info</a>
         <a class="btn btn--ghost btn--full" href="/returns/"> Returns & Exchanges</a>
         <a class="btn btn--ghost btn--full" href="/contact-snippet.html"> Contact</a>
 
         <!-- SOCIALS -->
-        <a class="btn btn--ghost btn--full" href="https://instagram.com/squarebidnesstm" target="_blank" rel="noopener"> Instagram</a>
-        <a class="btn btn--ghost btn--full" href="https://www.tiktok.com/@squarebidnesstm" target="_blank" rel="noopener"> TikTok</a>
-        <a class="btn btn--ghost btn--full" href="https://youtu.be/o2eKkE8NmFY" target="_blank" rel="noopener"> YouTube Interview</a>
-        <a class="btn btn--ghost btn--full" href="https://www.facebook.com/squarebidnessapparel" target="_blank" rel="noopener"> Facebook</a>
-        <a class="btn btn--ghost btn--full" href="https://bsky.app/profile/squarebidnesstm.bsky.social" target="_blank" rel="noopener"> Bluesky</a>
-        <a class="btn btn--ghost btn--full" href="https://www.linkedin.com/company/square-bidness-apparel/" target="_blank" rel="noopener"> LinkedIn</a>
+        <a class="btn btn--ghost btn--full" href="https://instagram.com/squarebidnesstm" target="_blank" rel="noopener noreferrer"> Instagram</a>
+        <a class="btn btn--ghost btn--full" href="https://www.tiktok.com/@squarebidnesstm" target="_blank" rel="noopener noreferrer"> TikTok</a>
+        <a class="btn btn--ghost btn--full" href="https://youtu.be/o2eKkE8NmFY" target="_blank" rel="noopener noreferrer"> YouTube Interview</a>
+        <a class="btn btn--ghost btn--full" href="https://www.facebook.com/squarebidnessapparel" target="_blank" rel="noopener noreferrer"> Facebook</a>
+        <a class="btn btn--ghost btn--full" href="https://bsky.app/profile/squarebidnesstm.bsky.social" target="_blank" rel="noopener noreferrer"> Bluesky</a>
+        <a class="btn btn--ghost btn--full" href="https://www.linkedin.com/company/square-bidness-apparel/" target="_blank" rel="noopener noreferrer"> LinkedIn</a>
       </div>
 
       <p class="muted" style="margin-top:1.25rem;">Veteran-owned. Louisiana-raised.</p>
     </div>
   </main>
 
+  <!-- FOOTER (injected) -->
   <div id="footer-placeholder"></div>
 
   <script>
-    // pull in nav/footer the same way as other pages
     document.addEventListener("DOMContentLoaded", async () => {
       try {
-        const nav = await fetch("/nav/").then(r => r.ok ? r.text() : "");
-        document.getElementById("nav-placeholder").innerHTML = nav;
-      } catch(_) {}
+        const navHtml = await fetch("/nav/index.html", { cache: "no-store" })
+          .then(r => r.ok ? r.text() : "");
+        const navSlot = document.getElementById("nav-placeholder");
+        if (navSlot && navHtml) navSlot.innerHTML = navHtml;
+      } catch (_) {}
+
       try {
-        const footer = await fetch("/footer/").then(r => r.ok ? r.text() : "");
-        document.getElementById("footer-placeholder").innerHTML = footer;
-      } catch(_) {}
+        const footerHtml = await fetch("/footer/index.html", { cache: "no-store" })
+          .then(r => r.ok ? r.text() : "");
+        const footerSlot = document.getElementById("footer-placeholder");
+        if (footerSlot && footerHtml) footerSlot.innerHTML = footerHtml;
+      } catch (_) {}
     });
   </script>
-  <div id="credit-placeholder"></div>
-<script>
-  document.addEventListener('DOMContentLoaded', async () => {
-    try {
-      const html = await fetch('/partials/credit.html', { cache: 'no-store' }).then(r => r.text());
-      const slot = document.getElementById('credit-placeholder');
-      if (slot) slot.innerHTML = html;
-    } catch {}
-  });
-</script>
 
 </body>
 </html>
