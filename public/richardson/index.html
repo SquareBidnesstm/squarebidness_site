@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Perf -->
+  <link rel="preconnect" href="https://www.googletagmanager.com">
+  <link rel="preconnect" href="https://www.google-analytics.com">
+
+  <!-- GA4 (site-wide) -->
+  <script defer src="/scripts/ga.js"></script>
+
+  <!-- Basics -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Richardson Fashion — Suits & Menswear</title>
+  <meta name="description" content="Richardson Fashion — tailored suits, formalwear, and alterations in Hammond, Louisiana. Walk in sharp, walk out sharper." />
+  <link rel="canonical" href="https://www.squarebidness.com/richardson/" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="/styles/style.css" />
+
+  <!-- Icons / PWA -->
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" href="/assets/icons/icon-180.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <meta name="theme-color" content="#000000" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Square Bidness" />
+  <meta property="og:title" content="Richardson Fashion — Suits & Menswear" />
+  <meta property="og:description" content="Tailored suits, formalwear, and alterations in Hammond, LA." />
+  <meta property="og:url" content="https://www.squarebidness.com/richardson/" />
+  <meta property="og:image" content="https://www.squarebidness.com/richardson/assets/og-richardson_1200x630.jpg" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Richardson Fashion — Suits & Menswear" />
+  <meta name="twitter:description" content="Walk in regular, walk out ready. Suits & alterations in Hammond, LA." />
+  <meta name="twitter:image" content="https://www.squarebidness.com/richardson/assets/og-richardson_1200x630.jpg" />
+
+  <style>
+    .rf-shell {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 1.75rem 1rem 3.5rem;
+    }
+
+    .rf-hero {
+      display: grid;
+      gap: 1.5rem;
+      align-items: center;
+      margin-bottom: 2.5rem;
+    }
+    @media (min-width: 860px) {
+      .rf-hero {
+        grid-template-columns: 1.1fr .9fr;
+      }
+    }
+
+    .rf-pill {
+      display:inline-flex;
+      align-items:center;
+      gap:.35rem;
+      border-radius:999px;
+      border:1px solid #272727;
+      padding:.25rem .7rem;
+      font-size:.7rem;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      color:#a1a1aa;
+    }
+    .rf-pill span {
+      width:4px;
+      height:4px;
+      border-radius:999px;
+      background:#22c55e;
+    }
+
+    .rf-title {
+      font-size:clamp(1.9rem, 3vw, 2.4rem);
+      font-weight:800;
+      margin:.45rem 0 .3rem;
+    }
+    .rf-sub {
+      color:#aeb2bc;
+      margin:0 0 1rem;
+      max-width:32rem;
+    }
+
+    .rf-cta-row {
+      display:flex;
+      flex-wrap:wrap;
+      gap:.65rem;
+      margin-top:.75rem;
+    }
+
+    .btn {
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:999px;
+      border:1px solid transparent;
+      font-weight:700;
+      text-decoration:none;
+      cursor:pointer;
+      padding:.65rem 1rem;
+      font-size:.9rem;
+    }
+    .btn--gold {
+      background:#c9a227;
+      border-color:#c9a227;
+      color:#111;
+      box-shadow:0 12px 28px rgba(201,162,39,.4);
+    }
+    .btn--ghost {
+      background:#111;
+      border-color:#262626;
+      color:#fff;
+    }
+
+    .rf-hero-media {
+      border-radius:18px;
+      border:1px solid #1f1f1f;
+      overflow:hidden;
+      background:#050505;
+      box-shadow:0 24px 48px rgba(0,0,0,.55);
+    }
+    .rf-hero-media img {
+      width:100%;
+      height:auto;
+      display:block;
+      object-fit:cover;
+    }
+
+    .rf-grid {
+      display:grid;
+      gap:1.1rem;
+      margin: 1.75rem 0 2.5rem;
+    }
+    @media (min-width: 840px) {
+      .rf-grid {
+        grid-template-columns: 2fr 1.3fr;
+      }
+    }
+
+    .rf-card {
+      background:#0b0b0b;
+      border:1px solid #1f1f1f;
+      border-radius:16px;
+      padding:1.1rem 1rem 1.25rem;
+      box-shadow:0 18px 40px rgba(0,0,0,.6);
+    }
+    .rf-card h2 {
+      margin:0 0 .4rem;
+      font-size:1.1rem;
+      font-weight:700;
+    }
+    .rf-card p,
+    .rf-card li {
+      color:#aeb2bc;
+      font-size:.9rem;
+      line-height:1.5;
+    }
+    .rf-card ul {
+      padding-left:1.1rem;
+      margin:.35rem 0 0;
+    }
+
+    .rf-contact {
+      display:grid;
+      gap:.35rem;
+      font-size:.9rem;
+      color:#d1d5db;
+    }
+    .rf-contact a {
+      color:#c9a227;
+      text-decoration:underline;
+    }
+
+    .rf-note {
+      margin-top:1.3rem;
+      font-size:.8rem;
+      color:#6b7280;
+    }
+  </style>
+
+  <!-- Inject shared nav/footer from /public -->
+  <script>
+  (async () => {
+    const bust = `?v=${Date.now()}`;
+
+    async function inject(url, id) {
+      try {
+        const res = await fetch(url + bust, { credentials: "same-origin" });
+        if (!res.ok) return null;
+        const html = await res.text();
+        const slot = document.getElementById(id);
+        if (slot) slot.innerHTML = html;
+        return slot;
+      } catch (e) {
+        console.warn("partial load failed:", url, e);
+        return null;
+      }
+    }
+
+    const nav = await inject("/public/nav/index.html", "nav-placeholder");
+    if (nav) {
+      const current = location.pathname.replace(/\/+$/, "") || "/";
+      nav.querySelectorAll("a[href]").forEach(a => {
+        try {
+          const href = new URL(a.getAttribute("href"), location.origin)
+            .pathname.replace(/\/+$/, "") || "/";
+          if (href === current || (href !== "/" && current.startsWith(href))) {
+            a.classList.add("is-active");
+            a.setAttribute("aria-current", "page");
+          }
+        } catch {}
+      });
+    }
+
+    await inject("/public/footer/index.html", "footer-placeholder");
+  })();
+  </script>
+</head>
+
+<body class="theme-dark" id="top">
+  <!-- NAV SLOT -->
+  <div id="nav-placeholder"></div>
+
+  <main class="rf-shell">
+    <!-- HERO -->
+    <section class="rf-hero">
+      <div>
+        <div class="rf-pill">
+          <span></span> Richardson Fashion • Hammond, LA
+        </div>
+        <h1 class="rf-title">Suits That Really Fit the Man</h1>
+        <p class="rf-sub">
+          From weddings to workdays, Richardson Fashion keeps you pressed, tailored, and presentable.
+          Classic suits, modern cuts, and real alterations — not just “off the rack.”
+        </p>
+
+        <div class="rf-cta-row">
+          <a class="btn btn--gold" href="tel:+19856625819">Call the Shop — (985) 662-5819</a>
+          <a
+            class="btn btn--ghost"
+            href="https://maps.google.com/?q=223%20E%20Thomas%20St%2C%20Hammond%2C%20LA%2070401"
+            target="_blank"
+            rel="noopener"
+          >
+            Get Directions
+          </a>
+        </div>
+      </div>
+
+      <div class="rf-hero-media">
+        <!-- put his suit shop hero image here -->
+        <img
+          src="/richardson/assets/hero-suits_1200.jpg"
+          alt="Richardson Fashion — suit shop interior with mannequins and jackets"
+          loading="eager"
+          decoding="async"
+          onerror="this.onerror=null;this.src='/assets/placeholder.png';">
+      </div>
+    </section>
+
+    <!-- BODY GRID -->
+    <section class="rf-grid">
+      <article class="rf-card">
+        <h2>Services</h2>
+        <ul>
+          <li>Two-piece & three-piece suits</li>
+          <li>Shirts, ties, shoes, and accessories</li>
+          <li>Alterations: hems, waists, sleeves, tapers</li>
+          <li>Wedding & special-occasion outfitting</li>
+        </ul>
+      </article>
+
+      <article class="rf-card">
+        <h2>Hours & Contact</h2>
+        <div class="rf-contact">
+          <div><strong>Hours:</strong> Tue–Sat · 11am – 6pm</div>
+          <div><strong>Phone:</strong> <a href="tel:+19856625819">(985) 662-5819</a></div>
+          <div>
+            <strong>Address:</strong>
+            <a
+              href="https://maps.google.com/?q=223%20E%20Thomas%20St%2C%20Hammond%2C%20LA%2070401"
+              target="_blank"
+              rel="noopener"
+            >
+              223 E Thomas St, Hammond, LA 70401
+            </a>
+          </div>
+          <div><strong>Instagram:</strong> <a href="https://instagram.com/" target="_blank" rel="noopener">@richardsonfashion</a></div>
+        </div>
+        <p class="rf-note">
+          Walk-ins welcome. For weddings and groups, call ahead so he can block time and pull looks in your sizes.
+        </p>
+      </article>
+    </section>
+
+    <!-- ABOUT BLOCK -->
+    <section class="rf-card">
+      <h2>About Richardson Fashion</h2>
+      <p>
+        Richardson Fashion is a neighborhood suit shop built on respect — for the customer, for the craft,
+        and for how you show up. Whether you’re stepping into court, church, or the reception,
+        the goal is the same: you leave sharper than you walked in.
+      </p>
+      <p>
+        Tailored fits, honest guidance, and no pressure. If it doesn’t look right, he’ll tell you.
+      </p>
+    </section>
+  </main>
+
+  <!-- FOOTER SLOT -->
+  <div id="footer-placeholder"></div>
+</body>
+</html>
