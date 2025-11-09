@@ -265,7 +265,7 @@
   <!-- FOOTER SLOT -->
   <div id="footer-placeholder"></div>
 
-  <!-- Pull in shared nav/footer from /public -->
+  <!-- Pull in shared nav/footer from root -->
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
 
@@ -282,13 +282,31 @@
             slot.innerHTML = html;
             slot.classList.add("fade-in");
           }
+          return slot;
         } catch (err) {
           console.warn("Partial failed:", url, err);
+          return null;
         }
       }
 
-      await inject("/public/nav/index.html", "nav-placeholder");
-      await inject("/public/footer/index.html", "footer-placeholder");
+      // NAV from /nav
+      const nav = await inject("/nav/index.html", "nav-placeholder");
+      if (nav) {
+        const current = location.pathname.replace(/\/+$/, "") || "/";
+        nav.querySelectorAll("a[href]").forEach(a => {
+          try {
+            const href = new URL(a.getAttribute("href"), location.origin)
+              .pathname.replace(/\/+$/, "") || "/";
+            if (href === current || (href !== "/" && current.startsWith(href))) {
+              a.classList.add("is-active");
+              a.setAttribute("aria-current", "page");
+            }
+          } catch {}
+        });
+      }
+
+      // FOOTER from /footer
+      await inject("/footer/index.html", "footer-placeholder");
     })();
   </script>
 </body>
