@@ -1,360 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script defer src="/scripts/ga.js"></script>
-
-
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Order Confirmed — Square Bidness</title>
-  <link rel="stylesheet" href="styles/style.css" />
-
-  <!-- OG -->
-  <meta name="description" content="Order confirmed. View your Square Bidness receipt." />
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Square Bidness">
-  <meta property="og:title" content="Order Confirmed — Square Bidness">
-  <meta property="og:description" content="Order confirmed. View your Square Bidness receipt.">
-  <meta property="og:url" content="https://squarebidness.com/thank-you.html">
-  <meta property="og:image" content="https://squarebidness.com/assets/og-square-bidness.png">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Thank You — Payment Confirmed</title>
+  <meta name="robots" content="noindex" />
   <meta name="theme-color" content="#000000" />
-  <link rel="icon" href="/favicon.ico" sizes="any">
-  <link rel="manifest" href="/site.webmanifest">
-
-
-  <!-- Load Nav + Footer -->
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      fetch("nav.html").then(r => r.text()).then(d => { document.getElementById("nav-placeholder").innerHTML = d; });
-      fetch("footer.html").then(r => r.text()).then(d => { document.getElementById("footer-placeholder").innerHTML = d; });
-    });
-  </script>
-<!-- In <head> if your API is NOT on /api/checkout-session -->
-<script>
-  // Example: Render
-  window.SB_API = "https://sb-checkout-server.onrender.com/api/checkout-session";
-</script>
-
+  <link rel="canonical" href="https://www.squarebidness.com/thank-you/" />
+  <style>
+    body{margin:0;background:#0a0a0a;color:#fff;font-family:system-ui,Segoe UI,Roboto,Inter,sans-serif}
+    .wrap{max-width:880px;margin:0 auto;padding:28px}
+    .card{background:#121212;border:1px solid #222;border-radius:16px;padding:22px}
+    .muted{color:#bdbdbd}
+    .btn{display:inline-block;margin-top:14px;padding:12px 16px;border-radius:12px;background:#fff;color:#000;font-weight:700;text-decoration:none}
+    code{background:#0f0f0f;padding:2px 6px;border-radius:6px;border:1px solid #222}
+  </style>
 </head>
-<body class="theme-dark" id="top">
-  <!-- NAV -->
-  <div id="nav-placeholder"></div>
-
-  <!-- HERO -->
-  <header class="page-hero">
-    <div class="container">
-      <h1 class="page-title">Thank You</h1>
-      <p class="page-subtitle">Your order has been confirmed</p>
-    </div>
-  </header>
-
-  <!-- MAIN -->
-  <main class="section">
-    <div class="container" style="max-width:900px">
-      <div id="confirmed" style="display:none;">
-        <p id="order-meta" style="opacity:.9; margin-bottom:1rem;"></p>
-
-        <table class="cart-table">
-          <thead>
-            <tr>
-              <th style="text-align:left;">Item</th>
-              <th>Price</th>
-              <th>Qty</th>
-              <th>Line</th>
-            </tr>
-          </thead>
-          <tbody id="receipt-items"></tbody>
-        </table>
-
-        <div class="summary" style="margin-top:1.25rem">
-          <table>
-            <tr>
-              <td>Subtotal</td>
-              <td class="right" id="r-subtotal">$0.00</td>
-            </tr>
-            <tr id="r-discount-row" style="display:none">
-              <td class="discount-code-label">Discount</td>
-              <td class="right" id="r-discount">-$0.00</td>
-            </tr>
-            <tr>
-              <td>Tax (9.45%)</td>
-              <td class="right" id="r-tax">$0.00</td>
-            </tr>
-            <tr class="total">
-              <td>Total</td>
-              <td class="right" id="r-total">$0.00</td>
-            </tr>
-          </table>
-
-          <div style="display:flex; gap:.5rem; margin-top:1rem;">
-            <button class="btn btn--ghost" onclick="window.print()">Print Receipt</button>
-            <a class="btn btn--gold" href="shop.html">Continue Shopping</a>
-          </div>
-        </div>
-      </div>
-
-      <div id="empty" style="display:none; text-align:center; padding:2rem;">
-        <p style="opacity:.85">We couldn’t find your order details. If you reached this page from a bookmark, please return to the shop.</p>
-        <a class="btn btn--ghost" href="shop.html">Back to Shop</a>
-      </div>
+<body>
+  <main class="wrap">
+    <h1>Thanks — your order is in.</h1>
+    <div class="card">
+      <p>We’ve received your payment and we’re getting things ready.</p>
+      <p class="muted">If you used a card, the charge will appear from <strong>Square Bidness</strong>.</p>
+      <p class="muted">Order ref (if present): <code id="ref">(loading…)</code></p>
+      <a class="btn" href="/">Back to Home</a>
     </div>
   </main>
 
-  <!-- FOOTER -->
-  <div id="footer-placeholder"></div>
-
   <script>
-  (function() {
-    // Must match your site
-    const CART_KEY   = 'sb_cart';
-    const COUPON_KEY = 'sb_coupon';
-    const LAST_ORDER_KEY = 'sb_last_order';
-    const TAX_RATE = 0.0945;
-
-    const moneyFmt = new Intl.NumberFormat('en-US', { style:'currency', currency:'USD' });
-    const money = n => moneyFmt.format(Number(n || 0));
-
-    const qs = new URLSearchParams(location.search);
-    const sessionId = qs.get('session_id'); // Stripe success_url can append this
-
-    // Guard to avoid duplicate GA purchase
-    function markPurchaseFired(orderId) {
-      sessionStorage.setItem('sb_purchase_fired_' + orderId, '1');
-    }
-    function hasFired(orderId) {
-      return sessionStorage.getItem('sb_purchase_fired_' + orderId) === '1';
-    }
-
-    async function maybeFetchFromServer(sessionId) {
-      // Optional: if your server exposes a retrieve endpoint, uncomment & adapt:
-      // const url = `https://sb-checkout-server.onrender.com/retrieve-session?session_id=${encodeURIComponent(sessionId)}`;
-      // const r = await fetch(url);
-      // if (!r.ok) throw new Error('retrieve failed');
-      // return r.json();
-      return null; // noop if not available
-    }
-
-    function renderReceipt(order) {
-      const confirmed = document.getElementById('confirmed');
-      const empty = document.getElementById('empty');
-      const itemsEl = document.getElementById('receipt-items');
-
-      if (!order || !Array.isArray(order.items) || !order.items.length) {
-        empty.style.display = '';
-        return;
-      }
-
-      confirmed.style.display = '';
-      document.getElementById('order-meta').textContent =
-        `Order #${order.orderId} • ${new Date(order.createdAt || Date.now()).toLocaleString()}`;
-
-      itemsEl.innerHTML = order.items.map(i => {
-        const line = Number(i.price || 0) * Number(i.qty || 1);
-        return `
-          <tr>
-            <td>
-              <img src="${i.image || ''}" alt="" style="width:54px;height:54px;object-fit:cover;border-radius:6px;vertical-align:middle;margin-right:.5rem">
-              ${i.name}
-            </td>
-            <td>${money(i.price)}</td>
-            <td>${i.qty}</td>
-            <td>${money(line)}</td>
-          </tr>
-        `;
-      }).join('');
-
-      document.getElementById('r-subtotal').textContent = money(order.subtotal);
-      document.getElementById('r-tax').textContent = money(order.tax);
-      document.getElementById('r-total').textContent = money(order.total);
-
-      const discRow = document.getElementById('r-discount-row');
-      const discEl  = document.getElementById('r-discount');
-      if (order.discount && order.discount > 0) {
-        discRow.style.display = '';
-        discEl.textContent = `-${money(order.discount)}`;
-        const label = discRow.querySelector('.discount-code-label');
-        if (label) label.textContent = `Discount${order.coupon ? ' ('+order.coupon+')' : ''}`;
-      } else {
-        discRow.style.display = 'none';
-      }
-    }
-
-    function fireGA(order) {
-      if (!order || hasFired(order.orderId)) return;
-
-      try {
-        if (typeof gtag === 'function') {
-          gtag('event', 'purchase', {
-            transaction_id: order.orderId,
-            currency: 'USD',
-            value: order.total,
-            tax: order.tax,
-            shipping: order.shipping || 0,
-            coupon: order.coupon || undefined,
-            items: order.items.map(i => ({
-              item_id: i.id,
-              item_name: i.name,
-              price: Number(i.price) || 0,
-              quantity: Number(i.qty) || 1
-            }))
-          });
-        }
-        markPurchaseFired(order.orderId);
-      } catch (e) {
-        console.warn('GA purchase not sent:', e);
-      }
-    }
-
-    function clearCartNow() {
-      // Clear after rendering/firing GA so a reload doesn't double-fire
-      try { localStorage.removeItem(CART_KEY); } catch(_){}
-      try { localStorage.removeItem(COUPON_KEY); } catch(_){}
-    }
-
-    function buildOrderFromCartSnapshot() {
-      // Use sessionStorage snapshot if present
-      try {
-        const raw = sessionStorage.getItem(LAST_ORDER_KEY);
-        if (!raw) return null;
-        return JSON.parse(raw);
-      } catch { return null; }
-    }
-
-    function computeIfNeeded(order) {
-      if (!order) return null;
-      // Ensure numbers are computed in case snapshot was partial
-      const subtotal = order.items.reduce((s, i) => s + (Number(i.price||0) * Number(i.qty||1)), 0);
-      const discount = Number(order.discount || 0);
-      const tax = (subtotal - discount) * TAX_RATE;
-      const total = (subtotal - discount + tax);
-      return {
-        ...order,
-        subtotal, discount, tax, total
-      };
-    }
-
-    (async function init() {
-      // 1) Prefer client snapshot
-      let order = buildOrderFromCartSnapshot();
-
-      // 2) If absent, optionally fetch from server using session_id
-      if (!order && sessionId) {
-        try {
-          const data = await maybeFetchFromServer(sessionId);
-          if (data) {
-            order = {
-              orderId: data.id || sessionId,
-              createdAt: Date.now(),
-              items: (data.items || []).map(x => ({
-                id: x.id, name: x.name, price: x.price, qty: x.qty, image: x.image || ''
-              })),
-              coupon: data.coupon || null,
-              shipping: data.shipping || 0,
-              subtotal: data.subtotal,
-              discount: data.discount || 0,
-              tax: data.tax,
-              total: data.total
-            };
-          }
-        } catch (e) {
-          console.warn('Could not retrieve session details:', e);
-        }
-      }
-
-      // 3) Compute/validate totals and render
-      order = computeIfNeeded(order);
-      if (!order) {
-        document.getElementById('empty').style.display = '';
-        return;
-      }
-
-      renderReceipt(order);
-      fireGA(order);
-
-      // 4) Clean up
-      clearCartNow();
-      // Clear snapshot so reload doesn't re-fire
-      sessionStorage.removeItem(LAST_ORDER_KEY);
-    })();
-  })();
+    // Show the Stripe Checkout Session ID if Stripe appended it
+    const p = new URLSearchParams(location.search);
+    const id = p.get('session_id') || p.get('order_id') || p.get('ref');
+    if (id) document.getElementById('ref').textContent = id;
+    else document.getElementById('ref').textContent = 'N/A';
   </script>
-<!-- ==== Google Customer Reviews Opt-in (Square Bidness) ==== -->
-<script>
-  // ---- Feature flag (flip to false to disable without removing code) ----
-  const GCR_ENABLED = true;
-
-  // ---- API endpoint: by default expect a path on your domain (/api/checkout-session).
-  // If your server is elsewhere (Render, etc.), set window.SB_API in <head>:
-  //   <script>window.SB_API = "https://YOUR-SERVER/api/checkout-session"</script>
-  const CHECKOUT_SESSION_API =
-    (typeof window.SB_API === "string" && window.SB_API) || "/api/checkout-session";
-
-  // ---- Helper: robust YYYY-MM-DD formatter ----
-  function fmtYYYYMMDD(date) {
-    const d = new Date(date);
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${y}-${m}-${day}`;
-  }
-
-  // ---- Render the GCR opt-in (called once we have order data) ----
-  function renderGcrOptIn(order) {
-    if (!GCR_ENABLED) return;
-    if (!window.gapi) return;
-    window.gapi.load("surveyoptin", function () {
-      const payload = {
-        merchant_id: 5344711433,                 // Square Bidness GCR merchant ID
-        order_id: order.order_id,                // Stripe session id or your order #
-        email: order.email,                      // buyer email
-        delivery_country: order.country || "US", // ISO-2 code: US, CA, etc.
-        estimated_delivery_date: order.estimated_delivery_date
-      };
-      if (Array.isArray(order.products) && order.products.length) {
-        payload.products = order.products.map(gtin => ({ gtin }));
-      }
-      window.gapi.surveyoptin.render(payload);
-    });
-  }
-
-  // Google calls this when platform.js loads
-  window.renderOptIn = function () {
-    if (window.__GCR_ORDER__) renderGcrOptIn(window.__GCR_ORDER__);
-  };
-
-  // ---- Bootstrap: fetch Stripe session and prepare order payload ----
-  (async function initGCR() {
-    try {
-      const sid = new URLSearchParams(location.search).get("session_id");
-      if (!sid) return; // nothing to do if we didn't come from Stripe
-
-      const url = `${CHECKOUT_SESSION_API}?session_id=${encodeURIComponent(sid)}`;
-      const res = await fetch(url, { credentials: "omit" });
-      if (!res.ok) throw new Error("Session lookup failed");
-      const data = await res.json();
-
-      // VSOP preorder fixed date (adjust if you change your ship date)
-      const estimated = "2025-11-01";
-
-      window.__GCR_ORDER__ = {
-        order_id: data.order_id || sid,
-        email: data.email || "",
-        country: data.country || "US",
-        estimated_delivery_date: estimated,
-        // products: ["0123456789012"] // add GTINs later if you want product ratings
-      };
-
-      // If Google library is already ready, render now
-      if (window.gapi && window.gapi.load) renderGcrOptIn(window.__GCR_ORDER__);
-    } catch (err) {
-      console.warn("GCR init skipped:", err);
-    }
-  })();
-</script>
-
-<!-- Load Google's platform.js (triggers window.renderOptIn when ready) -->
-<script src="https://apis.google.com/js/platform.js?onload=renderOptIn" async defer></script>
-<!-- ==== /Google Customer Reviews Opt-in ==== -->
-
 </body>
 </html>
