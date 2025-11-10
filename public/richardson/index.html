@@ -469,42 +469,21 @@
     </section>
   </main>
 
-  <!-- MAIN FOOTER -->
-  <div id="footer-placeholder"></div>
+ <!-- FOOTER -->
+<footer class="sb-footer" style="background:#0b0b0b;border-top:1px solid #1a1a1a;padding:2.2rem 1rem;text-align:center;">
+  <div class="container" style="max-width:1000px;margin:0 auto;">
+    <p style="color:#a1a1aa;font-size:.9rem;line-height:1.6;">
+      © <span id="year"></span> <strong>Square Bidness Tech Lab</strong>
+      <a href="/linkme/" style="color:#c9a227;text-decoration:underline;font-weight:600;">Link Me</a> ·
+      <a href="/privacy/" style="color:#c9a227;text-decoration:underline;font-weight:600;">Privacy</a> ·
+    </p>
+  </div>
+</footer>
 
-  <!-- TECH LAB CREDIT (partial already exists) -->
-  <div id="credit-placeholder"></div>
+<script>
+  // dynamic year
+  document.getElementById("year").textContent = new Date().getFullYear();
+</script>
 
-  <!-- Nav / footer injector -->
-  <script>
-  (async () => {
-    const bust = `?v=${Date.now()}`;
-
-    async function inject(url, id) {
-      try {
-        const res = await fetch(url + bust, { credentials: "same-origin" });
-        if (!res.ok) return;
-        const html = await res.text();
-        const slot = document.getElementById(id);
-        if (slot) slot.innerHTML = html;
-      } catch (e) {
-        console.warn("Partial failed:", url, e);
-      }
-    }
-
-    await inject("/public/footer/index.html", "footer-placeholder");
-  })();
-  </script>
-
-  <!-- Tech Lab credit partial -->
-  <script>
-  document.addEventListener('DOMContentLoaded', async () => {
-    try {
-      const html = await fetch('/partials/credit.html', { cache: 'no-store' }).then(r => r.text());
-      const slot = document.getElementById('credit-placeholder');
-      if (slot) slot.innerHTML = html;
-    } catch {}
-  });
-  </script>
 </body>
 </html>
