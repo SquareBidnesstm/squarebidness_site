@@ -5,27 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Checkout Canceled — Square Bidness</title>
 
-  <!-- SEO / Social -->
   <link rel="canonical" href="https://www.squarebidness.com/cancel/" />
-  <meta name="description" content="Your checkout was canceled. Your cart is saved and you can complete your order anytime.">
+  <meta name="description" content="Your cart is saved. Items aren’t reserved—stock moves fast." />
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Square Bidness">
   <meta property="og:title" content="Checkout Canceled — Square Bidness">
-  <meta property="og:description" content="Your checkout was canceled. Your cart is saved and you can complete your order anytime.">
+  <meta property="og:description" content="Your cart is saved. Items aren’t reserved—finish checkout before it sells out." />
   <meta property="og:url" content="https://www.squarebidness.com/cancel/">
   <meta property="og:image" content="https://www.squarebidness.com/assets/sb-social-card_1200.jpg">
 
-  <!-- Icons / PWA -->
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="apple-touch-icon" href="/assets/icons/icon-180.png">
   <link rel="manifest" href="/site.webmanifest">
   <meta name="theme-color" content="#000000">
 
-  <!-- Styles & GA -->
   <link rel="stylesheet" href="/styles/style.css" />
   <script defer src="/scripts/ga.js"></script>
 
-  <!-- Inject Nav + Footer -->
   <script>
     document.addEventListener("DOMContentLoaded", async () => {
       const bust = `?v=${Date.now()}`;
@@ -39,31 +35,29 @@
       await inject("/nav/index.html", "nav-placeholder");
       await inject("/footer/index.html", "footer-placeholder");
 
-      // Optional reason display from ?reason=
+      // Optional reason from ?reason=
       const params = new URLSearchParams(location.search);
       const reason = params.get("reason");
       if (reason) {
         const box = document.getElementById("cancel-reason");
         const text = document.querySelector(".reason-text");
-        if (box && text) {
-          text.textContent = `Cancellation reason: ${reason}`;
-          box.style.display = "block";
-        }
+        if (box && text) { text.textContent = reason; box.style.display = "block"; }
       }
     });
   </script>
 
   <style>
-    .page-hero{padding:28px 0;border-bottom:1px solid #1f1f1f}
-    .cancel-message{margin-top:18px}
+    .page-hero{padding:24px 0;border-bottom:1px solid #1f1f1f}
+    .cancel-wrap{margin-top:18px}
     .status-badge{display:inline-block;border-radius:10px;padding:.4rem .6rem;font-weight:700}
     .status-badge--warning{background:#2a1c00;border:1px solid #4a3500;color:#ffd166}
-    .cancel-actions{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:10px}
-    .cancel-help{margin-top:18px;border-top:1px solid #1f1f1f;padding-top:12px}
-    .suggested-products{margin-top:26px}
+    .tight{max-width:700px}
+    .cancel-actions{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:12px}
+    .suggested-products{margin-top:22px}
     .product-suggestions{display:flex;gap:.8rem;flex-wrap:wrap}
     .suggestion-item{display:inline-flex;flex-direction:column;gap:.4rem;border:1px solid #1f1f1f;border-radius:12px;padding:.6rem;max-width:180px}
     .suggestion-item img{width:100%;border-radius:8px;border:1px solid #1f1f1f}
+    .muted{color:#bdbdbd}
   </style>
 </head>
 
@@ -71,48 +65,36 @@
   <!-- NAV -->
   <div id="nav-placeholder"></div>
 
-  <!-- PAGE HERO -->
+  <!-- HERO -->
   <header class="page-hero">
     <div class="container">
       <h1 class="page-title">Checkout Canceled</h1>
-      <p class="page-subtitle">No worries — your cart is saved and ready when you are.</p>
+      <p class="page-subtitle">Cart saved — items aren’t reserved. Stock moves fast.</p>
     </div>
   </header>
 
-  <!-- MAIN CONTENT -->
+  <!-- MAIN -->
   <main class="section">
     <div class="container">
-      <div class="cancel-message">
-        <div class="status-badge status-badge--warning">⚠️ Checkout Canceled</div>
+      <div class="cancel-wrap tight">
+        <div class="status-badge status-badge--warning">⚠️ Heads up</div>
 
-        <div class="cancel-content">
-          <h2>Your items are still in your cart</h2>
-          <p class="cancel-description">
-            Return to your cart to complete checkout or continue shopping. Your selected items and sizes are saved.
-          </p>
+        <h2>Finish checkout while it’s in stock</h2>
+        <p class="muted">Jump back in now to lock your size before it’s gone.</p>
 
-          <!-- Optional reason display -->
-          <div id="cancel-reason" class="cancel-reason" style="display:none;">
-            <p class="reason-text"></p>
-          </div>
+        <!-- Optional reason -->
+        <div id="cancel-reason" class="muted" style="display:none;margin-top:6px">
+          <strong>Reason:</strong> <span class="reason-text"></span>
+        </div>
 
-          <!-- Action buttons -->
-          <div class="cancel-actions">
-            <a class="btn btn--gold" href="/cart/">Return to Cart</a>
-            <a class="btn btn--ghost" href="/shop/">Continue Shopping</a>
-          </div>
-
-          <!-- Help -->
-          <div class="cancel-help">
-            <h3>Need Help?</h3>
-            <p>If you experienced issues during checkout, email us and we’ll help you complete your order.</p>
-            <a href="mailto:hello@squarebidness.com" class="btn btn--ghost btn--small">Contact Support</a>
-          </div>
+        <div class="cancel-actions">
+          <a class="btn btn--gold" href="/cart/">Return to Cart</a>
+          <a class="btn btn--ghost" href="/shop/">Continue Shopping</a>
         </div>
       </div>
 
-      <!-- Related products -->
-      <div class="suggested-products">
+      <!-- Suggestions -->
+      <div class="suggested-products tight">
         <h3>You might also like</h3>
         <div class="product-suggestions">
           <a href="/product-vsop-jacket/" class="suggestion-item">
