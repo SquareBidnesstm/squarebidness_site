@@ -52,6 +52,13 @@
     }]
   }
   </script>
+
+  <style>
+    .cart-line{display:flex;gap:.75rem;align-items:center;border:1px solid #1f1f1f;border-radius:10px;padding:.5rem .75rem;margin:.4rem 0}
+    .cart-line img{width:56px;height:56px;object-fit:cover;border-radius:8px;border:1px solid #1f1f1f}
+    .muted{color:#bdbdbd}
+    .cta-row{display:flex;gap:.6rem;flex-wrap:wrap}
+  </style>
 </head>
 <body class="theme-dark">
   <!-- NAV -->
@@ -62,6 +69,7 @@
       <h1>Your Cart</h1>
       <div id="cart"></div>
       <div class="cta-row" style="margin-top:1rem">
+        <!-- If you use Stripe Payment Links, point this directly to the link -->
         <a class="btn btn--gold" id="checkout" href="/checkout/">Proceed to Checkout</a>
         <a class="btn btn--ghost" href="/shop/">Continue Shopping</a>
       </div>
@@ -74,53 +82,26 @@
   <script>
   (async () => {
     const bust = `?v=${Date.now()}`;
-
-    async function inject(url, slotId) {
+    async function inject(url, id) {
       try {
-        const res = await fetch(url + bust, { cache: "no-store", credentials: "same-origin" });
-        if (!res.ok) throw new Error("HTTP " + res.status);
-        const html = await res.text();
-        const slot = document.getElementById(slotId);
-        if (slot) {
-          slot.innerHTML = html;
-          slot.classList.add("fade-in");
-        }
-        return slot;
-      } catch (err) {
-        console.warn("Partial failed:", url, err);
-        return null;
-      }
+        const r = await fetch(url + bust, { cache:"no-store", credentials:"same-origin" });
+        if (!r.ok) return;
+        document.getElementById(id).innerHTML = await r.text();
+      } catch {}
     }
-
-    // inject nav/footer (no /public prefix — these live under /public in the repo)
     const nav = await inject("/nav/index.html", "nav-placeholder");
-    if (nav) {
-      const current = location.pathname.replace(/\/+$/, "") || "/";
-      nav.querySelectorAll("a[href]").forEach(a => {
-        try {
-          const href = new URL(a.getAttribute("href"), location.origin)
-            .pathname.replace(/\/+$/, "") || "/";
-          if (href === current || (href !== "/" && current.startsWith(href))) {
-            a.classList.add("is-active");
-            a.setAttribute("aria-current", "page");
-          }
-        } catch {}
-      });
-    }
-
     await inject("/footer/index.html", "footer-placeholder");
 
-    // CART RENDER
+    // Render cart from localStorage
     const el = document.getElementById("cart");
     const cart = JSON.parse(localStorage.getItem("sb_cart_v1") || "[]");
     if (!cart.length) {
       el.innerHTML = '<p class="muted">Your cart is empty.</p>';
       return;
     }
-
     const rows = cart.map(it => `
-      <div class="cart-line" style="display:flex;gap:.75rem;align-items:center;border:1px solid #1f1f1f;border-radius:10px;padding:.5rem .75rem;margin:.4rem 0">
-        ${it.image ? `<img src="${it.image}" alt="" style="width:56px;height:56px;object-fit:cover;border-radius:8px" />` : ``}
+      <div class="cart-line">
+        ${it.image ? `<img src="${it.image}" alt="">` : ``}
         <div style="flex:1">
           <div><strong>${it.name || it.sku || it.id}</strong></div>
           <div class="muted">$${Number(it.price||0).toFixed(2)} × ${Number(it.quantity||it.qty||1)}</div>
@@ -128,9 +109,7 @@
         <div><strong>$${(Number(it.price||0) * Number(it.quantity||it.qty||1)).toFixed(2)}</strong></div>
       </div>
     `).join("");
-
     const total = cart.reduce((n, it) => n + Number(it.price||0) * Number(it.quantity||it.qty||1), 0);
-
     el.innerHTML = rows + `<p style="text-align:right;margin-top:.5rem"><strong>Total: $${total.toFixed(2)}</strong></p>`;
   })();
   </script>
