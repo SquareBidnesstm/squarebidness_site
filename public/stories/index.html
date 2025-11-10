@@ -238,10 +238,33 @@
       border-color:#c9a227;
       background:#1a1a1a;
     }
+    .btn-buy[style*="pointer-events:none"]{
+      opacity:.5;
+    }
     .story-meta{
       font-size:.75rem;
       color:#6b7280;
       line-height:1.2;
+    }
+    .size-selector{
+      display:flex;
+      gap:.5rem;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .size-selector select{
+      padding:.5rem .75rem;
+      border-radius:8px;
+      background:#121212;
+      color:#fff;
+      border:1px solid #2a2a2a;
+      font-size:.85rem;
+      min-width:100px;
+    }
+    .size-note{
+      font-size:.7rem;
+      color:#6b7280;
+      margin:.25rem 0 0;
     }
   </style>
 </head>
@@ -282,8 +305,27 @@
 
         <div class="story-card__cta-row">
           <a class="btn-read" href="/blog/supima/">Read Story →</a>
-          <a class="btn-buy" href="https://buy.stripe.com/aFaaEXcS366d7U11cI8N20l">Get Liberty Tee — $35</a>
         </div>
+
+        <div class="size-selector">
+          <label for="story-size" style="font-size:.85rem;color:#9ca3af;font-weight:600">Size:</label>
+          <select id="story-size" name="size">
+            <option value="">Select…</option>
+            <option value="XS">XS — In Stock</option>
+            <option value="S">S — In Stock</option>
+            <option value="M" disabled>M — Sold Out</option>
+            <option value="L" disabled>L — Sold Out</option>
+            <option value="XL">XL — In Stock</option>
+            <option value="2X">2X — In Stock</option>
+            <option value="3X">3X — In Stock</option>
+          </select>
+          <a id="story-checkout" class="btn-buy"
+             href="#"
+             style="pointer-events:none;opacity:.5">
+            Checkout
+          </a>
+        </div>
+        <p id="story-size-note" class="size-note">Select a size to checkout.</p>
 
         <div class="story-meta">
           Oct 2025 · 3 min read
@@ -335,6 +377,50 @@
 
     // FOOTER
     await inject("/footer/index.html", "footer-placeholder");
+  })();
+  </script>
+
+  <!-- Size-specific Stripe checkout -->
+  <script>
+  (function(){
+    // Map sizes to individual Stripe Payment Links
+    const STRIPE_LINKS = {
+      XS: "https://buy.stripe.com/3cI3cvbNZ0LTdel08E8N20q",
+      S:  "https://buy.stripe.com/dRm14n3htamt7U108E8N20p",
+      M:  "", // sold out
+      L:  "", // sold out
+      XL: "https://buy.stripe.com/eVq5kDg4f1PXb6ddZu8N20m",
+      "2X": "https://buy.stripe.com/28EbJ119l66dfmtbRm8N20o",
+      "3X": "https://buy.stripe.com/14A28rg4f0LT0rz3kQ8N20n"
+    };
+
+    const sizeSelect = document.getElementById("story-size");
+    const checkoutBtn = document.getElementById("story-checkout");
+    const sizeNote = document.getElementById("story-size-note");
+
+    function updateCheckout() {
+      const size = sizeSelect.value;
+      const url = STRIPE_LINKS[size] || "";
+
+      if (url) {
+        checkoutBtn.href = url;
+        checkoutBtn.style.pointerEvents = "auto";
+        checkoutBtn.style.opacity = "1";
+        sizeNote.textContent = `Size ${size} selected. Click to checkout.`;
+      } else if (size) {
+        checkoutBtn.href = "#";
+        checkoutBtn.style.pointerEvents = "none";
+        checkoutBtn.style.opacity = ".5";
+        sizeNote.textContent = `${size} is sold out. Choose another size.`;
+      } else {
+        checkoutBtn.href = "#";
+        checkoutBtn.style.pointerEvents = "none";
+        checkoutBtn.style.opacity = ".5";
+        sizeNote.textContent = "Select a size to checkout.";
+      }
+    }
+
+    sizeSelect.addEventListener("change", updateCheckout);
   })();
   </script>
 
