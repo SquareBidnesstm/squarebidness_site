@@ -75,33 +75,31 @@
       </div>
     </section>
 
-    <!-- BUY BAR -->
-    <section class="liberty-buybar" id="order">
-      <div class="liberty-buybar__left">
-        <h2>Liberty Tee — Supima Cotton</h2>
-        <p>Small batch. Shot on location in New York. Ships from Louisiana.</p>
-      </div>
-      <div class="liberty-buybar__right">
-        <label class="sr-only" for="liberty-size">Select size</label>
-        <select id="liberty-size" name="size">
+    <!-- BUY CARD WITH SIZE-SPECIFIC STRIPE LINKS -->
+    <section class="buy-card" id="order" style="max-width:720px;margin:3rem auto;padding:1.5rem;border:1px solid #1f1f1f;border-radius:16px;background:#0f0f0f;color:#fff">
+      <h2 style="margin:0 0 0.5rem;font-size:1.25rem;font-weight:700">Liberty Tee — Supima Cotton</h2>
+      <p style="margin:0 0 1rem;color:#bdbdbd;font-size:0.9rem">Small batch. Shot in New York. Ships from Louisiana. $35 per tee.</p>
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:center;margin-bottom:1rem">
+        <label for="liberty-size" style="font-size:0.9rem;color:#bdbdbd;font-weight:600">Size</label>
+        <select id="liberty-size" name="size" style="padding:0.75rem 1rem;border-radius:10px;background:#121212;color:#fff;border:1px solid #222;font-size:1rem;min-width:120px">
           <option value="">Select…</option>
           <option value="XS">XS — In Stock</option>
           <option value="S">S — In Stock</option>
-          <option value="M">M — Sold Out</option>
-          <option value="L">L — Sold Out</option>
+          <option value="M" disabled>M — Sold Out</option>
+          <option value="L" disabled>L — Sold Out</option>
           <option value="XL">XL — In Stock</option>
           <option value="2X">2X — In Stock</option>
           <option value="3X">3X — In Stock</option>
         </select>
-        <label class="sr-only" for="liberty-qty">Quantity</label>
-        <input id="liberty-qty" name="qty" type="number" min="1" value="1" />
-        <a
-          id="liberty-checkout"
-          class="btn btn--gold"
-          href="https://buy.stripe.com/cNi00j8BNcuB5LT3kQ8N20g">
-          Checkout
+        <a id="liberty-checkout" class="btn btn--gold"
+           href="#"
+           style="pointer-events:none;opacity:.5;padding:0.75rem 1.25rem;border-radius:12px;background:#c9a227;color:#111;font-weight:700;text-decoration:none;border:1px solid #c9a227;box-shadow:0 8px 20px rgba(201,162,39,.4)">
+          Checkout Securely
         </a>
       </div>
+      <p id="liberty-size-note" style="margin:0;color:#9e9e9e;font-size:0.85rem">
+        Select a size to continue.
+      </p>
     </section>
 
     <!-- IMAGE GRID (3, 4, 7) -->
@@ -195,25 +193,47 @@
     })();
   </script>
 
-  <!-- Sync checkout -->
+  <!-- Size-specific Stripe checkout -->
   <script>
   (function(){
-    const sizeEl = document.getElementById("liberty-size");
-    const qtyEl  = document.getElementById("liberty-qty");
-    const btn    = document.getElementById("liberty-checkout");
-    const BASE   = "https://buy.stripe.com/cNi00j8BNcuB5LT3kQ8N20g";
+    // Map sizes to individual Stripe Payment Links
+    const STRIPE_LINKS = {
+      XS: "https://buy.stripe.com/3cI3cvbNZ0LTdel08E8N20q",
+      S:  "https://buy.stripe.com/dRm14n3htamt7U108E8N20p",
+      M:  "", // sold out
+      L:  "", // sold out
+      XL: "https://buy.stripe.com/eVq5kDg4f1PXb6ddZu8N20m",
+      "2X": "https://buy.stripe.com/28EbJ119l66dfmtbRm8N20o",
+      "3X": "https://buy.stripe.com/14A28rg4f0LT0rz3kQ8N20n"
+    };
 
-    function updateLink() {
-      const size = sizeEl ? sizeEl.value : "";
-      const qty  = qtyEl ? Math.max(1, Number(qtyEl.value || 1)) : 1;
-      const qs   = new URLSearchParams();
-      if (size) qs.set("size", size);
-      if (qty)  qs.set("qty", qty);
-      btn.href = qs.toString() ? `${BASE}?${qs}` : BASE;
+    const sizeSelect = document.getElementById("liberty-size");
+    const checkoutBtn = document.getElementById("liberty-checkout");
+    const sizeNote = document.getElementById("liberty-size-note");
+
+    function updateCheckout() {
+      const size = sizeSelect.value;
+      const url = STRIPE_LINKS[size] || "";
+
+      if (url) {
+        checkoutBtn.href = url;
+        checkoutBtn.style.pointerEvents = "auto";
+        checkoutBtn.style.opacity = "1";
+        sizeNote.textContent = `Size ${size} selected. Click to checkout securely via Stripe.`;
+      } else if (size) {
+        checkoutBtn.href = "#";
+        checkoutBtn.style.pointerEvents = "none";
+        checkoutBtn.style.opacity = ".5";
+        sizeNote.textContent = `${size} is sold out. Choose another size.`;
+      } else {
+        checkoutBtn.href = "#";
+        checkoutBtn.style.pointerEvents = "none";
+        checkoutBtn.style.opacity = ".5";
+        sizeNote.textContent = "Select a size to continue.";
+      }
     }
 
-    if (sizeEl) sizeEl.addEventListener("change", updateLink);
-    if (qtyEl) qtyEl.addEventListener("input", updateLink);
+    sizeSelect.addEventListener("change", updateCheckout);
   })();
   </script>
 
@@ -248,58 +268,6 @@
       }
       .liberty-hero__inner {
         padding: 1.5rem 1rem;
-      }
-    }
-
-    /* Liberty buybar - uses your existing form styles */
-    .liberty-buybar {
-      display: flex;
-      gap: 2rem;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1.5rem 2rem;
-      background: #0e0e0e;
-      border: 1px solid #1f1f1f;
-      border-radius: 16px;
-      margin: 3rem auto;
-      max-width: 1200px;
-    }
-
-    .liberty-buybar__left h2 {
-      font-size: 1.25rem;
-      margin: 0 0 0.5rem 0;
-      color: #fff;
-    }
-
-    .liberty-buybar__left p {
-      font-size: 0.9rem;
-      color: #aaa;
-      margin: 0;
-    }
-
-    .liberty-buybar__right {
-      display: flex;
-      gap: 1rem;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    @media (max-width: 880px) {
-      .liberty-buybar {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1.5rem;
-        padding: 1.25rem 1.5rem;
-      }
-      .liberty-buybar__right {
-        width: 100%;
-        flex-direction: column;
-        align-items: stretch;
-      }
-      .liberty-buybar__right select,
-      .liberty-buybar__right input,
-      .liberty-buybar__right a {
-        width: 100%;
       }
     }
 
@@ -416,6 +384,18 @@
       }
       .liberty-story p {
         font-size: 1rem;
+      }
+    }
+
+    /* Buy card mobile responsiveness */
+    @media (max-width: 600px) {
+      .buy-card > div {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+      }
+      .buy-card select,
+      .buy-card a {
+        width: 100% !important;
       }
     }
   </style>
