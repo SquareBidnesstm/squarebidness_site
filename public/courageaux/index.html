@@ -15,7 +15,7 @@
   <link rel="icon" type="image/png" sizes="16x16" href="/courageaux/assets/favicon-16.png" />
   <link rel="apple-touch-icon" href="/courageaux/assets/icon_180.png" />
 
-  <!-- Open Graph -->
+  <!-- Social -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Square Bidness" />
   <meta property="og:title" content="Courageaux Aesthetics — November Spotlight" />
@@ -24,18 +24,19 @@
   <meta property="og:image" content="https://www.squarebidness.com/courageaux/assets/amari_hero_1200x630.jpg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-
-  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Courageaux Aesthetics — Amari Wilford — Esthetician — November Spotlight" />
   <meta name="twitter:description" content="Clean, calm, confident skin. New client consults open • Hammond • Ponchatoula • Albany and surrounding areas." />
   <meta name="twitter:image" content="https://www.squarebidness.com/courageaux/assets/amari_hero_1200x630.jpg" />
 
+  <!-- Preload hero for snappy LCP -->
+  <link rel="preload" as="image"
+        href="/courageaux/assets/amari_800.jpg"
+        imagesrcset="/courageaux/assets/amari_800.jpg 800w, /courageaux/assets/amari_1200.jpg 1200w"
+        imagesizes="(min-width:900px) 48vw, 100vw">
+
   <style>
-    :root{
-      --bg:#0b0b0b; --fg:#fff; --muted:#bdbdbd; --soft:#121212;
-      --stroke:#1f1f1f; --gold:#c9a227;
-    }
+    :root{ --bg:#0b0b0b; --fg:#fff; --muted:#bdbdbd; --soft:#121212; --stroke:#1f1f1f; --gold:#c9a227; }
     *{box-sizing:border-box}
     html,body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,Segoe UI,Roboto,Arial}
     a{color:inherit}
@@ -46,7 +47,7 @@
     .btn--ghost{background:#0f0f0f;color:#fff;border:1px solid #2a2a2a}
     @media (hover:hover){ .btn:hover{opacity:.93} }
 
-    /* Hero (Pho-Matic style) */
+    /* Hero */
     .cx-hero{background:#0b0b0b;border-bottom:1px solid var(--stroke)}
     .cx-hero__inner{max-width:1200px;margin:0 auto;padding:18px 16px;display:grid;gap:18px;align-items:end}
     @media (min-width:900px){ .cx-hero__inner{grid-template-columns:1.05fr .95fr;gap:22px;padding:24px 16px} }
@@ -62,10 +63,20 @@
     .cx-hero__copy p{margin:.4rem 0;color:#d7dae0}
     .cx-hero__meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:.6rem}
 
-    .cx-hero__media picture, .cx-hero__media img{display:block;width:100%}
+    .cx-hero__media picture,.cx-hero__media img{display:block;width:100%}
     .cx-hero__media img{
       height:auto;object-fit:cover;border-radius:14px;border:1px solid var(--stroke);
       filter:contrast(1.05) saturate(1.02)
+    }
+
+    /* Tighter hero */
+    .cx-hero--tight .cx-hero__inner{padding:12px 16px 16px;gap:16px;align-items:flex-start}
+    .cx-hero__copy{align-self:flex-start}
+    .cx-badge{margin-bottom:4px}
+    .cx-hero__copy h1{margin:.25rem 0 .25rem}
+    .cx-hero__copy p{margin:.2rem 0 .3rem}
+    @media (min-width:900px){
+      .cx-hero--tight .cx-hero__inner{padding:12px 16px 18px;gap:16px}
     }
 
     /* Intro / Bio */
@@ -85,141 +96,83 @@
     .prod-thumb{display:flex;align-items:center;gap:12px}
     .prod-thumb img{width:110px;height:110px;object-fit:cover;border-radius:12px;border:1px solid #2a2a2a;background:#fff}
     @media (min-width:760px){ .prod-thumb img{width:120px;height:120px} }
-    
-    /* Raise hero copy (tighter hero) */
-.cx-hero--tight .cx-hero__inner{
-  padding:12px 16px 16px;
-  gap:16px;
-  align-items:flex-start;
-}
-.cx-hero__copy{ align-self:flex-start; }
-.cx-badge{ margin-bottom:4px; }
-.cx-hero__copy h1{ margin:.25rem 0 .25rem; }
-.cx-hero__copy p{ margin:.2rem 0 .3rem; }
-@media (min-width:900px){
-  .cx-hero--tight .cx-hero__inner{
-    padding:12px 16px 18px;
-    gap:16px;
-  }
-}
-/* Her Words card */
-.quote-card{
-  background:#121212;border:1px solid #1f1f1f;border-radius:16px;
-  padding:16px;max-width:980px;margin:0 auto;
-}
-.quote-card blockquote{margin:0;font-size:1.02rem;line-height:1.65;color:#e9e9e9}
-.quote-card blockquote p{margin:.6rem 0}
-.quote-meta{margin-top:.8rem;color:#bdbdbd;font-size:.9rem}
 
-/* base badge (bright) */
-.quote-badge{
-  display:inline-flex;gap:8px;align-items:center;
-  background:#fff;color:#000;border:1px solid #e5e5e5;
-  border-radius:999px;padding:6px 10px;font-weight:800;font-size:.78rem;
-}
-
-/* optional outline variant (use class="quote-badge alt") */
-.quote-badge.alt{
-  background:transparent;color:#e9e9e9;border:1px solid #2a2a2a;
-}
-
-/* small screens */
-@media (max-width:640px){
-  .quote-card{padding:14px}
-  .quote-badge{font-size:.74rem;padding:5px 9px}
-}
-
+    /* Her Words card */
+    .quote-card{background:#121212;border:1px solid #1f1f1f;border-radius:16px;padding:16px;max-width:980px;margin:0 auto}
+    .quote-card blockquote{margin:0;font-size:1.02rem;line-height:1.65;color:#e9e9e9}
+    .quote-card blockquote p{margin:.6rem 0}
+    .quote-meta{margin-top:.8rem;color:#bdbdbd;font-size:.9rem}
+    .quote-badge{
+      display:inline-flex;gap:8px;align-items:center;
+      background:#fff;color:#000;border:1px solid #e5e5e5;
+      border-radius:999px;padding:6px 10px;font-weight:800;font-size:.78rem
+    }
+    /* Outline variant */
+    .quote-badge.alt{background:transparent;color:#e9e9e9;border:1px solid #2a2a2a}
 
     /* Footer credit */
     footer{background:#0b0b0b;border-top:1px solid var(--stroke)}
-    .credit-strip{
-      margin:0 auto;padding:10px 14px;border:1px solid var(--stroke);
-      border-radius:12px;background:#0e0e0e;color:#d7dae0;text-align:center;font-size:.9rem
+    .credit-strip{margin:0 auto;padding:10px 14px;border:1px solid var(--stroke);border-radius:12px;background:#0e0e0e;color:#d7dae0;text-align:center;font-size:.9rem}
+  </style>
+
+  <!-- Center hero copy vertically on desktop -->
+  <style>
+    @media (min-width:900px){
+      .cx-hero__inner{min-height:clamp(420px,60vw,560px);align-items:center}
+      .cx-hero__copy{align-self:center;margin-top:0}
+      .cx-hero__media{height:100%;display:flex}
+      .cx-hero__media img{height:100%;width:100%;object-fit:cover}
     }
   </style>
-  <!-- Center hero copy vertically (paste after your existing styles) -->
-<style>
-  /* Desktop: center copy in the hero */
-  @media (min-width: 900px) {
-    .cx-hero__inner{
-      /* give the hero real height so media + copy can center */
-      min-height: clamp(420px, 60vw, 560px);
-      align-items: center;           /* vertical center both columns */
-    }
-    .cx-hero__copy{
-      align-self: center;            /* make sure copy sits mid-height */
-      margin-top: 0;
-    }
-    .cx-hero__media{
-      height: 100%;
-      display: flex;
-    }
-    .cx-hero__media img{
-      height: 100%;
-      width: 100%;
-      object-fit: cover;             /* fill the column cleanly */
-    }
-  }
-  /* optional modifier */
-.quote-badge.alt{
-  background:transparent;
-  color:#e9e9e9;
-  border:1px solid #2a2a2a;
-}
-
-</style>
-
 </head>
 <body>
 
- <!-- HERO -->
-<header class="cx-hero cx-hero--tight">
-  <div class="cx-hero__inner">
-    <div class="cx-hero__copy">
-      <span class="cx-badge">
-        <img src="/courageaux/assets/logo_courageaux_black_400.png"
-     alt="Courageaux Aesthetics logo"
-     style="height:18px;width:auto;display:block;image-rendering:-webkit-optimize-contrast">
-        Courageaux Aesthetics · Hammond, LA
-      </span>
-      <h1>Clean, calm, confident skin.</h1>
-      <p>New client consults open • Hammond • Ponchatoula • Albany and surrounding areas.</p>
-      <div class="cx-hero__meta">
-        <a class="btn btn--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener">Book a facial</a>
-        <a class="btn btn--ghost" href="https://courageauxaesthetics.glossgenius.com/" target="_blank" rel="noopener">Homepage</a>
-        <a class="btn btn--ghost" href="https://instagram.com/courageuxaesthetics" target="_blank" rel="noopener">@courageuxaesthetics</a>
-        <button id="cxMapBtn" type="button" class="btn btn--ghost">View map</button>
+  <!-- HERO -->
+  <header class="cx-hero cx-hero--tight">
+    <div class="cx-hero__inner">
+      <div class="cx-hero__copy">
+        <span class="cx-badge">
+          <img src="/courageaux/assets/logo_courageaux_black_400.png"
+               alt="Courageaux Aesthetics logo"
+               style="height:18px;width:auto;display:block;image-rendering:-webkit-optimize-contrast">
+          Courageaux Aesthetics · Hammond, LA
+        </span>
+        <h1>Clean, calm, confident skin.</h1>
+        <p>New client consults open • Hammond • Ponchatoula • Albany and surrounding areas.</p>
+        <div class="cx-hero__meta">
+          <a class="btn btn--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener">Book a facial</a>
+          <a class="btn btn--ghost" href="https://courageauxaesthetics.glossgenius.com/" target="_blank" rel="noopener">Homepage</a>
+          <a class="btn btn--ghost" href="https://instagram.com/courageuxaesthetics" target="_blank" rel="noopener">@courageuxaesthetics</a>
+          <button id="cxMapBtn" type="button" class="btn btn--ghost" aria-expanded="false" aria-controls="cxMapWrap">View map</button>
+        </div>
+      </div>
+
+      <div class="cx-hero__media">
+        <picture>
+          <source srcset="/courageaux/assets/amari_1200.jpg" media="(min-width: 720px)" />
+          <img src="/courageaux/assets/amari_800.jpg"
+               alt="Courageaux Aesthetics — Amari Wilford"
+               width="1200" height="900"
+               sizes="(min-width:900px) 48vw, 100vw"
+               loading="eager" decoding="async" fetchpriority="high" />
+        </picture>
       </div>
     </div>
+  </header>
 
-    <div class="cx-hero__media">
-      <picture>
-  <source srcset="/courageaux/assets/amari_1200.jpg" media="(min-width: 720px)" />
-  <img
-    src="/courageaux/assets/amari_800.jpg"
-    alt="Courageaux Aesthetics — Amari Wilford"
-    width="1200" height="900"
-    sizes="(min-width:900px) 48vw, 100vw"
-    loading="eager" decoding="async" fetchpriority="high" />
-</picture>
+  <!-- Her Words -->
+  <section class="container" style="padding:16px 16px 0">
+    <div class="quote-card">
+      <div class="quote-badge alt">
+        <img src="/courageaux/assets/logo_courageaux_black_400.png" alt="Courageaux Aesthetics logo" style="height:18px;width:auto;display:block">
+        Her Words
+      </div>
+      <blockquote class="quote-body">
+        <p>It’s an HONOR , to be Recognized by my city. Courageaux Aesthetics came from Joshua 1:9 be courageous for the lord is with you where ever you go. When I left school in New Orleans i understood the demand for skin care in Hammond wasn’t really a thing. Many people thought I couldn’t make money doing this , but I love what I do and my clients recognize it. I was put in position to show people of color we deserve luxury too. Reading text books that didn’t have people that look like me made me want to show the world that corrective skin care IS for us! When I became licensed I promised God that I will handle my Bidness !!</p>
+      </blockquote>
+      <div class="quote-meta">— <strong>Amari Wilford</strong>, Courageaux Aesthetics · <em>Inspiration: Joshua 1:9</em></div>
     </div>
-  </div>
-</header>
- 
- <section class="container" style="padding:16px 16px 0">
-  <div class="quote-card">
-    <div class="quote-badge alt">
-      <img src="/courageaux/assets/logo_courageaux_black_400.png" alt="Courageaux Aesthetics logo" style="height:18px;width:auto;display:block">
-      Her Words
-    </div>
-    <blockquote class="quote-body">
-      <p>It’s an HONOR , to be Recognized by my city. Courageaux Aesthetics came from Joshua 1:9 be courageous for the lord is with you where ever you go. When I left school in New Orleans i understood the demand for skin care in Hammond wasn’t really a thing. Many people thought I couldn’t make money doing this , but I love what I do and my clients recognize it. I was put in position to show people of color we deserve luxury too. Reading text books that didn’t have people that look like me made me want to show the world that corrective skin care IS for us! When I became licensed I promised God that I will handle my Bidness !!</p>
-    </blockquote>
-    <div class="quote-meta">— <strong>Amari Wilford</strong>, Courageaux Aesthetics · <em>Inspiration: Joshua 1:9</em></div>
-  </div>
-</section>
-
-
+  </section>
 
   <!-- INTRO / BIO -->
   <section class="intro">
@@ -235,14 +188,14 @@
 
   <!-- ADDRESS ROW -->
   <section>
-    <div class="container" style="padding:12px 16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--stroke);">
+    <div class="container" style="padding:12px 16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--stroke)">
       <span style="opacity:.9">📍 15073 W Club Deluxe Rd, Unit 1 — Hammond, LA 70403</span>
     </div>
   </section>
 
   <!-- SMALL MAP (toggle with the button) -->
   <section id="cxMapWrap" class="map-wrap">
-    <div class="container" style="padding:0 16px 16px;">
+    <div class="container" style="padding:0 16px 16px">
       <div class="map-card">
         <iframe
           title="Courageaux Aesthetics — Map"
@@ -260,10 +213,8 @@
   <section class="container" style="padding-top:16px">
     <div class="card product-cta">
       <div class="prod-thumb">
-        <img
-          src="/courageaux/assets/tee_soft-cream_400.jpg"
-          width="400" height="400"
-          alt="Ladies Supima Cotton Classic Logo Tee — Soft Cream" loading="lazy" decoding="async">
+        <img src="/courageaux/assets/tee_soft-cream_400.jpg" width="400" height="400"
+             alt="Ladies Supima Cotton Classic Logo Tee — Soft Cream" loading="lazy" decoding="async">
         <div class="product-info">
           <div class="kicker" style="margin-bottom:6px">Featured Tee</div>
           <h3 style="margin:.1rem 0 .3rem;line-height:1.2">Ladies Supima Cotton Classic Logo Tee — Soft Cream</h3>
@@ -275,30 +226,32 @@
   </section>
 
   <!-- OPTIONAL EXTRA CONTENT SLOT -->
-  <main class="container" style="padding:18px 16px 28px;">
+  <main class="container" style="padding:18px 16px 28px">
     <!-- Add additional copy or photos here if you want -->
   </main>
 
   <!-- FOOTER CREDIT -->
   <footer>
-    <div class="container" style="padding:16px 16px 24px;">
+    <div class="container" style="padding:16px 16px 24px">
       <div class="credit-strip">
         © 2025 Square Bidness Tech Lab —
-        <a href="/linkme/" style="color:#c9a227;text-decoration:underline;font-weight:700;">Link Me</a>
+        <a href="/linkme/" style="color:#c9a227;text-decoration:underline;font-weight:700">Link Me</a>
       </div>
     </div>
   </footer>
 
   <!-- Map toggle -->
   <script>
-    document.getElementById('cxMapBtn')?.addEventListener('click', () => {
-      const wrap = document.getElementById('cxMapWrap');
-      if (!wrap) return;
-      const open = wrap.style.display === 'block';
-      wrap.style.display = open ? 'none' : 'block';
+    (function(){
       const btn = document.getElementById('cxMapBtn');
-      if (btn) btn.textContent = open ? 'View map' : 'Hide map';
-    });
+      const wrap = document.getElementById('cxMapWrap');
+      btn?.addEventListener('click', () => {
+        const open = wrap.style.display === 'block';
+        wrap.style.display = open ? 'none' : 'block';
+        btn.textContent = open ? 'View map' : 'Hide map';
+        btn.setAttribute('aria-expanded', (!open).toString());
+      });
+    })();
   </script>
 </body>
 </html>
