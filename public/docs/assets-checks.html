@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Assets Checker — Square Bidness Tech Lab</title>
+<style>
+  :root{--bg:#0b0b0b;--fg:#f4f4f4;--muted:#b9b9b9;--gold:#c9a227;--card:#151515;--stroke:#222}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 system-ui,Segoe UI,Roboto,Arial}
+  header{padding:18px 16px;border-bottom:1px solid var(--stroke)}
+  h1{margin:0;font-size:clamp(18px,4vw,24px)}
+  main{max-width:1100px;margin:0 auto;padding:16px}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start}
+  textarea{flex:1;min-height:120px;background:#0f0f0f;color:#fff;border:1px solid #2a2a2a;border-radius:12px;padding:10px;font-family:ui-monospace,Menlo,Consolas,monospace}
+  .card{background:var(--card);border:1px solid var(--stroke);border-radius:14px;padding:14px}
+  .btn{padding:10px 14px;border-radius:12px;background:#fff;color:#000;font-weight:800;border:0;cursor:pointer}
+  .btn.outline{background:#0e0e0e;color:#fff;border:1px solid #2a2a2a}
+  .muted{color:var(--muted)}
+  table{width:100%;border-collapse:collapse;margin-top:12px}
+  th,td{border-bottom:1px solid #222;padding:8px;vertical-align:top}
+  th{font-size:.9rem;text-align:left;color:#ccc}
+  .ok{color:#9ae6b4} .warn{color:#f6e05e} .bad{color:#f56565}
+  .chip{display:inline-block;border:1px solid #333;border-radius:999px;padding:2px 8px;font-size:12px}
+  .grid{display:grid;gap:12px}
+  .flex{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .small{font-size:.85rem}
+</style>
+</head>
+<body>
+<header>
+  <h1>Assets Checker</h1>
+  <div class="muted small">Scan pages → collect asset URLs → flag 404s, bad MIME, redirects, “/public/” leaks.</div>
+</header>
+
+<main>
+  <div class="grid">
+    <div class="card">
+      <div class="flex">
+        <div>
+          <strong>Seed pages to crawl</strong>
+          <div class="muted small">One per line. We’ll fetch each page and auto-collect <code>&lt;img&gt;</code>, <code>&lt;script&gt;</code>, <code>&lt;link&gt;</code>, <code>&lt;source&gt;</code>, and OG image meta.</div>
+        </div>
+        <button class="btn outline" id="useDefaults">Use defaults</button>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <textarea id="seeds"></textarea>
+      </div>
+
+      <div class="flex" style="margin-top:10px">
+        <button class="btn" id="runBtn">Run check</button>
+        <button class="btn outline" id="exportBtn">Export CSV</button>
+        <span class="muted small" id="summary"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="flex">
+        <strong>Results</strong>
+        <span class="chip" id="statusChip">idle</span>
+      </div>
+      <table id="results">
+        <thead>
+          <tr>
+            <th>URL</th>
+            <th>Status</th>
+            <th>Type</th>
+            <th>Expected</th>
+            <th>Size</th>
+            <th>Cache</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+  </div>
+</main>
+
+<script>
+const $ = sel => document.querySelector(sel);
+const resultsBody = $('#results tbody');
+const statusChip = $('#statusChip');
+const summary = $('#summary');
+
+const DEFAULT_SEEDS = [
+  '/',                         // home
+  '/courageaux/',              // November Spotlight page
+  '/community-spotlight/',     // Community Spotlight hub/page
+  '/blog/',                    // blog index
+];
+
+const EXT_EXPECTED = {
+  '.js':'application/javascript',
+  '.mjs':'application/javascript',
+  '.css':'text/css',
+  '.jpg':'image/jpeg',
+  '.jpeg':'image/jpeg',
+  '.png':'image/png',
+  '.svg':'image/svg+xml',
+  '.webp':'image/webp',
+  '.ico':'image/x-icon',
+  '.pdf':'application/pdf',
+  '.json':'application/json',
+  '.html':'text/html'
+};
+
+function extOf(u){
+  try{
+    const p = new URL(u, location.origin).pathname.toLowerCase();
+    const i = p.lastIndexOf('.');
+    return i>-1 ? p.slice(i) : '';
+  }catch{ return '' }
+}
+
+function expectedMime(u){
+  const e = extOf(u);
+  return EXT_EXPECTED[e] || null;
+}
+
+function norm(u){
+  try{
+    return new URL(u, location.origin).href;
+  }catch{ return u }
+}
+
+function collectAssetsFromHTML(html, base){
+  const d = new DOMParser().parseFromString(html, 'text/html');
+  const urls = new Set();
+
+  const push = (u)=>{ if(u){ urls.add(norm(u)); } };
+
+  d.querySelectorAll('img[src]').forEach(el=>push(new URL(el.getAttribute('src'), base).href));
+  d.querySelectorAll('script[src]').forEach(el=>push(new URL(el.getAttribute('src'), base).href));
+  d.querySelectorAll('link[href]').forEach(el=>push(new URL(el.getAttribute('href'), base).href));
+  d.querySelectorAll('source[src]').forEach(el=>push(new URL(el.getAttribute('src'), base).href));
+  d.querySelectorAll('meta[property="og:image"][content],meta[name="twitter:image"][content]').forEach(el=>push(new URL(el.getAttribute('content'), base).href));
+
+  // srcset parsing
+  d.querySelectorAll('img[srcset],source[srcset]').forEach(el=>{
+    const ss = el.getAttribute('srcset')||'';
+    ss.split(',').map(s=>s.trim().split(' ')[0]).forEach(u=>{
+      if(u) push(new URL(u, base).href);
+    });
+  });
+
+  // also include anchors to internal HTML pages (to catch partials)
+  d.querySelectorAll('a[href]').forEach(a=>{
+    const href = a.getAttribute('href')||'';
+    try{
+      const u = new URL(href, base);
+      if(u.origin===location.origin && (u.pathname.endsWith('/') || u.pathname.endsWith('.html')))
+        urls.add(u.href);
+    }catch{}
+  });
+
+  return Array.from(urls);
+}
+
+async function fetchWithInfo(url){
+  const out = { url, status:0, ok:false, type:'', expected:expectedMime(url), size:'', cache:'', notes:[] };
+  try{
+    const res = await fetch(url, { cache:'no-store', redirect:'follow' });
+    out.status = res.status;
+    out.ok = res.ok;
+    out.type = (res.headers.get('content-type')||'').split(';')[0];
+    const len = res.headers.get('content-length');
+    out.size = len ? `${Number(len).toLocaleString()} B` : '';
+    out.cache = res.headers.get('cache-control')||'';
+    // notes
+    if(!res.ok) out.notes.push('HTTP '+res.status);
+    if(out.expected && out.type && out.expected!==out.type){
+      out.notes.push(`MIME mismatch (got ${out.type})`);
+    }
+    if(url.includes('/public/')) out.notes.push('Path contains /public/ (check your href/src)');
+    if(url.startsWith('http:')) out.notes.push('Mixed content (http)');
+  }catch(e){
+    out.notes.push('Fetch error: '+(e&&e.message?e.message:''));
+  }
+  return out;
+}
+
+function rowFor(r){
+  const cls = r.ok && (!r.expected || r.expected===r.type) ? 'ok' : (r.status===0 || r.status>=400 ? 'bad' : 'warn');
+  return `<tr>
+    <td style="word-break:break-all"><a href="${r.url}" target="_blank" rel="noopener">${r.url}</a></td>
+    <td class="${cls}">${r.status||'—'}</td>
+    <td>${r.type||'—'}</td>
+    <td>${r.expected||'—'}</td>
+    <td>${r.size||'—'}</td>
+    <td>${r.cache||'—'}</td>
+    <td>${r.notes.join('; ')||'—'}</td>
+  </tr>`;
+}
+
+async function throttleAll(items, worker, limit=6){
+  const ret = [];
+  let i=0, active=0;
+  return new Promise((resolve)=>{
+    const next = ()=>{
+      if(i>=items.length && active===0){ resolve(ret); return; }
+      while(active<limit && i<items.length){
+        const idx=i++, v=items[idx]; active++;
+        Promise.resolve(worker(v)).then((r)=>{ ret[idx]=r; active--; next(); });
+      }
+    };
+    next();
+  });
+}
+
+$('#useDefaults').addEventListener('click', ()=>{
+  $('#seeds').value = DEFAULT_SEEDS.join('\n');
+});
+
+$('#exportBtn').addEventListener('click', ()=>{
+  const rows = [...resultsBody.querySelectorAll('tr')].map(tr=>[...tr.children].map(td=>td.innerText.replace(/\n/g,' ').trim()));
+  const header = ['URL','Status','Type','Expected','Size','Cache','Notes'];
+  const csv = [header, ...rows].map(r=>r.map(x=>`"${x.replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download='assets-check.csv'; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 500);
+});
+
+$('#runBtn').addEventListener('click', async ()=>{
+  resultsBody.innerHTML = '';
+  statusChip.textContent = 'scanning...';
+  summary.textContent = '';
+
+  const seedLines = ($('#seeds').value||'').split('\n').map(s=>s.trim()).filter(Boolean);
+  const seeds = seedLines.length ? seedLines : DEFAULT_SEEDS;
+
+  // crawl seeds → gather assets
+  const pages = await throttleAll(seeds, async (p)=>{
+    try{
+      const url = norm(p);
+      const res = await fetch(url, { cache:'no-store' });
+      const html = await res.text();
+      return { url, ok:true, html };
+    }catch(e){ return { url:norm(p), ok:false, html:'' }; }
+  });
+
+  const assetSet = new Set();
+  for(const pg of pages){
+    if(pg.ok){
+      collectAssetsFromHTML(pg.html, pg.url).forEach(u=>assetSet.add(u));
+    }else{
+      // include the page itself so you see the failure
+      assetSet.add(pg.url);
+    }
+  }
+
+  const assets = Array.from(assetSet);
+  const results = await throttleAll(assets, fetchWithInfo, 8);
+
+  let bad=0, warn=0, ok=0;
+  results.forEach(r=>{
+    const good = r.ok && (!r.expected || r.expected===r.type);
+    if(good) ok++; else if(r.status===0 || r.status>=400) bad++; else warn++;
+    resultsBody.insertAdjacentHTML('beforeend', rowFor(r));
+  });
+
+  statusChip.textContent = 'done';
+  summary.textContent = `Checked ${results.length} URLs → ✅ ${ok}  ⚠️ ${warn}  ❌ ${bad}`;
+});
+</script>
+</body>
+</html>
