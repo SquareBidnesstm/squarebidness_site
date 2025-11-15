@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Puff’s Smokehouse — Order Pickup</title>
+  <meta name="description" content="Order Puff’s Smokehouse plates and pickup on arrival. Turkey wings, ribs, neck bones, sides and more." />
+  <link rel="canonical" href="https://www.squarebidness.com/puffs/">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Puff’s Smokehouse — Order Pickup">
+  <meta property="og:description" content="Order online, pickup on arrival. Plates include two sides and bread (except pig feet).">
+  <meta property="og:image" content="/puffs/assets/menu_1200x630.jpg">
+
+  <style>
+    :root{
+      --bg:#0b0b0b; --card:#111; --ink:#f7f7f7; --muted:#b9b9b9;
+      --brand:#ff9f1a; --line:#232323; --accent:#ffd28a;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,Segoe UI,Roboto,Arial}
+    .wrap{max-width:1100px;margin:0 auto;padding:16px}
+    header.hero{border-bottom:1px solid var(--line);background:linear-gradient(#0008,#0008), url('/puffs/assets/menu_hero.jpg') center/cover no-repeat}
+    header .wrap{padding:26px 16px}
+    h1{margin:0 0 6px;font-size:1.9rem}
+    p.sub{margin:0;color:var(--muted)}
+    .grid{display:grid;gap:16px;grid-template-columns:1.1fr .9fr}
+    @media (max-width: 900px){.grid{grid-template-columns:1fr}}
+
+    .card{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+    .card h2{margin:0;font-size:1.1rem;padding:12px 14px;border-bottom:1px solid var(--line);background:rgba(255,159,26,.08)}
+    .sect{padding:14px}
+    .row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px dashed #222}
+    .row:last-child{border-bottom:0}
+    .price{opacity:.9;white-space:nowrap}
+    .qty{display:flex;align-items:center;gap:6px}
+    .qty button{width:28px;height:28px;border-radius:8px;border:1px solid #2a2a2a;background:#141414;color:#fff;cursor:pointer}
+    .btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 14px;border-radius:12px;border:1px solid var(--line);color:#fff;text-decoration:none;cursor:pointer}
+    .btn.primary{background:#fff;color:#000;font-weight:800}
+    .muted{color:var(--muted)}
+    .note{font-size:.85rem;color:#ffd28a}
+    .pill{display:inline-block;padding:3px 8px;border-radius:999px;border:1px solid #333;font-size:.75rem;color:#ddd}
+    .cartTotal{display:flex;justify-content:space-between;margin:6px 0}
+    input, select, textarea{
+      background:#0f0f0f;border:1px solid #2a2a2a;color:#fff;border-radius:10px;padding:10px 12px;width:100%;
+    }
+    label{font-size:.9rem;color:#d5d5d5}
+    .stack{display:grid;gap:10px}
+    footer{color:#8b8b8b;border-top:1px solid var(--line);padding:18px 0;margin-top:18px;font-size:.9rem}
+    .tiny{font-size:.85rem;color:#9b9b9b}
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <h1>🍖 Puff’s Smokehouse</h1>
+      <p class="sub">Order online — pick up when you arrive. Ponchatoula, LA. <span class="pill">Preview</span></p>
+    </div>
+  </header>
+
+  <main class="wrap grid">
+    <!-- MENU -->
+    <section class="card" id="menu">
+      <h2>Menu</h2>
+      <div class="sect" id="menuContent"><!-- injected --></div>
+    </section>
+
+    <!-- CART / CHECKOUT -->
+    <aside class="card">
+      <h2>Your Order</h2>
+      <div class="sect">
+        <div id="cartLines" class="stack tiny" style="min-height:80px">No items yet.</div>
+        <div class="cartTotal"><span class="muted">Subtotal</span><strong id="sub">$0.00</strong></div>
+        <div class="cartTotal"><span class="muted">Tax (8.95%)</span><strong id="tax">$0.00</strong></div>
+        <div class="cartTotal" style="border-top:1px solid #222;padding-top:6px"><span>Total</span><strong id="tot">$0.00</strong></div>
+
+        <hr style="border:none;border-top:1px solid #222;margin:14px 0">
+
+        <div class="stack">
+          <label>Pickup time
+            <select id="pickup">
+              <option value="ASAP">ASAP</option>
+              <option>In 15 minutes</option>
+              <option>In 30 minutes</option>
+              <option>Top of the hour</option>
+            </select>
+          </label>
+          <label>Your name <input id="custName" placeholder="Name"></label>
+          <label>Phone <input id="custPhone" placeholder="(xxx) xxx-xxxx"></label>
+          <label>Notes (no onions, extra sauce, etc.) <textarea id="custNotes" rows="3"></textarea></label>
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+          <button class="btn primary" id="btnText">Text Order</button>
+          <button class="btn" id="btnCopy">Copy Summary</button>
+          <button class="btn" id="btnClear">Clear</button>
+        </div>
+
+        <p class="tiny" style="margin-top:10px">You’ll pay at pickup. Prices and availability subject to change. “Smoked Pig Feet Plate” available <strong>Sunday only</strong>.</p>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="wrap">
+    <div>© 2025 Puff’s Smokehouse · Built with Square Bidness Tech Lab</div>
+  </footer>
+
+  <script>
+    // ------- DATA -------
+    const MENU = [
+      {section:'Individual', items:[
+        {id:'turkey_wings_ind', name:'Smoked Turkey Wings', price:10},
+        {id:'turkey_legs_ind',  name:'Smoked Turkey Legs',  price:12},
+      ]},
+      {section:'Plates', note:'All plates come with two sides and bread (excluding pig feet).', items:[
+        {id:'neck_bones_plate', name:'Pork Neck Bones Plate', price:20},
+        {id:'turkey_neck_plate', name:'Turkey Neck Plate', price:20},
+        {id:'rib_half_plate', name:'Rib Plate (Half Slab)', price:20},
+        {id:'turkey_wings_plate', name:'Turkey Wings Plate (2)', price:20},
+        {id:'pig_feet_plate', name:'Smoked Pig Feet Plate', price:15, badge:'Sunday only', subnote:'served with corn and potatoes'}
+      ]},
+      {section:'Sides / Add-ons', items:[
+        {id:'extra_corn', name:'Extra Corn', price:1},
+        {id:'potatoes', name:'Potatoes', price:1},
+        {id:'meat_only', name:'Meat Only', price:15}
+      ]}
+    ];
+    const TAX_RATE = 0.0895; // adjust if needed
+    const PHONE = '9859811777'; // e.g. +19855551234
+
+    const cart = new Map(); // id -> qty
+
+    // ------- RENDER MENU -------
+    const $menu = document.getElementById('menuContent');
+    $menu.append(
+      ...MENU.map(sec => {
+        const wrap = document.createElement('section');
+        wrap.className = 'stack';
+        const h = document.createElement('h3');
+        h.textContent = sec.section;
+        h.style.margin = '0';
+        h.style.fontSize = '1.05rem';
+        wrap.append(h);
+
+        if (sec.note){
+          const n = document.createElement('div');
+          n.className = 'note';
+          n.textContent = sec.note;
+          wrap.append(n);
+        }
+
+        sec.items.forEach(item => {
+          const row = document.createElement('div');
+          row.className = 'row';
+          const name = document.createElement('div');
+          name.innerHTML = `<strong>${item.name}</strong>${item.subnote ? `<div class="tiny muted">${item.subnote}</div>`:''}${item.badge?` <span class="pill" style="margin-left:6px">${item.badge}</span>`:''}`;
+          const price = document.createElement('div');
+          price.className = 'price';
+          price.textContent = `$${item.price}`;
+          const qty = document.createElement('div');
+          qty.className = 'qty';
+          const minus = document.createElement('button'); minus.textContent = '–';
+          const v = document.createElement('span'); v.textContent = '0'; v.style.minWidth='16px'; v.style.textAlign='center';
+          const plus = document.createElement('button'); plus.textContent = '+';
+          minus.onclick = () => update(item.id, -1, item);
+          plus.onclick  = () => update(item.id, +1, item);
+          qty.append(minus, v, plus);
+          row.append(name, price, qty);
+          wrap.append(row);
+
+          row.dataset.bind = item.id;
+          v.dataset.bindQty = item.id;
+        });
+
+        return wrap;
+      })
+    );
+
+    function update(id, delta, item){
+      const q = Math.max(0, (cart.get(id)||0) + delta);
+      if (q === 0) cart.delete(id); else cart.set(id, q);
+      const qtySpan = document.querySelector(`[data-bind-qty="${id}"]`);
+      if (qtySpan) qtySpan.textContent = q;
+      renderCart();
+    }
+
+    function money(n){ return `$${n.toFixed(2)}`; }
+
+    function renderCart(){
+      const $lines = document.getElementById('cartLines');
+      $lines.innerHTML = '';
+      let sub = 0;
+
+      for (const sec of MENU){
+        for (const item of sec.items){
+          const q = cart.get(item.id) || 0;
+          if (!q) continue;
+          const line = document.createElement('div');
+          line.textContent = `${q} × ${item.name}`;
+          const right = document.createElement('div'); right.textContent = money(q*item.price);
+          const flex = document.createElement('div'); flex.style.display='flex'; flex.style.justifyContent='space-between';
+          flex.append(line, right);
+          $lines.append(flex);
+          sub += q*item.price;
+        }
+      }
+      if (sub === 0) $lines.textContent = 'No items yet.';
+
+      const tax = sub * TAX_RATE;
+      const tot = sub + tax;
+      document.getElementById('sub').textContent = money(sub);
+      document.getElementById('tax').textContent = money(tax);
+      document.getElementById('tot').textContent = money(tot);
+    }
+
+    // ------- ACTIONS -------
+    document.getElementById('btnClear').onclick = () => { cart.clear(); document.querySelectorAll('[data-bind-qty]').forEach(s=>s.textContent='0'); renderCart(); };
+
+    document.getElementById('btnCopy').onclick = () => {
+      const summary = buildSummary();
+      navigator.clipboard.writeText(summary).then(()=> alert('Order copied.')).catch(()=> alert('Copy failed'));
+    };
+
+    document.getElementById('btnText').onclick = () => {
+      if (cart.size === 0) { alert('Add something to the cart first.'); return; }
+      const summary = encodeURIComponent(buildSummary());
+      // Replace YOUR_NUMBER above with the shop number, e.g. +19855551234
+      window.location.href = `sms:${PHONE}?&body=${summary}`;
+    };
+
+    function buildSummary(){
+      const when = document.getElementById('pickup').value;
+      const name = document.getElementById('custName').value || '—';
+      const phone = document.getElementById('custPhone').value || '—';
+      const notes = document.getElementById('custNotes').value || '—';
+
+      let lines = [`Puff’s Smokehouse — Pickup Order`, `Pickup: ${when}`, `Name: ${name}`, `Phone: ${phone}`, '', 'Items:'];
+      let sub = 0;
+      for (const sec of MENU){
+        for (const item of sec.items){
+          const q = cart.get(item.id) || 0; if (!q) continue;
+          lines.push(`• ${q} × ${item.name}  $${(q*item.price).toFixed(2)}`);
+          sub += q*item.price;
+        }
+      }
+      const tax = sub*TAX_RATE, tot = sub+tax;
+      lines.push('', `Subtotal: $${sub.toFixed(2)}`, `Tax: $${tax.toFixed(2)}`, `Total: $${tot.toFixed(2)}`, '', `Notes: ${notes}`, '', `Sent from SquareBidness.com/puffs (preview)`);
+
+      return lines.join('\n');
+    }
+
+    // boot
+    renderCart();
+  </script>
+</body>
+</html>
