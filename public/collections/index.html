@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <script>
+    (async () => {
+      try {
+        // Inject global head (GA, fonts, base styles, etc.)
+        const html = await fetch('/partials/head.html', {cache:'no-cache'}).then(r => r.text());
+        document.head.insertAdjacentHTML('afterbegin', html);
+      } catch (e) {
+        console.warn('head include failed', e);
+      }
+    })();
+  </script>
+
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Collections — Square Bidness</title>
+  <meta name="description" content="Square Bidness collections — VSOP, Liberty, Winter Games, alumni drops, and core essentials. Limited runs, Louisiana-rooted, built to last.">
+  <link rel="canonical" href="https://www.squarebidness.com/collections/">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Square Bidness">
+  <meta property="og:title" content="Collections — Square Bidness">
+  <meta property="og:description" content="VSOP, Liberty, Winter Games, alumni drops, and core essentials from Square Bidness Apparel.">
+  <meta property="og:url" content="https://www.squarebidness.com/collections/">
+  <meta property="og:image" content="https://www.squarebidness.com/assets/meta/collections_1200x630.jpg">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Collections — Square Bidness">
+  <meta name="twitter:description" content="Limited collections and core essentials from Square Bidness Apparel.">
+  <meta name="twitter:image" content="https://www.squarebidness.com/assets/meta/collections_1200x630.jpg">
+
+  <style>
+    :root{
+      --bg:#050505;
+      --fg:#f5f5f5;
+      --muted:#bdbdbd;
+      --stroke:#1f1f1f;
+      --card:#0b0b0b;
+      --gold:#c9a227;
+      --pill:#111111;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--fg);
+      font-family:system-ui,Segoe UI,Roboto,Arial;
+    }
+    a{color:inherit;text-decoration:none}
+    .wrap{
+      max-width:1120px;
+      margin:0 auto;
+      padding:0 16px;
+    }
+
+    /* Hero */
+    .col-hero{
+      border-bottom:1px solid var(--stroke);
+      background:radial-gradient(circle at top left,#222 0,#050505 52%,#000 100%);
+    }
+    .col-hero__inner{
+      padding:22px 0 24px;
+    }
+    .col-kicker{
+      font-size:.8rem;
+      text-transform:uppercase;
+      letter-spacing:.14em;
+      color:var(--gold);
+      font-weight:800;
+    }
+    .col-hero h1{
+      margin:4px 0 6px;
+      font-size:clamp(1.6rem,3.2vw,2.2rem);
+    }
+    .col-hero p{
+      margin:4px 0 0;
+      max-width:70ch;
+      color:var(--muted);
+    }
+    .col-pills{
+      margin-top:10px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      font-size:.8rem;
+    }
+    .col-pill{
+      border-radius:999px;
+      padding:5px 10px;
+      border:1px solid #262626;
+      background:var(--pill);
+      color:#d7dae0;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+    }
+    .col-pill span{
+      display:inline-block;
+      width:7px;height:7px;
+      border-radius:999px;
+      background:#36c46f;
+    }
+
+    /* Grid */
+    .col-grid{
+      margin:22px 0 34px;
+      display:grid;
+      gap:18px;
+      grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+    }
+    .col-card{
+      background:var(--card);
+      border-radius:18px;
+      border:1px solid var(--stroke);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      min-height:100%;
+    }
+    .col-card__media{
+      position:relative;
+      overflow:hidden;
+    }
+    .col-card__media img{
+      width:100%;
+      height:auto;
+      display:block;
+    }
+    .col-tag{
+      position:absolute;
+      left:10px;
+      top:10px;
+      padding:4px 9px;
+      border-radius:999px;
+      font-size:.75rem;
+      font-weight:700;
+      background:#000;
+      color:#f5f5f5;
+      border:1px solid rgba(255,255,255,.12);
+    }
+    .col-card__body{
+      padding:12px 14px 14px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .col-card__label{
+      font-size:.82rem;
+      opacity:.8;
+    }
+    .col-card__title{
+      font-size:1.02rem;
+      font-weight:700;
+      margin:0;
+    }
+    .col-card__text{
+      font-size:.9rem;
+      color:var(--muted);
+      margin:0;
+    }
+    .col-meta{
+      margin-top:4px;
+      font-size:.8rem;
+      opacity:.8;
+    }
+    .col-cta{
+      margin-top:8px;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-size:.82rem;
+      font-weight:700;
+    }
+    .col-cta span{
+      display:inline-block;
+      transform:translateY(1px);
+    }
+    @media(hover:hover){
+      .col-card:hover{
+        border-color:#2a2a2a;
+      }
+      .col-cta:hover{
+        color:var(--gold);
+      }
+    }
+
+    /* Section label */
+    .col-section-label{
+      font-size:.9rem;
+      text-transform:uppercase;
+      letter-spacing:.18em;
+      color:var(--muted);
+      margin:4px 0 10px;
+    }
+
+    /* Footer strip */
+    .col-footer{
+      border-top:1px solid var(--stroke);
+      padding:16px 0 24px;
+      background:#050505;
+      font-size:.9rem;
+      color:var(--muted);
+    }
+    .col-footer__inner{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+    .col-footer__inner a{
+      color:var(--gold);
+      font-weight:700;
+      text-decoration:underline;
+    }
+  </style>
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <!-- HERO -->
+  <header class="col-hero">
+    <div class="wrap col-hero__inner">
+      <div class="col-kicker">Square Bidness Apparel</div>
+      <h1>Collections</h1>
+      <p>
+        Limited runs, story-driven drops, and core pieces you can wear year-round.
+        Built for everyday people that handle business with pride and professionalism.
+      </p>
+      <div class="col-pills">
+        <div class="col-pill"><span></span> Active collections live now</div>
+        <div class="col-pill">VSOP · Liberty · Winter Games · Alumni</div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap" style="padding-top:16px">
+    <div class="col-section-label">Current & upcoming collections</div>
+
+    <section class="col-grid" aria-label="Square Bidness collections">
+
+      <!-- VSOP -->
+      <article class="col-card">
+        <a href="/collections/vsop/" style="display:block;color:inherit;">
+          <div class="col-card__media">
+            <img src="/collections/assets/vsop_hero_800.jpg"
+                 alt="VSOP Collection — nylon, suede, heat-reactive details">
+            <div class="col-tag">VSOP</div>
+          </div>
+          <div class="col-card__body">
+            <div class="col-card__label">Very Superior Old Pale</div>
+            <h2 class="col-card__title">VSOP Collection</h2>
+            <p class="col-card__text">
+              Nylon, suede, and heat-reactive details in rich tones. Elevated street pieces with a grown feel.
+            </p>
+            <div class="col-meta">Jackets · Shorts · Limited color runs</div>
+            <div class="col-cta">Enter collection <span>→</span></div>
+          </div>
+        </a>
+      </article>
+
+      <!-- Liberty -->
+      <article class="col-card">
+        <a href="/collections/liberty/" style="display:block;color:inherit;">
+          <div class="col-card__media">
+            <img src="/liberty/assets/liberty_hero_800.jpg"
+                 alt="Liberty Collection — New York and Statue of Liberty inspired visuals">
+            <div class="col-tag">Liberty</div>
+          </div>
+          <div class="col-card__body">
+            <div class="col-card__label">From Louisiana to New York</div>
+            <h2 class="col-card__title">Liberty Collection</h2>
+            <p class="col-card__text">
+              Pieces inspired by the Fast Company Innovation Festival trip — movement, freedom, and big-city energy.
+            </p>
+            <div class="col-meta">Tees · Layers · Story-led visuals</div>
+            <div class="col-cta">View Liberty drops <span>→</span></div>
+          </div>
+        </a>
+      </article>
+
+      <!-- Winter Games -->
+      <article class="col-card">
+        <a href="/collections/winter-games/" style="display:block;color:inherit;">
+          <div class="col-card__media">
+            <img src="/collections/assets/wintergames_hero_800.jpg"
+                 alt="Winter Games Collection — winter-ready Square Bidness pieces">
+            <div class="col-tag">Winter Games</div>
+          </div>
+          <div class="col-card__body">
+            <div class="col-card__label">Cold season rotation</div>
+            <h2 class="col-card__title">Winter Games</h2>
+            <p class="col-card__text">
+              Heavier-weight pieces and layers for colder months, built for Louisiana winters and beyond.
+            </p>
+            <div class="col-meta">Limited inventory · Moving now</div>
+            <div class="col-cta">Shop Winter Games <span>→</span></div>
+          </div>
+        </a>
+      </article>
+
+      <!-- Alumni / Hammond / Alexandria etc. -->
+      <article class="col-card">
+        <a href="/collections/alumni/" style="display:block;color:inherit;">
+          <div class="col-card__media">
+            <img src="/collections/assets/alumni_hero_800.jpg"
+                 alt="Alumni and hometown-inspired caps and tees">
+            <div class="col-tag">Alumni</div>
+          </div>
+          <div class="col-card__body">
+            <div class="col-card__label">Hometown & school pride</div>
+            <h2 class="col-card__title">Alumni & Hometown Series</h2>
+            <p class="col-card__text">
+              Alumni hats, local pride pieces, and small-batch runs that tap into Hammond, Alexandria, and beyond.
+            </p>
+            <div class="col-meta">Caps · Tees · Special weekends</div>
+            <div class="col-cta">View alumni series <span>→</span></div>
+          </div>
+        </a>
+      </article>
+
+      <!-- Essentials -->
+      <article class="col-card">
+        <a href="/collections/essentials/" style="display:block;color:inherit;">
+          <div class="col-card__media">
+            <img src="/collections/assets/essentials_hero_800.jpg"
+                 alt="Square Bidness core essentials — everyday logo tees and staples">
+            <div class="col-tag">Essentials</div>
+          </div>
+          <div class="col-card__body">
+            <div class="col-card__label">Core rotation</div>
+            <h2 class="col-card__title">Square Bidness Essentials</h2>
+            <p class="col-card__text">
+              Everyday logo tees and staple pieces — clean, reliable, and always in the mix.
+            </p>
+            <div class="col-meta">Year-round · Restocked as needed</div>
+            <div class="col-cta">Shop essentials <span>→</span></div>
+          </div>
+        </a>
+      </article>
+
+      <!-- Future / Kids & Ladies lane -->
+      <article class="col-card">
+        <a href="/collections/future/" style="display:block;color:inherit;">
+          <div class="col-card__media">
+            <img src="/collections/assets/future_hero_800.jpg"
+                 alt="Upcoming kids and ladies-focused Square Bidness drops">
+            <div class="col-tag">Coming soon</div>
+          </div>
+          <div class="col-card__body">
+            <div class="col-card__label">Next up</div>
+            <h2 class="col-card__title">Kids · Ladies · Collabs</h2>
+            <p class="col-card__text">
+              Reserved lane for kids, women’s cuts, and brand collaborations — announced first to email and Link Me.
+            </p>
+            <div class="col-meta">Drop notifications via /linkme</div>
+            <div class="col-cta">Stay locked in <span>→</span></div>
+          </div>
+        </a>
+      </article>
+
+    </section>
+  </main>
+
+  <!-- Local footer strip -->
+  <footer class="col-footer">
+    <div class="wrap col-footer__inner">
+      <div>© 2025 Square Bidness Apparel</div>
+      <div><a href="/linkme/">Link Me</a></div>
+    </div>
+  </footer>
+
+  <div id="site-footer"></div>
+  <script src="/partials/loader.js"></script>
+</body>
+</html>
