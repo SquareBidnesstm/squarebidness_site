@@ -175,9 +175,10 @@
     © 2025 Puff’s Smokehouse · Built with Square Bidness Tech Lab · 
     <a href="tel:+19859811777" style="color:#fff;text-decoration:underline">(985) 981-1777</a>
     <span style="opacity:.5"> · </span>
-    <a id="ownerLogin" href="?owner=1" style="color:#fff;text-decoration:underline">Owner Login</a>
+    <a id="ownerLogin" href="/puffs/?owner=1&v=2" style="color:#fff;text-decoration:underline">Owner Login</a>
   </div>
 </footer>
+
 
 
   <div id="closedOverlay" class="overlay">
@@ -468,6 +469,29 @@
     link.href = url.pathname + url.search + url.hash;
   })();
 </script>
+  <script>
+  (function () {
+    const link = document.getElementById('ownerLogin');
+    if (!link) return;
+
+    // Start with absolute /puffs/ URL
+    const base = new URL(window.location.origin + '/puffs/');
+
+    // Copy current query params except 'owner'
+    const current = new URL(window.location.href);
+    current.searchParams.forEach((val, key) => {
+      if (key !== 'owner') base.searchParams.set(key, val);
+    });
+
+    // Force owner mode + cache-buster
+    base.searchParams.set('owner','1');
+    base.searchParams.set('v','2');
+
+    // Set the href (absolute path + query)
+    link.href = base.pathname + '?' + base.searchParams.toString();
+  })();
+</script>
+
 
 </body>
 </html>
