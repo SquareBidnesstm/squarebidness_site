@@ -1,33 +1,66 @@
 /* =====================================================
-   Square Bidness — PWA Service Worker (Dynamic Edition)
-   -----------------------------------------------------
+   Square Bidness — PWA Service Worker
+   -----------------------------------
    Static pre-cache + dynamic runtime caching
-   for Pho-Matic, VSOP, nav/footer, and global CSS.
+   for core shell, Pho-Matic, VSOP, Courageaux,
+   collections, nav/footer, and global CSS.
 ===================================================== */
 
-const CACHE_NAME = "squarebidness-v4";
+const CACHE_NAME = "squarebidness-v5";
+
+/**
+ * NOTE:
+ * Paths here are URL paths as the BROWSER sees them,
+ * not repo paths. So no "/public/..." prefix.
+ */
 const CORE_ASSETS = [
-  "/", 
+  "/",
   "/index.html",
+
+  // Global styles (adjust if your main CSS lives elsewhere)
   "/styles/style.css",
   "/styles/phomatic.min.css",
-  "/public/nav/index.html",
-  "/public/footer/index.html",
+
+  // Shared partials
+  "/nav/index.html",
+  "/footer/index.html",
+
+  // Pho-Matic lane
   "/phomatic/",
   "/phomatic/assets/hero-1200x630.jpg",
   "/phomatic/assets/gieno-1_800.jpg",
   "/phomatic/assets/gieno-1_1200.jpg",
   "/phomatic/assets/gieno-2_800.jpg",
   "/phomatic/assets/gieno-2_1200.jpg",
+
+  // VSOP hero assets (adjust file names if needed)
   "/assets/vsop-jacket.jpg",
-  "/assets/vsop-shorts.jpg"
+  "/assets/vsop-shorts.jpg",
+
+  // Courageaux main feature
+  "/courageaux/",
+  "/courageaux/assets/amari_800.jpg",
+  "/courageaux/assets/amari_1200.jpg",
+  "/courageaux/assets/amari_hero_1200x630.jpg",
+  "/courageaux/assets/courageaux_1200x630.jpg",
+
+  // Collections shell
+  "/collections/",
+  "/collections/vsop/",
+  "/collections/wintergames/",
+  "/collections/essentials/",
+  "/collections/alumni/",
+  "/collections/future/",
+
+  // Spotlight hub
+  "/spotlight/"
 ];
 
 /* ------------------------------
    INSTALL — Precache core assets
 ------------------------------ */
-self.addEventListener("install", (e) => {
-  e.waitUntil(
+self.addEventListener("install", (event) => {
+  event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE_ASSETS))
   );
   self.skipWaiting();
@@ -36,11 +69,13 @@ self.addEventListener("install", (e) => {
 /* ------------------------------
    ACTIVATE — Remove old caches
 ------------------------------ */
-self.addEventListener("activate", (e) => {
-  e.waitUntil(
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
-        keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))
+        keys
+          .filter((key) => key !== CACHE_NAME)
+          .map((key) => caches.delete(key))
       )
     )
   );
@@ -50,23 +85,32 @@ self.addEventListener("activate", (e) => {
 /* ------------------------------
    FETCH — Hybrid cache strategy
 ------------------------------ */
-self.addEventListener("fetch", (e) => {
-  const { request } = e;
+self.addEventListener("fetch", (event) => {
+  const { request } = event;
+
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
 
-  // Strategy: Cache First for core assets, Network First for pages
-  if (CORE_ASSETS.some((asset) => url.pathname.startsWith(asset))) {
-    e.respondWith(cacheFirst(request));
-  } else if (
+  // Cache-first for known core assets
+  if (CORE_ASSETS.includes(url.pathname)) {
+    event.respondWith(cacheFirst(request));
+    return;
+  }
+
+  // Dynamic cache for images / assets
+  if (
     url.pathname.startsWith("/phomatic/") ||
+    url.pathname.startsWith("/courageaux/") ||
+    url.pathname.startsWith("/collections/") ||
     url.pathname.startsWith("/assets/")
   ) {
-    e.respondWith(dynamicCache(request));
-  } else {
-    e.respondWith(networkFirst(request));
+    event.respondWith(dynamicCache(request));
+    return;
   }
+
+  // Default: network-first for normal pages
+  event.respondWith(networkFirst(request));
 });
 
 /* ------------------------------
@@ -75,6 +119,7 @@ self.addEventListener("fetch", (e) => {
 async function cacheFirst(request) {
   const cached = await caches.match(request);
   if (cached) return cached;
+
   const response = await fetch(request);
   const cache = await caches.open(CACHE_NAME);
   cache.put(request, response.clone());
@@ -87,8 +132,11 @@ async function networkFirst(request) {
     const cache = await caches.open(CACHE_NAME);
     cache.put(request, response.clone());
     return response;
-  } catch {
-    return caches.match(request) || caches.match("/index.html");
+  } catch (err) {
+    // If offline, fallback to cache or home
+    const cached = await caches.match(request);
+    if (cached) return cached;
+    return caches.match("/index.html");
   }
 }
 
@@ -102,12 +150,13 @@ async function dynamicCache(request) {
 
   try {
     const response = await fetch(request);
+    // Only cache basic, successful responses
     if (response.ok && response.type === "basic") {
       cache.put(request, response.clone());
     }
     return response;
-  } catch {
-    // fallback: placeholder or offline shell
+  } catch (err) {
+    // Fallback: offline shell
     return caches.match("/index.html");
   }
 }
@@ -115,6 +164,8 @@ async function dynamicCache(request) {
 /* ------------------------------
    MESSAGE — Manual skipWaiting
 ------------------------------ */
-self.addEventListener("message", (e) => {
-  if (e.data === "skipWaiting") self.skipWaiting();
+self.addEventListener("message", (event) => {
+  if (event.data === "skipWaiting") {
+    self.skipWaiting();
+  }
 });
