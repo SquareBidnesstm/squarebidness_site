@@ -1,23 +1,29 @@
+// ==============================
+// Square Bidness partial loader
+// ==============================
 (async () => {
   try {
-    // Ensure placeholders exist (safe if you forgot)
+    // Ensure placeholders exist
     if (!document.getElementById('site-header')) {
-      const h = document.createElement('div'); h.id = 'site-header';
+      const h = document.createElement('div');
+      h.id = 'site-header';
       document.body.prepend(h);
     }
     if (!document.getElementById('site-footer')) {
-      const f = document.createElement('div'); f.id = 'site-footer';
+      const f = document.createElement('div');
+      f.id = 'site-footer';
       document.body.appendChild(f);
     }
 
-    // Optional: inject shared HEAD defaults if not already injected
-    // Comment out if you prefer to keep it manual.
+    // Inject shared HEAD defaults once
     if (!document.documentElement.dataset.sbHeadInjected) {
       try {
         const headHTML = await fetch('/partials/head.html', { cache: 'no-cache' }).then(r => r.text());
         document.head.insertAdjacentHTML('afterbegin', headHTML);
         document.documentElement.dataset.sbHeadInjected = '1';
-      } catch (e) { console.warn('head include failed', e); }
+      } catch (e) {
+        console.warn('head include failed', e);
+      }
     }
 
     // Inject header/footer
@@ -35,14 +41,16 @@
     console.warn('partials loader failed', e);
   }
 })();
-// Service worker registration (PWA)
+
+// ==============================
+// Service worker registration
+// ==============================
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker
       .register('/sw.js')
-      .catch((err) => {
+      .catch(err => {
         console.warn('SW registration failed:', err);
       });
   });
 }
-
