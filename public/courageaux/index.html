@@ -363,5 +363,169 @@
       });
     }
   </script>
+
+    <!-- Add-to-Home Screen banner logic -->
+  <script>
+    (function(){
+      const banner   = document.getElementById('cx-a2hs');
+      const btnInstall = document.getElementById('cx-a2hs-install');
+      const btnClose   = document.getElementById('cx-a2hs-close');
+      const copySpan   = document.getElementById('cx-a2hs-copy');
+      const DISMISS_KEY = 'cxA2HS_dismissed';
+      let deferredPrompt = null;
+
+      const isStandalone =
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.navigator.standalone === true;
+
+      const ua = navigator.userAgent || '';
+      const isiOS = /iphone|ipad|ipod/i.test(ua);
+
+      function showBanner(){
+        if (!banner) return;
+        if (localStorage.getItem(DISMISS_KEY) === '1') return;
+        if (isStandalone) return; // already installed
+        banner.hidden = false;
+      }
+
+      function hideBanner(){
+        if (!banner) return;
+        banner.hidden = true;
+      }
+
+      // Handle close (dismiss)
+      btnClose?.addEventListener('click', () => {
+        localStorage.setItem(DISMISS_KEY, '1');
+        hideBanner();
+      });
+
+      // Android / Chrome A2HS
+      window.addEventListener('beforeinstallprompt', (e) => {
+        // Prevent the browser's default mini-infobar
+        e.preventDefault();
+        deferredPrompt = e;
+
+        // Ensure Install button visible and Android-style copy
+        if (btnInstall) btnInstall.style.display = 'inline-block';
+        if (copySpan) {
+          copySpan.textContent =
+            'Install the Courageaux shortcut so booking and directions are one tap away.';
+        }
+
+        showBanner();
+      });
+
+      // Install button click
+      btnInstall?.addEventListener('click', async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const choice = await deferredPrompt.userChoice;
+          deferredPrompt = null;
+          if (choice.outcome === 'accepted') {
+            localStorage.setItem(DISMISS_KEY, '1');
+            hideBanner();
+          }
+        } else if (isiOS) {
+          // Simple iOS hint if no prompt API
+          alert('On iPhone: tap the Share icon, then choose "Add to Home Screen" to install Courageaux.');
+        }
+      });
+
+      // iOS fallback: show guidance banner once
+      if (isiOS && !isStandalone && !localStorage.getItem(DISMISS_KEY)) {
+        if (btnInstall) btnInstall.style.display = 'none';
+        if (copySpan) {
+          copySpan.textContent =
+            'On iPhone: tap the Share icon and choose "Add to Home Screen" to keep Courageaux one tap away.';
+        }
+        showBanner();
+      }
+    })();
+  </script>
+
+    <!-- Add-to-Home Screen banner (Courageaux PWA) -->
+  <div id="cx-a2hs" class="cx-a2hs" hidden>
+    <div class="cx-a2hs__inner">
+      <div class="cx-a2hs__text">
+        <strong>Install Courageaux Aesthetics</strong>
+        <span id="cx-a2hs-copy">
+          Add this page to your home screen for faster booking and directions.
+        </span>
+      </div>
+      <div class="cx-a2hs__actions">
+        <button type="button" id="cx-a2hs-install" class="cx-a2hs__btn">
+          Install
+        </button>
+        <button type="button" id="cx-a2hs-close" class="cx-a2hs__close" aria-label="Dismiss">
+          ✕
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .cx-a2hs{
+      position:fixed;
+      left:50%;
+      bottom:12px;
+      transform:translateX(-50%);
+      z-index:9999;
+      max-width:480px;
+      width:calc(100% - 32px);
+      pointer-events:none;
+    }
+    .cx-a2hs__inner{
+      pointer-events:auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 12px;
+      border-radius:14px;
+      background:#101010;
+      border:1px solid #2a2a2a;
+      box-shadow:0 10px 30px rgba(0,0,0,.6);
+      color:#f5f5f5;
+      font-size:.85rem;
+    }
+    .cx-a2hs__text span{
+      display:block;
+      margin-top:2px;
+      color:#bdbdbd;
+      font-weight:400;
+      font-size:.8rem;
+    }
+    .cx-a2hs__actions{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      flex-shrink:0;
+    }
+    .cx-a2hs__btn{
+      border:none;
+      padding:6px 10px;
+      border-radius:999px;
+      background:#c9a227;
+      color:#000;
+      font-size:.8rem;
+      font-weight:800;
+      cursor:pointer;
+    }
+    .cx-a2hs__close{
+      border:none;
+      background:transparent;
+      color:#999;
+      cursor:pointer;
+      font-size:.85rem;
+    }
+    @media (hover:hover){
+      .cx-a2hs__btn:hover{opacity:.93}
+      .cx-a2hs__close:hover{color:#fff}
+    }
+    @media (min-width:900px){
+      /* Optional: only show the banner on mobile / small screens */
+      .cx-a2hs{display:none;}
+    }
+  </style>
 </body>
 </html>
