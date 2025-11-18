@@ -135,7 +135,7 @@
     .prod-thumb img{width:110px;height:110px;object-fit:cover;border-radius:12px;border:1px solid #2a2a2a;background:#fff}
     @media (min-width:760px){ .prod-thumb img{width:120px;height:120px} }
 
-    /* Quote (not currently used on home, but kept for consistency) */
+    /* Quote (kept for future use) */
     .quote-card{background:#121212;border:1px solid #1f1f1f;border-radius:16px;padding:16px;max-width:980px;margin:0 auto}
     .quote-card blockquote{margin:0;font-size:1.02rem;line-height:1.65;color:#e9e9e9}
     .quote-card blockquote p{margin:.6rem 0}
@@ -217,6 +217,70 @@
         background:transparent;
       }
     }
+
+    /* A2HS banner */
+    .cx-a2hs{
+      position:fixed;
+      left:50%;
+      bottom:12px;
+      transform:translateX(-50%);
+      z-index:9999;
+      max-width:480px;
+      width:calc(100% - 32px);
+      pointer-events:none;
+    }
+    .cx-a2hs__inner{
+      pointer-events:auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 12px;
+      border-radius:14px;
+      background:#101010;
+      border:1px solid #2a2a2a;
+      box-shadow:0 10px 30px rgba(0,0,0,.6);
+      color:#f5f5f5;
+      font-size:.85rem;
+    }
+    .cx-a2hs__text span{
+      display:block;
+      margin-top:2px;
+      color:#bdbdbd;
+      font-weight:400;
+      font-size:.8rem;
+    }
+    .cx-a2hs__actions{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      flex-shrink:0;
+    }
+    .cx-a2hs__btn{
+      border:none;
+      padding:6px 10px;
+      border-radius:999px;
+      background:#c9a227;
+      color:#000;
+      font-size:.8rem;
+      font-weight:800;
+      cursor:pointer;
+    }
+    .cx-a2hs__close{
+      border:none;
+      background:transparent;
+      color:#999;
+      cursor:pointer;
+      font-size:.85rem;
+    }
+    @media (hover:hover){
+      .cx-a2hs__btn:hover{opacity:.93}
+      .cx-a2hs__close:hover{color:#fff}
+    }
+    @media (min-width:900px){
+      /* Optional: only show the banner on mobile / small screens */
+      .cx-a2hs{display:none;}
+    }
   </style>
 
   <!-- Desktop hero proportions -->
@@ -273,531 +337,21 @@
     </div>
   </header>
 
- <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>D.C. Trip — Mission Brief | Square Bidness Tech Lab</title>
-  <meta name="description" content="One-page mission brief for the D.C. trip: schedule, session picks, packing checklist, networking scripts, and mission statement for Square Bidness Tech Lab.">
-  <link rel="canonical" href="https://lab.squarebidness.com/dc-trip/">
-
-  <!-- OG / Social -->
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Square Bidness Tech Lab">
-  <meta property="og:title" content="D.C. Trip — Mission Brief | Square Bidness Tech Lab">
-  <meta property="og:description" content="Schedule, session picks, packing list, networking scripts, and field photography notes for the D.C. trip.">
-  <meta property="og:url" content="https://lab.squarebidness.com/dc-trip/">
-
-  <meta name="twitter:card" content="summary_large_image">
-
-  <style>
-    :root{
-      --bg:#050505;
-      --fg:#f5f5f5;
-      --muted:#bdbdbd;
-      --stroke:#262626;
-      --card:#0b0b0b;
-      --accent:#c9a227;
-      --soft:#101010;
-    }
-    *{box-sizing:border-box}
-    html,body{
-      margin:0;
-      background:var(--bg);
-      color:var(--fg);
-      font-family:system-ui,Segoe UI,Roboto,Arial;
-    }
-    a{color:inherit;text-decoration:none}
-    .wrap{
-      max-width:1120px;
-      margin:0 auto;
-      padding:0 16px 32px;
-    }
-
-    .page-header{
-      padding:16px 0 10px;
-      border-bottom:1px solid var(--stroke);
-    }
-    .page-kicker{
-      font-size:.8rem;
-      text-transform:uppercase;
-      letter-spacing:.16em;
-      color:var(--accent);
-      font-weight:800;
-    }
-    .page-header h1{
-      margin:4px 0 6px;
-      font-size:clamp(1.6rem,3.1vw,2.2rem);
-    }
-    .page-header p{
-      margin:4px 0 0;
-      color:var(--muted);
-      max-width:72ch;
-      font-size:.95rem;
-    }
-    .pill-row{
-      margin-top:10px;
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      font-size:.8rem;
-    }
-    .pill{
-      border-radius:999px;
-      padding:5px 10px;
-      border:1px solid var(--stroke);
-      background:#0b0b0b;
-      color:#d7dae0;
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-    }
-    .pill span.bullet{
-      display:inline-block;
-      width:7px;height:7px;
-      border-radius:999px;
-      background:#3bd16b;
-    }
-
-    .layout{
-      display:grid;
-      gap:18px;
-      margin-top:16px;
-    }
-    @media(min-width:960px){
-      .layout{
-        grid-template-columns:minmax(0,1.6fr) minmax(0,1.2fr);
-      }
-    }
-
-    .card{
-      background:var(--card);
-      border:1px solid var(--stroke);
-      border-radius:16px;
-      padding:14px 14px 12px;
-      margin-bottom:10px;
-    }
-    .card h2{
-      margin:0 0 4px;
-      font-size:1.05rem;
-    }
-    .card h3{
-      margin:10px 0 4px;
-      font-size:.95rem;
-    }
-    .card p{
-      margin:4px 0;
-      font-size:.9rem;
-      color:var(--muted);
-    }
-    .card strong{color:#f5f5f5}
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      padding:3px 9px;
-      border-radius:999px;
-      border:1px solid var(--stroke);
-      font-size:.75rem;
-      text-transform:uppercase;
-      letter-spacing:.12em;
-      color:#d7dae0;
-      margin-bottom:6px;
-    }
-
-    .list{
-      list-style:none;
-      padding-left:0;
-      margin:4px 0;
-      font-size:.9rem;
-      color:var(--muted);
-    }
-    .list li{
-      padding:2px 0;
-    }
-    .list li span.label{
-      color:#f5f5f5;
-      font-weight:600;
-    }
-
-    .session-block{
-      border-radius:12px;
-      border:1px solid #333;
-      padding:8px 9px;
-      margin-bottom:8px;
-      background:#0f0f0f;
-    }
-    .session-time{
-      font-size:.78rem;
-      text-transform:uppercase;
-      letter-spacing:.12em;
-      color:#9ea2aa;
-    }
-    .session-title{
-      font-size:.92rem;
-      font-weight:600;
-      margin:2px 0;
-    }
-    .session-meta{
-      font-size:.82rem;
-      color:#a9adb5;
-    }
-    .session-note{
-      font-size:.8rem;
-      color:#8e929a;
-      margin-top:3px;
-    }
-
-    .two-col{
-      display:grid;
-      grid-template-columns:minmax(0,1fr);
-      gap:10px;
-    }
-    @media(min-width:720px){
-      .two-col{
-        grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-      }
-    }
-
-    .inline-link{
-      color:var(--accent);
-      text-decoration:underline;
-      text-underline-offset:2px;
-    }
-
-    .footer-note{
-      margin-top:14px;
-      font-size:.85rem;
-      color:#8a8a8a;
-    }
-  </style>
-</head>
-<body>
-  <main class="wrap">
-    <!-- PAGE HEADER -->
-    <header class="page-header">
-      <div class="page-kicker">D.C. Mission Brief</div>
-      <h1>Square Bidness / SB Tech Lab — D.C. Trip</h1>
-      <p>
-        Fast Company × Johns Hopkins innovation programming, space + AI conversations, and quiet groundwork
-        for SB Tech Lab — all organized in one place so you don’t have to dig through emails or papers.
-      </p>
-      <div class="pill-row">
-        <div class="pill"><span class="bullet"></span> Travel: New Orleans → D.C. · Tue Nov 18, 9:35 AM (MSY)</div>
-        <div class="pill">Venue: Johns Hopkins / Fast Company programming</div>
-        <div class="pill">Focus: AI · Energy · Space · Infrastructure</div>
+  <!-- Story / bio link-out -->
+  <section class="container" style="padding:18px 16px 0">
+    <div class="card" style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+      <div style="max-width:520px">
+        <div class="kicker" style="margin-bottom:6px">Her Story</div>
+        <h2 style="margin:.1rem 0 .35rem;line-height:1.3;font-size:1.1rem">Why Courageaux Aesthetics exists</h2>
+        <p style="margin:0;color:#d0d0d0;font-size:.92rem">
+          Read Amari’s own words about how Courageaux Aesthetics started, her inspiration from Joshua 1:9,
+          and her mission to bring corrective skin care to people of color in
+          Hammond, Ponchatoula, Albany, Independence and Amite.
+        </p>
       </div>
-    </header>
-
-    <section class="layout" aria-label="D.C. planning layout">
-      <!-- LEFT COLUMN: SESSIONS + SCRIPTS + MISSION -->
-      <div>
-
-        <!-- SESSIONS -->
-        <section class="card" aria-labelledby="sessions-heading">
-          <div class="badge">Day Plan · Sessions</div>
-          <h2 id="sessions-heading">Session picks for the day</h2>
-          <p>Locked-in plan you can glance at between floors. Swap on the fly if you feel a different pull.</p>
-
-          <h3>Morning (9:30 AM – 12:10 PM)</h3>
-
-          <div class="session-block">
-            <div class="session-time">9:30 AM · 1st Floor</div>
-            <div class="session-title">Networking Breakfast</div>
-            <div class="session-meta">Soft start · room scan · light intros.</div>
-            <div class="session-note">Goal: catch at least 2 people who look like builders, not just titles.</div>
-          </div>
-
-          <div class="session-block">
-            <div class="session-time">10:35 AM · 1st Floor — Theater</div>
-            <div class="session-title">PANEL: World Changing Ideas: Healthcare, Space, and AI at the Edge of Innovation</div>
-            <div class="session-meta">Featuring Gabriel Jones, Akhila Kosaraju, Molly Mulligan · Moderated by Brendan Vaughan</div>
-            <div class="session-note">Good wide-angle view of health, space, and AI — helps you hear how they connect lanes.</div>
-          </div>
-
-          <div class="session-block">
-            <div class="session-time">10:50 AM · 1st Floor — Theater</div>
-            <div class="session-title">INNOVATION IN ACTION: From Stars to Cells: How the Night Sky Helps Fight Cancer</div>
-            <div class="session-meta">Featuring Alex Szalay & Janis Taube, AstroPath</div>
-            <div class="session-note">Astro + oncology — listen for how they talk about data and imaging at scale.</div>
-          </div>
-
-          <div class="session-block">
-            <div class="session-time">11:05 AM · 1st Floor — Theater</div>
-            <div class="session-title">PANEL: Radical Vision: How AI Enables New Ways to See</div>
-            <div class="session-meta">Featuring Therese Canares, Gabriel Jones, Kunal Parikh, Jordan Shuff</div>
-            <div class="session-note">Good place to practice introducing SB as “AI-aware, infrastructure-minded, Louisiana-based.”</div>
-          </div>
-
-          <div class="session-block">
-            <div class="session-time">11:45 AM · 1st Floor — Theater</div>
-            <div class="session-title">BREAKOUT: Drug Discovery at Digital Speed</div>
-            <div class="session-meta">Featuring Ben Wolf, Chief Medical Officer, Isomorphic Labs</div>
-            <div class="session-note">AI + science at scale — good talking point when you mention compute, data, and why infrastructure matters.</div>
-          </div>
-
-          <h3 style="margin-top:10px;">Lunch & Cultural (12:10 PM – 2:15 PM)</h3>
-
-          <div class="session-block">
-            <div class="session-time">12:15 PM · 8th Floor</div>
-            <div class="session-title">Networking Lunch</div>
-            <div class="session-meta">Michael D. and Susan White Conference Center</div>
-            <div class="session-note">Sit with new faces. One sentence mission: “I’m Marcus, I run Square Bidness Apparel and SB Tech Lab out of Louisiana — we’re building around apparel, data, and future infrastructure.”</div>
-          </div>
-
-          <div class="session-block">
-            <div class="session-time">1:30 PM · 1st Floor — Theater</div>
-            <div class="session-title">The Lizard People: How UFOs, Magic, and Mind Control Explain Visual Culture in the Age of AI</div>
-            <div class="session-meta">Featuring Trevor Paglen</div>
-            <div class="session-note">Culture + AI + visuals — great bridge back to brand storytelling, Liberty visuals, and content.</div>
-          </div>
-
-          <h3 style="margin-top:10px;">Afternoon (2:15 PM – 6:05 PM)</h3>
-
-          <div class="session-block">
-            <div class="session-time">2:05 PM · 1st Floor — Theater</div>
-            <div class="session-title">INNOVATION IN ACTION: How to Avoid an Asteroid</div>
-            <div class="session-meta">Featuring Terik Daly, Planetary Scientist</div>
-            <div class="session-note">Light but smart — stay in the mix before policy.</div>
-          </div>
-
-          <div class="session-block">
-            <div class="session-time">2:20 PM · 1st Floor — Theater</div>
-            <div class="session-title">PANEL: How Policy Shapes the Future of Space</div>
-            <div class="session-meta">Featuring Rich Cooper & Jack Kiraly · Moderated by Rebecca Heilweil</div>
-            <div class="session-note">Ears open for how funding, regulation, and infrastructure are framed — this is vocabulary for future pitches.</div>
-          </div>
-
-          <div class="session-block">
-            <div class="session-time">3:00 PM · 9th Floor</div>
-            <div class="session-title">BREAKOUT: How Space Innovation Shapes Life on Earth</div>
-            <div class="session-meta">Featuring Molly Mulligan, COO, SpaceMD</div>
-            <div class="session-note">Direct tie to “why all this matters for regular people on the ground” — exactly where Square Bidness lives.</div>
-          </div>
-
-          <div class="session-block">
-            <div class="session-time">3:45 PM · 1st Floor — Theater</div>
-            <div class="session-title">INNOVATION IN ACTION: How a Startup Is Using VR-Style Headsets to Decode the Brain</div>
-            <div class="session-meta">Featuring Colton El-Habr & Steven Pang, Orbit</div>
-            <div class="session-note">Neuro + hardware + AI — good anchor for future Tech Lab conversations about sensors and data.</div>
-          </div>
-
-          <div class="session-block">
-            <div class="session-time">4:00 PM · 1st Floor — Theater</div>
-            <div class="session-title">PANEL: From Bits to Atoms: AI’s Potential to Revolutionize the Physical World</div>
-            <div class="session-meta">Featuring Hongquan Li, K.T. Ramesh, Smitha Shyam</div>
-            <div class="session-note">Listen for how they talk about AI touching real-world stuff — that’s your HQ and land story.</div>
-          </div>
-
-          <div class="session-block">
-            <div class="session-time">4:25 PM · 1st Floor — Theater</div>
-            <div class="session-title">PANEL: Powering the Age of AI — Conversation with Exelon CEO Calvin Butler</div>
-            <div class="session-meta">Power, grid, and energy systems.</div>
-            <div class="session-note">This is the closest lane to your micro–data center vision. Listen for phrases you can reuse later.</div>
-          </div>
-
-          <div class="session-block">
-            <div class="session-time">4:50 PM · 1st Floor — Theater</div>
-            <div class="session-title">INNOVATION IN ACTION: How AI Is Generating New Antibiotics</div>
-            <div class="session-meta">Featuring Akhila Kosaraju, Phare Bio</div>
-            <div class="session-note">Health + AI — more evidence for why compute and data infra matter.</div>
-          </div>
-
-          <div class="session-block">
-            <div class="session-time">5:30 PM · 1st Floor — Theater</div>
-            <div class="session-title">AI’s Next Chapter: Conversation with Nate Soares</div>
-            <div class="session-meta">Featuring Nate Soares · Moderated by Brendan Vaughan</div>
-            <div class="session-note">Smart closer. Be the calm, focused veteran taking it all in.</div>
-          </div>
-
-          <h3 style="margin-top:10px;">Reception (6:15 PM – 7:15 PM)</h3>
-
-          <div class="session-block">
-            <div class="session-time">6:00 PM · 8th Floor</div>
-            <div class="session-title">Reception</div>
-            <div class="session-meta">Michael D. and Susan White Conference Center</div>
-            <div class="session-note">Goal: 3–5 meaningful conversations, not 30 quick handshakes.</div>
-          </div>
-        </section>
-
-        <!-- NETWORKING SCRIPTS -->
-        <section class="card" aria-labelledby="scripts-heading">
-          <div class="badge">On-the-spot intros</div>
-          <h2 id="scripts-heading">Networking scripts (ready to pull out)</h2>
-
-          <h3>Base intro (use everywhere)</h3>
-          <p><strong>Short:</strong> “I’m Marcus, I run Square Bidness Apparel and SB Tech Lab out of Louisiana — we’re building around apparel, data, and future infrastructure.”</p>
-
-          <h3>To speakers / panelists</h3>
-          <p>
-            “I really appreciated your point about <em>[specific detail]</em>. I’m building a veteran-owned brand in Louisiana —
-            apparel on the front, tech and infrastructure on the back end. If you’re ever open to a quick 15-minute call, I’d
-            love to learn how you think about <em>[AI / energy / policy]</em> from your vantage point.”
-          </p>
-
-          <h3>To policy / energy / infra people</h3>
-          <p>
-            “I’m quietly putting together a small-scale data + infrastructure play in Louisiana tied to a clothing brand.
-            My goal is to line up with America-first manufacturing and modern infrastructure. What should someone like me
-            be paying attention to in D.C. right now?”
-          </p>
-
-          <h3>To other founders / operators</h3>
-          <p>
-            “What lane are you in and what problem are you really trying to solve?”  
-            (Let them talk, then respond:) “I love that. I’m Marcus, building Square Bidness and SB Tech Lab — we’re proving
-            you can do clean business and real infrastructure starting from a small Louisiana footprint.”
-          </p>
-
-          <h3>If D.C. / Hill / federal staff comes up</h3>
-          <p>
-            “I’m not here with any ask today — just getting a real feel for how innovation, infrastructure, and everyday
-            people line up. I run a veteran-owned brand, and I’m slowly mapping out how our land and buildings back home
-            could fit into America’s future infrastructure.”
-          </p>
-        </section>
-
-        <!-- MISSION STATEMENT -->
-        <section class="card" aria-labelledby="mission-heading">
-          <div class="badge">Why this trip matters</div>
-          <h2 id="mission-heading">SB / Tech Lab mission for D.C.</h2>
-          <ul class="list">
-            <li><span class="label">01 · Presence.</span> Bring Square Bidness and SB Tech Lab into the same rooms as national-level innovators, calmly and professionally.</li>
-            <li><span class="label">02 · Language.</span> Collect the exact words leaders use about AI, energy, policy, and infrastructure so future pitches hit the same notes.</li>
-            <li><span class="label">03 · Insight.</span> Understand where small, focused operations in places like Louisiana can plug into the bigger innovation story.</li>
-            <li><span class="label">04 · Relationships.</span> Leave with a handful of real contacts — people who remember Marcus from Louisiana, not just another badge.</li>
-          </ul>
-
-          <p style="margin-top:6px;">
-            Your only job: move like you already belong there — because you do.
-          </p>
-        </section>
-      </div>
-
-      <!-- RIGHT COLUMN: PACKING + PHOTO + QUICK LINKS -->
-      <div>
-
-        <!-- PACKING CHECKLIST -->
-        <section class="card" aria-labelledby="packing-heading">
-          <div class="badge">Pack smart</div>
-          <h2 id="packing-heading">Packing checklist (quick scan)</h2>
-
-          <div class="two-col">
-            <div>
-              <h3>Essentials</h3>
-              <ul class="list">
-                <li>• Wallet, ID, debit/credit cards</li>
-                <li>• Phone + charger + portable battery</li>
-                <li>• Headphones / AirPods</li>
-                <li>• Meds / vitamins / personal items</li>
-              </ul>
-
-              <h3>Tech & Work</h3>
-              <ul class="list">
-                <li>• iPhone (main capture device)</li>
-                <li>• Tripod with phone mount</li>
-                <li>• Power bank (fully charged)</li>
-                <li>• Extra charging cable for day bag</li>
-              </ul>
-            </div>
-
-            <div>
-              <h3>Clothing</h3>
-              <ul class="list">
-                <li>• 1–2 clean founder fits (Square Bidness pieces)</li>
-                <li>• Comfortable shoes for walking + standing</li>
-                <li>• Light layer / jacket for A/C + outside</li>
-              </ul>
-
-              <h3>Brand / Docs</h3>
-              <ul class="list">
-                <li>• Phone notes + this DC page bookmarked</li>
-                <li>• Key links memorized (squarebidness.com, lab, VSOP, Courageaux)</li>
-                <li>• One simple “about” line you can say in your sleep</li>
-              </ul>
-            </div>
-          </div>
-
-          <p style="margin-top:8px;font-size:.85rem;color:#8f93a0;">
-            Optional: one small notebook + pen if you like writing things physically when a bar hits.
-          </p>
-        </section>
-
-        <!-- FIELD PHOTOGRAPHY PLAN -->
-        <section class="card" aria-labelledby="photo-heading">
-          <div class="badge">Field photography</div>
-          <h2 id="photo-heading">Photography plan (tripod + phone)</h2>
-
-          <h3>Must-have shots</h3>
-          <ul class="list">
-            <li>• <span class="label">Power pose:</span> clean shot outside or near venue signage.</li>
-            <li>• <span class="label">Rooftop / skyline:</span> if accessible, one wide frame showing you and the city.</li>
-            <li>• <span class="label">Steps / columns:</span> classic D.C. government-energy frame.</li>
-            <li>• <span class="label">Candid:</span> walking / listening / taking notes — “in motion, in your lane.”</li>
-          </ul>
-
-          <h3>Tripod setup quick tips</h3>
-          <ul class="list">
-            <li>• Frame from mid-thigh up for most shots — keep headroom small.</li>
-            <li>• Lock phone at eye-level where possible; avoid extreme angles.</li>
-            <li>• Take both vertical (Reels/Stories) and horizontal (site/blog) at each spot.</li>
-            <li>• Use 3–10 second timer and shoot 3–5 takes per location.</li>
-          </ul>
-
-          <h3>Content lanes back home</h3>
-          <ul class="list">
-            <li>• “Louisiana to D.C.” recap for Liberty / blog.</li>
-            <li>• Tech Lab angle: small brand, big rooms, still grounded.</li>
-            <li>• Simple talking head later: what you learned about AI / energy / space.</li>
-          </ul>
-        </section>
-
-        <!-- CONTACT PACK LINK -->
-        <section class="card" aria-labelledby="contact-pack-heading">
-          <div class="badge">Support files</div>
-          <h2 id="contact-pack-heading">D.C. contact pack</h2>
-          <p>
-            Keep one place for names, roles, and follow-up notes. You can paste in:
-          </p>
-          <ul class="list">
-            <li>• Speakers / panelists you vibed with</li>
-            <li>• Policy / energy / infra contacts</li>
-            <li>• Other founders you actually want to stay in touch with</li>
-          </ul>
-
-          <p style="margin-top:8px;">
-            <a href="/dc-trip/contacts.html"
-               class="inline-link">
-              Open D.C. Contact Pack
-            </a>
-          </p>
-        </section>
-
-        <!-- OPTIONAL WH / CIVIC STRATEGY -->
-        <section class="card" aria-labelledby="civic-heading">
-          <div class="badge">Optional civic moves</div>
-          <h2 id="civic-heading">If you move near the White House / Capitol</h2>
-          <p>
-            No pressure — this is just a calm, respectful frame if you end up near bigger buildings.
-          </p>
-          <ul class="list">
-            <li>• Treat it like a recon trip: observe security, visitor centers, and how people move.</li>
-            <li>• If you speak with any staff or officers, keep it simple: you’re a veteran and a founder visiting for an innovation event.</li>
-            <li>• No big asks — just: “I’m just here learning, getting a feel for D.C. and how everything works.”</li>
-          </ul>
-          <p class="footer-note">
-            All the heavy moves come later, once Square Bidness and SB Tech Lab are fully lined up and the funding/infra picture is clearer.
-          </p>
-        </section>
-
-      </div>
-    </section>
-  </main>
-</body>
-</html>
-
+      <a class="btn btn--ghost" href="/courageaux/her-words.html">Read Her Words &amp; Bio</a>
+    </div>
+  </section>
 
   <!-- ADDRESS ROW -->
   <section aria-labelledby="address">
@@ -874,7 +428,7 @@
     }
   </script>
 
-    <!-- Add-to-Home Screen banner logic -->
+  <!-- Add-to-Home Screen banner logic -->
   <script>
     (function(){
       const banner   = document.getElementById('cx-a2hs');
@@ -911,11 +465,9 @@
 
       // Android / Chrome A2HS
       window.addEventListener('beforeinstallprompt', (e) => {
-        // Prevent the browser's default mini-infobar
         e.preventDefault();
         deferredPrompt = e;
 
-        // Ensure Install button visible and Android-style copy
         if (btnInstall) btnInstall.style.display = 'inline-block';
         if (copySpan) {
           copySpan.textContent =
@@ -936,7 +488,6 @@
             hideBanner();
           }
         } else if (isiOS) {
-          // Simple iOS hint if no prompt API
           alert('On iPhone: tap the Share icon, then choose "Add to Home Screen" to install Courageaux.');
         }
       });
@@ -953,7 +504,7 @@
     })();
   </script>
 
-    <!-- Add-to-Home Screen banner (Courageaux PWA) -->
+  <!-- Add-to-Home Screen banner (Courageaux PWA) -->
   <div id="cx-a2hs" class="cx-a2hs" hidden>
     <div class="cx-a2hs__inner">
       <div class="cx-a2hs__text">
@@ -972,70 +523,5 @@
       </div>
     </div>
   </div>
-
-  <style>
-    .cx-a2hs{
-      position:fixed;
-      left:50%;
-      bottom:12px;
-      transform:translateX(-50%);
-      z-index:9999;
-      max-width:480px;
-      width:calc(100% - 32px);
-      pointer-events:none;
-    }
-    .cx-a2hs__inner{
-      pointer-events:auto;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      padding:10px 12px;
-      border-radius:14px;
-      background:#101010;
-      border:1px solid #2a2a2a;
-      box-shadow:0 10px 30px rgba(0,0,0,.6);
-      color:#f5f5f5;
-      font-size:.85rem;
-    }
-    .cx-a2hs__text span{
-      display:block;
-      margin-top:2px;
-      color:#bdbdbd;
-      font-weight:400;
-      font-size:.8rem;
-    }
-    .cx-a2hs__actions{
-      display:flex;
-      align-items:center;
-      gap:6px;
-      flex-shrink:0;
-    }
-    .cx-a2hs__btn{
-      border:none;
-      padding:6px 10px;
-      border-radius:999px;
-      background:#c9a227;
-      color:#000;
-      font-size:.8rem;
-      font-weight:800;
-      cursor:pointer;
-    }
-    .cx-a2hs__close{
-      border:none;
-      background:transparent;
-      color:#999;
-      cursor:pointer;
-      font-size:.85rem;
-    }
-    @media (hover:hover){
-      .cx-a2hs__btn:hover{opacity:.93}
-      .cx-a2hs__close:hover{color:#fff}
-    }
-    @media (min-width:900px){
-      /* Optional: only show the banner on mobile / small screens */
-      .cx-a2hs{display:none;}
-    }
-  </style>
 </body>
 </html>
