@@ -135,7 +135,7 @@
     .prod-thumb img{width:110px;height:110px;object-fit:cover;border-radius:12px;border:1px solid #2a2a2a;background:#fff}
     @media (min-width:760px){ .prod-thumb img{width:120px;height:120px} }
 
-    /* Quote (kept for future use) */
+    /* Quote card template */
     .quote-card{background:#121212;border:1px solid #1f1f1f;border-radius:16px;padding:16px;max-width:980px;margin:0 auto}
     .quote-card blockquote{margin:0;font-size:1.02rem;line-height:1.65;color:#e9e9e9}
     .quote-card blockquote p{margin:.6rem 0}
@@ -218,7 +218,15 @@
       }
     }
 
-    /* A2HS banner */
+    /* Desktop hero proportions */
+    @media (min-width:900px){
+      .cx-hero__inner{min-height:clamp(420px,60vw,560px);align-items:center}
+      .cx-hero__copy{align-self:center;margin-top:0}
+      .cx-hero__media{height:100%;display:flex}
+      .cx-hero__media img{height:100%;width:100%;object-fit:cover}
+    }
+
+    /* Add-to-Home Screen banner */
     .cx-a2hs{
       position:fixed;
       left:50%;
@@ -278,18 +286,8 @@
       .cx-a2hs__close:hover{color:#fff}
     }
     @media (min-width:900px){
-      /* Optional: only show the banner on mobile / small screens */
+      /* Only show the banner on mobile / small screens */
       .cx-a2hs{display:none;}
-    }
-  </style>
-
-  <!-- Desktop hero proportions -->
-  <style>
-    @media (min-width:900px){
-      .cx-hero__inner{min-height:clamp(420px,60vw,560px);align-items:center}
-      .cx-hero__copy{align-self:center;margin-top:0}
-      .cx-hero__media{height:100%;display:flex}
-      .cx-hero__media img{height:100%;width:100%;object-fit:cover}
     }
   </style>
 </head>
@@ -349,7 +347,7 @@
           Hammond, Ponchatoula, Albany, Independence and Amite.
         </p>
       </div>
-      <a class="btn btn--ghost" href="/courageaux/her-words.html">Read Her Words &amp; Bio</a>
+      <a class="btn btn--ghost" href="/courageaux/her-words/">Read Her Words &amp; Bio</a>
     </div>
   </section>
 
@@ -431,7 +429,7 @@
   <!-- Add-to-Home Screen banner logic -->
   <script>
     (function(){
-      const banner   = document.getElementById('cx-a2hs');
+      const banner     = document.getElementById('cx-a2hs');
       const btnInstall = document.getElementById('cx-a2hs-install');
       const btnClose   = document.getElementById('cx-a2hs-close');
       const copySpan   = document.getElementById('cx-a2hs-copy');
@@ -448,7 +446,7 @@
       function showBanner(){
         if (!banner) return;
         if (localStorage.getItem(DISMISS_KEY) === '1') return;
-        if (isStandalone) return; // already installed
+        if (isStandalone) return;
         banner.hidden = false;
       }
 
@@ -457,13 +455,11 @@
         banner.hidden = true;
       }
 
-      // Handle close (dismiss)
       btnClose?.addEventListener('click', () => {
         localStorage.setItem(DISMISS_KEY, '1');
         hideBanner();
       });
 
-      // Android / Chrome A2HS
       window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
@@ -477,7 +473,6 @@
         showBanner();
       });
 
-      // Install button click
       btnInstall?.addEventListener('click', async () => {
         if (deferredPrompt) {
           deferredPrompt.prompt();
@@ -492,7 +487,6 @@
         }
       });
 
-      // iOS fallback: show guidance banner once
       if (isiOS && !isStandalone && !localStorage.getItem(DISMISS_KEY)) {
         if (btnInstall) btnInstall.style.display = 'none';
         if (copySpan) {
