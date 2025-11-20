@@ -217,6 +217,42 @@
       display:flex;
       gap:.5rem;
       flex-wrap:wrap;
+      align-items:center;
+    }
+
+    /* Soft text link inside cards */
+    .btn-link {
+      font-size:.8rem;
+      opacity:.8;
+      text-decoration:underline;
+      background:none;
+      border:none;
+      padding:0;
+      cursor:pointer;
+    }
+    .btn-link,
+    .btn-link:visited {
+      color:#d7dae0;
+    }
+    .btn-link:hover {
+      opacity:1;
+    }
+
+    /* Loop strip at bottom to circle everything */
+    .loop-strip {
+      border-top:1px solid #1f1f1f;
+      border-bottom:1px solid #1f1f1f;
+      padding:1rem 0;
+      text-align:center;
+      font-size:.8rem;
+      opacity:.9;
+    }
+    .loop-strip a {
+      color:#fff;
+      text-decoration:none;
+    }
+    .loop-strip a:hover {
+      text-decoration:underline;
     }
   </style>
 </head>
@@ -313,6 +349,7 @@
             </div>
             <div class="card__actions">
               <a class="btn btn--gold btn--primary" href="/supima/">Shop Supima</a>
+              <a class="btn-link" href="/supima/">Fit & fabric details</a>
             </div>
           </article>
 
@@ -331,6 +368,7 @@
             </div>
             <div class="card__actions">
               <a class="btn btn--gold btn--primary" href="/wintergames/">Shop Winter Games</a>
+              <a class="btn-link" href="/wintergames/">See full Winter Games lineup</a>
             </div>
           </article>
 
@@ -365,6 +403,7 @@
             </div>
             <div class="card__actions">
               <a class="btn btn--gold btn--primary" href="/dc-hat/">Shop D.C. Hat</a>
+              <a class="btn-link" href="/community/">See the D.C. motion</a>
             </div>
           </article>
 
@@ -382,6 +421,7 @@
             </div>
             <div class="card__actions">
               <a class="btn btn--ghost btn--secondary" href="/courageaux/her-words.html">See Her Words</a>
+              <a class="btn-link" href="/courageaux/her-words.html">Read November spotlight</a>
             </div>
           </article>
         </div>
@@ -398,6 +438,21 @@
         <div class="section__cta">
           <a class="btn btn--ghost" href="/community/">See Community Work</a>
         </div>
+      </div>
+    </section>
+
+    <!-- LOOP STRIP: quietly circles everything -->
+    <section class="section section--band">
+      <div class="container loop-strip">
+        <p>
+          Keep it in motion:
+          <a href="/vsop/">VSOP</a> ·
+          <a href="/wintergames/">Winter Games</a> ·
+          <a href="/supima/">Supima</a> ·
+          <a href="/dc-hat/">D.C. Hat</a> ·
+          <a href="/courageaux/her-words.html">Courageaux</a> ·
+          <a href="/stories/">Stories</a>
+        </p>
       </div>
     </section>
   </main>
@@ -459,39 +514,4 @@
     const navEl = await injectPartial('/nav/index.html', 'nav-placeholder');
 
     // highlight current link
-    if (navEl) {
-      const current = location.pathname.replace(/\/+$/, '') || '/';
-      navEl.querySelectorAll('a[href]').forEach(a => {
-        try {
-          const href = new URL(a.getAttribute('href'), location.origin).pathname.replace(/\/+$/, '') || '/';
-          if (href === current || (href !== '/' && current.startsWith(href))) {
-            a.classList.add('is-active');
-            a.setAttribute('aria-current', 'page');
-          }
-        } catch (_) {}
-      });
-    }
-
-    // FOOTER — served at /footer/index.html
-    await injectPartial('/footer/index.html', 'footer-placeholder');
-  })();
-  </script>
-
-  <!-- VSOP nav tracking -->
-  <script>
-  document.addEventListener('click', (e) => {
-    const a = e.target.closest('a[href="/vsop/"]');
-    if (!a) return;
-    try {
-      if (typeof gtag === 'function') {
-        gtag('event','click',{
-          event_category:'nav',
-          event_label:'vsop_home_link',
-          value:1
-        });
-      }
-    } catch(_) {}
-  });
-  </script>
-</body>
-</html>
+    if (nav
