@@ -366,7 +366,7 @@
           <!-- WINTER GAMES: Crewneck (Lil Soulja Slim) -->
           <article class="card" data-product-id="wintergames-hoodie">
             <div class="card__media">
-              <img src="/assets/og-lil-soulja-slim_800.jpg" alt="Winter Games hoodie from Square Bidness">
+              <img src="/assets/og-lil-soulja-slim_800.jpg" alt="Winter Games crewneck worn by OG Lil Soulja Slim">
               <span class="badge">Winter Games</span>
             </div>
             <div class="card__content">
@@ -401,23 +401,48 @@
             </div>
           </article>
 
-          <!-- COURAGEAUX / WOMEN COMING -->
+          <!-- WOMEN COMING SOON / MARQUESHA -->
           <article class="card">
             <div class="card__media">
-              <img src="/assets/courageaux-tee.jpg" alt="Courageaux Aesthetics inspired Square Bidness ladies tee">
+              <img
+                src="/community/marquesha-1-800.jpg"
+                srcset="/community/marquesha-1-800.jpg 800w, /community/marquesha-1-1600.jpg 1600w"
+                sizes="(max-width: 768px) 100vw, 400px"
+                alt="Marquesha representing the upcoming Square Bidness women’s lane">
               <span class="badge">Women Coming</span>
             </div>
             <div class="card__content">
-              <h3>Courageaux — Ladies First</h3>
+              <h3>Women’s Lane — Coming Soon</h3>
               <p class="card__description">
-                Skin clinic energy. Clean, calm, confident womenswear loading — Courageaux lane in motion.
+                Marquesha setting the tone for the women’s side — presence, posture, and Square Bidness written all over it.
               </p>
             </div>
             <div class="card__actions">
-              <a class="btn btn--ghost btn--secondary" href="/courageaux/her-words.html">See Her Words</a>
-              <a class="btn-link" href="/courageaux/her-words.html">Read November spotlight</a>
+              <a class="btn btn--ghost btn--secondary" href="/community/">
+                Watch the Community Lane
+              </a>
             </div>
           </article>
+
+          <!-- TAX PASS / FINAL BLOCK -->
+          <article class="card">
+            <div class="card__media">
+              <img src="/assets/tax-pass_1200x630.jpg" alt="Square Bidness Tax Pass artwork">
+              <span class="badge">Tax Pass</span>
+            </div>
+            <div class="card__content">
+              <h3>Tax Pass — Square Bidness</h3>
+              <p class="card__description">
+                Tax season handled the Square Bidness way — W-2s, 1099s, and small business returns with clean paperwork and straight answers.
+              </p>
+            </div>
+            <div class="card__actions">
+              <a class="btn btn--gold btn--primary" href="/tax-pass/">
+                Step Into Tax Pass
+              </a>
+            </div>
+          </article>
+
         </div>
       </div>
     </section>
@@ -468,6 +493,49 @@
         const desc  = card.querySelector(".card__description");
         const img   = card.querySelector("img");
         const price = card.querySelector(".price");
-        if (title &&
+        if (title && p.name) title.textContent = p.name;
+        if (desc && p.desc) desc.textContent = p.desc;
+        if (img && p.image) img.src = p.image;
+        if (price && typeof p.price === "number") price.textContent = `$${p.price.toFixed(2)}`;
+      });
+    })
+    .catch(() => {});
+  </script>
 
-            
+  <!-- NAV + FOOTER loader -->
+  <script>
+  (async () => {
+    const bust = `?v=${Date.now()}`;
+
+    async function injectPartial(url, targetId) {
+      try {
+        const res = await fetch(url + bust, { credentials: 'same-origin', cache: 'no-store' });
+        if (!res.ok) {
+          console.warn('[partials] not ok:', url, res.status);
+          return null;
+        }
+        const html = await res.text();
+        const el = document.getElementById(targetId);
+        if (!el) {
+          console.warn('[partials] missing target:', targetId);
+          return null;
+        }
+        el.innerHTML = html;
+        el.classList.add('fade-in');
+        return el;
+      } catch (err) {
+        console.warn('[partials] fetch fail:', url, err);
+        return null;
+      }
+    }
+
+    // NAV — served at /nav/index.html
+    await injectPartial('/nav/index.html', 'nav-placeholder');
+
+    // FOOTER — served at /footer/index.html
+    await injectPartial('/footer/index.html', 'footer-placeholder');
+  })();
+  </script>
+
+</body>
+</html>
