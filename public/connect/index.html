@@ -70,7 +70,7 @@
 
 <body class="theme-dark" id="top">
   
-  <!-- NAV -->
+  <!-- NAV (keeps your /nav/index.html style) -->
   <div id="nav-placeholder"></div>
 
   <!-- PAGE HERO -->
@@ -137,7 +137,7 @@
           </p>
         </section>
 
-        <!-- Social Media -->
+        <!-- Social Media (live only here + linkme) -->
         <div class="social-section">
           <h3>Follow Us</h3>
           <ul class="socials">
@@ -176,30 +176,26 @@
 
         <!-- Call to Action Buttons -->
         <div class="section__cta">
-          <a class="btn btn--gold" href="/shop.html">Shop Now</a>
-          <a class="btn btn--ghost" href="/index.html">Back Home</a>
+          <a class="btn btn--gold" href="/collections/">Shop Collections</a>
+          <a class="btn btn--ghost" href="/">Back Home</a>
         </div>
       </section>
 
-      <!-- Quick Links -->
+      <!-- Quick Links aligned with new nav -->
       <section class="quick-links">
         <h2 class="section__title">Quick Access</h2>
         <div class="quick-links-grid">
-          <a href="/shop.html" class="quick-link">
-            <span class="quick-link__title">Shop</span>
+          <a href="/collections/" class="quick-link">
+            <span class="quick-link__title">Collections</span>
             <span class="quick-link__desc">Latest drops and exclusives</span>
           </a>
-          <a href="/about.html" class="quick-link">
-            <span class="quick-link__title">About</span>
-            <span class="quick-link__desc">Our story and mission</span>
+          <a href="/courageaux/" class="quick-link">
+            <span class="quick-link__title">Courageaux</span>
+            <span class="quick-link__desc">Her lane, her aesthetic</span>
           </a>
-          <a href="/community.html" class="quick-link">
-            <span class="quick-link__title">Community</span>
-            <span class="quick-link__desc">Local impact and events</span>
-          </a>
-          <a href="/techlabs.html" class="quick-link">
-            <span class="quick-link__title">Tech Labs</span>
-            <span class="quick-link__desc">Innovation and infrastructure</span>
+          <a href="/stories/" class="quick-link">
+            <span class="quick-link__title">Stories</span>
+            <span class="quick-link__desc">Features and write-ups</span>
           </a>
         </div>
       </section>
@@ -207,33 +203,24 @@
     </div>
   </main>
 
-  <!-- FOOTER -->
+  <!-- FOOTER (keeps your /footer/index.html style) -->
   <div id="footer-placeholder"></div>
 
   <!-- Scripts: load after HTML so selectors exist -->
-  <script defer src="/scripts/sb-cart.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      // NAV
-      fetch("/nav.html?v=2") // cache-bust to avoid old copies
+      // NAV (pull your existing /nav/index.html partial)
+      fetch("/nav/index.html")
         .then(r => r.text())
         .then(d => {
           const host = document.getElementById("nav-placeholder");
           if (!host) return;
           host.innerHTML = d;
-
-          const current = (location.pathname.split("/").pop() || "connect.html");
-          document.querySelectorAll(".main-nav a").forEach(a => {
-            const hrefLast = (a.getAttribute("href") || "").split("/").pop();
-            if (hrefLast === current) {
-              a.classList.add("active");
-            }
-          });
         })
         .catch(err => console.error("nav load error:", err));
 
-      // FOOTER
-      fetch("/footer.html")
+      // FOOTER (pull your existing /footer/index.html partial)
+      fetch("/footer/index.html")
         .then(r => r.text())
         .then(d => {
           const host = document.getElementById("footer-placeholder");
