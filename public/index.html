@@ -1,107 +1,332 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <!-- Basics -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
 
-  <title>Square Bidness — Official Site</title>
-  <meta name="description" content="Square Bidness Apparel — Principles. Morals. Business Done Right. Louisiana-built lifestyle and limited apparel." />
+  <title>Square Bidness — Principles. Morals. Business Done Right.</title>
+  <meta name="description" content="Square Bidness Apparel — Veteran-owned Louisiana lifestyle brand. Principles. Morals. Business Done Right. Limited runs: VSOP, Supima, Winter Games and more." />
   <link rel="canonical" href="https://www.squarebidness.com/" />
 
-  <!-- App / Icons -->
+  <!-- Icons / PWA -->
   <link rel="icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
   <link rel="apple-touch-icon" href="/icon_180.png">
   <link rel="manifest" href="/manifest.webmanifest">
-
-  <!-- App-like behavior -->
   <meta name="theme-color" content="#000000">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Square Bidness">
-  <meta name="mobile-web-app-capable" content="yes">
 
   <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Square Bidness">
-  <meta property="og:title" content="Square Bidness — Official Site">
-  <meta property="og:description" content="Principles. Morals. Business Done Right. Limited apparel from Louisiana.">
+  <meta property="og:title" content="Square Bidness — Principles. Morals. Business Done Right.">
+  <meta property="og:description" content="Veteran-owned Louisiana lifestyle brand. Limited collections built on principles, morals, and business done right.">
   <meta property="og:url" content="https://www.squarebidness.com/">
   <meta property="og:image" content="/assets/og-default-1200x630.jpg">
   <meta name="twitter:card" content="summary_large_image" />
 
-  <!-- Styles -->
+  <!-- Inline styles for clean, no-404 setup -->
   <style>
+    :root {
+      color-scheme: dark;
+    }
+    * {
+      box-sizing: border-box;
+    }
     body {
       margin:0;
-      font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
       background:#000;
-      color:#fff;
+      color:#f9fafb;
     }
-    header {
-      padding:1rem 16px;
-      border-bottom:1px solid #1f1f1f;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      max-width:1200px;
-      margin:0 auto;
+    a {
+      color:inherit;
+      text-decoration:none;
     }
-    a { color:inherit; text-decoration:none; }
-    .logo { font-size:1.25rem; font-weight:600; letter-spacing:.5px; }
-
-    .hero {
-      position:relative;
-      width:100%;
-      max-width:1200px;
-      margin:0 auto;
-    }
-    .hero img {
-      width:100%;
-      height:auto;
-      display:block;
-    }
-    .hero-link {
-      position:absolute;
-      inset:0;
-      display:block;
+    a:hover {
+      text-decoration:underline;
     }
 
-    .sections {
+    .container {
       max-width:1200px;
-      margin:2rem auto 3rem;
+      margin:0 auto;
       padding:0 16px;
+    }
+
+    /* Header */
+    header.site-header {
+      border-bottom:1px solid #111827;
+      background:#000;
+    }
+    .site-header__inner {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:1rem 16px;
+      max-width:1200px;
+      margin:0 auto;
+    }
+    .logo {
+      font-size:1.25rem;
+      font-weight:600;
+      letter-spacing:0.08em;
+      text-transform:uppercase;
+    }
+    .logo span {
+      opacity:.75;
+      font-size:.8rem;
+      text-transform:none;
+      margin-left:.35rem;
+    }
+    nav a {
+      font-size:.9rem;
+      margin-left:1.25rem;
+      opacity:.9;
+    }
+    nav a:first-child {
+      margin-left:0;
+    }
+    nav a:hover {
+      opacity:1;
+    }
+
+    /* Hero */
+    .hero {
+      padding:2.5rem 0 2.75rem;
+      background:radial-gradient(circle at top, #111827, #020617);
+      border-bottom:1px solid #111827;
+    }
+    .hero__inner {
       display:grid;
       gap:1.75rem;
+      align-items:center;
     }
-    .block {
-      border:1px solid #1f1f1f;
-      padding:1.25rem 1rem;
-      border-radius:8px;
-      background:#0b0b0b;
+    @media (min-width:900px) {
+      .hero__inner {
+        grid-template-columns:1.15fr 1fr;
+      }
     }
-    .block h2 {
+    .hero__eyebrow {
+      font-size:.8rem;
+      text-transform:uppercase;
+      letter-spacing:.2em;
+      color:#9ca3af;
+      margin-bottom:.5rem;
+    }
+    .hero__title {
+      font-size:2.15rem;
+      line-height:1.15;
       margin:0 0 .5rem;
-      font-size:1.1rem;
-      font-weight:600;
     }
-    footer {
-      border-top:1px solid #1f1f1f;
-      background:#000;
-      color:#d7dae0;
-      padding:2rem 0 3rem;
+    @media (min-width:768px) {
+      .hero__title {
+        font-size:2.6rem;
+      }
+    }
+    .hero__tagline {
+      font-size:1rem;
+      color:#d1d5db;
+      margin:0 0 1rem;
+    }
+    .hero__sub {
       font-size:.9rem;
+      color:#9ca3af;
+      margin:0 0 1.5rem;
     }
-    footer .inner {
-      max-width:1200px;
-      margin:0 auto;
-      padding:0 16px;
+
+    .hero__actions {
+      display:flex;
+      flex-wrap:wrap;
+      gap:.75rem;
+      margin-bottom:1.5rem;
+    }
+    .btn {
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:.6rem 1.2rem;
+      border-radius:999px;
+      font-size:.9rem;
+      font-weight:500;
+      border:1px solid transparent;
+      cursor:pointer;
+      background:none;
+    }
+    .btn--gold {
+      background:linear-gradient(135deg,#fbbf24,#f59e0b);
+      color:#111827;
+      border-color:#fbbf24;
+    }
+    .btn--outline {
+      border-color:#4b5563;
+      color:#e5e7eb;
+    }
+    .btn--gold:hover {
+      filter:brightness(1.05);
+      text-decoration:none;
+    }
+    .btn--outline:hover {
+      border-color:#9ca3af;
+      text-decoration:none;
+    }
+
+    .hero__note {
+      font-size:.8rem;
+      color:#9ca3af;
+    }
+
+    .hero__media {
+      position:relative;
+    }
+    .hero__media img {
+      width:100%;
+      display:block;
+      border-radius:16px;
+      border:1px solid #111827;
+      background:#020617;
+    }
+    .hero__label {
+      position:absolute;
+      left:1rem;
+      bottom:1rem;
+      padding:.4rem .7rem;
+      border-radius:999px;
+      background:rgba(0,0,0,.8);
+      border:1px solid rgba(251,191,36,.6);
+      font-size:.75rem;
+      color:#fef3c7;
+      backdrop-filter:blur(6px);
+    }
+
+    @media (max-width:768px) {
+      .hero {
+        padding:2rem 0 2.25rem;
+      }
+      .hero__media {
+        order:-1;
+      }
+      .hero__label {
+        left:.75rem;
+        bottom:.75rem;
+      }
+    }
+
+    /* Collections grid */
+    .section {
+      padding:2.5rem 0 2.75rem;
+    }
+    .section__header {
+      margin-bottom:1.5rem;
+    }
+    .section__title {
+      font-size:1.25rem;
+      margin:0 0 .35rem;
+    }
+    .section__eyebrow {
+      font-size:.8rem;
+      text-transform:uppercase;
+      letter-spacing:.18em;
+      color:#9ca3af;
+    }
+    .section__lead {
+      font-size:.95rem;
+      color:#9ca3af;
+      margin:0;
+      max-width:540px;
+    }
+
+    .grid {
       display:grid;
       gap:1rem;
     }
-    @media (min-width:700px) {
-      .sections { grid-template-columns:repeat(3,1fr); }
+    @media (min-width:768px) {
+      .grid {
+        grid-template-columns:repeat(4,1fr);
+      }
+    }
+
+    .card {
+      border-radius:14px;
+      border:1px solid #111827;
+      background:#020617;
+      padding:1rem;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      min-height:160px;
+    }
+    .card__eyebrow {
+      font-size:.75rem;
+      text-transform:uppercase;
+      letter-spacing:.16em;
+      color:#9ca3af;
+      margin-bottom:.25rem;
+    }
+    .card__title {
+      font-size:1rem;
+      font-weight:600;
+      margin:0 0 .35rem;
+    }
+    .card__text {
+      font-size:.85rem;
+      color:#9ca3af;
+      margin:0 0 .75rem;
+    }
+    .card__link {
+      font-size:.85rem;
+      color:#e5e7eb;
+      text-decoration:none;
+    }
+    .card__link span {
+      opacity:.8;
+      margin-left:.15rem;
+    }
+    .card__link:hover span {
+      opacity:1;
+    }
+
+    /* Strip */
+    .strip {
+      border-top:1px solid #111827;
+      border-bottom:1px solid #111827;
+      padding:1rem 0;
+      font-size:.8rem;
+      color:#9ca3af;
+      text-align:center;
+    }
+    .strip a {
+      color:#e5e7eb;
+      margin:0 .4rem;
+    }
+
+    /* Footer */
+    footer.site-footer {
+      padding:2rem 0 3rem;
+      background:#000;
+      border-top:1px solid #111827;
+      color:#9ca3af;
+      font-size:.85rem;
+    }
+    .footer__inner {
+      display:grid;
+      gap:1rem;
+    }
+    @media (min-width:768px) {
+      .footer__inner {
+        grid-template-columns:2fr 1.2fr;
+        align-items:flex-start;
+      }
+    }
+    .footer__links a {
+      color:#e5e7eb;
+      margin-right:.75rem;
+    }
+    .footer__links a:last-child {
+      margin-right:0;
+    }
+    .footer__contact a {
+      color:#e5e7eb;
     }
   </style>
 </head>
@@ -109,55 +334,165 @@
 <body>
 
   <!-- HEADER -->
-  <header>
-    <div class="logo">Square Bidness</div>
-    <nav>
-      <a href="/connect.html">Connect</a>
-    </nav>
+  <header class="site-header">
+    <div class="site-header__inner">
+      <div class="logo">
+        Square Bidness
+        <span>Apparel</span>
+      </div>
+      <nav>
+        <a href="/connect.html">Connect</a>
+        <a href="/stories/">Stories</a>
+      </nav>
+    </div>
   </header>
 
-  <!-- HERO — VSOP -->
+  <!-- HERO -->
   <section class="hero">
-    <img src="/assets/vsop-hero-1200.jpg" alt="VSOP Collection — Square Bidness" loading="eager">
-    <a class="hero-link" href="/product/vsop/" aria-label="View VSOP"></a>
+    <div class="container">
+      <div class="hero__inner">
+        <div class="hero__copy">
+          <div class="hero__eyebrow">Louisiana · Veteran-owned</div>
+          <h1 class="hero__title">Principles. Morals. Business Done Right.</h1>
+          <p class="hero__tagline">
+            Square Bidness is a Louisiana lifestyle brand built on real motion — limited runs, clean presentation, and business handled the right way.
+          </p>
+          <p class="hero__sub">
+            VSOP, Supima, Winter Games, and more — from Hammond to New York and back to the block.
+          </p>
+
+          <div class="hero__actions">
+            <a class="btn btn--gold" href="/vsop/">Shop VSOP</a>
+            <a class="btn btn--outline" href="#collections">All collections</a>
+          </div>
+
+          <p class="hero__note">
+            American-first mindset. Local roots. Global behavior.
+          </p>
+        </div>
+
+        <div class="hero__media" aria-hidden="true">
+          <img src="/assets/vsop-hero-1200.jpg" alt="VSOP set from Square Bidness Apparel">
+          <div class="hero__label">
+            VSOP Collection · Fall behavior in motion
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
 
-  <!-- FEATURE SECTIONS -->
-  <section class="sections">
+  <!-- COLLECTIONS GRID -->
+  <main>
+    <section class="section" id="collections">
+      <div class="container">
+        <div class="section__header">
+          <div class="section__eyebrow">Front page of the paper</div>
+          <h2 class="section__title">What’s live right now</h2>
+          <p class="section__lead">
+            Tap into what’s moving: VSOP, Supima essentials, Winter Games, and the Courageaux lane.
+          </p>
+        </div>
 
-    <a href="/product/supima-tee/" class="block">
-      <h2>Supima Crewneck</h2>
-      <p>Premium. Clean. Limited run.</p>
-    </a>
+        <div class="grid">
+          <!-- VSOP -->
+          <article class="card">
+            <div>
+              <div class="card__eyebrow">VSOP Collection</div>
+              <h3 class="card__title">VSOP Jacket + Shorts</h3>
+              <p class="card__text">
+                Burgundy and brown set with embroidery hits. Very Superior Old Pale — aged concept, premium feel.
+              </p>
+            </div>
+            <a class="card__link" href="/vsop/">
+              View VSOP overview <span>→</span>
+            </a>
+          </article>
 
-    <a href="/collections/wintergames/" class="block">
-      <h2>Winter Game Hat</h2>
-      <p>Organic cotton. Louisiana exclusive.</p>
-    </a>
+          <!-- Supima -->
+          <article class="card">
+            <div>
+              <div class="card__eyebrow">Supima Essentials</div>
+              <h3 class="card__title">Supima Tee &amp; Crewneck</h3>
+              <p class="card__text">
+                Clean everyday uniform. Supima cotton with Square Bidness presence — shot in Hammond.
+              </p>
+            </div>
+            <a class="card__link" href="/supima/">
+              Shop Supima lane <span>→</span>
+            </a>
+          </article>
 
-    <a href="/courageaux/" class="block">
-      <h2>Courageaux Aesthetics</h2>
-      <p>Clean skin. Clean presence.</p>
-    </a>
+          <!-- Winter Games -->
+          <article class="card">
+            <div>
+              <div class="card__eyebrow">Winter Games</div>
+              <h3 class="card__title">Crewneck &amp; Waterproof Golfer</h3>
+              <p class="card__text">
+                Organic cotton crewneck and waterproof golfer hat — limited Louisiana run, Winter Games only.
+              </p>
+            </div>
+            <a class="card__link" href="/wintergames/">
+              Enter Winter Games <span>→</span>
+            </a>
+          </article>
 
-  </section>
+          <!-- Courageaux -->
+          <article class="card">
+            <div>
+              <div class="card__eyebrow">Courageaux Aesthetics</div>
+              <h3 class="card__title">Clean, calm, confident skin</h3>
+              <p class="card__text">
+                Hammond esthetics lane powered by Courageaux — presence and skincare that match the cloth.
+              </p>
+            </div>
+            <a class="card__link" href="/courageaux/">
+              Step into Courageaux <span>→</span>
+            </a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- STRIP -->
+    <section class="strip">
+      <div class="container">
+        <p>
+          Keep it in motion:
+          <a href="/vsop/">VSOP</a> ·
+          <a href="/wintergames/">Winter Games</a> ·
+          <a href="/supima/">Supima</a> ·
+          <a href="/courageaux/">Courageaux</a> ·
+          <a href="/stories/">Stories</a> ·
+          <a href="/connect.html">Connect</a>
+        </p>
+      </div>
+    </section>
+  </main>
 
   <!-- FOOTER -->
-  <footer>
-    <div class="inner">
-      <p>&copy; <span id="y"></span> 2025 Square Bidness Apparel</p>
-      <p>info@squarebidness.com</p>
-      <p>
-        <a href="/privacy/" style="color:#fff;">Privacy</a> ·
-        <a href="/terms/" style="color:#fff;">Terms</a> ·
-        <a href="/returns/" style="color:#fff;">Returns</a>
-      </p>
+  <footer class="site-footer">
+    <div class="container footer__inner">
+      <div>
+        <p>&copy; <span id="year"></span> Square Bidness Apparel</p>
+        <p>Principles. Morals. Business Done Right.</p>
+        <div class="footer__links">
+          <a href="/privacy/">Privacy</a>
+          <a href="/terms/">Terms</a>
+          <a href="/returns/">Returns</a>
+        </div>
+      </div>
+      <div class="footer__contact">
+        <p><strong>Contact</strong></p>
+        <p>
+          <a href="mailto:info@squarebidness.com">info@squarebidness.com</a>
+        </p>
+      </div>
     </div>
   </footer>
 
   <script>
-    document.getElementById('y').textContent = new Date().getFullYear();
+    // Simple, safe inline script (no external JS/MIME issues)
+    document.getElementById('year').textContent = new Date().getFullYear();
   </script>
-
 </body>
 </html>
