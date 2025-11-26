@@ -1,76 +1,45 @@
-<!-- /nav/index.html -->
-<header class="site-header">
-  <div class="container nav-inner" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.75rem 0;">
+<!-- public/nav/index.html -->
+<header class="site-header" style="background:#020617;border-bottom:1px solid #0b1220;color:#e5e7eb;">
+  <div class="nav container" style="max-width:1200px;margin:0 auto;padding:.75rem 16px;display:flex;align-items:center;justify-content:space-between;gap:1.25rem;">
     
-    <!-- Brand / Home -->
-    <a href="/" class="brand" style="font-weight:800;line-height:1;display:flex;align-items:center;gap:.5rem;color:#fff;text-decoration:none;">
+    <!-- Brand -->
+    <a href="/" class="nav__brand" style="display:flex;align-items:center;gap:.6rem;text-decoration:none;color:#e5e7eb;">
       <img src="/assets/cleantextlogo.png"
            alt="Square Bidness"
-           style="height:32px;width:auto;object-fit:contain;">
-      <span class="sr-only">Square Bidness</span>
+           style="height:26px;width:auto;display:block;">
+      <span style="font-size:.85rem;opacity:.85;">Principles. Morals. Business Done Right.</span>
     </a>
 
-    <!-- Nav links -->
-    <nav class="main-nav" aria-label="Main Navigation">
-      <ul style="display:flex;flex-wrap:wrap;gap:1rem;align-items:center;margin:0;padding:0;list-style:none;">
-        <li>
-          <a href="/" class="main-nav__link" style="color:#fff;text-decoration:none;font-weight:600;">
-            Home
-          </a>
-        </li>
-
-        <li>
-          <a href="/collections/" class="main-nav__link" style="color:#fff;text-decoration:none;font-weight:600;">
-            Collections
-          </a>
-        </li>
-
-        <li>
-          <a href="/courageaux/" class="main-nav__link" style="color:#fff;text-decoration:none;font-weight:600;">
-            Courageaux
-          </a>
-        </li>
-      </ul>
+    <!-- Primary links -->
+    <nav class="nav__links" aria-label="Main" style="display:flex;align-items:center;gap:1.1rem;font-size:.9rem;">
+      <a href="/vsop/" style="color:#e5e7eb;text-decoration:none;">VSOP</a>
+      <a href="/wintergames/" style="color:#e5e7eb;text-decoration:none;">Winter Games</a>
+      <a href="/supima/" style="color:#e5e7eb;text-decoration:none;">Supima</a>
+      <a href="/stories/" style="color:#e5e7eb;text-decoration:none;">Stories</a>
+      <a href="/community/" style="color:#e5e7eb;text-decoration:none;">Community</a>
     </nav>
+
+    <!-- Right side: campaign pill + Link Me + Cart -->
+    <div class="nav__right" style="display:flex;align-items:center;gap:.75rem;font-size:.85rem;">
+      <!-- Tax Pass / Tech Lab pill -->
+      <a href="/tax-pass/"
+         style="padding:.3rem .7rem;border-radius:999px;border:1px solid #1d4ed8;background:radial-gradient(circle at top left,#1e293b,#020617);color:#e5e7eb;text-decoration:none;font-size:.8rem;">
+        <span style="text-transform:uppercase;letter-spacing:.12em;font-size:.7rem;opacity:.8;display:block;">Tech Lab</span>
+        <span style="font-weight:600;">Tax Pass™</span>
+      </a>
+
+      <a href="/linkme/" style="color:#38bdf8;text-decoration:none;font-weight:500;">Link Me</a>
+
+      <!-- Cart -->
+      <a href="/cart/"
+         class="nav-cart"
+         style="display:inline-flex;align-items:center;gap:.35rem;padding:.35rem .7rem;border-radius:999px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;text-decoration:none;font-size:.85rem;">
+        <span>Cart</span>
+        <span class="nav-cart__count" data-cart-count
+              style="min-width:1.55rem;height:1.55rem;border-radius:999px;background:#0ea5e9;color:#020617;display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;">
+          0
+        </span>
+      </a>
+    </div>
   </div>
-
-  <style>
-    .site-header{
-      background:#000;
-      border-bottom:1px solid #1f1f1f;
-    }
-    @media(max-width:480px){
-      .main-nav__link{font-size:.9rem;}
-    }
-    .main-nav a.active{
-      color:#c9a227;
-      text-decoration:underline;
-      text-underline-offset:3px;
-    }
-  </style>
-
-  <script>
-    (function(){
-      // normalize current path like "/shop/"
-      const here = location.pathname.replace(/\/+$/,'/') || '/';
-
-      // add "active" state to current page link
-      document.querySelectorAll('.main-nav a').forEach(a=>{
-        const href = a.getAttribute('href') || '';
-        if (!href) return;
-        const norm = href.replace(/\/+$/,'/') || '/';
-
-        // rule:
-        // - if link is "/" then only match homepage
-        // - else highlight if current path starts with link path
-        const isHome  = norm === '/';
-        const isMatch = isHome ? (here === '/') : here.startsWith(norm);
-
-        if (isMatch) {
-          a.classList.add('active');
-          a.setAttribute('aria-current','page');
-        }
-      });
-    })();
-  </script>
 </header>
