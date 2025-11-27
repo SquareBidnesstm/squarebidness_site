@@ -92,11 +92,11 @@
     <div class="container">
 
       <!-- Filters -->
-      <div class="shop-filters">
-        <button class="chip is-active" data-filter="all">All</button>
-        <button class="chip" data-filter="vsop">Men</button>
-        <button class="chip" data-filter="tees">Ladies</button>
-        <button class="chip" data-filter="hats">Kids</button>
+      <div class="shop-filters" aria-label="Shop filters">
+        <button class="chip is-active" data-filter="all" type="button">All</button>
+        <button class="chip" data-filter="vsop" type="button">Men</button>
+        <button class="chip" data-filter="tees" type="button">Ladies</button>
+        <button class="chip" data-filter="hats" type="button">Kids</button>
       </div>
 
       <!-- GRID -->
@@ -163,7 +163,7 @@
           </div>
           <div class="card__content">
             <h3>Full VSOP Look</h3>
-            <p class="card__description">Complete the set with both pieces</p>
+            <p class="card__description">Complete the set with both pieces.</p>
           </div>
           <div class="card__actions">
             <a class="btn btn--gold btn--primary" href="/collection-vsop.html">Shop Collection</a>
@@ -189,7 +189,10 @@
 
     async function injectPartial(url, id) {
       try {
-        const res = await fetch(url + bust);
+        const res = await fetch(url + bust, {
+          cache: 'no-store',
+          credentials: 'same-origin'
+        });
         if (!res.ok) throw new Error(res.status);
         const html = await res.text();
         const el = document.getElementById(id);
@@ -201,7 +204,6 @@
       }
     }
 
-    // NOTE: no /public prefix here — these live in /public/nav and /public/footer in the repo
     const nav = await injectPartial('/nav/index.html', 'nav-placeholder');
     if (nav) {
       const current = location.pathname.replace(/\/+$/, '') || '/';
