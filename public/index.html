@@ -534,7 +534,9 @@
         if (title && p.name) title.textContent = p.name;
         if (desc && p.desc) desc.textContent = p.desc;
         if (img && p.image) img.src = p.image;
-        if (price && typeof p.price === "number") price.textContent = `$${p.price.toFixed(2)}`;
+        if (price && typeof p.price === "number") {
+          price.textContent = `$${p.price.toFixed(2)}`;
+        }
       });
     })
     .catch(() => {});
@@ -547,7 +549,10 @@
 
     async function injectPartial(url, targetId) {
       try {
-        const res = await fetch(url + bust, { credentials: 'same-origin', cache: 'no-store' });
+        const res = await fetch(url + bust, {
+          credentials: 'same-origin',
+          cache: 'no-store'
+        });
         if (!res.ok) {
           console.warn('[partials] not ok:', url, res.status);
           return null;
@@ -570,10 +575,11 @@
     // NAV — served at /nav/index.html
     await injectPartial('/nav/index.html', 'nav-placeholder');
 
-    // FOOTER — email version at /footer/index.html
+    // FOOTER — served at /footer/index.html
     await injectPartial('/footer/index.html', 'footer-placeholder');
   })();
   </script>
+
 
 </body>
 </html>
