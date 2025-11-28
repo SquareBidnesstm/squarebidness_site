@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Basics -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>VSOP Shorts — Square Bidness</title>
@@ -12,8 +13,8 @@
 
   <!-- Icons / PWA -->
   <link rel="icon" href="/favicon.ico" />
-  <link rel="apple-touch-icon" href="/icon_180.png" />
-  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="/assets/icons/icon-180.png" />
+  <link rel="manifest" href="/site.webmanifest" />
   <meta name="theme-color" content="#000000" />
 
   <!-- Open Graph -->
@@ -40,6 +41,7 @@
   <!-- NAV -->
   <div id="nav-placeholder"></div>
 
+  <!-- HERO -->
   <header class="page-hero">
     <div class="container">
       <h1 class="page-title">VSOP Shorts</h1>
@@ -109,20 +111,24 @@
     </div>
   </main>
 
+  <!-- FOOTER -->
   <div id="footer-placeholder"></div>
 
+  <!-- Nav/Footer Injection -->
   <script>
   (async()=>{
-    const bust=`?v=${Date.now()}`;
-    const inject=async(u,id)=>{
-      try{
-        const r=await fetch(u+bust,{credentials:'same-origin',cache:'no-store'});
-        if(!r.ok) throw 0;
-        const h=await r.text();
-        const el=document.getElementById(id);
-        if(!el) return;
-        el.innerHTML=h;
-      }catch(e){console.warn('fail',u)};
+    const bust = `?v=${Date.now()}`;
+    const inject = async (u, id) => {
+      try {
+        const r = await fetch(u + bust, { credentials:'same-origin', cache:'no-store' });
+        if (!r.ok) throw 0;
+        const h = await r.text();
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.innerHTML = h;
+      } catch(e) {
+        console.warn('fail', u);
+      }
     };
     await inject('/nav/basic.html','nav-placeholder');
     await inject('/footer/basic.html','footer-placeholder'); // basic footer on product pages
