@@ -1,38 +1,114 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script defer src="/scripts/ga.js"></script>
+
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Thank You — Payment Confirmed</title>
-  <meta name="robots" content="noindex" />
-  <meta name="theme-color" content="#000000" />
+  <title>Thank You — Square Bidness</title>
+  <meta name="description" content="Thank you for your order and support of Square Bidness Apparel.">
   <link rel="canonical" href="https://www.squarebidness.com/thank-you/" />
+  <meta name="theme-color" content="#000000" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Square Bidness" />
+  <meta property="og:title" content="Thank You — Square Bidness" />
+  <meta property="og:description" content="Your order has been received. Details will be sent to your email." />
+  <meta property="og:url" content="https://www.squarebidness.com/thank-you/" />
+
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/icon_180.png">
+  <link rel="manifest" href="/manifest.webmanifest">
+
+  <link rel="stylesheet" href="/styles/style.css" />
+
   <style>
-    body{margin:0;background:#0a0a0a;color:#fff;font-family:system-ui,Segoe UI,Roboto,Inter,sans-serif}
-    .wrap{max-width:880px;margin:0 auto;padding:28px}
-    .card{background:#121212;border:1px solid #222;border-radius:16px;padding:22px}
-    .muted{color:#bdbdbd}
-    .btn{display:inline-block;margin-top:14px;padding:12px 16px;border-radius:12px;background:#fff;color:#000;font-weight:700;text-decoration:none}
-    code{background:#0f0f0f;padding:2px 6px;border-radius:6px;border:1px solid #222}
+    .thank-shell{
+      max-width:760px;
+      margin:0 auto;
+      padding:3rem 1rem 3.5rem;
+      text-align:center;
+    }
+    .thank-kicker{
+      font-size:.8rem;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:#a1a1aa;
+    }
+    .thank-title{
+      margin:.4rem 0 .5rem;
+      font-size:clamp(1.8rem,3.2vw,2.4rem);
+    }
+    .thank-lead{
+      color:#d4d4d8;
+      font-size:.98rem;
+      max-width:38rem;
+      margin:0 auto 1.5rem;
+    }
+    .thank-meta{
+      font-size:.88rem;
+      color:#a1a1aa;
+      margin-top:1rem;
+    }
+    .thank-actions{
+      margin-top:1.8rem;
+      display:flex;
+      justify-content:center;
+      gap:.75rem;
+      flex-wrap:wrap;
+    }
   </style>
 </head>
-<body>
-  <main class="wrap">
-    <h1>Thanks — your order is in.</h1>
-    <div class="card">
-      <p>We’ve received your payment and we’re getting things ready.</p>
-      <p class="muted">If you used a card, the charge will appear from <strong>Square Bidness</strong>.</p>
-      <p class="muted">Order ref (if present): <code id="ref">(loading…)</code></p>
-      <a class="btn" href="/">Back to Home</a>
+
+<body class="theme-dark" id="top">
+  <div id="nav-placeholder"></div>
+
+  <main class="thank-shell">
+    <p class="thank-kicker">Square Bidness Apparel</p>
+    <h1 class="thank-title">Thank You for Your Order</h1>
+    <p class="thank-lead">
+      Your order has been received. A confirmation email with your details is on the way.
+      Once your package is in motion, you’ll receive tracking information (where available).
+    </p>
+
+    <p class="thank-meta">
+      Every order moves this brand forward. From Louisiana to wherever you are — we see you,
+      and we appreciate you.
+    </p>
+
+    <p class="thank-meta">
+      This confirmation page and the checkout flow are built and powered by
+      <strong>Square Bidness Tech Lab</strong>.
+    </p>
+
+    <div class="thank-actions">
+      <a class="btn btn--gold" href="/shop/">Back to Shop</a>
+      <a class="btn btn--ghost" href="/community/">See Community Work</a>
     </div>
   </main>
 
+  <div id="footer-placeholder"></div>
+
   <script>
-    // Show the Stripe Checkout Session ID if Stripe appended it
-    const p = new URLSearchParams(location.search);
-    const id = p.get('session_id') || p.get('order_id') || p.get('ref');
-    if (id) document.getElementById('ref').textContent = id;
-    else document.getElementById('ref').textContent = 'N/A';
+  (async () => {
+    const bust = `?v=${Date.now()}`;
+    async function injectPartial(url, targetId) {
+      try {
+        const res = await fetch(url + bust, {credentials:'same-origin',cache:'no-store'});
+        if (!res.ok) { console.warn('[partials] not ok:', url, res.status); return null; }
+        const html = await res.text();
+        const el = document.getElementById(targetId);
+        if (!el) return null;
+        el.innerHTML = html;
+        return el;
+      } catch (err) {
+        console.warn('[partials] fetch fail:', url, err);
+        return null;
+      }
+    }
+    await injectPartial('/nav/index.html','nav-placeholder');
+    await injectPartial('/footer/index.html','footer-placeholder');
+  })();
   </script>
 </body>
 </html>
