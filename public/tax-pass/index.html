@@ -5,9 +5,11 @@
   <script>
     (async () => {
       try {
-        const html = await fetch('/partials/head.html', {cache:'no-cache'}).then(r=>r.text());
+        const html = await fetch('/partials/head.html', { cache: 'no-cache' }).then(r => r.text());
         document.head.insertAdjacentHTML('afterbegin', html);
-      } catch(e){ console.warn('head include failed', e); }
+      } catch (e) {
+        console.warn('head include failed', e);
+      }
     })();
   </script>
 
@@ -22,11 +24,12 @@
   <meta property="og:title" content="Square Bidness Tax Pass™ — Digital Intake for Tax Offices">
   <meta property="og:description" content="Collect IDs, W-2s, and client details from any phone. Office code, simple links, status tracking. Built by Square Bidness Tech Lab.">
   <meta property="og:url" content="https://www.squarebidness.com/tax-pass/">
-  <meta property="og:image" content="/tax-pass/assets/tax-pass_1200x630.jpg">
+  <meta property="og:image" content="https://www.squarebidness.com/tax-pass/assets/tax-pass_1200x630.jpg">
 
   <meta name="theme-color" content="#050509">
- <meta name="apple-mobile-web-app-title" content="Tax Pass">
+  <meta name="apple-mobile-web-app-title" content="Tax Pass">
 
+  <!-- PWA / app shell just for Tax Pass -->
   <link rel="manifest" href="/tax-pass/manifest.webmanifest?v=2">
 
   <style>
@@ -303,6 +306,7 @@
   </style>
 </head>
 <body>
+  <!-- Global nav injected via loader.js -->
   <div id="site-header"></div>
 
   <main class="wrap">
@@ -536,7 +540,7 @@
         </div>
 
         <div>
-          <h2>Pricing & availability</h2>
+          <h2>Pricing &amp; availability</h2>
           <p>
             For early offices, we’re offering a simple structure:
           </p>
@@ -559,11 +563,13 @@
     </section>
   </main>
 
+  <!-- Product disclaimer footer just for Tax Pass -->
   <div class="footer">
     Square Bidness Tax Pass™ is a product of Square Bidness Tech Lab.  
     Not a tax preparation company — your clients’ returns are prepared and filed by your office.
   </div>
 
+  <!-- Global footer -->
   <div id="site-footer"></div>
   <script src="/partials/loader.js"></script>
 </body>
