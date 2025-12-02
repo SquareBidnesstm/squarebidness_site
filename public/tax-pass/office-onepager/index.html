@@ -1,8 +1,9 @@
-
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+
+  <!-- Global head partial (GA, styles, etc.) -->
   <script>
     (async () => {
       try {
@@ -16,293 +17,442 @@
 
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Tax Pass — Office One-Pager | Square Bidness Tech Lab</title>
-  <meta name="description" content="Printable one-pager for Tax Pass™ — show how your office collects IDs, W-2s, and client details from any phone. Built by Square Bidness Tech Lab.">
+  <meta name="description"
+        content="Square Bidness Tax Pass™ — a digital intake lane for independent tax offices. One-page overview for owners and office managers, built by Square Bidness Tech Lab.">
   <link rel="canonical" href="https://www.squarebidness.com/tax-pass/office-onepager/">
 
   <!-- Open Graph -->
-  <meta property="og:type" content="article">
+  <meta property="og:type" content="website">
   <meta property="og:site_name" content="Square Bidness">
-  <meta property="og:title" content="Tax Pass — Office One-Pager">
-  <meta property="og:description" content="Quick overview of Tax Pass™ for independent tax offices — digital intake from any phone, built by Square Bidness Tech Lab.">
+  <meta property="og:title" content="Tax Pass — Office One-Pager | Square Bidness Tech Lab">
+  <meta property="og:description"
+        content="Digital intake for independent tax offices — IDs, W-2s, and client details from any phone. One-page overview for owners and office managers.">
   <meta property="og:url" content="https://www.squarebidness.com/tax-pass/office-onepager/">
   <meta property="og:image" content="https://www.squarebidness.com/tax-pass/assets/tax-pass_1200x630.jpg">
 
-  <meta name="theme-color" content="#050509">
-  <meta name="apple-mobile-web-app-title" content="Tax Pass One-Pager">
-  <link rel="manifest" href="/tax-pass/manifest.webmanifest?v=2">
-
+  <meta name="theme-color" content="#ffffff">
   <style>
     :root{
-      --bg:#050509;
-      --surface:#0b0b10;
-      --border:#242436;
+      --bg:#f5f5f7;
+      --card:#ffffff;
+      --border:#e5e7eb;
+      --fg:#111827;
+      --muted:#6b7280;
       --accent:#f97316;
-      --fg:#f5f5f7;
-      --muted:#a3a3b0;
+      --accent-soft:#fef3c7;
+      --pill:#111827;
     }
     *{box-sizing:border-box}
     html,body{
       margin:0;
       padding:0;
       font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-      background:radial-gradient(circle at top,#111827,#020617);
+      background:var(--bg);
       color:var(--fg);
     }
     a{color:inherit;text-decoration:none}
     a:hover{text-decoration:underline}
 
     .wrap{
-      max-width:900px;
+      max-width:960px;
       margin:0 auto;
       padding:16px;
     }
 
+    .sheet{
+      background:var(--card);
+      border-radius:18px;
+      border:1px solid var(--border);
+      box-shadow:0 18px 45px rgba(15,23,42,.06);
+      padding:20px 18px 18px;
+    }
+
     header{
-      padding:10px 0 14px;
-      border-bottom:1px solid #111827;
-      margin-bottom:16px;
       display:flex;
-      flex-wrap:wrap;
       justify-content:space-between;
-      gap:8px;
-      align-items:flex-end;
+      gap:10px;
+      align-items:flex-start;
+      border-bottom:1px solid var(--border);
+      padding-bottom:10px;
+      margin-bottom:14px;
     }
-    .brand{
+    @media(max-width:640px){
+      header{flex-direction:column;align-items:flex-start;}
+    }
+    .brand-block{
       font-size:.8rem;
-      letter-spacing:.16em;
       text-transform:uppercase;
+      letter-spacing:.16em;
       color:var(--muted);
     }
-    .brand strong{color:#fff;}
-    h1{
-      margin:4px 0 0;
-      font-size:clamp(1.4rem,2.6vw,1.9rem);
-    }
-    .subtitle{
-      margin:0;
+    .brand-block strong{
+      display:block;
       font-size:.9rem;
-      color:var(--muted);
-      max-width:30rem;
+      color:#000;
     }
-
-    .back-link{
-      font-size:.8rem;
-      margin-top:4px;
-    }
-
-    .pill-row{
-      margin-top:8px;
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-    }
-    .pill{
+    .badge{
       display:inline-flex;
       align-items:center;
       gap:6px;
       padding:4px 10px;
       border-radius:999px;
-      border:1px solid #1f2937;
-      background:#020617;
-      font-size:.78rem;
-      color:#d1d5db;
+      border:1px solid rgba(15,23,42,.08);
+      background:#f9fafb;
+      font-size:.75rem;
+      color:#111827;
     }
-    .pill span{
-      width:7px;height:7px;border-radius:999px;background:#22c55e;
+    .badge span{
+      width:8px;height:8px;border-radius:999px;background:#22c55e;
     }
 
-    .main-card{
-      margin-top:16px;
-      border-radius:18px;
-      border:1px solid var(--border);
-      background:linear-gradient(145deg,#020617,#050509);
-      padding:16px 14px 16px;
+    h1{
+      margin:0;
+      font-size:1.4rem;
     }
-    .two-col{
+    .subtitle{
+      margin:4px 0 0;
+      font-size:.9rem;
+      color:var(--muted);
+      max-width:34rem;
+    }
+
+    .grid-2{
       display:grid;
       gap:14px;
+      margin-top:12px;
     }
-    @media(min-width:780px){
-      .two-col{
+    @media(min-width:768px){
+      .grid-2{
         grid-template-columns:1.1fr .9fr;
       }
     }
 
-    .section-title{
-      font-size:1rem;
-      margin:0 0 4px;
+    .block{
+      padding:10px 0;
+      border-bottom:1px solid var(--border);
     }
-    .section-text{
-      margin:0 0 8px;
-      font-size:.9rem;
+    .block:last-of-type{
+      border-bottom:none;
+    }
+    .block h2{
+      margin:0 0 4px;
+      font-size:.98rem;
+    }
+    .block p{
+      margin:0;
+      font-size:.88rem;
+      color:var(--muted);
+    }
+
+    .pill-row{
+      margin-top:6px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      font-size:.78rem;
+    }
+    .pill{
+      border-radius:999px;
+      padding:4px 9px;
+      border:1px solid #d4d4d8;
+      background:#f9fafb;
+      color:#4b5563;
+    }
+
+    .steps{
+      margin-top:6px;
+      display:grid;
+      gap:6px;
+      font-size:.86rem;
+    }
+    .step{
+      display:flex;
+      align-items:flex-start;
+      gap:8px;
+    }
+    .step-num{
+      width:20px;height:20px;
+      border-radius:999px;
+      border:1px solid #d4d4d8;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:.75rem;
+      color:#111827;
+      margin-top:2px;
+    }
+    .step-body strong{
+      display:block;
+      font-size:.86rem;
+      margin-bottom:2px;
+    }
+    .step-body p{
+      margin:0;
+      font-size:.82rem;
       color:var(--muted);
     }
 
     .list{
-      margin:6px 0 0 18px;
+      margin:6px 0 0 16px;
       padding:0;
-      font-size:.86rem;
-      color:#d1d5db;
-    }
-
-    .box{
-      border-radius:14px;
-      border:1px solid #1f2937;
-      background:#020617;
-      padding:10px 11px;
       font-size:.84rem;
-      color:#e5e7eb;
-      margin-top:8px;
-    }
-    .box strong{
-      display:block;
-      margin-bottom:2px;
+      color:var(--muted);
     }
 
-    .cta-area{
-      margin-top:14px;
-      border-radius:16px;
-      border:1px dashed #374151;
-      background:#020617;
-      padding:10px 11px 12px;
-      font-size:.86rem;
-      color:#e5e7eb;
+    .callout{
+      margin-top:8px;
+      border-radius:10px;
+      border:1px solid #fed7aa;
+      background:var(--accent-soft);
+      padding:7px 9px;
+      font-size:.8rem;
+      color:#92400e;
+    }
+
+    .download-row{
+      margin-top:10px;
       display:flex;
       flex-wrap:wrap;
-      gap:10px;
+      gap:8px;
       align-items:center;
-      justify-content:space-between;
     }
-    .btn-download{
+    .btn-primary{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      padding:8px 14px;
       border-radius:999px;
-      border:1px solid #f97316;
+      border:1px solid var(--accent);
       background:linear-gradient(135deg,#f97316,#fb923c);
       color:#111827;
       font-size:.86rem;
       font-weight:700;
-      padding:9px 16px;
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
       text-decoration:none;
-      white-space:nowrap;
+      box-shadow:0 10px 25px rgba(248,113,22,.35);
     }
-    .btn-download span{
+    .btn-primary span{
       font-size:.95rem;
     }
-    .cta-note{
-      font-size:.78rem;
-      color:#e5e7eb;
-      max-width:420px;
+    .download-note{
+      font-size:.8rem;
+      color:var(--muted);
     }
 
-    footer{
-      margin-top:18px;
-      padding:10px 0 18px;
-      border-top:1px solid #020617;
+    .footer-note{
+      margin-top:12px;
       font-size:.78rem;
-      color:#9ca3af;
+      color:#6b7280;
+      border-top:1px solid var(--border);
+      padding-top:8px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      justify-content:space-between;
+      align-items:center;
     }
-    footer strong{color:#e5e7eb;}
+    .footer-note strong{
+      color:#111827;
+    }
+    .footer-tag{
+      font-size:.75rem;
+      color:#4b5563;
+    }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div>
-        <div class="brand">
-          <strong>Square Bidness Tech Lab</strong><br>
-          Tax Pass™ · Office One-Pager
+  <!-- Global nav -->
+  <div id="site-header"></div>
+
+  <main class="wrap">
+    <section class="sheet" aria-label="Tax Pass office one-pager">
+      <header>
+        <div class="brand-block">
+          <span>Square Bidness</span>
+          <strong>Tech Lab</strong>
         </div>
-        <h1>Digital Intake for Independent Tax Offices</h1>
+        <div>
+          <div class="badge">
+            <span></span>
+            Tax Pass™ · Digital Intake for Tax Offices
+          </div>
+        </div>
+      </header>
+
+      <div class="block">
+        <h1>Square Bidness Tax Pass™ — Office Overview</h1>
         <p class="subtitle">
-          Quick overview of how Tax Pass™ gives your office a clean digital front door — without changing
-          your existing tax software.
+          A digital intake lane that sits in front of your existing tax software. Clients send IDs, W-2s,
+          and details from any phone. You get cleaner files, fewer no-shows, and a stronger season.
         </p>
         <div class="pill-row">
-          <div class="pill"><span></span> Built in Louisiana · Veteran-owned</div>
-          <div class="pill">No client app · Simple link · Office code based</div>
+          <div class="pill">Independent offices &amp; small chains</div>
+          <div class="pill">No client app</div>
+          <div class="pill">Simple link + office code</div>
         </div>
       </div>
-      <div class="back-link">
-        <a href="/tax-pass/">&larr; Back to full Tax Pass page</a>
-      </div>
-    </header>
 
-    <section class="main-card">
-      <div class="two-col">
+      <div class="grid-2">
         <div>
-          <h2 class="section-title">What Tax Pass does</h2>
-          <p class="section-text">
-            Tax Pass™ sits in front of your existing tax software. Clients use a branded link and office
-            code to send IDs, W-2s, and details from any phone — you keep working inside Drake, TaxSlayer,
-            ProSeries, and what you already know.
-          </p>
-          <ul class="list">
-            <li>Clients start from your link or QR code.</li>
-            <li>They confirm contact info and answer a few questions.</li>
-            <li>They upload photos of IDs and W-2s from their phone.</li>
-            <li>Files drop into your office queue: <em>New → In review → Ready to sign → Filed</em>.</li>
-          </ul>
+          <div class="block">
+            <h2>How Tax Pass fits your office</h2>
+            <p>
+              Tax Pass doesn’t replace your tax software — it sits in front of it as a clean “front door.”
+              You keep preparing returns in Drake, TaxSlayer, ProSeries, etc.
+            </p>
 
-          <div class="box">
-            <strong>Built with a real office in Alexandria, LA</strong>
-            The first rollout was built shoulder-to-shoulder with Tax Slayer — Jessica Porter, so the
-            flow matches real season days, not just a whiteboard.
+            <div class="steps">
+              <div class="step">
+                <div class="step-num">1</div>
+                <div class="step-body">
+                  <strong>Clients start from your link or QR code</strong>
+                  <p>
+                    We give you a branded intake link and office code. You text it, print it on cards,
+                    or drop it on your socials — whatever matches how you already move.
+                  </p>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-num">2</div>
+                <div class="step-body">
+                  <strong>They send IDs, W-2s, and details from their phone</strong>
+                  <p>
+                    Front/back of ID, W-2s, 1099s, basic questions, and quick notes. No app store,
+                    no login drama — just a simple secure link.
+                  </p>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-num">3</div>
+                <div class="step-body">
+                  <strong>You work from a clean dashboard</strong>
+                  <p>
+                    Files drop into an office queue: <em>New → In review → Ready to sign → Filed</em>.
+                    You still do all calculations and e-file in the software you’re used to.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="callout">
+              Built shoulder-to-shoulder with a real office in Alexandria, LA, so the flow makes sense
+              on busy days — not just in a pitch deck.
+            </div>
           </div>
-        </div>
 
-        <div>
-          <h2 class="section-title">How we roll it out with you</h2>
-          <p class="section-text">
-            We treat this as infrastructure, not a random app. The first season we work together is
-            about getting your intake tight and your staff comfortable.
-          </p>
-          <div class="box">
-            <strong>Onboarding steps</strong>
-            <ul class="list" style="margin-top:4px;">
-              <li>Short discovery call about your office and locations.</li>
-              <li>Office-branded link, code, and intake wording.</li>
-              <li>Pilot week with a slice of your client base.</li>
-              <li>Adjust messaging and dashboards based on real use.</li>
+          <div class="block">
+            <h2>What Tax Pass is <em>not</em></h2>
+            <ul class="list">
+              <li>Not a replacement for your tax software.</li>
+              <li>Not a big-box franchise portal that sits between you and your clients.</li>
+              <li>Not a “use our software or else” system.</li>
             </ul>
           </div>
-          <div class="box" style="margin-top:10px;">
-            <strong>Pricing &amp; availability</strong>
-            Per-office or per-season pricing with pilot terms for early offices. Custom setup if you
-            have multiple locations or remote preparers.
+        </div>
+
+        <div>
+          <div class="block">
+            <h2>Designed for independent offices</h2>
+            <p>
+              Whether you’re a single-location shop or a small multi-office operation, Tax Pass is built
+              to feel like <em>your</em> system — not a generic third-party app.
+            </p>
+            <ul class="list">
+              <li><strong>Office-branded intake:</strong> Your logo, colors, and office name at the top.</li>
+              <li><strong>Code-based routing:</strong> Each office gets a unique code (e.g. <code>EFHO7IRV</code>).</li>
+              <li><strong>Client status view:</strong> Optional link so clients can check status without blowing up your phone.</li>
+              <li><strong>Owner controls:</strong> You decide when intake is open/closed and how you’re notified.</li>
+            </ul>
+          </div>
+
+          <div class="block">
+            <h2>Security &amp; data handling</h2>
+            <ul class="list">
+              <li>Encrypted transport (HTTPS) end-to-end.</li>
+              <li>Files stored in secure cloud object storage.</li>
+              <li>Per-office configuration and access controls.</li>
+              <li>No ads, no selling client data — ever.</li>
+            </ul>
+            <p style="margin-top:6px;font-size:.8rem;color:var(--muted);">
+              We’re happy to walk your office or IT person through the architecture and policies before rollout.
+            </p>
+          </div>
+
+          <div class="block">
+            <h2>Pricing &amp; rollout</h2>
+            <p>
+              For early offices, we’re keeping pricing and rollout simple:
+            </p>
+            <ul class="list">
+              <li>Per-office or per-season pricing.</li>
+              <li>Pilot terms for the first season we work together.</li>
+              <li>Custom setup for multi-location shops.</li>
+            </ul>
+            <p style="margin-top:6px;font-size:.84rem;color:var(--muted);">
+              First wave is intentionally tight so we can support every office properly.
+            </p>
           </div>
         </div>
       </div>
 
-      <div class="cta-area">
-        <a
-          href="/tax-pass/assets/tax-pass-office-onepager.pdf"
-          class="btn-download"
-          target="_blank"
-          rel="noopener"
-        >
-          Download PDF One-Pager
-          <span>↓</span>
-        </a>
-        <p class="cta-note">
-          PDF is set up for email attachments and print. If it opens in your browser, use the download
-          button to save it, then share with your team or potential offices.
+      <div class="block">
+        <h2>Next steps for office owners</h2>
+        <p>
+          If you’re interested in Tax Pass for your office, we usually start with a quick conversation:
         </p>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Short discovery call</strong>
+              <p>15–20 minutes to understand your locations, volume, and how you run season today.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Brand + setup</strong>
+              <p>We configure your office code, branding, and simple instructions for your team.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Pilot week</strong>
+              <p>Start with a few clients or one location, then tune wording and flow based on real use.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="download-row">
+          <a
+            href="/tax-pass/office-onepager/tax-pass-office-onepager.pdf"
+            class="btn-primary"
+          >
+            Download PDF office one-pager
+            <span>↓</span>
+          </a>
+          <div class="download-note">
+            Once you upload the PDF to
+            <code>/tax-pass/office-onepager/tax-pass-office-onepager.pdf</code>, this button will download it.
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-note">
+        <div>
+          <strong>Square Bidness Tech Lab</strong><br>
+          Tax Pass™ is built for independent tax offices that want a clean digital front door without giving up their identity.
+        </div>
+        <div class="footer-tag">
+          Email: <a href="mailto:info@squarebidness.com">info@squarebidness.com</a>
+        </div>
       </div>
     </section>
+  </main>
 
-    <footer>
-      <p>
-        <strong>Square Bidness Tech Lab</strong> — the same team behind Square Bidness Apparel.  
-        Tax Pass™ is built for independent tax offices that want a clean digital intake lane without
-        giving up their identity.
-      </p>
-      <p style="margin-top:4px;">
-        Email <a href="mailto:info@squarebidness.com">info@squarebidness.com</a> or
-        <a href="mailto:marcusbuckner@squarebidness.com">marcusbuckner@squarebidness.com</a> to talk rollout.
-      </p>
-    </footer>
-  </div>
+  <!-- Global footer -->
+  <div id="site-footer"></div>
+  <script src="/partials/loader.js"></script>
 </body>
 </html>
