@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <script>
+    (async () => {
+      try {
+        const html = await fetch('/partials/head.html', { cache: 'no-cache' }).then(r => r.text());
+        document.head.insertAdjacentHTML('afterbegin', html);
+      } catch (e) {
+        console.warn('head include failed', e);
+      }
+    })();
+  </script>
+
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tax Pass™ for Multi-Office Chains — Square Bidness Tech Lab</title>
+  <meta name="description" content="Tax Pass™ for multi-office tax chains. Digital intake, office-code routing, and simple queues that scale across locations. Built by Square Bidness Tech Lab.">
+  <link rel="canonical" href="https://www.squarebidness.com/tax-pass/office-onepager/chain.html">
+
+  <meta name="theme-color" content="#020617" />
+
+  <style>
+    /* reuse same palette as V2 */
+    :root{
+      --bg:#020617;
+      --surface:#020818;
+      --surface-soft:#050b1c;
+      --border:#1f2937;
+      --accent:#f97316;
+      --fg:#e5e7eb;
+      --muted:#9ca3af;
+      --good:#22c55e;
+    }
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;padding:0;
+      background:radial-gradient(circle at top,#111827,#020617);
+      color:var(--fg);
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    }
+    a{color:inherit;text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    .wrap{max-width:900px;margin:0 auto;padding:18px 16px 32px;}
+
+    header{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:18px;
+    }
+    .brand-block{
+      font-size:.8rem;
+      text-transform:uppercase;
+      letter-spacing:.16em;
+      color:var(--muted);
+    }
+    .brand-block strong{
+      display:block;
+      color:#fff;
+      font-size:.78rem;
+    }
+    .tag-pill{
+      border-radius:999px;
+      border:1px solid #374151;
+      background:#020617;
+      padding:5px 10px;
+      font-size:.75rem;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      color:var(--muted);
+    }
+    .tag-pill span{
+      width:7px;height:7px;border-radius:999px;background:var(--good);
+    }
+
+    .hero{
+      border-radius:18px;
+      border:1px solid var(--border);
+      background:radial-gradient(circle at top left,#111827,#020617);
+      padding:18px 16px 16px;
+      display:grid;
+      gap:16px;
+    }
+    @media(min-width:760px){
+      .hero{grid-template-columns:1.3fr .9fr;}
+    }
+    .hero-eyebrow{
+      text-transform:uppercase;
+      letter-spacing:.18em;
+      font-size:11px;
+      color:var(--accent);
+      margin:0 0 4px;
+    }
+    h1{
+      margin:0 0 6px;
+      font-size:clamp(1.6rem,3.1vw,2.2rem);
+    }
+    .hero-sub{
+      margin:0 0 8px;
+      font-size:.95rem;
+      color:var(--muted);
+      max-width:32rem;
+    }
+    .hero-note{
+      margin:0;
+      font-size:.84rem;
+      color:#e5e7eb;
+    }
+    .hero-cta-row{
+      margin-top:10px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+    .btn{
+      border-radius:999px;
+      border:1px solid #1f2937;
+      padding:9px 14px;
+      font-size:.84rem;
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      cursor:pointer;
+      text-decoration:none;
+    }
+    .btn-primary{
+      background:linear-gradient(135deg,#f97316,#fb923c);
+      border-color:#f97316;
+      color:#030712;
+      font-weight:700;
+    }
+    .btn-ghost{
+      background:#020617;
+      color:#e5e7eb;
+    }
+
+    .hero-meta{
+      margin-top:10px;
+      font-size:.8rem;
+      color:var(--muted);
+    }
+
+    .band{
+      margin-top:16px;
+      border-radius:16px;
+      border:1px solid var(--border);
+      background:linear-gradient(135deg,#020617,#050b1c);
+      padding:10px 14px;
+      display:grid;
+      gap:10px;
+      font-size:.83rem;
+      color:#d1d5db;
+    }
+    @media(min-width:700px){
+      .band{grid-template-columns:repeat(3,1fr);}
+    }
+    .band strong{
+      display:block;
+      margin-bottom:2px;
+      color:#fef3c7;
+    }
+
+    .grid-2{
+      margin-top:18px;
+      display:grid;
+      gap:16px;
+    }
+    @media(min-width:760px){
+      .grid-2{grid-template-columns:1.1fr .9fr;}
+    }
+    .card{
+      border-radius:16px;
+      border:1px solid var(--border);
+      background:rgba(15,23,42,.9);
+      padding:14px 14px 12px;
+      font-size:.9rem;
+      color:var(--muted);
+    }
+    .card h2{
+      margin:0 0 6px;
+      font-size:1.02rem;
+      color:#e5e7eb;
+    }
+
+    .steps{margin:6px 0 0;display:grid;gap:8px;}
+    .step-row{display:flex;gap:9px;align-items:flex-start;font-size:.86rem;color:#e5e7eb;}
+    .step-num{
+      width:20px;height:20px;
+      border-radius:999px;
+      border:1px solid #4b5563;
+      display:flex;align-items:center;justify-content:center;
+      font-size:.78rem;margin-top:2px;
+    }
+    .step-body p{margin:0;font-size:.84rem;color:var(--muted);}
+
+    ul.bullets{
+      margin:6px 0 0 18px;
+      padding:0;
+      font-size:.86rem;
+      color:var(--muted);
+    }
+
+    .callout{
+      margin-top:8px;
+      border-radius:12px;
+      border:1px dashed #374151;
+      background:#020617;
+      padding:8px 9px;
+      font-size:.8rem;
+      color:#e5e7eb;
+    }
+
+    footer{
+      margin-top:16px;
+      padding-top:10px;
+      border-top:1px solid #020617;
+      font-size:.78rem;
+      color:#6b7280;
+    }
+    footer strong{color:#e5e7eb;}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand-block">
+        <span>Square Bidness</span>
+        <strong>Tech Lab</strong>
+      </div>
+      <div class="tag-pill">
+        <span></span> Built in Louisiana · Veteran-owned
+      </div>
+    </header>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div>
+        <p class="hero-eyebrow">Tax Pass™ · Multi-Office Edition</p>
+        <h1>One intake lane — clean queues across every location.</h1>
+        <p class="hero-sub">
+          Tax Pass™ gives your chain or multi-office group a consistent digital intake lane:
+          one link, unique office codes, and queues that keep every location in order.
+        </p>
+        <p class="hero-note">
+          Keep your existing tax software in each office. We standardize the front door.
+        </p>
+
+        <div class="hero-cta-row">
+          <a
+            href="mailto:info@squarebidness.com?subject=Tax%20Pass%20for%20multi-office%20chain&body=Tell%20us%20about%20your%20locations%20and%20current%20workflow."
+            class="btn btn-primary"
+          >
+            Talk multi-office rollout →
+          </a>
+          <a
+            href="https://lab.squarebidness.com/tax-pass/?office=EFHO7IRV"
+            class="btn btn-ghost"
+            target="_blank"
+            rel="noopener"
+          >
+            See sample client intake
+          </a>
+        </div>
+
+        <p class="hero-meta">
+          Built for owners who manage multiple locations but don’t want a big-box franchise dictating their systems.
+        </p>
+      </div>
+
+      <div><!-- empty side; reuse hero art later if you want --></div>
+    </section>
+
+    <!-- 3 POINTS FOR CHAINS -->
+    <section class="band">
+      <div>
+        <strong>Per-office codes</strong>
+        Each office gets its own code. A single master link can route files to the correct
+        location based on that code.
+      </div>
+      <div>
+        <strong>Shared standards</strong>
+        Same questions, same intake screens, same expectations — no matter which office
+        the client is dealing with.
+      </div>
+      <div>
+        <strong>Owner visibility</strong>
+        Optional owner view so you can see how many files are <em>New, In review, Ready, Filed</em>
+        across all locations.
+      </div>
+    </section>
+
+    <!-- LOWER GRID -->
+    <section class="grid-2">
+      <article class="card">
+        <h2>How Tax Pass scales across your locations</h2>
+        <p>
+          We start small: one or two offices, one owner, one point of contact.  
+          Then we roll what works out to the rest of the group.
+        </p>
+        <div class="steps">
+          <div class="step-row">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Map your locations</strong>
+              <p>We map each office, owner structure, and how you route clients today.</p>
+            </div>
+          </div>
+          <div class="step-row">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Configure codes + branding</strong>
+              <p>Each office gets a code, logo, and instructions that match your brand and culture.</p>
+            </div>
+          </div>
+          <div class="step-row">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Roll out in waves</strong>
+              <p>Start with a pilot wave, then expand once staff is comfortable and you like the results.</p>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>Pricing & owner controls</h2>
+        <p>
+          We price Tax Pass for chains and groups based on how you actually operate, not just
+          how many logins you have.
+        </p>
+        <ul class="bullets">
+          <li>Per-office or per-group pricing options.</li>
+          <li>Pilot terms for the first season together.</li>
+          <li>Owner controls for branding, messaging, and office hours.</li>
+        </ul>
+        <div class="callout">
+          Email <a href="mailto:info@squarebidness.com">info@squarebidness.com</a> with your location count,
+          software mix, and season timing.  
+          We’ll send back a rollout suggestion and sample terms.
+        </div>
+      </article>
+    </section>
+
+    <footer>
+      <p>
+        <strong>Square Bidness Tech Lab</strong> — Tax Pass™ is built for independent owners and small chains
+        that want enterprise-level intake without losing their name on the door.
+      </p>
+    </footer>
+  </div>
+</body>
+</html>
