@@ -50,17 +50,19 @@ window.addEventListener('sb:add_to_cart', (e) => {
   if (q) SB.ga.search(q);
 })();
 
-// ---- Register Service Worker ----
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
+// Clean SW register – root scope
+(function () {
+  if (!('serviceWorker' in navigator)) return;
+
+  window.addEventListener('load', function () {
     navigator.serviceWorker
-      .register('/public/service-worker.js')
-      .then(() => console.log('✅ Square Bidness Service Worker active'))
-      .catch((err) => console.warn('SW registration failed:', err));
+      .register('/service-worker.js')
+      .then(function (reg) {
+        console.log('[SW] registered with scope:', reg.scope);
+      })
+      .catch(function (err) {
+        console.warn('[SW] registration failed:', err);
+      });
   });
-}
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js').catch(() => {});
-  });
-}
+})();
+
