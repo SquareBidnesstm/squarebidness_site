@@ -49,20 +49,3 @@ window.addEventListener('sb:add_to_cart', (e) => {
   const q = u.searchParams.get('q');
   if (q) SB.ga.search(q);
 })();
-
-// Clean SW register – root scope
-(function () {
-  if (!('serviceWorker' in navigator)) return;
-
-  window.addEventListener('load', function () {
-    navigator.serviceWorker
-      .register('/service-worker.js')
-      .then(function (reg) {
-        console.log('[SW] registered with scope:', reg.scope);
-      })
-      .catch(function (err) {
-        console.warn('[SW] registration failed:', err);
-      });
-  });
-})();
-
