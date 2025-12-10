@@ -58,3 +58,4 @@ window.addEventListener('sb:add_to_cart', (e) => {
 })();
 
 console.debug('[SB] global.js loaded');
+
