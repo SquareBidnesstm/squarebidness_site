@@ -50,3 +50,4 @@ window.addEventListener('sb:add_to_cart', (e) => {
   const q = u.searchParams.get('q');
   if (q) SB.ga.search(q);
 })();
+
