@@ -10,12 +10,12 @@ SB.ga = {
   evt: (name, params = {}) => {
     try { window.gtag && gtag('event', name, params); } catch {}
   },
-  view_item: (data) => SB.ga.evt('view_item', data),
-  add_to_cart: (data) => SB.ga.evt('add_to_cart', data),
+  view_item:      (data) => SB.ga.evt('view_item', data),
+  add_to_cart:    (data) => SB.ga.evt('add_to_cart', data),
   begin_checkout: (data) => SB.ga.evt('begin_checkout', data),
-  purchase: (data) => SB.ga.evt('purchase', data),
-  subscribe: (where = 'footer') => SB.ga.evt('generate_lead', { method: `mailchimp_${where}` }),
-  search: (q) => SB.ga.evt('search', { search_term: q || '' })
+  purchase:       (data) => SB.ga.evt('purchase', data),
+  subscribe:      (where = 'footer') => SB.ga.evt('generate_lead', { method: `mailchimp_${where}` }),
+  search:         (q) => SB.ga.evt('search', { search_term: q || '' })
 };
 
 // ---- Footer year + Tech Lab credit ----
@@ -50,11 +50,11 @@ window.addEventListener('sb:add_to_cart', (e) => {
 });
 
 // ---- Track site search (?q=) ----
-(function trackSearchFromURL(){
+(function trackSearchFromURL() {
   const u = new URL(location.href);
   const q = u.searchParams.get('q');
   if (q) SB.ga.search(q);
 })();
 
-// ---- Debug marker ----
+// Debug marker
 console.debug('[SB] global.js loaded');
