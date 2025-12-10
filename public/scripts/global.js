@@ -1,7 +1,6 @@
 /* =====================================================
    Square Bidness — Global JS
    Analytics · Year update · Mailchimp
-   (Service Worker handled separately in sw-register.js)
 ===================================================== */
 
 // ---- GA4 helpers ----
@@ -14,18 +13,18 @@ SB.ga = {
   add_to_cart: (data) => SB.ga.evt('add_to_cart', data),
   begin_checkout: (data) => SB.ga.evt('begin_checkout', data),
   purchase: (data) => SB.ga.evt('purchase', data),
-  subscribe: (where = 'footer') =>
-    SB.ga.evt('generate_lead', { method: `mailchimp_${where}` }),
+  subscribe: (where = 'footer') => SB.ga.evt('generate_lead', { method: `mailchimp_${where}` }),
   search: (q) => SB.ga.evt('search', { search_term: q || '' })
 };
 
 // ---- Footer year + Tech Lab credit ----
 (() => {
   const y = new Date().getFullYear();
-  const a = document.getElementById('y');
-  const b = document.getElementById('tech-year');
-  if (a) a.textContent = y;
-  if (b) b.textContent = y;
+  const ids = ['y', 'tech-year', 'sb-year'];
+  ids.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = y;
+  });
 })();
 
 // ---- Mailchimp submit ping ----
@@ -51,8 +50,12 @@ window.addEventListener('sb:add_to_cart', (e) => {
 });
 
 // ---- Track site search (?q=) ----
-(function trackSearchFromURL() {
-  const u = new URL(location.href);
-  const q = u.searchParams.get('q');
-  if (q) SB.ga.search(q);
+(function trackSearchFromURL(){
+  try {
+    const u = new URL(location.href);
+    const q = u.searchParams.get('q');
+    if (q) SB.ga.search(q);
+  } catch (e) {
+    // ignore
+  }
 })();
