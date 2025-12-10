@@ -1,27 +1,35 @@
-// /service-worker.js
-// Square Bidness — resilient service worker (safe + quiet)
+/* ============================================
+   Square Bidness — Service Worker (sb-v2)
+   - Precache a few core assets
+   - Network-first for HTML pages
+   - Cache-first for other GET requests
+============================================ */
 
-const CACHE = 'sb-v1';
+const CACHE_NAME = 'sb-v2';
 
-/**
- * Only list files that are guaranteed to exist.
- * You can add more later (after you confirm they 200 OK in production).
- */
-const PRECACHE = [
-  '/',                               // home
-  '/assets/sb-social-card_1200.jpg', // main social card
-  '/assets/cleantextlogo.png'        // logo
+// Only list URLs that are guaranteed to exist
+const PRECACHE_URLS = [
+  '/',                             // home
+  '/styles/style.css',             // main CSS
+  '/nav/index.html',               // nav partial
+  '/footer/index.html',            // footer partial
+
+  // Key Courageaux assets
+  '/courageaux/',
+  '/courageaux/her-words.html',
+  '/courageaux/assets/courageaux_1200x630.jpg',
+  '/courageaux/assets/amari_hero_1200x630.jpg'
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE).then(async (cache) => {
-      for (const url of PRECACHE) {
+    caches.open(CACHE_NAME).then(async (cache) => {
+      for (const url of PRECACHE_URLS) {
         try {
           await cache.add(url);
         } catch (err) {
-          // Stay quiet on missing assets so console doesn't get noisy
-          // console.warn('[SW] precache skip:', url, err && err.message);
+          // Skip missing/bad assets; don't break install
+          console.warn('[SW] precache skip:', url, err && err.message);
         }
       }
       return self.skipWaiting();
@@ -30,35 +38,68 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(
+        keys
+          .filter((key) => key !== CACHE_NAME)
+          .map((key) => caches.delete(key))
+      )
+    ).then(() => self.clients.claim())
+  );
 });
 
 /**
- * Cache-first for precached assets, network fallback for the rest.
+ * Strategy:
+ * - For HTML (navigation): network-first, cache fallback.
+ * - For everything else (images, CSS, JS): cache-first, network fallback.
  */
 self.addEventListener('fetch', (event) => {
-  const { request } = event;
+  const request = event.request;
 
-  // Only handle GET
+  // Only handle GET requests
   if (request.method !== 'GET') return;
 
+  const accept = request.headers.get('accept') || '';
+  const isHTML =
+    request.mode === 'navigate' || accept.includes('text/html');
+
+  // HTML pages → network-first
+  if (isHTML) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          // Cache the fresh page
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+          return response;
+        })
+        .catch(() =>
+          // If offline, fall back to whatever we have
+          caches.match(request)
+        )
+    );
+    return;
+  }
+
+  // Assets → cache-first
   event.respondWith(
     caches.match(request).then((cached) => {
       if (cached) return cached;
 
-      return fetch(request)
-        .then((response) => {
-          // Optionally cache successful GETs on the fly
-          if (response && response.status === 200) {
-            const copy = response.clone();
-            caches.open(CACHE).then((cache) => cache.put(request, copy));
-          }
-          return response;
-        })
-        .catch(() => {
-          // If offline and not cached, just let it fail normally
-          return cached || Promise.reject('offline');
-        });
+      return fetch(request).then((response) => {
+        if (
+          response &&
+          response.status === 200 &&
+          response.type === 'basic'
+        ) {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) =>
+            cache.put(request, copy)
+          );
+        }
+        return response;
+      });
     })
   );
 });
