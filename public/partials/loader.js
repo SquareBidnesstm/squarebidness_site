@@ -33,3 +33,4 @@
   // FOOTER — served at /footer/index.html
   await injectPartial('/footer/index.html', 'site-footer');
 })();
+
