@@ -1,7 +1,7 @@
 /* =====================================================
    Square Bidness — Global JS
    Analytics · Year update · Mailchimp
-   (Service Worker registration moved to /scripts/sw-register.js)
+   (Service Worker registration now lives in /scripts/sw-register.js)
 ===================================================== */
 
 // ---- GA4 helpers ----
@@ -14,8 +14,9 @@ SB.ga = {
   add_to_cart:    (data) => SB.ga.evt('add_to_cart', data),
   begin_checkout: (data) => SB.ga.evt('begin_checkout', data),
   purchase:       (data) => SB.ga.evt('purchase', data),
-  subscribe:      (where = 'footer') => SB.ga.evt('generate_lead', { method: `mailchimp_${where}` }),
-  search:         (q) => SB.ga.evt('search', { search_term: q || '' })
+  subscribe:      (where = 'footer') =>
+    SB.ga.evt('generate_lead', { method: `mailchimp_${where}` }),
+  search: (q) => SB.ga.evt('search', { search_term: q || '' })
 };
 
 // ---- Footer year + Tech Lab credit ----
@@ -56,5 +57,4 @@ window.addEventListener('sb:add_to_cart', (e) => {
   if (q) SB.ga.search(q);
 })();
 
-// Debug marker
 console.debug('[SB] global.js loaded');
