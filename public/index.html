@@ -285,6 +285,47 @@
       from { opacity:0; transform:translateY(-4px); }
       to   { opacity:1; transform:translateY(0); }
     }
+
+    /* Update / refresh banner */
+    .sb-update-banner {
+      position:sticky;
+      top:0;
+      z-index:40;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:.75rem;
+      padding:.5rem 1rem;
+      background:#111827;
+      color:#e5e7eb;
+      font-size:.8rem;
+      border-bottom:1px solid #1f2937;
+    }
+    .sb-update-banner__btn {
+      border-radius:999px;
+      border:1px solid #4b5563;
+      padding:.25rem .75rem;
+      background:#facc15;
+      color:#111827;
+      font-size:.8rem;
+      cursor:pointer;
+      font-weight:600;
+      white-space:nowrap;
+    }
+    .sb-update-banner__close {
+      border:none;
+      background:transparent;
+      color:#9ca3af;
+      cursor:pointer;
+      font-size:1rem;
+      line-height:1;
+    }
+    @media (max-width:600px){
+      .sb-update-banner {
+        align-items:flex-start;
+        flex-direction:column;
+      }
+    }
   </style>
 </head>
 
@@ -294,16 +335,15 @@
     <span class="sb-update-banner__text">
       Square Bidness just pushed a fresh site update. If anything looks off, refresh to see the latest.
     </span>
-    <button class="sb-update-banner__btn" type="button" id="sb-update-refresh">
-      Refresh page
-    </button>
-    <button class="sb-update-banner__close" type="button" id="sb-update-close" aria-label="Dismiss">
-      ×
-    </button>
+    <div style="display:flex;align-items:center;gap:.5rem;">
+      <button class="sb-update-banner__btn" type="button" id="sb-update-refresh">
+        Refresh page
+      </button>
+      <button class="sb-update-banner__close" type="button" id="sb-update-close" aria-label="Dismiss">
+        ×
+      </button>
+    </div>
   </div>
-
-
-  
 
   <!-- HARD-WIRED NAV -->
   <header class="site-header" style="background:#020617;border-bottom:1px solid #0b1220;color:#e5e7eb;">
@@ -780,6 +820,32 @@
       });
     })
     .catch(() => {});
+  </script>
+
+  <!-- Footer year + update banner controls -->
+  <script>
+    (function(){
+      // Footer year
+      var y = document.getElementById('sb-year');
+      if (y) y.textContent = new Date().getFullYear();
+
+      // Update banner
+      var bar = document.getElementById('sb-update-banner');
+      if (!bar) return;
+      var btnRefresh = document.getElementById('sb-update-refresh');
+      var btnClose   = document.getElementById('sb-update-close');
+
+      if (btnRefresh) {
+        btnRefresh.addEventListener('click', function(){
+          window.location.reload();
+        });
+      }
+      if (btnClose) {
+        btnClose.addEventListener('click', function(){
+          bar.style.display = 'none';
+        });
+      }
+    })();
   </script>
 </body>
 </html>
