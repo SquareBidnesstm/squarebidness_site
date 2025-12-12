@@ -31,11 +31,11 @@
     }
   }
 
-  const navOk = await injectPartial('/nav/index.html', 'site-header');
+  const navOk  = await injectPartial('/nav/index.html', 'site-header');
   const footOk = await injectPartial('/footer/index.html', 'site-footer');
 
-  // Tell global.js “partials are here now”
-  if (navOk || footOk) {
-    window.dispatchEvent(new Event('sb:partials_loaded'));
-  }
+  // Tell global.js “partials are here now” (always fire)
+  window.dispatchEvent(new CustomEvent('sb:partials_loaded', {
+    detail: { navOk, footOk }
+  }));
 })();
