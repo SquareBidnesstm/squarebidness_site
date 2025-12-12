@@ -4,20 +4,23 @@
 ===================================================== */
 
 (() => {
-  // Always create a safe SB namespace
-  const SB = (window.SB = window.SB || {});
+  // ---- Namespace (bulletproof) ----
+  window.SB = window.SB || {};
+  window.SB.ga = window.SB.ga || {};
 
-  // ---- GA4 helpers ----
-  SB.ga = SB.ga || {};
-  SB.ga.evt = (name, params = {}) => {
-    try { window.gtag && window.gtag('event', name, params); } catch {}
+  window.SB.ga = {
+    evt: (name, params = {}) => {
+      try { window.gtag && window.gtag('event', name, params); } catch {}
+    },
+    view_item: (data) => window.SB.ga.evt('view_item', data),
+    add_to_cart: (data) => window.SB.ga.evt('add_to_cart', data),
+    begin_checkout: (data) => window.SB.ga.evt('begin_checkout', data),
+    purchase: (data) => window.SB.ga.evt('purchase', data),
+    subscribe: (where = 'footer') =>
+      window.SB.ga.evt('generate_lead', { method: `mailchimp_${where}` }),
+    search: (q) =>
+      window.SB.ga.evt('search', { search_term: q || '' })
   };
-  SB.ga.view_item      = (data) => SB.ga.evt('view_item', data);
-  SB.ga.add_to_cart    = (data) => SB.ga.evt('add_to_cart', data);
-  SB.ga.begin_checkout = (data) => SB.ga.evt('begin_checkout', data);
-  SB.ga.purchase       = (data) => SB.ga.evt('purchase', data);
-  SB.ga.subscribe      = (where = 'footer') => SB.ga.evt('generate_lead', { method: `mailchimp_${where}` });
-  SB.ga.search         = (q) => SB.ga.evt('search', { search_term: q || '' });
 
   // ---- Helpers that must work AFTER partials inject ----
   function syncYears() {
@@ -32,18 +35,23 @@
 
   // ---- Mailchimp submit ping ----
   document.addEventListener('submit', (e) => {
-    const f = e.target && e.target.closest && e.target.closest('#mc-embedded-subscribe-form');
-    if (!f) return;
-    SB.ga.subscribe('footer');
+    const form = e.target && e.target.closest && e.target.closest('#mc-embedded-subscribe-form');
+    if (!form) return;
+    window.SB.ga.subscribe('footer');
   });
 
   // ---- Track “Add to Cart” custom event ----
   window.addEventListener('sb:add_to_cart', (e) => {
     const d = (e && e.detail) || {};
-    SB.ga.add_to_cart({
+    window.SB.ga.add_to_cart({
       currency: 'USD',
-      value: (d.price || 0) * (d.quantity || 1),
-      items: [{ item_id: d.item_id, item_name: d.item_name, price: d.price, quantity: d.quantity }]
+      value: (Number(d.price) || 0) * (Number(d.quantity) || 1),
+      items: [{
+        item_id: d.item_id,
+        item_name: d.item_name,
+        price: Number(d.price) || 0,
+        quantity: Number(d.quantity) || 1
+      }]
     });
   });
 
@@ -52,7 +60,7 @@
     try {
       const u = new URL(location.href);
       const q = u.searchParams.get('q');
-      if (q) SB.ga.search(q);
+      if (q) window.SB.ga.search(q);
     } catch {}
   })();
 
