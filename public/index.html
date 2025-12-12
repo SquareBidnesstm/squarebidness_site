@@ -82,6 +82,7 @@
   <script defer src="/scripts/ga.js"></script>
   <script defer src="/scripts/sb-cart.js"></script>
   <script defer src="/scripts/global.js"></script>
+  <script defer src="/partials/loader.js"></script>
   <script defer src="/scripts/sw-register.js"></script>
 
   <!-- Page-specific styles -->
@@ -291,106 +292,8 @@
     </div>
   </div>
 
-  <!-- HARD-WIRED NAV -->
-  <header class="site-header" style="background:#020617;border-bottom:1px solid #0b1220;color:#e5e7eb;">
-    <style>
-      .nav-shell {
-        max-width:1200px;
-        margin:0 auto;
-        padding:.75rem 16px;
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        gap:1.25rem;
-      }
-      .nav__brand-row {
-        display:flex;
-        align-items:center;
-        gap:.6rem;
-        text-decoration:none;
-        color:#e5e7eb;
-      }
-      .nav__tagline { font-size:.85rem; opacity:.85; }
-      .nav__group { display:flex; align-items:center; gap:1.25rem; }
-      .nav__links {
-        display:flex;
-        align-items:center;
-        gap:1.1rem;
-        font-size:.9rem;
-      }
-      .nav__links a { color:#e5e7eb; text-decoration:none; }
-      .nav__right { display:flex; align-items:center; gap:.75rem; font-size:.85rem; }
-      .nav-cart {
-        display:inline-flex;
-        align-items:center;
-        gap:.35rem;
-        padding:.35rem .7rem;
-        border-radius:999px;
-        border:1px solid #1f2937;
-        background:#020617;
-        color:#e5e7eb;
-        text-decoration:none;
-        font-size:.85rem;
-      }
-      .nav-cart__count {
-        min-width:1.55rem;
-        height:1.55rem;
-        border-radius:999px;
-        background:#0ea5e9;
-        color:#020617;
-        display:inline-flex;
-        align-items:center;
-        justify-content:center;
-        font-size:.75rem;
-        font-weight:700;
-      }
-
-      .nav-menu-toggle {
-        display:none;
-        align-items:center;
-        gap:.4rem;
-        padding:.3rem .7rem;
-        border-radius:999px;
-        border:1px solid #1f2937;
-        background:#020617;
-        color:#e5e7eb;
-        font-size:.85rem;
-        cursor:pointer;
-      }
-      .nav-menu-toggle span.nav-menu-icon { font-size:1rem; line-height:1; }
-
-      /* Mobile layout */
-      @media (max-width:768px){
-        .nav-shell {
-          padding:.65rem 16px .5rem;
-          align-items:flex-start;
-          flex-direction:column;
-        }
-        .nav__group {
-          display:none;
-          flex-direction:column;
-          align-items:flex-start;
-          gap:.75rem;
-          width:100%;
-          padding-top:.6rem;
-          border-top:1px solid #111827;
-        }
-        .site-header.is-open .nav__group { display:flex; }
-        .nav__links { flex-wrap:wrap; gap:.75rem; }
-        .nav__right {
-          width:100%;
-          justify-content:flex-start;
-          flex-wrap:wrap;
-          gap:.6rem;
-        }
-        .nav-menu-toggle { display:inline-flex; }
-        .nav__tagline { display:none; }
-      }
-
-      @media (min-width:769px){
-        .nav-menu-toggle { display:none; }
-      }
-    </style>
+<!-- NAV injection target -->
+<header id="site-header" class="site-header"></header>
 
     <div class="nav-shell">
       <!-- Brand -->
@@ -624,43 +527,8 @@
     </section>
   </main>
 
-  <!-- HARD-WIRED FOOTER -->
-  <footer class="site-footer" style="border-top:1px solid #1f1f1f;background:#000;color:#d7dae0;padding:2rem 0 3rem;">
-    <div class="footer__inner" style="display:grid;gap:1.5rem;max-width:1200px;margin:0 auto;padding:0 16px;">
-      <div class="footer__left" style="font-size:.9rem;line-height:1.5;">
-        <p style="margin:0 0 .35rem;">&copy; <span id="sb-year"></span> Square Bidness Apparel</p>
-        <p style="margin:0 0 .35rem;">Principles. Morals. Business Done Right.</p>
-        <p style="margin:0 0 .35rem;">Hammond, Louisiana · US</p>
-        <p style="margin:0;">
-          <a href="mailto:squarebidnessapparel@gmail.com" style="color:#fff;text-decoration:none;">squarebidnessapparel@gmail.com</a>
-        </p>
-      </div>
-
-      <nav class="footer__nav" aria-label="Footer navigation" style="display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;font-size:.9rem;">
-        <a href="/shop/" style="color:#fff;text-decoration:none;">Shop</a>
-        <a href="/collections/" style="color:#fff;text-decoration:none;">Collections</a>
-        <a href="/stories/" style="color:#fff;text-decoration:none;">Stories</a>
-        <a href="/press/" style="color:#fff;text-decoration:none;">Press</a>
-        <a href="/connect.html" style="color:#fff;text-decoration:none;">Connect</a>
-        <a href="/returns/" style="color:#fff;text-decoration:none;">Returns</a>
-        <a href="/privacy/" style="color:#fff;text-decoration:none;">Privacy</a>
-        <a href="/terms/" style="color:#fff;text-decoration:none;">Terms</a>
-      </nav>
-
-      <div class="footer__right" style="font-size:.85rem;line-height:1.5;text-align:left;">
-        <p style="margin:0 0 .4rem;opacity:.9;">Site support by <strong>Square Bidness Tech Lab</strong></p>
-        <p style="margin:0 0 .4rem;"><a href="/lab/" style="color:#c9a227;text-decoration:none;">Visit Tech Lab</a></p>
-        <p style="margin:0;">Stay locked in: <a href="/linkme/" style="color:#c9a227;text-decoration:none;font-weight:600;">Link Me</a></p>
-      </div>
-    </div>
-
-    <div style="border-top:1px solid #1f1f1f;margin-top:1.75rem;padding-top:.75rem;">
-      <div style="max-width:1200px;margin:0 auto;padding:0 16px;font-size:.8rem;display:flex;flex-wrap:wrap;gap:.5rem;justify-content:space-between;opacity:.8;">
-        <span>Square Bidness — Louisiana rooted, global motion.</span>
-        <span>Crypto + card ready.</span>
-      </div>
-    </div>
-  </footer>
+<!-- FOOTER injection target -->
+<footer id="site-footer" class="site-footer"></footer>
 
   <!-- Product hydration (expects public/products.json) -->
   <script>
