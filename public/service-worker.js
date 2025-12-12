@@ -1,6 +1,6 @@
-/* Square Bidness — site SW (network-first for pages) */
-const CACHE = 'sb-site-v20251212a';
-const ASSET_CACHE = 'sb-assets-v20251212a';
+/* Square Bidness — site SW (network-first for pages + partial HTML) */
+const CACHE = 'sb-site-v20251212b';
+const ASSET_CACHE = 'sb-assets-v20251212b';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -30,8 +30,28 @@ self.addEventListener('activate', (event) => {
 });
 
 // Helpers
-const isHTML = (req) => req.mode === 'navigate' || (req.headers.get('accept') || '').includes('text/html');
 const isGET = (req) => req.method === 'GET';
+
+function isHTMLLikeRequest(req) {
+  // 1) normal page navigations
+  if (req.mode === 'navigate') return true;
+
+  // 2) partial HTML fetched via JS (nav/footer/partials)
+  try {
+    const url = new URL(req.url);
+    const p = url.pathname;
+
+    // treat these as HTML (network-first) so nav/footer never go stale
+    if (p.startsWith('/nav/') || p.startsWith('/footer/') || p.startsWith('/partials/')) return true;
+    if (p.endsWith('.html')) return true;
+
+    // sometimes accepts header includes html
+    const accept = (req.headers.get('accept') || '');
+    if (accept.includes('text/html')) return true;
+  } catch {}
+
+  return false;
+}
 
 self.addEventListener('fetch', (event) => {
   const req = event.request;
@@ -39,12 +59,11 @@ self.addEventListener('fetch', (event) => {
   // Only handle GET
   if (!isGET(req)) return;
 
-  // 1) NAVIGATION / HTML => NETWORK FIRST (prevents stale pages)
-  if (isHTML(req)) {
+  // 1) HTML + partial HTML => NETWORK FIRST (prevents stale pages + stale nav/footer)
+  if (isHTMLLikeRequest(req)) {
     event.respondWith((async () => {
       try {
         const fresh = await fetch(req, { cache: 'no-store' });
-        // optional: cache the page response lightly
         const cache = await caches.open(CACHE);
         cache.put(req, fresh.clone());
         return fresh;
