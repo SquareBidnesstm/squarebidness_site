@@ -1,13 +1,14 @@
 /* =====================================================
    Square Bidness — Global JS
    Analytics · Year update · Mailchimp
-   NOTE: Service Worker registration lives ONLY in /scripts/sw-register.js
 ===================================================== */
 
 // ---- GA4 helpers ----
 window.SB = window.SB || {};
 SB.ga = {
-  evt: (name, params = {}) => { try { window.gtag && gtag('event', name, params); } catch {} },
+  evt: (name, params = {}) => {
+    try { window.gtag && gtag('event', name, params); } catch {}
+  },
   view_item: (data) => SB.ga.evt('view_item', data),
   add_to_cart: (data) => SB.ga.evt('add_to_cart', data),
   begin_checkout: (data) => SB.ga.evt('begin_checkout', data),
@@ -19,12 +20,12 @@ SB.ga = {
 // ---- Footer year ----
 (() => {
   const y = new Date().getFullYear();
-  const a = document.getElementById('y');
-  const b = document.getElementById('sb-year');
-  const c = document.getElementById('tech-year');
-  if (a) a.textContent = y;
-  if (b) b.textContent = y;
-  if (c) c.textContent = y;
+  const sb = document.getElementById('sb-year');
+  const y1 = document.getElementById('y');
+  const y2 = document.getElementById('tech-year');
+  if (sb) sb.textContent = y;
+  if (y1) y1.textContent = y;
+  if (y2) y2.textContent = y;
 })();
 
 // ---- Mailchimp submit ping ----
