@@ -1,24 +1,30 @@
 // public/scripts/sw-register.js
-(() => {
-  if (!('serviceWorker' in navigator)) return;
+(async () => {
+  if (!("serviceWorker" in navigator)) return;
 
-  window.addEventListener('load', async () => {
+  // 1-time purge mode
+  const PURGE = true;
+
+  if (PURGE) {
     try {
-      const reg = await navigator.serviceWorker.register('/service-worker.js', { scope: '/' });
-      console.log('[SW] registered with scope:', reg.scope);
-
-      // If a new SW takes control, refresh once to show latest site
-      let reloaded = false;
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (reloaded) return;
-        reloaded = true;
-        window.location.reload();
-      });
-
-      // Encourage update checks when page opens
-      if (reg && reg.update) reg.update().catch(() => {});
-    } catch (err) {
-      console.warn('[SW] registration failed:', err);
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r => r.unregister()));
+      if (window.caches) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map(k => caches.delete(k)));
+      }
+      console.log("[SW] purged registrations + caches");
+    } catch (e) {
+      console.warn("[SW] purge failed", e);
     }
-  });
+    return;
+  }
+
+  // normal register (when PURGE=false)
+  try {
+    const reg = await navigator.serviceWorker.register("/service-worker.js", { scope: "/" });
+    console.log("[SW] registered with scope:", reg.scope);
+  } catch (err) {
+    console.warn("[SW] registration failed:", err);
+  }
 })();
