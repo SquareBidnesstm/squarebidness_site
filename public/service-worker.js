@@ -69,6 +69,19 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Always fetch latest for core JS so we never get stuck on old global.js
+try {
+  const url = new URL(req.url);
+  if (url.pathname === "/scripts/global.js" || url.pathname === "/scripts/sb-cart.js" || url.pathname === "/scripts/ga.js") {
+    event.respondWith((async () => {
+      try { return await fetch(req, { cache: "no-store" }); }
+      catch { return (await caches.match(req)) || Response.error(); }
+    })());
+    return;
+  }
+} catch {}
+
+
   // Assets: CACHE FIRST
   event.respondWith((async () => {
     const cached = await caches.match(req);
