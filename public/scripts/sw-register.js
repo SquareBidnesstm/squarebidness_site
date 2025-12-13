@@ -4,7 +4,7 @@
 
   // One-time purge controlled by a flag
   const KEY = 'sb_sw_purged_v20251212b';
-  const SHOULD_PURGE = false; // set true for one deploy, then set false forever
+  const SHOULD_PURGE = true; // set true for one deploy, then set false forever
 
   try {
     if (SHOULD_PURGE && !sessionStorage.getItem(KEY)) {
