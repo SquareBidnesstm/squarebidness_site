@@ -26,7 +26,8 @@
     ga.add_to_cart = (data) => ga.evt("add_to_cart", data);
     ga.begin_checkout = (data) => ga.evt("begin_checkout", data);
     ga.purchase = (data) => ga.evt("purchase", data);
-    ga.subscribe = (where = "footer") => ga.evt("generate_lead", { method: `mailchimp_${where}` });
+    ga.subscribe = (where = "footer") =>
+      ga.evt("generate_lead", { method: `mailchimp_${where}` });
     ga.search = (q) => ga.evt("search", { search_term: q || "" });
 
     // ---- Year sync (works after footer inject) ----
@@ -42,7 +43,10 @@
 
     // ---- Mailchimp submit ping ----
     document.addEventListener("submit", (e) => {
-      const form = e.target && e.target.closest && e.target.closest("#mc-embedded-subscribe-form");
+      const form =
+        e.target &&
+        e.target.closest &&
+        e.target.closest("#mc-embedded-subscribe-form");
       if (!form) return;
       ga.subscribe("footer");
     });
@@ -61,9 +65,9 @@
             item_id: d.item_id || "",
             item_name: d.item_name || "",
             price,
-            quantity
-          }
-        ]
+            quantity,
+          },
+        ],
       });
     });
 
@@ -76,7 +80,8 @@
 
     // ---- Nav mobile toggle (works for injected nav) ----
     document.addEventListener("click", (e) => {
-      const btn = e.target && e.target.closest && e.target.closest(".nav-menu-toggle");
+      const btn =
+        e.target && e.target.closest && e.target.closest(".nav-menu-toggle");
       if (!btn) return;
 
       // injected nav contains its own .site-header inside #site-header container
@@ -87,8 +92,6 @@
       btn.setAttribute("aria-expanded", open ? "true" : "false");
     });
 
-    // Debug line (optional): confirms it’s live
-    // console.log("[global.js] SB.ga ready:", typeof SB.ga.evt);
   } catch (err) {
     console.warn("[global.js] failed hard:", err);
   }
