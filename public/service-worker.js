@@ -1,6 +1,6 @@
 /* Square Bidness — site SW (network-first for pages + partial HTML) */
 const CACHE = 'sb-site-v20251212c';
-const ASSET_CACHE = 'sb-assets-v20251212c';
+const ASSET_CACHE = 'sb-assets-v20251213a';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
