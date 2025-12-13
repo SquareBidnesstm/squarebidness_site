@@ -10,7 +10,6 @@ self.addEventListener('install', (event) => {
       return cache.addAll([
         '/styles/style.css',
         '/scripts/ga.js',
-        '/scripts/loader.js,
         '/scripts/sw-register.js'
       ]);
     }).catch(() => {})
