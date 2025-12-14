@@ -1281,59 +1281,97 @@ img[src] {
   .signup__btn {
     width: 100%;
   }
+   /* =========================================
+   SB PATCH — matches injected NAV + fixes shimmer
+   Paste at the VERY BOTTOM of style.css
+========================================= */
+
+/* 1) STOP global shimmer on all images (use .img-skeleton instead) */
+img {
+  background: none !important;
+  animation: none !important;
 }
 
-/* utility for screen-reader-only labels (if not defined already) */
-.sr-only {
-  position: absolute !important;
-  width: 1px; height: 1px;
-  padding: 0; margin: -1px;
-  overflow: hidden; clip: rect(0,0,0,0);
-  white-space: nowrap; border: 0;
+/* keep shimmer ONLY for intentional skeletons */
+.img-skeleton {
+  display: block;
+  background: linear-gradient(90deg, #1f1f1f 25%, #333 50%, #1f1f1f 75%);
+  background-size: 200% 100%;
+  animation: sbShimmer 1.5s infinite;
 }
-.product-reviews .reviews-summary { display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; }
-.product-reviews .muted { opacity:.75; }
-.product-reviews .reviews-list { margin-top:.6rem; display:grid; gap:.75rem; }
-.product-reviews .review { padding:.75rem .9rem; background:#111; border:1px solid #222; border-radius:8px; }
-.product-reviews .review__header { display:flex; gap:.5rem; align-items:center; margin-bottom:.25rem; }
-.product-reviews blockquote { margin:0; }
-
-.connect-quick {
-  margin-bottom: 2.5rem;
-  padding: 1.5rem 1.25rem;
-  border-radius: 18px;
-  border: 1px solid #262626;
-  background: radial-gradient(circle at top left, #1b1b1b 0, #050505 55%, #000 100%);
+@keyframes sbShimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
 }
 
-.connect-tag {
-  font-size: 0.8rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #b3b3b3;
-  margin: 0 0 0.4rem;
+/* 2) NAV (your injected partial uses .site-header + .nav__*) */
+.site-header {
+  background: #020617 !important;
+  border-bottom: 1px solid #0b1220 !important;
+  color: #e5e7eb;
 }
 
-.connect-quick-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin: 0.75rem 0 0.5rem;
+.site-header .nav__brand-row { gap: .6rem; }
+.site-header .nav__tagline { color: #cbd5e1; opacity: .9; }
+
+/* Link styling for injected nav links */
+.site-header .nav__links a {
+  color: #f5d742;
+  text-decoration: none;
+  font-weight: 500;
+  position: relative;
+  padding: .35rem 0;
+  transition: all .2s ease;
+}
+.site-header .nav__links a:hover {
+  color: #fff;
+  text-shadow: 0 0 10px rgba(245,215,66,.55);
 }
 
-.connect-note {
-  font-size: 0.85rem;
-  color: #a0a0a0;
-  margin-top: 0.4rem;
+/* Active link (your loader/global should add .is-active) */
+.site-header .nav__links a.is-active,
+.site-header .nav__links a[aria-current="page"] {
+  color: #fff;
+  text-shadow: 0 0 10px rgba(245,215,66,.55);
+}
+.site-header .nav__links a.is-active::after,
+.site-header .nav__links a[aria-current="page"]::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: -3px;
+  width: 100%; height: 2px;
+  background: #f5d742;
+  opacity: 1;
 }
 
-@media (max-width: 600px) {
-  .connect-quick {
-    padding: 1.25rem 1rem;
-  }
-
-  .connect-quick-row .btn {
-    width: 100%;
-    justify-content: center;
-  }
+/* Cart pill in injected nav */
+.site-header .nav-cart {
+  border: 1px solid #1f2937;
+  background: #020617;
+  color: #e5e7eb;
 }
+.site-header .nav-cart__count {
+  background: #f5d742;
+  color: #111;
+}
+
+/* Menu toggle matches your button vibe */
+.site-header .nav-menu-toggle {
+  border: 1px solid #333;
+  border-radius: 999px;
+}
+.site-header.is-open .nav__group {
+  border-top: 1px solid #111827;
+}
+
+/* 3) FOOTER: your footer partial has inline styles.
+      This just makes sure your base .site-footer doesn't override it. */
+.site-footer {
+  background: transparent; /* let footer partial control its own look */
+  border-top: 0;
+  padding: 0;
+  margin-top: 0;
+}
+
+}
+
