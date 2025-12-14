@@ -129,76 +129,76 @@
 
   <style>
   /* Scope EVERYTHING to press page */
-  .press-page .press-page-header{margin-bottom:1.5rem}
-  .press-page .press-page-header h1{margin:0 0 .25rem;font-size:1.75rem;font-weight:800}
-  .press-page .press-page-header .muted{color:#999;font-size:.95rem}
+  .press-page .press-hero h1{margin:0 0 .35rem;font-size:clamp(30px,4vw,44px);font-weight:900;line-height:1.05}
+  .press-page .press-hero .lead{margin:0;color:#cfd3da;opacity:.9;max-width:72ch}
 
+  /* Grid (top) */
+  .press-page .press-grid{
+    display:grid;
+    gap:1rem;
+    margin-top:1.25rem;
+  }
+  @media(min-width:900px){
+    .press-page .press-grid{grid-template-columns:1.15fr .85fr;align-items:start}
+  }
+
+  /* Card base */
+  .press-page .sb-card{
+    background:#0e0e0e;
+    border:1px solid #1f1f1f;
+    border-radius:16px;
+    overflow:hidden;
+  }
+  .press-page .sb-card__pad{padding:1rem}
+  .press-page .sb-kicker{margin:0 0 .35rem;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;opacity:.8}
+  .press-page .sb-title{margin:.2rem 0 .4rem;font-size:1.15rem;font-weight:900}
+  .press-page .sb-muted{margin:0;color:#cfd3da;opacity:.88}
+  .press-page .sb-actions{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.85rem}
+
+  /* Lists */
   .press-page .press-list{
     list-style:none;
     padding:0;
-    margin:1rem 0 2rem;
+    margin:.75rem 0 0;
     display:grid;
-    gap:1rem;
+    gap:.75rem;
   }
-
-  .press-page .press-item a{
+  .press-page .press-list li a{
     display:block;
-    background:#0e0e0e;
-    border:1px solid #1f1f1f;
-    border-radius:10px;
+    background:#0b0b0b;
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:12px;
     padding:.9rem 1rem;
     color:#fff;
     text-decoration:none;
-    font-weight:600;
-    line-height:1.4;
+    font-weight:700;
+    line-height:1.35;
   }
-
-  .press-page .press-item a span{
+  .press-page .press-list li a span{
     display:block;
-    font-size:.75rem;
-    color:#aaa;
-    font-weight:400;
     margin-top:.25rem;
+    font-weight:400;
+    font-size:.82rem;
+    color:#a1a1aa;
   }
+  .press-page .press-list li a:hover{background:#141414;border-color:#2a2a2a}
+  .press-page .press-list li a:focus-visible{outline:2px solid rgba(201,162,39,.65);outline-offset:3px}
 
-  .press-page .press-item a:hover{background:#1a1a1a;border-color:#2a2a2a}
-  .press-page .press-item a:focus-visible{
-    outline:2px solid rgba(201,162,39,.65);
-    outline-offset:3px;
-  }
-
-  /* Card-style press feature (YouTube) */
-  .press-page .press-cards{
+  /* Featured cards row */
+  .press-page .feature-cards{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
     gap:1rem;
-    margin:2rem 0;
+    margin-top:.85rem;
   }
+  @media(min-width:900px){ .press-page .feature-cards{grid-template-columns:1fr 1fr;} }
 
-  .press-page .press-card{
-    background:#0b0b0b;
-    border:1px solid rgba(255,255,255,.06);
-    border-radius:16px;
-    overflow:hidden;
-    box-shadow:0 16px 36px rgba(0,0,0,.35);
-    display:flex;
-    flex-direction:column;
-  }
-
-  .press-page .press-card__img{
+  .press-page .feature-card__img{
     position:relative;
     display:block;
     background:#000;
   }
-
-  .press-page .press-card__img img{
-    width:100%;
-    height:auto;
-    display:block;
-    object-fit:cover;
-  }
-
-  .press-page .press-badge{
+  .press-page .feature-card__img img{width:100%;height:auto;display:block;object-fit:cover}
+  .press-page .badge{
     position:absolute;
     left:.75rem;
     bottom:.75rem;
@@ -211,53 +211,78 @@
     text-transform:uppercase;
     letter-spacing:.04em;
   }
+  .press-page .meta-line{
+    display:flex;
+    gap:.5rem;
+    align-items:center;
+    color:#a1a1aa;
+    font-size:.85rem;
+    margin-bottom:.4rem;
+  }
 
-  .press-page .press-card__body{padding:.8rem .9rem 1rem}
-  .press-page .press-card__date{display:block;color:#a1a1aa;font-size:.8rem;margin-bottom:.15rem}
-  .press-page .press-card__title{font-size:1rem;line-height:1.2;margin:.2rem 0 .35rem}
-  .press-page .press-card__title a{color:#fff;text-decoration:none}
-  .press-page .press-card__title a:hover{text-decoration:underline}
-  .press-page .press-card__excerpt{color:#cfd3da;font-size:.9rem;margin:0 0 .7rem}
-  .press-page .press-card__cta{display:flex;gap:.5rem;flex-wrap:wrap}
-
-  /* Buttons scoped to press only (so global .btn stays king elsewhere) */
+  /* Buttons scoped to press only */
   .press-page .btn{
     display:inline-flex;
     align-items:center;
     justify-content:center;
     border-radius:999px;
     border:1px solid transparent;
-    font-weight:700;
+    font-weight:800;
     text-decoration:none;
     cursor:pointer;
+    line-height:1;
+    padding:.62rem .95rem;
   }
   .press-page .btn--gold{
     background:#c9a227;
     color:#111;
     border-color:#c9a227;
-    padding:.55rem .9rem;
   }
   .press-page .btn--ghost{
     background:#111;
     border:1px solid #2a2a2a;
     color:#fff;
-    padding:.55rem .9rem;
   }
-  .press-page .btn:focus-visible{
-    outline:2px solid rgba(201,162,39,.65);
-    outline-offset:3px;
+  .press-page .btn:focus-visible{outline:2px solid rgba(201,162,39,.65);outline-offset:3px}
+
+  /* Recognition strip */
+  .press-page .recognition-strip{
+    margin-top:1.35rem;
+    border-top:1px solid #1f1f1f;
+    padding:1rem 0;
   }
+  .press-page .recognition-strip .row{
+    display:flex;
+    gap:1rem;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .press-page .stamp{
+    display:inline-flex;
+    gap:.5rem;
+    align-items:center;
+    border:1px solid rgba(255,255,255,.10);
+    background:#0b0b0b;
+    padding:.5rem .7rem;
+    border-radius:999px;
+    color:#fff;
+    font-weight:800;
+    font-size:.85rem;
+    opacity:.95;
+  }
+  .press-page .stamp svg{width:18px;height:18px;color:#c9a227}
 
   /* Small phone tightening */
   @media (max-width:520px){
-    .press-page .press-item a{padding:.85rem .9rem}
-    .press-page .press-card__body{padding:.75rem .85rem .95rem}
+    .press-page .sb-card__pad{padding:.9rem}
+    .press-page .press-list li a{padding:.85rem .9rem}
   }
-</style>
-
+  </style>
 </head>
 
-<body class="theme-dark" id="top">
+<!-- ✅ added press-page class so scoped styles work -->
+<body class="theme-dark press-page" id="top">
 
   <!-- NAV injection target (loader.js fills this) -->
   <div id="site-header"></div>
@@ -267,7 +292,7 @@
       <div class="container">
 
         <header class="press-hero">
-          <h1>Press</h1>
+          <h1>Press</h11>
           <p class="lead">Stories, interviews, shoutouts — plus media contact + kit for editors, partners, and lenders.</p>
         </header>
 
@@ -410,7 +435,7 @@
           </div>
         </section>
 
-        <!-- WHO'S WHO stamp (bottom part, like you asked) -->
+        <!-- Recognition strip -->
         <section class="recognition-strip" aria-label="Recognition">
           <div class="container" style="padding:0;">
             <div class="row">
@@ -423,7 +448,6 @@
 
               <div style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;justify-content:flex-end;">
                 <span class="stamp" title="Marquis Who’s Who">
-                  <!-- simple seal icon -->
                   <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <path d="M12 2l2.2 4.7 5.1.7-3.7 3.6.9 5.1L12 13.9 7.5 16.1l.9-5.1L4.7 7.4l5.1-.7L12 2z" stroke="currentColor" stroke-width="1.5"/>
                   </svg>
@@ -468,3 +492,4 @@
   </script>
 </body>
 </html>
+
