@@ -128,140 +128,204 @@
   <script defer src="/scripts/sw-register.js"></script>
 
   <style>
-  /* Scope EVERYTHING to press page */
-  .press-page .press-page-header{margin-bottom:1.5rem}
-  .press-page .press-page-header h1{margin:0 0 .25rem;font-size:1.75rem;font-weight:800}
-  .press-page .press-page-header .muted{color:#999;font-size:.95rem}
+/* =========================
+   PRESS PAGE — GOLDMASTER CSS
+   Everything scoped to .press-page
+========================= */
 
-  .press-page .press-list{
-    list-style:none;
-    padding:0;
-    margin:1rem 0 2rem;
-    display:grid;
-    gap:1rem;
-  }
+/* Base headings / hero */
+.press-page .press-hero{margin:0 0 1.25rem;}
+.press-page .press-hero h1{margin:0 0 .35rem;font-size:2rem;font-weight:900;letter-spacing:-.02em;}
+.press-page .press-hero .lead{margin:0;color:#a1a1aa;max-width:75ch;line-height:1.5;}
 
-  .press-page .press-item a,
-  .press-page .press-list a{
-    display:block;
-    background:#0e0e0e;
-    border:1px solid #1f1f1f;
-    border-radius:10px;
-    padding:.9rem 1rem;
-    color:#fff;
-    text-decoration:none;
-    font-weight:600;
-    line-height:1.4;
-  }
+/* Grid at top (Press Contact + Quick Links) */
+.press-page .press-grid{
+  display:grid;
+  gap:1rem;
+  margin:1rem 0 1.25rem;
+}
+@media(min-width:900px){
+  .press-page .press-grid{grid-template-columns:1fr 1fr;align-items:stretch;}
+}
 
-  .press-page .press-item a span,
-  .press-page .press-list a span{
-    display:block;
-    font-size:.75rem;
-    color:#aaa;
-    font-weight:400;
-    margin-top:.25rem;
-  }
+/* Card system (uses your "sb-card" naming) */
+.press-page .sb-card{
+  background:#0e0e0e;
+  border:1px solid #1f1f1f;
+  border-radius:14px;
+  overflow:hidden;
+}
+.press-page .sb-card__pad{padding:16px;}
+.press-page .sb-kicker{
+  opacity:.8;
+  font-size:.8rem;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  margin:0 0 .35rem;
+}
+.press-page .sb-title{margin:.1rem 0 .35rem;font-size:1.25rem;font-weight:900;letter-spacing:-.01em;}
+.press-page .sb-muted{margin:0;color:#a1a1aa;line-height:1.55;}
 
-  .press-page .press-item a:hover,
-  .press-page .press-list a:hover{background:#1a1a1a;border-color:#2a2a2a}
+/* Buttons (scoped so global can stay king elsewhere) */
+.press-page .btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  border:1px solid transparent;
+  font-weight:800;
+  text-decoration:none;
+  cursor:pointer;
+  gap:.5rem;
+}
+.press-page .btn--gold{
+  background:#c9a227;
+  color:#111;
+  border-color:#c9a227;
+  padding:.55rem .95rem;
+}
+.press-page .btn--ghost{
+  background:#111;
+  border:1px solid #2a2a2a;
+  color:#fff;
+  padding:.55rem .95rem;
+}
+.press-page .btn:focus-visible{
+  outline:2px solid rgba(201,162,39,.65);
+  outline-offset:3px;
+}
 
-  .press-page .press-item a:focus-visible,
-  .press-page .press-list a:focus-visible{
-    outline:2px solid rgba(201,162,39,.65);
-    outline-offset:3px;
-  }
+/* Actions row */
+.press-page .sb-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:12px;
+}
 
-  /* Card-style press feature (YouTube) */
-  .press-page .press-cards{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-    gap:1rem;
-    margin:2rem 0;
-  }
+/* =========================
+   Press list cards
+========================= */
+.press-page .press-list{
+  list-style:none;
+  padding:0;
+  margin:0;
+  display:grid;
+  gap:1rem;
+}
 
-  .press-page .press-card{
-    background:#0b0b0b;
-    border:1px solid rgba(255,255,255,.06);
-    border-radius:16px;
-    overflow:hidden;
-    box-shadow:0 16px 36px rgba(0,0,0,.35);
-    display:flex;
-    flex-direction:column;
-  }
+/* Only style the link inside the list item */
+.press-page .press-list > li > a{
+  display:block;
+  background:#0e0e0e;
+  border:1px solid #1f1f1f;
+  border-radius:12px;
+  padding:.95rem 1rem;
+  color:#fff;
+  text-decoration:none;
+  font-weight:800;
+  line-height:1.35;
+}
+.press-page .press-list > li > a span{
+  display:block;
+  font-size:.8rem;
+  color:#a1a1aa;
+  font-weight:500;
+  margin-top:.35rem;
+  line-height:1.45;
+}
+.press-page .press-list > li > a:hover{background:#151515;border-color:#2a2a2a;}
+.press-page .press-list > li > a:focus-visible{
+  outline:2px solid rgba(201,162,39,.65);
+  outline-offset:3px;
+}
 
-  .press-page .press-card__img{
-    position:relative;
-    display:block;
-    background:#000;
-  }
+/* =========================
+   Featured cards
+========================= */
+.press-page .feature-cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:1rem;
+}
 
-  .press-page .press-card__img img{
-    width:100%;
-    height:auto;
-    display:block;
-    object-fit:cover;
-  }
+.press-page .feature-card__img{
+  position:relative;
+  display:block;
+  background:#000;
+}
+.press-page .feature-card__img img{
+  width:100%;
+  height:auto;
+  display:block;
+  object-fit:cover;
+}
 
-  .press-page .press-badge,
-  .press-page .badge,
-  .press-page .stamp{
-    position:absolute;
-    left:.75rem;
-    bottom:.75rem;
-    background:rgba(201,162,39,.1);
-    border:1px solid rgba(201,162,39,.45);
-    color:#fff;
-    border-radius:999px;
-    padding:.25rem .6rem;
-    font-size:.7rem;
-    text-transform:uppercase;
-    letter-spacing:.04em;
-  }
+/* Badge = ABSOLUTE (only for images) */
+.press-page .badge{
+  position:absolute;
+  left:.75rem;
+  bottom:.75rem;
+  background:rgba(201,162,39,.12);
+  border:1px solid rgba(201,162,39,.5);
+  color:#fff;
+  border-radius:999px;
+  padding:.25rem .6rem;
+  font-size:.7rem;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+}
 
-  .press-page .press-card__body{padding:.8rem .9rem 1rem}
-  .press-page .press-card__date{display:block;color:#a1a1aa;font-size:.8rem;margin-bottom:.15rem}
-  .press-page .press-card__title{font-size:1rem;line-height:1.2;margin:.2rem 0 .35rem}
-  .press-page .press-card__title a{color:#fff;text-decoration:none}
-  .press-page .press-card__title a:hover{text-decoration:underline}
-  .press-page .press-card__excerpt{color:#cfd3da;font-size:.9rem;margin:0 0 .7rem}
-  .press-page .press-card__cta{display:flex;gap:.5rem;flex-wrap:wrap}
+/* Meta line inside featured cards */
+.press-page .meta-line{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.45rem;
+  align-items:center;
+  color:#a1a1aa;
+  font-size:.85rem;
+  margin:0 0 .4rem;
+}
 
-  /* Buttons scoped to press only (so global .btn stays king elsewhere) */
-  .press-page .btn{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    border-radius:999px;
-    border:1px solid transparent;
-    font-weight:700;
-    text-decoration:none;
-    cursor:pointer;
-  }
-  .press-page .btn--gold{
-    background:#c9a227;
-    color:#111;
-    border-color:#c9a227;
-    padding:.55rem .9rem;
-  }
-  .press-page .btn--ghost{
-    background:#111;
-    border:1px solid #2a2a2a;
-    color:#fff;
-    padding:.55rem .9rem;
-  }
-  .press-page .btn:focus-visible{
-    outline:2px solid rgba(201,162,39,.65);
-    outline-offset:3px;
-  }
+/* =========================
+   Recognition strip
+========================= */
+.press-page .recognition-strip{
+  margin:1.5rem 0 0;
+  padding:1rem 0;
+  border-top:1px solid #1f1f1f;
+}
+.press-page .recognition-strip .row{
+  display:flex;
+  gap:1rem;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+}
 
-  /* Small phone tightening */
-  @media (max-width:520px){
-    .press-page .press-item a,
-    .press-page .press-list a{padding:.85rem .9rem}
-    .press-page .press-card__body{padding:.75rem .85rem .95rem}
-  }
-  </style>
+/* Stamp = INLINE CHIP (NOT absolute) */
+.press-page .stamp{
+  display:inline-flex;
+  align-items:center;
+  gap:.5rem;
+  background:rgba(201,162,39,.12);
+  border:1px solid rgba(201,162,39,.5);
+  color:#fff;
+  border-radius:999px;
+  padding:.35rem .7rem;
+  font-size:.8rem;
+  font-weight:900;
+  letter-spacing:.02em;
+}
+.press-page .stamp svg{width:18px;height:18px;opacity:.9;}
+
+/* Mobile tightening */
+@media (max-width:520px){
+  .press-page .sb-card__pad{padding:14px;}
+  .press-page .press-list > li > a{padding:.9rem .95rem;}
+}
+</style>
+
 
 </head>
 
