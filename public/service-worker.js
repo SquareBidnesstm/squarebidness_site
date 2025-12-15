@@ -1,15 +1,16 @@
 /* Square Bidness — site SW (network-first for pages + partial HTML) */
-const CACHE = 'sb-site-v20251213-gm';
-const ASSET_CACHE = 'sb-assets-v20251213-gm';
+const CACHE = 'sb-site-v20251215-gm01';
+const ASSET_CACHE = 'sb-assets-v20251215-gm01';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(ASSET_CACHE).then((cache) => {
       return cache.addAll([
-        '/styles/style.css',
+        // Keep precache small to avoid “stuck” styles.
         '/scripts/ga.js',
-        '/scripts/sw-register.js'
+        '/scripts/sw-register.js',
+        '/offline/'
       ]);
     }).catch(() => {})
   );
@@ -19,7 +20,9 @@ self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
     await Promise.all(keys.map((k) => {
-      if (k !== CACHE && k !== ASSET_CACHE) return caches.delete(k);
+      if (k.startsWith('sb-') && k !== CACHE && k !== ASSET_CACHE) {
+        return caches.delete(k);
+      }
     }));
     await self.clients.claim();
   })());
@@ -54,7 +57,7 @@ self.addEventListener('fetch', (event) => {
       try {
         const fresh = await fetch(req, { cache: 'no-store' });
 
-        // IMPORTANT: only cache good responses
+        // only cache good responses
         if (fresh && fresh.ok) {
           const cache = await caches.open(CACHE);
           cache.put(req, fresh.clone());
@@ -63,24 +66,27 @@ self.addEventListener('fetch', (event) => {
         return fresh;
       } catch (e) {
         const cached = await caches.match(req);
-        return cached || caches.match('/') || Response.error();
+        return cached || caches.match('/offline/') || Response.error();
       }
     })());
     return;
   }
 
-  // Always fetch latest for core JS so we never get stuck on old global.js
-try {
-  const url = new URL(req.url);
-  if (url.pathname === "/scripts/global.js" || url.pathname === "/scripts/sb-cart.js" || url.pathname === "/scripts/ga.js") {
-    event.respondWith((async () => {
-      try { return await fetch(req, { cache: "no-store" }); }
-      catch { return (await caches.match(req)) || Response.error(); }
-    })());
-    return;
-  }
-} catch {}
-
+  // Always fetch latest for core JS so we never get stuck
+  try {
+    const url = new URL(req.url);
+    if (
+      url.pathname === "/scripts/global.js" ||
+      url.pathname === "/scripts/sb-cart.js" ||
+      url.pathname === "/scripts/ga.js"
+    ) {
+      event.respondWith((async () => {
+        try { return await fetch(req, { cache: "no-store" }); }
+        catch { return (await caches.match(req)) || Response.error(); }
+      })());
+      return;
+    }
+  } catch {}
 
   // Assets: CACHE FIRST
   event.respondWith((async () => {
