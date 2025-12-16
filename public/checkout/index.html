@@ -43,6 +43,9 @@
   <link rel="manifest" href="/site.webmanifest">
   <meta name="theme-color" content="#000000">
 
+  <script defer src="/scripts/checkout-render.js"></script>
+
+
   <!-- Org JSON-LD (site-wide) -->
   <script type="application/ld+json">
   {
@@ -69,6 +72,9 @@
   <!-- Stripe.js (for server checkout sessions) -->
   <script src="https://js.stripe.com/v3/"></script>
 
+  <script defer src="/scripts/cart-render.js"></script>
+
+
   <style>
     /* Light touch for table safety (won’t fight your global css) */
     .cart-table img{border:1px solid #1f1f1f}
@@ -78,20 +84,29 @@
 
   <!-- Inject nav/footer (consistent paths + cache bust) -->
   <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-      const bust = `?v=${Date.now()}`;
-      async function inject(url, id) {
-        try {
-          const r = await fetch(url + bust, { cache:"no-store", credentials:"same-origin" });
-          if (!r.ok) return;
-          const el = document.getElementById(id);
-          if (el) el.innerHTML = await r.text();
-        } catch {}
-      }
-      await inject("/nav/index.html", "nav-placeholder");
-      await inject("/footer/index.html", "footer-placeholder");
-    });
-  </script>
+  document.addEventListener("DOMContentLoaded", async () => {
+    const bust = `?v=${Date.now()}`;
+    async function inject(url, id) {
+      try {
+        const r = await fetch(url + bust, { cache:"no-store", credentials:"same-origin" });
+        if (!r.ok) return;
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = await r.text();
+      } catch {}
+    }
+
+    await inject("/nav/index.html", "nav-placeholder");
+    await inject("/footer/index.html", "footer-placeholder");
+
+    // ✅ NOW run checkout render (after page is ready)
+    if (window.SB && typeof SB.renderCheckoutTable === "function") {
+      SB.renderCheckoutTable({ taxRate: 0.0945 });
+    } else {
+      console.warn("SB.renderCheckoutTable not found — did /scripts/checkout-render.js load?");
+    }
+  });
+</script>
+
 </head>
 
 <body class="theme-dark" id="top">
