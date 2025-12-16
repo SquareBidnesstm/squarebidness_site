@@ -127,15 +127,17 @@
   const found = readCartAnyKey();
   const cart = normalize(found.items);
 
-  // ✅ Optional: migrate whatever we found into sb_cart_v1 so everything matches going forward
+// ✅ Only migrate if we actually found items
+if (cart.length) {
   try {
     localStorage.setItem("sb_cart_v1", JSON.stringify(cart));
   } catch {}
+}
 
-  if (!cart.length) {
-    el.innerHTML = '<p class="muted">Your cart is empty.</p>';
-    return;
-  }
+if (!cart.length) {
+  el.innerHTML = '<p class="muted">Your cart is empty.</p>';
+  return;
+}
 
   const rows = cart.map(it => `
     <div class="cart-line">
