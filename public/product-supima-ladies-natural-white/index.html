@@ -293,6 +293,76 @@
     });
   })();
 </script>
+  <script>
+  // ✅ Bulletproof add-to-cart (does not depend on SB.cart being ready)
+  (function () {
+    const KEY = "sb_cart_v1";
+
+    function readCart() {
+      try { return JSON.parse(localStorage.getItem(KEY) || "[]"); }
+      catch { return []; }
+    }
+
+    function writeCart(items) {
+      try { localStorage.setItem(KEY, JSON.stringify(items || [])); } catch {}
+      // update badge counts if present
+      try {
+        const count = (items || []).reduce((n, it) => n + Number(it.quantity || 0), 0);
+        document.querySelectorAll("[data-cart-count]").forEach(el => el.textContent = String(count));
+      } catch {}
+      return items || [];
+    }
+
+    function addItem(item) {
+      const items = readCart();
+      const id = String(item.item_id || "");
+      const qty = Number(item.quantity || 1);
+
+      if (!id) return items;
+
+      const idx = items.findIndex(x => String(x.item_id || "") === id && String(x.variant || "") === String(item.variant || ""));
+      if (idx >= 0) items[idx].quantity = Number(items[idx].quantity || 0) + qty;
+      else items.push(item);
+
+      return writeCart(items);
+    }
+
+    function onReady(fn){
+      if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", fn);
+      else fn();
+    }
+
+    onReady(() => {
+      const sel = document.getElementById("womensSize");
+      const btn = document.getElementById("womensCheckout");
+      if (!sel || !btn) return;
+
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+
+        const size = sel.value;
+        if (!size) {
+          alert("Please select a size.");
+          return;
+        }
+
+        addItem({
+          item_id: "supima-ladies-natural-white",
+          name: "Supima Ladies Tee — Natural White",
+          item_name: "Supima Ladies Tee — Natural White",
+          variant: size,
+          price: 36,
+          quantity: 1,
+          image: "/collections/assets/amari_2_800.jpg"
+        });
+
+        // go to cart
+        window.location.href = "/cart/";
+      });
+    });
+  })();
+</script>
+
 
 </body>
 </html>
