@@ -1,15 +1,15 @@
 // /courageaux/sw.js
 // Courageaux Aesthetics — PWA / Offline Shell
-// v2 — includes Her Words page + safer caching
+// v2.1 — resilient precache + safer offline behavior
 
-const CACHE_NAME = 'courageaux-v2'; // ⬅️ bumped from v1 → v2
+const CACHE_NAME = 'courageaux-v2.1';
 
 const ASSETS = [
   // Core shell
   '/courageaux/',
   '/courageaux/index.html',
 
-  // Her Words page (so it’s treated as a normal HTML route)
+  // Her Words page
   '/courageaux/her-words/',
   '/courageaux/her-words/index.html',
 
@@ -20,7 +20,7 @@ const ASSETS = [
   '/courageaux/assets/icon-512-maskable.png',
   '/courageaux/assets/icon_180.png',
 
-  // Hero + product art
+  // Hero + art
   '/courageaux/assets/amari_800.jpg',
   '/courageaux/assets/amari_1200.jpg',
   '/courageaux/assets/amari_hero_1200x630.jpg',
@@ -32,62 +32,68 @@ const ASSETS = [
   '/courageaux/assets/favicon.ico'
 ];
 
-// INSTALL — precache core assets
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
-  );
-  self.skipWaiting();
+// INSTALL — precache core assets (resilient: one missing file won't fail install)
+self.addEventListener('install', (event) => {
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+
+    // Add assets one-by-one so a single 404 doesn't kill the whole install.
+    await Promise.allSettled(
+      ASSETS.map(async (path) => {
+        try {
+          await cache.add(path);
+        } catch (_) {
+          // silent fail: asset missing or blocked; SW still installs
+        }
+      })
+    );
+
+    await self.skipWaiting();
+  })());
 });
 
 // ACTIVATE — clean old caches
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys.map(key => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
-        })
-      )
-    )
-  );
-  self.clients.claim();
+self.addEventListener('activate', (event) => {
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.map((key) => (key === CACHE_NAME ? null : caches.delete(key))));
+    await self.clients.claim();
+  })());
 });
 
 // FETCH — cache-first with network fallback, HTML gets graceful fallback
-self.addEventListener('fetch', event => {
-  const { request } = event;
+self.addEventListener('fetch', (event) => {
+  const req = event.request;
 
   // Only handle GET + same-origin
-  if (request.method !== 'GET') return;
+  if (req.method !== 'GET') return;
 
-  const url = new URL(request.url);
+  const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
 
-  event.respondWith(
-    caches.match(request).then(cached => {
-      if (cached) return cached;
+  event.respondWith((async () => {
+    const cached = await caches.match(req);
+    if (cached) return cached;
 
-      // No cache hit → go to network
-      return fetch(request)
-        .then(response => {
-          // Only cache good, basic responses
-          const clone = response.clone();
-          if (response.ok && response.type === 'basic') {
-            caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
-          }
-          return response;
-        })
-        .catch(() => {
-          // If offline and asking for HTML, fall back to main Courageaux page
-          const accept = request.headers.get('accept') || '';
-          if (accept.includes('text/html')) {
-            return caches.match('/courageaux/index.html');
-          }
-          // Otherwise, just fail silently
-        });
-    })
-  );
+    try {
+      const res = await fetch(req);
+
+      // Cache good basic responses
+      if (res && res.ok && res.type === 'basic') {
+        const cache = await caches.open(CACHE_NAME);
+        cache.put(req, res.clone()).catch(() => {});
+      }
+
+      return res;
+    } catch (_) {
+      // Offline fallback for navigations / HTML
+      const accept = req.headers.get('accept') || '';
+      if (accept.includes('text/html')) {
+        return (await caches.match('/courageaux/index.html')) || Response.error();
+      }
+
+      // Non-HTML: return a real error response instead of undefined
+      return Response.error();
+    }
+  })());
 });
