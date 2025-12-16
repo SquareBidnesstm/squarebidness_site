@@ -80,39 +80,78 @@
   <div id="footer-placeholder"></div>
 
   <script>
-  (async () => {
-    const bust = `?v=${Date.now()}`;
-    async function inject(url, id) {
+(async () => {
+  const bust = `?v=${Date.now()}`;
+  async function inject(url, id) {
+    try {
+      const r = await fetch(url + bust, { cache:"no-store", credentials:"same-origin" });
+      if (!r.ok) return;
+      document.getElementById(id).innerHTML = await r.text();
+    } catch {}
+  }
+  await inject("/nav/index.html", "nav-placeholder");
+  await inject("/footer/index.html", "footer-placeholder");
+
+  // ✅ Cart read helper — supports older/newer keys + migrates to sb_cart_v1
+  function readCartAnyKey(){
+    const CANDIDATES = ["sb_cart_v1", "sb_cart_v2", "sb_cart", "cart", "sbCart"];
+    for (const key of CANDIDATES) {
       try {
-        const r = await fetch(url + bust, { cache:"no-store", credentials:"same-origin" });
-        if (!r.ok) return;
-        document.getElementById(id).innerHTML = await r.text();
+        const raw = localStorage.getItem(key);
+        if (!raw) continue;
+        const parsed = JSON.parse(raw);
+
+        // Some carts store {items:[...]} instead of [...]
+        const items = Array.isArray(parsed) ? parsed
+                    : (parsed && Array.isArray(parsed.items)) ? parsed.items
+                    : null;
+
+        if (items && items.length) return { key, items };
       } catch {}
     }
-    const nav = await inject("/nav/index.html", "nav-placeholder");
-    await inject("/footer/index.html", "footer-placeholder");
+    return { key: null, items: [] };
+  }
 
-    // Render cart from localStorage
-    const el = document.getElementById("cart");
-    const cart = JSON.parse(localStorage.getItem("sb_cart_v1") || "[]");
-    if (!cart.length) {
-      el.innerHTML = '<p class="muted">Your cart is empty.</p>';
-      return;
-    }
-    const rows = cart.map(it => `
-      <div class="cart-line">
-        ${it.image ? `<img src="${it.image}" alt="">` : ``}
-        <div style="flex:1">
-          <div><strong>${it.name || it.sku || it.id}</strong></div>
-          <div class="muted">$${Number(it.price||0).toFixed(2)} × ${Number(it.quantity||it.qty||1)}</div>
-        </div>
-        <div><strong>$${(Number(it.price||0) * Number(it.quantity||it.qty||1)).toFixed(2)}</strong></div>
+  function normalize(items){
+    return (items || []).map(it => ({
+      id: it.id || it.sku || it.productId || it.name || "item",
+      sku: it.sku || it.id || "",
+      name: it.name || it.title || it.sku || it.id || "Item",
+      image: it.image || it.img || "",
+      price: Number(it.price || 0),
+      qty: Number(it.quantity || it.qty || 1)
+    })).filter(it => it.qty > 0);
+  }
+
+  const el = document.getElementById("cart");
+  const found = readCartAnyKey();
+  const cart = normalize(found.items);
+
+  // ✅ Optional: migrate whatever we found into sb_cart_v1 so everything matches going forward
+  try {
+    localStorage.setItem("sb_cart_v1", JSON.stringify(cart));
+  } catch {}
+
+  if (!cart.length) {
+    el.innerHTML = '<p class="muted">Your cart is empty.</p>';
+    return;
+  }
+
+  const rows = cart.map(it => `
+    <div class="cart-line">
+      ${it.image ? `<img src="${it.image}" alt="">` : ``}
+      <div style="flex:1">
+        <div><strong>${it.name}</strong></div>
+        <div class="muted">$${it.price.toFixed(2)} × ${it.qty}</div>
       </div>
-    `).join("");
-    const total = cart.reduce((n, it) => n + Number(it.price||0) * Number(it.quantity||it.qty||1), 0);
-    el.innerHTML = rows + `<p style="text-align:right;margin-top:.5rem"><strong>Total: $${total.toFixed(2)}</strong></p>`;
-  })();
-  </script>
+      <div><strong>$${(it.price * it.qty).toFixed(2)}</strong></div>
+    </div>
+  `).join("");
+
+  const total = cart.reduce((n, it) => n + it.price * it.qty, 0);
+  el.innerHTML = rows + `<p style="text-align:right;margin-top:.5rem"><strong>Total: $${total.toFixed(2)}</strong></p>`;
+})();
+</script>
 
   <!-- global helpers -->
   <script defer src="/scripts/global.js"></script>
