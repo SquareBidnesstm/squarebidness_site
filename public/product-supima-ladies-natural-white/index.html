@@ -193,9 +193,11 @@
     const PRODUCT = {
       item_id: "supima-ladies-natural-white",
       item_name: "Supima Ladies Tee — Natural White",
+      name: "Supima Ladies Tee — Natural White",
       price: 36.00,
       image: "/assets/supima/ladies-natural-white_800.jpg",
-      url: "/product-supima-ladies-natural-white/"
+      url: "/product-supima-ladies-natural-white/",
+      sku: "sb-supima-ladies-natural-white"
     };
 
     function readCart() {
@@ -205,27 +207,32 @@
 
     function writeCart(items) {
       try { localStorage.setItem(KEY, JSON.stringify(items || [])); } catch {}
+
+      // update badge counts if present
       try {
-        const count = (items || []).reduce((n, it) => n + Number(it.quantity || 0), 0);
+        const count = (items || []).reduce((n, it) => n + Number(it.quantity || it.qty || 0), 0);
         document.querySelectorAll("[data-cart-count]").forEach(el => el.textContent = String(count));
       } catch {}
+
       return items || [];
     }
 
     function addItem(item) {
       const items = readCart();
-      const id = String(item.item_id || "");
-      const variant = String(item.variant || "");
-      const qty = Number(item.quantity || 1);
 
-      if (!id) return items;
+      const id = String(item.item_id || item.id || "");
+      const variant = String(item.variant || "");
+      const qty = Number(item.quantity || item.qty || 1);
+
+      if (!id || qty <= 0) return items;
 
       const idx = items.findIndex(x =>
-        String(x.item_id || "") === id && String(x.variant || "") === variant
+        String(x.item_id || x.id || "") === id &&
+        String(x.variant || "") === variant
       );
 
       if (idx >= 0) items[idx].quantity = Number(items[idx].quantity || 0) + qty;
-      else items.push(item);
+      else items.push({ ...item, item_id: id, quantity: qty });
 
       return writeCart(items);
     }
@@ -261,6 +268,7 @@
           quantity: 1
         });
 
+        // optional: go straight to cart
         window.location.href = "/cart/";
       });
     });
