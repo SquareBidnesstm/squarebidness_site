@@ -261,5 +261,38 @@
       });
     })();
   </script>
+  <script>
+  // Women’s Supima Tee — add to SB cart
+  (function(){
+    const sel = document.getElementById("womensSize");
+    const btn = document.getElementById("womensCheckout");
+    if (!sel || !btn) return;
+
+    btn.addEventListener("click", (e) => {
+      const size = sel.value;
+      if (!size) {
+        e.preventDefault();
+        alert("Please select a size.");
+        return;
+      }
+
+      // ✅ WRITE TO CART
+      if (window.SB && SB.cart && typeof SB.cart.add === "function") {
+        SB.cart.add({
+          item_id: "supima-ladies-natural-white",
+          item_name: "Supima Ladies Tee — Natural White",
+          variant: size,
+          price: 36,
+          quantity: 1,
+          image: "/collections/assets/amari_2_800.jpg"
+        });
+      }
+
+      // Optional: go to cart instead of Stripe
+      window.location.href = "/cart/";
+    });
+  })();
+</script>
+
 </body>
 </html>
