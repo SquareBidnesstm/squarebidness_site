@@ -190,6 +190,14 @@
   (function () {
     const KEY = "sb_cart_v1";
 
+    const PRODUCT = {
+      item_id: "supima-ladies-natural-white",
+      item_name: "Supima Ladies Tee — Natural White",
+      price: 36.00,
+      image: "/assets/supima/ladies-natural-white_800.jpg",
+      url: "/product-supima-ladies-natural-white/"
+    };
+
     function readCart() {
       try { return JSON.parse(localStorage.getItem(KEY) || "[]"); }
       catch { return []; }
@@ -228,23 +236,29 @@
     }
 
     onReady(() => {
-      const sel = document.getElementById("womensSize");
-      const btn = document.getElementById("womensCheckout");
-      if (!sel || !btn) return;
+      const sizeEl = document.getElementById("size");
+      const addBtn = document.getElementById("addBtn");
+      if (!sizeEl || !addBtn) return;
 
-      btn.addEventListener("click", (e) => {
-        e.preventDefault();
+      function setDisabled(disabled) {
+        addBtn.disabled = !!disabled;
+        addBtn.setAttribute("aria-disabled", String(!!disabled));
+      }
 
-        const size = sel.value;
-        if (!size) return alert("Please select a size.");
+      setDisabled(true);
+
+      sizeEl.addEventListener("change", () => {
+        setDisabled(!sizeEl.value);
+      });
+
+      addBtn.addEventListener("click", () => {
+        const size = sizeEl.value;
+        if (!size) return;
 
         addItem({
-          item_id: "supima-ladies-natural-white",
-          item_name: "Supima Ladies Tee — Natural White",
+          ...PRODUCT,
           variant: size,
-          price: 36,
-          quantity: 1,
-          image: "/assets/supima/ladies-natural-white_800.jpg"
+          quantity: 1
         });
 
         window.location.href = "/cart/";
@@ -252,8 +266,5 @@
     });
   })();
 </script>
-
-
-
 </body>
 </html>
