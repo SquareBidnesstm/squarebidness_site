@@ -187,114 +187,6 @@
 
   <!-- Product logic (size gate + cart add) -->
   <script>
-    (function(){
-      const PRODUCT = {
-        id: "supima-ladies-natural-white",
-        name: "Supima Ladies Tee — Natural White",
-        price: 36.00,
-        image: "/assets/supima/ladies-natural-white_800.jpg",
-        url: "/product-supima-ladies-natural-white/",
-        sku: "sb-supima-ladies-natural-white",
-        variant: "Natural White"
-      };
-
-      const sizeEl = document.getElementById("size");
-      const addBtn = document.getElementById("addBtn");
-
-      function setDisabled(disabled){
-        addBtn.setAttribute("aria-disabled", String(disabled));
-        addBtn.disabled = !!disabled;
-      }
-
-      setDisabled(true);
-
-      sizeEl?.addEventListener("change", () => {
-        setDisabled(!sizeEl.value);
-      });
-
-      function fallbackAdd(item){
-        // Safe fallback if sb-cart.js isn't available
-        const KEY = "sb_cart_items";
-        let items = [];
-        try { items = JSON.parse(localStorage.getItem(KEY) || "[]"); } catch(e) {}
-        items.push(item);
-        try { localStorage.setItem(KEY, JSON.stringify(items)); } catch(e) {}
-        // update any cart count chips
-        const count = items.length;
-        document.querySelectorAll("[data-cart-count]").forEach(el => el.textContent = String(count));
-      }
-
-      addBtn?.addEventListener("click", () => {
-        const size = sizeEl.value;
-        if (!size) return;
-
-        const item = {
-          id: PRODUCT.id,
-          sku: PRODUCT.sku,
-          name: PRODUCT.name,
-          price: PRODUCT.price,
-          qty: 1,
-          size,
-          image: PRODUCT.image,
-          url: PRODUCT.url,
-          variant: PRODUCT.variant
-        };
-
-        try {
-          // Try common cart APIs first (if your sb-cart exposes one)
-          if (window.sbCart && typeof window.sbCart.add === "function") {
-            window.sbCart.add(item);
-          } else if (window.SBCart && typeof window.SBCart.addItem === "function") {
-            window.SBCart.addItem(item);
-          } else if (typeof window.addToCart === "function") {
-            window.addToCart(item);
-          } else {
-            fallbackAdd(item);
-          }
-
-          // small UX: push to cart
-          window.location.href = "/cart/";
-        } catch (e) {
-          fallbackAdd(item);
-          window.location.href = "/cart/";
-        }
-      });
-    })();
-  </script>
-  <script>
-  // Women’s Supima Tee — add to SB cart
-  (function(){
-    const sel = document.getElementById("womensSize");
-    const btn = document.getElementById("womensCheckout");
-    if (!sel || !btn) return;
-
-    btn.addEventListener("click", (e) => {
-      const size = sel.value;
-      if (!size) {
-        e.preventDefault();
-        alert("Please select a size.");
-        return;
-      }
-
-      // ✅ WRITE TO CART
-      if (window.SB && SB.cart && typeof SB.cart.add === "function") {
-        SB.cart.add({
-          item_id: "supima-ladies-natural-white",
-          item_name: "Supima Ladies Tee — Natural White",
-          variant: size,
-          price: 36,
-          quantity: 1,
-          image: "/collections/assets/amari_2_800.jpg"
-        });
-      }
-
-      // Optional: go to cart instead of Stripe
-      window.location.href = "/cart/";
-    });
-  })();
-</script>
-  <script>
-  // ✅ Bulletproof add-to-cart (does not depend on SB.cart being ready)
   (function () {
     const KEY = "sb_cart_v1";
 
@@ -305,7 +197,6 @@
 
     function writeCart(items) {
       try { localStorage.setItem(KEY, JSON.stringify(items || [])); } catch {}
-      // update badge counts if present
       try {
         const count = (items || []).reduce((n, it) => n + Number(it.quantity || 0), 0);
         document.querySelectorAll("[data-cart-count]").forEach(el => el.textContent = String(count));
@@ -316,11 +207,15 @@
     function addItem(item) {
       const items = readCart();
       const id = String(item.item_id || "");
+      const variant = String(item.variant || "");
       const qty = Number(item.quantity || 1);
 
       if (!id) return items;
 
-      const idx = items.findIndex(x => String(x.item_id || "") === id && String(x.variant || "") === String(item.variant || ""));
+      const idx = items.findIndex(x =>
+        String(x.item_id || "") === id && String(x.variant || "") === variant
+      );
+
       if (idx >= 0) items[idx].quantity = Number(items[idx].quantity || 0) + qty;
       else items.push(item);
 
@@ -341,27 +236,23 @@
         e.preventDefault();
 
         const size = sel.value;
-        if (!size) {
-          alert("Please select a size.");
-          return;
-        }
+        if (!size) return alert("Please select a size.");
 
         addItem({
           item_id: "supima-ladies-natural-white",
-          name: "Supima Ladies Tee — Natural White",
           item_name: "Supima Ladies Tee — Natural White",
           variant: size,
           price: 36,
           quantity: 1,
-          image: "/collections/assets/amari_2_800.jpg"
+          image: "/assets/supima/ladies-natural-white_800.jpg"
         });
 
-        // go to cart
         window.location.href = "/cart/";
       });
     });
   })();
 </script>
+
 
 
 </body>
