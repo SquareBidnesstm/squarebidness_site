@@ -10,6 +10,9 @@
   <link rel="preconnect" href="https://www.googletagmanager.com" />
   <link rel="preconnect" href="https://www.google-analytics.com" />
   <script defer src="/scripts/ga.js"></script>
+  <script defer src="/scripts/cart-render.js"></script>
+  <script defer src="/scripts/global.js"></script>
+
 
   <!-- Styles -->
   <link rel="stylesheet" href="/styles/style.css" />
@@ -92,70 +95,14 @@
   await inject("/nav/index.html", "nav-placeholder");
   await inject("/footer/index.html", "footer-placeholder");
 
-  // ✅ Cart read helper — supports older/newer keys + migrates to sb_cart_v1
-  function readCartAnyKey(){
-    const CANDIDATES = ["sb_cart_v1","sb_cart_v2","sb_cart","cart","sbCart","sb_cart_items"];
-    for (const key of CANDIDATES) {
-      try {
-        const raw = localStorage.getItem(key);
-        if (!raw) continue;
-        const parsed = JSON.parse(raw);
-
-        // Some carts store {items:[...]} instead of [...]
-        const items = Array.isArray(parsed) ? parsed
-                    : (parsed && Array.isArray(parsed.items)) ? parsed.items
-                    : null;
-
-        if (items && items.length) return { key, items };
-      } catch {}
-    }
-    return { key: null, items: [] };
+  // ✅ after partials are in, render cart
+  if (window.SB && typeof SB.renderCart === "function") {
+    SB.renderCart({ mountId: "cart" });
   }
-
-  function normalize(items){
-    return (items || []).map(it => ({
-      id: it.id || it.sku || it.productId || it.name || "item",
-      sku: it.sku || it.id || "",
-      name: it.name || it.title || it.sku || it.id || "Item",
-      image: it.image || it.img || "",
-      price: Number(it.price || 0),
-      qty: Number(it.quantity || it.qty || 1)
-    })).filter(it => it.qty > 0);
-  }
-
-  const el = document.getElementById("cart");
-  const found = readCartAnyKey();
-  const cart = normalize(found.items);
-
-// ✅ Only migrate if we actually found items
-if (cart.length) {
-  try {
-    localStorage.setItem("sb_cart_v1", JSON.stringify(cart));
-  } catch {}
-}
-
-if (!cart.length) {
-  el.innerHTML = '<p class="muted">Your cart is empty.</p>';
-  return;
-}
-
-  const rows = cart.map(it => `
-    <div class="cart-line">
-      ${it.image ? `<img src="${it.image}" alt="">` : ``}
-      <div style="flex:1">
-        <div><strong>${it.name}</strong></div>
-        <div class="muted">$${it.price.toFixed(2)} × ${it.qty}</div>
-      </div>
-      <div><strong>$${(it.price * it.qty).toFixed(2)}</strong></div>
-    </div>
-  `).join("");
-
-  const total = cart.reduce((n, it) => n + it.price * it.qty, 0);
-  el.innerHTML = rows + `<p style="text-align:right;margin-top:.5rem"><strong>Total: $${total.toFixed(2)}</strong></p>`;
 })();
 </script>
 
-  <!-- global helpers -->
-  <script defer src="/scripts/global.js"></script>
+
+  
 </body>
 </html>
