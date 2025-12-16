@@ -43,9 +43,6 @@
   <link rel="manifest" href="/site.webmanifest">
   <meta name="theme-color" content="#000000">
 
-  <script defer src="/scripts/checkout-render.js"></script>
-
-
   <!-- Org JSON-LD (site-wide) -->
   <script type="application/ld+json">
   {
@@ -66,17 +63,13 @@
   }
   </script>
 
-  <!-- Global cart helpers -->
+  <!-- Global cart helpers (optional but fine) -->
   <script defer src="/scripts/sb-cart.js"></script>
 
-  <!-- Stripe.js (for server checkout sessions) -->
-  <script src="https://js.stripe.com/v3/"></script>
-
-  <script defer src="/scripts/cart-render.js"></script>
-
+  <!-- Stripe.js -->
+  <script defer src="https://js.stripe.com/v3/"></script>
 
   <style>
-    /* Light touch for table safety (won’t fight your global css) */
     .cart-table img{border:1px solid #1f1f1f}
     .right{text-align:right}
     .total td{font-weight:900}
@@ -97,16 +90,8 @@
 
     await inject("/nav/index.html", "nav-placeholder");
     await inject("/footer/index.html", "footer-placeholder");
-
-    // ✅ NOW run checkout render (after page is ready)
-    if (window.SB && typeof SB.renderCheckoutTable === "function") {
-      SB.renderCheckoutTable({ taxRate: 0.0945 });
-    } else {
-      console.warn("SB.renderCheckoutTable not found — did /scripts/checkout-render.js load?");
-    }
   });
-</script>
-
+  </script>
 </head>
 
 <body class="theme-dark" id="top">
@@ -172,22 +157,14 @@
   <!-- FOOTER -->
   <div id="footer-placeholder"></div>
 
-  <!-- Checkout logic (paste-ready) -->
+  <!-- Checkout logic -->
   <script>
   (function() {
-    // ---------- Config ----------
     const CART_KEY   = "sb_cart_v1";
     const COUPON_KEY = "sb_coupon";
     const TAX_RATE   = 0.0945;
 
-    // Your checkout server endpoint (creates Stripe Checkout Session)
     const CHECKOUT_ENDPOINT = "https://sb-checkout-server.vercel.app/api/create-checkout-session";
-
-    // Optional: direct Stripe Payment Link short-circuit for 1-item carts
-    // Example: { "sb-hoco-hat": "https://buy.stripe.com/..." }
-    const STRIPE_LINKS = {
-      // "sb-hoco-hat": "https://buy.stripe.com/7sY9ATaJV529del8Fa8N20h"
-    };
 
     const moneyFmt = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
     const money = n => moneyFmt.format(Number(n || 0));
@@ -197,7 +174,6 @@
       catch { return []; }
     }
 
-    // Normalize whatever shape is in storage into a stable shape for checkout
     function normalizeCart(rawItems){
       return (rawItems || []).map(i => ({
         id: String(i.item_id || i.id || i.sku || ""),
@@ -206,7 +182,7 @@
         qty: Number(i.quantity ?? i.qty ?? 1),
         variant: i.variant || i.size || null,
         image: i.image || i.img || ""
-      })).filter(i => i.id && i.qty > 0 && i.price >= 0);
+      })).filter(i => i.id && i.qty > 0);
     }
 
     function getCoupon() {
@@ -291,16 +267,7 @@
         qty: Number(i.qty) || 1
       })).filter(i => i.qty > 0);
 
-      if (!items.length) {
-        alert("Your cart is empty");
-        return;
-      }
-
-      // Optional: direct Payment Link for single-item carts
-      if (items.length === 1) {
-        const link = STRIPE_LINKS[items[0].id] || null;
-        if (link) { location.assign(link); return; }
-      }
+      if (!items.length) return alert("Your cart is empty");
 
       // GA4 begin_checkout (best effort)
       try {
@@ -326,26 +293,6 @@
       try {
         const coupon = getCoupon() || null;
 
-        // snapshot for thank-you page
-        const subtotal = items.reduce((s, i) => s + (i.price * i.qty), 0);
-        const { discount } = applyCoupon(subtotal);
-        const tax = Math.max(0, (subtotal - discount) * TAX_RATE);
-        const total = Math.max(0, subtotal - discount + tax);
-        const orderId = "SB-" + Date.now();
-
-        sessionStorage.setItem("sb_last_order", JSON.stringify({
-          orderId,
-          createdAt: Date.now(),
-          items,
-          coupon,
-          subtotal,
-          discount,
-          tax,
-          total,
-          shipping: 0
-        }));
-
-        // Create checkout session via server
         const res = await fetch(CHECKOUT_ENDPOINT, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -360,10 +307,8 @@
 
         const data = await res.json();
 
-        // Server can return a hosted URL
         if (data.url) { location.assign(data.url); return; }
 
-        // Or a session id + publishable key
         if (data.id && data.publishableKey && window.Stripe) {
           const stripe = Stripe(data.publishableKey);
           const { error } = await stripe.redirectToCheckout({ sessionId: data.id });
@@ -386,5 +331,8 @@
     });
   })();
   </script>
+
+  <!-- global helpers -->
+  <script defer src="/scripts/global.js"></script>
 </body>
 </html>
