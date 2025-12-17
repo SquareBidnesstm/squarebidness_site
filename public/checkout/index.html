@@ -70,9 +70,21 @@
   <script defer src="https://js.stripe.com/v3/"></script>
 
   <style>
-    .cart-table img{border:1px solid #1f1f1f}
-    .right{text-align:right}
-    .total td{font-weight:900}
+    .right { text-align:right }
+    .total td { font-weight:900 }
+
+    /* ✅ Fixed thumb box = reduces CLS + passes “width/height” audit */
+    .cart-table .thumb{
+      width:54px;
+      height:54px;
+      object-fit:cover;
+      border-radius:6px;
+      vertical-align:middle;
+      margin-right:.5rem;
+      border:1px solid #1f1f1f;
+      background:#0f0f0f;
+      display:inline-block;
+    }
   </style>
 
   <!-- Inject nav/footer (consistent paths + cache bust) -->
@@ -87,7 +99,6 @@
         if (el) el.innerHTML = await r.text();
       } catch {}
     }
-
     await inject("/nav/index.html", "nav-placeholder");
     await inject("/footer/index.html", "footer-placeholder");
   });
@@ -220,10 +231,11 @@
       tbody.innerHTML = items.map(i => {
         const line = i.price * i.qty;
         const title = i.variant ? `${i.name} (${i.variant})` : i.name;
+
         return `
           <tr>
             <td style="text-align:left;">
-              ${i.image ? `<img src="${i.image}" alt="" style="width:54px;height:54px;object-fit:cover;border-radius:6px;vertical-align:middle;margin-right:.5rem">` : ``}
+              ${i.image ? `<img class="thumb" src="${i.image}" alt="" width="54" height="54" loading="lazy" decoding="async">` : ``}
               ${title}
             </td>
             <td>${money(i.price)}</td>
