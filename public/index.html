@@ -21,7 +21,6 @@
   <!-- Build/version stamp (controls update banner) -->
   <meta name="sb:build" content="v20251215-goldmaster-01" />
 
-
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Square Bidness" />
@@ -43,6 +42,16 @@
   <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com">
   <link rel="preconnect" href="https://www.google-analytics.com">
+
+  <!-- ✅ Preload LCP hero image (MUST stay in HEAD) -->
+  <link
+    rel="preload"
+    as="image"
+    href="/assets/hero_1200.webp"
+    imagesrcset="/assets/hero_800.webp 800w, /assets/hero_1200.webp 1200w"
+    imagesizes="(min-width: 900px) 50vw, 100vw"
+    fetchpriority="high"
+  />
 
   <!-- Global CSS -->
   <link rel="stylesheet" href="/styles/style.css" />
@@ -228,15 +237,37 @@
       </a>
 
       <div class="hero__inner">
-        <picture class="hero__media" aria-hidden="true">
-          <img loading="lazy" src="/assets/hero.jpg" alt="Square Bidness hero image">
+        <!-- Media -->
+        <div class="hero__media">
+          <picture>
+            <source
+              type="image/webp"
+              srcset="/assets/hero_800.webp 800w, /assets/hero_1200.webp 1200w"
+              sizes="(min-width: 900px) 50vw, 100vw"
+            />
+            <img
+              src="/assets/hero_1200.jpg"
+              srcset="/assets/hero_800.jpg 800w, /assets/hero_1200.jpg 1200w"
+              sizes="(min-width: 900px) 50vw, 100vw"
+              width="1200"
+              height="800"
+              alt="Square Bidness hero image"
+              loading="eager"
+              decoding="async"
+              fetchpriority="high"
+              style="width:100%;height:auto;"
+            />
+          </picture>
+
+          <!-- Overlay CTA -->
           <a href="/vsop/" class="sb-banner sb-banner--overlay" rel="noopener">
             <span class="sb-banner__eyebrow">VSOP Collection</span>
             <strong>Preorders Live Right Now</strong>
             <span class="sb-banner__cta">Tap in and see the set →</span>
           </a>
-        </picture>
+        </div>
 
+        <!-- Copy -->
         <div class="hero__copy">
           <h1 class="brand">Square Bidness</h1>
           <p class="tagline">Principles. Morals. Business Done Right.</p>
@@ -248,6 +279,7 @@
       </div>
     </div>
   </header>
+
 
   <main>
     <section class="section section--band" id="shop">
