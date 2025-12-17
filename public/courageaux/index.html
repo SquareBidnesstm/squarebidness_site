@@ -64,11 +64,15 @@
   }
   </script>
 
-  <!-- Preload hero -->
-  <link rel="preload" as="image"
-        href="/courageaux/assets/amari_800.jpg"
-        imagesrcset="/courageaux/assets/amari_800.jpg 800w, /courageaux/assets/amari_1200.jpg 1200w"
-        imagesizes="(min-width:900px) 48vw, 100vw" />
+  <!-- Preload hero (LCP) -->
+  <link
+    rel="preload"
+    as="image"
+    href="/courageaux/assets/amari_1200.jpg"
+    imagesrcset="/courageaux/assets/amari_800.jpg 800w, /courageaux/assets/amari_1200.jpg 1200w"
+    imagesizes="(min-width:900px) 48vw, 100vw"
+    fetchpriority="high"
+  />
 
   <style>
     :root{ --bg:#0b0b0b; --fg:#fff; --muted:#bdbdbd; --soft:#121212; --stroke:#1f1f1f; --gold:#c9a227 }
@@ -142,7 +146,7 @@
     <div class="cx-hero__inner">
       <div class="cx-hero__copy">
         <span class="cx-badge">
-          <img src="/courageaux/assets/logo_courageaux_black_400.png" alt="Courageaux Aesthetics logo">
+          <img src="/courageaux/assets/logo_courageaux_black_400.png" width="400" height="400" alt="Courageaux Aesthetics logo" loading="eager" decoding="async" fetchpriority="low">
           Courageaux Aesthetics · Hammond, LA
         </span>
 
@@ -170,11 +174,16 @@
       <div class="cx-hero__media">
         <picture>
           <source srcset="/courageaux/assets/amari_1200.jpg" media="(min-width: 720px)">
-          <img src="/courageaux/assets/amari_800.jpg"
-               alt="Courageaux Aesthetics — Amari Wilford portrait"
-               width="1200" height="900"
-               sizes="(min-width:900px) 48vw, 100vw"
-               loading="eager" decoding="async" fetchpriority="high">
+          <img
+            src="/courageaux/assets/amari_800.jpg"
+            alt="Courageaux Aesthetics — Amari Wilford portrait"
+            width="1200" height="900"
+            sizes="(min-width:900px) 48vw, 100vw"
+            loading="eager"
+            decoding="async"
+            fetchpriority="high"
+            style="width:100%;height:auto;"
+          >
         </picture>
       </div>
     </div>
@@ -357,7 +366,6 @@
               showBanner();
             }
           } catch(_) {
-            // If storage blocked, still allow banner
             if (btnInstall) btnInstall.style.display = 'none';
             copySpan.textContent = 'On iPhone: tap the Share icon and choose "Add to Home Screen" to keep Courageaux one tap away.';
             showBanner();
