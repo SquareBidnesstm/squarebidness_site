@@ -85,22 +85,95 @@
   <script>
 (async () => {
   const bust = `?v=${Date.now()}`;
+
   async function inject(url, id) {
     try {
-      const r = await fetch(url + bust, { cache:"no-store", credentials:"same-origin" });
+      const r = await fetch(url + bust, { cache: "no-store", credentials: "same-origin" });
       if (!r.ok) return;
-      document.getElementById(id).innerHTML = await r.text();
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = await r.text();
     } catch {}
   }
+
   await inject("/nav/index.html", "nav-placeholder");
   await inject("/footer/index.html", "footer-placeholder");
 
-  // ✅ after partials are in, render cart
-  if (window.SB && typeof SB.renderCart === "function") {
-    SB.renderCart({ mountId: "cart" });
+  // --- Cart read (supports legacy keys, prefers sb_cart_v1) ---
+  const PRIMARY = "sb_cart_v1";
+  const CANDIDATES = ["sb_cart_v1","sb_cart_v2","sb_cart","sbCart","cart","sb_cart_items"];
+
+  function readCartAnyKey() {
+    for (const key of CANDIDATES) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) continue;
+        const parsed = JSON.parse(raw);
+        const items = Array.isArray(parsed) ? parsed
+          : (parsed && Array.isArray(parsed.items)) ? parsed.items
+          : null;
+        if (items && items.length) return { key, items };
+      } catch {}
+    }
+    return { key: null, items: [] };
   }
+
+  function normalize(items) {
+    return (items || []).map(it => ({
+      id: it.item_id || it.id || it.sku || it.productId || "item",
+      name: it.item_name || it.name || it.title || it.sku || it.id || "Item",
+      image: it.image || it.img || "",
+      price: Number(it.price || 0),
+      qty: Number(it.quantity ?? it.qty ?? 1),
+      variant: it.variant || it.size || ""
+    })).filter(it => it.qty > 0);
+  }
+
+  const el = document.getElementById("cart");
+  const found = readCartAnyKey();
+  const cart = normalize(found.items);
+
+  // ✅ Only migrate if we found real items (prevents wiping good carts)
+  if (cart.length) {
+    try { localStorage.setItem(PRIMARY, JSON.stringify(cart)); } catch {}
+  }
+
+  if (!cart.length) {
+    el.innerHTML = '<p class="muted">Your cart is empty.</p>';
+    return;
+  }
+
+  const rows = cart.map(it => {
+    const title = it.variant ? `${it.name} (${it.variant})` : it.name;
+
+    return `
+      <div class="cart-line">
+        ${it.image ? `
+          <img
+            src="${it.image}"
+            alt=""
+            width="56"
+            height="56"
+            loading="lazy"
+            decoding="async"
+            style="width:56px;height:56px;object-fit:cover;"
+          >
+        ` : ``}
+
+        <div style="flex:1">
+          <div><strong>${title}</strong></div>
+          <div class="muted">$${it.price.toFixed(2)} × ${it.qty}</div>
+        </div>
+
+        <div><strong>$${(it.price * it.qty).toFixed(2)}</strong></div>
+      </div>
+    `;
+  }).join("");
+
+  const total = cart.reduce((n, it) => n + it.price * it.qty, 0);
+  el.innerHTML = rows + `<p style="text-align:right;margin-top:.5rem"><strong>Total: $${total.toFixed(2)}</strong></p>`;
 })();
 </script>
+
 
 
   
