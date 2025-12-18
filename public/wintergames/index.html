@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"> 
+<html lang="en">
 <head>
   <!-- Basics -->
   <meta charset="UTF-8" />
@@ -13,53 +13,17 @@
   <link rel="preconnect" href="https://www.googletagmanager.com">
   <link rel="preconnect" href="https://www.google-analytics.com">
 
+  <!-- Preload HERO (LCP) -->
+  <link rel="preload" as="image"
+        href="/wintergames/assets/og-lil-soulja-slim_1200.webp"
+        imagesrcset="/wintergames/assets/og-lil-soulja-slim_800.webp 800w, /wintergames/assets/og-lil-soulja-slim_1200.webp 1200w"
+        imagesizes="(max-width: 768px) 100vw, 980px">
+
   <!-- GA4 (site-wide) -->
   <script defer src="/scripts/ga.js"></script>
 
   <!-- CSS -->
   <link rel="stylesheet" href="/styles/style.css" />
-  <style>
-    :root { --wg-gold:#c9a227; }
-    body.theme-dark.wintergames-body{
-      background:radial-gradient(circle at top,rgba(201,162,39,.055) 0%,#000 54%);
-      color:#fff;min-height:100vh;
-    }
-    .wg-shell{max-width:980px;margin:0 auto;padding:1.5rem 1rem 4rem;}
-    .wg-card{background:#0a0a0a;border:1px solid rgba(255,255,255,.06);border-radius:18px;overflow:hidden;box-shadow:0 24px 42px rgba(0,0,0,.35);margin-bottom:1.2rem;}
-    .wg-card img{width:100%;display:block;object-fit:cover;}
-    .wg-content{padding:1.25rem 1rem 1.5rem;}
-    .wg-eyebrow{display:inline-block;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.08);border-radius:999px;padding:.25rem .7rem .35rem;font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.6rem;}
-    .wg-title{font-size:clamp(1.9rem,3.4vw,2.4rem);font-weight:800;line-height:1.04;margin:0 0 .45rem;}
-    .wg-sub{color:#e5e7eb;margin:.15rem 0 1rem;}
-    .wg-buybar{background:rgba(11,11,11,.75);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:1rem;display:flex;flex-wrap:wrap;gap:.65rem;align-items:center;justify-content:space-between;}
-    .wg-buybar select,.wg-buybar input{background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.12);border-radius:10px;color:#fff;padding:.5rem .6rem;min-width:7rem;}
-    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.35rem;border-radius:999px;border:1px solid transparent;font-weight:700;text-decoration:none;cursor:pointer;transition:transform .12s ease-out; padding:.65rem 1.05rem;}
-    .btn--gold{background:var(--wg-gold);color:#171717;border-color:rgba(201,162,39,.55);box-shadow:0 14px 32px rgba(201,162,39,.35);}
-    .btn--ghost{background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.12);color:#fff;}
-    .btn[aria-disabled="true"]{opacity:.6;pointer-events:none;}
-    .wg-footnote{margin-top:.9rem;color:#a1a1aa;font-size:.85rem}
-    @media (max-width:720px){
-      .wg-buybar{flex-direction:column;align-items:flex-start;}
-    }
-  </style>
-  <style>
-  /* Winter Games marquee banner */
-  .wg-marquee{
-    border-block:1px solid rgba(255,255,255,.06);
-    background:linear-gradient(180deg, rgba(255,255,255,.02), transparent);
-    overflow:hidden; white-space:nowrap; user-select:none;
-  }
-  .wg-marquee__inner{
-    display:inline-flex; gap:2rem; padding:.65rem 0;
-    font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:#fff;
-    animation:wg-scroll 18s linear infinite;
-  }
-  .wg-marquee__tag{ color:#c9a227; margin:0 .5rem; }
-  @keyframes wg-scroll{
-    from{ transform:translateX(0) }
-    to{ transform:translateX(-50%) }
-  }
-  </style>
 
   <!-- Icons / PWA -->
   <link rel="icon" href="/favicon.ico" sizes="any">
@@ -80,6 +44,158 @@
   <meta name="twitter:description" content="Heavyweight organic cotton crewneck and Waterproof Golf Hat, worn by OG Lil Soulja Slim." />
   <meta name="twitter:image" content="https://www.squarebidness.com/wintergames/assets/og-lil-soulja-slim_1200x630.jpg" />
   <meta name="twitter:site" content="@squarebidnesstm" />
+
+  <style>
+    :root { --wg-gold:#c9a227; }
+
+    body.theme-dark.wintergames-body{
+      background:radial-gradient(circle at top,rgba(201,162,39,.055) 0%,#000 54%);
+      color:#fff;
+      min-height:100vh;
+    }
+
+    .wg-shell{max-width:980px;margin:0 auto;padding:1.5rem 1rem 4rem;}
+
+    /* Card shell */
+    .wg-card{
+      background:#0a0a0a;
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:18px;
+      overflow:hidden;
+      box-shadow:0 24px 42px rgba(0,0,0,.35);
+      margin-bottom:1.2rem;
+    }
+
+    /* CLS FIX: reserve space before images load */
+    .wg-media{
+      position:relative;
+      width:100%;
+      background:#070707;
+      overflow:hidden;
+    }
+    /* Hero is 16:9-ish (adjust if your source is different) */
+    .wg-media--hero{aspect-ratio: 16 / 9;}
+    /* Hat photo is also wide; keep stable */
+    .wg-media--hat{aspect-ratio: 16 / 9;}
+
+    .wg-media picture,
+    .wg-media img{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      display:block;
+    }
+    .wg-media img{object-fit:cover;}
+
+    .wg-content{padding:1.25rem 1rem 1.5rem;}
+
+    .wg-eyebrow{
+      display:inline-block;
+      background:rgba(0,0,0,.45);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:999px;
+      padding:.25rem .7rem .35rem;
+      font-size:.65rem;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      margin-bottom:.6rem;
+    }
+
+    .wg-title{
+      font-size:clamp(1.9rem,3.4vw,2.4rem);
+      font-weight:800;
+      line-height:1.04;
+      margin:0 0 .45rem;
+    }
+
+    .wg-sub{color:#e5e7eb;margin:.15rem 0 1rem;}
+
+    .wg-buybar{
+      background:rgba(11,11,11,.75);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:14px;
+      padding:1rem;
+      display:flex;
+      flex-wrap:wrap;
+      gap:.65rem;
+      align-items:center;
+      justify-content:space-between;
+    }
+
+    .wg-buybar select,.wg-buybar input{
+      background:rgba(0,0,0,.45);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:10px;
+      color:#fff;
+      padding:.5rem .6rem;
+      min-width:7rem;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:.35rem;
+      border-radius:999px;
+      border:1px solid transparent;
+      font-weight:700;
+      text-decoration:none;
+      cursor:pointer;
+      transition:transform .12s ease-out;
+      padding:.65rem 1.05rem;
+      will-change:transform;
+    }
+    .btn--gold{
+      background:var(--wg-gold);
+      color:#171717;
+      border-color:rgba(201,162,39,.55);
+      box-shadow:0 14px 32px rgba(201,162,39,.35);
+    }
+    .btn--ghost{
+      background:rgba(0,0,0,.45);
+      border:1px solid rgba(255,255,255,.12);
+      color:#fff;
+    }
+    .btn[aria-disabled="true"]{opacity:.6;pointer-events:none;}
+
+    .wg-footnote{margin-top:.9rem;color:#a1a1aa;font-size:.85rem}
+
+    @media (max-width:720px){
+      .wg-buybar{flex-direction:column;align-items:flex-start;}
+    }
+
+    /* Winter Games marquee banner (CLS safe) */
+    .wg-marquee{
+      border-block:1px solid rgba(255,255,255,.06);
+      background:linear-gradient(180deg, rgba(255,255,255,.02), transparent);
+      overflow:hidden;
+      user-select:none;
+    }
+    .wg-marquee__track{
+      display:flex;
+      width:max-content;
+      gap:2rem;
+      padding:.65rem 0;
+      font-weight:800;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      color:#fff;
+      will-change:transform;
+      animation:wg-scroll 18s linear infinite;
+    }
+    .wg-marquee__tag{ color:#c9a227; margin:0 .5rem; }
+    @keyframes wg-scroll{
+      from{ transform:translateX(0) }
+      to{ transform:translateX(-50%) }
+    }
+
+    /* Respect reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      .wg-marquee__track{animation:none;}
+      .btn{transition:none;}
+    }
+  </style>
 </head>
 
 <body class="theme-dark wintergames-body">
@@ -88,35 +204,41 @@
 
   <!-- Winter Games marquee banner -->
   <div class="wg-marquee" aria-hidden="true">
-    <div class="wg-marquee__inner">
-      WINTER GAMES <span class="wg-marquee__tag">•</span> ORGANIC COTTON
-      <span class="wg-marquee__tag">•</span> LOUISIANA ENERGY
-      <span class="wg-marquee__tag">•</span> LEGACY APPROVED
-      <span class="wg-marquee__tag">•</span> SQUARE BIDNESS
-      &nbsp;&nbsp;WINTER GAMES <span class="wg-marquee__tag">•</span> ORGANIC COTTON
-      <span class="wg-marquee__tag">•</span> LOUISIANA ENERGY
-      <span class="wg-marquee__tag">•</span> LEGACY APPROVED
-      <span class="wg-marquee__tag">•</span> SQUARE BIDNESS
+    <div class="wg-marquee__track">
+      <span>WINTER GAMES <span class="wg-marquee__tag">•</span> ORGANIC COTTON <span class="wg-marquee__tag">•</span> LOUISIANA ENERGY <span class="wg-marquee__tag">•</span> LEGACY APPROVED <span class="wg-marquee__tag">•</span> SQUARE BIDNESS</span>
+      <span>WINTER GAMES <span class="wg-marquee__tag">•</span> ORGANIC COTTON <span class="wg-marquee__tag">•</span> LOUISIANA ENERGY <span class="wg-marquee__tag">•</span> LEGACY APPROVED <span class="wg-marquee__tag">•</span> SQUARE BIDNESS</span>
     </div>
   </div>
 
   <main class="wg-shell">
     <!-- Crewneck Hero Card -->
     <article class="wg-card" aria-label="Winter Games hero">
-      <picture>
-        <!-- relative to /wintergames/ -->
-        <source srcset="assets/og-lil-soulja-slim_1200.jpg" media="(min-width: 768px)">
-        <img
-          src="assets/og-lil-soulja-slim_800.jpg"
-          alt="OG Lil Soulja Slim in the Winter Games crewneck"
-          loading="eager"
-          decoding="async"
-          onerror="this.onerror=null;this.src='/assets/placeholder.png';">
-      </picture>
+      <div class="wg-media wg-media--hero">
+        <picture>
+          <!-- WebP first -->
+          <source
+            type="image/webp"
+            srcset="assets/og-lil-soulja-slim_800.webp 800w, assets/og-lil-soulja-slim_1200.webp 1200w"
+            sizes="(max-width: 768px) 100vw, 980px">
+          <!-- Fallback JPG -->
+          <source
+            type="image/jpeg"
+            srcset="assets/og-lil-soulja-slim_800.jpg 800w, assets/og-lil-soulja-slim_1200.jpg 1200w"
+            sizes="(max-width: 768px) 100vw, 980px">
+          <img
+            src="assets/og-lil-soulja-slim_800.jpg"
+            alt="OG Lil Soulja Slim in the Winter Games crewneck"
+            width="1200" height="675"
+            loading="eager"
+            decoding="async"
+            fetchpriority="high"
+            onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';">
+        </picture>
+      </div>
     </article>
 
     <!-- Crewneck Content + Buy -->
-    <section class="wg-content">
+    <section class="wg-content" aria-label="Winter Games crewneck">
       <p class="wg-eyebrow">Winter Games Collection</p>
       <h1 class="wg-title">Heavyweight Organic Cotton Crewneck</h1>
       <p class="wg-sub">
@@ -142,7 +264,7 @@
           <a id="wg-checkout" class="btn btn--gold" href="#" aria-disabled="true" target="_blank" rel="noopener">
             Select size
           </a>
-          <a class="btn btn--ghost" href="/#shop">Back to Shop</a>
+          <a class="btn btn--ghost" href="/shop/">Back to Shop</a>
         </div>
       </div>
 
@@ -151,24 +273,37 @@
 
     <!-- Waterproof Golf Hat Card -->
     <article class="wg-card" aria-label="Winter Games Waterproof Golf Hat">
-      <picture>
-        <!-- relative to /wintergames/ -->
-        <source
-          srcset="
-            assets/winter-game-hat_1600.jpg 1600w,
-            assets/winter-game-hat_1200.jpg 1200w"
-          sizes="(max-width: 768px) 100vw, 980px">
-        <img
-          src="assets/winter-game-hat_800.jpg"
-          alt="Square Bidness Winter Games waterproof golf hat overlooking the D.C. skyline."
-          loading="lazy"
-          decoding="async"
-          onerror="this.onerror=null;this.src='/assets/placeholder.png';">
-      </picture>
+      <div class="wg-media wg-media--hat">
+        <picture>
+          <!-- WebP first -->
+          <source
+            type="image/webp"
+            srcset="
+              assets/winter-game-hat_800.webp 800w,
+              assets/winter-game-hat_1200.webp 1200w,
+              assets/winter-game-hat_1600.webp 1600w"
+            sizes="(max-width: 768px) 100vw, 980px">
+          <!-- Fallback JPG -->
+          <source
+            type="image/jpeg"
+            srcset="
+              assets/winter-game-hat_800.jpg 800w,
+              assets/winter-game-hat_1200.jpg 1200w,
+              assets/winter-game-hat_1600.jpg 1600w"
+            sizes="(max-width: 768px) 100vw, 980px">
+          <img
+            src="assets/winter-game-hat_800.jpg"
+            alt="Square Bidness Winter Games waterproof golf hat overlooking the D.C. skyline."
+            width="1600" height="900"
+            loading="lazy"
+            decoding="async"
+            onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';">
+        </picture>
+      </div>
     </article>
 
     <!-- Hat Content + Buy -->
-    <section class="wg-content">
+    <section class="wg-content" aria-label="Winter Games hat">
       <p class="wg-eyebrow">Winter Games Collection</p>
       <h2 class="wg-title" style="font-size:clamp(1.6rem,3vw,2rem);">
         Winter Games Waterproof Golf Hat
@@ -192,7 +327,7 @@
             rel="noopener">
             Checkout — $39.99
           </a>
-          <a class="btn btn--ghost" href="/#shop">Back to Shop</a>
+          <a class="btn btn--ghost" href="/shop/">Back to Shop</a>
         </div>
       </div>
 
