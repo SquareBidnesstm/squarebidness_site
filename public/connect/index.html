@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Analytics -->
-  <script defer src="/scripts/ga.js"></script>
-
   <!-- Basics -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -37,6 +34,7 @@
   <link rel="preconnect" href="https://www.google-analytics.com">
 
   <!-- Styles -->
+  <link rel="preload" as="style" href="/styles/style.css">
   <link rel="stylesheet" href="/styles/style.css" />
 
   <!-- Icons / PWA (main site defaults) -->
@@ -46,6 +44,9 @@
   <link rel="apple-touch-icon" href="/icon_180.png">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#000000">
+
+  <!-- Analytics -->
+  <script defer src="/scripts/ga.js"></script>
 
   <style>
     .page-hero {
@@ -83,6 +84,7 @@
     }
     .panel h2,
     .panel h3,
+    .panel--soft h2,
     .panel--soft h3 {
       margin-top:0;
       margin-bottom:.35rem;
@@ -179,7 +181,7 @@
 
 <body class="theme-dark" id="top">
   <!-- NAV -->
-  <div id="nav-placeholder"></div>
+  <div id="nav-placeholder" aria-busy="true"></div>
 
   <!-- HERO -->
   <header class="page-hero">
@@ -211,6 +213,7 @@
             <a href="mailto:info@squarebidness.com">info@squarebidness.com</a>
             <div class="muted-small">General, partnerships, and media.</div>
           </li>
+
           <li style="margin-top:.6rem;">
             <span class="label">HQ Address</span>
             <div>Square Bidness Apparel</div>
@@ -281,7 +284,7 @@
   </main>
 
   <!-- FOOTER -->
-  <div id="footer-placeholder"></div>
+  <div id="footer-placeholder" aria-busy="true"></div>
 
   <!-- NAV + FOOTER loader -->
   <script>
@@ -302,13 +305,14 @@
           return;
         }
         el.innerHTML = html;
+        el.setAttribute('aria-busy', 'false');
       } catch (err) {
         console.warn('[partials] fetch fail:', url, err);
       }
     }
 
-    await injectPartial('/nav/index.html', 'nav-placeholder');       // full nav
-    await injectPartial('/footer/index.html', 'footer-placeholder'); // global footer
+    await injectPartial('/nav/index.html', 'nav-placeholder');
+    await injectPartial('/footer/index.html', 'footer-placeholder');
   })();
   </script>
 </body>
