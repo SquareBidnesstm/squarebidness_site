@@ -1,39 +1,44 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <!-- Basics -->
   <meta charset="utf-8" />
-  <!-- Inject shared head (fonts, GA, base meta, etc.) -->
-  <script>
-    (async () => {
-      try {
-        const html = await fetch('/partials/head.html', { cache: 'no-cache' }).then(r => r.text());
-        document.head.insertAdjacentHTML('afterbegin', html);
-      } catch (e) {
-        console.warn('head include failed', e);
-      }
-    })();
-  </script>
-
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Square Bidness Tech Lab — Built By The Brand</title>
-  <meta name="description"
-        content="Square Bidness Tech Lab builds the tools behind the brand — Tax Pass™, content systems, and future data / AI infrastructure. Louisiana-rooted, veteran-owned, built for independent operators." />
+  <meta name="description" content="Square Bidness Tech Lab builds the tools behind the brand — Tax Pass™, content systems, and future data / AI infrastructure. Louisiana-rooted, veteran-owned, built for independent operators." />
   <link rel="canonical" href="https://www.squarebidness.com/techlabs/" />
+  <meta name="theme-color" content="#000000" />
+
+  <!-- Perf -->
+  <link rel="preconnect" href="https://www.googletagmanager.com">
+  <link rel="preconnect" href="https://www.google-analytics.com">
+  <link rel="preload" href="/styles/style.css" as="style" />
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/styles/style.css" />
 
   <!-- OG / Social -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Square Bidness">
   <meta property="og:title" content="Square Bidness Tech Lab — Built By The Brand">
-  <meta property="og:description"
-        content="The engineering arm behind Square Bidness — Tax Pass™, internal tools, and future data / AI infrastructure for independent operators.">
+  <meta property="og:description" content="The engineering arm behind Square Bidness — Tax Pass™, internal tools, and future data / AI infrastructure for independent operators.">
   <meta property="og:url" content="https://www.squarebidness.com/techlabs/">
-  <meta property="og:image" content="https://www.squarebidness.com/assets/meta/techlab_1200x630.jpg">
+  <meta property="og:image" content="https://www.squarebidness.com/assets/og/tech-lab-1200x630.jpg">
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Square Bidness Tech Lab — Built By The Brand">
-  <meta name="twitter:description"
-        content="Square Bidness Tech Lab builds the tools behind the brand — from Tax Pass™ to future data and AI infrastructure.">
-  <meta name="twitter:image" content="https://www.squarebidness.com/assets/meta/techlab_1200x630.jpg">
+  <meta name="twitter:description" content="Square Bidness Tech Lab builds the tools behind the brand — from Tax Pass™ to future data and AI infrastructure.">
+  <meta name="twitter:image" content="https://www.squarebidness.com/assets/og/tech-lab-1200x630.jpg">
+
+  <!-- Icons / PWA -->
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/icon_180.png">
+  <link rel="manifest" href="/manifest.webmanifest">
+
+  <!-- GA -->
+  <script defer src="/scripts/ga.js"></script>
 
   <style>
     :root{
@@ -42,7 +47,6 @@
       --surface-soft:#050b1c;
       --border:#111827;
       --accent:#f97316;
-      --accent-soft:#3b2412;
       --fg:#e5e7eb;
       --muted:#9ca3af;
       --good:#22c55e;
@@ -58,39 +62,35 @@
     a{color:inherit;text-decoration:none}
     a:hover{text-decoration:underline}
 
-    .wrap{
-      max-width:1120px;
-      margin:0 auto;
-      padding:16px;
-    }
+    .wrap{max-width:1120px;margin:0 auto;padding:16px;}
 
-    header{
+    .hero{
       margin:10px 0 18px;
       display:flex;
       flex-wrap:wrap;
       justify-content:space-between;
-      gap:10px;
+      gap:12px;
       align-items:flex-start;
     }
-    .brand-block{
-      max-width:640px;
-    }
+    .brand-block{max-width:680px;}
     .eyebrow{
       text-transform:uppercase;
       letter-spacing:.16em;
       font-size:11px;
       color:var(--accent);
       margin:0 0 4px;
+      font-weight:800;
     }
     h1{
       margin:0 0 6px;
-      font-size:clamp(1.8rem,3.2vw,2.3rem);
+      font-size:clamp(1.8rem,3.2vw,2.35rem);
+      line-height:1.08;
     }
     .sub{
       margin:0 0 10px;
       font-size:.95rem;
       color:var(--muted);
-      max-width:36rem;
+      max-width:38rem;
     }
     .tagline{
       margin:0;
@@ -101,17 +101,16 @@
     .badge-pill{
       border-radius:999px;
       border:1px solid #1f2937;
-      padding:5px 11px;
-      font-size:.8rem;
+      padding:6px 12px;
+      font-size:.82rem;
       background:#020617;
       color:var(--muted);
       display:inline-flex;
       align-items:center;
-      gap:6px;
+      gap:8px;
+      white-space:nowrap;
     }
-    .badge-pill span{
-      width:8px;height:8px;border-radius:999px;background:var(--good);
-    }
+    .badge-pill span{width:8px;height:8px;border-radius:999px;background:var(--good);}
 
     .hero-links{
       margin-top:10px;
@@ -123,7 +122,7 @@
       border-radius:999px;
       border:1px solid #1f2937;
       padding:9px 14px;
-      font-size:.84rem;
+      font-size:.86rem;
       display:inline-flex;
       align-items:center;
       gap:6px;
@@ -136,19 +135,16 @@
       background:linear-gradient(135deg,#f97316,#fb923c);
       color:#020617;
       border-color:#f97316;
-      font-weight:700;
+      font-weight:800;
     }
-    .btn span{
-      font-size:.9rem;
-    }
+    .btn span{font-size:.95rem;}
 
     .hero-note{
       margin-top:8px;
-      font-size:.8rem;
+      font-size:.82rem;
       color:#9ca3af;
     }
 
-    /* Sections */
     .section{
       margin:18px 0;
       border-radius:18px;
@@ -156,92 +152,66 @@
       background:linear-gradient(145deg,#020617,#050b1c);
       padding:16px 16px 14px;
     }
-    .section h2{
-      margin:0 0 6px;
-      font-size:1.1rem;
-    }
-    .section p{
-      margin:0 0 10px;
-      font-size:.9rem;
-      color:var(--muted);
-    }
+    .section h2{margin:0 0 6px;font-size:1.1rem;}
+    .section p{margin:0 0 10px;font-size:.9rem;color:var(--muted);}
 
-    .grid-3{
-      display:grid;
-      gap:12px;
-    }
-    @media(min-width:860px){
-      .grid-3{grid-template-columns:repeat(3,1fr);}
-    }
+    .grid-3{display:grid;gap:12px;}
+    @media(min-width:860px){.grid-3{grid-template-columns:repeat(3,1fr);}}
+
     .card{
       border-radius:14px;
       border:1px solid #1f2937;
       background:#020617;
-      padding:11px 11px 12px;
-      font-size:.86rem;
-      color:#e5e7eb;
+      padding:12px 12px 13px;
       display:flex;
       flex-direction:column;
-      gap:4px;
+      gap:6px;
+      min-height:100%;
     }
-    .card h3{
-      margin:0 0 2px;
-      font-size:.96rem;
-    }
-    .card p{
-      margin:0;
-      font-size:.84rem;
-      color:#9ca3af;
-    }
-    .card-footer{
-      margin-top:7px;
-      font-size:.8rem;
-    }
+    .card h3{margin:0;font-size:1rem;}
+    .card p{margin:0;font-size:.86rem;color:#9ca3af;line-height:1.45;}
+    .card-footer{margin-top:6px;font-size:.82rem;color:#cbd5e1;}
 
-    .list{
-      margin:6px 0 0 18px;
-      padding:0;
-      font-size:.87rem;
-      color:var(--muted);
-    }
+    .list{margin:6px 0 0 18px;padding:0;font-size:.9rem;color:var(--muted);}
+    .list li{margin:.25rem 0;}
 
     .callout{
       border-radius:12px;
       border:1px dashed #1f2937;
       background:#020617;
-      padding:9px 10px;
-      font-size:.8rem;
+      padding:10px 11px;
+      font-size:.85rem;
       color:#d4d4de;
-      margin-top:6px;
+      margin-top:10px;
     }
 
-    footer{
+    .page-footer{
       max-width:1120px;
-      margin:10px auto 18px;
+      margin:6px auto 18px;
       padding:0 16px;
-      border-top:1px solid #020617;
-      font-size:.78rem;
+      font-size:.8rem;
       color:#6b7280;
     }
-    footer strong{color:#e5e7eb;}
+    .page-footer strong{color:#e5e7eb;}
   </style>
 </head>
-<body>
-  <!-- Global nav -->
-  <div id="site-header"></div>
+
+<body class="theme-dark" id="top">
+  <!-- NAV -->
+  <div id="nav-placeholder"></div>
 
   <main class="wrap">
-    <header>
+    <header class="hero">
       <div class="brand-block">
         <p class="eyebrow">Square Bidness Tech Lab</p>
         <h1>We build the tools behind Square Bidness.</h1>
+
         <p class="sub">
-          The same team that builds the clothes builds the infrastructure — from Tax Pass™ for tax offices
+          The same team that builds the clothes builds the infrastructure — from Tax Pass™ for independent offices
           to the systems that keep Square Bidness moving online and on-site.
         </p>
-        <p class="tagline">
-          Louisiana-rooted, veteran-owned, built for independent operators.
-        </p>
+
+        <p class="tagline">Louisiana-rooted, veteran-owned, built for independent operators.</p>
 
         <div class="hero-links">
           <a class="btn btn-primary" href="/tax-pass/">
@@ -250,11 +220,13 @@
           <a class="btn" href="https://lab.squarebidness.com/shortcuts/" target="_blank" rel="noopener">
             Internal Tools &amp; Shortcuts
           </a>
+          <a class="btn" href="/linkme/">
+            Link Me <span>→</span>
+          </a>
         </div>
 
         <p class="hero-note">
-          Square Bidness Tech Lab is where we experiment first — then roll the best pieces out to our
-          brand, our partners, and select offices.
+          Tech Lab is where we experiment first — then roll the best pieces out to the brand, partners, and select offices.
         </p>
       </div>
 
@@ -269,19 +241,19 @@
     <section class="section">
       <h2>What we’re shipping out of the Lab</h2>
       <p>
-        Tech Lab is not a generic agency. It’s the engineering arm of Square Bidness — tuned for real motion,
-        not fake dashboards. We build tools that solve problems we see every day.
+        Tech Lab isn’t a generic agency. It’s the engineering arm of Square Bidness — tuned for real motion.
+        We build tools that solve problems we see every day.
       </p>
 
       <div class="grid-3">
         <article class="card">
           <h3>Tax Pass™</h3>
           <p>
-            Digital intake lane for independent tax offices. Clients send IDs, W-2s, and details from
-            any phone — you work from a clean office queue.
+            Digital intake lane for independent tax offices. Clients send IDs, W-2s, and details from any phone —
+            you work from a clean office queue.
           </p>
           <div class="card-footer">
-            Live pilot: Tax Slayer — Jessica Porter (Alexandria, LA).<br>
+            Live pilot: Tax Pass™ (Alexandria, LA).<br>
             <a href="/tax-pass/">See Tax Pass overview →</a>
           </div>
         </article>
@@ -289,33 +261,33 @@
         <article class="card">
           <h3>Content &amp; site systems</h3>
           <p>
-            The site you’re on — SquareBidness.com — runs on our own stack. Lightweight, fast, and built
-            to showcase limited drops, spotlights, and tech products.
+            SquareBidness.com runs on our own lightweight stack — fast pages for limited drops, spotlights,
+            and tools we build in-house.
           </p>
           <div class="card-footer">
-            From VSOP to Courageaux spotlights — all wired through Tech Lab infrastructure.
+            From VSOP to Community spotlights — all wired through Tech Lab infrastructure.
           </div>
         </article>
 
         <article class="card">
           <h3>Future data &amp; AI infrastructure</h3>
           <p>
-            Planning a local-first data and compute lane from our Hammond property — designed to
-            support Square Bidness and future partners in the region.
+            Local-first data + compute lane in planning — built to support Square Bidness and future partners
+            in the region.
           </p>
           <div class="card-footer">
-            Phase II: 2,000 sq ft slab at HQ1 reserved for modular data + fabrication buildout.
+            Phase II: 2,000 sq ft slab reserved for modular data + fabrication buildout.
           </div>
         </article>
       </div>
     </section>
 
-    <!-- HOW WE WORK WITH OTHERS -->
+    <!-- HOW WE WORK -->
     <section class="section">
       <h2>How we work with offices &amp; partners</h2>
       <p>
-        We keep the circle tight. We’d rather do a few things right than a hundred things halfway. When we
-        say “yes,” we’re in the loop with you — not just handing off a login.
+        We keep the circle tight. We’d rather do a few things right than a hundred things halfway.
+        When we say “yes,” we’re in the loop — not just handing off a login.
       </p>
 
       <ul class="list">
@@ -325,22 +297,44 @@
       </ul>
 
       <div class="callout">
-        Want to talk through Tax Pass™ or another idea for your office?
-        Email <a href="mailto:info@squarebidness.com">info@squarebidness.com</a> or
-        <a href="mailto:marcusbuckner@squarebidness.com">marcusbuckner@squarebidness.com</a>.
+        Want to talk through Tax Pass™ or another idea?
+        Email <a href="mailto:info@squarebidness.com">info@squarebidness.com</a>.
       </div>
     </section>
   </main>
 
-  <footer>
+  <div class="page-footer">
     <p>
       <strong>Square Bidness Tech Lab</strong> — the engineering arm of Square Bidness Apparel.<br>
       Principles. Morals. Business Done Right — in fabric and in infrastructure.
     </p>
-  </footer>
+  </div>
 
-  <!-- Global footer -->
-  <div id="site-footer"></div>
-  <script src="/partials/loader.js"></script>
+  <!-- FOOTER -->
+  <div id="footer-placeholder"></div>
+
+  <!-- NAV + FOOTER inject -->
+  <script>
+  (async () => {
+    const bust = `?v=${Date.now()}`;
+
+    async function inject(url, id) {
+      try {
+        const res = await fetch(url + bust, { cache: "no-store", credentials: "same-origin" });
+        if (!res.ok) return null;
+        const html = await res.text();
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = html;
+        return el;
+      } catch (e) {
+        console.warn("partial load failed:", url, e);
+        return null;
+      }
+    }
+
+    await inject("/nav/index.html", "nav-placeholder");
+    await inject("/footer/index.html", "footer-placeholder");
+  })();
+  </script>
 </body>
 </html>
