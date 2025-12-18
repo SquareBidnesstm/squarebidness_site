@@ -29,7 +29,7 @@
 
   <!-- Icons / PWA -->
   <link rel="icon" href="/favicon.ico" />
- <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/icon-180.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/icon-180.png">
   <link rel="manifest" href="/manifest.webmanifest" />
   <meta name="theme-color" content="#000000" />
 
@@ -37,8 +37,15 @@
   <script defer src="/scripts/ga.js"></script>
   <script defer src="/scripts/sb-cart.js"></script>
 
-  <!-- Optional: preload hero image -->
-  <link rel="preload" as="image" href="/assets/vsop-jacket_800.jpg" />
+  <!-- ✅ Preload LCP hero image (WebP first, JPG fallback already in <picture>) -->
+  <link
+    rel="preload"
+    as="image"
+    href="/assets/hero_1200.webp"
+    imagesrcset="/assets/hero_800.webp 800w, /assets/hero_1200.webp 1200w"
+    imagesizes="(min-width:900px) 48vw, 100vw"
+    fetchpriority="high"
+  />
 
   <style>
     .vsop-hero {
@@ -226,17 +233,32 @@
           <a class="btn btn--gold" href="#set">View the Set</a>
           <a class="btn btn--ghost" href="/shop/">Back to Shop</a>
           <div class="vsop-preorder-pill">
-            Preorder window live 
+            Preorder window live
           </div>
         </div>
       </div>
 
       <div class="vsop-hero__media">
+        <!-- ✅ Hero now uses your /assets/hero_* (WebP + JPG fallback) -->
         <picture>
-          <source srcset="/assets/vsop-jacket_1200.jpg" media="(min-width:768px)">
-          <img src="/assets/vsop-jacket_800.jpg"
-               alt="VSOP hooded jacket styled with matching shorts"
-               loading="lazy" width="800" height="1000">
+          <source
+            type="image/webp"
+            srcset="/assets/hero_800.webp 800w, /assets/hero_1200.webp 1200w"
+            sizes="(min-width:900px) 48vw, 100vw"
+          />
+          <img
+            src="/assets/hero_1200.jpg"
+            srcset="/assets/hero_800.jpg 800w, /assets/hero_1200.jpg 1200w"
+            sizes="(min-width:900px) 48vw, 100vw"
+            alt="VSOP hooded jacket styled with matching shorts"
+            width="1200"
+            height="800"
+            loading="eager"
+            decoding="async"
+            fetchpriority="high"
+            style="width:100%;height:auto;"
+            onerror="this.onerror=null;this.src='/assets/hero_1200.jpg';"
+          />
         </picture>
       </div>
     </div>
@@ -252,65 +274,82 @@
     </div>
   </div>
 
-  <!-- SET GRID -->
-  <section id="set">
-    <div class="vsop-section-title">
-      <h2>The Set</h2>
-      <p>Pick your pieces — or run both. Preorder secures your size before the wider public rollout.</p>
-    </div>
+  <!-- ✅ Main landmark (fixes Lighthouse “no main landmark”) -->
+  <main id="main-content">
+    <!-- SET GRID -->
+    <section id="set">
+      <div class="vsop-section-title">
+        <h2>The Set</h2>
+        <p>Pick your pieces — or run both. Preorder secures your size before the wider public rollout.</p>
+      </div>
 
-    <div class="vsop-grid">
-      <!-- Jacket card -->
-      <article class="vsop-card">
-        <div class="vsop-card__media">
-          <img src="/assets/vsop-jacket_800.jpg"
-               alt="VSOP hooded jacket in burgundy and brown">
-        </div>
-        <div class="vsop-card__body">
-          <h2>VSOP Hooded Jacket</h2>
-          <p>
-            Heavyweight construction, full embroidery, lined hood. For nights that feel like business
-            meetings and victory laps at the same time.
-          </p>
-          <div class="vsop-price">$129.99 · Preorder</div>
-          <p class="vsop-note">Ships on or before 2026.</p>
-        </div>
-        <div class="vsop-card__actions">
-          <a class="btn btn--gold btn--primary" href="/product-vsop-jacket/">
-            Choose Size &amp; Preorder Jacket
-          </a>
-          <a class="btn btn--ghost btn--secondary" href="/product-vsop-jacket/#details">
-            View details
-          </a>
-        </div>
-      </article>
+      <div class="vsop-grid">
+        <!-- Jacket card -->
+        <article class="vsop-card">
+          <div class="vsop-card__media">
+            <img
+              src="/assets/vsop-jacket_800.jpg"
+              alt="VSOP hooded jacket in burgundy and brown"
+              width="800"
+              height="1000"
+              loading="lazy"
+              decoding="async"
+              onerror="this.onerror=null;this.src='/assets/placeholder.png';"
+            >
+          </div>
+          <div class="vsop-card__body">
+            <h2>VSOP Hooded Jacket</h2>
+            <p>
+              Heavyweight construction, full embroidery, lined hood. For nights that feel like business
+              meetings and victory laps at the same time.
+            </p>
+            <div class="vsop-price">$129.99 · Preorder</div>
+            <p class="vsop-note">Ships on or before 2026.</p>
+          </div>
+          <div class="vsop-card__actions">
+            <a class="btn btn--gold btn--primary" href="/product-vsop-jacket/">
+              Choose Size &amp; Preorder Jacket
+            </a>
+            <a class="btn btn--ghost btn--secondary" href="/product-vsop-jacket/#details">
+              View details
+            </a>
+          </div>
+        </article>
 
-      <!-- Shorts card -->
-      <article class="vsop-card">
-        <div class="vsop-card__media">
-          <img src="/assets/vsop-shorts_800.jpg"
-               alt="VSOP matching shorts in burgundy and brown">
-        </div>
-        <div class="vsop-card__body">
-          <h2>VSOP Shorts</h2>
-          <p>
-            Athletic fit, embroidered mark, cut to sit right with the jacket or a Supima tee.
-            Same VSOP story — just on the legs.
-          </p>
-          <div class="vsop-price">$89.99 · Preorder</div>
-          <p class="vsop-note">Ships on or before 2026.</p>
-        </div>
-        <div class="vsop-card__actions">
-          <a class="btn btn--gold btn--primary" href="/product-vsop-shorts/">
-            Choose Size &amp; Preorder Shorts
-          </a>
-          <a class="btn btn--ghost btn--secondary" href="/product-vsop-shorts/#details">
-            View details
-          </a>
-        </div>
-      </article>
-    </div>
-  </section>
+        <!-- Shorts card -->
+        <article class="vsop-card">
+          <div class="vsop-card__media">
+            <img
+              src="/assets/vsop-shorts_800.jpg"
+              alt="VSOP matching shorts in burgundy and brown"
+              width="800"
+              height="1000"
+              loading="lazy"
+              decoding="async"
+              onerror="this.onerror=null;this.src='/assets/placeholder.png';"
+            >
+          </div>
+          <div class="vsop-card__body">
+            <h2>VSOP Shorts</h2>
+            <p>
+              Athletic fit, embroidered mark, cut to sit right with the jacket or a Supima tee.
+              Same VSOP story — just on the legs.
+            </p>
+            <div class="vsop-price">$89.99 · Preorder</div>
+            <p class="vsop-note">Ships on or before 2026.</p>
+          </div>
+          <div class="vsop-card__actions">
+            <a class="btn btn--gold btn--primary" href="/product-vsop-shorts/">
+              Choose Size &amp; Preorder Shorts
+            </a>
+            <a class="btn btn--ghost btn--secondary" href="/product-vsop-shorts/#details">
+              View details
+            </a>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
 
   <!-- FOOTER SLOT -->
   <div id="footer-placeholder"></div>
