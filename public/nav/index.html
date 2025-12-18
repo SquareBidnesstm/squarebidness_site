@@ -1,6 +1,16 @@
 <!-- public/nav/index.html -->
 <header class="site-header" style="background:#020617;border-bottom:1px solid #0b1220;color:#e5e7eb;">
   <style>
+    /* CLS FIX:
+       Reserve a stable minimum header height + stable mobile collapsed area.
+       This prevents layout jump when nav is injected + when JS runs.
+    */
+    .site-header{min-height:64px;}
+    @media (max-width:768px){
+      /* Reserve enough space for brand + toggle row even before links render */
+      .site-header{min-height:108px;}
+    }
+
     .nav-shell{
       max-width:1200px;
       margin:0 auto;
@@ -103,22 +113,33 @@
         align-items:flex-start;
         flex-direction:column;
       }
+
+      /* CLS FIX:
+         Use max-height for smooth open/close without “display: none” jumps.
+         Start collapsed but reserve the container so injection doesn’t reflow later.
+      */
       .nav__group{
-        display:none;
-        flex-direction:column;
-        align-items:flex-start;
-        gap:.75rem;
         width:100%;
+        display:block;              /* no display toggling */
+        overflow:hidden;
+        max-height:0;               /* collapsed */
+        padding-top:0;
+        border-top:0;
+        transition:max-height .18s ease;
+      }
+      .site-header.is-open .nav__group{
+        max-height:420px;           /* enough for links + right side */
         padding-top:.6rem;
         border-top:1px solid #111827;
       }
-      .site-header.is-open .nav__group{display:flex;}
+
       .nav__right{width:100%;justify-content:flex-start;gap:.6rem;}
       .nav-menu-toggle{display:inline-flex;}
       .nav__tagline{display:none;}
     }
 
     @media (prefers-reduced-motion: reduce){
+      .nav__group{transition:none;}
       .nav__links a.is-active::after,
       .nav__links a[aria-current="page"]::after{transition:none;}
     }
@@ -131,14 +152,14 @@
       <span class="nav__tagline">Principles. Morals. Business Done Right.</span>
     </a>
 
-    <!-- Mobile toggle (global.js handles click) -->
-    <button class="nav-menu-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">
-      <span class="nav-menu-icon">☰</span>
+    <!-- Mobile toggle -->
+    <button id="navToggle" class="nav-menu-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">
+      <span class="nav-menu-icon" aria-hidden="true">☰</span>
       <span>Menu</span>
     </button>
 
     <!-- Links + right side -->
-    <div class="nav__group">
+    <div id="navGroup" class="nav__group">
       <nav class="nav__links" aria-label="Main">
         <a href="/vsop/">VSOP</a>
         <a href="/wintergames/">Winter Games</a>
@@ -166,4 +187,19 @@
       </div>
     </div>
   </div>
+
+  <!-- CLS-safe toggle (works even if global.js doesn’t run) -->
+  <script>
+    (function(){
+      const header = document.currentScript?.closest('.site-header') || document.querySelector('.site-header');
+      const btn = document.getElementById('navToggle');
+      if (!header || !btn) return;
+
+      btn.addEventListener('click', () => {
+        const open = !header.classList.contains('is-open');
+        header.classList.toggle('is-open', open);
+        btn.setAttribute('aria-expanded', String(open));
+      });
+    })();
+  </script>
 </header>
