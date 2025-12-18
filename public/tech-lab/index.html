@@ -1,33 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Analytics -->
-  <script defer src="/scripts/ga.js"></script>
-
   <!-- Basics -->
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>SB Tech Lab — Field Tools & Infrastructure | Square Bidness</title>
   <link rel="canonical" href="https://www.squarebidness.com/tech-lab/" />
+
+  <!-- SEO -->
+  <meta name="description" content="SB Tech Lab is where Square Bidness documents installs, maps breakers, plans recessed lighting, and trains for future datacenter and infrastructure work — separate subdomain, same discipline." />
+  <meta name="robots" content="index,follow" />
+
+  <!-- Theme -->
+  <meta name="theme-color" content="#000000" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="format-detection" content="telephone=no" />
+
+  <!-- Perf / GA4 -->
+  <link rel="preconnect" href="https://www.googletagmanager.com">
+  <link rel="preconnect" href="https://www.google-analytics.com">
+  <script defer src="/scripts/ga.js"></script>
 
   <!-- Styles -->
   <link rel="stylesheet" href="/styles/style.css" />
 
   <!-- Icons / PWA (main site) -->
-  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
   <link rel="apple-touch-icon" href="/icon_180.png">
   <link rel="manifest" href="/manifest.webmanifest">
-
-  <!-- Theme -->
-  <meta name="theme-color" content="#000000">
-  <meta name="color-scheme" content="dark light">
-  <meta name="format-detection" content="telephone=no">
-
-  <!-- SEO -->
-  <meta name="description" content="SB Tech Lab is where Square Bidness documents installs, maps breakers, plans recessed lighting, and trains for future datacenter and infrastructure work — separate subdomain, same discipline." />
-  <meta name="robots" content="index,follow">
 
   <!-- Open Graph -->
   <meta property="og:type" content="website">
@@ -35,13 +37,23 @@
   <meta property="og:title" content="SB Tech Lab — Field Tools & Infrastructure">
   <meta property="og:description" content="Field docs, recessed layouts, breaker maps and training lanes that connect HQ1, HQ2 and Start2Finish projects to future data center work.">
   <meta property="og:url" content="https://www.squarebidness.com/tech-lab/">
-  <meta property="og:image" content="/assets/og/tech-lab-1200x630.jpg">
+  <meta property="og:image" content="https://www.squarebidness.com/assets/og/tech-lab-1200x630.jpg">
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="SB Tech Lab — Field Tools & Infrastructure">
   <meta name="twitter:description" content="Square Bidness Tech Lab lives at lab.squarebidness.com — a subdomain built for field tools, documentation, and infrastructure prep.">
-  <meta name="twitter:image" content="/assets/og/tech-lab-1200x630.jpg">
+  <meta name="twitter:image" content="https://www.squarebidness.com/assets/og/tech-lab-1200x630.jpg">
+
+  <!-- Preload LCP hero image (WebP first) -->
+  <link
+    rel="preload"
+    as="image"
+    href="/assets/tech-lab/tech-lab-hero-1600.webp"
+    imagesrcset="/assets/tech-lab/tech-lab-hero-800.webp 800w, /assets/tech-lab/tech-lab-hero-1600.webp 1600w"
+    imagesizes="(max-width: 900px) 100vw, 960px"
+    fetchpriority="high"
+  />
 
   <!-- JSON-LD -->
   <script type="application/ld+json">
@@ -52,309 +64,241 @@
     "url": "https://www.squarebidness.com/tech-lab/",
     "description": "SB Tech Lab is where Square Bidness documents installs, maps breakers, plans recessed lighting, and trains for future datacenter and infrastructure work — separate subdomain, same discipline.",
     "about": [
-      {
-        "@type": "Organization",
-        "name": "Square Bidness Apparel"
-      },
-      {
-        "@type": "WebSite",
-        "name": "SB Tech Lab",
-        "url": "https://lab.squarebidness.com/"
-      }
+      { "@type": "Organization", "name": "Square Bidness Apparel" },
+      { "@type": "WebSite", "name": "SB Tech Lab", "url": "https://lab.squarebidness.com/" }
     ],
     "publisher": {
       "@type": "Organization",
       "name": "Square Bidness Apparel",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://www.squarebidness.com/assets/og-default-1200x630.jpg"
-      }
+      "logo": { "@type": "ImageObject", "url": "https://www.squarebidness.com/assets/og-default-1200x630.jpg" }
     }
   }
   </script>
 
   <style>
-    .page-wrap {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 24px 16px 40px;
+    body{ background:#000; color:#fff; }
+    .page-wrap{ max-width:960px; margin:0 auto; padding:24px 16px 40px; }
+    .lab-hero{ margin-bottom:20px; }
+    .lab-kicker{ font-size:.8rem; text-transform:uppercase; letter-spacing:.12em; color:#b3b3b3; }
+    .lab-title{ font-size:clamp(24px,5vw,32px); margin:4px 0 6px; }
+    .lab-sub{ font-size:.95rem; color:#dddddd; max-width:640px; }
+
+    .lab-hero-img{
+      margin:18px 0 14px;
+      border-radius:18px;
+      overflow:hidden;
+      border:1px solid #1b1b1b;
+      background:#050505;
     }
-    .lab-hero {
-      margin-bottom: 20px;
+    .lab-hero-img picture, .lab-hero-img img{
+      display:block; width:100%; height:auto;
     }
-    .lab-kicker {
-      font-size: .8rem;
-      text-transform: uppercase;
-      letter-spacing: .12em;
-      color: #b3b3b3;
-    }
-    .lab-title {
-      font-size: clamp(24px, 5vw, 32px);
-      margin: 4px 0 6px;
-    }
-    .lab-sub {
-      font-size: .95rem;
-      color: #dddddd;
-      max-width: 640px;
-    }
-    .lab-hero-img {
-      margin: 18px 0 14px;
-      border-radius: 18px;
-      overflow: hidden;
-      border: 1px solid #1b1b1b;
-    }
-    .lab-hero-img img {
-      display:block;
-      width:100%;
-      height:auto;
-    }
-    .badge-row {
-      display:flex;
-      flex-wrap:wrap;
-      gap:6px;
-      margin-top:6px;
-    }
-    .badge {
-      font-size:.78rem;
-      padding:3px 10px;
-      border-radius:999px;
-      border:1px solid #2a2a2a;
-      color:#bdbdbd;
-    }
-    .badge--gold {
-      border-color:#c4a46e;
-      color:#c4a46e;
-    }
-    .section {
-      margin-top: 22px;
-      font-size: .96rem;
-      line-height: 1.7;
-      color: #f2f2f2;
-    }
-    .section h2 {
-      font-size: 1.1rem;
-      margin: 0 0 .5rem;
-    }
-    .section p {
-      margin: 0 0 .9rem;
-    }
-    .cards-grid {
-      display:grid;
-      gap:10px;
+
+    .badge-row{ display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+    .badge{ font-size:.78rem; padding:3px 10px; border-radius:999px; border:1px solid #2a2a2a; color:#bdbdbd; }
+    .badge--gold{ border-color:#c4a46e; color:#c4a46e; }
+
+    .section{ margin-top:22px; font-size:.96rem; line-height:1.7; color:#f2f2f2; }
+    .section h2{ font-size:1.1rem; margin:0 0 .5rem; }
+    .section p{ margin:0 0 .9rem; }
+
+    .cards-grid{
+      display:grid; gap:10px;
       grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
       margin-top:.6rem;
     }
-    .card-link {
-      border-radius:14px;
-      border:1px solid #1f1f1f;
-      padding:10px 12px;
-      background:#050505;
-      text-decoration:none;
-      color:#f5f5f5;
-      font-size:.9rem;
-      display:flex;
-      flex-direction:column;
-      gap:3px;
+    .card-link{
+      border-radius:14px; border:1px solid #1f1f1f;
+      padding:10px 12px; background:#050505;
+      text-decoration:none; color:#f5f5f5; font-size:.9rem;
+      display:flex; flex-direction:column; gap:3px;
     }
-    .card-link:hover {
-      background:#0b0b0b;
+    .card-link:hover{ background:#0b0b0b; }
+    .card-title-row{ display:flex; align-items:center; gap:6px; }
+    .card-title-row span{ font-size:1.1rem; }
+    .card-chip{
+      margin-top:2px; font-size:.75rem; padding:2px 8px;
+      border-radius:999px; background:#f5f5f5; color:#000;
+      font-weight:600; align-self:flex-start;
     }
-    .card-link span {
-      font-size:1.1rem;
-      margin-right:6px;
-    }
-    .card-title-row {
-      display:flex;
-      align-items:center;
-      gap:6px;
-    }
-    .card-chip {
-      margin-top:2px;
-      font-size:.75rem;
-      padding:2px 8px;
-      border-radius:999px;
-      background:#f5f5f5;
-      color:#000;
-      font-weight:600;
-      align-self:flex-start;
-    }
-    .small-note {
-      font-size:.8rem;
-      color:#9a9a9a;
-      margin-top:4px;
-    }
+    .small-note{ font-size:.8rem; color:#9a9a9a; margin-top:4px; }
   </style>
 </head>
 
-<body>
+<body class="theme-dark" id="top">
+  <!-- NAV SLOT (optional if you want global nav here too) -->
+  <div id="nav-placeholder"></div>
 
-<div class="page-wrap">
+  <main class="page-wrap" role="main">
+    <header class="lab-hero">
+      <div class="lab-kicker">SB Tech Lab</div>
+      <h1 class="lab-title">Field Tools &amp; Infrastructure for Square Bidness</h1>
+      <p class="lab-sub">
+        SB Tech Lab lives on its own subdomain at <strong>lab.squarebidness.com</strong>.
+        It’s where installs are documented, breakers get mapped, recessed layouts are planned,
+        and future data center work gets built one project at a time.
+      </p>
 
-  <header class="lab-hero">
-    <div class="lab-kicker">SB Tech Lab</div>
-    <h1 class="lab-title">Field Tools &amp; Infrastructure for Square Bidness</h1>
-    <p class="lab-sub">
-      SB Tech Lab lives on its own subdomain at <strong>lab.squarebidness.com</strong>.  
-      It’s where installs are documented, breakers get mapped, recessed layouts are planned,
-      and future data center work gets built one project at a time.
-    </p>
+      <div class="lab-hero-img">
+        <picture>
+          <source
+            type="image/webp"
+            srcset="/assets/tech-lab/tech-lab-hero-800.webp 800w, /assets/tech-lab/tech-lab-hero-1600.webp 1600w"
+            sizes="(max-width: 900px) 100vw, 960px"
+          />
+          <img
+            src="/assets/tech-lab/tech-lab-hero-1600.jpg"
+            srcset="/assets/tech-lab/tech-lab-hero-800.jpg 800w, /assets/tech-lab/tech-lab-hero-1600.jpg 1600w"
+            sizes="(max-width: 900px) 100vw, 960px"
+            width="1600"
+            height="900"
+            alt="SB Tech Lab dashboard and field tools on screen"
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+          />
+        </picture>
+      </div>
 
-    <div class="lab-hero-img">
-      <img src="/assets/tech-lab/tech-lab-hero-1600.jpg"
-           srcset="/assets/tech-lab/tech-lab-hero-800.jpg 800w, /assets/tech-lab/tech-lab-hero-1600.jpg 1600w"
-           sizes="(max-width: 900px) 100vw, 960px"
-           alt="SB Tech Lab dashboard and field tools on screen">
-    </div>
+      <div class="badge-row">
+        <span class="badge badge--gold">Subdomain: lab.squarebidness.com</span>
+        <span class="badge">HQ1 · HQ2 · Start2Finish projects</span>
+        <span class="badge">Breaker maps · recessed layouts · print sheets</span>
+      </div>
+    </header>
 
-    <div class="badge-row">
-      <span class="badge badge--gold">Subdomain: lab.squarebidness.com</span>
-      <span class="badge">HQ1 · HQ2 · Start2Finish projects</span>
-      <span class="badge">Breaker maps · recessed layouts · print sheets</span>
-    </div>
-  </header>
+    <section class="section">
+      <h2>Why a Tech Lab for a Clothing Brand?</h2>
+      <p>
+        Square Bidness was born from getting clothes right — fit, fabric, and feel.
+        The Tech Lab is the same mindset applied to buildings, power and infrastructure.
+        Every field project becomes a <strong>live training module</strong> for future racks,
+        data, and distribution.
+      </p>
+      <p>Instead of losing notes in text messages, SB Tech Lab turns them into:</p>
+      <ul>
+        <li>Field tools that save to your device (measurements, layouts, counts).</li>
+        <li>Print sheets that can be handed straight to a crew or lender.</li>
+        <li>Pages that show banks and partners the work is documented, not guessed.</li>
+      </ul>
+    </section>
 
-  <section class="section">
-    <h2>Why a Tech Lab for a Clothing Brand?</h2>
-    <p>
-      Square Bidness was born from getting clothes right — fit, fabric, and feel.  
-      The Tech Lab is the same mindset applied to buildings, power and infrastructure.
-      Every field project becomes a <strong>live training module</strong> for future racks,
-      data, and distribution.
-    </p>
-    <p>
-      Instead of losing notes in text messages, SB Tech Lab turns them into:
-    </p>
-    <ul>
-      <li>Field tools that save to your device (measurements, layouts, counts).</li>
-      <li>Print sheets that can be handed straight to a crew or lender.</li>
-      <li>Pages that show banks and partners the work is documented, not guessed.</li>
-    </ul>
-  </section>
+    <section class="section">
+      <h2>HQ1 &amp; HQ2 — Your Training Grounds</h2>
+      <p>
+        Hammond (HQ1) and Pineville (HQ2) are more than mailing addresses — they’re
+        <strong>controlled labs</strong> where breakers, recessed lights, LVP, and repairs are done
+        the same way a tech shop would prep for a data center floor.
+      </p>
 
-  <section class="section">
-    <h2>HQ1 &amp; HQ2 — Your Training Grounds</h2>
-    <p>
-      Hammond (HQ1) and Pineville (HQ2) are more than mailing addresses — they’re  
-      <strong>controlled labs</strong> where breakers, recessed lights, LVP, and repairs are done
-      the same way a tech shop would prep for a data center floor.
-    </p>
+      <div class="cards-grid">
+        <a class="card-link" href="https://lab.squarebidness.com/shortcuts/" target="_blank" rel="noopener">
+          <div class="card-title-row"><span>🛠️</span><div>SB Tech Lab — Shortcuts</div></div>
+          <div class="small-note">One screen to reach floor plans, field tools, and power sheets.</div>
+          <div class="card-chip">Hub</div>
+        </a>
 
-    <div class="cards-grid">
-      <a class="card-link" href="https://lab.squarebidness.com/shortcuts/" target="_blank" rel="noopener">
-        <div class="card-title-row">
-          <span>🛠️</span>
-          <div>SB Tech Lab — Shortcuts</div>
-        </div>
-        <div class="small-note">One screen to reach floor plans, field tools, and power sheets.</div>
-        <div class="card-chip">Hub</div>
-      </a>
+        <a class="card-link" href="https://lab.squarebidness.com/lab/hq2/" target="_blank" rel="noopener">
+          <div class="card-title-row"><span>🏠</span><div>HQ2 — Pineville Buildout</div></div>
+          <div class="small-note">Electrical upgrades, LVP corrections, recessed lighting, and lender language.</div>
+          <div class="card-chip">HQ2</div>
+        </a>
 
-      <a class="card-link" href="https://lab.squarebidness.com/lab/hq2/" target="_blank" rel="noopener">
-        <div class="card-title-row">
-          <span>🏠</span>
-          <div>HQ2 — Pineville Buildout</div>
-        </div>
-        <div class="small-note">Electrical upgrades, LVP corrections, recessed lighting, and lender language.</div>
-        <div class="card-chip">HQ2</div>
-      </a>
+        <a class="card-link" href="https://lab.squarebidness.com/lab/hq1/" target="_blank" rel="noopener">
+          <div class="card-title-row"><span>🏠</span><div>HQ1 — Hammond House</div></div>
+          <div class="small-note">Breaker mapping, roof repair checklist, and recessed plans for the rooms you live in.</div>
+          <div class="card-chip">HQ1</div>
+        </a>
+      </div>
+    </section>
 
-      <a class="card-link" href="https://lab.squarebidness.com/lab/hq1/" target="_blank" rel="noopener">
-        <div class="card-title-row">
-          <span>🏠</span>
-          <div>HQ1 — Hammond House</div>
-        </div>
-        <div class="small-note">Breaker mapping, roof repair checklist, and recessed plans for the rooms you live in.</div>
-        <div class="card-chip">HQ1</div>
-      </a>
-    </div>
-  </section>
+    <section class="section">
+      <h2>Start2Finish Lane — Contractor Work Documented Like Tech</h2>
+      <p>
+        When Start2Finish steps in as the contractor, their work gets its own lane inside the Lab.
+        Brady’s Alexandria house and any future Start2Finish jobs can show:
+      </p>
+      <ul>
+        <li>Live progress logs — what got done, room by room.</li>
+        <li>Wall plate and device counts for finish passes.</li>
+        <li>Required photo angles for lenders and portfolios.</li>
+      </ul>
 
-  <section class="section">
-    <h2>Start2Finish Lane — Contractor Work Documented Like Tech</h2>
-    <p>
-      When Start2Finish steps in as the contractor, their work gets its own lane inside the Lab.
-      Brady’s Alexandria house and any future Start2Finish jobs can show:
-    </p>
-    <ul>
-      <li>Live progress logs — what got done, room by room.</li>
-      <li>Wall plate and device counts for finish passes.</li>
-      <li>Required photo angles for lenders and portfolios.</li>
-    </ul>
+      <div class="cards-grid">
+        <a class="card-link" href="https://lab.squarebidness.com/lab/start2finish-progress/" target="_blank" rel="noopener">
+          <div class="card-title-row"><span>⚡</span><div>Start2Finish Progress</div></div>
+          <div class="small-note">Live project status for Brady’s Alexandria house and related work.</div>
+          <div class="card-chip">Live</div>
+        </a>
 
-    <div class="cards-grid">
-      <a class="card-link" href="https://lab.squarebidness.com/lab/start2finish-progress/" target="_blank" rel="noopener">
-        <div class="card-title-row">
-          <span>⚡</span>
-          <div>Start2Finish Progress</div>
-        </div>
-        <div class="small-note">Live project status for Brady’s Alexandria house and related work.</div>
-        <div class="card-chip">Live</div>
-      </a>
+        <a class="card-link" href="https://lab.squarebidness.com/lab/start2finish-brief/" target="_blank" rel="noopener">
+          <div class="card-title-row"><span>🏗️</span><div>Start2Finish Brief</div></div>
+          <div class="small-note">Lender-ready narrative: who Start2Finish is and what the scope includes.</div>
+          <div class="card-chip">Brief</div>
+        </a>
 
-      <a class="card-link" href="https://lab.squarebidness.com/lab/start2finish-brief/" target="_blank" rel="noopener">
-        <div class="card-title-row">
-          <span>🏗️</span>
-          <div>Start2Finish Brief</div>
-        </div>
-        <div class="small-note">Lender-ready narrative: who Start2Finish is and what the scope includes.</div>
-        <div class="card-chip">Brief</div>
-      </a>
+        <a class="card-link" href="https://lab.squarebidness.com/lab/start2finish-bank-prep/" target="_blank" rel="noopener">
+          <div class="card-title-row"><span>🏦</span><div>Bank Prep</div></div>
+          <div class="small-note">DSCR lane, photos, and talking points for local banks and credit unions.</div>
+          <div class="card-chip">Bank</div>
+        </a>
+      </div>
+    </section>
 
-      <a class="card-link" href="https://lab.squarebidness.com/lab/start2finish-bank-prep/" target="_blank" rel="noopener">
-        <div class="card-title-row">
-          <span>🏦</span>
-          <div>Bank Prep</div>
-        </div>
-        <div class="small-note">DSCR lane, photos, and talking points for local banks and credit unions.</div>
-        <div class="card-chip">Bank</div>
-      </a>
-    </div>
-  </section>
+    <section class="section">
+      <h2>Square Bidness Install Method</h2>
+      <p>
+        All of this rolls up under one banner: the <strong>Square Bidness Install Method</strong>.
+        It’s your way of working — from how you prep a ceiling to how you label a panel,
+        to how you photograph and ship a finished job.
+      </p>
 
-  <section class="section">
-    <h2>Square Bidness Install Method</h2>
-    <p>
-      All of this rolls up under one banner: the <strong>Square Bidness Install Method</strong>.  
-      It’s your way of working — from how you prep a ceiling to how you label a panel,
-      to how you photograph and ship a finished job.
-    </p>
+      <p>Inside the Lab, the Install Method page breaks down:</p>
+      <ul>
+        <li>Pre-work: measurements, sketches, and counts.</li>
+        <li>Execution: harness building, safety checks, and order of operations.</li>
+        <li>Finish: plates, labels, photos, and lender documentation.</li>
+      </ul>
 
-    <p>
-      Inside the Lab, the Install Method page breaks down:
-    </p>
-    <ul>
-      <li>Pre-work: measurements, sketches, and counts.</li>
-      <li>Execution: harness building, safety checks, and order of operations.</li>
-      <li>Finish: plates, labels, photos, and lender documentation.</li>
-    </ul>
+      <div class="cards-grid">
+        <a class="card-link" href="https://lab.squarebidness.com/lab/install-method/" target="_blank" rel="noopener">
+          <div class="card-title-row"><span>📐</span><div>Square Bidness Install Method</div></div>
+          <div class="small-note">Philosophy, sequence, and standards for every job.</div>
+          <div class="card-chip">Method</div>
+        </a>
 
-    <div class="cards-grid">
-      <a class="card-link" href="https://lab.squarebidness.com/lab/install-method/" target="_blank" rel="noopener">
-        <div class="card-title-row">
-          <span>📐</span>
-          <div>Square Bidness Install Method</div>
-        </div>
-        <div class="small-note">Philosophy, sequence, and standards for every job.</div>
-        <div class="card-chip">Method</div>
-      </a>
+        <a class="card-link" href="https://lab.squarebidness.com/lab/power/pull-map.html" target="_blank" rel="noopener">
+          <div class="card-title-row"><span>🔌</span><div>Pull Map &amp; Power Sheets</div></div>
+          <div class="small-note">EMT, THHN routing and grounding concepts tied to future racks.</div>
+          <div class="card-chip">Power</div>
+        </a>
+      </div>
 
-      <a class="card-link" href="https://lab.squarebidness.com/lab/power/pull-map.html" target="_blank" rel="noopener">
-        <div class="card-title-row">
-          <span>🔌</span>
-          <div>Pull Map &amp; Power Sheets</div>
-        </div>
-        <div class="small-note">EMT, THHN routing and grounding concepts tied to future racks.</div>
-        <div class="card-chip">Power</div>
-      </a>
-    </div>
+      <p class="small-note">
+        SB Tech Lab is not a public store. It’s a <strong>back-of-house control room</strong> that proves
+        Square Bidness takes installs as seriously as product.
+      </p>
+    </section>
+  </main>
 
-    <p class="small-note">
-      SB Tech Lab is not a public store. It’s a <strong>back-of-house control room</strong> that proves
-      Square Bidness takes installs as seriously as product.
-    </p>
-  </section>
+  <!-- FOOTER SLOT -->
+  <div id="footer-placeholder"></div>
 
-</div>
-
+  <!-- Inject nav/footer (optional, keep consistent with rest of site) -->
+  <script>
+  (async () => {
+    const bust = `?v=${Date.now()}`;
+    async function inject(url, id){
+      try{
+        const r = await fetch(url + bust, { cache:'no-store', credentials:'same-origin' });
+        if(!r.ok) return;
+        const el = document.getElementById(id);
+        if(el) el.innerHTML = await r.text();
+      } catch(_) {}
+    }
+    await inject('/nav/index.html','nav-placeholder');
+    await inject('/footer/index.html','footer-placeholder');
+  })();
+  </script>
 </body>
 </html>
