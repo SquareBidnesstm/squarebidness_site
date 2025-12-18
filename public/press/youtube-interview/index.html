@@ -43,7 +43,7 @@
     "name":"Marcus Buckner x Terrance Gangsta Williams — Interview",
     "description":"A candid interview with Square Bidness founder Marcus Buckner on legacy, discipline, and building a Louisiana brand — hosted by Terrance Gangsta Williams, The Original Hot Boy (@GangstaTheOriginalHotBoy).",
     "thumbnailUrl":["https://img.youtube.com/vi/o2eKkE8NmFY/maxresdefault.jpg"],
-    "embedUrl":"https://www.youtube.com/embed/o2eKkE8NmFY",
+    "embedUrl":"https://www.youtube-nocookie.com/embed/o2eKkE8NmFY",
     "contentUrl":"https://www.youtube.com/watch?v=o2eKkE8NmFY",
     "publisher":{
       "@type":"Organization",
@@ -69,13 +69,12 @@
   <link rel="manifest" href="/manifest.webmanifest">
 
   <style>
-    /* Local styles to complement /styles/style.css */
     :root { --gold:#c9a227; }
 
     body.theme-dark.press-body { background:#000; color:#fff; }
     .press-shell { max-width:1100px; margin:0 auto; padding:1.5rem 1rem 4rem; }
 
-    .press-hero {
+    .press-hero{
       display:grid; gap:1.25rem;
       grid-template-columns:minmax(280px, 460px) minmax(0,1fr);
       background:#0b0b0b; border:1px solid rgba(255,255,255,.05);
@@ -83,10 +82,10 @@
       margin-bottom:1.8rem;
     }
     @media (max-width:880px){ .press-hero{ grid-template-columns:1fr; } }
-    .press-hero__media img { width:100%; height:100%; object-fit:cover; display:block; }
+    .press-hero__media img{ width:100%; height:100%; object-fit:cover; display:block; }
     .press-hero__body { padding:2rem 1.6rem; }
 
-    .eyebrow {
+    .eyebrow{
       display:inline-block; padding:.3rem .7rem; border-radius:999px;
       background:rgba(201,162,39,.08); border:1px solid rgba(201,162,39,.4);
       font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; color:#fff;
@@ -94,15 +93,20 @@
     .press-title { font-size:clamp(1.9rem,3.6vw,2.6rem); font-weight:800; margin:.6rem 0 .35rem; }
     .press-sub   { color:#d1d5db; max-width:38rem; }
 
-    .btn { display:inline-flex; align-items:center; justify-content:center; gap:.35rem; border-radius:999px; border:1px solid transparent; text-decoration:none; font-weight:700; cursor:pointer; }
-    .btn--gold { background:var(--gold); color:#141414; padding:.6rem 1rem; border-color:rgba(201,162,39,.45); box-shadow:0 12px 35px rgba(201,162,39,.25); }
-    .btn--ghost{ background:rgba(0,0,0,.45); color:#fff; padding:.6rem 1rem; border:1px solid rgba(255,255,255,.12); }
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:.35rem;
+      border-radius:999px; border:1px solid transparent; text-decoration:none;
+      font-weight:700; cursor:pointer;
+    }
+    .btn--gold{
+      background:var(--gold); color:#141414; padding:.6rem 1rem;
+      border-color:rgba(201,162,39,.45); box-shadow:0 12px 35px rgba(201,162,39,.25);
+    }
+    .btn--ghost{
+      background:rgba(0,0,0,.45); color:#fff; padding:.6rem 1rem;
+      border:1px solid rgba(255,255,255,.12);
+    }
     .cta-row { display:flex; gap:.6rem; flex-wrap:wrap; margin-top:1rem; }
-
-    .video-wrap { aspect-ratio:16/9; width:min(960px,100%); margin:1.2rem auto 0; border-radius:16px; overflow:hidden; border:1px solid #1f1f1f; box-shadow:0 24px 48px rgba(0,0,0,.5); background:#000; }
-    .press-bodycopy { max-width:860px; margin:1.8rem auto 0; color:#d7dae0; line-height:1.6; padding:0 0.25rem; }
-    .press-bodycopy h2 { font-size:1.05rem; margin:1.6rem 0 .5rem; color:#fff; }
-    .press-footerlinks { display:flex; gap:.6rem; flex-wrap:wrap; margin-top:1rem; }
 
     /* ===== BIG VSOP CTA ===== */
     .vsop-banner{
@@ -124,7 +128,6 @@
     .vsop-banner__btn:hover{ transform:translateY(-1px); box-shadow:0 14px 34px rgba(0,0,0,.55), 0 0 0 4px rgba(0,0,0,.18) inset; }
     .vsop-banner__spark{ font-size:1.1rem; }
 
-    /* Hero CTA variant that really pops */
     .btn--vsop{
       background:linear-gradient(135deg,#ffef9a 0%, #ffd04d 40%, #c9a227 100%);
       color:#111; padding:.7rem 1.05rem; border:1px solid rgba(0,0,0,.2);
@@ -132,6 +135,69 @@
       text-transform:uppercase; letter-spacing:.04em;
     }
     .btn--vsop:hover{ transform:translateY(-1px); }
+
+    /* ===== Video wrapper + click-to-load poster (reduces 3p + cookies) ===== */
+    .video-wrap{
+      width:min(960px,100%);
+      margin:1.2rem auto 0;
+      border-radius:16px;
+      overflow:hidden;
+      border:1px solid #1f1f1f;
+      box-shadow:0 24px 48px rgba(0,0,0,.5);
+      background:#000;
+    }
+    .video-poster{
+      position:relative;
+      width:100%;
+      aspect-ratio:16/9;
+      display:block;
+      cursor:pointer;
+      border:0;
+      padding:0;
+      background:#000;
+      text-align:left;
+    }
+    .video-poster img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+      filter:contrast(1.02) saturate(1.02);
+    }
+    .video-poster__overlay{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:linear-gradient(180deg, rgba(0,0,0,.1), rgba(0,0,0,.55));
+    }
+    .play-btn{
+      width:78px;height:78px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.22);
+      background:rgba(0,0,0,.55);
+      display:grid;
+      place-items:center;
+      box-shadow:0 18px 44px rgba(0,0,0,.55);
+    }
+    .play-btn svg{ width:34px;height:34px; fill:#fff; transform:translateX(2px); }
+    .video-poster:focus-visible{
+      outline:3px solid rgba(201,162,39,.75);
+      outline-offset:3px;
+    }
+    .video-note{
+      max-width:860px;
+      margin:.8rem auto 0;
+      color:#9ca3af;
+      font-size:.9rem;
+      line-height:1.5;
+      padding:0 .25rem;
+    }
+
+    .press-bodycopy { max-width:860px; margin:1.8rem auto 0; color:#d7dae0; line-height:1.6; padding:0 0.25rem; }
+    .press-bodycopy h2 { font-size:1.05rem; margin:1.6rem 0 .5rem; color:#fff; }
+    .press-footerlinks { display:flex; gap:.6rem; flex-wrap:wrap; margin-top:1rem; }
   </style>
 </head>
 
@@ -153,7 +219,13 @@
         <img
           src="https://img.youtube.com/vi/o2eKkE8NmFY/maxresdefault.jpg"
           alt="Marcus Buckner interview with Terrance Gangsta Williams — YouTube thumbnail"
-          loading="eager" decoding="async" fetchpriority="high" />
+          width="1280"
+          height="720"
+          loading="eager"
+          decoding="async"
+          fetchpriority="high"
+          referrerpolicy="no-referrer"
+        />
       </div>
       <div class="press-hero__body">
         <span class="eyebrow">Press · Interview</span>
@@ -171,16 +243,44 @@
       </div>
     </section>
 
-    <!-- VIDEO -->
-    <section id="watch" class="video-wrap" aria-label="Embedded interview video">
-      <iframe
-        width="100%" height="100%"
-        src="https://www.youtube.com/embed/o2eKkE8NmFY"
-        title="Marcus Buckner Interview — Square Bidness Apparel"
-        frameborder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        allowfullscreen></iframe>
+    <!-- VIDEO (click-to-load, no-cookie) -->
+    <section id="watch" class="video-wrap" aria-label="Interview video">
+      <button
+        id="ytPoster"
+        class="video-poster"
+        type="button"
+        aria-label="Play interview video"
+        aria-controls="ytFrameWrap"
+      >
+        <img
+          src="https://img.youtube.com/vi/o2eKkE8NmFY/maxresdefault.jpg"
+          srcset="
+            https://img.youtube.com/vi/o2eKkE8NmFY/hqdefault.jpg 480w,
+            https://img.youtube.com/vi/o2eKkE8NmFY/sddefault.jpg 640w,
+            https://img.youtube.com/vi/o2eKkE8NmFY/maxresdefault.jpg 1280w"
+          sizes="(max-width: 768px) 100vw, 960px"
+          width="1280"
+          height="720"
+          alt="Video poster — Marcus Buckner interview"
+          loading="lazy"
+          decoding="async"
+          referrerpolicy="no-referrer"
+        />
+        <div class="video-poster__overlay" aria-hidden="true">
+          <div class="play-btn" aria-hidden="true">
+            <svg viewBox="0 0 24 24" role="img" aria-hidden="true">
+              <path d="M8 5v14l11-7z"></path>
+            </svg>
+          </div>
+        </div>
+      </button>
+
+      <div id="ytFrameWrap" hidden></div>
     </section>
+
+    <p class="video-note">
+      Tip: Video loads only when you press play — this keeps the page lighter and reduces third-party cookies.
+    </p>
 
     <!-- COPY -->
     <section class="press-bodycopy">
@@ -225,6 +325,53 @@
     await inject("/nav/index.html", "nav-placeholder");
     await inject("/footer/index.html", "footer-placeholder");
   })();
+  </script>
+
+  <!-- Click-to-load YouTube (nocookie) -->
+  <script>
+    (function(){
+      const poster = document.getElementById('ytPoster');
+      const wrap = document.getElementById('ytFrameWrap');
+      if (!poster || !wrap) return;
+
+      function loadYT(){
+        // Prevent double loads
+        if (!wrap.hasAttribute('hidden')) return;
+
+        // youtube-nocookie + modestbranding; autoplay only AFTER user action
+        const src = "https://www.youtube-nocookie.com/embed/o2eKkE8NmFY?autoplay=1&rel=0&modestbranding=1";
+
+        wrap.innerHTML = `
+          <iframe
+            width="100%"
+            height="100%"
+            style="display:block;aspect-ratio:16/9;width:100%;height:auto;"
+            src="${src}"
+            title="Marcus Buckner Interview — Square Bidness Apparel"
+            frameborder="0"
+            loading="lazy"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen
+          ></iframe>
+        `;
+
+        poster.hidden = true;
+        wrap.hidden = false;
+
+        // Move focus to iframe region for accessibility
+        wrap.setAttribute('tabindex','-1');
+        wrap.focus({ preventScroll:true });
+      }
+
+      poster.addEventListener('click', loadYT);
+      poster.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          loadYT();
+        }
+      });
+    })();
   </script>
 </body>
 </html>
