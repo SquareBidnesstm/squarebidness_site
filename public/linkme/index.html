@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Perf -->
+  <link rel="preconnect" href="https://www.googletagmanager.com">
+  <link rel="preconnect" href="https://www.google-analytics.com">
+
   <!-- Analytics -->
   <script defer src="/scripts/ga.js"></script>
 
@@ -16,7 +20,7 @@
   <meta name="description" content="Quick links to Square Bidness — VSOP, Winter Games, Supima, Tech Lab, stories, community, and direct contact.">
 
   <!-- Open Graph -->
-  <meta property="og:type" content="profile">
+  <meta property="og:type" content="website">
   <meta property="og:site_name" content="Square Bidness">
   <meta property="og:title" content="Link Me — Square Bidness">
   <meta property="og:description" content="All Square Bidness links in one place. VSOP, Winter Games, Supima, Tech Lab, and direct contact.">
@@ -31,10 +35,6 @@
   <meta name="twitter:description" content="All Square Bidness links in one clean lane.">
   <meta name="twitter:image" content="https://www.squarebidness.com/assets/sb-social-card_1200.jpg">
 
-  <!-- Perf -->
-  <link rel="preconnect" href="https://www.googletagmanager.com">
-  <link rel="preconnect" href="https://www.google-analytics.com">
-
   <!-- Styles -->
   <link rel="stylesheet" href="/styles/style.css" />
 
@@ -45,6 +45,9 @@
   <meta name="theme-color" content="#000000" />
 
   <style>
+    /* Prevent layout shift for images across this page */
+    img{height:auto}
+
     .page-hero {
       padding:2.75rem 0 2rem;
       text-align:center;
@@ -80,12 +83,14 @@
       justify-content:space-between;
       align-items:center;
       font-size:1rem;
-      transition:background .15s ease, border-color .15s ease;
+      transition:background .15s ease, border-color .15s ease, transform .12s ease;
       box-shadow:0 18px 40px rgba(15,23,42,.45);
+      will-change:transform;
     }
     .link-card:hover {
       background:#0b1220;
       border-color:#1e293b;
+      transform:translateY(-1px);
     }
     .link-card span {
       font-weight:600;
@@ -115,9 +120,7 @@
       box-shadow:0 18px 40px rgba(15,23,42,.4);
       font-size:.95rem;
     }
-    .contact-block p {
-      margin:.35rem 0;
-    }
+    .contact-block p { margin:.35rem 0; }
     .contact-label {
       text-transform:uppercase;
       letter-spacing:.14em;
@@ -125,17 +128,12 @@
       opacity:.75;
       margin-bottom:.2rem;
     }
-    .contact-block a {
-      color:#38bdf8;
-      text-decoration:none;
-    }
-    .contact-block a:hover {
-      text-decoration:underline;
-    }
+    .contact-block a { color:#38bdf8; text-decoration:none; }
+    .contact-block a:hover { text-decoration:underline; }
   </style>
 </head>
 
-<body class="theme-dark">
+<body class="theme-dark" id="top">
   <!-- NAV -->
   <div id="nav-placeholder"></div>
 
@@ -146,49 +144,42 @@
   </header>
 
   <!-- MAIN -->
-  <main class="section">
+  <main class="section" role="main">
     <div class="links-wrapper">
 
-      <!-- VSOP -->
       <a class="link-card" href="/vsop/">
         <span>VSOP Collection</span>
-        <span class="arrow">→</span>
+        <span class="arrow" aria-hidden="true">→</span>
       </a>
 
-      <!-- Winter Games -->
       <a class="link-card" href="/wintergames/">
         <span>Winter Games</span>
-        <span class="arrow">→</span>
+        <span class="arrow" aria-hidden="true">→</span>
       </a>
 
-      <!-- Supima -->
       <a class="link-card" href="/supima/">
         <span>Supima Tees</span>
-        <span class="arrow">→</span>
+        <span class="arrow" aria-hidden="true">→</span>
       </a>
 
-      <!-- Community -->
       <a class="link-card" href="/community/">
         <span>Community Lane</span>
-        <span class="arrow">→</span>
+        <span class="arrow" aria-hidden="true">→</span>
       </a>
 
-      <!-- Stories -->
       <a class="link-card" href="/stories/">
         <span>Stories</span>
-        <span class="arrow">→</span>
+        <span class="arrow" aria-hidden="true">→</span>
       </a>
 
-      <!-- Tech Lab -->
       <a class="link-card" href="/tax-pass/">
         <span>Tax Pass™ — Tech Lab</span>
-        <span class="arrow">→</span>
+        <span class="arrow" aria-hidden="true">→</span>
       </a>
 
-      <!-- Shop -->
       <a class="link-card" href="/#shop">
         <span>Shop Everything Live</span>
-        <span class="arrow">→</span>
+        <span class="arrow" aria-hidden="true">→</span>
       </a>
 
     </div>
@@ -196,13 +187,13 @@
     <!-- Contact -->
     <div class="section-title">Direct Contact</div>
 
-    <section class="contact-block">
+    <section class="contact-block" aria-label="Direct contact">
       <div class="contact-label">Email</div>
       <p><a href="mailto:marcusbuckner@squarebidness.com">marcusbuckner@squarebidness.com</a></p>
 
       <div class="contact-label" style="margin-top:.75rem;">HQ Address</div>
       <p>Square Bidness Apparel</p>
-      <p>Hammond, Louisiana</p>
+      <p>46331 N Baptist Rd, Hammond, LA 70401</p>
 
       <p style="margin-top:.6rem;opacity:.75;font-size:.85rem;">
         Built for motion — apparel + Tech Lab.
@@ -213,23 +204,43 @@
   <!-- FOOTER -->
   <div id="footer-placeholder"></div>
 
-  <!-- Inject NAV + FOOTER -->
+  <!-- Inject NAV + FOOTER + set active link -->
   <script>
   (async () => {
     const bust = `?v=${Date.now()}`;
 
     async function inject(url, slot){
       try {
-        const res = await fetch(url + bust, { cache: "no-store" });
-        if (!res.ok) return;
-        document.getElementById(slot).innerHTML = await res.text();
-      } catch(e){ console.warn("partial fail:", url); }
+        const res = await fetch(url + bust, { cache: "no-store", credentials: "same-origin" });
+        if (!res.ok) return null;
+        const html = await res.text();
+        const el = document.getElementById(slot);
+        if (!el) return null;
+        el.innerHTML = html;
+        return el;
+      } catch(e){
+        console.warn("partial fail:", url, e);
+        return null;
+      }
     }
 
-    await inject("/nav/index.html", "nav-placeholder");
+    const nav = await inject("/nav/index.html", "nav-placeholder");
+    if (nav) {
+      const current = location.pathname.replace(/\/+$/, "") || "/";
+      nav.querySelectorAll("a[href]").forEach(a => {
+        try {
+          const href = new URL(a.getAttribute("href"), location.origin)
+            .pathname.replace(/\/+$/, "") || "/";
+          if (href === current || (href !== "/" && current.startsWith(href))) {
+            a.classList.add("is-active");
+            a.setAttribute("aria-current", "page");
+          }
+        } catch {}
+      });
+    }
+
     await inject("/footer/index.html", "footer-placeholder");
   })();
   </script>
-
 </body>
 </html>
