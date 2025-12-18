@@ -16,15 +16,12 @@
     :root{ --bg:#000; --fg:#f5f5f5; --muted:#a0a0a0; --card:#0e0e0e; --stroke:#1f1f1f; --gold:#c9a227; }
     body{ background:var(--bg); color:var(--fg); margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
     .wrap{ max-width:980px; margin:0 auto; padding:24px 16px 60px; }
-    .topbar{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:14px; }
+    .topbar{ display:flex; gap:10px; flex-wrap:wrap; align-items:flex-start; justify-content:space-between; margin-bottom:14px; }
     .kicker{ opacity:.85; font-size:.85rem; letter-spacing:.06em; text-transform:uppercase; }
     h1{ margin:.25rem 0 .35rem; font-size:clamp(24px,4vw,36px); line-height:1.15; }
     .lead{ opacity:.9; max-width:75ch; margin:0; }
     .card{ background:var(--card); border:1px solid var(--stroke); border-radius:14px; padding:14px; margin-top:12px; }
-    .row{ display:grid; gap:12px; margin-top:12px; }
-    @media(min-width:900px){ .row{ grid-template-columns:1fr 1fr; } }
     h2{ margin:0 0 6px; font-size:1.05rem; }
-    h3{ margin:12px 0 6px; font-size:.95rem; }
     .muted{ color:var(--muted); font-size:.92rem; line-height:1.6; }
     .btns{ display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; }
     .btn{
@@ -32,6 +29,7 @@
       padding:10px 12px; border-radius:12px; border:1px solid var(--stroke);
       text-decoration:none; font-weight:800; font-size:.9rem;
       color:var(--fg); background:#0b0b0b;
+      cursor:pointer;
     }
     .btn--gold{ background:var(--gold); color:#0b0b0b; border-color:rgba(201,162,39,.6); }
     .btn--ghost{ background:transparent; }
@@ -48,18 +46,19 @@
       resize:vertical;
       white-space:pre-wrap;
     }
-    .mini{ opacity:.78; font-size:.85rem; margin-top:6px; }
+    .mini{ opacity:.78; font-size:.85rem; margin-left:8px; }
     .qa dt{ font-weight:900; margin-top:10px; }
     .qa dd{ margin:4px 0 0; color:var(--fg); opacity:.92; line-height:1.6; }
     .hr{ height:1px; background:var(--stroke); margin:12px 0; }
     .foot{ margin-top:14px; opacity:.75; font-size:.85rem; }
+    a{ color:#fff; text-decoration:underline; }
 
     /* PRINT */
     @media print{
       body{ background:#fff; color:#000; }
       .wrap{ padding:0; }
       .card{ background:#fff; border:1px solid #ddd; }
-      .btns, .topbar .btn{ display:none !important; }
+      .btns{ display:none !important; }
       .block{ background:#fff; color:#000; border:1px solid #ddd; }
       a{ color:#000; text-decoration:none; }
     }
@@ -69,12 +68,14 @@
     function copyBlock(id){
       const el = document.getElementById(id);
       if(!el) return;
+      el.focus();
       el.select();
       el.setSelectionRange(0, 999999);
       try{ document.execCommand('copy'); }catch(e){}
       const s = document.getElementById(id + "_status");
       if(s){ s.textContent = "Copied."; setTimeout(()=>{ s.textContent=""; }, 1200); }
     }
+    function printSheet(){ window.print(); }
   </script>
 </head>
 
@@ -88,20 +89,22 @@
         <p class="lead">
           Editor-ready boilerplate, AP-style blurb, and FAQ. Built for fast quoting, email replies, and printouts.
         </p>
-      </div>
 
-      <div class="btns" aria-label="Quick actions">
-        <a class="btn btn--gold" href="/docs/square_bidness_media_kit_2025.pdf" target="_blank" rel="noopener">Media Kit (PDF)</a>
-        <a class="btn btn--ghost" href="/media-kit/">Web Media Kit</a>
-        <a class="btn btn--ghost" href="/press/">Back to Press</a>
+        <div class="btns" aria-label="Quick actions">
+          <a class="btn btn--gold" href="/docs/square_bidness_media_kit_2025.pdf" target="_blank" rel="noopener">Media Kit (PDF)</a>
+          <a class="btn btn--ghost" href="/media-kit/">Web Media Kit</a>
+          <a class="btn btn--ghost" href="/press/">Back to Press</a>
+          <button class="btn btn--ghost" type="button" onclick="printSheet()">Print</button>
+        </div>
       </div>
     </div>
 
-    <!-- COPY/PASTE BLOCKS -->
     <section class="card" id="boilerplate">
       <h2>1) One-Sentence Boilerplate (Footer)</h2>
       <p class="muted">Use at the end of articles, newsletters, and show notes.</p>
-      <textarea class="block" id="boilerplate_text" readonly>Square Bidness Apparel is a Louisiana-based apparel brand founded in 2022 by veteran operator Marcus Buckner, building across casual, business-casual, tech-casual, and workwear categories with a focus on professionalism, durability, and real-world use.</textarea>
+
+      <textarea class="block" id="boilerplate_text" readonly>Square Bidness Apparel is a Louisiana-based apparel brand founded on January 4, 2022 by veteran operator Marcus Buckner, building across casual, business-casual, tech-casual, and workwear categories with a focus on professionalism, durability, and real-world use.</textarea>
+
       <div class="btns">
         <button class="btn btn--gold" type="button" onclick="copyBlock('boilerplate_text')">Copy</button>
         <span class="mini" id="boilerplate_text_status"></span>
@@ -111,7 +114,9 @@
     <section class="card" id="ap-blurb">
       <h2>2) 50-Word AP-Style Blurb</h2>
       <p class="muted">Short, neutral, and paste-ready for editor bios.</p>
-      <textarea class="block" id="ap_text" readonly>Square Bidness Apparel, founded in 2022 by veteran entrepreneur Marcus Buckner, is a Louisiana-rooted apparel brand operating across casual, business-casual, tech-casual, and workwear categories. The company blends disciplined operations, infrastructure ownership, and documented buildouts through its Square Bidness Tech Lab.</textarea>
+
+      <textarea class="block" id="ap_text" readonly>Square Bidness Apparel, founded January 4, 2022 by veteran entrepreneur Marcus Buckner, is a Louisiana-rooted apparel brand spanning casual, business-casual, tech-casual, and workwear categories. The company pairs disciplined operations with documented infrastructure buildouts through the Square Bidness Tech Lab.</textarea>
+
       <div class="btns">
         <button class="btn btn--gold" type="button" onclick="copyBlock('ap_text')">Copy</button>
         <span class="mini" id="ap_text_status"></span>
@@ -142,14 +147,15 @@
         <dd>Square Bidness periodically engages lenders and strategic partners for asset-backed growth, infrastructure expansion, and equipment acquisition. The company prioritizes long-term ownership, disciplined scaling, and transparent documentation.</dd>
 
         <dt>Where can media find official assets?</dt>
-        <dd>Official assets and downloads are available at squarebidness.com/media-kit/ and via the Media Kit PDF link.</dd>
+        <dd>Official assets and downloads are available at <a href="/media-kit/">squarebidness.com/media-kit/</a> and via the Media Kit PDF link.</dd>
       </dl>
 
       <div class="hr"></div>
 
-      <p class="muted"><strong>Media Contact</strong><br>
-        Email: <a href="mailto:info@squarebidness.com" style="color:#fff;text-decoration:underline;">info@squarebidness.com</a><br>
-        Web: <a href="https://www.squarebidness.com/" style="color:#fff;text-decoration:underline;">squarebidness.com</a><br>
+      <p class="muted">
+        <strong>Media Contact</strong><br>
+        Email: <a href="mailto:info@squarebidness.com">info@squarebidness.com</a><br>
+        Web: <a href="https://www.squarebidness.com/">squarebidness.com</a><br>
         Instagram: @squarebidnesstm · TikTok: @squarebidnesstm · Facebook: Square Bidness Apparel
       </p>
     </section>
