@@ -83,17 +83,7 @@
     .lab-title{ font-size:clamp(24px,5vw,32px); margin:4px 0 6px; }
     .lab-sub{ font-size:.95rem; color:#dddddd; max-width:640px; }
 
-    .lab-hero-img{
-      margin:18px 0 14px;
-      border-radius:18px;
-      overflow:hidden;
-      border:1px solid #1b1b1b;
-      background:#050505;
-    }
-    .lab-hero-img picture, .lab-hero-img img{
-      display:block; width:100%; height:auto;
-    }
-
+    
     .badge-row{ display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
     .badge{ font-size:.78rem; padding:3px 10px; border-radius:999px; border:1px solid #2a2a2a; color:#bdbdbd; }
     .badge--gold{ border-color:#c4a46e; color:#c4a46e; }
@@ -122,6 +112,27 @@
       font-weight:600; align-self:flex-start;
     }
     .small-note{ font-size:.8rem; color:#9a9a9a; margin-top:4px; }
+
+    /* Tech Lab hero image: smaller on desktop */
+.lab-hero-img{
+  margin: 18px 0 14px;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid #1b1b1b;
+}
+
+.lab-hero-frame{
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Desktop cap */
+@media (min-width: 900px){
+  .lab-hero-frame{
+    max-width: 720px;   /* change to 640 / 760 if you want */
+  }
+}
+
   </style>
 </head>
 
@@ -139,26 +150,30 @@
         and future data center work gets built one project at a time.
       </p>
 
-      <div class="lab-hero-img">
-        <picture>
-          <source
-            type="image/webp"
-            srcset="/assets/tech-lab/tech-lab-hero-800.webp 800w, /assets/tech-lab/tech-lab-hero-1600.webp 1600w"
-            sizes="(max-width: 900px) 100vw, 960px"
-          />
-          <img
-            src="/assets/tech-lab/tech-lab-hero-1600.jpg"
-            srcset="/assets/tech-lab/tech-lab-hero-800.jpg 800w, /assets/tech-lab/tech-lab-hero-1600.jpg 1600w"
-            sizes="(max-width: 900px) 100vw, 960px"
-            width="1600"
-            height="900"
-            alt="SB Tech Lab dashboard and field tools on screen"
-            loading="eager"
-            fetchpriority="high"
-            decoding="async"
-          />
-        </picture>
-      </div>
+     <div class="lab-hero-img">
+  <div class="lab-hero-frame">
+    <picture>
+      <source
+        type="image/webp"
+        srcset="/assets/tech-lab/tech-lab-hero-800.webp 800w, /assets/tech-lab/tech-lab-hero-1600.webp 1600w"
+        sizes="(max-width: 900px) 100vw, 720px"
+      />
+      <img
+        src="/assets/tech-lab/tech-lab-hero-1600.jpg"
+        srcset="/assets/tech-lab/tech-lab-hero-800.jpg 800w, /assets/tech-lab/tech-lab-hero-1600.jpg 1600w"
+        sizes="(max-width: 900px) 100vw, 720px"
+        width="1600"
+        height="900"
+        alt="SB Tech Lab dashboard and field tools on screen"
+        loading="eager"
+        fetchpriority="high"
+        decoding="async"
+        style="width:100%;height:auto;display:block;"
+      />
+    </picture>
+  </div>
+</div>
+
 
       <div class="badge-row">
         <span class="badge badge--gold">Subdomain: lab.squarebidness.com</span>
