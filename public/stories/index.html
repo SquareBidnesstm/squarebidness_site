@@ -39,7 +39,7 @@
   <meta name="twitter:image" content="https://www.squarebidness.com/assets/sb-social-card_1200.jpg" />
   <meta name="twitter:site" content="@squarebidnesstm" />
 
-  <!-- JSON-LD CollectionPage (optional but clean) -->
+  <!-- JSON-LD CollectionPage -->
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
@@ -97,15 +97,24 @@
       flex-direction:column;
       box-shadow:0 18px 40px rgba(15,23,42,.75);
     }
+
     .story-card__media{
       position:relative;
       background:#000;
     }
+
+    /* Reserve space to prevent CLS */
+    .story-card__media picture,
     .story-card__media img{
-      width:100%;
       display:block;
+      width:100%;
+      height:auto;
+    }
+
+    .story-card__media img{
       object-fit:cover;
     }
+
     .story-badge{
       position:absolute;
       left:.75rem;
@@ -119,6 +128,7 @@
       border:1px solid rgba(249,250,251,.18);
       color:#e5e7eb;
     }
+
     .story-card__body{
       padding:.85rem .95rem 1.1rem;
     }
@@ -195,30 +205,6 @@
     .stories-footer-row a:hover{
       text-decoration:underline;
     }
-
-    /* Use gradient media block for cards without an explicit image */
-    .story-card__media--gradient{
-      height:180px;
-      background:radial-gradient(circle at top,#22d3ee 0%,#1d4ed8 40%,#020617 100%);
-      display:flex;
-      align-items:flex-end;
-      padding:.85rem;
-    }
-    .story-card__media--gradient span{
-      font-size:.8rem;
-      font-weight:700;
-      color:#e5e7eb;
-      text-transform:uppercase;
-      letter-spacing:.08em;
-    }
-    .story-card__media--photo {
-  position: relative;
-  overflow: hidden;
-  border-radius: 12px;
-}
-
-
-
   </style>
 </head>
 
@@ -245,12 +231,24 @@
         <!-- Innovation Fest -->
         <article class="story-card">
           <div class="story-card__media">
-            <img
-              src="/blog/assets/innovation-fest-hero_800.jpg"
-              srcset="/blog/assets/innovation-fest-hero_800.jpg 800w,
-                      /blog/assets/innovation-fest-hero_1200.jpg 1200w"
-              sizes="(max-width: 768px) 100vw, 480px"
-              alt="Innovation Fest 2025 — Louisiana to NYC trip">
+            <picture>
+              <source
+                type="image/webp"
+                srcset="/blog/assets/innovation-fest-hero_800.webp 800w, /blog/assets/innovation-fest-hero_1200.webp 1200w"
+                sizes="(max-width: 768px) 100vw, 480px"
+              />
+              <img
+                src="/blog/assets/innovation-fest-hero_1200.jpg"
+                srcset="/blog/assets/innovation-fest-hero_800.jpg 800w, /blog/assets/innovation-fest-hero_1200.jpg 1200w"
+                sizes="(max-width: 768px) 100vw, 480px"
+                width="1200"
+                height="800"
+                alt="Innovation Fest 2025 — Louisiana to NYC trip"
+                loading="lazy"
+                decoding="async"
+                style="width:100%;height:auto;"
+              />
+            </picture>
             <span class="story-badge">Events</span>
           </div>
           <div class="story-card__body">
@@ -273,9 +271,24 @@
         <!-- Winter Games / OG Lil Soulja Slim -->
         <article class="story-card">
           <div class="story-card__media">
-            <img
-              src="/wintergames/assets/og-lil-soulja-slim_800.jpg"
-              alt="OG Lil Soulja Slim wearing the Winter Games crewneck in Hammond">
+            <picture>
+              <source
+                type="image/webp"
+                srcset="/wintergames/assets/og-lil-soulja-slim_800.webp 800w, /wintergames/assets/og-lil-soulja-slim_1200.webp 1200w"
+                sizes="(max-width: 768px) 100vw, 480px"
+              />
+              <img
+                src="/wintergames/assets/og-lil-soulja-slim_800.jpg"
+                srcset="/wintergames/assets/og-lil-soulja-slim_800.jpg 800w, /wintergames/assets/og-lil-soulja-slim_1200.jpg 1200w"
+                sizes="(max-width: 768px) 100vw, 480px"
+                width="800"
+                height="1000"
+                alt="OG Lil Soulja Slim wearing the Winter Games crewneck in Hammond"
+                loading="lazy"
+                decoding="async"
+                style="width:100%;height:auto;"
+              />
+            </picture>
             <span class="story-badge">Collection</span>
           </div>
           <div class="story-card__body">
@@ -294,12 +307,18 @@
           </div>
         </article>
 
-        <!-- YouTube Interview with Terrance Gangsta Williams -->
+        <!-- YouTube Interview (external image cannot be WebP unless you host it) -->
         <article class="story-card">
           <div class="story-card__media">
             <img
               src="https://img.youtube.com/vi/o2eKkE8NmFY/hqdefault.jpg"
-              alt="Marcus Buckner interview with Terrance Gangsta Williams on YouTube">
+              width="480"
+              height="360"
+              loading="lazy"
+              decoding="async"
+              alt="Marcus Buckner interview with Terrance Gangsta Williams on YouTube"
+              style="width:100%;height:auto;display:block;"
+            />
             <span class="story-badge">Interview</span>
           </div>
           <div class="story-card__body">
@@ -320,35 +339,42 @@
         </article>
 
         <!-- Courageaux — Her Words -->
-<article class="story-card">
-  <div class="story-card__media story-card__media--photo">
-    <img
-      src="/courageaux/assets/amari_hero_1200x630.jpg"
-      alt="Amari Wilford of Courageaux Aesthetics in Hammond, Louisiana"
-      loading="lazy"
-      width="1200"
-      height="630"
-      style="width:100%;height:auto;display:block;border-radius:12px;"
-    />
-    <span class="story-card__tag">Courageaux Aesthetics · Her Words</span>
-  </div>
-  <div class="story-card__body">
-    <time class="story-date" datetime="2025-11-01">Nov 2025</time>
-    <h2 class="story-title">
-      <a href="/courageaux/her-words.html">
-        Courageaux Aesthetics — Her Words &amp; Bio
-      </a>
-    </h2>
-    <p class="story-excerpt">
-      Hammond esthetician Amari Wilford on Joshua 1:9, clean calm confident skin, and building Courageaux Aesthetics in the same lane as Square Bidness.
-    </p>
-    <div class="story-cta">
-      <a class="btn btn--gold" href="/courageaux/her-words.html">Read Her Words</a>
-      <a class="btn btn--ghost" href="/press/">Back to Press</a>
-    </div>
-  </div>
-</article>
-
+        <article class="story-card">
+          <div class="story-card__media">
+            <picture>
+              <source
+                type="image/webp"
+                srcset="/courageaux/assets/amari_hero_1200x630.webp 1200w, /courageaux/assets/amari_hero_800x420.webp 800w"
+                sizes="(max-width: 768px) 100vw, 480px"
+              />
+              <img
+                src="/courageaux/assets/amari_hero_1200x630.jpg"
+                width="1200"
+                height="630"
+                loading="lazy"
+                decoding="async"
+                alt="Amari Wilford of Courageaux Aesthetics in Hammond, Louisiana"
+                style="width:100%;height:auto;display:block;"
+              />
+            </picture>
+            <span class="story-badge">Courageaux</span>
+          </div>
+          <div class="story-card__body">
+            <time class="story-date" datetime="2025-11-01">Nov 2025</time>
+            <h2 class="story-title">
+              <a href="/courageaux/her-words.html">
+                Courageaux Aesthetics — Her Words &amp; Bio
+              </a>
+            </h2>
+            <p class="story-excerpt">
+              Hammond esthetician Amari Wilford on Joshua 1:9, clean calm confident skin, and building Courageaux Aesthetics in the same lane as Square Bidness.
+            </p>
+            <div class="story-cta">
+              <a class="btn btn--gold" href="/courageaux/her-words.html">Read Her Words</a>
+              <a class="btn btn--ghost" href="/press/">Back to Press</a>
+            </div>
+          </div>
+        </article>
 
       </section>
 
@@ -364,7 +390,7 @@
   <!-- FOOTER SLOT -->
   <div id="footer-placeholder"></div>
 
-  <!-- Simple click tracking for story cards (optional, light) -->
+  <!-- Simple click tracking for story cards -->
   <script>
   document.addEventListener('click', (e) => {
     const cardLink = e.target.closest('.story-card a[href]');
