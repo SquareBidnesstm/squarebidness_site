@@ -42,12 +42,14 @@
     </div>
   </div>
 
-  <!-- CLS-safe year fill (runs immediately when injected) -->
+  <!-- CLS-safe year fill (scoped to footer only) -->
   <script>
     (function () {
       try {
+        var wrap = document.currentScript && document.currentScript.parentElement;
+        if (!wrap) return;
         var y = String(new Date().getFullYear());
-        var el = document.getElementById('sb-year');
+        var el = wrap.querySelector('#sb-year');
         if (el) el.textContent = y;
       } catch(_) {}
     })();
