@@ -36,7 +36,7 @@
     .block{
       width:100%;
       min-height:112px;
-      padding:10px 10px;
+      padding:10px;
       border-radius:12px;
       border:1px solid #2b2b2b;
       background:#050505;
@@ -48,12 +48,11 @@
     }
     .mini{ opacity:.78; font-size:.85rem; margin-left:8px; }
     .qa dt{ font-weight:900; margin-top:10px; }
-    .qa dd{ margin:4px 0 0; color:var(--fg); opacity:.92; line-height:1.6; }
+    .qa dd{ margin:4px 0 0; opacity:.92; line-height:1.6; }
     .hr{ height:1px; background:var(--stroke); margin:12px 0; }
     .foot{ margin-top:14px; opacity:.75; font-size:.85rem; }
     a{ color:#fff; text-decoration:underline; }
 
-    /* PRINT */
     @media print{
       body{ background:#fff; color:#000; }
       .wrap{ padding:0; }
@@ -70,8 +69,7 @@
       if(!el) return;
       el.focus();
       el.select();
-      el.setSelectionRange(0, 999999);
-      try{ document.execCommand('copy'); }catch(e){}
+      document.execCommand('copy');
       const s = document.getElementById(id + "_status");
       if(s){ s.textContent = "Copied."; setTimeout(()=>{ s.textContent=""; }, 1200); }
     }
@@ -80,101 +78,95 @@
 </head>
 
 <body class="theme-dark">
-  <main class="wrap">
+<main class="wrap">
 
-    <div class="topbar">
-      <div>
-        <div class="kicker">Press Paste Sheet</div>
-        <h1>Square Bidness — Copy/Paste (2025)</h1>
-        <p class="lead">
-          Editor-ready boilerplate, AP-style blurb, and FAQ. Built for fast quoting, email replies, and printouts.
-        </p>
+  <div class="topbar">
+    <div>
+      <div class="kicker">Press Paste Sheet</div>
+      <h1>Square Bidness — Copy / Paste (2025)</h1>
+      <p class="lead">Editor-ready boilerplate, AP-style blurb, and FAQ. Built for fast quoting, email replies, and print.</p>
 
-        <div class="btns" aria-label="Quick actions">
-          <a class="btn btn--gold" href="/docs/square_bidness_media_kit_2025.pdf" target="_blank" rel="noopener">Media Kit (PDF)</a>
-          <a class="btn btn--ghost" href="/media-kit/">Web Media Kit</a>
-          <a class="btn btn--ghost" href="/press/">Back to Press</a>
-          <button class="btn btn--ghost" type="button" onclick="printSheet()">Print</button>
-        </div>
+      <div class="btns">
+        <a class="btn btn--gold" href="/docs/square_bidness_media_kit_2025.pdf" target="_blank">Media Kit (PDF)</a>
+        <a class="btn btn--ghost" href="/media-kit/">Web Media Kit</a>
+        <a class="btn btn--ghost" href="/press/">Back to Press</a>
+        <button class="btn btn--ghost" onclick="printSheet()">Print</button>
       </div>
     </div>
-    <section class="card" id="mission">
-  <h2>Mission Statement</h2>
-  <p class="muted">Official mission line used across Square Bidness brand materials.</p>
-
-  <textarea class="block" id="mission_text" readonly>Principles. Morals. Business Done Right.</textarea>
-
-  <div class="btns">
-    <button class="btn btn--gold" type="button" onclick="copyBlock('mission_text')">Copy</button>
-    <span class="mini" id="mission_text_status"></span>
   </div>
-</section>
 
+  <!-- MISSION -->
+  <section class="card">
+    <h2>Mission Statement</h2>
+    <p class="muted">Official mission line used across Square Bidness materials.</p>
+    <textarea class="block" id="mission_text" readonly>Principles. Morals. Business Done Right.</textarea>
+    <div class="btns">
+      <button class="btn btn--gold" onclick="copyBlock('mission_text')">Copy</button>
+      <span class="mini" id="mission_text_status"></span>
+    </div>
+  </section>
 
-    <section class="card" id="boilerplate">
-      <h2>1) One-Sentence Boilerplate (Footer)</h2>
-      <p class="muted">Use at the end of articles, newsletters, and show notes.</p>
+  <!-- BOILERPLATE -->
+  <section class="card">
+    <h2>1) One-Sentence Boilerplate</h2>
+    <textarea class="block" id="boilerplate_text" readonly>Square Bidness Apparel is a Louisiana-based apparel brand founded January 4, 2022 by veteran operator Marcus Buckner, spanning casual, business-casual, tech-casual, and workwear with an emphasis on clean presentation, durability, and real-world use.</textarea>
+    <div class="btns">
+      <button class="btn btn--gold" onclick="copyBlock('boilerplate_text')">Copy</button>
+      <span class="mini" id="boilerplate_text_status"></span>
+    </div>
+  </section>
 
-      <textarea class="block" id="boilerplate_text" readonly>Square Bidness Apparel is a Louisiana-based apparel brand founded on January 4, 2022 by veteran operator Marcus Buckner, building across casual, business-casual, tech-casual, and workwear categories with a focus on professionalism, durability, and real-world use.</textarea>
+  <!-- AP BLURB -->
+  <section class="card">
+    <h2>2) 50-Word AP-Style Blurb</h2>
+    <textarea class="block" id="ap_text" readonly>Square Bidness Apparel, founded Jan. 4, 2022 by veteran entrepreneur Marcus Buckner, is a Louisiana-rooted apparel brand spanning casual, business-casual, tech-casual and workwear. The company pairs disciplined operations with documented infrastructure and buildouts through the Square Bidness Tech Lab, supporting long-term ownership and growth.</textarea>
+    <div class="btns">
+      <button class="btn btn--gold" onclick="copyBlock('ap_text')">Copy</button>
+      <span class="mini" id="ap_text_status"></span>
+    </div>
+  </section>
 
-      <div class="btns">
-        <button class="btn btn--gold" type="button" onclick="copyBlock('boilerplate_text')">Copy</button>
-        <span class="mini" id="boilerplate_text_status"></span>
-      </div>
-    </section>
+  <!-- FAQ -->
+  <section class="card">
+    <h2>3) Press FAQ</h2>
+    <dl class="qa">
 
-    <section class="card" id="ap-blurb">
-      <h2>2) 50-Word AP-Style Blurb</h2>
-      <p class="muted">Short, neutral, and paste-ready for editor bios.</p>
+      <dt>What is Square Bidness Apparel?</dt>
+      <dd>Square Bidness Apparel is a Louisiana-based apparel brand founded January 4, 2022, producing limited-run collections across casual, business-casual, tech-casual, and workwear categories.</dd>
 
-      <textarea class="block" id="ap_text" readonly>Square Bidness Apparel, founded January 4, 2022 by veteran entrepreneur Marcus Buckner, is a Louisiana-rooted apparel brand spanning casual, business-casual, tech-casual, and workwear categories. The company pairs disciplined operations with documented infrastructure buildouts through the Square Bidness Tech Lab.</textarea>
+      <dt>Who is the founder?</dt>
+      <dd>Marcus Buckner is the founder and owner-operator of Square Bidness Apparel and Square Bidness Tech Lab. He is a veteran-led operator who documents and performs much of the company’s electrical, construction, and infrastructure work firsthand.</dd>
 
-      <div class="btns">
-        <button class="btn btn--gold" type="button" onclick="copyBlock('ap_text')">Copy</button>
-        <span class="mini" id="ap_text_status"></span>
-      </div>
-    </section>
+      <dt>Where is the company based?</dt>
+      <dd>Square Bidness operates in Louisiana with HQ1 in Hammond (primary headquarters on approximately 1.07 acres, including a completed 40×50 slab reserved for Phase II Tech Lab expansion), HQ2 in Pineville (secondary headquarters and active field lab), plus a separate one-acre property with an existing building being prepared as a future operational asset.</dd>
 
-    <section class="card" id="faq">
-      <h2>3) Press FAQ</h2>
-      <p class="muted">Use for interviews, producer prep, lender context, and quick replies.</p>
+      <dt>What categories does the brand operate in?</dt>
+      <dd>The brand spans casual, business-casual, tech-casual, and workwear, released through limited drops rather than fast-fashion cycles.</dd>
 
-      <dl class="qa">
-        <dt>What is Square Bidness Apparel?</dt>
-        <dd>Square Bidness Apparel is a Louisiana-based apparel brand founded on January 4, 2022. The company designs and releases products across casual, business-casual, tech-casual, and workwear categories, emphasizing clean presentation, durability, and practical wear.</dd>
+      <dt>What is the Square Bidness Tech Lab?</dt>
+      <dd>The Tech Lab documents real-world electrical, flooring, lighting, and infrastructure projects and serves as a training and testing environment for future modular, data-center-inspired systems.</dd>
 
-        <dt>Who is the founder?</dt>
-        <dd>Marcus Buckner is the founder and owner-operator of Square Bidness Apparel and the Square Bidness Tech Lab. He is a veteran-led operator who documents and performs much of the company’s electrical, construction, and infrastructure work firsthand.</dd>
+      <dt>Is Square Bidness seeking funding or partnerships?</dt>
+      <dd>Square Bidness selectively engages lenders and strategic partners for asset-backed growth, infrastructure expansion, and equipment acquisition. The company prioritizes long-term ownership, disciplined scaling, and transparent documentation.</dd>
 
-        <<dt>Where is the company based?</dt>
-        <dd> Square Bidness operates multiple Louisiana locations. HQ1 in Hammond serves as the primary headquarters and sits on approximately 1.07 acres operated by the company, including a completed 40×50 (approx. 2,000 sq ft) concrete slab reserved for Phase II Square Bidness Tech Lab expansion. HQ2 in Pineville functions as a secondary headquarters and active field lab. In addition, Square Bidness owns a separate one-acre property with an existing building, currently being cleared and prepared as a future operational asset.</dd>
+      <dt>Where can media find official assets?</dt>
+      <dd>Official assets are available at <a href="/media-kit/">squarebidness.com/media-kit</a> and via the Media Kit PDF.</dd>
 
+    </dl>
 
-        <dt>What categories does the brand operate in?</dt>
-        <dd>Square Bidness Apparel spans casual, business-casual, tech-casual, and workwear. Collections are released in limited runs rather than fast-fashion cycles.</dd>
+    <div class="hr"></div>
 
-        <dt>What is the Square Bidness Tech Lab?</dt>
-        <dd>The Square Bidness Tech Lab documents real-world electrical, flooring, lighting, and infrastructure projects. It also functions as a training and testing environment for future modular, data-center-inspired builds and operational systems.</dd>
+    <p class="muted">
+      <strong>Media Contact</strong><br>
+      Email: <a href="mailto:info@squarebidness.com">info@squarebidness.com</a><br>
+      Web: <a href="https://www.squarebidness.com/">squarebidness.com</a><br>
+      Lab: <a href="https://lab.squarebidness.com/">lab.squarebidness.com</a><br>
+      Instagram: @squarebidnesstm · TikTok: @squarebidnesstm · Facebook: Square Bidness Apparel
+    </p>
+  </section>
 
-        <dt>Is Square Bidness seeking funding or partnerships?</dt>
-        <dd>Square Bidness periodically engages lenders and strategic partners for asset-backed growth, infrastructure expansion, and equipment acquisition. The company prioritizes long-term ownership, disciplined scaling, and transparent documentation.</dd>
+  <p class="foot">Version: v2025.12.17 · Built for print + paste · Square Bidness Tech Lab</p>
 
-        <dt>Where can media find official assets?</dt>
-        <dd>Official assets and downloads are available at <a href="/media-kit/">squarebidness.com/media-kit/</a> and via the Media Kit PDF link.</dd>
-      </dl>
-
-      <div class="hr"></div>
-
-      <p class="muted">
-        <strong>Media Contact</strong><br>
-        Email: <a href="mailto:info@squarebidness.com">info@squarebidness.com</a><br>
-        Web: <a href="https://www.squarebidness.com/">squarebidness.com</a><br>
-        Web: <a href="https://www.lab.squarebidness.com/">lab.squarebidness.com</a><br>
-        Instagram: @squarebidnesstm · TikTok: @squarebidnesstm · Facebook: Square Bidness Apparel
-      </p>
-    </section>
-
-    <p class="foot">Version: v2025.12.17 · Built for print + paste · Square Bidness Tech Lab</p>
-  </main>
+</main>
 </body>
 </html>
