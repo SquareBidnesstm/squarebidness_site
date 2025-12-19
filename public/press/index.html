@@ -127,7 +127,7 @@
   <script defer src="/partials/loader.js"></script>
   <script defer src="/scripts/sw-register.js"></script>
 
-  <style>
+ <style>
 /* =========================
    PRESS PAGE — GOLDMASTER CSS
    Everything scoped to .press-page
@@ -188,28 +188,73 @@
   .press-page .sb-card__pad{padding:14px;}
   .press-page .press-list > li > a{padding:.9rem .95rem;}
 }
-  </style>
 
-  <style>
-  /* Marquis Who's Who Stamp (index-style, forced) */
-  .whoswho-stamp{
-    width:108px;height:108px;display:grid;place-items:center;text-align:center;line-height:1.05;
-    font-weight:900;letter-spacing:.02em;
-    background:
-      radial-gradient(140% 120% at 30% 20%, rgba(201,162,39,.35), transparent 55%),
-      radial-gradient(120% 120% at 70% 80%, rgba(201,162,39,.18), transparent 60%),
-      linear-gradient(180deg, rgba(201,162,39,.20), rgba(0,0,0,0)),
-      #0a0a0a;
-    border:1px solid rgba(201,162,39,.65);
-    box-shadow:0 10px 30px rgba(0,0,0,.45), 0 0 0 1px rgba(0,0,0,.35) inset;
-    border-radius:18px;color:#f5f5f5;user-select:none;
-  }
-  .whoswho-stamp .whoswho-year{
-    display:inline-block;margin-top:6px;padding:3px 10px;border-radius:999px;
-    font-weight:900;font-size:.86rem;background:#c9a227;color:#0b0b0b;box-shadow:0 6px 16px rgba(201,162,39,.28);
-  }
-  .whoswho-stamp:link,.whoswho-stamp:visited{color:#f5f5f5;}
-  </style>
+/* =========================
+   Marquis Who's Who Stamp (index-style, forced)
+========================= */
+.press-page .whoswho-stamp{
+  width:108px;height:108px;display:grid;place-items:center;text-align:center;line-height:1.05;
+  font-weight:900;letter-spacing:.02em;
+  background:
+    radial-gradient(140% 120% at 30% 20%, rgba(201,162,39,.35), transparent 55%),
+    radial-gradient(120% 120% at 70% 80%, rgba(201,162,39,.18), transparent 60%),
+    linear-gradient(180deg, rgba(201,162,39,.20), rgba(0,0,0,0)),
+    #0a0a0a;
+  border:1px solid rgba(201,162,39,.65);
+  box-shadow:0 10px 30px rgba(0,0,0,.45), 0 0 0 1px rgba(0,0,0,.35) inset;
+  border-radius:18px;color:#f5f5f5;user-select:none;
+}
+.press-page .whoswho-stamp .whoswho-year{
+  display:inline-block;margin-top:6px;padding:3px 10px;border-radius:999px;
+  font-weight:900;font-size:.86rem;background:#c9a227;color:#0b0b0b;box-shadow:0 6px 16px rgba(201,162,39,.28);
+}
+.press-page .whoswho-stamp:link,
+.press-page .whoswho-stamp:visited{color:#f5f5f5;}
+
+/* =========================
+   Press Quick Copy (Mission + Boilerplate)
+========================= */
+.press-page .press-copy-grid{
+  display:grid;
+  gap:12px;
+  margin-top:12px;
+}
+@media(min-width:900px){
+  .press-page .press-copy-grid{ grid-template-columns:1fr 1fr; }
+}
+.press-page .press-copy-card{
+  border:1px solid #1f1f1f;
+  background:#0b0b0b;
+  border-radius:14px;
+  padding:12px;
+}
+.press-page .press-copy-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:8px;
+}
+.press-page .press-copy-box{
+  width:100%;
+  min-height:88px;
+  padding:10px 10px;
+  border-radius:12px;
+  border:1px solid #2b2b2b;
+  background:#050505;
+  color:#f5f5f5;
+  font-size:.92rem;
+  line-height:1.45;
+  resize:vertical;
+  white-space:pre-wrap;
+}
+.press-page .press-copy-status{
+  margin-top:6px;
+  font-size:.85rem;
+  opacity:.8;
+}
+</style>
+
 </head>
 
 <body class="theme-dark press-page" id="top">
@@ -426,6 +471,53 @@
           </div>
         </section>
 
+        <!-- PRESS QUICK COPY (Mission + Boilerplate) -->
+<section class="section" aria-label="Press Quick Copy" id="press-quick-copy">
+  <div class="container">
+    <div class="sb-card">
+      <div class="sb-card__pad">
+        <p class="sb-kicker">Press Quick Copy</p>
+        <h2 class="sb-title">Mission + boilerplate (copy/paste)</h2>
+        <p class="sb-muted">
+          For editors and producers: one-click copy of the official mission statement and the standard footer boilerplate.
+        </p>
+
+        <div class="press-copy-grid">
+          <!-- Mission -->
+          <div class="press-copy-card">
+            <div class="press-copy-top">
+              <strong>Mission Statement</strong>
+              <button class="btn btn--ghost press-copy-btn" type="button"
+                onclick="sbCopyText('sb_mission','sb_mission_status')">Copy</button>
+            </div>
+
+            <textarea class="press-copy-box" id="sb_mission" readonly>Principles. Morals. Business Done Right.</textarea>
+            <div class="press-copy-status" id="sb_mission_status" aria-live="polite"></div>
+          </div>
+
+          <!-- Boilerplate -->
+          <div class="press-copy-card">
+            <div class="press-copy-top">
+              <strong>One-Sentence Boilerplate</strong>
+              <button class="btn btn--ghost press-copy-btn" type="button"
+                onclick="sbCopyText('sb_boilerplate','sb_boilerplate_status')">Copy</button>
+            </div>
+
+            <textarea class="press-copy-box" id="sb_boilerplate" readonly>Square Bidness Apparel is a Louisiana-based apparel brand founded on January 4, 2022 by veteran operator Marcus Buckner, building across casual, business-casual, tech-casual, and workwear categories with a focus on professionalism, durability, and real-world use.</textarea>
+            <div class="press-copy-status" id="sb_boilerplate_status" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <div class="sb-actions" style="margin-top:12px;">
+          <a class="btn btn--gold" href="/press/paste-sheet/">Open Full Paste Sheet</a>
+          <a class="btn btn--ghost" href="/docs/square_bidness_media_kit_2025.pdf" target="_blank" rel="noopener">Media Kit (PDF)</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
         <!-- Recognition -->
         <section class="section section--band" aria-label="Recognition">
           <div class="container">
@@ -477,5 +569,25 @@
       } catch(_) {}
     });
   </script>
+  <script>
+  function sbCopyText(textareaId, statusId){
+    const el = document.getElementById(textareaId);
+    const st = document.getElementById(statusId);
+    if(!el) return;
+
+    el.focus();
+    el.select();
+    el.setSelectionRange(0, 999999);
+
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch(e) {}
+
+    if(st){
+      st.textContent = ok ? "Copied." : "Copy failed — select and copy manually.";
+      setTimeout(()=>{ st.textContent = ""; }, 1200);
+    }
+  }
+</script>
+
 </body>
 </html>
