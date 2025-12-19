@@ -1,79 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- shared head bits -->
+  <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com">
   <link rel="preconnect" href="https://www.google-analytics.com">
   <script defer src="/scripts/ga.js"></script>
 
+  <!-- Basics -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Search — Square Bidness</title>
   <link rel="canonical" href="https://www.squarebidness.com/search/" />
   <meta name="description" content="Search Square Bidness products and posts." />
+
+  <!-- Make this utility-only -->
+  <meta name="robots" content="noindex,nofollow">
+
+  <!-- Theme / Icons -->
   <meta name="theme-color" content="#000000" />
   <link rel="icon" href="/favicon.ico" sizes="any" />
-  <link rel="stylesheet" href="/styles/style.css" />
-  <meta name="robots" content="noindex,nofollow">
   <link rel="manifest" href="/site.webmanifest">
 
-
-  <!-- JSON-LD: WebSite + SearchAction -->
-  <script type="application/ld+json">
-  {
-    "@context":"https://schema.org",
-    "@type":"WebSite",
-    "@id":"https://www.squarebidness.com/#website",
-    "url":"https://www.squarebidness.com/",
-    "name":"Square Bidness",
-    "potentialAction":{
-      "@type":"SearchAction",
-      "target":"https://www.squarebidness.com/search/?q={search_term_string}",
-      "query-input":"required name=search_term_string"
-    }
-  }
-  </script>
+  <!-- Global CSS -->
+  <link rel="stylesheet" href="/styles/style.css" />
 
   <style>
     .search-wrap{max-width:900px;margin:1.5rem auto;padding:0 16px}
     .search-bar{display:flex;gap:.5rem}
-    .search-bar input{flex:1;padding:.7rem .9rem;border-radius:8px;border:1px solid #2a2a2a;background:#0f0f0f;color:#eee}
-    .search-bar button{padding:.7rem 1rem;border-radius:8px;border:1px solid #444;background:#c9a227;color:#111;font-weight:700}
-    .results{margin-top:1rem;display:grid;gap:.75rem}
-    .result{border:1px solid #1f1f1f;border-radius:12px;padding:12px;background:#0e0e0e}
-    .result h3{margin:.2rem 0}
-    .result small{opacity:.8}
-    .pill{display:inline-block;border:1px solid #333;border-radius:999px;padding:.15rem .5rem;font-size:.75rem;margin-right:.35rem;opacity:.9}
+    .search-bar input{flex:1;padding:.7rem .9rem;border-radius:10px;border:1px solid #2a2a2a;background:#0f0f0f;color:#eee}
+    .search-bar button{padding:.7rem 1rem;border-radius:10px;border:1px solid #444;background:#c9a227;color:#111;font-weight:800}
+
     .muted{opacity:.8}
+
+    .results{margin-top:1rem;display:grid;gap:.75rem}
+    .result{border:1px solid #1f1f1f;border-radius:14px;padding:12px;background:#0e0e0e}
+    .result h3{margin:.25rem 0 .15rem}
+    .result p{margin:.25rem 0 0}
+    .result small{opacity:.8}
+
+    .pill{display:inline-block;border:1px solid #333;border-radius:999px;padding:.15rem .55rem;font-size:.75rem;margin-right:.35rem;opacity:.95}
+
+    .group-title{margin:1.2rem 0 .35rem;font-size:.9rem;letter-spacing:.12em;text-transform:uppercase;opacity:.75}
+    .results-grid{display:grid;gap:.75rem}
+
+    .empty{border:1px dashed #2a2a2a;border-radius:14px;padding:14px;background:#0b0b0b}
     .site-bottom {margin:2rem auto 3rem;max-width:900px;padding:0 16px;text-align:center;opacity:.8}
-    .site-bottom a{color:#c9a227}
+    .site-bottom a{color:#c9a227;text-decoration:none}
+    .site-bottom a:hover{text-decoration:underline}
   </style>
 </head>
+
 <body class="theme-dark">
+  <!-- NAV -->
   <div id="nav-placeholder"></div>
 
   <main class="search-wrap">
-    <h1>Search</h1>
-    <form class="search-bar" id="search-form" role="search">
+    <h1 style="margin:.25rem 0 .8rem;">Search</h1>
+
+    <form class="search-bar" id="search-form" role="search" aria-label="Site search">
       <input id="search-input" name="q" type="search" placeholder="Search products, posts…" autocomplete="off" />
       <button type="submit">Search</button>
     </form>
 
-    <div id="search-stats" class="muted" style="margin-top:.5rem"></div>
+    <div id="search-stats" class="muted" style="margin-top:.55rem"></div>
     <section id="search-results" class="results" aria-live="polite"></section>
   </main>
 
+  <!-- FOOTER -->
   <div id="footer-placeholder"></div>
 
   <div class="site-bottom">
-    © 2025 Square Bidness Tech Lab — <a href="/linkme/">Link Me</a>
+    © <span id="y"></span> Square Bidness Tech Lab — <a href="/linkme/">Link Me</a>
   </div>
 
   <script>
-    // Load site chrome
+    // Year
+    (function(){ var y=document.getElementById('y'); if(y) y.textContent = new Date().getFullYear(); })();
+
+    // Inject NAV + FOOTER (same pattern you're using elsewhere)
     document.addEventListener("DOMContentLoaded", async () => {
-      try { document.getElementById("nav-placeholder").innerHTML = await (await fetch("/nav/")).text(); } catch {}
-      try { document.getElementById("footer-placeholder").innerHTML = await (await fetch("/footer/")).text(); } catch {}
+      const bust = `?v=${Date.now()}`;
+
+      async function injectPartial(url, targetId) {
+        try{
+          const res = await fetch(url + bust, { credentials:'same-origin', cache:'no-store' });
+          if(!res.ok) return null;
+          const html = await res.text();
+          const el = document.getElementById(targetId);
+          if(!el) return null;
+          el.innerHTML = html;
+          return el;
+        } catch { return null; }
+      }
+
+      await injectPartial('/nav/index.html', 'nav-placeholder');
+      await injectPartial('/footer/index.html', 'footer-placeholder');
     });
 
     // ===== DOM =====
@@ -86,7 +107,6 @@
     const norm  = s => (s||'').toString().toLowerCase();
     const match = (hay, needle) => norm(hay).includes(norm(needle));
     const esc   = s => (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-
     function pill(txt){ return `<span class="pill">${esc(txt)}</span>`; }
     function money(n){ try { return `$${Number(n).toFixed(2)}` } catch { return '' } }
 
@@ -95,12 +115,12 @@
       try {
         const r = await fetch('/products.json', { cache: 'no-store' });
         if (!r.ok) return {};
-        return await r.json(); // { sku: { name, desc, price, url?, path? } }
+        return await r.json(); // { key: { name, desc, price, url, sku } }
       } catch { return {}; }
     }
 
     async function loadBlog() {
-      // Fallback minimal inline list in case /blog/index.json is missing
+      // Minimal fallback if /blog/index.json isn't there
       const FALLBACK = [
         {
           title: "Innovation Fest 2025: From Louisiana to NYC",
@@ -118,7 +138,7 @@
 
     // ===== Cards =====
     function productCard(p) {
-      const url   = p.url || p.path || (p.sku ? `/product-${p.sku.replace(/^sb-?/,'')}.html` : '#');
+      const url   = p.url || p.path || '#';
       const price = (p.price != null) ? money(p.price) : '';
       return `
         <article class="result">
@@ -126,18 +146,19 @@
           <h3><a href="${esc(url)}">${esc(p.name || p.title || p.sku || 'Product')}</a></h3>
           ${price ? `<div><strong>${esc(price)}</strong></div>` : ``}
           ${p.desc ? `<p class="muted">${esc(p.desc)}</p>` : ``}
-          ${p.sku ? `<small class="muted">SKU: ${esc(p.sku)}</small></small>` : ``}
+          ${p.sku ? `<small class="muted">SKU: ${esc(p.sku)}</small>` : ``}
         </article>
       `;
     }
 
     function postCard(post) {
+      const d = post.date ? new Date(post.date) : null;
       return `
         <article class="result">
           ${pill('Post')}
           <h3><a href="${esc(post.url || '#')}">${esc(post.title || 'Post')}</a></h3>
           ${post.desc ? `<p class="muted">${esc(post.desc)}</p>` : ``}
-          ${post.date ? `<small class="muted">${new Date(post.date).toLocaleDateString()}</small>` : ``}
+          ${d && !isNaN(d) ? `<small class="muted">${d.toLocaleDateString()}</small>` : ``}
         </article>
       `;
     }
@@ -168,24 +189,28 @@
       $stats.textContent = total ? `${total} result${total===1?'':'s'} for “${q}”` : `No results for “${q}”`;
 
       if (!total) {
-        $results.innerHTML = `<div class="empty"><p>No results. Try “VSOP”, “jacket”, “shorts”, or “innovation”.</p></div>`;
+        $results.innerHTML = `<div class="empty"><p>No results. Try “VSOP”, “jacket”, “shorts”, “Supima”.</p></div>`;
         return;
       }
 
       const blocks = [];
       if (productHits.length) {
         blocks.push(`
-          <h4 class="group-title">Products (${productHits.length})</h4>
-          <div class="results-grid">
-            ${productHits.map(productCard).join('')}
+          <div>
+            <div class="group-title">Products (${productHits.length})</div>
+            <div class="results-grid">
+              ${productHits.map(productCard).join('')}
+            </div>
           </div>
         `);
       }
       if (postHits.length) {
         blocks.push(`
-          <h4 class="group-title">Posts (${postHits.length})</h4>
-          <div class="results-grid">
-            ${postHits.map(postCard).join('')}
+          <div>
+            <div class="group-title">Posts (${postHits.length})</div>
+            <div class="results-grid">
+              ${postHits.map(postCard).join('')}
+            </div>
           </div>
         `);
       }
@@ -200,7 +225,8 @@
     }
     function setQueryInURL(q) {
       const u = new URL(location.href);
-      if (q) { u.searchParams.set('q', q); } else { u.searchParams.delete('q'); }
+      if (q) u.searchParams.set('q', q);
+      else u.searchParams.delete('q');
       history.replaceState(null, '', u.toString());
     }
 
