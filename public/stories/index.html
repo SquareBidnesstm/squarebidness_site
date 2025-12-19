@@ -14,6 +14,16 @@
   <link rel="preconnect" href="https://www.google-analytics.com">
   <script defer src="/scripts/ga.js"></script>
 
+  <!-- ✅ Preload LCP image (first story card) -->
+  <link
+    rel="preload"
+    as="image"
+    href="/blog/assets/innovation-fest-hero_1200.webp"
+    imagesrcset="/blog/assets/innovation-fest-hero_800.webp 800w, /blog/assets/innovation-fest-hero_1200.webp 1200w"
+    imagesizes="(max-width: 768px) 100vw, 480px"
+    fetchpriority="high"
+  />
+
   <!-- Brand / Icons / PWA -->
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="apple-touch-icon" href="/icon_180.png" />
@@ -103,14 +113,13 @@
       background:#000;
     }
 
-    /* Reserve space to prevent CLS */
+    /* CLS guard + consistent crop */
     .story-card__media picture,
     .story-card__media img{
       display:block;
       width:100%;
       height:auto;
     }
-
     .story-card__media img{
       object-fit:cover;
     }
@@ -212,7 +221,7 @@
   <!-- NAV SLOT -->
   <div id="nav-placeholder"></div>
 
-  <main class="section">
+  <main class="section" id="main">
     <div class="container">
 
       <!-- HERO -->
@@ -228,7 +237,7 @@
       <!-- STORIES GRID -->
       <section class="stories-grid" aria-label="Square Bidness stories">
 
-        <!-- Innovation Fest -->
+        <!-- Innovation Fest (LCP) -->
         <article class="story-card">
           <div class="story-card__media">
             <picture>
@@ -244,7 +253,8 @@
                 width="1200"
                 height="800"
                 alt="Innovation Fest 2025 — Louisiana to NYC trip"
-                loading="eager" fetchpriority="high"
+                loading="eager"
+                fetchpriority="high"
                 decoding="async"
                 style="width:100%;height:auto;"
               />
@@ -307,7 +317,7 @@
           </div>
         </article>
 
-        <!-- YouTube Interview (external image cannot be WebP unless you host it) -->
+        <!-- YouTube Interview (external image) -->
         <article class="story-card">
           <div class="story-card__media">
             <img
@@ -344,7 +354,7 @@
             <picture>
               <source
                 type="image/webp"
-                srcset="/courageaux/assets/amari_hero_1200x630.webp 1200w, /courageaux/assets/amari_hero_800x420.webp 800w"
+                srcset="/courageaux/assets/amari_hero_800x420.webp 800w, /courageaux/assets/amari_hero_1200x630.webp 1200w"
                 sizes="(max-width: 768px) 100vw, 480px"
               />
               <img
