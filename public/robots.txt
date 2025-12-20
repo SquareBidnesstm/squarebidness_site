@@ -1,25 +1,28 @@
-# BEGIN Cloudflare Managed Content
-
 User-agent: *
-Content-signal: search=yes,ai-train=no
 Allow: /
 
-# Block utility / non-indexable pages
+# --- Non-index utility flows ---
 Disallow: /cart/
 Disallow: /checkout/
 Disallow: /search/
 Disallow: /model-search/
-Disallow: /docs/
 Disallow: /thank-you/
 Disallow: /success/
 Disallow: /cancel/
 
-# Block injected partials & internal includes
+# --- Internal partials / includes ---
 Disallow: /nav/
 Disallow: /footer/
 Disallow: /partials/
+Disallow: /includes/
 
-# Block AI / training bots
+# --- Docs (PDFs can still be accessed directly, but not indexed) ---
+Disallow: /docs/
+
+# --- Cloudflare / AI preference signal ---
+Content-signal: search=yes,ai-train=no
+
+# --- Block AI/training bots explicitly ---
 User-agent: Amazonbot
 Disallow: /
 
@@ -45,5 +48,4 @@ User-agent: meta-externalagent
 Disallow: /
 
 Sitemap: https://www.squarebidness.com/sitemap.xml
-
-# END Cloudflare Managed Content
+Host: https://www.squarebidness.com/
