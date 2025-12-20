@@ -9,11 +9,11 @@
   <link rel="canonical" href="https://www.squarebidness.com/press/" />
 
   <!-- Build stamp -->
-  <meta name="sb:build" content="v20251213-goldmaster" />
+  <meta name="sb:build" content="v20251219-press-sweep" />
 
   <!-- Perf -->
-  <link rel="preconnect" href="https://www.googletagmanager.com">
-  <link rel="preconnect" href="https://www.google-analytics.com">
+  <link rel="preconnect" href="https://www.googletagmanager.com" />
+  <link rel="preconnect" href="https://www.google-analytics.com" />
 
   <!-- Global CSS -->
   <link rel="stylesheet" href="/styles/style.css" />
@@ -23,6 +23,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/icon-180.png" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <meta name="theme-color" content="#000000" />
+  <meta name="color-scheme" content="dark light" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
@@ -81,8 +82,8 @@
         ]
       },
       {
-        "@type":"PressPage",
-        "@id":"https://www.squarebidness.com/press/#press",
+        "@type":"WebPage",
+        "@id":"https://www.squarebidness.com/press/#page",
         "url":"https://www.squarebidness.com/press/",
         "name":"Press — Square Bidness",
         "description":"Press resources, brand story, media kit, and media contact for Square Bidness.",
@@ -120,148 +121,101 @@
   }
   </script>
 
-  <!-- Site scripts -->
+  <!-- Site scripts (NO DUPES) -->
   <script defer src="/scripts/ga.js"></script>
   <script defer src="/scripts/sb-cart.js"></script>
   <script defer src="/scripts/global.js"></script>
-  <script defer src="/partials/loader.js"></script>
   <script defer src="/scripts/sw-register.js"></script>
 
- <style>
-/* =========================
-   PRESS PAGE — GOLDMASTER CSS
-   Everything scoped to .press-page
-========================= */
+  <style>
+    /* CLS reserve for injected nav */
+    #nav-placeholder{min-height:72px;}
 
-/* Base headings / hero */
-.press-page .press-hero{margin:0 0 1.25rem;}
-.press-page .press-hero h1{margin:0 0 .35rem;font-size:2rem;font-weight:900;letter-spacing:-.02em;}
-.press-page .press-hero .lead{margin:0;color:#a1a1aa;max-width:75ch;line-height:1.5;}
+    /* =========================
+       PRESS PAGE — GOLDMASTER CSS
+       Everything scoped to .press-page
+    ========================= */
 
-/* Grid at top (Press Contact + Quick Links) */
-.press-page .press-grid{display:grid;gap:1rem;margin:1rem 0 1.25rem;}
-@media(min-width:900px){.press-page .press-grid{grid-template-columns:1fr 1fr;align-items:stretch;}}
+    .press-page .press-hero{margin:0 0 1.25rem;}
+    .press-page .press-hero h1{margin:0 0 .35rem;font-size:2rem;font-weight:900;letter-spacing:-.02em;}
+    .press-page .press-hero .lead{margin:0;color:#a1a1aa;max-width:75ch;line-height:1.5;}
 
-/* Card system */
-.press-page .sb-card{background:#0e0e0e;border:1px solid #1f1f1f;border-radius:14px;overflow:hidden;}
-.press-page .sb-card__pad{padding:16px;}
-.press-page .sb-kicker{opacity:.8;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;margin:0 0 .35rem;}
-.press-page .sb-title{margin:.1rem 0 .35rem;font-size:1.25rem;font-weight:900;letter-spacing:-.01em;}
-.press-page .sb-muted{margin:0;color:#a1a1aa;line-height:1.55;}
+    .press-page .press-grid{display:grid;gap:1rem;margin:1rem 0 1.25rem;}
+    @media(min-width:900px){.press-page .press-grid{grid-template-columns:1fr 1fr;align-items:stretch;}}
 
-/* Buttons (scoped) */
-.press-page .btn{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid transparent;font-weight:800;text-decoration:none;cursor:pointer;gap:.5rem;}
-.press-page .btn--gold{background:#c9a227;color:#111;border-color:#c9a227;padding:.55rem .95rem;}
-.press-page .btn--ghost{background:#111;border:1px solid #2a2a2a;color:#fff;padding:.55rem .95rem;}
-.press-page .btn:focus-visible{outline:2px solid rgba(201,162,39,.65);outline-offset:3px;}
+    .press-page .sb-card{background:#0e0e0e;border:1px solid #1f1f1f;border-radius:14px;overflow:hidden;}
+    .press-page .sb-card__pad{padding:16px;}
+    .press-page .sb-kicker{opacity:.8;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;margin:0 0 .35rem;}
+    .press-page .sb-title{margin:.1rem 0 .35rem;font-size:1.25rem;font-weight:900;letter-spacing:-.01em;}
+    .press-page .sb-muted{margin:0;color:#a1a1aa;line-height:1.55;}
 
-/* Actions row */
-.press-page .sb-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;}
+    .press-page .btn{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid transparent;font-weight:800;text-decoration:none;cursor:pointer;gap:.5rem;}
+    .press-page .btn--gold{background:#c9a227;color:#111;border-color:#c9a227;padding:.55rem .95rem;}
+    .press-page .btn--ghost{background:#111;border:1px solid #2a2a2a;color:#fff;padding:.55rem .95rem;}
+    .press-page .btn:focus-visible{outline:2px solid rgba(201,162,39,.65);outline-offset:3px;}
 
-/* Press list cards */
-.press-page .press-list{list-style:none;padding:0;margin:0;display:grid;gap:1rem;}
-.press-page .press-list > li > a{
-  display:block;background:#0e0e0e;border:1px solid #1f1f1f;border-radius:12px;
-  padding:.95rem 1rem;color:#fff;text-decoration:none;font-weight:800;line-height:1.35;
-}
-.press-page .press-list > li > a span{display:block;font-size:.8rem;color:#a1a1aa;font-weight:500;margin-top:.35rem;line-height:1.45;}
-.press-page .press-list > li > a:hover{background:#151515;border-color:#2a2a2a;}
-.press-page .press-list > li > a:focus-visible{outline:2px solid rgba(201,162,39,.65);outline-offset:3px;}
+    .press-page .sb-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;}
 
-/* Featured cards */
-.press-page .feature-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;}
-.press-page .feature-card__img{position:relative;display:block;background:#000;}
-.press-page .feature-card__img img{width:100%;height:auto;display:block;object-fit:cover;}
+    .press-page .press-list{list-style:none;padding:0;margin:0;display:grid;gap:1rem;}
+    .press-page .press-list > li > a{
+      display:block;background:#0e0e0e;border:1px solid #1f1f1f;border-radius:12px;
+      padding:.95rem 1rem;color:#fff;text-decoration:none;font-weight:800;line-height:1.35;
+    }
+    .press-page .press-list > li > a span{display:block;font-size:.8rem;color:#a1a1aa;font-weight:500;margin-top:.35rem;line-height:1.45;}
+    .press-page .press-list > li > a:hover{background:#151515;border-color:#2a2a2a;}
+    .press-page .press-list > li > a:focus-visible{outline:2px solid rgba(201,162,39,.65);outline-offset:3px;}
 
-/* Badge */
-.press-page .badge{
-  position:absolute;left:.75rem;bottom:.75rem;
-  background:rgba(201,162,39,.12);border:1px solid rgba(201,162,39,.5);
-  color:#fff;border-radius:999px;padding:.25rem .6rem;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;
-}
+    .press-page .feature-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;}
+    .press-page .feature-card__img{position:relative;display:block;background:#000;}
+    .press-page .feature-card__img img{width:100%;height:auto;display:block;object-fit:cover;}
 
-/* Meta line */
-.press-page .meta-line{display:flex;flex-wrap:wrap;gap:.45rem;align-items:center;color:#a1a1aa;font-size:.85rem;margin:0 0 .4rem;}
+    .press-page .badge{
+      position:absolute;left:.75rem;bottom:.75rem;
+      background:rgba(201,162,39,.12);border:1px solid rgba(201,162,39,.5);
+      color:#fff;border-radius:999px;padding:.25rem .6rem;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;
+    }
 
-/* Mobile tightening */
-@media (max-width:520px){
-  .press-page .sb-card__pad{padding:14px;}
-  .press-page .press-list > li > a{padding:.9rem .95rem;}
-}
+    .press-page .meta-line{display:flex;flex-wrap:wrap;gap:.45rem;align-items:center;color:#a1a1aa;font-size:.85rem;margin:0 0 .4rem;}
 
-/* =========================
-   Marquis Who's Who Stamp (index-style, forced)
-========================= */
-.press-page .whoswho-stamp{
-  width:108px;height:108px;display:grid;place-items:center;text-align:center;line-height:1.05;
-  font-weight:900;letter-spacing:.02em;
-  background:
-    radial-gradient(140% 120% at 30% 20%, rgba(201,162,39,.35), transparent 55%),
-    radial-gradient(120% 120% at 70% 80%, rgba(201,162,39,.18), transparent 60%),
-    linear-gradient(180deg, rgba(201,162,39,.20), rgba(0,0,0,0)),
-    #0a0a0a;
-  border:1px solid rgba(201,162,39,.65);
-  box-shadow:0 10px 30px rgba(0,0,0,.45), 0 0 0 1px rgba(0,0,0,.35) inset;
-  border-radius:18px;color:#f5f5f5;user-select:none;
-}
-.press-page .whoswho-stamp .whoswho-year{
-  display:inline-block;margin-top:6px;padding:3px 10px;border-radius:999px;
-  font-weight:900;font-size:.86rem;background:#c9a227;color:#0b0b0b;box-shadow:0 6px 16px rgba(201,162,39,.28);
-}
-.press-page .whoswho-stamp:link,
-.press-page .whoswho-stamp:visited{color:#f5f5f5;}
+    @media (max-width:520px){
+      .press-page .sb-card__pad{padding:14px;}
+      .press-page .press-list > li > a{padding:.9rem .95rem;}
+    }
 
-/* =========================
-   Press Quick Copy (Mission + Boilerplate)
-========================= */
-.press-page .press-copy-grid{
-  display:grid;
-  gap:12px;
-  margin-top:12px;
-}
-@media(min-width:900px){
-  .press-page .press-copy-grid{ grid-template-columns:1fr 1fr; }
-}
-.press-page .press-copy-card{
-  border:1px solid #1f1f1f;
-  background:#0b0b0b;
-  border-radius:14px;
-  padding:12px;
-}
-.press-page .press-copy-top{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  margin-bottom:8px;
-}
-.press-page .press-copy-box{
-  width:100%;
-  min-height:88px;
-  padding:10px 10px;
-  border-radius:12px;
-  border:1px solid #2b2b2b;
-  background:#050505;
-  color:#f5f5f5;
-  font-size:.92rem;
-  line-height:1.45;
-  resize:vertical;
-  white-space:pre-wrap;
-}
-.press-page .press-copy-status{
-  margin-top:6px;
-  font-size:.85rem;
-  opacity:.8;
-}
-</style>
+    .press-page .whoswho-stamp{
+      width:108px;height:108px;display:grid;place-items:center;text-align:center;line-height:1.05;
+      font-weight:900;letter-spacing:.02em;
+      background:
+        radial-gradient(140% 120% at 30% 20%, rgba(201,162,39,.35), transparent 55%),
+        radial-gradient(120% 120% at 70% 80%, rgba(201,162,39,.18), transparent 60%),
+        linear-gradient(180deg, rgba(201,162,39,.20), rgba(0,0,0,0)),
+        #0a0a0a;
+      border:1px solid rgba(201,162,39,.65);
+      box-shadow:0 10px 30px rgba(0,0,0,.45), 0 0 0 1px rgba(0,0,0,.35) inset;
+      border-radius:18px;color:#f5f5f5;user-select:none;
+    }
+    .press-page .whoswho-stamp .whoswho-year{
+      display:inline-block;margin-top:6px;padding:3px 10px;border-radius:999px;
+      font-weight:900;font-size:.86rem;background:#c9a227;color:#0b0b0b;box-shadow:0 6px 16px rgba(201,162,39,.28);
+    }
 
+    .press-page .press-copy-grid{display:grid;gap:12px;margin-top:12px;}
+    @media(min-width:900px){ .press-page .press-copy-grid{ grid-template-columns:1fr 1fr; } }
+    .press-page .press-copy-card{border:1px solid #1f1f1f;background:#0b0b0b;border-radius:14px;padding:12px;}
+    .press-page .press-copy-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;}
+    .press-page .press-copy-box{
+      width:100%;min-height:88px;padding:10px 10px;border-radius:12px;
+      border:1px solid #2b2b2b;background:#050505;color:#f5f5f5;
+      font-size:.92rem;line-height:1.45;resize:vertical;white-space:pre-wrap;
+    }
+    .press-page .press-copy-status{margin-top:6px;font-size:.85rem;opacity:.8;}
+  </style>
 </head>
 
 <body class="theme-dark press-page" id="top">
-  <!-- NAV injection target -->
-  <div id="site-header"></div>
+  <div id="nav-placeholder" aria-busy="true"></div>
 
-  <main>
+  <main role="main">
     <section class="section">
       <div class="container">
 
@@ -306,7 +260,6 @@
         </section>
 
         <div class="press-grid">
-          <!-- Brand Facts -->
           <section class="sb-card" aria-label="Brand Facts">
             <div class="sb-card__pad">
               <p class="sb-kicker">Brand Facts</p>
@@ -349,7 +302,6 @@
             </div>
           </section>
 
-          <!-- Quick Links -->
           <section class="sb-card" aria-label="Press Quick Links">
             <div class="sb-card__pad">
               <p class="sb-kicker">Quick Links</p>
@@ -377,7 +329,6 @@
           </section>
         </div>
 
-        <!-- Press list -->
         <section class="section section--band" style="padding:1rem 0 1.25rem;">
           <div class="container" style="padding:0;">
             <h2 class="section__title" style="margin:0 0 .5rem;">Articles &amp; Features</h2>
@@ -404,12 +355,10 @@
           </div>
         </section>
 
-        <!-- Featured cards -->
         <section aria-label="Featured Press" style="margin-top:1.25rem;">
           <h2 class="section__title" style="margin:0 0 .6rem;">Featured</h2>
 
           <div class="feature-cards">
-            <!-- YouTube Interview -->
             <article class="sb-card">
               <a class="feature-card__img" href="/press/youtube-interview/" aria-label="Watch Marcus Buckner Interview">
                 <img
@@ -424,7 +373,7 @@
                   alt="Marcus Buckner Interview — YouTube thumbnail"
                   loading="lazy"
                   decoding="async"
-                  referrerpolicy="no-referrer">
+                  referrerpolicy="no-referrer" />
                 <span class="badge">Interview</span>
               </a>
               <div class="sb-card__pad">
@@ -442,7 +391,6 @@
               </div>
             </article>
 
-            <!-- Founder -->
             <article class="sb-card">
               <a class="feature-card__img" href="/founder/" aria-label="Read Founder Bio">
                 <img
@@ -451,7 +399,7 @@
                   height="630"
                   alt="Marcus Buckner — Founder of Square Bidness"
                   loading="lazy"
-                  decoding="async">
+                  decoding="async" />
                 <span class="badge">Founder</span>
               </a>
               <div class="sb-card__pad">
@@ -471,54 +419,45 @@
           </div>
         </section>
 
-        <!-- PRESS QUICK COPY (Mission + Boilerplate) -->
-<section class="section" aria-label="Press Quick Copy" id="press-quick-copy">
-  <div class="container">
-    <div class="sb-card">
-      <div class="sb-card__pad">
-        <p class="sb-kicker">Press Quick Copy</p>
-        <h2 class="sb-title">Mission + boilerplate (copy/paste)</h2>
-        <p class="sb-muted">
-          For editors and producers: one-click copy of the official mission statement and the standard footer boilerplate.
-        </p>
+        <section class="section" aria-label="Press Quick Copy" id="press-quick-copy">
+          <div class="container">
+            <div class="sb-card">
+              <div class="sb-card__pad">
+                <p class="sb-kicker">Press Quick Copy</p>
+                <h2 class="sb-title">Mission + boilerplate (copy/paste)</h2>
+                <p class="sb-muted">
+                  For editors and producers: one-click copy of the official mission statement and the standard footer boilerplate.
+                </p>
 
-        <div class="press-copy-grid">
-          <!-- Mission -->
-          <div class="press-copy-card">
-            <div class="press-copy-top">
-              <strong>Mission Statement</strong>
-              <button class="btn btn--ghost press-copy-btn" type="button"
-                onclick="sbCopyText('sb_mission','sb_mission_status')">Copy</button>
+                <div class="press-copy-grid">
+                  <div class="press-copy-card">
+                    <div class="press-copy-top">
+                      <strong>Mission Statement</strong>
+                      <button class="btn btn--ghost" type="button" onclick="sbCopyText('sb_mission','sb_mission_status')">Copy</button>
+                    </div>
+                    <textarea class="press-copy-box" id="sb_mission" readonly>Principles. Morals. Business Done Right.</textarea>
+                    <div class="press-copy-status" id="sb_mission_status" aria-live="polite"></div>
+                  </div>
+
+                  <div class="press-copy-card">
+                    <div class="press-copy-top">
+                      <strong>One-Sentence Boilerplate</strong>
+                      <button class="btn btn--ghost" type="button" onclick="sbCopyText('sb_boilerplate','sb_boilerplate_status')">Copy</button>
+                    </div>
+                    <textarea class="press-copy-box" id="sb_boilerplate" readonly>Square Bidness Apparel is a Louisiana-based apparel brand founded on January 4, 2022 by veteran operator Marcus Buckner, building across casual, business-casual, tech-casual, and workwear categories with a focus on professionalism, durability, and real-world use.</textarea>
+                    <div class="press-copy-status" id="sb_boilerplate_status" aria-live="polite"></div>
+                  </div>
+                </div>
+
+                <div class="sb-actions" style="margin-top:12px;">
+                  <a class="btn btn--gold" href="/press/paste-sheet/">Open Full Paste Sheet</a>
+                  <a class="btn btn--ghost" href="/docs/square_bidness_media_kit_2025.pdf" target="_blank" rel="noopener">Media Kit (PDF)</a>
+                </div>
+              </div>
             </div>
-
-            <textarea class="press-copy-box" id="sb_mission" readonly>Principles. Morals. Business Done Right.</textarea>
-            <div class="press-copy-status" id="sb_mission_status" aria-live="polite"></div>
           </div>
+        </section>
 
-          <!-- Boilerplate -->
-          <div class="press-copy-card">
-            <div class="press-copy-top">
-              <strong>One-Sentence Boilerplate</strong>
-              <button class="btn btn--ghost press-copy-btn" type="button"
-                onclick="sbCopyText('sb_boilerplate','sb_boilerplate_status')">Copy</button>
-            </div>
-
-            <textarea class="press-copy-box" id="sb_boilerplate" readonly>Square Bidness Apparel is a Louisiana-based apparel brand founded on January 4, 2022 by veteran operator Marcus Buckner, building across casual, business-casual, tech-casual, and workwear categories with a focus on professionalism, durability, and real-world use.</textarea>
-            <div class="press-copy-status" id="sb_boilerplate_status" aria-live="polite"></div>
-          </div>
-        </div>
-
-        <div class="sb-actions" style="margin-top:12px;">
-          <a class="btn btn--gold" href="/press/paste-sheet/">Open Full Paste Sheet</a>
-          <a class="btn btn--ghost" href="/docs/square_bidness_media_kit_2025.pdf" target="_blank" rel="noopener">Media Kit (PDF)</a>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-
-        <!-- Recognition -->
         <section class="section section--band" aria-label="Recognition">
           <div class="container">
             <p class="section__lead" style="max-width:70ch;">
@@ -540,7 +479,6 @@
           </div>
         </section>
 
-        <!-- Contact line -->
         <section class="section section--band" aria-label="Media / Collab / Speaking" style="padding:1rem 0;">
           <div class="container" style="padding:0;">
             <h2 class="section__title" style="margin:0 0 .35rem;">Media / Collab / Speaking</h2>
@@ -554,10 +492,47 @@
     </section>
   </main>
 
-  <!-- FOOTER injection target -->
-  <div id="site-footer"></div>
+  <div id="footer-placeholder" aria-busy="true"></div>
 
-  <!-- Optional: VSOP click tracking -->
+  <script>
+    function sbCopyText(textareaId, statusId){
+      const el = document.getElementById(textareaId);
+      const st = document.getElementById(statusId);
+      if(!el) return;
+
+      el.focus();
+      el.select();
+      el.setSelectionRange(0, 999999);
+
+      let ok = false;
+      try { ok = document.execCommand('copy'); } catch(e) {}
+
+      if(st){
+        st.textContent = ok ? "Copied." : "Copy failed — select and copy manually.";
+        setTimeout(()=>{ st.textContent = ""; }, 1200);
+      }
+    }
+  </script>
+
+  <script>
+  (async () => {
+    const bust = `?v=${Date.now()}`;
+    async function injectPartial(url, targetId) {
+      try {
+        const res = await fetch(url + bust, { cache:'no-store', credentials:'same-origin' });
+        if (!res.ok) return;
+        const html = await res.text();
+        const el = document.getElementById(targetId);
+        if (!el) return;
+        el.innerHTML = html;
+        el.setAttribute('aria-busy', 'false');
+      } catch (_) {}
+    }
+    await injectPartial('/nav/index.html', 'nav-placeholder');
+    await injectPartial('/footer/index.html', 'footer-placeholder');
+  })();
+  </script>
+
   <script>
     document.addEventListener('click', (e) => {
       const a = e.target.closest && e.target.closest('a[href="/vsop/"]');
@@ -569,25 +544,5 @@
       } catch(_) {}
     });
   </script>
-  <script>
-  function sbCopyText(textareaId, statusId){
-    const el = document.getElementById(textareaId);
-    const st = document.getElementById(statusId);
-    if(!el) return;
-
-    el.focus();
-    el.select();
-    el.setSelectionRange(0, 999999);
-
-    let ok = false;
-    try { ok = document.execCommand('copy'); } catch(e) {}
-
-    if(st){
-      st.textContent = ok ? "Copied." : "Copy failed — select and copy manually.";
-      setTimeout(()=>{ st.textContent = ""; }, 1200);
-    }
-  }
-</script>
-
 </body>
 </html>
