@@ -11,6 +11,9 @@
   <meta name="format-detection" content="telephone=no" />
   <meta name="color-scheme" content="dark light" />
 
+  <!-- Build stamp -->
+  <meta name="sb:build" content="v20251220-media-kit" />
+
   <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com">
   <link rel="preconnect" href="https://www.google-analytics.com">
@@ -41,6 +44,7 @@
   <meta name="twitter:title" content="Media Kit — Square Bidness" />
   <meta name="twitter:description" content="Press-ready overview of Square Bidness — founder story, brand footprint, and media contact." />
   <meta name="twitter:image" content="https://www.squarebidness.com/assets/og-default-1200x630.jpg" />
+  <meta name="twitter:site" content="@squarebidnesstm" />
 
   <!-- Structured Data -->
   <script type="application/ld+json">
@@ -115,6 +119,9 @@
 
   <!-- Page-only styles (KEEP: your current look) -->
   <style>
+    /* CLS guard for injected nav */
+    #nav-placeholder{min-height:72px;}
+
     .mk-wrap{max-width:1100px;margin:0 auto;padding:28px 16px 56px;}
     .mk-hero{display:grid;gap:16px;align-items:start;}
     @media(min-width:900px){.mk-hero{grid-template-columns:1.25fr .75fr;}}
@@ -129,47 +136,17 @@
     @media(min-width:900px){.mk-grid{grid-template-columns:1fr 1fr;}}
     .mk-list{margin:.5rem 0 0 1.05rem;}
     .mk-list li{margin:.25rem 0;opacity:.92;}
-    .mk-mini{opacity:.8;font-size:.85rem;}
+    .mk-mini{opacity:.88;font-size:.9rem;line-height:1.6;}
     .mk-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;}
     .mk-divider{height:1px;background:#1f1f1f;margin:14px 0;}
     .mk-footnote{opacity:.7;font-size:.8rem;margin-top:12px;}
-
-    /* Injected shell placeholders */
-    #sb-nav-slot, #sb-footer-slot{min-height:1px;}
   </style>
-
-  <!-- Inject NAV + FOOTER (no hardwire) -->
-  <script>
-    (function(){
-      function inject(url, targetId){
-        fetch(url, { credentials: "same-origin" })
-          .then(function(r){ return r.text(); })
-          .then(function(html){
-            var slot = document.getElementById(targetId);
-            if(!slot) return;
-            slot.innerHTML = html;
-
-            // Keep year updated if footer uses #sb-year
-            var y = document.getElementById("sb-year");
-            if(y) y.textContent = new Date().getFullYear();
-          })
-          .catch(function(){ /* fail silent */ });
-      }
-
-      document.addEventListener("DOMContentLoaded", function(){
-        // Update these paths to match your repo includes
-        // Common patterns: /includes/nav.html and /includes/footer.html
-        inject("/includes/nav.html", "sb-nav-slot");
-        inject("/includes/footer.html", "sb-footer-slot");
-      });
-    })();
-  </script>
 </head>
 
 <body class="theme-dark" id="top">
 
-  <!-- NAV injected here -->
-  <div id="sb-nav-slot" aria-label="Site Navigation"></div>
+  <!-- NAV SLOT -->
+  <div id="nav-placeholder" aria-busy="true"></div>
 
   <main class="mk-wrap">
 
@@ -272,7 +249,6 @@
       </p>
 
       <div class="mk-grid">
-
         <div class="mk-card" style="padding:14px;">
           <h3 style="margin:0 0 4px;">HQ1 — Hammond (Primary Headquarters)</h3>
           <p class="mk-mini">Operations · Production · Planning</p>
@@ -292,7 +268,6 @@
             <li>Used to document real-world execution through the Tech Lab</li>
           </ul>
         </div>
-
       </div>
 
       <div class="mk-divider"></div>
@@ -387,8 +362,33 @@
 
   </main>
 
-  <!-- FOOTER injected here -->
-  <div id="sb-footer-slot" aria-label="Site Footer"></div>
+  <!-- FOOTER SLOT -->
+  <div id="footer-placeholder" aria-busy="true"></div>
+
+  <!-- Inject nav/footer (same pattern as your other pages) -->
+  <script>
+  (async () => {
+    const bust = `?v=${Date.now()}`;
+
+    async function injectPartial(url, targetId) {
+      try {
+        const res = await fetch(url + bust, { cache: 'no-store', credentials: 'same-origin' });
+        if (!res.ok) return null;
+        const html = await res.text();
+        const el = document.getElementById(targetId);
+        if (!el) return null;
+        el.innerHTML = html;
+        el.setAttribute('aria-busy', 'false');
+        return el;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    await injectPartial('/nav/index.html', 'nav-placeholder');
+    await injectPartial('/footer/index.html', 'footer-placeholder');
+  })();
+  </script>
 
 </body>
 </html>
