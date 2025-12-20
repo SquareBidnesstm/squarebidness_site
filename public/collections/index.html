@@ -8,6 +8,11 @@
   <meta name="description" content="Square Bidness collections — VSOP, Liberty, Winter Games, alumni drops, essentials, and upcoming lanes. Limited runs, Louisiana-rooted, built to last.">
   <link rel="canonical" href="https://www.squarebidness.com/collections/">
 
+  <!-- Theme / indexing -->
+  <meta name="theme-color" content="#000000">
+  <meta name="color-scheme" content="dark light">
+  <meta name="robots" content="index,follow">
+
   <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Square Bidness">
@@ -17,9 +22,11 @@
   <meta property="og:image" content="https://www.squarebidness.com/assets/meta/collections_1200x630.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Collections — Square Bidness">
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@squarebidnesstm">
   <meta name="twitter:title" content="Collections — Square Bidness">
   <meta name="twitter:description" content="Limited collections and core essentials from Square Bidness Apparel.">
   <meta name="twitter:image" content="https://www.squarebidness.com/assets/meta/collections_1200x630.jpg">
@@ -35,29 +42,51 @@
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/icon-180.png">
   <link rel="manifest" href="/manifest.webmanifest">
-  <meta name="theme-color" content="#000000">
 
-  <!-- Preload the FIRST visible card image (LCP helper) -->
-  <link rel="preload" as="image"
-        href="/assets/hero_1200.webp"
-        imagesrcset="/assets/hero_800.webp 800w, /assets/hero_1200.webp 1200w"
-        imagesizes="(min-width: 900px) 420px, 100vw" />
+  <!-- ✅ Preload the FIRST visible card image (LCP helper) -->
+  <link
+    rel="preload"
+    as="image"
+    href="/assets/hero_1200.webp"
+    imagesrcset="/assets/hero_800.webp 800w, /assets/hero_1200.webp 1200w"
+    imagesizes="(min-width: 900px) 420px, 100vw"
+    fetchpriority="high"
+  />
 
-  <!-- Org JSON-LD (optional but good for consistency) -->
+  <!-- Org JSON-LD -->
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
-    "@type":"Organization",
-    "@id": "https://www.squarebidness.com/#org",
-    "name":"Square Bidness Apparel",
-    "url":"https://www.squarebidness.com/",
-    "logo":"https://www.squarebidness.com/assets/cleantextlogo.png",
-    "sameAs":[
-      "https://instagram.com/squarebidnesstm",
-      "https://www.tiktok.com/@squarebidnesstm",
-      "https://www.facebook.com/squarebidnessapparel",
-      "https://bsky.app/profile/squarebidnesstm.bsky.social",
-      "https://www.linkedin.com/company/square-bidness-apparel"
+    "@graph":[
+      {
+        "@type":"WebSite",
+        "@id":"https://www.squarebidness.com/#website",
+        "name":"Square Bidness",
+        "url":"https://www.squarebidness.com/"
+      },
+      {
+        "@type":"Organization",
+        "@id":"https://www.squarebidness.com/#org",
+        "name":"Square Bidness Apparel",
+        "url":"https://www.squarebidness.com/",
+        "logo":"https://www.squarebidness.com/assets/cleantextlogo.png",
+        "sameAs":[
+          "https://instagram.com/squarebidnesstm",
+          "https://www.tiktok.com/@squarebidnesstm",
+          "https://www.facebook.com/squarebidnessapparel",
+          "https://bsky.app/profile/squarebidnesstm.bsky.social",
+          "https://www.linkedin.com/company/square-bidness-apparel"
+        ]
+      },
+      {
+        "@type":"CollectionPage",
+        "@id":"https://www.squarebidness.com/collections/#page",
+        "url":"https://www.squarebidness.com/collections/",
+        "name":"Collections — Square Bidness",
+        "description":"Square Bidness collections — VSOP, Liberty, Winter Games, alumni drops, essentials, and upcoming lanes.",
+        "isPartOf":{"@id":"https://www.squarebidness.com/#website"},
+        "about":{"@id":"https://www.squarebidness.com/#org"}
+      }
     ]
   }
   </script>
@@ -65,11 +94,142 @@
   <!-- GA / Global JS -->
   <script defer src="/scripts/ga.js"></script>
   <script defer src="/scripts/sb-cart.js"></script>
-</head>
-<body class="theme-dark" id="top">
 
+  <style>
+    :root{
+      --bg:#020617;
+      --fg:#f5f5f5;
+      --muted:#bdbdbd;
+      --stroke:#1f2937;
+      --card:#020617;
+      --gold:#c9a227;
+      --pill:#020617;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--fg);
+      font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    }
+    a{color:inherit;text-decoration:none}
+
+    /* CLS guard for injected nav/footer */
+    #nav-placeholder{min-height:72px;}
+    #footer-placeholder{min-height:120px;}
+
+    .wrap{
+      max-width:1120px;
+      margin:0 auto;
+      padding:0 16px;
+    }
+
+    .col-hero{
+      border-bottom:1px solid var(--stroke);
+      background:radial-gradient(circle at top left,#0b1120 0,#020617 55%,#000 100%);
+    }
+    .col-hero__inner{ padding:22px 0 24px; }
+    .col-kicker{
+      font-size:.8rem;
+      text-transform:uppercase;
+      letter-spacing:.14em;
+      color:var(--gold);
+      font-weight:800;
+    }
+    .col-hero h1{ margin:4px 0 6px; font-size:clamp(1.6rem,3.2vw,2.2rem); }
+    .col-hero p{ margin:4px 0 0; max-width:70ch; color:var(--muted); }
+
+    .col-pills{ margin-top:10px; display:flex; flex-wrap:wrap; gap:8px; font-size:.8rem; }
+    .col-pill{
+      border-radius:999px;
+      padding:5px 10px;
+      border:1px solid #1f2937;
+      background:var(--pill);
+      color:#d7dae0;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+    }
+    .col-pill span{ width:7px;height:7px;border-radius:999px;background:#36c46f;display:inline-block; }
+
+    .col-section-label{
+      font-size:.9rem;
+      text-transform:uppercase;
+      letter-spacing:.18em;
+      color:var(--muted);
+      margin:4px 0 10px;
+    }
+
+    .col-grid{
+      margin:22px 0 34px;
+      display:grid;
+      gap:18px;
+      grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+    }
+    .col-card{
+      background:var(--card);
+      border-radius:18px;
+      border:1px solid var(--stroke);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      min-height:100%;
+    }
+    .col-card__media{
+      position:relative;
+      overflow:hidden;
+      background:#000;
+    }
+
+    /* CLS guard + consistent crop */
+    .col-card__media picture,
+    .col-card__media img{
+      display:block;
+      width:100%;
+      height:auto;
+    }
+    .col-card__media img{ object-fit:cover; }
+
+    .col-tag{
+      position:absolute; left:10px; top:10px;
+      padding:4px 9px;
+      border-radius:999px;
+      font-size:.75rem;
+      font-weight:800;
+      background:#020617;
+      color:#f5f5f5;
+      border:1px solid rgba(148,163,184,.7);
+    }
+    .col-card__body{
+      padding:12px 14px 14px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .col-card__label{ font-size:.82rem; opacity:.82; }
+    .col-card__title{ font-size:1.02rem; font-weight:800; margin:0; }
+    .col-card__text{ font-size:.9rem; color:var(--muted); margin:0; line-height:1.55; }
+    .col-meta{ margin-top:4px; font-size:.8rem; opacity:.82; }
+    .col-cta{
+      margin-top:8px;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-size:.82rem;
+      font-weight:900;
+    }
+    .col-cta span{ transform:translateY(1px); display:inline-block; }
+
+    @media(hover:hover){
+      .col-card:hover{ border-color:#334155; }
+      .col-card:hover .col-cta{ color:var(--gold); }
+    }
+  </style>
+</head>
+
+<body class="theme-dark" id="top">
   <!-- NAV -->
-  <div id="nav-placeholder"></div>
+  <div id="nav-placeholder" aria-busy="true"></div>
 
   <!-- HERO -->
   <header class="col-hero">
@@ -88,7 +248,7 @@
   </header>
 
   <main class="wrap" style="padding-top:16px">
-    <div class="col-section-label">Current & upcoming collections</div>
+    <div class="col-section-label">Current &amp; upcoming collections</div>
 
     <section class="col-grid" aria-label="Square Bidness collections">
 
@@ -127,10 +287,11 @@
 
       <!-- Liberty -->
       <article class="col-card">
-        <a href="/collections/liberty/" style="display:block;color:inherit;">
+        <a href="/liberty/" style="display:block;color:inherit;">
           <div class="col-card__media">
             <picture>
-              <source type="image/webp"
+              <source
+                type="image/webp"
                 srcset="/liberty/assets/liberty-8_800.webp 800w, /liberty/assets/liberty-8_1200.webp 1200w"
                 sizes="(max-width: 768px) 100vw, 420px">
               <img
@@ -161,7 +322,8 @@
         <a href="/wintergames/" style="display:block;color:inherit;">
           <div class="col-card__media">
             <picture>
-              <source type="image/webp"
+              <source
+                type="image/webp"
                 srcset="/wintergames/assets/og-lil-soulja-slim_800.webp 800w, /wintergames/assets/og-lil-soulja-slim_1200.webp 1200w"
                 sizes="(max-width: 768px) 100vw, 420px">
               <img
@@ -192,7 +354,8 @@
         <a href="/collections/alumni/" style="display:block;color:inherit;">
           <div class="col-card__media">
             <picture>
-              <source type="image/webp"
+              <source
+                type="image/webp"
                 srcset="/assets/og-hoco_800.webp 800w, /assets/og-hoco_1200.webp 1200w"
                 sizes="(max-width: 768px) 100vw, 420px">
               <img
@@ -207,8 +370,8 @@
             <div class="col-tag">Alumni</div>
           </div>
           <div class="col-card__body">
-            <div class="col-card__label">Hometown & school pride</div>
-            <h2 class="col-card__title">Alumni & Hometown Series</h2>
+            <div class="col-card__label">Hometown &amp; school pride</div>
+            <h2 class="col-card__title">Alumni &amp; Hometown Series</h2>
             <p class="col-card__text">
               Alumni hats, local pride pieces, and small-batch runs that tap into Hammond, Alexandria, and beyond.
             </p>
@@ -223,7 +386,8 @@
         <a href="/collections/essentials/" style="display:block;color:inherit;">
           <div class="col-card__media">
             <picture>
-              <source type="image/webp"
+              <source
+                type="image/webp"
                 srcset="/collections/assets/amari_1_800.webp 800w, /collections/assets/amari_1_1200.webp 1200w"
                 sizes="(max-width: 768px) 100vw, 420px">
               <img
@@ -254,12 +418,13 @@
         <a href="/collections/future/" style="display:block;color:inherit;">
           <div class="col-card__media">
             <picture>
-              <source type="image/webp"
+              <source
+                type="image/webp"
                 srcset="/assets/community/marquesha-1_800.webp 800w, /assets/community/marquesha-1_1200.webp 1200w"
                 sizes="(max-width: 768px) 100vw, 420px">
               <img
-                src="/assets/community/marquesha-1-800.jpg"
-                srcset="/assets/community/marquesha-1-800.jpg 800w, /assets/community/marquesha-1-1200.jpg 1200w"
+                src="/assets/community/marquesha-1_800.jpg"
+                srcset="/assets/community/marquesha-1_800.jpg 800w, /assets/community/marquesha-1_1200.jpg 1200w"
                 sizes="(max-width: 768px) 100vw, 420px"
                 width="1200" height="800"
                 alt="Upcoming kids and ladies-focused Square Bidness drops"
@@ -284,123 +449,9 @@
   </main>
 
   <!-- FOOTER -->
-  <div id="footer-placeholder"></div>
+  <div id="footer-placeholder" aria-busy="true"></div>
 
-  <!-- Page styles (blue/black + gold accent) -->
-  <style>
-    :root{
-      --bg:#020617;
-      --fg:#f5f5f5;
-      --muted:#bdbdbd;
-      --stroke:#1f2937;
-      --card:#020617;
-      --gold:#c9a227;
-      --pill:#020617;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      background:var(--bg);
-      color:var(--fg);
-      font-family:system-ui,Segoe UI,Roboto,Arial;
-    }
-    a{color:inherit;text-decoration:none}
-    .wrap{
-      max-width:1120px;
-      margin:0 auto;
-      padding:0 16px;
-    }
-
-    .col-hero{
-      border-bottom:1px solid var(--stroke);
-      background:radial-gradient(circle at top left,#0b1120 0,#020617 55%,#000 100%);
-    }
-    .col-hero__inner{ padding:22px 0 24px; }
-    .col-kicker{
-      font-size:.8rem;
-      text-transform:uppercase;
-      letter-spacing:.14em;
-      color:var(--gold);
-      font-weight:800;
-    }
-    .col-hero h1{ margin:4px 0 6px; font-size:clamp(1.6rem,3.2vw,2.2rem); }
-    .col-hero p{ margin:4px 0 0; max-width:70ch; color:var(--muted); }
-
-    .col-pills{ margin-top:10px; display:flex; flex-wrap:wrap; gap:8px; font-size:.8rem; }
-    .col-pill{
-      border-radius:999px;
-      padding:5px 10px;
-      border:1px solid #1f2937;
-      background:var(--pill);
-      color:#d7dae0;
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-    }
-    .col-pill span{ width:7px;height:7px;border-radius:999px;background:#36c46f;display:inline-block; }
-
-    .col-grid{
-      margin:22px 0 34px;
-      display:grid;
-      gap:18px;
-      grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
-    }
-    .col-card{
-      background:var(--card);
-      border-radius:18px;
-      border:1px solid var(--stroke);
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-      min-height:100%;
-    }
-    .col-card__media{ position:relative; overflow:hidden; background:#000; }
-    .col-card__media img{ width:100%; height:auto; display:block; }
-    .col-tag{
-      position:absolute; left:10px; top:10px;
-      padding:4px 9px;
-      border-radius:999px;
-      font-size:.75rem;
-      font-weight:700;
-      background:#020617;
-      color:#f5f5f5;
-      border:1px solid rgba(148,163,184,.7);
-    }
-    .col-card__body{
-      padding:12px 14px 14px;
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-    }
-    .col-card__label{ font-size:.82rem; opacity:.8; }
-    .col-card__title{ font-size:1.02rem; font-weight:700; margin:0; }
-    .col-card__text{ font-size:.9rem; color:var(--muted); margin:0; }
-    .col-meta{ margin-top:4px; font-size:.8rem; opacity:.8; }
-    .col-cta{
-      margin-top:8px;
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      font-size:.82rem;
-      font-weight:700;
-    }
-    .col-cta span{ transform:translateY(1px); display:inline-block; }
-
-    @media(hover:hover){
-      .col-card:hover{ border-color:#334155; }
-      .col-cta:hover{ color:var(--gold); }
-    }
-
-    .col-section-label{
-      font-size:.9rem;
-      text-transform:uppercase;
-      letter-spacing:.18em;
-      color:var(--muted);
-      margin:4px 0 10px;
-    }
-  </style>
-
-  <!-- NAV + FOOTER loader (same pattern as home) -->
+  <!-- NAV + FOOTER loader -->
   <script>
   (async () => {
     const bust = `?v=${Date.now()}`;
@@ -408,17 +459,14 @@
     async function injectPartial(url, targetId) {
       try {
         const res = await fetch(url + bust, { credentials: 'same-origin', cache: 'no-store' });
-        if (!res.ok) {
-          console.warn('[partials] not ok:', url, res.status);
-          return null;
-        }
+        if (!res.ok) return null;
         const html = await res.text();
         const el = document.getElementById(targetId);
         if (!el) return null;
         el.innerHTML = html;
+        el.setAttribute('aria-busy','false');
         return el;
-      } catch (err) {
-        console.warn('[partials] fetch fail:', url, err);
+      } catch (_) {
         return null;
       }
     }
