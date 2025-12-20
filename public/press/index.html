@@ -20,7 +20,7 @@
 
   <!-- Icons / PWA -->
   <link rel="icon" href="/favicon.ico" sizes="any" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/icon-180.png" />
+  <link rel="apple-touch-icon" href="/icon_180.png" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <meta name="theme-color" content="#000000" />
   <meta name="color-scheme" content="dark light" />
@@ -43,6 +43,16 @@
   <meta name="twitter:description" content="Articles, interviews, and features on Square Bidness. Media kit + contact." />
   <meta name="twitter:image" content="https://www.squarebidness.com/assets/sb-social-card_1200.jpg" />
 
+  <!-- ✅ Preload (optional): first featured image (local) -->
+  <link
+    rel="preload"
+    as="image"
+    href="/assets/sb-social-card_1200.webp"
+    imagesrcset="/assets/sb-social-card_800.webp 800w, /assets/sb-social-card_1200.webp 1200w"
+    imagesizes="(max-width: 768px) 100vw, 520px"
+    fetchpriority="high"
+  />
+
   <!-- Schema -->
   <script type="application/ld+json">
   {
@@ -59,7 +69,10 @@
         "@id":"https://www.squarebidness.com/#org",
         "name":"Square Bidness Apparel",
         "url":"https://www.squarebidness.com/",
-        "logo":"https://www.squarebidness.com/assets/cleantextlogo.png",
+        "logo":{
+          "@type":"ImageObject",
+          "url":"https://www.squarebidness.com/assets/cleantextlogo.png"
+        },
         "email":"info@squarebidness.com",
         "sameAs":[
           "https://instagram.com/squarebidnesstm",
@@ -167,7 +180,11 @@
 
     .press-page .feature-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;}
     .press-page .feature-card__img{position:relative;display:block;background:#000;}
-    .press-page .feature-card__img img{width:100%;height:auto;display:block;object-fit:cover;}
+
+    /* CLS + consistent crop */
+    .press-page .feature-card__img picture,
+    .press-page .feature-card__img img{width:100%;height:auto;display:block;}
+    .press-page .feature-card__img img{object-fit:cover;}
 
     .press-page .badge{
       position:absolute;left:.75rem;bottom:.75rem;
@@ -359,6 +376,7 @@
           <h2 class="section__title" style="margin:0 0 .6rem;">Featured</h2>
 
           <div class="feature-cards">
+            <!-- Featured interview -->
             <article class="sb-card">
               <a class="feature-card__img" href="/press/youtube-interview/" aria-label="Watch Marcus Buckner Interview">
                 <img
@@ -391,15 +409,25 @@
               </div>
             </article>
 
+            <!-- Featured founder -->
             <article class="sb-card">
               <a class="feature-card__img" href="/founder/" aria-label="Read Founder Bio">
-                <img
-                  src="/assets/sb-social-card_1200.jpg"
-                  width="1200"
-                  height="630"
-                  alt="Marcus Buckner — Founder of Square Bidness"
-                  loading="lazy"
-                  decoding="async" />
+                <picture>
+                  <source
+                    type="image/webp"
+                    srcset="/assets/sb-social-card_800.webp 800w, /assets/sb-social-card_1200.webp 1200w"
+                    sizes="(max-width: 768px) 100vw, 420px"
+                  />
+                  <img
+                    src="/assets/sb-social-card_1200.jpg"
+                    srcset="/assets/sb-social-card_800.jpg 800w, /assets/sb-social-card_1200.jpg 1200w"
+                    sizes="(max-width: 768px) 100vw, 420px"
+                    width="1200"
+                    height="630"
+                    alt="Marcus Buckner — Founder of Square Bidness"
+                    loading="lazy"
+                    decoding="async" />
+                </picture>
                 <span class="badge">Founder</span>
               </a>
               <div class="sb-card__pad">
@@ -433,7 +461,7 @@
                   <div class="press-copy-card">
                     <div class="press-copy-top">
                       <strong>Mission Statement</strong>
-                      <button class="btn btn--ghost" type="button" onclick="sbCopyText('sb_mission','sb_mission_status')">Copy</button>
+                      <button class="btn btn--ghost" type="button" data-copy="#sb_mission" data-status="#sb_mission_status">Copy</button>
                     </div>
                     <textarea class="press-copy-box" id="sb_mission" readonly>Principles. Morals. Business Done Right.</textarea>
                     <div class="press-copy-status" id="sb_mission_status" aria-live="polite"></div>
@@ -442,7 +470,7 @@
                   <div class="press-copy-card">
                     <div class="press-copy-top">
                       <strong>One-Sentence Boilerplate</strong>
-                      <button class="btn btn--ghost" type="button" onclick="sbCopyText('sb_boilerplate','sb_boilerplate_status')">Copy</button>
+                      <button class="btn btn--ghost" type="button" data-copy="#sb_boilerplate" data-status="#sb_boilerplate_status">Copy</button>
                     </div>
                     <textarea class="press-copy-box" id="sb_boilerplate" readonly>Square Bidness Apparel is a Louisiana-based apparel brand founded on January 4, 2022 by veteran operator Marcus Buckner, building across casual, business-casual, tech-casual, and workwear categories with a focus on professionalism, durability, and real-world use.</textarea>
                     <div class="press-copy-status" id="sb_boilerplate_status" aria-live="polite"></div>
@@ -494,26 +522,55 @@
 
   <div id="footer-placeholder" aria-busy="true"></div>
 
+  <!-- ✅ Copy buttons (modern clipboard first, fallback to execCommand) -->
   <script>
-    function sbCopyText(textareaId, statusId){
-      const el = document.getElementById(textareaId);
-      const st = document.getElementById(statusId);
-      if(!el) return;
+  (function(){
+    async function doCopy(text){
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+      return false;
+    }
 
+    function fallbackCopyFromEl(el){
       el.focus();
       el.select();
       el.setSelectionRange(0, 999999);
-
-      let ok = false;
-      try { ok = document.execCommand('copy'); } catch(e) {}
-
-      if(st){
-        st.textContent = ok ? "Copied." : "Copy failed — select and copy manually.";
-        setTimeout(()=>{ st.textContent = ""; }, 1200);
-      }
+      try { return document.execCommand('copy'); } catch(e){ return false; }
     }
+
+    function setStatus(sel, msg){
+      const st = document.querySelector(sel);
+      if (!st) return;
+      st.textContent = msg;
+      setTimeout(()=>{ st.textContent = ""; }, 1200);
+    }
+
+    document.addEventListener('click', async (e) => {
+      const btn = e.target.closest && e.target.closest('[data-copy]');
+      if (!btn) return;
+
+      const targetSel = btn.getAttribute('data-copy');
+      const statusSel = btn.getAttribute('data-status');
+      const el = document.querySelector(targetSel);
+      if (!el) return;
+
+      const text = (el.value || el.textContent || "").trim();
+      let ok = false;
+
+      try {
+        ok = await doCopy(text);
+      } catch(_) {}
+
+      if (!ok) ok = fallbackCopyFromEl(el);
+
+      setStatus(statusSel, ok ? "Copied." : "Copy failed — select and copy manually.");
+    });
+  })();
   </script>
 
+  <!-- Inject nav/footer -->
   <script>
   (async () => {
     const bust = `?v=${Date.now()}`;
@@ -533,6 +590,7 @@
   })();
   </script>
 
+  <!-- Tiny click tracking example -->
   <script>
     document.addEventListener('click', (e) => {
       const a = e.target.closest && e.target.closest('a[href="/vsop/"]');
