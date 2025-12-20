@@ -29,8 +29,15 @@
   <link rel="preconnect" href="https://www.googletagmanager.com" />
   <link rel="preconnect" href="https://www.google-analytics.com" />
 
-  <!-- Preload likely LCP image (prefer WebP if it exists) -->
-  <link rel="preload" as="image" href="/assets/community/marquesha-1_800.webp" fetchpriority="high" />
+  <!-- ✅ Preload likely LCP image (WebP first, JPG fallback via the <picture> below) -->
+  <link
+    rel="preload"
+    as="image"
+    href="/assets/community/marquesha-1_1200.webp"
+    imagesrcset="/assets/community/marquesha-1_800.webp 800w, /assets/community/marquesha-1_1200.webp 1200w"
+    imagesizes="(max-width: 600px) 100vw, 360px"
+    fetchpriority="high"
+  />
 
   <link rel="stylesheet" href="/styles/style.css" />
 
@@ -41,7 +48,26 @@
   <meta name="theme-color" content="#000000" />
   <meta name="color-scheme" content="dark light" />
 
+  <!-- GA4 -->
   <script defer src="/scripts/ga.js"></script>
+
+  <!-- JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"CollectionPage",
+    "name":"Community — Square Bidness",
+    "url":"https://www.squarebidness.com/community/",
+    "description":"Square Bidness Community Lane — Northshore and Central Louisiana stories, spotlights, and day-ones. Powered by Square Bidness Tech Lab.",
+    "isPartOf":{"@type":"WebSite","name":"Square Bidness","url":"https://www.squarebidness.com/"},
+    "about":[
+      {"@type":"Thing","name":"Square Bidness Community"},
+      {"@type":"Thing","name":"Northshore Louisiana"},
+      {"@type":"Thing","name":"Central Louisiana"},
+      {"@type":"Organization","name":"Square Bidness Tech Lab","url":"https://lab.squarebidness.com/"}
+    ]
+  }
+  </script>
 
   <style>
     :root{
@@ -72,8 +98,11 @@
       border-radius:16px;border:1px solid var(--stroke);
       overflow:hidden;display:flex;flex-direction:column;min-height:100%;
     }
-    .comm-card__media{position:relative}
-    .comm-card__media img{display:block;width:100%;height:auto;background:#000}
+    .comm-card__media{position:relative;background:#000}
+    .comm-card__media picture,
+    .comm-card__media img{display:block;width:100%;height:auto}
+    .comm-card__media img{object-fit:cover}
+
     .comm-tag{
       position:absolute;top:10px;left:10px;
       padding:4px 10px;border-radius:999px;font-size:.75rem;font-weight:700;
@@ -115,11 +144,14 @@
         <a href="/october-spotlight/" style="display:block;color:inherit;">
           <div class="comm-card__media">
             <picture>
-              <source type="image/webp"
+              <source
+                type="image/webp"
                 srcset="/assets/community/marquesha-1_800.webp 800w, /assets/community/marquesha-1_1200.webp 1200w"
                 sizes="(max-width: 600px) 100vw, 360px">
               <img
                 src="/assets/community/marquesha-1_800.jpg"
+                srcset="/assets/community/marquesha-1_800.jpg 800w, /assets/community/marquesha-1_1200.jpg 1200w"
+                sizes="(max-width: 600px) 100vw, 360px"
                 alt="Marquesha Baham wearing a custom Square Bidness denim set"
                 width="1200" height="800"
                 loading="eager" decoding="async" fetchpriority="high" />
@@ -142,11 +174,14 @@
         <a href="/november-spotlight/" style="display:block;color:inherit;">
           <div class="comm-card__media">
             <picture>
-              <source type="image/webp"
+              <source
+                type="image/webp"
                 srcset="/collections/assets/amari_2_800.webp 800w, /collections/assets/amari_2_1200.webp 1200w"
                 sizes="(max-width: 600px) 100vw, 360px">
               <img
                 src="/collections/assets/amari_2_800.jpg"
+                srcset="/collections/assets/amari_2_800.jpg 800w, /collections/assets/amari_2_1200.jpg 1200w"
+                sizes="(max-width: 600px) 100vw, 360px"
                 alt="Amari Wilford of Courageaux Aesthetics in Square Bidness Supima tee"
                 width="1200" height="800"
                 loading="lazy" decoding="async" />
@@ -169,11 +204,14 @@
         <a href="/phomatic/" style="display:block;color:inherit;">
           <div class="comm-card__media">
             <picture>
-              <source type="image/webp"
+              <source
+                type="image/webp"
                 srcset="/phomatic/assets/gieno-1_800.webp 800w, /phomatic/assets/gieno-1_1200.webp 1200w"
                 sizes="(max-width: 600px) 100vw, 360px">
               <img
                 src="/phomatic/assets/gieno-1_800.jpg"
+                srcset="/phomatic/assets/gieno-1_800.jpg 800w, /phomatic/assets/gieno-1_1200.jpg 1200w"
+                sizes="(max-width: 600px) 100vw, 360px"
                 alt="Pho-Matic Photography by Gieno Smith — community moments and event coverage"
                 width="1200" height="800"
                 loading="lazy" decoding="async" />
@@ -196,11 +234,14 @@
         <a href="/stories/" style="display:block;color:inherit;">
           <div class="comm-card__media">
             <picture>
-              <source type="image/webp"
+              <source
+                type="image/webp"
                 srcset="/assets/og-hoco_800.webp 800w, /assets/og-hoco_1200.webp 1200w"
                 sizes="(max-width: 600px) 100vw, 360px">
               <img
                 src="/assets/og-hoco_1200.jpg"
+                srcset="/assets/og-hoco_800.jpg 800w, /assets/og-hoco_1200.jpg 1200w"
+                sizes="(max-width: 600px) 100vw, 360px"
                 alt="Square Bidness stories and community moments"
                 width="1200" height="800"
                 loading="lazy" decoding="async" />
