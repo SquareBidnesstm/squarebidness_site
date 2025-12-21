@@ -15,12 +15,12 @@
   <meta name="sb:build" content="v20251221-stories" />
 
   <!-- Perf / GA4 -->
-  <link rel="preconnect" href="https://www.googletagmanager.com">
-  <link rel="preconnect" href="https://www.google-analytics.com">
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+  <link rel="preconnect" href="https://www.google-analytics.com" crossorigin>
   <script defer src="/scripts/ga.js"></script>
   <script defer src="/scripts/global.js"></script>
 
-  <!-- ✅ Preload LCP image -->
+  <!-- ✅ Preload LCP image (WebP) -->
   <link
     rel="preload"
     as="image"
@@ -28,6 +28,15 @@
     imagesrcset="/blog/assets/innovation-fest-hero_800.webp 800w, /blog/assets/innovation-fest-hero_1200.webp 1200w"
     imagesizes="(max-width: 768px) 100vw, 480px"
     fetchpriority="high"
+  />
+  <!-- Optional: Preload fallback JPG (safe for older browsers) -->
+  <link
+    rel="preload"
+    as="image"
+    href="/blog/assets/innovation-fest-hero_1200.jpg"
+    imagesrcset="/blog/assets/innovation-fest-hero_800.jpg 800w, /blog/assets/innovation-fest-hero_1200.jpg 1200w"
+    imagesizes="(max-width: 768px) 100vw, 480px"
+    fetchpriority="low"
   />
 
   <!-- Icons / PWA -->
@@ -114,7 +123,7 @@
         "position":2,
         "item":{
           "@type":"CollectionPage",
-          "headline":"Winter Games — Lil Soulja Slim in Hammond",
+          "name":"Winter Games — Lil Soulja Slim in Hammond",
           "url":"https://www.squarebidness.com/wintergames/",
           "datePublished":"2025-10-01",
           "image":["https://www.squarebidness.com/wintergames/assets/og-lil-soulja-slim_1200x630.jpg"],
@@ -370,7 +379,8 @@
               width="1200" height="675"
               loading="lazy" decoding="async"
               alt="Marcus Buckner x Terrance Gangsta Williams — interview thumbnail"
-              style="width:100%;height:auto;display:block;object-fit:cover;background:#000;"
+              referrerpolicy="no-referrer"
+              style="width:100%;height:auto;display:block;object-fit:cover;background:#000;aspect-ratio:16/9;"
             >
             <div class="story-badge">Video</div>
           </div>
