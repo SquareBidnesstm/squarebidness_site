@@ -1,3 +1,4 @@
+<!-- /public/collections/index.html -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -6,7 +7,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Collections — Square Bidness</title>
   <meta name="description" content="Square Bidness collections — VSOP, Liberty, Winter Games, alumni drops, essentials, and upcoming lanes. Limited runs, Louisiana-rooted, built to last.">
-  <link rel="canonical" href="https://www.squarebidness.com/collections/">
+  <link rel="canonical" href="https://www.squarebidness.com/collections/" />
+
+  <!-- Build stamp (partials cache bust) -->
+  <meta name="sb:build" content="v20251221-collections" />
 
   <!-- Theme / indexing -->
   <meta name="theme-color" content="#000000">
@@ -38,7 +42,7 @@
   <!-- Global CSS -->
   <link rel="stylesheet" href="/styles/style.css" />
 
-  <!-- Icons / PWA (match main site) -->
+  <!-- Icons / PWA -->
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/icon-180.png">
   <link rel="manifest" href="/manifest.webmanifest">
@@ -91,9 +95,16 @@
   }
   </script>
 
-  <!-- GA / Global JS -->
+  <!-- GA / site scripts -->
   <script defer src="/scripts/ga.js"></script>
   <script defer src="/scripts/sb-cart.js"></script>
+  <script defer src="/scripts/global.js"></script>
+
+  <!-- ✅ Nav/Footer injection (ONE script across the whole site) -->
+  <script defer src="/scripts/partials.js"></script>
+
+  <!-- Optional -->
+  <script defer src="/scripts/sw-register.js"></script>
 
   <style>
     :root{
@@ -115,8 +126,8 @@
     a{color:inherit;text-decoration:none}
 
     /* CLS guard for injected nav/footer */
-    #nav-placeholder{min-height:72px;}
-    #footer-placeholder{min-height:120px;}
+    #site-header{min-height:72px;}
+    #site-footer{min-height:120px;}
 
     .wrap{
       max-width:1120px;
@@ -180,8 +191,6 @@
       overflow:hidden;
       background:#000;
     }
-
-    /* CLS guard + consistent crop */
     .col-card__media picture,
     .col-card__media img{
       display:block;
@@ -228,8 +237,8 @@
 </head>
 
 <body class="theme-dark" id="top">
-  <!-- NAV -->
-  <div id="nav-placeholder" aria-busy="true"></div>
+  <!-- NAV injected by /scripts/partials.js -->
+  <div id="site-header" aria-busy="true"></div>
 
   <!-- HERO -->
   <header class="col-hero">
@@ -413,7 +422,7 @@
         </a>
       </article>
 
-      <!-- Future / Kids & Ladies lane -->
+      <!-- Future -->
       <article class="col-card">
         <a href="/collections/future/" style="display:block;color:inherit;">
           <div class="col-card__media">
@@ -448,32 +457,7 @@
     </section>
   </main>
 
-  <!-- FOOTER -->
-  <div id="footer-placeholder" aria-busy="true"></div>
-
-  <!-- NAV + FOOTER loader -->
-  <script>
-  (async () => {
-    const bust = `?v=${Date.now()}`;
-
-    async function injectPartial(url, targetId) {
-      try {
-        const res = await fetch(url + bust, { credentials: 'same-origin', cache: 'no-store' });
-        if (!res.ok) return null;
-        const html = await res.text();
-        const el = document.getElementById(targetId);
-        if (!el) return null;
-        el.innerHTML = html;
-        el.setAttribute('aria-busy','false');
-        return el;
-      } catch (_) {
-        return null;
-      }
-    }
-
-    await injectPartial('/nav/index.html', 'nav-placeholder');
-    await injectPartial('/footer/index.html', 'footer-placeholder');
-  })();
-  </script>
+  <!-- FOOTER injected by /scripts/partials.js -->
+  <div id="site-footer" aria-busy="true"></div>
 </body>
 </html>
