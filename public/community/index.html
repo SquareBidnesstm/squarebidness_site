@@ -7,7 +7,11 @@
   <meta name="description" content="Square Bidness Community Lane — Northshore and Central Louisiana stories, spotlights, and day-ones. Powered by Square Bidness Tech Lab." />
   <link rel="canonical" href="https://www.squarebidness.com/community/" />
 
-  <meta name="sb:build" content="v20251219-community-sweep" />
+  <meta name="sb:build" content="v20251221a" />
+
+  <meta name="theme-color" content="#000000" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="robots" content="index,follow" />
 
   <!-- Social -->
   <meta property="og:type" content="website" />
@@ -25,11 +29,21 @@
   <meta name="twitter:description" content="Community lane for Square Bidness — Northshore and Central Louisiana stories, spotlights, and day-ones." />
   <meta name="twitter:image" content="https://www.squarebidness.com/assets/community/marquesha-1-social-1200x630.jpg" />
 
-  <!-- Perf -->
-  <link rel="preconnect" href="https://www.googletagmanager.com" />
-  <link rel="preconnect" href="https://www.google-analytics.com" />
+  <!-- CSS -->
+  <link rel="stylesheet" href="/styles/style.css" />
 
-  <!-- ✅ Preload likely LCP image (WebP first, JPG fallback via the <picture> below) -->
+  <!-- Icons -->
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" href="/assets/icons/icon-180.png" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+
+  <!-- GA -->
+  <script defer src="/scripts/ga.js"></script>
+
+  <!-- ✅ Partials -->
+  <script defer src="/scripts/partials.js"></script>
+
+  <!-- Preload (LCP) -->
   <link
     rel="preload"
     as="image"
@@ -38,18 +52,6 @@
     imagesizes="(max-width: 600px) 100vw, 360px"
     fetchpriority="high"
   />
-
-  <link rel="stylesheet" href="/styles/style.css" />
-
-  <!-- Icons -->
-  <link rel="icon" href="/favicon.ico" sizes="any" />
-  <link rel="apple-touch-icon" href="/icon_180.png" />
-  <link rel="manifest" href="/manifest.webmanifest" />
-  <meta name="theme-color" content="#000000" />
-  <meta name="color-scheme" content="dark light" />
-
-  <!-- GA4 -->
-  <script defer src="/scripts/ga.js"></script>
 
   <!-- JSON-LD -->
   <script type="application/ld+json">
@@ -76,6 +78,9 @@
     *{box-sizing:border-box}
     body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
     a{color:inherit;text-decoration:none}
+
+    #site-header{min-height:72px;}
+    #site-footer{min-height:120px;}
 
     .wrap{max-width:1120px;margin:0 auto;padding:0 16px}
 
@@ -110,20 +115,17 @@
     }
     .comm-card__body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px;font-size:.92rem}
     .comm-card__body h2{margin:0;font-size:1rem}
-    .comm-card__body p{margin:0;color:#d1d5db}
+    .comm-card__body p{margin:0;color:#d1d5db;line-height:1.45}
     .comm-meta-small{font-size:.8rem;color:#9ca3af;margin-top:2px}
     .comm-cta{margin-top:8px;display:inline-flex;align-items:center;gap:6px;font-size:.85rem;font-weight:700;color:var(--gold)}
     .comm-cta span{transform:translateY(1px)}
     @media(hover:hover){ .comm-card:hover{border-color:#262626} }
     .comm-footnote{font-size:.85rem;color:#9ca3af;margin-bottom:26px}
-
-    /* CLS guard for injected nav */
-    #nav-placeholder{min-height:72px;}
   </style>
 </head>
 
 <body class="theme-dark" id="top">
-  <div id="nav-placeholder" aria-busy="true"></div>
+  <div id="site-header"></div>
 
   <header class="comm-hero">
     <div class="wrap comm-hero__inner">
@@ -144,17 +146,18 @@
         <a href="/october-spotlight/" style="display:block;color:inherit;">
           <div class="comm-card__media">
             <picture>
-              <source
-                type="image/webp"
+              <source type="image/webp"
                 srcset="/assets/community/marquesha-1_800.webp 800w, /assets/community/marquesha-1_1200.webp 1200w"
+                sizes="(max-width: 600px) 100vw, 360px">
+              <source type="image/jpeg"
+                srcset="/assets/community/marquesha-1_800.jpg 800w, /assets/community/marquesha-1_1200.jpg 1200w"
                 sizes="(max-width: 600px) 100vw, 360px">
               <img
                 src="/assets/community/marquesha-1_800.jpg"
-                srcset="/assets/community/marquesha-1_800.jpg 800w, /assets/community/marquesha-1_1200.jpg 1200w"
-                sizes="(max-width: 600px) 100vw, 360px"
                 alt="Marquesha Baham wearing a custom Square Bidness denim set"
                 width="1200" height="800"
-                loading="eager" decoding="async" fetchpriority="high" />
+                loading="eager" decoding="async" fetchpriority="high"
+                onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';" />
             </picture>
             <div class="comm-tag">October Spotlight</div>
           </div>
@@ -174,17 +177,18 @@
         <a href="/november-spotlight/" style="display:block;color:inherit;">
           <div class="comm-card__media">
             <picture>
-              <source
-                type="image/webp"
+              <source type="image/webp"
                 srcset="/collections/assets/amari_2_800.webp 800w, /collections/assets/amari_2_1200.webp 1200w"
+                sizes="(max-width: 600px) 100vw, 360px">
+              <source type="image/jpeg"
+                srcset="/collections/assets/amari_2_800.jpg 800w, /collections/assets/amari_2_1200.jpg 1200w"
                 sizes="(max-width: 600px) 100vw, 360px">
               <img
                 src="/collections/assets/amari_2_800.jpg"
-                srcset="/collections/assets/amari_2_800.jpg 800w, /collections/assets/amari_2_1200.jpg 1200w"
-                sizes="(max-width: 600px) 100vw, 360px"
                 alt="Amari Wilford of Courageaux Aesthetics in Square Bidness Supima tee"
                 width="1200" height="800"
-                loading="lazy" decoding="async" />
+                loading="lazy" decoding="async"
+                onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';" />
             </picture>
             <div class="comm-tag">November Spotlight</div>
           </div>
@@ -204,17 +208,18 @@
         <a href="/phomatic/" style="display:block;color:inherit;">
           <div class="comm-card__media">
             <picture>
-              <source
-                type="image/webp"
+              <source type="image/webp"
                 srcset="/phomatic/assets/gieno-1_800.webp 800w, /phomatic/assets/gieno-1_1200.webp 1200w"
+                sizes="(max-width: 600px) 100vw, 360px">
+              <source type="image/jpeg"
+                srcset="/phomatic/assets/gieno-1_800.jpg 800w, /phomatic/assets/gieno-1_1200.jpg 1200w"
                 sizes="(max-width: 600px) 100vw, 360px">
               <img
                 src="/phomatic/assets/gieno-1_800.jpg"
-                srcset="/phomatic/assets/gieno-1_800.jpg 800w, /phomatic/assets/gieno-1_1200.jpg 1200w"
-                sizes="(max-width: 600px) 100vw, 360px"
                 alt="Pho-Matic Photography by Gieno Smith — community moments and event coverage"
                 width="1200" height="800"
-                loading="lazy" decoding="async" />
+                loading="lazy" decoding="async"
+                onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';" />
             </picture>
             <div class="comm-tag">Featured Photographer</div>
           </div>
@@ -234,17 +239,18 @@
         <a href="/stories/" style="display:block;color:inherit;">
           <div class="comm-card__media">
             <picture>
-              <source
-                type="image/webp"
+              <source type="image/webp"
                 srcset="/assets/og-hoco_800.webp 800w, /assets/og-hoco_1200.webp 1200w"
+                sizes="(max-width: 600px) 100vw, 360px">
+              <source type="image/jpeg"
+                srcset="/assets/og-hoco_800.jpg 800w, /assets/og-hoco_1200.jpg 1200w"
                 sizes="(max-width: 600px) 100vw, 360px">
               <img
                 src="/assets/og-hoco_1200.jpg"
-                srcset="/assets/og-hoco_800.jpg 800w, /assets/og-hoco_1200.jpg 1200w"
-                sizes="(max-width: 600px) 100vw, 360px"
                 alt="Square Bidness stories and community moments"
                 width="1200" height="800"
-                loading="lazy" decoding="async" />
+                loading="lazy" decoding="async"
+                onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';" />
             </picture>
             <div class="comm-tag">More Stories</div>
           </div>
@@ -268,30 +274,6 @@
     </p>
   </main>
 
-  <div id="footer-placeholder" aria-busy="true"></div>
-
-  <script>
-  (async () => {
-    const bust = `?v=${Date.now()}`;
-
-    async function injectPartial(url, targetId) {
-      try {
-        const res = await fetch(url + bust, { credentials:'same-origin', cache:'no-store' });
-        if (!res.ok) return null;
-        const html = await res.text();
-        const el = document.getElementById(targetId);
-        if (!el) return null;
-        el.innerHTML = html;
-        el.setAttribute('aria-busy','false');
-        return el;
-      } catch (_) {
-        return null;
-      }
-    }
-
-    await injectPartial('/nav/index.html', 'nav-placeholder');
-    await injectPartial('/footer/index.html', 'footer-placeholder');
-  })();
-  </script>
+  <div id="site-footer"></div>
 </body>
 </html>
