@@ -1,27 +1,41 @@
 // public/partials/loader.js
-(async () => {
-  const bust = `?v=${Date.now()}`;
+(() => {
+  // ✅ Set this to your deploy version when you push updates.
+  // Example: window.SB_BUILD = "v20251221a" (you can set it in <head>), or leave default below.
+  const BUILD = (window.SB_BUILD || document.querySelector('meta[name="sb:build"]')?.content || "v1");
+
+  // ✅ Cache-friendly: only changes when BUILD changes.
+  const bust = `?v=${encodeURIComponent(BUILD)}`;
+
+  function onReady(fn) {
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", fn, { once: true });
+    } else {
+      fn();
+    }
+  }
 
   async function injectPartial(url, targetId) {
+    const el = document.getElementById(targetId);
+    if (!el) {
+      console.warn("[partials] missing target:", targetId);
+      return false;
+    }
+
     try {
-      const res = await fetch(url + bust, { cache: "no-store", credentials: "same-origin" });
+      // ✅ Prefer cache so Cloudflare/browser can actually cache nav/footer
+      // If you need to force fresh during debugging, temporarily switch to { cache: "no-store" }.
+      const res = await fetch(url + bust, { cache: "force-cache", credentials: "same-origin" });
       if (!res.ok) {
         console.warn("[partials] not ok:", url, res.status);
         return false;
       }
 
       const html = await res.text();
-      const el = document.getElementById(targetId);
-      if (!el) {
-        console.warn("[partials] missing target:", targetId);
-        return false;
-      }
-
       el.innerHTML = html;
 
-      // Optional nice reveal if you keep .fade-in in CSS
+      // Optional reveal class
       el.classList.add("fade-in");
-
       return true;
     } catch (err) {
       console.warn("[partials] fetch fail:", url, err);
@@ -38,7 +52,7 @@
 
     const current = (location.pathname.replace(/\/+$/, "") || "/");
 
-    scope.querySelectorAll('a[href]').forEach((a) => {
+    scope.querySelectorAll("a[href]").forEach((a) => {
       const raw = a.getAttribute("href");
       if (!raw) return;
 
@@ -49,8 +63,7 @@
       let hrefPath = "";
       try {
         const u = new URL(raw, location.origin);
-        // if external domain, skip
-        if (u.origin !== location.origin) return;
+        if (u.origin !== location.origin) return; // external
         hrefPath = (u.pathname.replace(/\/+$/, "") || "/");
       } catch {
         return;
@@ -72,12 +85,14 @@
     });
   }
 
-  // Inject both
-  const navOk = await injectPartial("/nav/index.html", "site-header");
-  if (navOk) markActiveNav();
+  onReady(async () => {
+    // ✅ Inject both (ONLY real files, not /nav/ directory)
+    const navOk = await injectPartial("/nav/index.html", "site-header");
+    if (navOk) markActiveNav();
 
-  const footOk = await injectPartial("/footer/index.html", "site-footer");
+    const footOk = await injectPartial("/footer/index.html", "site-footer");
 
-  // Let global.js sync years, etc.
-  if (navOk || footOk) window.dispatchEvent(new Event("sb:partials_loaded"));
+    // Let any listeners (global.js, etc.) know chrome is in
+    if (navOk || footOk) window.dispatchEvent(new Event("sb:partials_loaded"));
+  });
 })();
