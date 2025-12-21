@@ -1,3 +1,4 @@
+<!-- /public/wintergames/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,6 +9,11 @@
   <link rel="canonical" href="https://www.squarebidness.com/wintergames/" />
   <meta name="description" content="Square Bidness Winter Games — heavyweight organic cotton crewneck and Waterproof Golf Hat. Limited Louisiana run." />
   <meta name="theme-color" content="#000000" />
+  <meta name="color-scheme" content="dark light">
+  <meta name="robots" content="index,follow">
+
+  <!-- Build stamp -->
+  <meta name="sb:build" content="v20251221-wintergames" />
 
   <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com">
@@ -17,17 +23,19 @@
   <link rel="preload" as="image"
         href="/wintergames/assets/og-lil-soulja-slim_1200.webp"
         imagesrcset="/wintergames/assets/og-lil-soulja-slim_800.webp 800w, /wintergames/assets/og-lil-soulja-slim_1200.webp 1200w"
-        imagesizes="(max-width: 768px) 100vw, 980px">
+        imagesizes="(max-width: 768px) 100vw, 980px"
+        fetchpriority="high">
 
-  <!-- GA4 (site-wide) -->
+  <!-- GA4 -->
   <script defer src="/scripts/ga.js"></script>
+  <script defer src="/scripts/global.js"></script>
 
   <!-- CSS -->
   <link rel="stylesheet" href="/styles/style.css" />
 
   <!-- Icons / PWA -->
   <link rel="icon" href="/favicon.ico" sizes="any">
-  <link rel="apple-touch-icon" href="/icon_180.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/icon-180.png">
   <link rel="manifest" href="/manifest.webmanifest">
 
   <!-- OG / Twitter -->
@@ -45,6 +53,9 @@
   <meta name="twitter:image" content="https://www.squarebidness.com/wintergames/assets/og-lil-soulja-slim_1200x630.jpg" />
   <meta name="twitter:site" content="@squarebidnesstm" />
 
+  <!-- ✅ Nav/Footer injection -->
+  <script defer src="/scripts/partials.js"></script>
+
   <style>
     :root { --wg-gold:#c9a227; }
 
@@ -54,9 +65,12 @@
       min-height:100vh;
     }
 
+    /* CLS guard for injected nav/footer */
+    #site-header{min-height:72px;}
+    #site-footer{min-height:120px;}
+
     .wg-shell{max-width:980px;margin:0 auto;padding:1.5rem 1rem 4rem;}
 
-    /* Card shell */
     .wg-card{
       background:#0a0a0a;
       border:1px solid rgba(255,255,255,.06);
@@ -66,16 +80,8 @@
       margin-bottom:1.2rem;
     }
 
-    /* CLS FIX: reserve space before images load */
-    .wg-media{
-      position:relative;
-      width:100%;
-      background:#070707;
-      overflow:hidden;
-    }
-    /* Hero is 16:9-ish (adjust if your source is different) */
+    .wg-media{ position:relative; width:100%; background:#070707; overflow:hidden; }
     .wg-media--hero{aspect-ratio: 16 / 9;}
-    /* Hat photo is also wide; keep stable */
     .wg-media--hat{aspect-ratio: 16 / 9;}
 
     .wg-media picture,
@@ -123,7 +129,7 @@
       justify-content:space-between;
     }
 
-    .wg-buybar select,.wg-buybar input{
+    .wg-buybar select{
       background:rgba(0,0,0,.45);
       border:1px solid rgba(255,255,255,.12);
       border-radius:10px;
@@ -165,7 +171,6 @@
       .wg-buybar{flex-direction:column;align-items:flex-start;}
     }
 
-    /* Winter Games marquee banner (CLS safe) */
     .wg-marquee{
       border-block:1px solid rgba(255,255,255,.06);
       background:linear-gradient(180deg, rgba(255,255,255,.02), transparent);
@@ -189,8 +194,6 @@
       from{ transform:translateX(0) }
       to{ transform:translateX(-50%) }
     }
-
-    /* Respect reduced motion */
     @media (prefers-reduced-motion: reduce){
       .wg-marquee__track{animation:none;}
       .btn{transition:none;}
@@ -198,11 +201,9 @@
   </style>
 </head>
 
-<body class="theme-dark wintergames-body">
-  <!-- NAV -->
-  <div id="nav-placeholder"></div>
+<body class="theme-dark wintergames-body" id="top">
+  <div id="site-header" aria-busy="true"></div>
 
-  <!-- Winter Games marquee banner -->
   <div class="wg-marquee" aria-hidden="true">
     <div class="wg-marquee__track">
       <span>WINTER GAMES <span class="wg-marquee__tag">•</span> ORGANIC COTTON <span class="wg-marquee__tag">•</span> LOUISIANA ENERGY <span class="wg-marquee__tag">•</span> LEGACY APPROVED <span class="wg-marquee__tag">•</span> SQUARE BIDNESS</span>
@@ -210,23 +211,18 @@
     </div>
   </div>
 
-  <main class="wg-shell">
-    <!-- Crewneck Hero Card -->
+  <main class="wg-shell" id="main-content">
     <article class="wg-card" aria-label="Winter Games hero">
       <div class="wg-media wg-media--hero">
         <picture>
-          <!-- WebP first -->
-          <source
-            type="image/webp"
-            srcset="assets/og-lil-soulja-slim_800.webp 800w, assets/og-lil-soulja-slim_1200.webp 1200w"
+          <source type="image/webp"
+            srcset="/wintergames/assets/og-lil-soulja-slim_800.webp 800w, /wintergames/assets/og-lil-soulja-slim_1200.webp 1200w"
             sizes="(max-width: 768px) 100vw, 980px">
-          <!-- Fallback JPG -->
-          <source
-            type="image/jpeg"
-            srcset="assets/og-lil-soulja-slim_800.jpg 800w, assets/og-lil-soulja-slim_1200.jpg 1200w"
+          <source type="image/jpeg"
+            srcset="/wintergames/assets/og-lil-soulja-slim_800.jpg 800w, /wintergames/assets/og-lil-soulja-slim_1200.jpg 1200w"
             sizes="(max-width: 768px) 100vw, 980px">
           <img
-            src="assets/og-lil-soulja-slim_800.jpg"
+            src="/wintergames/assets/og-lil-soulja-slim_800.jpg"
             alt="OG Lil Soulja Slim in the Winter Games crewneck"
             width="1200" height="675"
             loading="eager"
@@ -237,19 +233,17 @@
       </div>
     </article>
 
-    <!-- Crewneck Content + Buy -->
     <section class="wg-content" aria-label="Winter Games crewneck">
       <p class="wg-eyebrow">Winter Games Collection</p>
       <h1 class="wg-title">Heavyweight Organic Cotton Crewneck</h1>
-      <p class="wg-sub">
-        Worn by Lil Soulja Slim. Winter energy for people who still handling business.
-      </p>
+      <p class="wg-sub">Worn by Lil Soulja Slim. Winter energy for people who still handling business.</p>
 
       <div class="wg-buybar">
         <div>
           <strong>Winter Games Crewneck</strong><br />
           <small>Pick size to checkout.</small>
         </div>
+
         <div style="display:flex;gap:.55rem;align-items:center;flex-wrap:wrap;">
           <label class="sr-only" for="wg-size">Size</label>
           <select id="wg-size" aria-label="Select size">
@@ -264,6 +258,7 @@
           <a id="wg-checkout" class="btn btn--gold" href="#" aria-disabled="true" target="_blank" rel="noopener">
             Select size
           </a>
+
           <a class="btn btn--ghost" href="/shop/">Back to Shop</a>
         </div>
       </div>
@@ -271,28 +266,17 @@
       <p class="wg-footnote">Ships from Louisiana. Taxes/shipping calculated at checkout.</p>
     </section>
 
-    <!-- Waterproof Golf Hat Card -->
     <article class="wg-card" aria-label="Winter Games Waterproof Golf Hat">
       <div class="wg-media wg-media--hat">
         <picture>
-          <!-- WebP first -->
-          <source
-            type="image/webp"
-            srcset="
-              assets/winter-game-hat_800.webp 800w,
-              assets/winter-game-hat_1200.webp 1200w,
-              assets/winter-game-hat_1600.webp 1600w"
+          <source type="image/webp"
+            srcset="/wintergames/assets/winter-game-hat_800.webp 800w, /wintergames/assets/winter-game-hat_1200.webp 1200w, /wintergames/assets/winter-game-hat_1600.webp 1600w"
             sizes="(max-width: 768px) 100vw, 980px">
-          <!-- Fallback JPG -->
-          <source
-            type="image/jpeg"
-            srcset="
-              assets/winter-game-hat_800.jpg 800w,
-              assets/winter-game-hat_1200.jpg 1200w,
-              assets/winter-game-hat_1600.jpg 1600w"
+          <source type="image/jpeg"
+            srcset="/wintergames/assets/winter-game-hat_800.jpg 800w, /wintergames/assets/winter-game-hat_1200.jpg 1200w, /wintergames/assets/winter-game-hat_1600.jpg 1600w"
             sizes="(max-width: 768px) 100vw, 980px">
           <img
-            src="assets/winter-game-hat_800.jpg"
+            src="/wintergames/assets/winter-game-hat_800.jpg"
             alt="Square Bidness Winter Games waterproof golf hat overlooking the D.C. skyline."
             width="1600" height="900"
             loading="lazy"
@@ -302,12 +286,9 @@
       </div>
     </article>
 
-    <!-- Hat Content + Buy -->
     <section class="wg-content" aria-label="Winter Games hat">
       <p class="wg-eyebrow">Winter Games Collection</p>
-      <h2 class="wg-title" style="font-size:clamp(1.6rem,3vw,2rem);">
-        Winter Games Waterproof Golf Hat
-      </h2>
+      <h2 class="wg-title" style="font-size:clamp(1.6rem,3vw,2rem);">Winter Games Waterproof Golf Hat</h2>
       <p class="wg-sub">
         D.C. skyline, Winter Games patch, waterproof finish. For cold-weather rounds
         and rooftop views where you’re still handling bidness.
@@ -319,72 +300,25 @@
           <small>One size fits most.</small>
         </div>
         <div style="display:flex;gap:.55rem;align-items:center;flex-wrap:wrap;">
-          <a
-            id="wg-hat-checkout"
-            class="btn btn--gold"
-            href="https://buy.stripe.com/7sY7sLg4f5297U15sY8N20s"
-            target="_blank"
-            rel="noopener">
+          <a class="btn btn--gold"
+             href="https://buy.stripe.com/7sY7sLg4f5297U15sY8N20s"
+             target="_blank" rel="noopener">
             Checkout — $39.99
           </a>
           <a class="btn btn--ghost" href="/shop/">Back to Shop</a>
         </div>
       </div>
 
-      <p class="wg-footnote">
-        Water-resistant crown and bill. Ships from Louisiana with the rest of the Winter Games line.
-      </p>
+      <p class="wg-footnote">Water-resistant crown and bill. Ships from Louisiana with the rest of the Winter Games line.</p>
     </section>
   </main>
 
-  <!-- FOOTER -->
-  <div id="footer-placeholder"></div>
-
-  <!-- Inject nav/footer from root -->
-  <script>
-  (async () => {
-    const bust = `?v=${Date.now()}`;
-
-    async function inject(url, id) {
-      try {
-        const res = await fetch(url + bust, { cache: "no-store", credentials: "same-origin" });
-        if (!res.ok) return null;
-        const html = await res.text();
-        const el = document.getElementById(id);
-        if (el) el.innerHTML = html;
-        return el;
-      } catch (e) {
-        console.warn("partial load failed:", url, e);
-        return null;
-      }
-    }
-
-    // NAV
-    const nav = await inject("/nav/index.html", "nav-placeholder");
-    if (nav) {
-      const current = location.pathname.replace(/\/+$/, "") || "/";
-      nav.querySelectorAll("a[href]").forEach(a => {
-        try {
-          const href = new URL(a.getAttribute("href"), location.origin)
-            .pathname.replace(/\/+$/, "") || "/";
-          if (href === current || (href !== "/" && current.startsWith(href))) {
-            a.classList.add("is-active");
-            a.setAttribute("aria-current", "page");
-          }
-        } catch {}
-      });
-    }
-
-    // FOOTER
-    await inject("/footer/index.html", "footer-placeholder");
-  })();
-  </script>
+  <div id="site-footer" aria-busy="true"></div>
 
   <!-- Stripe link; append size + UTM (Crewneck only) -->
   <script>
   (() => {
     const BASE = "https://buy.stripe.com/14A7sL8BNamtfmt08E8N20k";
-
     const sizeEl = document.getElementById('wg-size');
     const btn    = document.getElementById('wg-checkout');
 
