@@ -1,16 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!--
-  QUICK FIX NOTES
-  - On Vercel, files in /public are served from "/" — do NOT prefix URLs with "/public".
-  - Images: /public/assets/...  → use /assets/...
-  - JS:     /public/scripts/... → use /scripts/...
-  - Partials: /public/nav/index.html → /nav/index.html
-             /public/footer/index.html → /footer/index.html
-  - products.json at /public/products.json → fetch("/products.json")
-  -->
-
   <!-- Page basics -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -18,8 +8,8 @@
   <meta name="description" content="Veteran-owned Louisiana lifestyle brand. Apparel built on principles, morals, and business done right. Shop the VSOP Collection and more." />
   <link rel="canonical" href="https://www.squarebidness.com/" />
 
-  <!-- Build/version stamp (controls update banner) -->
-  <meta name="sb:build" content="v20251215-goldmaster-01" />
+  <!-- Build/version stamp -->
+  <meta name="sb:build" content="v20251221-home" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
@@ -43,7 +33,7 @@
   <link rel="preconnect" href="https://www.googletagmanager.com">
   <link rel="preconnect" href="https://www.google-analytics.com">
 
-  <!-- ✅ Preload LCP hero image (MUST stay in HEAD) -->
+  <!-- ✅ Preload LCP hero image -->
   <link
     rel="preload"
     as="image"
@@ -93,22 +83,19 @@
   <!-- Site scripts -->
   <script defer src="/scripts/ga.js"></script>
   <script defer src="/scripts/sb-cart.js"></script>
-  <script defer src="/scripts/global.js?v=v20251213a"></script>
+  <script defer src="/scripts/global.js"></script>
 
-  <!-- Partials injector (nav/footer) -->
+  <!-- ✅ Partials injector -->
   <script defer src="/scripts/partials.js"></script>
 
   <!-- Service worker -->
   <script defer src="/scripts/sw-register.js"></script>
 
-  <!-- Page-specific styles -->
   <style>
     .hero { position:relative; }
-
     .sb-banner { font-weight:700; }
     .sb-banner a { text-decoration:underline; }
 
-    /* Tax Pass pill */
     .taxpass-pill{
       display:inline-flex;align-items:center;gap:.5rem;
       margin:1rem 0 1.25rem;padding:.4rem .9rem;border-radius:999px;
@@ -121,9 +108,8 @@
     .taxpass-pill__arrow{ font-size:.9rem;margin-left:.15rem; }
     .taxpass-pill:hover{ border-color:#4b5563;background:radial-gradient(circle at top left,#111827,#030712); }
 
-    /* VSOP overlay */
     .sb-banner--overlay{
-      position:absolute;bottom:1rem;left:1rem;right:auto;max-width:260px;
+      position:absolute;bottom:1rem;left:1rem;right:auto;max-width:300px;
       padding:.65rem .85rem;border-radius:12px;border:1px solid rgba(255,215,0,.3);
       box-shadow:0 10px 30px rgba(0,0,0,.65);
       text-align:left;text-decoration:none;display:flex;flex-direction:column;gap:.15rem;
@@ -172,7 +158,6 @@
     .loop-strip a{ color:#fff;text-decoration:none; }
     .loop-strip a:hover{ text-decoration:underline; }
 
-    /* Update banner */
     [hidden]{ display:none !important; }
     .sb-update-banner{
       position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;
@@ -189,7 +174,6 @@
       .sb-update-banner{ align-items:flex-start;flex-direction:column; }
     }
 
-    /* Who’s Who stamp (bottom part) */
     .whoswho-row{
       display:flex;flex-wrap:wrap;gap:1rem;align-items:center;justify-content:space-between;
       padding:14px;border:1px solid #1f1f1f;border-radius:12px;background:#0e0e0e;
@@ -211,7 +195,7 @@
 </head>
 
 <body class="theme-dark" id="top">
-  <!-- UPDATE REFRESH BANNER (only shows when build changes) -->
+  <!-- UPDATE REFRESH BANNER -->
   <div class="sb-update-banner" id="sb-update-banner" hidden>
     <span class="sb-update-banner__text">
       Square Bidness just pushed a fresh site update. If anything looks off, refresh to see the latest.
@@ -222,7 +206,7 @@
     </div>
   </div>
 
-  <!-- NAV injection target (loader.js fills this) -->
+  <!-- NAV injected by /scripts/partials.js -->
   <div id="site-header"></div>
 
   <!-- HERO -->
@@ -237,7 +221,6 @@
       </a>
 
       <div class="hero__inner">
-        <!-- Media -->
         <div class="hero__media">
           <picture>
             <source
@@ -259,15 +242,14 @@
             />
           </picture>
 
-          <!-- Overlay CTA -->
+          <!-- ✅ Overlay CTA updated -->
           <a href="/vsop/" class="sb-banner sb-banner--overlay" rel="noopener">
             <span class="sb-banner__eyebrow">VSOP Collection</span>
-            <strong>Preorders Live Right Now</strong>
+            <strong>Preorders Live · Ships Feb 1, 2026</strong>
             <span class="sb-banner__cta">Tap in and see the set →</span>
           </a>
         </div>
 
-        <!-- Copy -->
         <div class="hero__copy">
           <h1 class="brand">Square Bidness</h1>
           <p class="tagline">Principles. Morals. Business Done Right.</p>
@@ -279,7 +261,6 @@
       </div>
     </div>
   </header>
-
 
   <main>
     <section class="section section--band" id="shop">
@@ -297,6 +278,7 @@
               <h3>VSOP Hooded Jacket</h3>
               <p class="card__description">Premium fabric, full embroidery hit. Louisiana to NYC energy.</p>
               <p class="price">$129.99</p>
+              <p class="card__description" style="opacity:.85;margin-top:.25rem;">Ships Feb 1, 2026</p>
             </div>
             <div class="card__actions">
               <a class="btn btn--gold btn--primary" href="/product-vsop-jacket/">Preorder Jacket</a>
@@ -313,6 +295,7 @@
               <h3>VSOP Shorts</h3>
               <p class="card__description">Embroidery hit, athletic fit. Built to match the jacket.</p>
               <p class="price">$89.99</p>
+              <p class="card__description" style="opacity:.85;margin-top:.25rem;">Ships Feb 1, 2026</p>
             </div>
             <div class="card__actions">
               <a class="btn btn--gold btn--primary" href="/product-vsop-shorts/">Preorder Shorts</a>
@@ -415,40 +398,38 @@
       </div>
     </section>
 
-    <!-- Bottom part: Recognition + Who’s Who stamp -->
-   <section class="section section--band" aria-label="Recognition">
-  <div class="container">
-    <h2 class="section__title">Recognition</h2>
-    <p class="section__lead" style="max-width:70ch;">
-      Founder recognition and press resources for editors, partners, and lenders.
-    </p>
+    <section class="section section--band" aria-label="Recognition">
+      <div class="container">
+        <h2 class="section__title">Recognition</h2>
+        <p class="section__lead" style="max-width:70ch;">
+          Founder recognition and press resources for editors, partners, and lenders.
+        </p>
 
-    <div class="whoswho-row">
-      <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
-        <a href="/press/" class="whoswho-stamp" aria-label="Marquis Who’s Who stamp (view Press)" style="text-decoration:none;">
-          Marquis<br>Who’s<br>Who<br><span style="font-weight:700;opacity:.9;">2025</span>
-        </a>
-
-        <div class="whoswho-meta">
-          <div class="k">
-            <a href="/press/" style="color:#fff;text-decoration:none;">
-              Marquis Who’s Who — Founder Recognition
+        <div class="whoswho-row">
+          <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+            <a href="/press/" class="whoswho-stamp" aria-label="Marquis Who’s Who stamp (view Press)" style="text-decoration:none;">
+              Marquis<br>Who’s<br>Who<br><span style="font-weight:700;opacity:.9;">2025</span>
             </a>
+
+            <div class="whoswho-meta">
+              <div class="k">
+                <a href="/press/" style="color:#fff;text-decoration:none;">
+                  Marquis Who’s Who — Founder Recognition
+                </a>
+              </div>
+              <div class="s">
+                Press-ready links + brand resources.
+                <a href="/press/" style="color:#c9a227;text-decoration:none;font-weight:800;">Visit Press →</a>
+              </div>
+            </div>
           </div>
-          <div class="s">
-            Press-ready links + brand resources.
-            <a href="/press/" style="color:#c9a227;text-decoration:none;font-weight:800;">Visit Press →</a>
+
+          <div class="whoswho-actions">
+            <a class="btn btn--gold" href="/press/">Press</a>
           </div>
         </div>
       </div>
-
-      <div class="whoswho-actions">
-        <a class="btn btn--gold" href="/press/">Press</a>
-      </div>
-    </div>
-  </div>
-</section>
-
+    </section>
   </main>
 
   <!-- Product hydration -->
@@ -474,7 +455,7 @@
       .catch(() => {});
   </script>
 
-  <!-- Update banner logic (shows ONLY when build changes) -->
+  <!-- Update banner logic -->
   <script>
     (function(){
       var buildMeta = document.querySelector('meta[name="sb:build"]');
@@ -509,7 +490,7 @@
     })();
   </script>
 
-  <!-- FOOTER injection target (loader.js fills this) -->
+  <!-- FOOTER injected by /scripts/partials.js -->
   <div id="site-footer"></div>
 </body>
 </html>
