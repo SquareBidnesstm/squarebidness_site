@@ -16,15 +16,22 @@
   <meta name="sb:build" content="v20251221-wintergames" />
 
   <!-- Perf -->
-  <link rel="preconnect" href="https://www.googletagmanager.com">
-  <link rel="preconnect" href="https://www.google-analytics.com">
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+  <link rel="preconnect" href="https://www.google-analytics.com" crossorigin>
 
-  <!-- Preload HERO (LCP) -->
+  <!-- Preload HERO (LCP) — WebP -->
   <link rel="preload" as="image"
         href="/wintergames/assets/og-lil-soulja-slim_1200.webp"
         imagesrcset="/wintergames/assets/og-lil-soulja-slim_800.webp 800w, /wintergames/assets/og-lil-soulja-slim_1200.webp 1200w"
         imagesizes="(max-width: 768px) 100vw, 980px"
         fetchpriority="high">
+
+  <!-- Optional: Preload fallback JPG for older browsers (safe) -->
+  <link rel="preload" as="image"
+        href="/wintergames/assets/og-lil-soulja-slim_1200.jpg"
+        imagesrcset="/wintergames/assets/og-lil-soulja-slim_800.jpg 800w, /wintergames/assets/og-lil-soulja-slim_1200.jpg 1200w"
+        imagesizes="(max-width: 768px) 100vw, 980px"
+        fetchpriority="low">
 
   <!-- GA4 -->
   <script defer src="/scripts/ga.js"></script>
@@ -163,7 +170,13 @@
       border:1px solid rgba(255,255,255,.12);
       color:#fff;
     }
-    .btn[aria-disabled="true"]{opacity:.6;pointer-events:none;}
+
+    /* Make disabled anchors actually behave disabled */
+    a[aria-disabled="true"]{
+      opacity:.6;
+      pointer-events:none;
+      cursor:not-allowed;
+    }
 
     .wg-footnote{margin-top:.9rem;color:#a1a1aa;font-size:.85rem}
 
@@ -197,6 +210,17 @@
     @media (prefers-reduced-motion: reduce){
       .wg-marquee__track{animation:none;}
       .btn{transition:none;}
+    }
+
+    /* sr-only utility (you used it in the label) */
+    .sr-only{
+      position:absolute;
+      width:1px;height:1px;
+      padding:0;margin:-1px;
+      overflow:hidden;
+      clip:rect(0,0,0,0);
+      white-space:nowrap;
+      border:0;
     }
   </style>
 </head>
