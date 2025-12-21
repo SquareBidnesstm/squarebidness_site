@@ -8,6 +8,11 @@
   <meta name="description" content="Veteran-owned Louisiana lifestyle brand. Apparel built on principles, morals, and business done right. Shop the VSOP Collection and more." />
   <link rel="canonical" href="https://www.squarebidness.com/" />
 
+  <!-- Indexing + theme -->
+  <meta name="robots" content="index,follow">
+  <meta name="theme-color" content="#000000">
+  <meta name="color-scheme" content="dark light">
+
   <!-- Build/version stamp -->
   <meta name="sb:build" content="v20251221-home" />
 
@@ -30,10 +35,10 @@
   <meta name="twitter:image" content="https://www.squarebidness.com/assets/sb-social-card_1200.jpg" />
 
   <!-- Perf -->
-  <link rel="preconnect" href="https://www.googletagmanager.com">
-  <link rel="preconnect" href="https://www.google-analytics.com">
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+  <link rel="preconnect" href="https://www.google-analytics.com" crossorigin>
 
-  <!-- ✅ Preload LCP hero image -->
+  <!-- ✅ Preload LCP hero image (WebP) -->
   <link
     rel="preload"
     as="image"
@@ -41,6 +46,15 @@
     imagesrcset="/assets/hero_800.webp 800w, /assets/hero_1200.webp 1200w"
     imagesizes="(min-width: 900px) 50vw, 100vw"
     fetchpriority="high"
+  />
+  <!-- ✅ Preload LCP fallback (JPG) -->
+  <link
+    rel="preload"
+    as="image"
+    href="/assets/hero_1200.jpg"
+    imagesrcset="/assets/hero_800.jpg 800w, /assets/hero_1200.jpg 1200w"
+    imagesizes="(min-width: 900px) 50vw, 100vw"
+    fetchpriority="low"
   />
 
   <!-- Global CSS -->
@@ -51,7 +65,6 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/icon-180.png">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
-  <meta name="theme-color" content="#000000">
 
   <!-- Org JSON-LD -->
   <script type="application/ld+json">
@@ -92,6 +105,10 @@
   <script defer src="/scripts/sw-register.js"></script>
 
   <style>
+    /* CLS guard for injected nav/footer */
+    #site-header{min-height:72px;}
+    #site-footer{min-height:120px;}
+
     .hero { position:relative; }
     .sb-banner { font-weight:700; }
     .sb-banner a { text-decoration:underline; }
@@ -196,7 +213,7 @@
 
 <body class="theme-dark" id="top">
   <!-- UPDATE REFRESH BANNER -->
-  <div class="sb-update-banner" id="sb-update-banner" hidden>
+  <div class="sb-update-banner" id="sb-update-banner" hidden aria-live="polite">
     <span class="sb-update-banner__text">
       Square Bidness just pushed a fresh site update. If anything looks off, refresh to see the latest.
     </span>
@@ -207,7 +224,7 @@
   </div>
 
   <!-- NAV injected by /scripts/partials.js -->
-  <div id="site-header"></div>
+  <div id="site-header" aria-busy="true"></div>
 
   <!-- HERO -->
   <header class="hero hero--dark">
@@ -239,10 +256,11 @@
               decoding="async"
               fetchpriority="high"
               style="width:100%;height:auto;"
+              onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';"
             />
           </picture>
 
-          <!-- ✅ Overlay CTA updated -->
+          <!-- Overlay CTA -->
           <a href="/vsop/" class="sb-banner sb-banner--overlay" rel="noopener">
             <span class="sb-banner__eyebrow">VSOP Collection</span>
             <strong>Preorders Live · Ships Feb 1, 2026</strong>
@@ -271,7 +289,7 @@
         <div class="home-grid">
           <article class="card" data-product-id="vsop-jacket">
             <div class="card__media">
-              <img src="/assets/vsop-jacket.jpg" alt="VSOP embroidered hooded jacket in burgundy and brown">
+              <img src="/assets/vsop-jacket.jpg" alt="VSOP embroidered hooded jacket in burgundy and brown" onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';">
               <span class="badge">VSOP · Preorder</span>
             </div>
             <div class="card__content">
@@ -288,7 +306,7 @@
 
           <article class="card" data-product-id="vsop-shorts">
             <div class="card__media">
-              <img src="/assets/vsop-shorts.jpg" alt="VSOP matching shorts in burgundy and brown">
+              <img src="/assets/vsop-shorts.jpg" alt="VSOP matching shorts in burgundy and brown" onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';">
               <span class="badge">VSOP · Preorder</span>
             </div>
             <div class="card__content">
@@ -305,7 +323,7 @@
 
           <article class="card" data-product-id="supima-tee">
             <div class="card__media">
-              <img src="/collections/assets/amari_2_800.jpg" alt="Amari in a Supima Square Bidness tee">
+              <img src="/collections/assets/amari_2_800.jpg" alt="Amari in a Supima Square Bidness tee" onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';">
               <span class="badge">Supima Essential</span>
             </div>
             <div class="card__content">
@@ -321,7 +339,7 @@
 
           <article class="card" data-product-id="wintergames-crewneck">
             <div class="card__media">
-              <img src="/wintergames/assets/og-lil-soulja-slim_800.jpg" alt="Winter Games crewneck worn by OG Lil Soulja Slim">
+              <img src="/wintergames/assets/og-lil-soulja-slim_800.jpg" alt="Winter Games crewneck worn by OG Lil Soulja Slim" onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';">
               <span class="badge">Winter Games</span>
             </div>
             <div class="card__content">
@@ -337,7 +355,7 @@
 
           <article class="card" data-product-id="wintergames-hat">
             <div class="card__media">
-              <img src="/wintergames/assets/winter-game-hat_800.jpg" alt="Winter Games Waterproof Golfer hat from Square Bidness">
+              <img src="/wintergames/assets/winter-game-hat_800.jpg" alt="Winter Games Waterproof Golfer hat from Square Bidness" onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';">
               <span class="badge">Winter Games</span>
             </div>
             <div class="card__content">
@@ -359,7 +377,11 @@
                 src="/assets/community/marquesha-1-800.jpg"
                 srcset="/assets/community/marquesha-1-800.jpg 800w, /assets/community/marquesha-1-1600.jpg 1600w"
                 sizes="(max-width: 768px) 100vw, 400px"
-                alt="Marquesha representing the upcoming Square Bidness women’s lane">
+                alt="Marquesha representing the upcoming Square Bidness women’s lane"
+                loading="lazy"
+                decoding="async"
+                onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';"
+              >
               <span class="badge">Women Coming</span>
             </div>
             <div class="card__content">
@@ -438,18 +460,27 @@
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (!data) return;
+
         document.querySelectorAll("[data-product-id]").forEach(card => {
           const id = card.getAttribute("data-product-id");
           const p  = data[id];
           if (!p) return;
+
           const title = card.querySelector("h3");
           const desc  = card.querySelector(".card__description");
           const img   = card.querySelector("img");
           const price = card.querySelector(".price");
+
           if (title && p.name) title.textContent = p.name;
           if (desc && p.desc) desc.textContent = p.desc;
-          if (img && p.image) img.src = p.image;
-          if (price && typeof p.price === "number") price.textContent = `$${p.price.toFixed(2)}`;
+
+          if (img && p.image) {
+            img.src = p.image;
+          }
+
+          if (price && typeof p.price === "number") {
+            price.textContent = `$${p.price.toFixed(2)}`;
+          }
         });
       })
       .catch(() => {});
@@ -491,6 +522,6 @@
   </script>
 
   <!-- FOOTER injected by /scripts/partials.js -->
-  <div id="site-footer"></div>
+  <div id="site-footer" aria-busy="true"></div>
 </body>
 </html>
