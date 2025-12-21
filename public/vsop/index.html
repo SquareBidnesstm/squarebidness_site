@@ -8,6 +8,9 @@
   <meta name="description" content="VSOP Collection — Burgundy + Brown set. Hooded jacket and matching shorts with full embroidery. Fall 2025 limited run from Square Bidness." />
   <link rel="canonical" href="https://www.squarebidness.com/vsop/" />
 
+  <!-- Build stamp (used by /scripts/partials.js for cache busting) -->
+  <meta name="sb:build" content="v20251221-vsop" />
+
   <!-- SEO / Social -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Square Bidness" />
@@ -36,8 +39,12 @@
   <!-- GA + cart -->
   <script defer src="/scripts/ga.js"></script>
   <script defer src="/scripts/sb-cart.js"></script>
+  <script defer src="/scripts/global.js"></script>
 
-  <!-- ✅ Preload LCP hero image (WebP first, JPG fallback already in <picture>) -->
+  <!-- ✅ Partials loader (nav/footer everywhere) -->
+  <script defer src="/scripts/partials.js"></script>
+
+  <!-- ✅ Preload LCP hero image -->
   <link
     rel="preload"
     as="image"
@@ -48,170 +55,67 @@
   />
 
   <style>
-    .vsop-hero {
-      background:#05010a;
-      border-bottom:1px solid #1f1f1f;
-    }
+    .vsop-hero { background:#05010a; border-bottom:1px solid #1f1f1f; }
     .vsop-hero__inner {
-      max-width:1200px;
-      margin:0 auto;
-      padding:20px 16px 24px;
-      display:grid;
-      gap:18px;
-      align-items:center;
+      max-width:1200px;margin:0 auto;padding:20px 16px 24px;
+      display:grid;gap:18px;align-items:center;
     }
-    @media(min-width:900px){
-      .vsop-hero__inner{
-        grid-template-columns:1.1fr .9fr;
-      }
-    }
-    .vsop-hero__copy h1{
-      margin:0 0 .25rem;
-      font-size:clamp(1.6rem,3.5vw,2.4rem);
-    }
-    .vsop-hero__copy p{
-      margin:.3rem 0;
-      max-width:32rem;
-    }
-    .vsop-tagline{
-      color:#e5e5e5;
-      font-size:.95rem;
-    }
+    @media(min-width:900px){ .vsop-hero__inner{ grid-template-columns:1.1fr .9fr; } }
+    .vsop-hero__copy h1{ margin:0 0 .25rem; font-size:clamp(1.6rem,3.5vw,2.4rem); }
+    .vsop-hero__copy p{ margin:.3rem 0; max-width:32rem; }
+    .vsop-tagline{ color:#e5e5e5; font-size:.95rem; }
     .vsop-label{
-      display:inline-flex;
-      align-items:center;
-      gap:.35rem;
-      padding:.25rem .55rem;
-      border-radius:999px;
+      display:inline-flex;align-items:center;gap:.35rem;
+      padding:.25rem .55rem;border-radius:999px;
       border:1px solid rgba(255,215,0,.35);
-      background:#22000b;
-      color:#fef3c7;
-      font-size:.75rem;
-      text-transform:uppercase;
-      letter-spacing:.08em;
-      margin-bottom:.35rem;
+      background:#22000b;color:#fef3c7;font-size:.75rem;
+      text-transform:uppercase;letter-spacing:.08em;margin-bottom:.35rem;
     }
-    .vsop-label span{
-      height:8px;width:8px;
-      border-radius:999px;
-      background:#22c55e;
-    }
+    .vsop-label span{ height:8px;width:8px;border-radius:999px;background:#22c55e; }
     .vsop-hero__media img{
-      width:100%;
-      display:block;
-      border-radius:14px;
-      border:1px solid #1f1f1f;
-      background:#0b0b0b;
-      object-fit:cover;
+      width:100%;display:block;border-radius:14px;border:1px solid #1f1f1f;
+      background:#0b0b0b;object-fit:cover;
     }
-    .vsop-hero__meta{
-      margin-top:.75rem;
-      display:flex;
-      flex-wrap:wrap;
-      gap:.6rem;
-    }
+    .vsop-hero__meta{ margin-top:.75rem; display:flex; flex-wrap:wrap; gap:.6rem; }
     .vsop-preorder-pill{
-      font-size:.8rem;
-      padding:.35rem .6rem;
-      border-radius:999px;
+      font-size:.8rem;padding:.35rem .6rem;border-radius:999px;
       border:1px solid rgba(255,255,255,.18);
-      background:#111827;
-      color:#e5e7eb;
+      background:#111827;color:#e5e7eb;
     }
-
     .vsop-grid{
-      max-width:1200px;
-      margin:0 auto;
-      padding:20px 16px 30px;
-      display:grid;
-      gap:16px;
+      max-width:1200px;margin:0 auto;padding:20px 16px 30px;
+      display:grid;gap:16px;
     }
-    @media(min-width:880px){
-      .vsop-grid{
-        grid-template-columns:1.05fr 1.05fr;
-      }
-    }
+    @media(min-width:880px){ .vsop-grid{ grid-template-columns:1.05fr 1.05fr; } }
     .vsop-card{
-      background:#050308;
-      border-radius:14px;
-      border:1px solid #1f1f1f;
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
+      background:#050308;border-radius:14px;border:1px solid #1f1f1f;
+      overflow:hidden;display:flex;flex-direction:column;
     }
-    .vsop-card__media img{
-      width:100%;
-      display:block;
-      object-fit:cover;
-    }
-    .vsop-card__body{
-      padding:14px 14px 10px;
-    }
-    .vsop-card__body h2{
-      margin:0 0 .15rem;
-      font-size:1.05rem;
-    }
-    .vsop-card__body p{
-      margin:0 0 .35rem;
-      font-size:.93rem;
-      color:#d7dae0;
-    }
-    .vsop-price{
-      font-weight:700;
-      color:#facc15;
-      font-size:.97rem;
-    }
+    .vsop-card__media img{ width:100%;display:block;object-fit:cover; }
+    .vsop-card__body{ padding:14px 14px 10px; }
+    .vsop-card__body h2{ margin:0 0 .15rem;font-size:1.05rem; }
+    .vsop-card__body p{ margin:0 0 .35rem;font-size:.93rem;color:#d7dae0; }
+    .vsop-price{ font-weight:700;color:#facc15;font-size:.97rem; }
     .vsop-card__actions{
-      padding:0 14px 14px;
-      display:flex;
-      flex-wrap:wrap;
-      gap:.5rem;
-      align-items:center;
+      padding:0 14px 14px;display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;
     }
-    .vsop-note{
-      font-size:.82rem;
-      color:#9ca3af;
-      margin-top:.4rem;
-    }
-    .vsop-section-title{
-      max-width:1200px;
-      margin:20px auto 0;
-      padding:0 16px;
-    }
-    .vsop-section-title h2{
-      margin:0 0 .25rem;
-      font-size:1.1rem;
-    }
-    .vsop-section-title p{
-      margin:0;
-      font-size:.9rem;
-      color:#9ca3af;
-    }
-
+    .vsop-note{ font-size:.82rem;color:#9ca3af;margin-top:.4rem; }
+    .vsop-section-title{ max-width:1200px;margin:20px auto 0;padding:0 16px; }
+    .vsop-section-title h2{ margin:0 0 .25rem;font-size:1.1rem; }
+    .vsop-section-title p{ margin:0;font-size:.9rem;color:#9ca3af; }
     .section-nav{
-      max-width:1200px;
-      margin:0 auto;
-      padding:6px 16px 12px;
-      font-size:.85rem;
-      color:#9ca3af;
-      display:flex;
-      justify-content:space-between;
-      gap:8px;
-      flex-wrap:wrap;
+      max-width:1200px;margin:0 auto;padding:6px 16px 12px;
+      font-size:.85rem;color:#9ca3af;display:flex;
+      justify-content:space-between;gap:8px;flex-wrap:wrap;
     }
-    .section-nav a{
-      color:#e5e7eb;
-      text-decoration:none;
-    }
-    .section-nav a:hover{
-      text-decoration:underline;
-    }
+    .section-nav a{ color:#e5e7eb;text-decoration:none; }
+    .section-nav a:hover{ text-decoration:underline; }
   </style>
 </head>
 
 <body class="theme-dark" id="top">
-  <!-- NAV -->
-  <div id="nav-placeholder"></div>
+  <!-- NAV injected by /scripts/partials.js -->
+  <div id="site-header"></div>
 
   <!-- HERO -->
   <header class="vsop-hero">
@@ -221,25 +125,30 @@
           <span aria-hidden="true"></span>
           VSOP Collection · Fall 2025
         </div>
+
         <h1>VSOP — Very Superior Old Pale.</h1>
+
         <p class="vsop-tagline">
           Burgundy + Brown set — jacket and shorts that feel aged, intentional, and ready for real motion.
         </p>
+
         <p>
           This is not a random color combo. It’s a story piece: Louisiana roots, New York skyline,
           and grown-man fabric decisions.
         </p>
+
         <div class="vsop-hero__meta">
           <a class="btn btn--gold" href="#set">View the Set</a>
           <a class="btn btn--ghost" href="/shop/">Back to Shop</a>
+
+          <!-- ✅ Ship date updated -->
           <div class="vsop-preorder-pill">
-            Preorder window live
+            Preorder · Ships Feb 1, 2026
           </div>
         </div>
       </div>
 
       <div class="vsop-hero__media">
-        <!-- ✅ Hero now uses your /assets/hero_* (WebP + JPG fallback) -->
         <picture>
           <source
             type="image/webp"
@@ -274,9 +183,7 @@
     </div>
   </div>
 
-  <!-- ✅ Main landmark (fixes Lighthouse “no main landmark”) -->
   <main id="main-content">
-    <!-- SET GRID -->
     <section id="set">
       <div class="vsop-section-title">
         <h2>The Set</h2>
@@ -304,7 +211,9 @@
               meetings and victory laps at the same time.
             </p>
             <div class="vsop-price">$129.99 · Preorder</div>
-            <p class="vsop-note">Ships on or before 2026.</p>
+
+            <!-- ✅ Ship date updated -->
+            <p class="vsop-note">Ships Feb 1, 2026.</p>
           </div>
           <div class="vsop-card__actions">
             <a class="btn btn--gold btn--primary" href="/product-vsop-jacket/">
@@ -336,7 +245,9 @@
               Same VSOP story — just on the legs.
             </p>
             <div class="vsop-price">$89.99 · Preorder</div>
-            <p class="vsop-note">Ships on or before 2026.</p>
+
+            <!-- ✅ Ship date updated -->
+            <p class="vsop-note">Ships Feb 1, 2026.</p>
           </div>
           <div class="vsop-card__actions">
             <a class="btn btn--gold btn--primary" href="/product-vsop-shorts/">
@@ -351,35 +262,7 @@
     </section>
   </main>
 
-  <!-- FOOTER SLOT -->
-  <div id="footer-placeholder"></div>
-
-  <!-- NAV + FOOTER inject -->
-  <script>
-  (async () => {
-    const bust = `?v=${Date.now()}`;
-
-    async function injectPartial(url, targetId) {
-      try {
-        const res = await fetch(url + bust, { credentials: 'same-origin', cache: 'no-store' });
-        if (!res.ok) {
-          console.warn('[partials] not ok:', url, res.status);
-          return null;
-        }
-        const html = await res.text();
-        const el = document.getElementById(targetId);
-        if (!el) return null;
-        el.innerHTML = html;
-        return el;
-      } catch (err) {
-        console.warn('[partials] fetch fail:', url, err);
-        return null;
-      }
-    }
-
-    await injectPartial('/nav/index.html', 'nav-placeholder');
-    await injectPartial('/footer/index.html', 'footer-placeholder');
-  })();
-  </script>
+  <!-- FOOTER injected by /scripts/partials.js -->
+  <div id="site-footer"></div>
 </body>
 </html>
