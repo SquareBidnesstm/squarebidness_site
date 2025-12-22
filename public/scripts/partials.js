@@ -1,10 +1,6 @@
-// public/partials/loader.js
+// /public/scripts/partials.js
 (() => {
-  const BUILD =
-    window.SB_BUILD ||
-    document.querySelector('meta[name="sb:build"]')?.content ||
-    "v1";
-
+  const BUILD = (window.SB_BUILD || document.querySelector('meta[name="sb:build"]')?.content || "v1");
   const bust = `?v=${encodeURIComponent(BUILD)}`;
 
   function onReady(fn) {
@@ -17,26 +13,21 @@
 
   async function injectPartial(url, targetId) {
     const el = document.getElementById(targetId);
-
-    // ✅ Quietly skip if the page doesn't have this slot
-    if (!el) return false;
+    if (!el) {
+      console.warn("[partials] missing target:", targetId);
+      return false;
+    }
 
     try {
-      const res = await fetch(url + bust, {
-        cache: "force-cache",
-        credentials: "same-origin",
-      });
-
+      const res = await fetch(url + bust, { cache: "force-cache", credentials: "same-origin" });
       if (!res.ok) {
         console.warn("[partials] not ok:", url, res.status);
         return false;
       }
 
-      el.innerHTML = await res.text();
-
-      // Optional reveal class (only if you define it in CSS)
-      // el.classList.add("fade-in");
-
+      const html = await res.text();
+      el.innerHTML = html;
+      el.classList.add("fade-in");
       return true;
     } catch (err) {
       console.warn("[partials] fetch fail:", url, err);
@@ -54,7 +45,6 @@
     scope.querySelectorAll("a[href]").forEach((a) => {
       const raw = a.getAttribute("href");
       if (!raw) return;
-
       if (raw.startsWith("#")) return;
       if (/^(mailto:|tel:)/i.test(raw)) return;
 
@@ -88,8 +78,6 @@
 
     const footOk = await injectPartial("/footer/index.html", "site-footer");
 
-    if (navOk || footOk) {
-      window.dispatchEvent(new Event("sb:partials_loaded"));
-    }
+    if (navOk || footOk) window.dispatchEvent(new Event("sb:partials_loaded"));
   });
 })();
