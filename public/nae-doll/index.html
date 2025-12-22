@@ -1,70 +1,165 @@
+<!-- /public/nae-doll/index.html (private inspiration page) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+
   <title>Biker Girl Nae Doll — Star in the Making</title>
   <meta name="description" content="Private preview for Biker Girl Nae Doll — throttle-ready confidence and star energy. This ain’t for sale; this is what your lane could look like." />
-  <meta property="og:title" content="Biker Girl Nae Doll — Star in the Making" />
-  <meta property="og:description" content="This ain’t for sale — this is what your lane could look like. You are a star, it’s time to fill your role." />
-  <meta property="og:image" content="/nae-doll/assets/nae-doll-2_1200x630.jpg" />
+
+  <!-- Canonical (optional) -->
+  <link rel="canonical" href="https://www.squarebidness.com/nae-doll/" />
+
+  <!-- Theme -->
+  <meta name="theme-color" content="#000000" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="robots" content="noindex,nofollow" />
+
+  <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Square Bidness" />
+  <meta property="og:title" content="Biker Girl Nae Doll — Star in the Making" />
+  <meta property="og:description" content="This ain’t for sale — this is what your lane could look like. You are a star, it’s time to fill your role." />
+  <meta property="og:image" content="https://www.squarebidness.com/nae-doll/assets/nae-doll-2_1200x630.webp" />
+  <meta property="og:url" content="https://www.squarebidness.com/nae-doll/" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Biker Girl Nae Doll — Star in the Making" />
+  <meta name="twitter:description" content="This ain’t for sale — this is what your lane could look like. You are a star, it’s time to fill your role." />
+  <meta name="twitter:image" content="https://www.squarebidness.com/nae-doll/assets/nae-doll-2_1200x630.webp" />
+
+  <!-- ✅ Preload hero (LCP) WEBP -->
+  <link
+    rel="preload"
+    as="image"
+    href="/nae-doll/assets/nae-doll-2_1200.webp"
+    imagesrcset="/nae-doll/assets/nae-doll-2_800.webp 800w, /nae-doll/assets/nae-doll-2_1200.webp 1200w"
+    imagesizes="100vw"
+    fetchpriority="high"
+  />
+
   <style>
-    :root { --gold:#c7a65c; }
+    :root{
+      --bg:#000;
+      --fg:#fff;
+      --muted:rgba(255,255,255,.78);
+      --stroke:rgba(255,255,255,.10);
+      --gold:#c7a65c;
+      --card:#0b0b0b;
+    }
     *{box-sizing:border-box}
-    body{margin:0;background:#000;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,sans-serif}
+    html,body{height:100%}
+    body{
+      margin:0;background:var(--bg);color:var(--fg);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,sans-serif;
+      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    }
+    a{color:inherit}
+
+    .container{max-width:1100px;margin:0 auto;padding:0 16px;}
+    .visually-hidden{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(1px,1px,1px,1px);white-space:nowrap}
 
     /* HERO */
     .hero{
-      position:relative;min-height:62vh;display:grid;place-items:center;text-align:center;
-      padding:3.2rem 1rem;isolation:isolate;overflow:hidden;
-      background:#000 url("/nae-doll/assets/nae-doll-2_1200.jpg") center/cover no-repeat fixed;
+      position:relative;isolation:isolate;overflow:hidden;
+      min-height:62vh;display:grid;place-items:center;
+      padding:3.2rem 0;
+      border-bottom:1px solid var(--stroke);
+      background:
+        radial-gradient(80% 70% at 50% 12%, rgba(199,166,92,.18), transparent 62%),
+        linear-gradient(to bottom, rgba(0,0,0,.40), rgba(0,0,0,.86));
     }
-    .hero::before{
-      content:"";position:absolute;inset:0;background:
+    .hero__bg{
+      position:absolute;inset:0;z-index:-2;
+      background:#000;
+    }
+    .hero__bg img{
+      width:100%;height:100%;object-fit:cover;display:block;
+      filter:saturate(1.05) contrast(1.05);
+      transform:scale(1.02);
+    }
+    .hero__shade{
+      position:absolute;inset:0;z-index:-1;
+      background:
         radial-gradient(80% 70% at 50% 15%, rgba(199,166,92,.18), transparent 60%),
-        linear-gradient(to bottom, rgba(0,0,0,.55), rgba(0,0,0,.85));
-      z-index:-1;
+        linear-gradient(to bottom, rgba(0,0,0,.40), rgba(0,0,0,.86));
     }
-    .hero h1{margin:0 0 .5rem;font-size:2.35rem;letter-spacing:.6px;animation:fadeUp .7s ease-out both}
-    .sub{color:#bbb;font-size:1rem;animation:fadeUp .9s ease-out both}
+    .hero__inner{text-align:center;padding:0 10px;}
+    .hero h1{
+      margin:0 0 .5rem;
+      font-size:clamp(1.75rem, 3.2vw, 2.6rem);
+      letter-spacing:.4px;
+      animation:fadeUp .7s ease-out both;
+    }
+    .sub{
+      color:rgba(255,255,255,.72);
+      font-size:1rem;
+      animation:fadeUp .9s ease-out both;
+    }
     .banner{
-      display:inline-block;margin:1rem auto 0;padding:.45rem 1rem;border:1px solid rgba(199,166,92,.65);
-      border-radius:999px;color:var(--gold);font-size:.86rem;letter-spacing:.45px;text-transform:uppercase;
-      backdrop-filter: blur(4px);background:rgba(0,0,0,.35);animation:glow 2.6s ease-in-out 1s both;
+      display:inline-flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:.4rem;
+      margin:1rem auto 0;padding:.45rem 1rem;
+      border:1px solid rgba(199,166,92,.65);
+      border-radius:999px;color:var(--gold);
+      font-size:.84rem;letter-spacing:.42px;text-transform:uppercase;
+      backdrop-filter: blur(6px);background:rgba(0,0,0,.35);
+      box-shadow:0 0 30px rgba(199,166,92,.12);
+      animation:glow 2.6s ease-in-out 1s both;
     }
 
     /* GRID */
+    .grid-wrap{padding:1.4rem 0 2.2rem;}
     .grid{
-      display:grid;gap:1.2rem;max-width:1100px;margin:1.2rem auto 2.5rem;padding:0 1rem;
-      grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+      display:grid;gap:1rem;
+      grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
     }
     .card{
-      position:relative;border-radius:18px;overflow:hidden;
+      position:relative;border-radius:18px;overflow:hidden;background:var(--card);
       box-shadow:0 0 0 1px rgba(255,255,255,.08), 0 20px 40px rgba(0,0,0,.6);
       transition:transform .35s ease, box-shadow .35s ease;
     }
     .card::after{
       content:"";position:absolute;inset:-2px;border-radius:20px;
-      background:radial-gradient(80% 80% at 50% 10%, rgba(199,166,92,.35), transparent 55%);
+      background:radial-gradient(80% 80% at 50% 10%, rgba(199,166,92,.25), transparent 55%);
       pointer-events:none;mix-blend:screen;
     }
-    .card:hover{transform:translateY(-4px);box-shadow:0 0 0 1px rgba(255,255,255,.12), 0 28px 60px rgba(0,0,0,.7)}
-    img{display:block;width:100%;height:100%;object-fit:cover}
+    .card:hover{
+      transform:translateY(-4px);
+      box-shadow:0 0 0 1px rgba(255,255,255,.12), 0 28px 60px rgba(0,0,0,.7);
+    }
+    .card picture,.card img{display:block;width:100%;height:auto}
+    .card img{object-fit:cover;background:#000}
 
     /* MESSAGE */
     .message{
-      max-width:900px;margin:2.5rem auto 2.8rem;padding:1.6rem 1.2rem;
-      text-align:center;border-top:1px solid rgba(255,255,255,.08);
-      border-bottom:1px solid rgba(255,255,255,.08);
+      margin:0 auto 2.6rem;
+      padding:1.6rem 0;
+      text-align:center;
+      border-top:1px solid var(--stroke);
+      border-bottom:1px solid var(--stroke);
     }
     .message p{
-      font-size:1.05rem;line-height:1.6;color:#ddd;margin:0.6rem 0;
+      max-width:70ch;margin:.55rem auto;
+      font-size:1.05rem;line-height:1.65;color:rgba(255,255,255,.86);
+      padding:0 16px;
     }
     .message strong{color:var(--gold);}
 
-    footer{padding:1.6rem 1rem 2.2rem;text-align:center;color:#888;font-size:.9rem}
+    footer{
+      padding:1.6rem 0 2.2rem;
+      text-align:center;color:rgba(255,255,255,.55);
+      font-size:.9rem;
+    }
+
+    /* reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      .hero h1,.sub{animation:none}
+      .banner{animation:none}
+      .card{transition:none}
+      .hero__bg img{transform:none}
+    }
 
     @keyframes fadeUp{
       from{opacity:0;transform:translateY(10px)}
@@ -72,14 +167,35 @@
     }
     @keyframes glow{
       0%{box-shadow:0 0 0 rgba(199,166,92,0)}
-      100%{box-shadow:0 0 30px rgba(199,166,92,.15)}
+      100%{box-shadow:0 0 30px rgba(199,166,92,.12)}
     }
   </style>
 </head>
+
 <body>
-  <!-- HERO INTRO -->
-  <section class="hero">
-    <div>
+  <!-- HERO -->
+  <section class="hero" aria-label="Nae Doll private preview">
+    <div class="hero__bg" aria-hidden="true">
+      <!-- ✅ WEBP first + JPG fallback (same paths, just .webp added) -->
+      <picture>
+        <source type="image/webp"
+          srcset="/nae-doll/assets/nae-doll-2_800.webp 800w, /nae-doll/assets/nae-doll-2_1200.webp 1200w"
+          sizes="100vw">
+        <source type="image/jpeg"
+          srcset="/nae-doll/assets/nae-doll-2_800.jpg 800w, /nae-doll/assets/nae-doll-2_1200.jpg 1200w"
+          sizes="100vw">
+        <img
+          src="/nae-doll/assets/nae-doll-2_1200.jpg"
+          width="1200" height="800"
+          alt=""
+          loading="eager"
+          decoding="async"
+          fetchpriority="high">
+      </picture>
+    </div>
+    <div class="hero__shade" aria-hidden="true"></div>
+
+    <div class="container hero__inner">
       <h1>✨ Biker Girl Nae Doll — Star Energy ✨</h1>
       <div class="sub">“They won’t believe until you do.”</div>
       <div class="banner">Throttle-ready confidence • True Rider • Star in the Making</div>
@@ -87,28 +203,50 @@
   </section>
 
   <!-- TWO-SHOT GALLERY -->
-  <main class="grid">
-    <figure class="card">
-      <img 
-        src="/nae-doll/assets/nae-doll_1200.jpg" 
-        srcset="/nae-doll/assets/nae-doll_800.jpg 800w, /nae-doll/assets/nae-doll_1200.jpg 1200w" 
-        sizes="(max-width: 768px) 100vw, 540px"
-        alt="Biker Girl Nae Doll — look one">
-    </figure>
+  <main class="grid-wrap" aria-label="Two-shot gallery">
+    <div class="container">
+      <div class="grid">
+        <figure class="card">
+          <picture>
+            <source type="image/webp"
+              srcset="/nae-doll/assets/nae-doll_800.webp 800w, /nae-doll/assets/nae-doll_1200.webp 1200w"
+              sizes="(max-width: 768px) 100vw, 540px">
+            <source type="image/jpeg"
+              srcset="/nae-doll/assets/nae-doll_800.jpg 800w, /nae-doll/assets/nae-doll_1200.jpg 1200w"
+              sizes="(max-width: 768px) 100vw, 540px">
+            <img
+              src="/nae-doll/assets/nae-doll_1200.jpg"
+              width="1200" height="800"
+              loading="lazy"
+              decoding="async"
+              alt="Biker Girl Nae Doll — look one">
+          </picture>
+        </figure>
 
-    <figure class="card">
-      <img 
-        src="/nae-doll/assets/nae-doll-2_1200.jpg" 
-        srcset="/nae-doll/assets/nae-doll-2_800.jpg 800w, /nae-doll/assets/nae-doll-2_1200.jpg 1200w" 
-        sizes="(max-width: 768px) 100vw, 540px"
-        alt="Biker Girl Nae Doll — look two">
-    </figure>
+        <figure class="card">
+          <picture>
+            <source type="image/webp"
+              srcset="/nae-doll/assets/nae-doll-2_800.webp 800w, /nae-doll/assets/nae-doll-2_1200.webp 1200w"
+              sizes="(max-width: 768px) 100vw, 540px">
+            <source type="image/jpeg"
+              srcset="/nae-doll/assets/nae-doll-2_800.jpg 800w, /nae-doll/assets/nae-doll-2_1200.jpg 1200w"
+              sizes="(max-width: 768px) 100vw, 540px">
+            <img
+              src="/nae-doll/assets/nae-doll-2_1200.jpg"
+              width="1200" height="800"
+              loading="lazy"
+              decoding="async"
+              alt="Biker Girl Nae Doll — look two">
+          </picture>
+        </figure>
+      </div>
+    </div>
   </main>
 
   <!-- PERSONAL MESSAGE -->
-  <section class="message">
-    <p><strong>This ain’t for sale</strong> — this is what your lane could look like.  
-    This is what a brand presentation feels like when the concept and visuals come together.</p>
+  <section class="message" aria-label="Message">
+    <p><strong>This ain’t for sale</strong> — this is what your lane could look like.
+      This is what a brand presentation feels like when the concept and visuals come together.</p>
     <p>You’ve got the look, the energy, the heart — now it’s time to <strong>fill your role</strong> and move like the star you already are.</p>
   </section>
 
