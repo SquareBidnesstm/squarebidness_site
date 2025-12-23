@@ -6,17 +6,22 @@
   <link rel="preconnect" href="https://www.google-analytics.com">
 
   <!-- GA4 (site-wide) -->
-<script defer src="/scripts/ga.js"></script>
+  <script defer src="/scripts/ga.js"></script>
 
-<!-- Optional global helpers -->
-<script defer src="/scripts/global.js"></script>
+  <!-- Optional global helpers -->
+  <script defer src="/scripts/global.js"></script>
 
-<!-- SB analytics (site-wide) -->
-<script defer src="/scripts/sb-analytics.js"></script>
+  <!-- SB analytics (site-wide) -->
+  <script defer src="/scripts/sb-analytics.js"></script>
 
-<!-- Nav/Footer injection -->
-<script defer src="/scripts/partials.js"></script>
+  <!-- Nav/Footer injection -->
+  <script defer src="/scripts/partials.js"></script>
 
+  <!-- Global cart helpers (optional but fine) -->
+  <script defer src="/scripts/sb-cart.js"></script>
+
+  <!-- Stripe.js -->
+  <script defer src="https://js.stripe.com/v3/"></script>
 
   <!-- Basics -->
   <meta charset="UTF-8" />
@@ -73,12 +78,6 @@
   }
   </script>
 
-  <!-- Global cart helpers (optional but fine) -->
-  <script defer src="/scripts/sb-cart.js"></script>
-
-  <!-- Stripe.js -->
-  <script defer src="https://js.stripe.com/v3/"></script>
-
   <style>
     .right { text-align:right }
     .total td { font-weight:900 }
@@ -96,28 +95,11 @@
       display:inline-block;
     }
   </style>
-
-  <!-- Inject nav/footer (consistent paths + cache bust) -->
-  <script>
-  document.addEventListener("DOMContentLoaded", async () => {
-    const bust = `?v=${Date.now()}`;
-    async function inject(url, id) {
-      try {
-        const r = await fetch(url + bust, { cache:"no-store", credentials:"same-origin" });
-        if (!r.ok) return;
-        const el = document.getElementById(id);
-        if (el) el.innerHTML = await r.text();
-      } catch {}
-    }
-    await inject("/nav/index.html", "nav-placeholder");
-    await inject("/footer/index.html", "footer-placeholder");
-  });
-  </script>
 </head>
 
 <body class="theme-dark" id="top">
-  <!-- NAV -->
-  <div id="nav-placeholder"></div>
+  <!-- NAV injected by /scripts/partials.js -->
+  <div id="site-header"></div>
 
   <!-- HERO -->
   <header class="page-hero">
@@ -175,8 +157,8 @@
     </div>
   </main>
 
-  <!-- FOOTER -->
-  <div id="footer-placeholder"></div>
+  <!-- FOOTER injected by /scripts/partials.js -->
+  <div id="site-footer"></div>
 
   <!-- Checkout logic -->
   <script>
@@ -353,8 +335,5 @@
     });
   })();
   </script>
-
-  <!-- global helpers -->
-  <script defer src="/scripts/global.js"></script>
 </body>
 </html>
