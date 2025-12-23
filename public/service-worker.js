@@ -1,107 +1,131 @@
 /* Square Bidness — site SW (network-first for pages + partial HTML) */
-const CACHE = 'sb-site-v20251215-gm01';
-const ASSET_CACHE = 'sb-assets-v20251215-gm01';
 
-self.addEventListener('install', (event) => {
+const CACHE = "sb-site-v20251223a";
+const ASSET_CACHE = "sb-assets-v20251223a";
+
+self.addEventListener("install", (event) => {
   self.skipWaiting();
   event.waitUntil(
-    caches.open(ASSET_CACHE).then((cache) => {
-      return cache.addAll([
-        // Keep precache small to avoid “stuck” styles.
-        '/scripts/ga.js',
-        '/scripts/sw-register.js',
-        '/offline/'
-      ]);
-    }).catch(() => {})
+    (async () => {
+      try {
+        const cache = await caches.open(ASSET_CACHE);
+        await cache.addAll([
+          // Keep precache small & stable
+          "/offline/",
+          "/styles/style.css",
+          "/scripts/ga.js",
+          "/scripts/partials.js",
+          "/scripts/sb-analytics.js",
+          "/scripts/sw-register.js"
+        ]);
+      } catch (_) {}
+    })()
   );
 });
 
-self.addEventListener('activate', (event) => {
-  event.waitUntil((async () => {
-    const keys = await caches.keys();
-    await Promise.all(keys.map((k) => {
-      if (k.startsWith('sb-') && k !== CACHE && k !== ASSET_CACHE) {
-        return caches.delete(k);
-      }
-    }));
-    await self.clients.claim();
-  })());
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    (async () => {
+      const keys = await caches.keys();
+      await Promise.all(
+        keys.map((k) => {
+          if (k.startsWith("sb-") && k !== CACHE && k !== ASSET_CACHE) {
+            return caches.delete(k);
+          }
+        })
+      );
+      await self.clients.claim();
+    })()
+  );
 });
 
-const isGET = (req) => req.method === 'GET';
+const isGET = (req) => req.method === "GET";
 
 function isHTMLLikeRequest(req) {
-  if (req.mode === 'navigate') return true;
+  if (req.mode === "navigate") return true;
 
   try {
     const url = new URL(req.url);
     const p = url.pathname;
 
-    if (p.startsWith('/nav/') || p.startsWith('/footer/') || p.startsWith('/partials/')) return true;
-    if (p.endsWith('.html')) return true;
+    // Treat NAV/FOOTER HTML partial endpoints as HTML-like
+    if (p.startsWith("/nav/") || p.startsWith("/footer/")) return true;
 
-    const accept = (req.headers.get('accept') || '');
-    if (accept.includes('text/html')) return true;
+    // Any explicit html file
+    if (p.endsWith(".html")) return true;
+
+    // Accept header based
+    const accept = req.headers.get("accept") || "";
+    if (accept.includes("text/html")) return true;
   } catch {}
 
   return false;
 }
 
-self.addEventListener('fetch', (event) => {
+async function networkFirstHTML(req) {
+  try {
+    const fresh = await fetch(req, { cache: "no-store" });
+
+    if (fresh && fresh.ok) {
+      const cache = await caches.open(CACHE);
+      cache.put(req, fresh.clone());
+    }
+    return fresh;
+  } catch (_) {
+    const cached = await caches.match(req);
+    return cached || (await caches.match("/offline/")) || Response.error();
+  }
+}
+
+async function noStoreFirst(req) {
+  try {
+    return await fetch(req, { cache: "no-store" });
+  } catch (_) {
+    return (await caches.match(req)) || Response.error();
+  }
+}
+
+self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (!isGET(req)) return;
 
-  // HTML / partial HTML: NETWORK FIRST
+  // HTML + nav/footer partial HTML: NETWORK FIRST
   if (isHTMLLikeRequest(req)) {
-    event.respondWith((async () => {
-      try {
-        const fresh = await fetch(req, { cache: 'no-store' });
-
-        // only cache good responses
-        if (fresh && fresh.ok) {
-          const cache = await caches.open(CACHE);
-          cache.put(req, fresh.clone());
-        }
-
-        return fresh;
-      } catch (e) {
-        const cached = await caches.match(req);
-        return cached || caches.match('/offline/') || Response.error();
-      }
-    })());
+    event.respondWith(networkFirstHTML(req));
     return;
   }
 
-  // Always fetch latest for core JS so we never get stuck
+  // Never-stuck core JS (always try network no-store)
   try {
     const url = new URL(req.url);
     if (
       url.pathname === "/scripts/global.js" ||
       url.pathname === "/scripts/sb-cart.js" ||
-      url.pathname === "/scripts/ga.js"
+      url.pathname === "/scripts/ga.js" ||
+      url.pathname === "/scripts/partials.js" ||
+      url.pathname === "/scripts/sb-analytics.js"
     ) {
-      event.respondWith((async () => {
-        try { return await fetch(req, { cache: "no-store" }); }
-        catch { return (await caches.match(req)) || Response.error(); }
-      })());
+      event.respondWith(noStoreFirst(req));
       return;
     }
   } catch {}
 
   // Assets: CACHE FIRST
-  event.respondWith((async () => {
-    const cached = await caches.match(req);
-    if (cached) return cached;
+  event.respondWith(
+    (async () => {
+      const cached = await caches.match(req);
+      if (cached) return cached;
 
-    try {
-      const fresh = await fetch(req);
-      if (fresh && fresh.ok) {
-        const cache = await caches.open(ASSET_CACHE);
-        cache.put(req, fresh.clone());
+      try {
+        const fresh = await fetch(req);
+        if (fresh && fresh.ok) {
+          const cache = await caches.open(ASSET_CACHE);
+          cache.put(req, fresh.clone());
+        }
+        return fresh;
+      } catch (_) {
+        return cached || Response.error();
       }
-      return fresh;
-    } catch (e) {
-      return cached || Response.error();
-    }
-  })());
+    })()
+  );
 });
