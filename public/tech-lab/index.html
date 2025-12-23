@@ -1,3 +1,4 @@
+<!-- /public/tech-lab/index.html  (Field Tools page) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -20,6 +21,12 @@
   <link rel="preconnect" href="https://www.googletagmanager.com">
   <link rel="preconnect" href="https://www.google-analytics.com">
   <script defer src="/scripts/ga.js"></script>
+
+  <!-- Site-wide analytics -->
+  <script defer src="/scripts/sb-analytics.js"></script>
+
+  <!-- Partials loader (correct path for this repo) -->
+  <script defer src="/scripts/partials.js"></script>
 
   <!-- Styles -->
   <link rel="stylesheet" href="/styles/style.css" />
@@ -89,6 +96,7 @@
 </head>
 
 <body class="theme-dark">
+  <!-- Partials target (partials.js will fill these if configured) -->
   <div id="nav-placeholder"></div>
 
   <main class="page-wrap">
@@ -121,11 +129,11 @@
     <section class="section">
       <h2>Active Lab Links</h2>
       <div class="cards-grid">
-        <a class="card-link" href="https://lab.squarebidness.com/shortcuts/" target="_blank">🛠️ Tech Lab Shortcuts <div class="card-chip">Hub</div></a>
-        <a class="card-link" href="https://lab.squarebidness.com/lab/hq1/" target="_blank">🏠 HQ1 — Hammond <div class="card-chip">HQ1</div></a>
-        <a class="card-link" href="https://lab.squarebidness.com/lab/hq2/" target="_blank">🏠 HQ2 — Pineville <div class="card-chip">HQ2</div></a>
-        <a class="card-link" href="https://lab.squarebidness.com/lab/start2finish-progress/" target="_blank">⚡ Start2Finish Progress <div class="card-chip">Live</div></a>
-        <a class="card-link" href="https://lab.squarebidness.com/lab/install-method/" target="_blank">📐 Install Method <div class="card-chip">Method</div></a>
+        <a class="card-link" href="https://lab.squarebidness.com/shortcuts/" target="_blank" rel="noopener">🛠️ Tech Lab Shortcuts <div class="card-chip">Hub</div></a>
+        <a class="card-link" href="https://lab.squarebidness.com/lab/hq1/" target="_blank" rel="noopener">🏠 HQ1 — Hammond <div class="card-chip">HQ1</div></a>
+        <a class="card-link" href="https://lab.squarebidness.com/lab/hq2/" target="_blank" rel="noopener">🏠 HQ2 — Pineville <div class="card-chip">HQ2</div></a>
+        <a class="card-link" href="https://lab.squarebidness.com/lab/start2finish-progress/" target="_blank" rel="noopener">⚡ Start2Finish Progress <div class="card-chip">Live</div></a>
+        <a class="card-link" href="https://lab.squarebidness.com/lab/install-method/" target="_blank" rel="noopener">📐 Install Method <div class="card-chip">Method</div></a>
       </div>
 
       <p class="small-note">
@@ -137,17 +145,37 @@
 
   <div id="footer-placeholder"></div>
 
+  <!-- KEEP BOTH PURPOSES:
+       1) /scripts/partials.js = your standard system
+       2) this inline fetch = hard fallback if partials.js isn’t active on this page -->
   <script>
-    (async () => {
-      const v = '?v=' + Date.now();
-      const inject = async (u,id) => {
+    (function () {
+      const bust = `?v=${Date.now()}`;
+
+      async function inject(url, id) {
         try {
-          const r = await fetch(u+v,{cache:'no-store'});
-          if(r.ok) document.getElementById(id).innerHTML = await r.text();
-        } catch(e){}
-      };
-      inject('/nav/index.html','nav-placeholder');
-      inject('/footer/index.html','footer-placeholder');
+          const el = document.getElementById(id);
+          if (!el) return;
+
+          // If something (partials.js) already filled it, don’t overwrite.
+          if (el.innerHTML && el.innerHTML.trim().length > 0) return;
+
+          const res = await fetch(url + bust, { cache: "no-store", credentials: "same-origin" });
+          if (!res.ok) return;
+          el.innerHTML = await res.text();
+        } catch (e) {}
+      }
+
+      // Run after DOM is ready (so placeholders exist)
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", () => {
+          inject("/nav/index.html", "nav-placeholder");
+          inject("/footer/index.html", "footer-placeholder");
+        }, { once: true });
+      } else {
+        inject("/nav/index.html", "nav-placeholder");
+        inject("/footer/index.html", "footer-placeholder");
+      }
     })();
   </script>
 </body>
