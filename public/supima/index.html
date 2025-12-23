@@ -8,6 +8,9 @@
   <meta name="description" content="Square Bidness Supima cotton tees. Clean essentials, men’s + women’s fits. $36. Louisiana rooted, built right." />
   <link rel="canonical" href="https://www.squarebidness.com/supima/" />
 
+  <!-- ✅ Product marker -->
+  <meta name="sb:product" content="supima" />
+
   <!-- CSS -->
   <link rel="stylesheet" href="/styles/style.css" />
 
@@ -24,8 +27,18 @@
   <script defer src="/scripts/sb-analytics.js"></script>
   <script defer src="/scripts/sw-register.js"></script>
 
+  <!-- ✅ Nav/Footer injection (standard) -->
+  <script defer src="/scripts/partials.js"></script>
+
   <!-- ✅ Preload hero (WEBP first) -->
-  <link rel="preload" as="image" href="/collections/assets/amari_2_1200.webp" type="image/webp" imagesizes="(max-width: 900px) 100vw, 520px" />
+  <link
+    rel="preload"
+    as="image"
+    href="/collections/assets/amari_2_1200.webp"
+    type="image/webp"
+    imagesizes="(max-width: 900px) 100vw, 520px"
+    fetchpriority="high"
+  />
 
   <style>
     .supima-hero{border-bottom:1px solid #1f1f1f;padding:2rem 0;background:#0b0b0b;}
@@ -65,8 +78,8 @@
 
 <body class="theme-dark" id="top">
 
-  <!-- NAV (injected) -->
-  <div id="nav-placeholder"></div>
+  <!-- ✅ NAV injected by /scripts/partials.js -->
+  <div id="site-header"></div>
 
   <!-- HERO -->
   <section class="supima-hero">
@@ -221,51 +234,7 @@
 
   </main>
 
-  <!-- FOOTER (injected) -->
-  <div id="footer-placeholder"></div>
-
-  <!-- NAV + FOOTER inject -->
-  <script>
-  (async () => {
-    const bust = `?v=${Date.now()}`;
-
-    async function inject(url, id) {
-      try {
-        const res = await fetch(url + bust, { cache: "no-store", credentials: "same-origin" });
-        if (!res.ok) {
-          console.warn("[partials] not ok:", url, res.status);
-          return null;
-        }
-        const html = await res.text();
-        const el = document.getElementById(id);
-        if (el) el.innerHTML = html;
-        return el;
-      } catch (e) {
-        console.warn("partial load failed:", url, e);
-        return null;
-      }
-    }
-
-    // NAV
-    const nav = await inject("/nav/index.html", "nav-placeholder");
-    if (nav) {
-      const current = location.pathname.replace(/\/+$/, "") || "/";
-      nav.querySelectorAll("a[href]").forEach(a => {
-        try {
-          const href = new URL(a.getAttribute("href"), location.origin)
-            .pathname.replace(/\/+$/, "") || "/";
-          if (href === current || (href !== "/" && current.startsWith(href))) {
-            a.classList.add("is-active");
-            a.setAttribute("aria-current", "page");
-          }
-        } catch {}
-      });
-    }
-
-    // FOOTER
-    await inject("/footer/index.html", "footer-placeholder");
-  })();
-  </script>
-
+  <!-- ✅ FOOTER injected by /scripts/partials.js -->
+  <div id="site-footer"></div>
 </body>
 </html>
