@@ -1,62 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script defer src="/scripts/ga.js"></script>
-
+  <!-- Basics -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Thank You — Square Bidness</title>
-  <meta name="description" content="Thank you for your order and support of Square Bidness Apparel.">
+  <meta name="description" content="Thank you for your order and support of Square Bidness." />
   <link rel="canonical" href="https://www.squarebidness.com/thank-you/" />
+  <meta name="robots" content="noindex,nofollow" />
   <meta name="theme-color" content="#000000" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="format-detection" content="telephone=no" />
 
+  <!-- Build stamp -->
+  <meta name="sb:build" content="v20251222-thankyou" />
+
+  <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Square Bidness" />
   <meta property="og:title" content="Thank You — Square Bidness" />
   <meta property="og:description" content="Your order has been received. Details will be sent to your email." />
   <meta property="og:url" content="https://www.squarebidness.com/thank-you/" />
+  <meta property="og:image" content="https://www.squarebidness.com/assets/sb-social-card_1200.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://www.squarebidness.com/assets/sb-social-card_1200.jpg" />
 
-  <link rel="icon" href="/favicon.ico" sizes="any">
-  <link rel="apple-touch-icon" href="/icon_180.png">
-  <link rel="manifest" href="/manifest.webmanifest">
+  <!-- Icons / PWA -->
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/icon-180.png" />
+  <link rel="manifest" href="/manifest.webmanifest" />
 
+  <!-- CSS -->
   <link rel="stylesheet" href="/styles/style.css" />
 
+  <!-- Analytics -->
+  <script defer src="/scripts/ga.js"></script>
+  <script defer src="/scripts/sb-analytics.js"></script>
+
+  <!-- Nav/Footer loader -->
+  <script defer src="/partials/partials.js"></script>
+
   <style>
-    .thank-shell{
-      max-width:760px;
-      margin:0 auto;
-      padding:3rem 1rem 3.5rem;
-      text-align:center;
-    }
-    .thank-kicker{
-      font-size:.8rem;
-      letter-spacing:.18em;
-      text-transform:uppercase;
-      color:#a1a1aa;
-    }
-    .thank-title{
-      margin:.4rem 0 .5rem;
-      font-size:clamp(1.8rem,3.2vw,2.4rem);
-    }
-    .thank-lead{
-      color:#d4d4d8;
-      font-size:.98rem;
-      max-width:38rem;
-      margin:0 auto 1.5rem;
-    }
-    .thank-meta{
-      font-size:.88rem;
-      color:#a1a1aa;
-      margin-top:1rem;
-    }
-    .thank-actions{
-      margin-top:1.8rem;
-      display:flex;
-      justify-content:center;
-      gap:.75rem;
-      flex-wrap:wrap;
-    }
+    .thank-shell{max-width:760px;margin:0 auto;padding:3rem 1rem 3.5rem;text-align:center;}
+    .thank-kicker{font-size:.8rem;letter-spacing:.18em;text-transform:uppercase;color:#a1a1aa;}
+    .thank-title{margin:.4rem 0 .5rem;font-size:clamp(1.8rem,3.2vw,2.4rem);}
+    .thank-lead{color:#d4d4d8;font-size:.98rem;max-width:38rem;margin:0 auto 1.5rem;}
+    .thank-meta{font-size:.88rem;color:#a1a1aa;margin-top:1rem;}
+    .thank-actions{margin-top:1.8rem;display:flex;justify-content:center;gap:.75rem;flex-wrap:wrap;}
   </style>
 </head>
 
@@ -64,7 +54,7 @@
   <div id="nav-placeholder"></div>
 
   <main class="thank-shell">
-    <p class="thank-kicker">Square Bidness Apparel</p>
+    <p class="thank-kicker">Square Bidness</p>
     <h1 class="thank-title">Thank You for Your Order</h1>
     <p class="thank-lead">
       Your order has been received. A confirmation email with your details is on the way.
@@ -88,27 +78,5 @@
   </main>
 
   <div id="footer-placeholder"></div>
-
-  <script>
-  (async () => {
-    const bust = `?v=${Date.now()}`;
-    async function injectPartial(url, targetId) {
-      try {
-        const res = await fetch(url + bust, {credentials:'same-origin',cache:'no-store'});
-        if (!res.ok) { console.warn('[partials] not ok:', url, res.status); return null; }
-        const html = await res.text();
-        const el = document.getElementById(targetId);
-        if (!el) return null;
-        el.innerHTML = html;
-        return el;
-      } catch (err) {
-        console.warn('[partials] fetch fail:', url, err);
-        return null;
-      }
-    }
-    await injectPartial('/nav/index.html','nav-placeholder');
-    await injectPartial('/footer/index.html','footer-placeholder');
-  })();
-  </script>
 </body>
 </html>
