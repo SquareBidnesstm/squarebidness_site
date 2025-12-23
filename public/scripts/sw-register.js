@@ -20,9 +20,14 @@
     return;
   }
 
-  // Normal registration
+  // Use build stamp to help update SW file fetch
+  const BUILD =
+    (window.SB_BUILD ||
+      document.querySelector('meta[name="sb:build"]')?.content ||
+      "v1");
+
   try {
-    const reg = await navigator.serviceWorker.register("/service-worker.js", {
+    const reg = await navigator.serviceWorker.register(`/service-worker.js?v=${encodeURIComponent(BUILD)}`, {
       scope: "/",
     });
     console.log("[SW] registered with scope:", reg.scope);
