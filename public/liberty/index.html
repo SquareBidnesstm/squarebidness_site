@@ -11,6 +11,9 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="index,follow" />
 
+  <!-- ✅ Product marker (your standard A) -->
+  <meta name="sb:product" content="liberty-tee" />
+
   <!-- Social preview -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Square Bidness">
@@ -41,8 +44,13 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
 
-  <!-- GA4 -->
+  <!-- Scripts (site-wide) -->
   <script defer src="/scripts/ga.js"></script>
+  <script defer src="/scripts/global.js"></script>
+  <script defer src="/scripts/sb-analytics.js"></script>
+
+  <!-- ✅ Nav/Footer injection (standard) -->
+  <script defer src="/scripts/partials.js"></script>
 
   <!-- ✅ Preload Liberty hero (LCP) — WebP first -->
   <link
@@ -150,10 +158,6 @@
   </script>
 
   <style>
-    /* CLS guard for injected nav/footer */
-    #nav-placeholder{min-height:72px;}
-    #footer-placeholder{min-height:120px;}
-
     /* Liberty hero */
     .liberty-hero{
       display:grid;
@@ -272,8 +276,8 @@
 </head>
 
 <body class="theme-dark liberty-body">
-  <!-- NAV SLOT -->
-  <div id="nav-placeholder" aria-busy="true"></div>
+  <!-- ✅ NAV SLOT (partials.js expects this id) -->
+  <div id="site-header"></div>
 
   <main class="liberty-shell">
     <!-- HERO -->
@@ -307,7 +311,7 @@
           From Louisiana to Battery Park City — Liberty green, real fabric, veteran owned, no shortcuts.
         </p>
         <div class="liberty-cta-row">
-          <a class="btn btn--gold" href="https://www.squarebidness.com/vsop/" target="_blank" rel="noopener">VSOP</a>
+          <a class="btn btn--gold" href="/vsop/">VSOP</a>
           <a class="btn btn--ghost" href="#gallery">View Editorial</a>
         </div>
       </div>
@@ -332,9 +336,15 @@
           <option value="3X">3X — In Stock</option>
         </select>
 
-        <a id="liberty-checkout" class="btn btn--gold"
-           href="#"
-           style="pointer-events:none;opacity:.5;padding:0.75rem 1.25rem;border-radius:12px;background:#c9a227;color:#111;font-weight:700;text-decoration:none;border:1px solid #c9a227;box-shadow:0 8px 20px rgba(201,162,39,.4)">
+        <!-- ✅ Stripe button uses data-stripe-checkout (your standard B) -->
+        <a
+          id="liberty-checkout"
+          class="btn btn--gold"
+          href="#"
+          data-stripe-checkout="liberty-tee"
+          target="_blank" rel="noopener"
+          style="pointer-events:none;opacity:.5"
+        >
           Checkout Securely
         </a>
       </div>
@@ -447,31 +457,8 @@
     </section>
   </main>
 
-  <!-- FOOTER SLOT -->
-  <div id="footer-placeholder" aria-busy="true"></div>
-
-  <!-- Inject nav/footer (fixed paths) -->
-  <script>
-    (async () => {
-      const bust = `?v=${Date.now()}`;
-      async function inject(url, id) {
-        try {
-          const res = await fetch(url + bust, { cache: "no-store", credentials: "same-origin" });
-          if (!res.ok) return;
-          const html = await res.text();
-          const el = document.getElementById(id);
-          if (el) {
-            el.innerHTML = html;
-            el.setAttribute("aria-busy", "false");
-          }
-        } catch (e) {
-          console.warn("inject failed:", url, e);
-        }
-      }
-      await inject("/nav/index.html", "nav-placeholder");
-      await inject("/footer/index.html", "footer-placeholder");
-    })();
-  </script>
+  <!-- ✅ FOOTER SLOT (partials.js expects this id) -->
+  <div id="site-footer"></div>
 
   <!-- Size-specific Stripe checkout -->
   <script>
