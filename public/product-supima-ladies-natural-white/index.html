@@ -12,6 +12,9 @@
   <!-- Build stamp (used by partials loader for cache busting) -->
   <meta name="sb:build" content="v20251221-supima-ladies-natural-white" />
 
+  <!-- ✅ Product marker (your standard) -->
+  <meta name="sb:product" content="supima-ladies-natural-white" />
+
   <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com">
   <link rel="preconnect" href="https://www.google-analytics.com">
@@ -35,7 +38,7 @@
   <meta property="og:type" content="product" />
   <meta property="og:site_name" content="Square Bidness" />
   <meta property="og:title" content="Supima Ladies Tee — Natural White" />
-  <meta property="og:description" content="Clean essential. Supima cotton. Select size and checkout." />
+  <meta property="og:description" content="Clean essential. Supima cotton. Select size and add to cart." />
   <meta property="og:url" content="https://www.squarebidness.com/product-supima-ladies-natural-white/" />
   <meta property="og:image" content="https://www.squarebidness.com/assets/supima/ladies-natural-white_1200.webp" />
   <meta property="og:image:width" content="1200" />
@@ -215,7 +218,10 @@
           </div>
 
           <div class="p-actions">
-            <button id="addBtn" class="btn btn--gold" type="button" aria-disabled="true">Add to Cart</button>
+            <!-- ✅ Your standard button -->
+            <button type="button" class="btn btn--gold" data-add-to-cart="supima-ladies-natural-white" aria-disabled="true" disabled>
+              Add to cart
+            </button>
             <a class="btn btn--ghost" href="/cart/">Go to Cart</a>
           </div>
 
@@ -245,68 +251,24 @@
   <!-- FOOTER injection target -->
   <div id="site-footer"></div>
 
-  <!-- Product logic (size gate + cart add) -->
+  <!-- ✅ Page wiring for your data-add-to-cart button (since global.js doesn't do it yet) -->
   <script>
-  (function () {
-    const KEY = "sb_cart_v1";
+  (function(){
+    const root = window;
 
-    const PRODUCT = {
-      item_id: "supima-ladies-natural-white",
-      item_name: "Supima Ladies Tee — Natural White",
-      name: "Supima Ladies Tee — Natural White",
-      price: 36.00,
-      image: "/assets/supima/ladies-natural-white_800.webp",
-      url: "/product-supima-ladies-natural-white/",
-      sku: "sb-supima-ladies-natural-white"
-    };
-
-    function readCart() {
-      try { return JSON.parse(localStorage.getItem(KEY) || "[]"); }
-      catch { return []; }
-    }
-
-    function writeCart(items) {
-      try { localStorage.setItem(KEY, JSON.stringify(items || [])); } catch {}
-      try {
-        const count = (items || []).reduce((n, it) => n + Number(it.quantity || it.qty || 0), 0);
-        document.querySelectorAll("[data-cart-count]").forEach(el => el.textContent = String(count));
-      } catch {}
-      return items || [];
-    }
-
-    function addItem(item) {
-      const items = readCart();
-
-      const id = String(item.item_id || item.id || "");
-      const variant = String(item.variant || "");
-      const qty = Number(item.quantity || item.qty || 1);
-
-      if (!id || qty <= 0) return items;
-
-      const idx = items.findIndex(x =>
-        String(x.item_id || x.id || "") === id &&
-        String(x.variant || "") === variant
-      );
-
-      if (idx >= 0) items[idx].quantity = Number(items[idx].quantity || 0) + qty;
-      else items.push({ ...item, item_id: id, quantity: qty });
-
-      return writeCart(items);
-    }
-
-    function onReady(fn){
-      if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", fn);
+    function ready(fn){
+      if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", fn, { once:true });
       else fn();
     }
 
-    onReady(() => {
+    ready(() => {
       const sizeEl = document.getElementById("size");
-      const addBtn = document.getElementById("addBtn");
-      if (!sizeEl || !addBtn) return;
+      const btn = document.querySelector('[data-add-to-cart="supima-ladies-natural-white"]');
+      if (!sizeEl || !btn) return;
 
-      function setDisabled(disabled) {
-        addBtn.disabled = !!disabled;
-        addBtn.setAttribute("aria-disabled", String(!!disabled));
+      function setDisabled(disabled){
+        btn.disabled = !!disabled;
+        btn.setAttribute("aria-disabled", String(!!disabled));
       }
 
       setDisabled(true);
@@ -315,18 +277,30 @@
         setDisabled(!sizeEl.value);
       });
 
-      addBtn.addEventListener("click", () => {
-        const size = sizeEl.value;
+      btn.addEventListener("click", () => {
+        const size = String(sizeEl.value || "").trim();
         if (!size) return;
 
-        addItem({
-          ...PRODUCT,
-          variant: size,
-          quantity: 1
+        if (!root.SB || !root.SB.cart || typeof root.SB.cart.add !== "function") {
+          console.warn("[sb-cart] SB.cart.add not ready yet");
+          return;
+        }
+
+        root.SB.cart.add({
+          item_id: "supima-ladies-natural-white",
+          item_name: "Supima Ladies Tee — Natural White",
+          price: 36.00,
+          quantity: 1,
+          size: size,
+          variant: size, // helps your checkout normalizer
+          image: "/assets/supima/ladies-natural-white_800.webp",
+          url: "/product-supima-ladies-natural-white/",
+          sku: "sb-supima-ladies-natural-white"
         });
 
-        addBtn.textContent = "Added ✓";
-        setTimeout(() => (addBtn.textContent = "Add to Cart"), 1200);
+        const old = btn.textContent;
+        btn.textContent = "Added ✓";
+        setTimeout(() => (btn.textContent = old), 1100);
       });
     });
   })();
