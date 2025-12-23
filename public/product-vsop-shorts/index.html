@@ -1,19 +1,17 @@
-<!-- /public/product-vsop-shorts/index.html -->
 <!doctype html>
 <html lang="en">
 <head>
   <!-- Basics -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <title>VSOP Shorts — Square Bidness</title>
   <meta name="description" content="VSOP Shorts — Burgundy + Brown. Athletic fit with embroidered mark. Fall 2025 limited run." />
   <link rel="canonical" href="https://www.squarebidness.com/product-vsop-shorts/" />
 
   <!-- Build stamp -->
   <meta name="sb:build" content="v20251221-vsop-shorts" />
- 
-  <meta name="sb:product" content="vsop-shorts">
-
+  <meta name="sb:product" content="vsop-shorts" />
 
   <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com">
@@ -111,6 +109,7 @@
 </head>
 
 <body class="theme-dark" id="top">
+  <!-- NAV injected by /scripts/partials.js -->
   <div id="site-header"></div>
 
   <header class="page-hero">
@@ -188,7 +187,10 @@
             </div>
 
             <div class="buybox__actions">
-              <button id="add-to-cart" class="btn btn--gold" type="button">Add to Cart</button>
+              <!-- ✅ Updated button -->
+              <button type="button" class="btn btn--gold" data-add-to-cart="vsop-shorts">
+                Add to cart
+              </button>
               <a class="btn btn--ghost" href="/shop/">Back to Shop</a>
             </div>
 
@@ -201,6 +203,63 @@
     </div>
   </main>
 
+  <!-- FOOTER injected by /scripts/partials.js -->
   <div id="site-footer"></div>
+
+  <!-- ✅ Buybox wiring: reads size + qty and adds correct item -->
+  <script>
+  (function(){
+    const root = window;
+    function ready(fn){
+      if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", fn, { once:true });
+      else fn();
+    }
+
+    ready(function(){
+      const buybox = document.querySelector(".buybox");
+      const msg = document.getElementById("buybox-msg");
+      const sizeEl = document.getElementById("size");
+      const qtyEl = document.getElementById("qty");
+
+      function setMsg(t){
+        if (!msg) return;
+        msg.textContent = t || "";
+      }
+
+      document.addEventListener("click", function(e){
+        const btn = e.target.closest && e.target.closest("[data-add-to-cart]");
+        if (!btn) return;
+
+        // Only handle this page’s buybox button
+        if (!buybox || !buybox.contains(btn)) return;
+
+        e.preventDefault();
+
+        const id = String(btn.getAttribute("data-add-to-cart") || "").trim();
+        const size = (sizeEl && sizeEl.value || "").trim();
+        const qty = Math.max(1, Number(qtyEl && qtyEl.value || 1));
+
+        if (!size) { setMsg("Please select a size."); try{ sizeEl.focus(); }catch{} return; }
+        if (!root.SB || !root.SB.cart || typeof root.SB.cart.add !== "function") {
+          setMsg("Cart is still loading—try again in a moment.");
+          return;
+        }
+
+        const item = {
+          item_id: id,
+          item_name: (buybox.getAttribute("data-name") || "VSOP Shorts — Burgundy + Brown"),
+          price: Number(buybox.getAttribute("data-price") || 89.99),
+          quantity: qty,
+          size: size,
+          image: (buybox.getAttribute("data-image") || "/assets/vsop-shorts_1200.webp"),
+          url: "/product-vsop-shorts/"
+        };
+
+        root.SB.cart.add(item);
+        setMsg("Added to cart.");
+      }, true);
+    });
+  })();
+  </script>
 </body>
 </html>
