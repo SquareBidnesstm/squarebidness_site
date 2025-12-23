@@ -1,26 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script defer src="/scripts/ga.js"></script>
-
+  <!-- Basics -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Returns &amp; Exchanges — Square Bidness</title>
-  <meta name="description" content="Returns and exchanges policy for Square Bidness Apparel. Learn how returns, size exchanges, and preorder items are handled.">
+  <meta name="description" content="Returns and exchanges policy for Square Bidness Apparel. Learn how returns, size exchanges, and preorder items are handled." />
   <link rel="canonical" href="https://www.squarebidness.com/returns/" />
+  <meta name="robots" content="index,follow" />
   <meta name="theme-color" content="#000000" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="format-detection" content="telephone=no" />
 
+  <!-- Build stamp -->
+  <meta name="sb:build" content="v20251222-returns" />
+
+  <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Square Bidness" />
   <meta property="og:title" content="Returns &amp; Exchanges — Square Bidness" />
   <meta property="og:description" content="How we handle returns, exchanges, and preorder items at Square Bidness Apparel." />
   <meta property="og:url" content="https://www.squarebidness.com/returns/" />
+  <meta property="og:image" content="https://www.squarebidness.com/assets/og-default-1200x630.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
 
-  <link rel="icon" href="/favicon.ico" sizes="any">
-  <link rel="apple-touch-icon" href="/icon_180.png">
-  <link rel="manifest" href="/manifest.webmanifest">
+  <!-- Icons / PWA -->
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" href="/icon_180.png" />
+  <link rel="manifest" href="/manifest.webmanifest" />
 
+  <!-- CSS -->
   <link rel="stylesheet" href="/styles/style.css" />
+
+  <!-- Analytics (site-wide) -->
+  <script defer src="/scripts/ga.js"></script>
+  <script defer src="/scripts/sb-analytics.js"></script>
+  <script defer src="/partials/partials.js"></script>
 
   <style>
     .policy-shell{max-width:900px;margin:0 auto;padding:2.5rem 1rem 3rem;}
@@ -38,6 +53,12 @@
 
 <body class="theme-dark" id="top">
   <div id="nav-placeholder"></div>
+  <noscript>
+    <div style="padding:1rem;max-width:900px;margin:0 auto;">
+      <p style="color:#d4d4d8;">Navigation requires JavaScript. Use these links:</p>
+      <p><a href="/shop/">Shop</a> · <a href="/collections/">Collections</a> · <a href="/connect/">Connect</a></p>
+    </div>
+  </noscript>
 
   <main class="policy-shell">
     <p class="policy-kicker">Square Bidness • Policies</p>
@@ -64,9 +85,7 @@
     <section class="policy-section" id="exchanges">
       <div class="anchor-label">Section #2</div>
       <h2>Size exchanges</h2>
-      <p>
-        If you need a different size and we have inventory, we’ll work with you on an exchange.
-      </p>
+      <p>If you need a different size and we have inventory, we’ll work with you on an exchange.</p>
       <ul>
         <li>Email <a href="mailto:support@squarebidness.com">support@squarebidness.com</a> with your order number.</li>
         <li>Let us know the size you received and the size you’re requesting.</li>
@@ -91,25 +110,19 @@
     <section class="policy-section" id="process">
       <div class="anchor-label">Section #4</div>
       <h2>How to start a return or exchange</h2>
-      <p>
-        To start a return or exchange, contact us:
-      </p>
+      <p>To start a return or exchange, contact us:</p>
       <ul>
         <li>Email: <a href="mailto:support@squarebidness.com">support@squarebidness.com</a></li>
         <li>Include your name, order number, and a short note about the issue.</li>
         <li>Photos help us move faster for defects or damage.</li>
       </ul>
-      <p>
-        Once approved, we’ll share instructions for shipping your item back and what to expect next.
-      </p>
+      <p>Once approved, we’ll share instructions for shipping your item back and what to expect next.</p>
     </section>
 
     <section class="policy-section" id="refunds">
       <div class="anchor-label">Section #5</div>
       <h2>Refund timing</h2>
-      <p>
-        When a refund is approved, it will be issued back to your original payment method.
-      </p>
+      <p>When a refund is approved, it will be issued back to your original payment method.</p>
       <ul>
         <li>Refund timing depends on your bank or card issuer (typically 3–10 business days).</li>
         <li>We’ll email you once your return has been processed on our side.</li>
@@ -124,36 +137,9 @@
       </p>
     </section>
 
-    <p class="policy-meta">
-      Last updated by Square Bidness Tech Lab.
-    </p>
+    <p class="policy-meta">Last updated by Square Bidness Tech Lab.</p>
   </main>
 
   <div id="footer-placeholder"></div>
-
-  <script>
-  (async () => {
-    const bust = `?v=${Date.now()}`;
-    async function injectPartial(url, targetId) {
-      try {
-        const res = await fetch(url + bust, {credentials:'same-origin',cache:'no-store'});
-        if (!res.ok) {
-          console.warn('[partials] not ok:', url, res.status);
-          return null;
-        }
-        const html = await res.text();
-        const el = document.getElementById(targetId);
-        if (!el) return null;
-        el.innerHTML = html;
-        return el;
-      } catch (err) {
-        console.warn('[partials] fetch fail:', url, err);
-        return null;
-      }
-    }
-    await injectPartial('/nav/index.html','nav-placeholder');
-    await injectPartial('/footer/index.html','footer-placeholder');
-  })();
-  </script>
 </body>
 </html>
