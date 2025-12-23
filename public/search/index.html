@@ -4,7 +4,6 @@
   <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com">
   <link rel="preconnect" href="https://www.google-analytics.com">
-  <script defer src="/scripts/ga.js"></script>
 
   <!-- Basics -->
   <meta charset="utf-8" />
@@ -13,36 +12,54 @@
   <link rel="canonical" href="https://www.squarebidness.com/search/" />
   <meta name="description" content="Search Square Bidness products and posts." />
 
-  <!-- Make this utility-only -->
-  <meta name="robots" content="noindex,nofollow">
+  <!-- Utility-only -->
+  <meta name="robots" content="noindex,nofollow" />
 
-  <!-- Theme / Icons -->
+  <!-- Theme -->
   <meta name="theme-color" content="#000000" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="format-detection" content="telephone=no" />
+
+  <!-- Build stamp -->
+  <meta name="sb:build" content="v20251222-search" />
+
+  <!-- Social (optional for noindex pages; safe defaults) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Square Bidness" />
+  <meta property="og:title" content="Search — Square Bidness" />
+  <meta property="og:description" content="Search Square Bidness products and posts." />
+  <meta property="og:url" content="https://www.squarebidness.com/search/" />
+  <meta property="og:image" content="https://www.squarebidness.com/assets/og-default-1200x630.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- Icons / PWA -->
   <link rel="icon" href="/favicon.ico" sizes="any" />
-  <link rel="manifest" href="/site.webmanifest">
+  <link rel="manifest" href="/site.webmanifest" />
 
   <!-- Global CSS -->
   <link rel="stylesheet" href="/styles/style.css" />
+
+  <!-- Analytics (site-wide) -->
+  <script defer src="/scripts/ga.js"></script>
+  <script defer src="/scripts/sb-analytics.js"></script>
+
+  <!-- Nav/Footer loader -->
+  <script defer src="/partials/partials.js"></script>
 
   <style>
     .search-wrap{max-width:900px;margin:1.5rem auto;padding:0 16px}
     .search-bar{display:flex;gap:.5rem}
     .search-bar input{flex:1;padding:.7rem .9rem;border-radius:10px;border:1px solid #2a2a2a;background:#0f0f0f;color:#eee}
     .search-bar button{padding:.7rem 1rem;border-radius:10px;border:1px solid #444;background:#c9a227;color:#111;font-weight:800}
-
     .muted{opacity:.8}
-
     .results{margin-top:1rem;display:grid;gap:.75rem}
     .result{border:1px solid #1f1f1f;border-radius:14px;padding:12px;background:#0e0e0e}
     .result h3{margin:.25rem 0 .15rem}
     .result p{margin:.25rem 0 0}
     .result small{opacity:.8}
-
     .pill{display:inline-block;border:1px solid #333;border-radius:999px;padding:.15rem .55rem;font-size:.75rem;margin-right:.35rem;opacity:.95}
-
     .group-title{margin:1.2rem 0 .35rem;font-size:.9rem;letter-spacing:.12em;text-transform:uppercase;opacity:.75}
     .results-grid{display:grid;gap:.75rem}
-
     .empty{border:1px dashed #2a2a2a;border-radius:14px;padding:14px;background:#0b0b0b}
     .site-bottom {margin:2rem auto 3rem;max-width:900px;padding:0 16px;text-align:center;opacity:.8}
     .site-bottom a{color:#c9a227;text-decoration:none}
@@ -51,7 +68,6 @@
 </head>
 
 <body class="theme-dark">
-  <!-- NAV -->
   <div id="nav-placeholder"></div>
 
   <main class="search-wrap">
@@ -66,7 +82,6 @@
     <section id="search-results" class="results" aria-live="polite"></section>
   </main>
 
-  <!-- FOOTER -->
   <div id="footer-placeholder"></div>
 
   <div class="site-bottom">
@@ -76,26 +91,6 @@
   <script>
     // Year
     (function(){ var y=document.getElementById('y'); if(y) y.textContent = new Date().getFullYear(); })();
-
-    // Inject NAV + FOOTER (same pattern you're using elsewhere)
-    document.addEventListener("DOMContentLoaded", async () => {
-      const bust = `?v=${Date.now()}`;
-
-      async function injectPartial(url, targetId) {
-        try{
-          const res = await fetch(url + bust, { credentials:'same-origin', cache:'no-store' });
-          if(!res.ok) return null;
-          const html = await res.text();
-          const el = document.getElementById(targetId);
-          if(!el) return null;
-          el.innerHTML = html;
-          return el;
-        } catch { return null; }
-      }
-
-      await injectPartial('/nav/index.html', 'nav-placeholder');
-      await injectPartial('/footer/index.html', 'footer-placeholder');
-    });
 
     // ===== DOM =====
     const $form    = document.querySelector('#search-form');
@@ -115,12 +110,11 @@
       try {
         const r = await fetch('/products.json', { cache: 'no-store' });
         if (!r.ok) return {};
-        return await r.json(); // { key: { name, desc, price, url, sku } }
+        return await r.json();
       } catch { return {}; }
     }
 
     async function loadBlog() {
-      // Minimal fallback if /blog/index.json isn't there
       const FALLBACK = [
         {
           title: "Innovation Fest 2025: From Louisiana to NYC",
@@ -132,7 +126,7 @@
       try {
         const r = await fetch('/blog/index.json', { cache: 'no-store' });
         if (!r.ok) return FALLBACK;
-        return await r.json(); // [ { title, url, desc, date? } ]
+        return await r.json();
       } catch { return FALLBACK; }
     }
 
@@ -173,17 +167,9 @@
       }
 
       const [productsIdx, blogIdx] = await Promise.all([loadProducts(), loadBlog()]);
-
-      // Products (object -> array)
       const products = Object.keys(productsIdx || {}).map(k => productsIdx[k] || {});
-      const productHits = products.filter(p =>
-        match(p.name, needle) || match(p.desc, needle) || match(p.sku, needle)
-      );
-
-      // Posts
-      const postHits = (blogIdx || []).filter(b =>
-        match(b.title, needle) || match(b.desc, needle)
-      );
+      const productHits = products.filter(p => match(p.name, needle) || match(p.desc, needle) || match(p.sku, needle));
+      const postHits = (blogIdx || []).filter(b => match(b.title, needle) || match(b.desc, needle));
 
       const total = productHits.length + postHits.length;
       $stats.textContent = total ? `${total} result${total===1?'':'s'} for “${q}”` : `No results for “${q}”`;
@@ -198,9 +184,7 @@
         blocks.push(`
           <div>
             <div class="group-title">Products (${productHits.length})</div>
-            <div class="results-grid">
-              ${productHits.map(productCard).join('')}
-            </div>
+            <div class="results-grid">${productHits.map(productCard).join('')}</div>
           </div>
         `);
       }
@@ -208,9 +192,7 @@
         blocks.push(`
           <div>
             <div class="group-title">Posts (${postHits.length})</div>
-            <div class="results-grid">
-              ${postHits.map(postCard).join('')}
-            </div>
+            <div class="results-grid">${postHits.map(postCard).join('')}</div>
           </div>
         `);
       }
