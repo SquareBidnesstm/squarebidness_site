@@ -1,116 +1,41 @@
-<!DOCTYPE html>
+<!-- /public/success/index.html -->
+<!doctype html>
 <html lang="en">
 <head>
-  <script defer src="/scripts/ga.js"></script>
-
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Order Confirmed — Square Bidness</title>
-  <meta name="description" content="Your Square Bidness order is confirmed.">
-  <link rel="canonical" href="https://www.squarebidness.com/success/" />
+  <title>Order Complete — Square Bidness</title>
+  <meta name="robots" content="noindex,nofollow" />
   <meta name="theme-color" content="#000000" />
-
-  <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="Square Bidness" />
-  <meta property="og:title" content="Order Confirmed — Square Bidness" />
-  <meta property="og:description" content="Your order is confirmed. Watch your email for details and tracking information." />
-  <meta property="og:url" content="https://www.squarebidness.com/success/" />
-
-  <link rel="icon" href="/favicon.ico" sizes="any">
-  <link rel="apple-touch-icon" href="/icon_180.png">
-  <link rel="manifest" href="/manifest.webmanifest">
-
   <link rel="stylesheet" href="/styles/style.css" />
+  <link rel="icon" href="/favicon.ico" sizes="any">
 
-  <style>
-    .success-shell{
-      max-width:760px;
-      margin:0 auto;
-      padding:3rem 1rem 3.5rem;
-      text-align:center;
-    }
-    .success-kicker{
-      font-size:.8rem;
-      letter-spacing:.18em;
-      text-transform:uppercase;
-      color:#4ade80;
-    }
-    .success-title{
-      margin:.4rem 0 .5rem;
-      font-size:clamp(1.8rem,3.2vw,2.4rem);
-    }
-    .success-lead{
-      color:#d4d4d8;
-      font-size:.98rem;
-      max-width:38rem;
-      margin:0 auto 1.5rem;
-    }
-    .success-meta{
-      font-size:.88rem;
-      color:#a1a1aa;
-      margin-top:1rem;
-    }
-    .success-actions{
-      margin-top:1.8rem;
-      display:flex;
-      justify-content:center;
-      gap:.75rem;
-      flex-wrap:wrap;
-    }
-  </style>
+  <script defer src="/scripts/ga.js"></script>
+  <script defer src="/scripts/global.js"></script>
+  <script defer src="/scripts/sb-analytics.js"></script>
+  <script defer src="/scripts/partials.js"></script>
 </head>
+<body class="theme-dark">
+  <div id="site-header" aria-busy="true"></div>
 
-<body class="theme-dark" id="top">
-  <div id="nav-placeholder"></div>
+  <main class="section">
+    <div class="container" style="max-width:720px;">
+      <h1 style="margin:.25rem 0 0;">Order complete.</h1>
+      <p style="opacity:.85;margin:.6rem 0 1rem;">
+        Thank you for tapping in with Square Bidness. Check your email for confirmation.
+      </p>
 
-  <main class="success-shell">
-    <p class="success-kicker">Order Confirmed</p>
-    <h1 class="success-title">Your Square Bidness Order Is Locked In</h1>
-    <p class="success-lead">
-      Your payment was successful and your order is now in our system.
-      You’ll receive an email with your order details shortly. Once your items are prepped and shipped,
-      we’ll send tracking information (where available).
-    </p>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+        <a class="btn btn--gold" href="/shop/">Back to Shop</a>
+        <a class="btn btn--ghost" href="/support/">Need help?</a>
+      </div>
 
-    <p class="success-meta">
-      If anything looks off with your order details, reply directly to your confirmation email or contact
-      <a href="mailto:squarebidnessapparel@gmail.com">squarebidnessapparel@gmail.com</a>
-      with your order number.
-    </p>
-
-    <p class="success-meta">
-      Checkout and payment integration are engineered and maintained by
-      <strong>Square Bidness Tech Lab</strong>.
-    </p>
-
-    <div class="success-actions">
-      <a class="btn btn--gold" href="/shop/">Back to Shop</a>
-      <a class="btn btn--ghost" href="/returns/">Returns &amp; Policy Info</a>
+      <p style="opacity:.7;margin-top:1.25rem;font-size:.9rem;">
+        If you don’t see the confirmation email, check spam/promotions.
+      </p>
     </div>
   </main>
 
-  <div id="footer-placeholder"></div>
-
-  <script>
-  (async () => {
-    const bust = `?v=${Date.now()}`;
-    async function injectPartial(url, targetId) {
-      try {
-        const res = await fetch(url + bust, {credentials:'same-origin',cache:'no-store'});
-        if (!res.ok) { console.warn('[partials] not ok:', url, res.status); return null; }
-        const html = await res.text();
-        const el = document.getElementById(targetId);
-        if (!el) return null;
-        el.innerHTML = html;
-        return el;
-      } catch (err) {
-        console.warn('[partials] fetch fail:', url, err);
-        return null;
-      }
-    }
-    await injectPartial('/nav/index.html','nav-placeholder');
-    await injectPartial('/footer/index.html','footer-placeholder');
-  })();
-  </script>
+  <div id="site-footer" aria-busy="true"></div>
 </body>
 </html>
