@@ -1,26 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script defer src="/scripts/ga.js"></script>
-
+  <!-- Basics -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Shipping Policy — Square Bidness</title>
-  <meta name="description" content="Shipping details for Square Bidness Apparel, including processing times, carriers, tracking, and preorder shipping expectations.">
+  <meta name="description" content="Shipping details for Square Bidness Apparel, including processing times, carriers, tracking, and preorder shipping expectations." />
   <link rel="canonical" href="https://www.squarebidness.com/shipping/" />
+  <meta name="robots" content="index,follow" />
   <meta name="theme-color" content="#000000" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="format-detection" content="telephone=no" />
 
+  <!-- Build stamp -->
+  <meta name="sb:build" content="v20251222-shipping" />
+
+  <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Square Bidness" />
   <meta property="og:title" content="Shipping Policy — Square Bidness" />
   <meta property="og:description" content="How we ship orders, including processing times, tracking, and preorder timelines." />
   <meta property="og:url" content="https://www.squarebidness.com/shipping/" />
+  <meta property="og:image" content="https://www.squarebidness.com/assets/og-default-1200x630.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
 
-  <link rel="icon" href="/favicon.ico" sizes="any">
-  <link rel="apple-touch-icon" href="/icon_180.png">
-  <link rel="manifest" href="/manifest.webmanifest">
+  <!-- Icons / PWA -->
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" href="/icon_180.png" />
+  <link rel="manifest" href="/manifest.webmanifest" />
 
+  <!-- CSS -->
   <link rel="stylesheet" href="/styles/style.css" />
+
+  <!-- Analytics (site-wide) -->
+  <script defer src="/scripts/ga.js"></script>
+  <script defer src="/scripts/sb-analytics.js"></script>
+  <script defer src="/partials/partials.js"></script>
 
   <style>
     .policy-shell{max-width:900px;margin:0 auto;padding:2.5rem 1rem 3rem;}
@@ -37,6 +52,12 @@
 
 <body class="theme-dark" id="top">
   <div id="nav-placeholder"></div>
+  <noscript>
+    <div style="padding:1rem;max-width:900px;margin:0 auto;">
+      <p style="color:#d4d4d8;">Navigation requires JavaScript. Use these links:</p>
+      <p><a href="/shop/">Shop</a> · <a href="/collections/">Collections</a> · <a href="/connect/">Connect</a></p>
+    </div>
+  </noscript>
 
   <main class="policy-shell">
     <p class="policy-kicker">Square Bidness • Policies</p>
@@ -112,30 +133,5 @@
   </main>
 
   <div id="footer-placeholder"></div>
-
-  <script>
-  (async () => {
-    const bust = `?v=${Date.now()}`;
-    async function injectPartial(url, targetId) {
-      try {
-        const res = await fetch(url + bust, {credentials:'same-origin',cache:'no-store'});
-        if (!res.ok) {
-          console.warn('[partials] not ok:', url, res.status);
-          return null;
-        }
-        const html = await res.text();
-        const el = document.getElementById(targetId);
-        if (!el) return null;
-        el.innerHTML = html;
-        return el;
-      } catch (err) {
-        console.warn('[partials] fetch fail:', url, err);
-        return null;
-      }
-    }
-    await injectPartial('/nav/index.html','nav-placeholder');
-    await injectPartial('/footer/index.html','footer-placeholder');
-  })();
-  </script>
 </body>
 </html>
