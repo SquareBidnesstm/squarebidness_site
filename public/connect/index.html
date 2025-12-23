@@ -1,48 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Basics -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Connect — Square Bidness</title>
 
   <link rel="canonical" href="https://www.squarebidness.com/connect/" />
   <meta name="description" content="Connect with Square Bidness — partnerships, wholesale, media, and community work built on principles, morals, and business done right." />
+  <meta name="robots" content="index,follow" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="format-detection" content="telephone=no" />
+
+  <!-- Build stamp -->
+  <meta name="sb:build" content="v20251222-connect" />
 
   <!-- Open Graph -->
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Square Bidness">
-  <meta property="og:title" content="Connect — Square Bidness">
-  <meta property="og:description" content="Direct line for partnerships, wholesale, media, and community work with Square Bidness.">
-  <meta property="og:url" content="https://www.squarebidness.com/connect/">
-  <meta property="og:image" content="https://www.squarebidness.com/assets/sb-social-card_1200.jpg">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-
-  <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Connect — Square Bidness">
-  <meta name="twitter:description" content="Partnerships, wholesale, media, and community work. Tap in with Square Bidness.">
-  <meta name="twitter:image" content="https://www.squarebidness.com/assets/sb-social-card_1200.jpg">
-  <meta name="twitter:site" content="@squarebidnesstm">
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Square Bidness" />
+  <meta property="og:title" content="Connect — Square Bidness" />
+  <meta property="og:description" content="Direct line for partnerships, wholesale, media, and community work with Square Bidness." />
+  <meta property="og:url" content="https://www.squarebidness.com/connect/" />
+  <meta property="og:image" content="https://www.squarebidness.com/assets/og-default-1200x630.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Connect — Square Bidness" />
+  <meta name="twitter:description" content="Partnerships, wholesale, media, and community work. Tap in with Square Bidness." />
+  <meta name="twitter:image" content="https://www.squarebidness.com/assets/og-default-1200x630.jpg" />
 
   <!-- Perf -->
-  <link rel="preconnect" href="https://www.googletagmanager.com">
-  <link rel="preconnect" href="https://www.google-analytics.com">
+  <link rel="preconnect" href="https://www.googletagmanager.com" />
+  <link rel="preconnect" href="https://www.google-analytics.com" />
 
   <!-- Styles -->
   <link rel="stylesheet" href="/styles/style.css" />
 
   <!-- Icons / PWA -->
-  <link rel="icon" href="/favicon.ico">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
-  <link rel="apple-touch-icon" href="/icon_180.png">
-  <link rel="manifest" href="/manifest.webmanifest">
-  <meta name="theme-color" content="#000000">
-  <meta name="color-scheme" content="dark light">
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+  <link rel="apple-touch-icon" href="/icon_180.png" />
+  <link rel="manifest" href="/manifest.webmanifest" />
 
-  <!-- Analytics -->
+  <!-- Analytics (site-wide) -->
   <script defer src="/scripts/ga.js"></script>
+  <script defer src="/scripts/sb-analytics.js"></script>
+
+  <!-- Nav/Footer loader -->
+  <script defer src="/partials/partials.js"></script>
 
   <style>
     #nav-placeholder{min-height:72px;}
@@ -138,10 +143,9 @@
           </li>
 
           <li style="margin-top:.6rem;">
-            <span class="label">HQ Address</span>
-            <div>Square Bidness Apparel</div>
-            <div>Hammond, LA 70401</div>
-            <div class="muted-small">HQ1 · Apparel + Tech Lab buildout in motion.</div>
+            <span class="label">Location</span>
+            <div>Hammond, Louisiana</div>
+            <div class="muted-small">Louisiana rooted. Always in motion.</div>
           </li>
         </ul>
 
@@ -182,8 +186,7 @@
           <p class="connect-section-title">Community &amp; Speaking</p>
           <p class="muted-small">Schools, nonprofits, and local organizers: alumni events, youth talks, entrepreneurship panels, and brand-building workshops.</p>
           <div class="connect-chip-row">
-            <span class="connect-chip">Hammond &amp; Northshore</span>
-            <span class="connect-chip">Alexandria &amp; CenLa</span>
+            <span class="connect-chip">Louisiana</span>
             <span class="connect-chip">Entrepreneurship</span>
             <span class="connect-chip">Creative direction</span>
           </div>
@@ -197,24 +200,5 @@
   </main>
 
   <div id="footer-placeholder" aria-busy="true"></div>
-
-  <script>
-  (async () => {
-    const bust = `?v=${Date.now()}`;
-    async function injectPartial(url, targetId) {
-      try {
-        const res = await fetch(url + bust, { credentials:'same-origin', cache:'no-store' });
-        if (!res.ok) return;
-        const html = await res.text();
-        const el = document.getElementById(targetId);
-        if (!el) return;
-        el.innerHTML = html;
-        el.setAttribute('aria-busy','false');
-      } catch (_) {}
-    }
-    await injectPartial('/nav/index.html', 'nav-placeholder');
-    await injectPartial('/footer/index.html', 'footer-placeholder');
-  })();
-  </script>
 </body>
 </html>
