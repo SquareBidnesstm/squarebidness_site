@@ -34,19 +34,17 @@
   <meta name="twitter:description" content="Veteran-owned Louisiana lifestyle brand. Apparel built on principles, morals, and business done right." />
   <meta name="twitter:image" content="https://www.squarebidness.com/assets/sb-social-card_1200.jpg" />
 
-  <!-- Perf -->
+  <!-- Perf (keep <= 4 preconnects; fonts removed unless you actually use them) -->
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
   <link rel="preconnect" href="https://www.google-analytics.com" crossorigin>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
 
   <!-- ✅ Preload LCP hero image (WebP) -->
   <link
     rel="preload"
     as="image"
     href="/assets/hero_1200.webp"
-    imagesrcset="/assets/hero_800.webp 800w, /assets/hero_1200.webp 1200w"
-    imagesizes="(min-width: 900px) 50vw, 100vw"
+    imagesrcset="/assets/hero_600.webp 600w, /assets/hero_800.webp 800w, /assets/hero_1200.webp 1200w"
+    imagesizes="(max-width: 768px) 90vw, 52vw"
     fetchpriority="high"
   />
 
@@ -58,17 +56,30 @@
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/icon-180.png">
   <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
 
-  <!-- Org JSON-LD -->
+  <!-- ✅ Sitemap link should point to the canonical index (you redirect /sitemap.xml anyway) -->
+  <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap-index.xml">
+
+  <!-- Org JSON-LD (single, consolidated — no street address) -->
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
     "@type":"Organization",
     "@id":"https://www.squarebidness.com/#org",
     "name":"Square Bidness Apparel",
+    "alternateName":"Square Bidness",
     "url":"https://www.squarebidness.com/",
     "logo":"https://www.squarebidness.com/assets/cleantextlogo.png",
+    "areaServed":[
+      "Hammond, Louisiana",
+      "Northshore Louisiana",
+      "Southeastern Louisiana"
+    ],
+    "address":{
+      "@type":"PostalAddress",
+      "addressRegion":"LA",
+      "addressCountry":"US"
+    },
     "sameAs":[
       "https://instagram.com/squarebidnesstm",
       "https://www.tiktok.com/@squarebidnesstm",
@@ -86,24 +97,6 @@
     ]
   }
   </script>
- 
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": "Square Bidness",
-  "areaServed": [
-    "Hammond, Louisiana",
-    "Northshore Louisiana",
-    "Southeastern Louisiana"
-  ],
-  "address": {
-    "@type": "PostalAddress",
-    "addressRegion": "LA",
-    "addressCountry": "US"
-  }
-}
-</script>
 
   <!-- Site scripts -->
   <script defer src="/scripts/ga.js"></script>
@@ -152,8 +145,23 @@
       .hero__inner{ grid-template-columns:1fr 1fr;align-items:center; }
     }
     .hero__media{ position:relative; }
-    .hero__media img{ width:100%;border-radius:12px;border:1px solid #1f1f1f;background:#0f0f0f;display:block; }
-    .cta-row{ display:flex;gap:.5rem;flex-wrap:wrap; }
+    .hero__media img{
+      width:100%;
+      height:auto;
+      display:block;
+      border-radius:12px;
+      border:1px solid #1f1f1f;
+      background:#0f0f0f;
+
+      /* ✅ CLS fix: reserve space */
+      aspect-ratio: 3 / 2;
+      object-fit: cover;
+    }
+
+    header.hero.hero--dark{ min-height:260px; }
+    @media (min-width: 900px){
+      header.hero.hero--dark{ min-height:300px; }
+    }
 
     .home-grid{ display:grid;gap:1rem; }
     @media(min-width:768px){ .home-grid{ grid-template-columns:repeat(3,1fr); } }
@@ -245,30 +253,26 @@
       <div class="hero__inner">
         <div class="hero__media">
           <picture>
-           <source
-  type="image/webp"
-  srcset="
-    /assets/hero_600.webp 600w,
-    /assets/hero_800.webp 800w,
-    /assets/hero_1200.webp 1200w
-  "
-  sizes="(max-width: 768px) 90vw, 52vw">
+            <source
+              type="image/webp"
+              srcset="/assets/hero_600.webp 600w, /assets/hero_800.webp 800w, /assets/hero_1200.webp 1200w"
+              sizes="(max-width: 768px) 90vw, 52vw">
 
-            <source type="image/jpeg"
+            <source
+              type="image/jpeg"
               srcset="/assets/hero_800.jpg 800w, /assets/hero_1200.jpg 1200w"
-              sizes="(min-width: 900px) 50vw, 100vw" />
+              sizes="(max-width: 768px) 90vw, 52vw" />
+
             <img
               src="/assets/hero_1200.jpg"
               srcset="/assets/hero_800.jpg 800w, /assets/hero_1200.jpg 1200w"
-              sizes="(min-width: 900px) 50vw, 100vw"
+              sizes="(max-width: 768px) 90vw, 52vw"
               width="1200"
               height="800"
               alt="Square Bidness hero image"
               loading="eager"
               decoding="async"
-              fetchpriority="high"
-              style="width:100%;height:auto;"
-            />
+              fetchpriority="high" />
           </picture>
 
           <a href="/vsop/" class="sb-banner sb-banner--overlay" rel="noopener">
@@ -436,44 +440,40 @@
             </div>
           </article>
 
-         <article class="card">
-  <div class="card__media">
-    <picture>
-      <source
-        type="image/webp"
-        srcset="/assets/community/marquesha-1_800.webp 800w, /assets/community/marquesha-1_1200.webp 1200w"
-        sizes="(max-width: 768px) 100vw, 400px"
-      />
-      <source
-        type="image/jpeg"
-        srcset="/assets/community/marquesha-1-800.jpg 800w, /assets/community/marquesha-1_1200.jpg 1200w"
-        sizes="(max-width: 768px) 100vw, 400px"
-      />
-      <img
-        src="/assets/community/marquesha-1-800.jpg"
-        alt="Marquesha representing the upcoming Square Bidness women’s lane"
-        width="800"
-        height="1000"
-        loading="lazy"
-        decoding="async"
-        style="width:100%;height:auto;"
-      />
-    </picture>
+          <article class="card">
+            <div class="card__media">
+              <picture>
+                <source
+                  type="image/webp"
+                  srcset="/assets/community/marquesha-1_800.webp 800w, /assets/community/marquesha-1_1200.webp 1200w"
+                  sizes="(max-width: 768px) 100vw, 400px" />
+                <source
+                  type="image/jpeg"
+                  srcset="/assets/community/marquesha-1-800.jpg 800w, /assets/community/marquesha-1_1200.jpg 1200w"
+                  sizes="(max-width: 768px) 100vw, 400px" />
+                <img
+                  src="/assets/community/marquesha-1-800.jpg"
+                  alt="Marquesha representing the upcoming Square Bidness women’s lane"
+                  width="800"
+                  height="1000"
+                  loading="lazy"
+                  decoding="async" />
+              </picture>
 
-    <span class="badge">Women Coming</span>
-  </div>
+              <span class="badge">Women Coming</span>
+            </div>
 
-  <div class="card__content">
-    <h3>Women’s Lane — Coming Soon</h3>
-    <p class="card__description">
-      Marquesha setting the tone for the women’s side — presence, posture, and Square Bidness written all over it.
-    </p>
-  </div>
+            <div class="card__content">
+              <h3>Women’s Lane — Coming Soon</h3>
+              <p class="card__description">
+                Marquesha setting the tone for the women’s side — presence, posture, and Square Bidness written all over it.
+              </p>
+            </div>
 
-  <div class="card__actions">
-    <a class="btn btn--ghost btn--secondary" href="/community/">Watch the Community Lane</a>
-  </div>
-</article>
+            <div class="card__actions">
+              <a class="btn btn--ghost btn--secondary" href="/community/">Watch the Community Lane</a>
+            </div>
+          </article>
         </div>
       </div>
     </section>
