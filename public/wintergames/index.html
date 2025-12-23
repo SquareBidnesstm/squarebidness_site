@@ -159,6 +159,7 @@
       padding:.65rem 1.05rem;
       will-change:transform;
     }
+    .btn:hover{transform:translateY(-1px);}
     .btn--gold{
       background:var(--wg-gold);
       color:#171717;
@@ -273,21 +274,51 @@
           <select id="wg-size" aria-label="Select size">
             <option value="">Select size…</option>
             <option value="S">S</option>
+            <option value="M" disabled>M — Sold out</option>
             <option value="L">L</option>
             <option value="XL">XL</option>
             <option value="2XL">2XL</option>
-            <option value="M" disabled>M — Sold out</option>
           </select>
 
-          <a id="wg-checkout" class="btn btn--gold" href="#" aria-disabled="true" target="_blank" rel="noopener">
+          <a id="wg-checkout" class="btn btn--gold" href="#" aria-disabled="true" target="_blank" rel="noopener" data-track="begin_checkout" data-item="Winter Games Crewneck">
             Select size
           </a>
 
-          <a class="btn btn--ghost" href="/shop/">Back to Shop</a>
+          <a class="btn btn--ghost" href="/shop/" data-track="view_shop" data-item="Shop">
+            Back to Shop
+          </a>
         </div>
       </div>
 
       <p class="wg-footnote">Ships from Louisiana. Taxes/shipping calculated at checkout.</p>
+
+      <!-- WINTERGAMES: Conversion Block (Trust + Shipping + Returns) -->
+      <section class="buy-trust" style="margin-top:14px;border:1px solid #1f1f1f;border-radius:14px;background:#0e0e0e;padding:14px 14px 12px;">
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;">
+          <strong style="font-size:.95rem;">Winter Games</strong>
+          <span style="font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:#c9a227;">Limited run</span>
+        </div>
+
+        <ul style="list-style:none;padding:10px 0 0;margin:0;display:grid;gap:8px;">
+          <li style="display:flex;gap:10px;line-height:1.35;">
+            <span aria-hidden="true">🚚</span>
+            <span><strong>Fast shipping</strong> (U.S.). Tracking sent by email.</span>
+          </li>
+          <li style="display:flex;gap:10px;line-height:1.35;">
+            <span aria-hidden="true">↩️</span>
+            <span><strong>Returns &amp; Exchanges</strong> available. <a href="/returns/" style="color:#fff;text-decoration:underline;">Read policy</a></span>
+          </li>
+          <li style="display:flex;gap:10px;line-height:1.35;">
+            <span aria-hidden="true">🔒</span>
+            <span><strong>Secure checkout</strong>. Need help? <a href="/connect/" style="color:#fff;text-decoration:underline;">Contact us</a></span>
+          </li>
+        </ul>
+
+        <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;">
+          <span style="display:inline-block;border:1px solid #242426;border-radius:999px;padding:.35rem .6rem;font-size:.75rem;color:#d7dae0;background:#111;">Ships from Louisiana</span>
+          <span style="display:inline-block;border:1px solid #242426;border-radius:999px;padding:.35rem .6rem;font-size:.75rem;color:#d7dae0;background:#111;">Limited inventory</span>
+        </div>
+      </section>
     </section>
 
     <article class="wg-card" aria-label="Winter Games Waterproof Golf Hat">
@@ -326,10 +357,13 @@
         <div style="display:flex;gap:.55rem;align-items:center;flex-wrap:wrap;">
           <a class="btn btn--gold"
              href="https://buy.stripe.com/7sY7sLg4f5297U15sY8N20s"
-             target="_blank" rel="noopener">
+             target="_blank" rel="noopener"
+             data-track="begin_checkout" data-item="Winter Games Hat">
             Checkout — $39.99
           </a>
-          <a class="btn btn--ghost" href="/shop/">Back to Shop</a>
+          <a class="btn btn--ghost" href="/shop/" data-track="view_shop" data-item="Shop">
+            Back to Shop
+          </a>
         </div>
       </div>
 
@@ -339,7 +373,7 @@
 
   <div id="site-footer" aria-busy="true"></div>
 
-  <!-- Stripe link; append size + UTM (Crewneck only) -->
+  <!-- Crewneck Stripe link; append size + UTM -->
   <script>
   (() => {
     const BASE = "https://buy.stripe.com/14A7sL8BNamtfmt08E8N20k";
@@ -367,5 +401,25 @@
     updateLink();
   })();
   </script>
+
+  <!-- Simple click tracking via gtag (requires ga.js to load gtag) -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-track]");
+      if (!btn) return;
+
+      const action = btn.getAttribute("data-track");
+      const item = btn.getAttribute("data-item") || "Winter Games";
+
+      gtag("event", action, {
+        event_category: "ecommerce",
+        event_label: item
+      });
+    });
+  </script>
+
 </body>
 </html>
