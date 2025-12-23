@@ -5,19 +5,21 @@
   <link rel="preconnect" href="https://www.googletagmanager.com">
   <link rel="preconnect" href="https://www.google-analytics.com">
 
- <!-- GA4 -->
-<script defer src="/scripts/ga.js"></script>
+  <!-- GA4 -->
+  <script defer src="/scripts/ga.js"></script>
 
-<!-- Optional global helpers -->
-<script defer src="/scripts/global.js"></script>
+  <!-- Optional global helpers -->
+  <script defer src="/scripts/global.js"></script>
 
-<!-- SB analytics (site-wide) -->
-<script defer src="/scripts/sb-analytics.js"></script>
+  <!-- SB analytics (site-wide) -->
+  <script defer src="/scripts/sb-analytics.js"></script>
 
-<!-- Nav/Footer injection -->
-<script defer src="/scripts/partials.js"></script>
+  <!-- Nav/Footer injection -->
+  <script defer src="/scripts/partials.js"></script>
 
-  
+  <!-- Cart core (if header/cart badge is in play site-wide) -->
+  <script defer src="/scripts/sb-cart.js"></script>
+
   <!-- Basics -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -44,7 +46,6 @@
   <meta name="twitter:site" content="@squarebidnesstm" />
   <meta name="sb:product" content="wintergames-hat">
 
-  
   <!-- CSS -->
   <link rel="stylesheet" href="/styles/style.css" />
 
@@ -73,19 +74,16 @@
     "url":"https://www.squarebidness.com/wintergames/hat/"
   }
   </script>
-
-  <!-- Cart core (if header/cart badge is in play site-wide) -->
-  <script defer src="/scripts/sb-cart.js"></script>
 </head>
 
 <body class="theme-dark" id="top">
 
-  <!-- NAV (injected) -->
-  <div id="nav-placeholder"></div>
+  <!-- NAV injected by /scripts/partials.js -->
+  <div id="site-header"></div>
 
   <main class="section">
     <div class="container" style="max-width:960px;">
-      
+
       <!-- Hero / Visual -->
       <section class="product-hero" style="display:grid;gap:1.75rem;align-items:start;">
         <div class="product-hero__media">
@@ -100,7 +98,9 @@
               sizes="(max-width:768px) 100vw, 560px"
               alt="Square Bidness Winter Games Waterproof Golfer"
               loading="lazy"
+              decoding="async"
               style="width:100%;height:auto;border-radius:12px;display:block;"
+              onerror="this.onerror=null;this.src='/assets/placeholder.png';"
             >
           </figure>
         </div>
@@ -110,7 +110,9 @@
           <p class="eyebrow" style="letter-spacing:.12em;text-transform:uppercase;font-size:.75rem;color:#c9a227;margin:0 0 .5rem;">
             Winter Games Collection
           </p>
+
           <h1 class="page-title" style="margin:0 0 .5rem;">Winter Games Waterproof Golfer</h1>
+
           <p class="page-subtitle" style="margin:0 0 1rem;">
             Performance waterproof golfer — built for Louisiana fronts and D.C. rooftops, Capitol building in the back and motion on the calendar.
           </p>
@@ -132,20 +134,18 @@
 
           <!-- STRIPE CHECKOUT CTA -->
           <div class="section__cta" style="display:flex;flex-wrap:wrap;gap:.75rem;margin-top:1rem;">
-            <a class="btn btn--gold" href="https://buy.stripe.com/7sY7sLg4f5297U15sY8N20s" target="_blank" rel="noopener">
-              Secure Checkout — Waterproof Golfer
+            <a
+              class="btn btn--gold"
+              href="https://buy.stripe.com/7sY7sLg4f5297U15sY8N20s"
+              data-stripe-checkout="wintergames-hat"
+              target="_blank" rel="noopener"
+            >
+              Checkout — $39.99
             </a>
+
             <a class="btn btn--ghost" href="/wintergames/">
               Back to Winter Games
             </a>
-            <a
-  class="btn btn--gold"
-  href="https://buy.stripe.com/7sY7sLg4f5297U15sY8N20s"
-  data-stripe-checkout="wintergames-hat"
-  target="_blank" rel="noopener"
->
-  Checkout — $39.99
-</a>
           </div>
 
           <p style="margin-top:1rem;font-size:.8rem;opacity:.7;">
@@ -164,7 +164,7 @@
           mist, and light rain.
         </p>
         <p style="font-size:.9rem;line-height:1.8;opacity:.9;max-width:48rem;">
-          Take it on the course, to the capitol, or on a quick run to handle business.  
+          Take it on the course, to the capitol, or on a quick run to handle business.
           Square Bidness up top — whether you’re in Baton Rouge, Hammond, or right back in D.C.
           with the skyline behind you, you’re covered.
         </p>
@@ -173,26 +173,8 @@
     </div>
   </main>
 
-  <!-- FOOTER (injected) -->
-  <div id="footer-placeholder"></div>
-
-  <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-      try {
-        const navHtml = await fetch("/nav/index.html", { cache: "no-store" })
-          .then(r => r.ok ? r.text() : "");
-        const navSlot = document.getElementById("nav-placeholder");
-        if (navSlot && navHtml) navSlot.innerHTML = navHtml;
-      } catch (_) {}
-
-      try {
-        const footerHtml = await fetch("/footer/index.html", { cache: "no-store" })
-          .then(r => r.ok ? r.text() : "");
-        const footerSlot = document.getElementById("footer-placeholder");
-        if (footerSlot && footerHtml) footerSlot.innerHTML = footerHtml;
-      } catch (_) {}
-    });
-  </script>
+  <!-- FOOTER injected by /scripts/partials.js -->
+  <div id="site-footer"></div>
 
 </body>
 </html>
