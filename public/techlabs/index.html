@@ -1,3 +1,4 @@
+<!-- /public/techlabs/index.html  (Brand / Product arm page) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -8,6 +9,9 @@
   <meta name="description" content="Square Bidness Tech Lab builds the tools behind the brand — Tax Pass™, content systems, and future data / AI infrastructure. Louisiana-rooted, veteran-owned, built for independent operators." />
   <link rel="canonical" href="https://www.squarebidness.com/techlabs/" />
   <meta name="theme-color" content="#000000" />
+  <meta name="color-scheme" content="dark light">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="robots" content="index,follow">
 
   <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com">
@@ -39,6 +43,12 @@
 
   <!-- GA -->
   <script defer src="/scripts/ga.js"></script>
+
+  <!-- Site-wide analytics -->
+  <script defer src="/scripts/sb-analytics.js"></script>
+
+  <!-- Partials loader (correct path for this repo) -->
+  <script defer src="/scripts/partials.js"></script>
 
   <style>
     :root{
@@ -313,28 +323,37 @@
   <!-- FOOTER -->
   <div id="footer-placeholder"></div>
 
-  <!-- NAV + FOOTER inject -->
+  <!-- KEEP BOTH PURPOSES:
+       1) /scripts/partials.js = your standard system
+       2) this inline fetch = hard fallback if partials.js isn’t active on this page -->
   <script>
-  (async () => {
-    const bust = `?v=${Date.now()}`;
+    (function () {
+      const bust = `?v=${Date.now()}`;
 
-    async function inject(url, id) {
-      try {
-        const res = await fetch(url + bust, { cache: "no-store", credentials: "same-origin" });
-        if (!res.ok) return null;
-        const html = await res.text();
-        const el = document.getElementById(id);
-        if (el) el.innerHTML = html;
-        return el;
-      } catch (e) {
-        console.warn("partial load failed:", url, e);
-        return null;
+      async function inject(url, id) {
+        try {
+          const el = document.getElementById(id);
+          if (!el) return;
+
+          // If something (partials.js) already filled it, don’t overwrite.
+          if (el.innerHTML && el.innerHTML.trim().length > 0) return;
+
+          const res = await fetch(url + bust, { cache: "no-store", credentials: "same-origin" });
+          if (!res.ok) return;
+          el.innerHTML = await res.text();
+        } catch (e) {}
       }
-    }
 
-    await inject("/nav/index.html", "nav-placeholder");
-    await inject("/footer/index.html", "footer-placeholder");
-  })();
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", () => {
+          inject("/nav/index.html", "nav-placeholder");
+          inject("/footer/index.html", "footer-placeholder");
+        }, { once: true });
+      } else {
+        inject("/nav/index.html", "nav-placeholder");
+        inject("/footer/index.html", "footer-placeholder");
+      }
+    })();
   </script>
 </body>
 </html>
