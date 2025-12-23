@@ -1,27 +1,192 @@
+<!-- public/offline/index.html -->
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Offline — Square Bidness</title>
-  <meta name="robots" content="noindex" />
+
+  <meta name="description" content="You're offline. Square Bidness is still in motion." />
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="format-detection" content="telephone=no" />
+
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+
   <style>
-    html,body{margin:0;background:#020617;color:#e5e7eb;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial}
-    .wrap{min-height:100vh;display:grid;place-items:center;padding:24px}
-    .card{max-width:680px;width:100%;background:#000;border:1px solid #1f2937;border-radius:16px;padding:24px}
-    h1{margin:0 0 10px;font-size:22px}
-    p{margin:0;color:#9ca3af;line-height:1.5}
-    a{color:#fff;text-decoration:none;border-bottom:1px solid #334155}
+    :root{
+      --gold:#c9a227;
+      --bg:#000;
+      --card:#020617;
+      --stroke:#1f2937;
+      --muted:#9ca3af;
+      --fg:#e5e7eb;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:radial-gradient(circle at top,#0b1220 0%, #000 55%, #000 100%);
+      color:var(--fg);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      display:grid;
+      place-items:center;
+      padding:24px;
+      text-align:center;
+    }
+
+    .watermark{
+      position:fixed;
+      top:50%;
+      left:50%;
+      transform:translate(-50%,-50%);
+      font-size:22vw;
+      font-weight:900;
+      letter-spacing:-0.06em;
+      color:rgba(201,162,39,0.06);
+      text-transform:uppercase;
+      user-select:none;
+      pointer-events:none;
+      z-index:0;
+      white-space:nowrap;
+    }
+
+    .wrap{position:relative;z-index:1;width:100%;max-width:720px}
+    .card{
+      background:linear-gradient(180deg, rgba(2,6,23,.95), rgba(0,0,0,.92));
+      border:1px solid var(--stroke);
+      border-radius:18px;
+      padding:22px;
+      box-shadow:0 22px 60px rgba(0,0,0,.6);
+    }
+
+    .logo{
+      width:120px;
+      height:auto;
+      margin:0 auto 10px;
+      display:block;
+      filter:drop-shadow(0 10px 25px rgba(0,0,0,.55));
+    }
+
+    h1{margin:6px 0 6px;font-size:1.55rem}
+    p{margin:0;color:var(--muted);line-height:1.55}
+
+    .banner{
+      margin-top:14px;
+      background:radial-gradient(circle at top, rgba(201,162,39,.18), rgba(0,0,0,.9) 60%);
+      border:1px solid rgba(201,162,39,.25);
+      border-radius:16px;
+      padding:14px;
+    }
+    .banner img{
+      width:100%;
+      max-width:420px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:0 10px 26px rgba(0,0,0,.5);
+      display:block;
+      margin:0 auto 10px;
+      background:#0b0b0b;
+    }
+    .banner h2{margin:0 0 4px;font-size:1.05rem}
+    .banner small{display:block;color:#a3a3a3;margin-top:6px;font-size:.78rem}
+
+    .actions{
+      margin-top:14px;
+      display:flex;
+      gap:.6rem;
+      justify-content:center;
+      flex-wrap:wrap;
+    }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:.65rem 1.05rem;
+      border-radius:999px;
+      font-weight:800;
+      text-decoration:none;
+      border:1px solid var(--stroke);
+      background:#0b1220;
+      color:var(--fg);
+      cursor:pointer;
+    }
+    .btn--gold{
+      background:var(--gold);
+      border-color:rgba(201,162,39,.55);
+      color:#111;
+      box-shadow:0 10px 28px rgba(201,162,39,.25);
+    }
+    .btn:active{transform:scale(.99)}
+    .status{margin-top:10px;font-size:.85rem;color:var(--muted);min-height:1.2em}
+
+    footer{
+      margin-top:14px;
+      font-size:.78rem;
+      color:#7b8290;
+      opacity:.85;
+    }
   </style>
 </head>
+
 <body>
-  <div class="wrap">
-    <div class="card">
+  <div class="watermark">Liberty</div>
+
+  <main class="wrap" role="main" aria-label="Offline">
+    <section class="card">
+      <img class="logo" src="/assets/cleantextlogo.png" alt="Square Bidness" loading="lazy" decoding="async" />
+
       <h1>You’re offline.</h1>
-      <p>Square Bidness is still in motion. Check your connection and reload.</p>
-      <p style="margin-top:12px"><a href="/">Return to Home</a></p>
-    </div>
-  </div>
+      <p>Square Bidness is still in motion. Check your connection, then tap below to try again.</p>
+
+      <div class="banner" aria-label="Offline preview">
+        <!-- If liberty image ever moves, swap this to /assets/placeholder.png -->
+        <img src="/liberty/assets/liberty-3.jpg"
+             alt="Liberty Collection preview"
+             loading="lazy"
+             decoding="async"
+             onerror="this.onerror=null;this.src='/assets/placeholder.png';" />
+
+        <h2>Liberty Collection (Preview)</h2>
+        <p style="margin-top:2px;color:#d1d5db;font-size:.9rem;">
+          Limited content may be available offline if it was cached earlier.
+        </p>
+        <small>Offline mode is a fallback — some pages may not load until you reconnect.</small>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn--gold" id="reloadBtn" type="button">Try Again</button>
+        <a class="btn" href="/">Return Home</a>
+      </div>
+
+      <div class="status" id="status" aria-live="polite"></div>
+
+      <footer>© <span id="y"></span> Square Bidness Tech Lab</footer>
+    </section>
+  </main>
+
+  <script>
+    document.getElementById('y').textContent = new Date().getFullYear();
+
+    const status = document.getElementById('status');
+    const btn = document.getElementById('reloadBtn');
+
+    function setStatus(msg){ if(status) status.textContent = msg || ""; }
+
+    btn?.addEventListener('click', async () => {
+      setStatus("Trying to reconnect…");
+      // Quick online hint (not perfect, but helps)
+      if (navigator.onLine) {
+        // Give the browser a beat, then reload
+        setTimeout(() => location.reload(), 250);
+      } else {
+        setTimeout(() => setStatus("Still offline. Check Wi-Fi or cellular, then try again."), 600);
+      }
+    });
+
+    window.addEventListener('online', () => setStatus("Back online — reloading…"));
+    window.addEventListener('online', () => setTimeout(() => location.reload(), 300));
+  </script>
 </body>
 </html>
-
