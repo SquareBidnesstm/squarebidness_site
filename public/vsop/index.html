@@ -142,7 +142,6 @@
           <a class="btn btn--gold" href="#set">View the Set</a>
           <a class="btn btn--ghost" href="/shop/">Back to Shop</a>
 
-          <!-- ✅ Ship date updated -->
           <div class="vsop-preorder-pill">
             Preorder · Ships Feb 1, 2026
           </div>
@@ -205,6 +204,7 @@
               onerror="this.onerror=null;this.src='/assets/placeholder.png';"
             >
           </div>
+
           <div class="vsop-card__body">
             <h2>VSOP Hooded Jacket</h2>
             <p>
@@ -212,14 +212,18 @@
               meetings and victory laps at the same time.
             </p>
             <div class="vsop-price">$129.99 · Preorder</div>
-
-            <!-- ✅ Ship date updated -->
             <p class="vsop-note">Ships Feb 1, 2026.</p>
           </div>
+
           <div class="vsop-card__actions">
             <a class="btn btn--gold btn--primary" href="/product-vsop-jacket/">
               Choose Size &amp; Preorder Jacket
             </a>
+
+            <button type="button" class="btn btn--gold" data-add-to-cart="vsop-jacket">
+              Add to cart
+            </button>
+
             <a class="btn btn--ghost btn--secondary" href="/product-vsop-jacket/#details">
               View details
             </a>
@@ -239,6 +243,7 @@
               onerror="this.onerror=null;this.src='/assets/placeholder.png';"
             >
           </div>
+
           <div class="vsop-card__body">
             <h2>VSOP Shorts</h2>
             <p>
@@ -246,14 +251,18 @@
               Same VSOP story — just on the legs.
             </p>
             <div class="vsop-price">$89.99 · Preorder</div>
-
-            <!-- ✅ Ship date updated -->
             <p class="vsop-note">Ships Feb 1, 2026.</p>
           </div>
+
           <div class="vsop-card__actions">
             <a class="btn btn--gold btn--primary" href="/product-vsop-shorts/">
               Choose Size &amp; Preorder Shorts
             </a>
+
+            <button type="button" class="btn btn--gold" data-add-to-cart="vsop-shorts">
+              Add to cart
+            </button>
+
             <a class="btn btn--ghost btn--secondary" href="/product-vsop-shorts/#details">
               View details
             </a>
@@ -265,5 +274,66 @@
 
   <!-- FOOTER injected by /scripts/partials.js -->
   <div id="site-footer"></div>
+
+  <!-- ✅ Wire buttons to SB.cart.add() (safe + analytics-friendly) -->
+  <script>
+  (function(){
+    const root = window;
+    root.SB = root.SB && typeof root.SB === "object" ? root.SB : {};
+    if (root.SB._cartUiBound) return; // prevent double-binding if reused
+    root.SB._cartUiBound = true;
+
+    // Minimal product map for this page.
+    // item_id MUST match data-add-to-cart value.
+    const PRODUCTS = {
+      "vsop-jacket": {
+        item_id: "vsop-jacket",
+        item_name: "VSOP Hooded Jacket",
+        price: 129.99,
+        quantity: 1,
+        url: "/product-vsop-jacket/",
+        image: "/assets/vsop-jacket_800.jpg"
+      },
+      "vsop-shorts": {
+        item_id: "vsop-shorts",
+        item_name: "VSOP Shorts",
+        price: 89.99,
+        quantity: 1,
+        url: "/product-vsop-shorts/",
+        image: "/assets/vsop-shorts_800.jpg"
+      }
+    };
+
+    function onClick(e){
+      const btn = e.target && e.target.closest ? e.target.closest("[data-add-to-cart]") : null;
+      if (!btn) return;
+
+      e.preventDefault();
+      const id = String(btn.getAttribute("data-add-to-cart") || "").trim();
+      const item = PRODUCTS[id] || { item_id: id, quantity: 1 };
+
+      if (!root.SB || !root.SB.cart || typeof root.SB.cart.add !== "function") {
+        console.warn("[SB cart] SB.cart.add not ready yet.");
+        return;
+      }
+
+      root.SB.cart.add(item);
+
+      // Optional micro-feedback (won't break your UI)
+      try {
+        btn.blur();
+        btn.dataset.state = "added";
+        const original = btn.textContent;
+        btn.textContent = "Added";
+        setTimeout(() => {
+          btn.textContent = original;
+          delete btn.dataset.state;
+        }, 900);
+      } catch {}
+    }
+
+    document.addEventListener("click", onClick, true);
+  })();
+  </script>
 </body>
 </html>
