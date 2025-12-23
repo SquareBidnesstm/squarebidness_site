@@ -6,6 +6,7 @@
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
       ]
     },
+
     {
       "source": "/docs/(.*)",
       "headers": [
@@ -14,12 +15,14 @@
         { "key": "Cache-Control", "value": "public, max-age=3600" }
       ]
     },
+
     {
       "source": "/robots.txt",
       "headers": [
         { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
       ]
     },
+
     {
       "source": "/sitemap-index.xml",
       "headers": [
@@ -33,6 +36,50 @@
       "headers": [
         { "key": "Content-Type", "value": "application/xml; charset=utf-8" },
         { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+      ]
+    },
+
+    /* ✅ NEW: nav/footer partial HTML (fast, but not stuck) */
+    {
+      "source": "/nav/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=3600" }
+      ]
+    },
+    {
+      "source": "/footer/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=3600" }
+      ]
+    },
+
+    /* ✅ NEW: scripts should update fast */
+    {
+      "source": "/scripts/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=3600" }
+      ]
+    },
+
+    /* ✅ NEW: SW + manifests must never be stuck */
+    {
+      "source": "/service-worker.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/manifest.webmanifest",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+      ]
+    },
+
+    /* ✅ NEW: offline fallback should always be fresh */
+    {
+      "source": "/offline/(.*)",
+      "headers": [
         { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
       ]
     }
