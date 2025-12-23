@@ -6,8 +6,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>About — Square Bidness</title>
-  <meta name="description" content="Square Bidness Apparel — veteran-owned Louisiana lifestyle brand built on principles, morals, and business done right. Powered in-house by Square Bidness Tech Lab." />
+  <meta name="description" content="Square Bidness — veteran-owned Louisiana lifestyle brand built on principles, morals, and business done right. Powered in-house by Square Bidness Tech Lab." />
   <link rel="canonical" href="https://www.squarebidness.com/about/" />
+  <meta name="robots" content="index,follow" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="format-detection" content="telephone=no" />
+
+  <!-- Build stamp -->
+  <meta name="sb:build" content="v20251222-about" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
@@ -15,9 +22,18 @@
   <meta property="og:title" content="About — Square Bidness" />
   <meta property="og:description" content="Veteran-owned Louisiana lifestyle brand built on principles, morals, and business done right. Powered in-house by Square Bidness Tech Lab." />
   <meta property="og:url" content="https://www.squarebidness.com/about/" />
-  <meta property="og:image" content="https://www.squarebidness.com/assets/sb-social-card_1200.jpg" />
+
+  <meta property="og:image" content="https://www.squarebidness.com/assets/sb-social-card_1200.webp" />
+  <meta property="og:image:type" content="image/webp" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Square Bidness — About" />
+
+  <meta property="og:image" content="https://www.squarebidness.com/assets/sb-social-card_1200.jpg" />
+  <meta property="og:image:type" content="image/jpeg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Square Bidness — About" />
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
@@ -29,204 +45,63 @@
   <!-- CSS -->
   <link rel="stylesheet" href="/styles/style.css" />
 
-  <!-- Icons / PWA (root) -->
+  <!-- Icons / PWA -->
   <link rel="icon" href="/favicon.ico" sizes="any" />
-  <link rel="apple-touch-icon" href="/icon_180.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/icon-180.png" />
   <link rel="manifest" href="/manifest.webmanifest" />
-  <meta name="theme-color" content="#000000" />
 
-  <!-- GA + Cart (nav/cart integration) -->
+  <!-- Analytics -->
   <script defer src="/scripts/ga.js"></script>
-  <script defer src="/scripts/sb-cart.js"></script>
+  <script defer src="/scripts/sb-analytics.js"></script>
+
+  <!-- Nav/Footer loader -->
+  <script defer src="/partials/partials.js"></script>
 
   <style>
-    .about-hero {
-      border-bottom:1px solid #1f1f1f;
-      background:radial-gradient(circle at top left,#111827,#020617 55%,#000 100%);
-    }
-    .about-hero__inner{
-      max-width:1200px;
-      margin:0 auto;
-      padding:26px 16px 28px;
-      display:grid;
-      gap:18px;
-      align-items:center;
-    }
-    @media(min-width:860px){
-      .about-hero__inner{
-        grid-template-columns:1.1fr .9fr;
-      }
-    }
-    .about-kicker{
-      font-size:.8rem;
-      text-transform:uppercase;
-      letter-spacing:.18em;
-      color:#9ca3af;
-      margin-bottom:.35rem;
-    }
-    .about-hero h1{
-      margin:0 0 .3rem;
-      font-size:clamp(1.7rem,3.5vw,2.4rem);
-    }
-    .about-tagline{
-      margin:0 0 .75rem;
-      font-size:.95rem;
-      color:#d1d5db;
-    }
-    .about-pill{
-      display:inline-flex;
-      align-items:center;
-      gap:.45rem;
-      padding:.35rem .7rem;
-      border-radius:999px;
-      border:1px solid #1f2937;
-      background:#020617;
-      color:#e5e7eb;
-      font-size:.8rem;
-      margin-bottom:.6rem;
-    }
-    .about-pill span{
-      width:8px;height:8px;
-      border-radius:999px;
-      background:#22c55e;
-    }
-    .about-meta{
-      font-size:.86rem;
-      color:#9ca3af;
-      margin-top:.4rem;
-    }
-    .about-hero__media{
-      position:relative;
-    }
-    .about-hero__media img{
-      width:100%;
-      display:block;
-      border-radius:14px;
-      border:1px solid #1f2937;
-      background:#020617;
-      object-fit:cover;
-    }
-    .about-hero__badge{
-      position:absolute;
-      bottom:10px;
-      left:10px;
-      padding:.45rem .7rem;
-      border-radius:999px;
-      font-size:.78rem;
-      background:rgba(0,0,0,.85);
-      border:1px solid rgba(148,163,184,.7);
-      color:#e5e7eb;
-    }
+    .about-hero{border-bottom:1px solid #1f1f1f;background:radial-gradient(circle at top left,#111827,#020617 55%,#000 100%);}
+    .about-hero__inner{max-width:1200px;margin:0 auto;padding:26px 16px 28px;display:grid;gap:18px;align-items:center;}
+    @media(min-width:860px){.about-hero__inner{grid-template-columns:1.1fr .9fr;}}
+    .about-kicker{font-size:.8rem;text-transform:uppercase;letter-spacing:.18em;color:#9ca3af;margin-bottom:.35rem;}
+    .about-hero h1{margin:0 0 .3rem;font-size:clamp(1.7rem,3.5vw,2.4rem);}
+    .about-tagline{margin:0 0 .75rem;font-size:.95rem;color:#d1d5db;}
+    .about-pill{display:inline-flex;align-items:center;gap:.45rem;padding:.35rem .7rem;border-radius:999px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;font-size:.8rem;margin-bottom:.6rem;}
+    .about-pill span{width:8px;height:8px;border-radius:999px;background:#22c55e;}
+    .about-meta{font-size:.86rem;color:#9ca3af;margin-top:.4rem;}
+    .about-hero__media{position:relative;}
+    .about-hero__media img{width:100%;display:block;border-radius:14px;border:1px solid #1f2937;background:#020617;object-fit:cover;}
+    .about-hero__badge{position:absolute;bottom:10px;left:10px;padding:.45rem .7rem;border-radius:999px;font-size:.78rem;background:rgba(0,0,0,.85);border:1px solid rgba(148,163,184,.7);color:#e5e7eb;}
 
-    .about-main{
-      max-width:1200px;
-      margin:0 auto;
-      padding:20px 16px 32px;
-      display:grid;
-      gap:18px;
-    }
-    @media(min-width:900px){
-      .about-main{
-        grid-template-columns:1.2fr .9fr;
-        align-items:flex-start;
-      }
-    }
-    .about-section h2{
-      margin:0 0 .4rem;
-      font-size:1.05rem;
-    }
-    .about-section p{
-      margin:0 0 .7rem;
-      font-size:.95rem;
-      color:#d1d5db;
-    }
-    .about-taglist{
-      list-style:none;
-      padding:0;
-      margin:.4rem 0 0;
-      display:flex;
-      flex-wrap:wrap;
-      gap:.35rem;
-      font-size:.82rem;
-    }
-    .about-taglist li{
-      padding:.25rem .6rem;
-      border-radius:999px;
-      border:1px solid #1f2937;
-      background:#020617;
-      color:#9ca3af;
-    }
+    .about-main{max-width:1200px;margin:0 auto;padding:20px 16px 32px;display:grid;gap:18px;}
+    @media(min-width:900px){.about-main{grid-template-columns:1.2fr .9fr;align-items:flex-start;}}
+    .about-section h2{margin:0 0 .4rem;font-size:1.05rem;}
+    .about-section p{margin:0 0 .7rem;font-size:.95rem;color:#d1d5db;}
+    .about-taglist{list-style:none;padding:0;margin:.4rem 0 0;display:flex;flex-wrap:wrap;gap:.35rem;font-size:.82rem;}
+    .about-taglist li{padding:.25rem .6rem;border-radius:999px;border:1px solid #1f2937;background:#020617;color:#9ca3af;}
 
-    .about-sidecard{
-      border-radius:14px;
-      border:1px solid #1f2937;
-      background:#020617;
-      padding:14px 14px 12px;
-      font-size:.9rem;
-    }
-    .about-sidecard h3{
-      margin:0 0 .4rem;
-      font-size:.96rem;
-    }
-    .about-sidecard p{
-      margin:0 0 .5rem;
-      color:#d1d5db;
-    }
-    .about-sidecard small{
-      display:block;
-      font-size:.8rem;
-      color:#9ca3af;
-    }
+    .about-sidecard{border-radius:14px;border:1px solid #1f2937;background:#020617;padding:14px 14px 12px;font-size:.9rem;}
+    .about-sidecard h3{margin:0 0 .4rem;font-size:.96rem;}
+    .about-sidecard p{margin:0 0 .5rem;color:#d1d5db;}
+    .about-sidecard small{display:block;font-size:.8rem;color:#9ca3af;}
 
-    .about-list{
-      list-style:none;
-      padding:0;
-      margin:0;
-      font-size:.9rem;
-      color:#d1d5db;
-    }
-    .about-list li{
-      margin:0 0 .35rem;
-    }
-    .about-list strong{
-      color:#e5e7eb;
-    }
+    .about-list{list-style:none;padding:0;margin:0;font-size:.9rem;color:#d1d5db;}
+    .about-list li{margin:0 0 .35rem;}
+    .about-list strong{color:#e5e7eb;}
 
-    .about-techlab{
-      margin-top:16px;
-      padding:10px 12px;
-      border-radius:12px;
-      border:1px dashed #1d4ed8;
-      background:#020617;
-      font-size:.86rem;
-      color:#bfdbfe;
-    }
-    .about-techlab strong{
-      color:#e5e7eb;
-    }
+    .about-techlab{margin-top:16px;padding:10px 12px;border-radius:12px;border:1px dashed #1d4ed8;background:#020617;font-size:.86rem;color:#bfdbfe;}
+    .about-techlab strong{color:#e5e7eb;}
 
-    .section__cta{
-      margin-top:1rem;
-      display:flex;
-      flex-wrap:wrap;
-      gap:.5rem;
-    }
+    .section__cta{margin-top:1rem;display:flex;flex-wrap:wrap;gap:.5rem;}
   </style>
 </head>
 
 <body class="theme-dark" id="top">
-  <!-- NAV SLOT -->
   <div id="nav-placeholder"></div>
 
-  <!-- HERO -->
   <header class="about-hero">
     <div class="about-hero__inner">
       <div>
-        <div class="about-pill">
-          <span></span>
-          Veteran-owned · Louisiana-raised · Built in-house
-        </div>
-        <div class="about-kicker">Square Bidness Apparel</div>
+        <div class="about-pill"><span></span>Veteran-owned · Louisiana-raised · Built in-house</div>
+        <div class="about-kicker">Square Bidness</div>
         <h1>Principles. Morals. Business Done Right.</h1>
         <p class="about-tagline">
           Square Bidness is a Louisiana lifestyle brand built for everyday people who handle business
@@ -239,26 +114,22 @@
       </div>
 
       <div class="about-hero__media">
-        <img src="/assets/hero.jpg"
-             alt="Square Bidness apparel and lifestyle visuals from Louisiana to New York">
-        <div class="about-hero__badge">
-          Square Bidness HQ · Hammond, Louisiana
-        </div>
+        <img src="/assets/hero.jpg" alt="Square Bidness apparel and lifestyle visuals from Louisiana to New York">
+        <div class="about-hero__badge">Square Bidness HQ · Hammond, Louisiana</div>
       </div>
     </div>
   </header>
 
   <main class="about-main">
-    <!-- Left column: story -->
     <section class="about-section">
       <h2>Who we are</h2>
       <p>
-        Square Bidness Apparel started as a simple idea — make clothes for the people who really move
+        Square Bidness started as a simple idea — make clothes for the people who really move
         the needle. The ones handling business, raising families, serving communities, and keeping
         their name solid wherever they go.
       </p>
       <p>
-        Founded by a U.S. veteran and rooted in Louisiana, the brand has grown from early T-shirt drops
+        Founded by a U.S. veteran and rooted in Louisiana, the brand has grown from early drops
         into full collections like <strong>VSOP</strong>, <strong>Winter Games</strong>, and
         <strong>Supima Essentials</strong>, with international reach and local love at the same time.
       </p>
@@ -278,12 +149,11 @@
 
       <h2>Where we’re based</h2>
       <p>
-        The heart of Square Bidness runs through the Northshore and Central Louisiana — with a growing
-        footprint beyond the state.
+        The heart of Square Bidness runs through Louisiana — with a growing footprint beyond the state.
       </p>
       <ul class="about-list">
-        <li><strong>Square Bidness HQ:</strong> 46331 N Baptist Rd, Hammond, LA 70401</li>
-        <li><strong>Northshore · Central Louisiana:</strong> Hammond, Pineville, Alexandria, and surrounding areas</li>
+        <li><strong>Square Bidness HQ:</strong> Hammond, Louisiana</li>
+        <li><strong>Louisiana footprint:</strong> Hammond, Pineville, Alexandria, and surrounding areas</li>
         <li><strong>Beyond:</strong> Orders and connections reaching across the U.S. and into the Dominican Republic</li>
       </ul>
 
@@ -293,12 +163,11 @@
       </div>
     </section>
 
-    <!-- Right column: Tech Lab + operations -->
     <aside>
       <div class="about-sidecard">
         <h3>Built in-house by Square Bidness Tech Lab</h3>
         <p>
-          Every pixel on this site — from the product layouts to the booking pages, lender packets,
+          Every pixel on this site — from the product layouts to booking pages, lender packets,
           and digital tools — is designed and maintained by <strong>Square Bidness Tech Lab</strong>.
         </p>
         <p>
@@ -324,41 +193,6 @@
     </aside>
   </main>
 
-  <!-- FOOTER SLOT -->
   <div id="footer-placeholder"></div>
-
-  <!-- NAV + FOOTER loader (shared across site) -->
-  <script>
-  (async () => {
-    const bust = `?v=${Date.now()}`;
-
-    async function injectPartial(url, targetId) {
-      try {
-        const res = await fetch(url + bust, {
-          credentials: 'same-origin',
-          cache: 'no-store'
-        });
-        if (!res.ok) {
-          console.warn('[partials] not ok:', url, res.status);
-          return null;
-        }
-        const html = await res.text();
-        const el = document.getElementById(targetId);
-        if (!el) {
-          console.warn('[partials] missing target:', targetId);
-          return null;
-        }
-        el.innerHTML = html;
-        return el;
-      } catch (err) {
-        console.warn('[partials] fetch fail:', url, err);
-        return null;
-      }
-    }
-
-    await injectPartial('/nav/index.html', 'nav-placeholder');
-    await injectPartial('/footer/index.html', 'footer-placeholder');
-  })();
-  </script>
 </body>
 </html>
