@@ -10,7 +10,7 @@
   <link rel="canonical" href="https://www.squarebidness.com/product-supima-ladies-natural-white/" />
 
   <!-- Build stamp (used by partials loader for cache busting) -->
-  <meta name="sb:build" content="v20251221-supima-ladies-natural-white" />
+  <meta name="sb:build" content="v20251224-supima-ladies-natural-white" />
 
   <!-- ✅ Product marker (your standard) -->
   <meta name="sb:product" content="supima-ladies-natural-white" />
@@ -28,11 +28,20 @@
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#000000">
 
-  <!-- ✅ Preload main product image (WEBP) -->
-  <link rel="preload" as="image"
-        href="/assets/supima/ladies-natural-white_1200.webp"
-        type="image/webp"
-        imagesizes="(max-width: 960px) 100vw, 560px">
+  <!-- ✅ Preload main product image (WEBP, 780×520 master with responsive cuts) -->
+  <link
+    rel="preload"
+    as="image"
+    href="/assets/supima/ladies-natural-white_780.webp"
+    type="image/webp"
+    imagesrcset="
+      /assets/supima/ladies-natural-white_420.webp 420w,
+      /assets/supima/ladies-natural-white_640.webp 640w,
+      /assets/supima/ladies-natural-white_700.webp 700w,
+      /assets/supima/ladies-natural-white_780.webp 780w
+    "
+    imagesizes="(max-width: 960px) 100vw, 560px"
+  >
 
   <!-- Open Graph -->
   <meta property="og:type" content="product" />
@@ -42,7 +51,7 @@
   <meta property="og:url" content="https://www.squarebidness.com/product-supima-ladies-natural-white/" />
   <meta property="og:image" content="https://www.squarebidness.com/assets/supima/ladies-natural-white_1200.webp" />
   <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="1200" />
+  <meta property="og:image:height" content="630" />
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
@@ -55,11 +64,7 @@
   <script defer src="/scripts/sb-cart.js"></script>
   <script defer src="/scripts/global.js"></script>
   <script defer src="/scripts/sb-analytics.js"></script>
-
-  <!-- ✅ Standard partials loader -->
   <script defer src="/scripts/partials.js"></script>
-
-  <!-- Optional -->
   <script defer src="/scripts/sw-register.js"></script>
 
   <style>
@@ -90,6 +95,13 @@
     .p-crumbs{margin:0 0 10px;font-size:.85rem;color:#9ca3af;}
     .p-crumbs a{color:#e5e7eb;text-decoration:none;}
     .p-crumbs a:hover{text-decoration:underline;}
+
+    /* A11y: make select a comfortable tap target */
+    .p-row select{
+      min-height:44px;
+      padding:0.45rem 0.7rem;
+      font-size:0.95rem;
+    }
   </style>
 
   <!-- ✅ Product JSON-LD -->
@@ -167,23 +179,38 @@
       <section class="p-card" aria-label="Product images">
         <div class="p-media">
           <picture>
+            <!-- WEBP responsive sources (420 / 640 / 700 / 780) -->
             <source
               type="image/webp"
-              srcset="/assets/supima/ladies-natural-white_800.webp 800w, /assets/supima/ladies-natural-white_1200.webp 1200w"
-              sizes="(max-width: 960px) 100vw, 560px">
+              srcset="
+                /assets/supima/ladies-natural-white_420.webp 420w,
+                /assets/supima/ladies-natural-white_640.webp 640w,
+                /assets/supima/ladies-natural-white_700.webp 700w,
+                /assets/supima/ladies-natural-white_780.webp 780w
+              "
+              sizes="(max-width: 960px) 100vw, 560px"
+            >
+            <!-- JPEG fallback -->
             <source
               type="image/jpeg"
-              srcset="/assets/supima/ladies-natural-white_800.jpg 800w, /assets/supima/ladies-natural-white_1200.jpg 1200w"
-              sizes="(max-width: 960px) 100vw, 560px">
+              srcset="
+                /assets/supima/ladies-natural-white_420.jpg 420w,
+                /assets/supima/ladies-natural-white_640.jpg 640w,
+                /assets/supima/ladies-natural-white_700.jpg 700w,
+                /assets/supima/ladies-natural-white_780.jpg 780w
+              "
+              sizes="(max-width: 960px) 100vw, 560px"
+            >
             <img
-              src="/assets/supima/ladies-natural-white_800.jpg"
+              src="/assets/supima/ladies-natural-white_780.jpg"
               alt="Supima Ladies Tee — Natural White"
               loading="eager"
               decoding="async"
               fetchpriority="high"
-              width="800"
-              height="1000"
-              style="width:100%;height:auto;">
+              width="780"
+              height="520"
+              style="width:100%;height:auto;"
+            >
           </picture>
         </div>
 
@@ -251,14 +278,17 @@
   <!-- FOOTER injection target -->
   <div id="site-footer"></div>
 
-  <!-- ✅ Page wiring for your data-add-to-cart button (since global.js doesn't do it yet) -->
+  <!-- ✅ Page wiring for your data-add-to-cart button -->
   <script>
   (function(){
     const root = window;
 
     function ready(fn){
-      if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", fn, { once:true });
-      else fn();
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", fn, { once:true });
+      } else {
+        fn();
+      }
     }
 
     ready(() => {
@@ -292,8 +322,8 @@
           price: 36.00,
           quantity: 1,
           size: size,
-          variant: size, // helps your checkout normalizer
-          image: "/assets/supima/ladies-natural-white_800.webp",
+          variant: size,
+          image: "/assets/supima/ladies-natural-white_780.webp",
           url: "/product-supima-ladies-natural-white/",
           sku: "sb-supima-ladies-natural-white"
         });
