@@ -12,18 +12,23 @@
   <meta name="robots" content="index,follow">
 
   <!-- Build stamp -->
-  <meta name="sb:build" content="v20251224-stories-prod" />
+  <meta name="sb:build" content="v20251224-stories-perf" />
 
   <!-- Perf: preconnect (tight) -->
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
   <link rel="preconnect" href="https://www.google-analytics.com" crossorigin>
 
-  <!-- ✅ Preload LCP image (match the FIRST card image exactly) -->
+  <!-- ✅ Preload LCP image (MATCHES innovation-fest-2025_*.webp) -->
   <link
     rel="preload"
     as="image"
-    href="/blog/assets/innovation-fest-hero_1200.webp"
-    imagesrcset="/blog/assets/innovation-fest-hero_800.webp 800w, /blog/assets/innovation-fest-hero_1200.webp 1200w"
+    href="/blog/assets/innovation-fest-2025_780.webp"
+    imagesrcset="
+      /blog/assets/innovation-fest-2025_420.webp 420w,
+      /blog/assets/innovation-fest-2025_640.webp 640w,
+      /blog/assets/innovation-fest-2025_700.webp 700w,
+      /blog/assets/innovation-fest-2025_780.webp 780w
+    "
     imagesizes="(max-width: 768px) 100vw, 520px"
     fetchpriority="high"
   />
@@ -33,17 +38,18 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/icon-180.png" />
   <link rel="manifest" href="/manifest.webmanifest" />
 
-  <!-- Styles -->
+  <!-- Tiny critical shell (just enough to keep layout stable) -->
   <style>
-  /* tiny critical shell only */
-  #site-header{min-height:72px}
-  .wrap{max-width:1120px;margin:0 auto;padding:0 16px}
-  .stories-hero{padding:2.25rem 0 1.5rem;border-bottom:1px solid #0b1220}
-  .stories-grid{display:grid;gap:1.25rem;margin:1.8rem 0 2.5rem;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
-  .story-card{border-radius:18px;overflow:hidden}
-</style>
-<link rel="preload" href="/styles/style.css" as="style">
-<link rel="stylesheet" href="/styles/style.css">
+    #site-header{min-height:72px}
+    .wrap{max-width:1120px;margin:0 auto;padding:0 16px}
+    .stories-hero{padding:2.25rem 0 1.5rem;border-bottom:1px solid #0b1220}
+    .stories-grid{display:grid;gap:1.25rem;margin:1.8rem 0 2.5rem;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+    .story-card{border-radius:18px;overflow:hidden}
+  </style>
+
+  <!-- Main CSS (preload + apply) -->
+  <link rel="preload" href="/styles/style.css" as="style">
+  <link rel="stylesheet" href="/styles/style.css">
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
@@ -107,7 +113,7 @@
           "headline":"Innovation Fest 2025 — From Louisiana to NYC",
           "url":"https://www.squarebidness.com/blog/post/innovation-fest-2025/",
           "datePublished":"2025-09-24",
-          "image":["https://www.squarebidness.com/blog/assets/innovation-fest-hero_1200.jpg"],
+          "image":["https://www.squarebidness.com/blog/assets/innovation-fest-2025_780.jpg"],
           "author":{"@type":"Person","name":"Marcus Buckner"},
           "publisher":{
             "@type":"Organization",
@@ -140,7 +146,7 @@
           "name":"Marcus Buckner x Terrance Gangsta Williams",
           "url":"https://www.squarebidness.com/press/youtube-interview/",
           "embedUrl":"https://www.youtube.com/embed/o2eKkE8NmFY",
-          "thumbnailUrl":["https://www.squarebidness.com/stories/assets/yt-o2eKkE8NmFY_1200x675.jpg"],
+          "thumbnailUrl":["https://www.squarebidness.com/stories/assets/stories-video-1_780.jpg"],
           "uploadDate":"2025-11-03",
           "publisher":{
             "@type":"Organization",
@@ -172,149 +178,17 @@
   <!-- Scripts -->
   <script defer src="/scripts/ga.js"></script>
   <script defer src="/scripts/global.js"></script>
+
+  <!-- ✅ Site-wide analytics script (once) -->
   <script defer src="/scripts/sb-analytics.js"></script>
 
   <!-- ✅ Nav/Footer injection -->
   <script defer src="/scripts/partials.js"></script>
-
-  <!-- ✅ Site-wide analytics script (per your rule) -->
-  <script defer src="/scripts/sb-analytics.js"></script>
-
-  <style>
-    body.theme-dark.stories-body{ background:#020617; color:#f9fafb; }
-
-    /* CLS guard for injected nav/footer */
-    #site-header{min-height:72px;}
-    #site-footer{min-height:120px;}
-
-    .wrap{max-width:1120px;margin:0 auto;padding:0 16px;}
-
-    .stories-hero{
-      padding:2.25rem 0 1.5rem;
-      border-bottom:1px solid #0b1220;
-      background:radial-gradient(circle at top left,#020617,#000 60%);
-    }
-    .stories-hero .page-kicker{
-      font-size:.75rem;
-      letter-spacing:.18em;
-      text-transform:uppercase;
-      color:#9ca3af;
-      margin-bottom:.35rem;
-    }
-    .stories-hero h1{ font-size:2rem; font-weight:800; margin:0 0 .4rem; }
-    .stories-hero .muted{ max-width:620px; font-size:.95rem; color:#9ca3af; }
-
-    .stories-grid{
-      display:grid;
-      gap:1.25rem;
-      margin:1.8rem 0 2.5rem;
-      grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-    }
-
-    .story-card{
-      background:#020617;
-      border-radius:18px;
-      border:1px solid rgba(148,163,184,.25);
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-      box-shadow:0 18px 40px rgba(15,23,42,.75);
-    }
-
-    .story-card__media{
-      position:relative;
-      background:#000;
-      /* ✅ Reserve space -> kills CLS from unsized images */
-      aspect-ratio: 3 / 2;
-      overflow:hidden;
-    }
-    .story-card__media picture,
-    .story-card__media img{
-      width:100%;
-      height:100%;
-      display:block;
-    }
-    .story-card__media img{ object-fit:cover; }
-
-    .story-badge{
-      position:absolute;
-      left:.75rem; bottom:.75rem;
-      padding:.22rem .6rem;
-      border-radius:999px;
-      font-size:.7rem;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      background:rgba(15,23,42,.88);
-      border:1px solid rgba(249,250,251,.18);
-      color:#e5e7eb;
-    }
-
-    .story-card__body{ padding:.85rem .95rem 1.1rem; }
-    .story-date{ display:block; font-size:.8rem; color:#9ca3af; margin-bottom:.15rem; }
-    .story-title{ font-size:1rem; font-weight:700; margin:.15rem 0 .3rem; }
-    .story-title{ color:#f9fafb; }
-    .story-excerpt{ font-size:.9rem; color:#cbd5f5; margin:0 0 .65rem; line-height:1.5; }
-
-    .story-cta{ display:flex; flex-wrap:wrap; gap:.45rem; }
-
-    .btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      border-radius:999px;
-      border:1px solid transparent;
-      font-size:.85rem;
-      font-weight:700;
-      text-decoration:none;
-      cursor:pointer;
-      padding:.5rem .85rem;
-      user-select:none;
-    }
-    .btn--ghost{
-      background:rgba(15,23,42,.8);
-      border-color:rgba(148,163,184,.6);
-      color:#e5e7eb;
-    }
-    .btn--ghost:hover{ background:rgba(15,23,42,1); }
-    .btn--gold{
-      background:#c9a227;
-      border-color:#c9a227;
-      color:#111827;
-      box-shadow:0 10px 28px rgba(201,162,39,.4);
-    }
-
-    .card-link{
-      display:block;
-      color:inherit;
-      text-decoration:none;
-    }
-    .card-link:hover .story-title{ text-decoration:underline; }
-
-    .stories-footer-row{
-      display:flex;
-      flex-wrap:wrap;
-      gap:.6rem;
-      align-items:center;
-      justify-content:space-between;
-      padding-top:1rem;
-      border-top:1px solid #0b1220;
-      font-size:.85rem;
-      color:#9ca3af;
-      margin-bottom:2rem;
-    }
-    .stories-footer-row a{ color:#e5e7eb; text-decoration:none; }
-    .stories-footer-row a:hover{ text-decoration:underline; }
-
-    a:focus-visible{
-      outline:2px solid rgba(201,162,39,.65);
-      outline-offset:3px;
-      border-radius:10px;
-    }
-  </style>
 </head>
 
 <body class="theme-dark stories-body" id="top">
   <div id="site-header" aria-busy="true" style="content-visibility:auto;contain-intrinsic-size:80px;"></div>
+
   <header class="stories-hero">
     <div class="wrap">
       <div class="page-kicker">Square Bidness</div>
@@ -328,43 +202,42 @@
   <main class="wrap" role="main">
     <section class="stories-grid" aria-label="Story cards">
 
-      <!-- 1) Innovation Fest -->
+      <!-- 1) Innovation Fest (LCP) -->
       <article class="story-card">
         <a class="card-link" href="/blog/post/innovation-fest-2025/">
           <div class="story-card__media">
-            <!-- ✅ Innovation Fest hero (you have _420 _640 _700 _780) -->
-<picture>
-  <source
-    type="image/webp"
-    srcset="
-      /blog/assets/innovation-fest-2025_420.webp 420w,
-      /blog/assets/innovation-fest-2025_640.webp 640w,
-      /blog/assets/innovation-fest-2025_700.webp 700w,
-      /blog/assets/innovation-fest-2025_780.webp 780w
-    "
-    sizes="(max-width: 768px) 100vw, 520px"
-  />
-  <source
-    type="image/jpeg"
-    srcset="
-      /blog/assets/innovation-fest-2025_420.jpg 420w,
-      /blog/assets/innovation-fest-2025_640.jpg 640w,
-      /blog/assets/innovation-fest-2025_700.jpg 700w,
-      /blog/assets/innovation-fest-2025_780.jpg 780w
-    "
-    sizes="(max-width: 768px) 100vw, 520px"
-  />
-  <img
-    src="/blog/assets/innovation-fest-2025_780.jpg"
-    alt="Innovation Fest 2025 — Square Bidness from Louisiana to NYC"
-    width="780"
-    height="520"
-    loading="eager"
-    decoding="async"
-    fetchpriority="high"
-    onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';"
-  />
-</picture>
+            <picture>
+              <source
+                type="image/webp"
+                srcset="
+                  /blog/assets/innovation-fest-2025_420.webp 420w,
+                  /blog/assets/innovation-fest-2025_640.webp 640w,
+                  /blog/assets/innovation-fest-2025_700.webp 700w,
+                  /blog/assets/innovation-fest-2025_780.webp 780w
+                "
+                sizes="(max-width: 768px) 100vw, 520px"
+              />
+              <source
+                type="image/jpeg"
+                srcset="
+                  /blog/assets/innovation-fest-2025_420.jpg 420w,
+                  /blog/assets/innovation-fest-2025_640.jpg 640w,
+                  /blog/assets/innovation-fest-2025_700.jpg 700w,
+                  /blog/assets/innovation-fest-2025_780.jpg 780w
+                "
+                sizes="(max-width: 768px) 100vw, 520px"
+              />
+              <img
+                src="/blog/assets/innovation-fest-2025_780.jpg"
+                alt="Innovation Fest 2025 — Square Bidness from Louisiana to NYC"
+                width="780"
+                height="520"
+                loading="eager"
+                decoding="async"
+                fetchpriority="high"
+                onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';"
+              />
+            </picture>
             <div class="story-badge">Blog</div>
           </div>
 
@@ -387,18 +260,25 @@
         <a class="card-link" href="/wintergames/">
           <div class="story-card__media">
             <picture>
-              <source type="image/webp"
+              <source
+                type="image/webp"
                 srcset="/wintergames/assets/og-lil-soulja-slim_800.webp 800w, /wintergames/assets/og-lil-soulja-slim_1200.webp 1200w"
-                sizes="(max-width: 768px) 100vw, 520px">
-              <source type="image/jpeg"
+                sizes="(max-width: 768px) 100vw, 520px"
+              >
+              <source
+                type="image/jpeg"
                 srcset="/wintergames/assets/og-lil-soulja-slim_800.jpg 800w, /wintergames/assets/og-lil-soulja-slim_1200.jpg 1200w"
-                sizes="(max-width: 768px) 100vw, 520px">
+                sizes="(max-width: 768px) 100vw, 520px"
+              >
               <img
                 src="/wintergames/assets/og-lil-soulja-slim_800.jpg"
-                width="1200" height="800"
-                loading="lazy" decoding="async"
+                width="1200"
+                height="800"
+                loading="lazy"
+                decoding="async"
                 alt="Winter Games — Lil Soulja Slim in Hammond"
-                onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';">
+                onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';"
+              >
             </picture>
             <div class="story-badge">Collection</div>
           </div>
@@ -417,38 +297,37 @@
         </a>
       </article>
 
-      <!-- 3) YouTube interview (SELF-HOSTED thumbnail to avoid 3rd-party cookie warnings) -->
+      <!-- 3) YouTube interview (self-hosted thumbnail) -->
       <article class="story-card">
         <a class="card-link" href="/press/youtube-interview/">
           <div class="story-card__media">
-            <!-- Put your downloaded thumbnail here -->
             <picture>
-  <source
-    type="image/webp"
-    srcset="
-      /stories/assets/stories-video-1_420.webp 420w,
-      /stories/assets/stories-video-1_780.webp 780w
-    "
-    sizes="(max-width: 768px) 100vw, 520px"
-  />
-  <source
-    type="image/jpeg"
-    srcset="
-      /stories/assets/stories-video-1_420.jpg 420w,
-      /stories/assets/stories-video-1_780.jpg 780w
-    "
-    sizes="(max-width: 768px) 100vw, 520px"
-  />
-  <img
-    src="/stories/assets/stories-video-1_780.jpg"
-    alt="Marcus Buckner x Terrance Gangsta Williams — interview"
-    width="780"
-    height="520"
-    loading="lazy"
-    decoding="async"
-    onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';"
-  />
-</picture>
+              <source
+                type="image/webp"
+                srcset="
+                  /stories/assets/stories-video-1_420.webp 420w,
+                  /stories/assets/stories-video-1_780.webp 780w
+                "
+                sizes="(max-width: 768px) 100vw, 520px"
+              />
+              <source
+                type="image/jpeg"
+                srcset="
+                  /stories/assets/stories-video-1_420.jpg 420w,
+                  /stories/assets/stories-video-1_780.jpg 780w
+                "
+                sizes="(max-width: 768px) 100vw, 520px"
+              />
+              <img
+                src="/stories/assets/stories-video-1_780.jpg"
+                alt="Marcus Buckner x Terrance Gangsta Williams — interview"
+                width="780"
+                height="520"
+                loading="lazy"
+                decoding="async"
+                onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';"
+              />
+            </picture>
             <div class="story-badge">Video</div>
           </div>
 
@@ -471,18 +350,25 @@
         <a class="card-link" href="/courageaux/her-words.html">
           <div class="story-card__media">
             <picture>
-              <source type="image/webp"
+              <source
+                type="image/webp"
                 srcset="/collections/assets/amari_1_800.webp 800w, /collections/assets/amari_1_1200.webp 1200w"
-                sizes="(max-width: 768px) 100vw, 520px">
-              <source type="image/jpeg"
+                sizes="(max-width: 768px) 100vw, 520px"
+              >
+              <source
+                type="image/jpeg"
                 srcset="/collections/assets/amari_1_800.jpg 800w, /collections/assets/amari_1_1200.jpg 1200w"
-                sizes="(max-width: 768px) 100vw, 520px">
+                sizes="(max-width: 768px) 100vw, 520px"
+              >
               <img
                 src="/collections/assets/amari_1_800.jpg"
-                width="1200" height="800"
-                loading="lazy" decoding="async"
-                alt="Courageaux Aesthetics — Her Words & Bio"
-                onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';">
+                width="1200"
+                height="800"
+                loading="lazy"
+                decoding="async"
+                alt="Courageaux Aesthetics — Her Words &amp; Bio"
+                onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';"
+              >
             </picture>
             <div class="story-badge">Spotlight</div>
           </div>
