@@ -60,9 +60,105 @@
   <!-- ✅ Partials loader (nav/footer everywhere) -->
   <script defer src="/scripts/partials.js"></script>
 
-  <style>
-    /* ...your styles... */
-  </style>
+<style>
+  /* HERO stays the same (optional max width so it doesn’t feel huge on desktop) */
+  .vsop-hero { background:#05010a; border-bottom:1px solid #1f1f1f; }
+  .vsop-hero__inner{
+    max-width:1200px;margin:0 auto;padding:20px 16px 24px;
+    display:grid;gap:18px;align-items:center;
+  }
+  @media(min-width:900px){ .vsop-hero__inner{ grid-template-columns:1.1fr .9fr; } }
+
+  .vsop-hero__media{
+    /* keeps the hero image from getting comically wide on big monitors */
+    max-width:560px;
+    margin-left:auto;
+  }
+  @media(max-width:899px){
+    .vsop-hero__media{ max-width:none; margin-left:0; }
+  }
+
+  .vsop-hero__media img{
+    width:100%;
+    display:block;
+    border-radius:14px;
+    border:1px solid #1f1f1f;
+    background:#0b0b0b;
+    object-fit:cover;
+    aspect-ratio: 3 / 2; /* CLS guard */
+  }
+
+  /* SECTION NAV */
+  .section-nav{
+    max-width:1200px;margin:0 auto;padding:6px 16px 12px;
+    font-size:.85rem;color:#9ca3af;display:flex;
+    justify-content:space-between;gap:8px;flex-wrap:wrap;
+  }
+  .section-nav a{ color:#e5e7eb;text-decoration:none; }
+  .section-nav a:hover{ text-decoration:underline; }
+
+  /* ✅ PRODUCT GRID: side-by-side on desktop */
+  .vsop-grid{
+    max-width:1200px;
+    margin:0 auto;
+    padding:20px 16px 30px;
+    display:grid;
+    gap:16px;
+    grid-template-columns:1fr;         /* mobile */
+  }
+  @media(min-width:900px){
+    .vsop-grid{
+      grid-template-columns:repeat(2, minmax(0, 1fr)); /* desktop = 2 columns */
+      gap:18px;
+    }
+  }
+
+  /* CARD */
+  .vsop-card{
+    background:#050308;
+    border-radius:14px;
+    border:1px solid #1f1f1f;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    min-width:0; /* prevents overflow in grid */
+  }
+
+  /* ✅ PRODUCT IMAGE: keep it visually smaller + never crop the product */
+  .vsop-card__media{
+    background:#0b0b0b;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:10px;
+  }
+
+  /* “frame” height so both cards line up clean on desktop */
+  .vsop-card__media img{
+    width:100%;
+    height:auto;
+    max-width:420px;     /* prevents huge product images on desktop */
+    object-fit:contain;  /* protects product (no crop) */
+    display:block;
+    border-radius:12px;
+    border:1px solid #1f1f1f;
+    background:#0b0b0b;
+  }
+
+  .vsop-card__body{ padding:14px 14px 10px; }
+  .vsop-card__body h2{ margin:0 0 .15rem;font-size:1.05rem; }
+  .vsop-card__body p{ margin:0 0 .35rem;font-size:.93rem;color:#d7dae0; }
+  .vsop-price{ font-weight:700;color:#facc15;font-size:.97rem; }
+  .vsop-note{ font-size:.82rem;color:#9ca3af;margin-top:.4rem; }
+
+  .vsop-card__actions{
+    padding:0 14px 14px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:.5rem;
+    align-items:center;
+  }
+</style>
 </head>
 
 <body class="theme-dark" id="top">
