@@ -11,6 +11,10 @@
   <!-- ✅ Product marker -->
   <meta name="sb:product" content="supima" />
 
+  <!-- Perf: preconnect (only keep if ga.js actually hits these early) -->
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+  <link rel="preconnect" href="https://www.google-analytics.com" crossorigin>
+
   <!-- CSS -->
   <link rel="stylesheet" href="/styles/style.css" />
 
@@ -20,38 +24,63 @@
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#000000">
 
+  <!-- ✅ Preload hero (stable + responsive) -->
+  <link
+    rel="preload"
+    as="image"
+    href="/collections/assets/amari_2_1200.webp"
+    imagesrcset="/collections/assets/amari_2_800.webp 800w, /collections/assets/amari_2_780.webp 780w"
+    imagesizes="(max-width: 900px) 100vw, 520px"
+    fetchpriority="high"
+  />
+
   <!-- Scripts -->
   <script defer src="/scripts/ga.js"></script>
   <script defer src="/scripts/sb-cart.js"></script>
   <script defer src="/scripts/global.js"></script>
   <script defer src="/scripts/sb-analytics.js"></script>
   <script defer src="/scripts/sw-register.js"></script>
-
-  <!-- ✅ Nav/Footer injection (standard) -->
   <script defer src="/scripts/partials.js"></script>
 
-  <!-- ✅ Preload hero (WEBP first) -->
-  <link
-    rel="preload"
-    as="image"
-    href="/collections/assets/amari_2_1200.webp"
-    type="image/webp"
-    imagesizes="(max-width: 900px) 100vw, 520px"
-    fetchpriority="high"
-  />
-
   <style>
+    /* ✅ CLS guard for injected nav/footer (biggest common shift culprit) */
+    #site-header{min-height:80px;}
+    #site-footer{min-height:140px;}
+
     .supima-hero{border-bottom:1px solid #1f1f1f;padding:2rem 0;background:#0b0b0b;}
     .supima-hero__grid{display:grid;gap:1.25rem;align-items:center;}
     @media(min-width:900px){.supima-hero__grid{grid-template-columns:1.2fr .8fr;}}
 
-    /* Images smaller on desktop (hero + liberty) */
+    /* ✅ Keep hero image smaller on desktop + reserve space BEFORE load */
     .supima-hero__grid > div:first-child{display:flex;justify-content:center;}
-    .supima-hero .supima-hero__media{width:100%;max-width:560px;}
-    @media(min-width:900px){.supima-hero .supima-hero__media{max-width:520px;}}
-    .supima-hero img{width:100%;border-radius:14px;border:1px solid #1f1f1f;display:block;background:#0f0f0f;height:auto;}
+    .supima-hero__media{width:100%;max-width:560px;}
+    @media(min-width:900px){.supima-hero__media{max-width:520px;}}
 
-    .price-pill{display:inline-flex;align-items:center;gap:.5rem;padding:.35rem .75rem;border-radius:999px;border:1px solid rgba(255,215,0,.35);color:#FFD700;background:#120707;font-weight:700;font-size:.9rem;}
+    /* Reserve box space so image decode doesn't move layout */
+    .supima-hero__media picture,
+    .supima-hero__media img{
+      display:block;
+      width:100%;
+    }
+    .supima-hero__media picture{
+      aspect-ratio: 4 / 5; /* matches your 800x1000 */
+      border-radius:14px;
+      overflow:hidden;
+      border:1px solid #1f1f1f;
+      background:#0f0f0f;
+    }
+    .supima-hero__media img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+
+    .price-pill{
+      display:inline-flex;align-items:center;gap:.5rem;
+      padding:.35rem .75rem;border-radius:999px;
+      border:1px solid rgba(255,215,0,.35);
+      color:#FFD700;background:#120707;font-weight:700;font-size:.9rem;
+    }
 
     .split{display:grid;gap:1rem;}
     @media(min-width:900px){.split{grid-template-columns:1fr 1fr;}}
@@ -64,21 +93,32 @@
     .media-grid{display:grid;gap:1rem;align-items:center;}
     @media(min-width:900px){.media-grid{grid-template-columns:1fr 1fr;}}
     .media-box{display:flex;justify-content:center;}
-    .media-box .media{width:100%;max-width:560px;}
-    @media(min-width:900px){.media-box .media{max-width:520px;}}
-    .media-box img{width:100%;border-radius:14px;border:1px solid #1f1f1f;display:block;height:auto;}
+    .media{width:100%;max-width:560px;}
+    @media(min-width:900px){.media{max-width:520px;}}
+
+    /* ✅ Reserve space for Liberty image too (prevents “unsized img” CLS) */
+    .media picture,
+    .media img{display:block;width:100%;}
+    .media picture{
+      aspect-ratio: 4 / 5; /* matches 800x1000 */
+      border-radius:14px;
+      overflow:hidden;
+      border:1px solid #1f1f1f;
+      background:#0b0b0b;
+    }
+    .media img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
 
     .note{border:1px solid #1f1f1f;border-radius:14px;background:#0b0b0b;padding:1rem;}
-
-    /* Women’s product button */
     .shop-widget{margin-top:.85rem;display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
     .shop-widget .btn{white-space:nowrap}
   </style>
 </head>
 
 <body class="theme-dark" id="top">
-
-  <!-- ✅ NAV injected by /scripts/partials.js -->
   <div id="site-header"></div>
 
   <!-- HERO -->
@@ -86,26 +126,23 @@
     <div class="container">
       <div class="supima-hero__grid">
         <div class="supima-hero__media">
-          <!-- ✅ WEBP FIRST + JPG FALLBACK -->
           <picture>
             <source
               type="image/webp"
-              srcset="/collections/assets/amari_2_800.webp 800w, /collections/assets/amari_2_1200.webp 1200w"
+              srcset="/collections/assets/amari_2_420.webp 420w, /collections/assets/amari_2_700.webp 700w"
               sizes="(max-width: 900px) 100vw, 520px">
             <source
               type="image/jpeg"
-              srcset="/collections/assets/amari_2_800.jpg 800w, /collections/assets/amari_2_1200.jpg 1200w"
+              srcset="/collections/assets/amari_2_420.jpg 420w, /collections/assets/amari_2_700.jpg 700w"
               sizes="(max-width: 900px) 100vw, 520px">
             <img
-              src="/collections/assets/amari_2_800.jpg"
+              src="/collections/assets/amari_2_700.jpg"
               alt="Supima cotton — Square Bidness"
+              width="780"
+              height="975"
               loading="eager"
               decoding="async"
-              fetchpriority="high"
-              width="800"
-              height="1000"
-              style="width:100%;height:auto;"
-            >
+              fetchpriority="high">
           </picture>
         </div>
 
@@ -130,7 +167,6 @@
   </section>
 
   <main>
-
     <!-- MEN / WOMEN FIT SPLIT -->
     <section class="section" id="shop">
       <div class="container">
@@ -198,43 +234,36 @@
         <div class="media-grid">
           <div class="media-box">
             <div class="media">
-              <!-- ✅ WEBP FIRST + JPG FALLBACK -->
               <picture>
                 <source
                   type="image/webp"
-                  srcset="/assets/supima/liberty-6_800.webp 800w, /assets/supima/liberty-6_1200.webp 1200w"
+                  srcset="/assets/supima/liberty-6_420.webp 800w, /assets/supima/liberty-6_700.webp 700w"
                   sizes="(max-width: 900px) 100vw, 520px">
                 <source
                   type="image/jpeg"
-                  srcset="/assets/supima/liberty-6_800.jpg 800w, /assets/supima/liberty-6_1200.jpg 1200w"
+                  srcset="/assets/supima/liberty-6_420.jpg 420w, /assets/supima/liberty-6_700.jpg 700w"
                   sizes="(max-width: 900px) 100vw, 520px">
                 <img
-                  src="/assets/supima/liberty-6_800.jpg"
+                  src="/assets/supima/liberty-6_700.jpg"
                   alt="Liberty Collection — Supima Cotton"
+                  width="780"
+                  height="975"
                   loading="lazy"
-                  decoding="async"
-                  width="800"
-                  height="1000"
-                  style="width:100%;height:auto;"
-                >
+                  decoding="async">
               </picture>
             </div>
           </div>
 
           <div>
             <h2 class="section__title">Supima x Liberty Collection</h2>
-            <p class="section__lead">
-              Same clean cotton lane — Liberty energy. Built for presence and posture.
-            </p>
+            <p class="section__lead">Same clean cotton lane — Liberty energy. Built for presence and posture.</p>
             <a class="btn btn--gold" href="/liberty/">View Liberty Collection</a>
           </div>
         </div>
       </div>
     </section>
-
   </main>
 
-  <!-- ✅ FOOTER injected by /scripts/partials.js -->
   <div id="site-footer"></div>
 </body>
 </html>
