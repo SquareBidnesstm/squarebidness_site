@@ -106,6 +106,30 @@
     }
   }
   </script>
+
+  <!-- Page-local tweaks: CLS + contrast + touch targets -->
+  <style>
+    /* Small CLS guard for injected header */
+    #site-header { min-height: 72px; }
+
+    /* Improve contrast for links on dark background (accessibility) */
+    body.theme-dark a {
+      color: #e5e7eb;
+    }
+    body.theme-dark a:hover {
+      color: #facc15;
+    }
+
+    /* Touch target size: qty + ghost button on this page */
+    .buybox__row input[type="number"] {
+      min-height: 44px;
+      padding: 0.4rem 0.6rem;
+    }
+    .btn.btn--ghost {
+      min-height: 44px;
+      padding: 0.55rem 1rem;
+    }
+  </style>
 </head>
 
 <body class="theme-dark" id="top">
@@ -159,7 +183,8 @@
               width="780"
               height="520"
               alt="VSOP Shorts in burgundy and brown"
-              loading="lazy"
+              loading="eager"
+              fetchpriority="high"
               decoding="async"
               style="width:100%;height:auto;"
               onerror="this.onerror=null;this.src='/assets/placeholder.png';"
@@ -185,9 +210,11 @@
             Preorder — ships Feb 1, 2026
           </p>
 
-          <div class="product-help" style="margin:.5rem 0 .75rem; font-size:.95rem; opacity:.9">
-            <a href="/returns/#policy">30-day returns</a> · <a href="/returns/#preorders">Preorder policy</a>
-          </div>
+          <div class="product-help">
+  <a href="/returns/#policy">30-day returns</a> ·
+  <a href="/returns/#preorders">Preorder policy</a>
+</div>
+
 
           <section class="buybox"
             data-sku-base="vsop-shorts"
