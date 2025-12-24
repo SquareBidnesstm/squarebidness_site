@@ -10,12 +10,22 @@
   <link rel="canonical" href="https://www.squarebidness.com/product-vsop-jacket/" />
 
   <!-- Build stamp -->
-  <meta name="sb:build" content="v20251221-vsop-jacket" />
+  <meta name="sb:build" content="v20251224-vsop-jacket-prod" />
   <meta name="sb:product" content="vsop-jacket" />
 
   <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com">
   <link rel="preconnect" href="https://www.google-analytics.com">
+
+  <!-- ✅ Preload product hero (matches picture below) -->
+  <link
+    rel="preload"
+    as="image"
+    href="/assets/vsop-jacket_800.webp"
+    imagesrcset="/assets/vsop-jacket_800.webp 800w, /assets/vsop-jacket_1200.webp 1200w"
+    imagesizes="(min-width:768px) 60vw, 100vw"
+    fetchpriority="high"
+  />
 
   <!-- CSS -->
   <link rel="stylesheet" href="/styles/style.css" />
@@ -23,7 +33,7 @@
   <!-- Icons / PWA -->
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/icon-180.png" />
-  <link rel="manifest" href="/site.webmanifest" />
+  <link rel="manifest" href="/manifest.webmanifest" />
   <meta name="theme-color" content="#000000" />
 
   <!-- Open Graph -->
@@ -106,6 +116,38 @@
     }
   }
   </script>
+
+  <!-- Tiny CLS guards just for this page -->
+  <style>
+    #site-header{min-height:72px;}
+    #site-footer{min-height:120px;}
+
+    .product-detail__media{
+      max-width:520px;
+      margin:0 auto 1.5rem;
+      /* Reserve space for hero to kill layout shift */
+      aspect-ratio: 4 / 5;
+    }
+    .product-detail__media picture,
+    .product-detail__media img{
+      width:100%;
+      height:100%;
+      display:block;
+      object-fit:cover;
+    }
+
+    /* Keep buybox tap targets comfortable on mobile */
+    .buybox__actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:.6rem;
+      margin-top:.75rem;
+    }
+    .buybox__actions .btn{
+      min-height:40px;
+      padding:.55rem 1rem;
+    }
+  </style>
 </head>
 
 <body class="theme-dark" id="top">
@@ -132,15 +174,19 @@
               srcset="/assets/vsop-jacket_800.webp 800w, /assets/vsop-jacket_1200.webp 1200w"
               sizes="(min-width:768px) 60vw, 100vw"
             />
-            <img
-              src="/assets/vsop-jacket_800.jpg"
+            <source
+              type="image/jpeg"
               srcset="/assets/vsop-jacket_800.jpg 800w, /assets/vsop-jacket_1200.jpg 1200w"
               sizes="(min-width:768px) 60vw, 100vw"
+            />
+            <img
+              src="/assets/vsop-jacket_800.jpg"
               width="800"
               height="1000"
               alt="VSOP Hooded Jacket in burgundy and brown"
-              loading="lazy"
+              loading="eager"
               decoding="async"
+              fetchpriority="high"
               onerror="this.onerror=null;this.src='/assets/placeholder.png';"
             />
           </picture>
@@ -189,7 +235,6 @@
             </div>
 
             <div class="buybox__actions">
-              <!-- ✅ Updated button -->
               <button type="button" class="btn btn--gold" data-add-to-cart="vsop-jacket">
                 Add to cart
               </button>
@@ -213,8 +258,11 @@
   (function(){
     const root = window;
     function ready(fn){
-      if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", fn, { once:true });
-      else fn();
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", fn, { once:true });
+      } else {
+        fn();
+      }
     }
 
     ready(function(){
@@ -241,7 +289,12 @@
         const size = (sizeEl && sizeEl.value || "").trim();
         const qty = Math.max(1, Number(qtyEl && qtyEl.value || 1));
 
-        if (!size) { setMsg("Please select a size."); try{ sizeEl.focus(); }catch{} return; }
+        if (!size) {
+          setMsg("Please select a size.");
+          try { sizeEl.focus(); } catch {}
+          return;
+        }
+
         if (!root.SB || !root.SB.cart || typeof root.SB.cart.add !== "function") {
           setMsg("Cart is still loading—try again in a moment.");
           return;
