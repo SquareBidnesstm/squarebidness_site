@@ -123,18 +123,18 @@
     #site-footer{min-height:120px;}
 
     .product-detail__media{
-      max-width:520px;
-      margin:0 auto 1.5rem;
-      /* Reserve space for hero to kill layout shift */
-      aspect-ratio: 4 / 5;
-    }
-    .product-detail__media picture,
-    .product-detail__media img{
-      width:100%;
-      height:100%;
-      display:block;
-      object-fit:cover;
-    }
+  max-width:520px;
+  margin:0 auto 1.5rem;
+}
+.product-detail__media picture,
+.product-detail__media img{
+  width:100%;
+  display:block;
+}
+.product-detail__media img{
+  height:auto; /* no crop */
+}
+
 
     /* Keep buybox tap targets comfortable on mobile */
     .buybox__actions{
@@ -168,28 +168,45 @@
       <div class="product-detail">
 
         <div class="product-detail__media">
-          <picture>
-            <source
-              type="image/webp"
-              srcset="/assets/vsop-jacket_800.webp 800w, /assets/vsop-jacket_1200.webp 1200w"
-              sizes="(min-width:768px) 60vw, 100vw"
-            />
-            <source
-              type="image/jpeg"
-              srcset="/assets/vsop-jacket_800.jpg 800w, /assets/vsop-jacket_1200.jpg 1200w"
-              sizes="(min-width:768px) 60vw, 100vw"
-            />
-            <img
-              src="/assets/vsop-jacket_800.jpg"
-              width="800"
-              height="1000"
-              alt="VSOP Hooded Jacket in burgundy and brown"
-              loading="eager"
-              decoding="async"
-              fetchpriority="high"
-              onerror="this.onerror=null;this.src='/assets/placeholder.png';"
-            />
-          </picture>
+          <div class="product-detail__media">
+  <picture>
+    <!-- WebP first -->
+    <source
+      type="image/webp"
+      srcset="
+        /assets/vsop-jacket_480.webp 480w,
+        /assets/vsop-jacket_700.webp 700w,
+        /assets/vsop-jacket_780.webp 780w,
+        /assets/vsop-jacket_800.webp 800w
+      "
+      sizes="(min-width: 900px) 520px, 100vw"
+    />
+
+    <!-- JPEG fallback -->
+    <source
+      type="image/jpeg"
+      srcset="
+        /assets/vsop-jacket_480.jpg 480w,
+        /assets/vsop-jacket_700.jpg 700w,
+        /assets/vsop-jacket_780.jpg 780w,
+        /assets/vsop-jacket_800.jpg 800w
+      "
+      sizes="(min-width: 900px) 520px, 100vw"
+    />
+
+    <img
+      src="/assets/vsop-jacket_800.jpg"
+      alt="VSOP Hooded Jacket in burgundy and brown"
+      width="780"
+      height="520"
+      loading="eager"
+      decoding="async"
+      fetchpriority="high"
+      onerror="this.onerror=null;this.src='/assets/placeholder.png';"
+      style="width:100%;height:auto;"
+    />
+  </picture>
+</div>
         </div>
 
         <article class="product-detail__info"
