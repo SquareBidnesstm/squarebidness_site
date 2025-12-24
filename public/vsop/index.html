@@ -42,14 +42,14 @@
   <meta name="theme-color" content="#000000" />
 
   <!-- ✅ Preload LCP hero image (use your new 780/420 WebP set) -->
-  <link
-    rel="preload"
-    as="image"
-    href="/assets/hero_780.webp"
-    imagesrcset="/assets/hero_420.webp 420w, /assets/hero_780.webp 780w"
-    imagesizes="(min-width:900px) 48vw, 100vw"
-    fetchpriority="high"
-  />
+ <link
+  rel="preload"
+  as="image"
+  href="/assets/hero_780.webp"
+  imagesrcset="/assets/hero_420.webp 420w, /assets/hero_640.webp 640w, /assets/hero_780.webp 780w"
+  imagesizes="(min-width:900px) 44vw, 100vw"
+  fetchpriority="high"
+/>
 
   <!-- GA + cart -->
   <script defer src="/scripts/ga.js"></script>
@@ -158,6 +158,15 @@
     gap:.5rem;
     align-items:center;
   }
+  /* CLS guard for injected nav/footer (VSOP page) */
+#site-header { min-height: 80px; }
+#site-footer { min-height: 140px; }
+
+/* CLS guard: reserve hero height so text/image/layout doesn't jump */
+header.vsop-hero { min-height: 520px; }
+@media (max-width: 899px){
+  header.vsop-hero { min-height: 0; } /* let mobile flow naturally */
+}
 </style>
 </head>
 
@@ -196,33 +205,30 @@
       </div>
 
       <div class="vsop-hero__media">
-        <picture>
-          <!-- ✅ WebP: 420 + 780 -->
-          <source
-            type="image/webp"
-            srcset="/assets/hero_420.webp 420w, /assets/hero_780.webp 780w"
-            sizes="(min-width:900px) 48vw, 100vw"
-          />
-          <!-- ✅ JPG fallback: 420 + 780 -->
-          <source
-            type="image/jpeg"
-            srcset="/assets/hero_420.jpg 420w, /assets/hero_780.jpg 780w"
-            sizes="(min-width:900px) 48vw, 100vw"
-          />
-          <img
-            src="/assets/hero_780.jpg"
-            srcset="/assets/hero_420.jpg 420w, /assets/hero_780.jpg 780w"
-            sizes="(min-width:900px) 48vw, 100vw"
-            alt="VSOP hooded jacket styled with matching shorts"
-            width="780"
-            height="520"
-            loading="eager"
-            decoding="async"
-            fetchpriority="high"
-            style="width:100%;height:auto;"
-            onerror="this.onerror=null;this.src='/assets/hero_780.jpg';"
-          />
-        </picture>
+       <picture>
+  <source
+    type="image/webp"
+    srcset="/assets/hero_420.webp 420w, /assets/hero_640.webp 640w, /assets/hero_780.webp 780w"
+    sizes="(min-width:900px) 44vw, 100vw"
+  />
+  <source
+    type="image/jpeg"
+    srcset="/assets/hero_420.jpg 420w, /assets/hero_640.jpg 640w, /assets/hero_780.jpg 780w"
+    sizes="(min-width:900px) 44vw, 100vw"
+  />
+  <img
+    src="/assets/hero_780.jpg"
+    srcset="/assets/hero_420.jpg 420w, /assets/hero_640.jpg 640w, /assets/hero_780.jpg 780w"
+    sizes="(min-width:900px) 44vw, 100vw"
+    alt="VSOP hooded jacket styled with matching shorts"
+    width="780"
+    height="520"
+    loading="eager"
+    decoding="async"
+    fetchpriority="high"
+    style="width:100%;height:auto;"
+  />
+</picture>
       </div>
     </div>
   </header>
