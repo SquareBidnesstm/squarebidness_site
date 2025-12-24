@@ -52,10 +52,27 @@
       }
 
       const html = await res.text();
-      el.innerHTML = html;
+
+      // Single batched DOM write to reduce layout thrash
+      const wrapper = document.createElement("div");
+      wrapper.innerHTML = html;
+
+      const frag = document.createDocumentFragment();
+      while (wrapper.firstChild) {
+        frag.appendChild(wrapper.firstChild);
+      }
+
+      // Replace existing children in one shot
+      el.replaceChildren(frag);
 
       // Optional fade-in hook (only matters if your CSS defines it)
       el.classList.add("fade-in");
+
+      // Clear aria-busy if it was set in the HTML
+      if (el.hasAttribute("aria-busy")) {
+        el.setAttribute("aria-busy", "false");
+      }
+
       return true;
     } catch (err) {
       console.warn("[partials] fetch fail:", url, err);
@@ -106,29 +123,42 @@
     });
   }
 
-  onReady(async () => {
-    const navTargetId = findFirstExistingId(NAV_TARGET_IDS);
-    const footTargetId = findFirstExistingId(FOOT_TARGET_IDS);
+  onReady(() => {
+    // Let first paint happen, then inject nav/footer
+    window.requestAnimationFrame(async () => {
+      const navTargetId = findFirstExistingId(NAV_TARGET_IDS);
+      const footTargetId = findFirstExistingId(FOOT_TARGET_IDS);
 
-    const navOk = navTargetId
-      ? await injectPartial("/nav/index.html", navTargetId)
-      : false;
+      // Kick off both fetches in parallel to minimize time on main thread
+      const navPromise = navTargetId
+        ? injectPartial("/nav/index.html", navTargetId)
+        : Promise.resolve(false);
 
-    if (!navTargetId) {
-      console.warn("[partials] no nav target found (site-header or nav-placeholder).");
-    }
+      const footPromise = footTargetId
+        ? injectPartial("/footer/index.html", footTargetId)
+        : Promise.resolve(false);
 
-    if (navOk) markActiveNav();
+      if (!navTargetId) {
+        console.warn(
+          "[partials] no nav target found (site-header or nav-placeholder)."
+        );
+      }
+      if (!footTargetId) {
+        console.warn(
+          "[partials] no footer target found (site-footer or footer-placeholder)."
+        );
+      }
 
-    const footOk = footTargetId
-      ? await injectPartial("/footer/index.html", footTargetId)
-      : false;
+      const [navOk, footOk] = await Promise.all([navPromise, footPromise]);
 
-    if (!footTargetId) {
-      console.warn("[partials] no footer target found (site-footer or footer-placeholder).");
-    }
+      if (navOk) {
+        // Mark active link AFTER nav HTML is in place
+        markActiveNav();
+      }
 
-    if (navOk || footOk) window.dispatchEvent(new Event("sb:partials_loaded"));
+      if (navOk || footOk) {
+        window.dispatchEvent(new Event("sb:partials_loaded"));
+      }
+    });
   });
 })();
-
