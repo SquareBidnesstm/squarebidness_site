@@ -66,68 +66,70 @@
   <script defer src="/scripts/sb-analytics.js"></script>
   <script defer src="/scripts/partials.js"></script>
   <script defer src="/scripts/sw-register.js"></script>
+  <!-- ✅ Global buybox wiring -->
+  <script defer src="/scripts/buybox.js"></script>
 
   <style>
-  /* scoped page styles */
-  .p-wrap{max-width:1100px;margin:0 auto;padding:28px 16px 56px;}
-  .p-grid{display:grid;gap:18px;align-items:start;}
-  @media(min-width:960px){.p-grid{grid-template-columns:1.05fr .95fr;gap:22px;}}
-  .p-card{background:#0e0e0e;border:1px solid #1f1f1f;border-radius:14px;overflow:hidden;}
-  .p-pad{padding:16px;}
+    /* scoped page styles */
+    .p-wrap{max-width:1100px;margin:0 auto;padding:28px 16px 56px;}
+    .p-grid{display:grid;gap:18px;align-items:start;}
+    @media(min-width:960px){.p-grid{grid-template-columns:1.05fr .95fr;gap:22px;}}
+    .p-card{background:#0e0e0e;border:1px solid #1f1f1f;border-radius:14px;overflow:hidden;}
+    .p-pad{padding:16px;}
 
-  /* ✅ reserve space for the LCP image (kills CLS) */
-  .p-media{
-    background:#000;
-    border-bottom:1px solid #1f1f1f;
-    aspect-ratio: 3 / 2; /* 780 × 520 */
-    overflow:hidden;
-  }
-  .p-media img{
-    width:100%;
-    height:100%;
-    display:block;
-    object-fit:cover;
-    background:#0b0b0b;
-  }
+    /* ✅ reserve space for the LCP image (kills CLS) */
+    .p-media{
+      background:#000;
+      border-bottom:1px solid #1f1f1f;
+      aspect-ratio: 3 / 2; /* 780 × 520 */
+      overflow:hidden;
+    }
+    .p-media img{
+      width:100%;
+      height:100%;
+      display:block;
+      object-fit:cover;
+      background:#0b0b0b;
+    }
 
-  .p-title{margin:.25rem 0 .35rem;font-weight:900;letter-spacing:-.02em;font-size:clamp(1.35rem,2.2vw,2rem);line-height:1.15;}
-  .p-muted{margin:0;color:#a1a1aa;line-height:1.55;}
-  .p-price{margin:.75rem 0 0;font-size:1.15rem;font-weight:900;}
-  .p-pill{display:inline-flex;align-items:center;gap:.5rem;padding:.35rem .75rem;border-radius:999px;border:1px solid rgba(255,215,0,.35);color:#FFD700;background:#120707;font-weight:800;font-size:.85rem;}
-  .p-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px;}
-  .p-select{
-    background:#0b0b0b;color:#fff;border:1px solid #2a2a2a;border-radius:12px;
-    padding:.6rem .7rem;font-weight:800;min-width:180px;
-  }
-  .p-note{margin-top:12px;padding:12px;border:1px solid #1f1f1f;border-radius:14px;background:#0b0b0b;color:#d7dae0;}
-  .p-note small{display:block;color:#a1a1aa;margin-top:6px;}
-  .p-specs{margin:0;padding-left:1.1rem;}
-  .p-specs li{margin:.35rem 0;color:#d7dae0;opacity:.92;}
-  .p-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;}
-  .p-actions .btn{white-space:nowrap;}
-  .p-actions .btn[aria-disabled="true"]{opacity:.55;pointer-events:none;}
+    .p-title{margin:.25rem 0 .35rem;font-weight:900;letter-spacing:-.02em;font-size:clamp(1.35rem,2.2vw,2rem);line-height:1.15;}
+    .p-muted{margin:0;color:#a1a1aa;line-height:1.55;}
+    .p-price{margin:.75rem 0 0;font-size:1.15rem;font-weight:900;}
+    .p-pill{display:inline-flex;align-items:center;gap:.5rem;padding:.35rem .75rem;border-radius:999px;border:1px solid rgba(255,215,0,.35);color:#FFD700;background:#120707;font-weight:800;font-size:.85rem;}
+    .p-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px;}
+    .p-select{
+      background:#0b0b0b;color:#fff;border:1px solid #2a2a2a;border-radius:12px;
+      padding:.6rem .7rem;font-weight:800;min-width:180px;
+    }
+    .p-note{margin-top:12px;padding:12px;border:1px solid #1f1f1f;border-radius:14px;background:#0b0b0b;color:#d7dae0;}
+    .p-note small{display:block;color:#a1a1aa;margin-top:6px;}
+    .p-specs{margin:0;padding-left:1.1rem;}
+    .p-specs li{margin:.35rem 0;color:#d7dae0;opacity:.92;}
+    .p-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;}
+    .p-actions .btn{white-space:nowrap;}
+    .p-actions .btn[aria-disabled="true"]{opacity:.55;pointer-events:none;}
 
-  .p-crumbs{margin:0 0 10px;font-size:.85rem;color:#9ca3af;}
+    .p-crumbs{margin:0 0 10px;font-size:.85rem;color:#9ca3af;}
 
-  /* ✅ make breadcrumb links clearly distinguishable (fixes a11y warning) */
-  .p-crumbs a{
-    color:#e5e7eb;
-    text-decoration:underline;
-    text-decoration-thickness:0.08em;
-    text-underline-offset:0.18em;
-    font-weight:600;
-  }
-  .p-crumbs a:hover{
-    text-decoration:underline;
-  }
+    /* ✅ make breadcrumb links clearly distinguishable (fixes a11y warning) */
+    .p-crumbs a{
+      color:#e5e7eb;
+      text-decoration:underline;
+      text-decoration-thickness:0.08em;
+      text-underline-offset:0.18em;
+      font-weight:600;
+    }
+    .p-crumbs a:hover{
+      text-decoration:underline;
+    }
 
-  /* A11y: comfortable tap target on select */
-  .p-row select{
-    min-height:44px;
-    padding:0.45rem 0.7rem;
-    font-size:0.95rem;
-  }
-</style>
+    /* A11y: comfortable tap target on select */
+    .p-row select{
+      min-height:44px;
+      padding:0.45rem 0.7rem;
+      font-size:0.95rem;
+    }
+  </style>
 
   <!-- ✅ Product JSON-LD -->
   <script type="application/ld+json">
@@ -204,36 +206,36 @@
       <section class="p-card" aria-label="Product images">
         <div class="p-media">
           <picture>
-  <source
-    type="image/webp"
-    srcset="
-      /assets/supima/ladies-natural-white_420.webp 420w,
-      /assets/supima/ladies-natural-white_640.webp 640w,
-      /assets/supima/ladies-natural-white_700.webp 700w,
-      /assets/supima/ladies-natural-white_780.webp 780w
-    "
-    sizes="(max-width: 960px) 100vw, 560px"
-  >
-  <source
-    type="image/jpeg"
-    srcset="
-      /assets/supima/ladies-natural-white_420.jpg 420w,
-      /assets/supima/ladies-natural-white_640.jpg 640w,
-      /assets/supima/ladies-natural-white_700.jpg 700w,
-      /assets/supima/ladies-natural-white_780.jpg 780w
-    "
-    sizes="(max-width: 960px) 100vw, 560px"
-  >
-  <img
-    src="/assets/supima/ladies-natural-white_780.jpg"
-    alt="Supima Ladies Tee — Natural White"
-    loading="eager"
-    decoding="async"
-    fetchpriority="high"
-    width="780"
-    height="520"
-  >
-</picture>
+            <source
+              type="image/webp"
+              srcset="
+                /assets/supima/ladies-natural-white_420.webp 420w,
+                /assets/supima/ladies-natural-white_640.webp 640w,
+                /assets/supima/ladies-natural-white_700.webp 700w,
+                /assets/supima/ladies-natural-white_780.webp 780w
+              "
+              sizes="(max-width: 960px) 100vw, 560px"
+            >
+            <source
+              type="image/jpeg"
+              srcset="
+                /assets/supima/ladies-natural-white_420.jpg 420w,
+                /assets/supima/ladies-natural-white_640.jpg 640w,
+                /assets/supima/ladies-natural-white_700.jpg 700w,
+                /assets/supima/ladies-natural-white_780.jpg 780w
+              "
+              sizes="(max-width: 960px) 100vw, 560px"
+            >
+            <img
+              src="/assets/supima/ladies-natural-white_780.jpg"
+              alt="Supima Ladies Tee — Natural White"
+              loading="eager"
+              decoding="async"
+              fetchpriority="high"
+              width="780"
+              height="520"
+            >
+          </picture>
         </div>
 
         <div class="p-pad">
@@ -254,44 +256,61 @@
 
           <div class="p-price">$36.00</div>
 
-          <div class="p-row" style="margin-top:14px;">
-            <label for="size" class="p-muted" style="font-weight:800;color:#e5e7eb;">Select size</label>
-            <select id="size" class="p-select" aria-label="Select size">
-              <option value="" selected disabled>Select…</option>
-              <option value="XS">XS</option>
-              <option value="S">S</option>
-              <option value="M">M</option>
-              <option value="L">L</option>
-              <option value="XL">XL</option>
-            </select>
-          </div>
+          <!-- ✅ Global buybox block wired by /scripts/buybox.js -->
+          <section
+            class="buybox"
+            data-sku-base="sb-supima-ladies-natural-white"
+            data-name="Supima Ladies Tee — Natural White"
+            data-price="36.00"
+            data-image="/assets/supima/ladies-natural-white_780.webp"
+            data-url="/product-supima-ladies-natural-white/"
+          >
+            <div class="p-row" style="margin-top:14px;">
+              <label for="size" class="p-muted" style="font-weight:800;color:#e5e7eb;">Select size</label>
+              <select id="size" class="p-select" aria-label="Select size">
+                <option value="" selected disabled>Select…</option>
+                <option value="XS">XS</option>
+                <option value="S">S</option>
+                <option value="M">M</option>
+                <option value="L">L</option>
+                <option value="XL">XL</option>
+              </select>
+            </div>
 
-          <div class="p-actions">
-            <!-- ✅ Your standard button -->
-            <button type="button" class="btn btn--gold" data-add-to-cart="supima-ladies-natural-white" aria-disabled="true" disabled>
-              Add to cart
-            </button>
-            <a class="btn btn--ghost" href="/cart/">Go to Cart</a>
-          </div>
+            <div class="p-actions">
+              <button
+                type="button"
+                class="btn btn--gold"
+                data-add-to-cart="supima-ladies-natural-white"
+                aria-disabled="true"
+                disabled
+              >
+                Add to cart
+              </button>
+              <a class="btn btn--ghost" href="/cart/">Go to Cart</a>
+            </div>
 
-          <div class="p-note">
-            <strong>Fit note:</strong> true-to-size for a clean fitted look. Size up for relaxed.
-            <small>Women’s ref: Amari wears <strong>Ladies Small</strong>.</small>
-          </div>
+            <p class="buybox__msg" role="status" aria-live="polite"></p>
 
-          <div style="margin-top:14px;">
-            <h2 style="margin:0 0 .45rem;font-size:1rem;font-weight:900;">Details</h2>
-            <ul class="p-specs">
-              <li>Supima cotton · soft hand feel</li>
-              <li>Women’s fit · clean silhouette</li>
-              <li>Colorway: Natural White</li>
-              <li>Price: $36</li>
-            </ul>
-          </div>
+            <div class="p-note">
+              <strong>Fit note:</strong> true-to-size for a clean fitted look. Size up for relaxed.
+              <small>Women’s ref: Amari wears <strong>Ladies Small</strong>.</small>
+            </div>
 
-          <div style="margin-top:14px;">
-            <a class="btn btn--ghost" href="/supima/">Back to Supima</a>
-          </div>
+            <div style="margin-top:14px;">
+              <h2 style="margin:0 0 .45rem;font-size:1rem;font-weight:900;">Details</h2>
+              <ul class="p-specs">
+                <li>Supima cotton · soft hand feel</li>
+                <li>Women’s fit · clean silhouette</li>
+                <li>Colorway: Natural White</li>
+                <li>Price: $36</li>
+              </ul>
+            </div>
+
+            <div style="margin-top:14px;">
+              <a class="btn btn--ghost" href="/supima/">Back to Supima</a>
+            </div>
+          </section>
         </div>
       </aside>
     </div>
@@ -299,63 +318,5 @@
 
   <!-- FOOTER injection target -->
   <div id="site-footer"></div>
-
-  <!-- ✅ Page wiring for your data-add-to-cart button -->
-  <script>
-  (function(){
-    const root = window;
-
-    function ready(fn){
-      if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", fn, { once:true });
-      } else {
-        fn();
-      }
-    }
-
-    ready(() => {
-      const sizeEl = document.getElementById("size");
-      const btn = document.querySelector('[data-add-to-cart="supima-ladies-natural-white"]');
-      if (!sizeEl || !btn) return;
-
-      function setDisabled(disabled){
-        btn.disabled = !!disabled;
-        btn.setAttribute("aria-disabled", String(!!disabled));
-      }
-
-      setDisabled(true);
-
-      sizeEl.addEventListener("change", () => {
-        setDisabled(!sizeEl.value);
-      });
-
-      btn.addEventListener("click", () => {
-        const size = String(sizeEl.value || "").trim();
-        if (!size) return;
-
-        if (!root.SB || !root.SB.cart || typeof root.SB.cart.add !== "function") {
-          console.warn("[sb-cart] SB.cart.add not ready yet");
-          return;
-        }
-
-        root.SB.cart.add({
-          item_id: "supima-ladies-natural-white",
-          item_name: "Supima Ladies Tee — Natural White",
-          price: 36.00,
-          quantity: 1,
-          size: size,
-          variant: size,
-          image: "/assets/supima/ladies-natural-white_780.webp",
-          url: "/product-supima-ladies-natural-white/",
-          sku: "sb-supima-ladies-natural-white"
-        });
-
-        const old = btn.textContent;
-        btn.textContent = "Added ✓";
-        setTimeout(() => (btn.textContent = old), 1100);
-      });
-    });
-  })();
-  </script>
 </body>
 </html>
