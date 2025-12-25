@@ -67,17 +67,27 @@
   <script defer src="/scripts/sb-analytics.js"></script>
   <script defer src="/scripts/partials.js"></script>
   <script defer src="/scripts/sw-register.js"></script>
+  <!-- ✅ Global buybox wiring -->
+  <script defer src="/scripts/buybox.js"></script>
 
   <!-- Scoped page styles -->
   <style>
     .p-wrap{max-width:1100px;margin:0 auto;padding:28px 16px 56px;}
     .p-grid{display:grid;gap:18px;align-items:start;}
-    @media(min-width:960px){.p-grid{grid-template-columns:1.05fr .95fr;gap:22px;}}
+    @media(min-width:960px){.p-grid{grid-template-columns:1.05fr .95fr;gap:22px;}
+    }
     .p-card{background:#0e0e0e;border:1px solid #1f1f1f;border-radius:14px;overflow:hidden;}
     .p-pad{padding:16px;}
-    .p-media{background:#000;border-bottom:1px solid #1f1f1f;}
+
+    /* ✅ reserve space for the image (kills CLS) */
+    .p-media{
+      background:#000;
+      border-bottom:1px solid #1f1f1f;
+      aspect-ratio: 3 / 2; /* 780 × 520 */
+      overflow:hidden;
+    }
     .p-media picture,
-    .p-media img{display:block;width:100%;height:auto;}
+    .p-media img{display:block;width:100%;height:100%;}
     .p-media img{
       object-fit:cover;
       background:#0b0b0b;
@@ -98,10 +108,17 @@
     .p-specs li{margin:.35rem 0;color:#d7dae0;opacity:.92;}
     .p-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;}
     .p-actions .btn{white-space:nowrap;min-height:44px;align-items:center;display:inline-flex;}
+    .p-actions .btn[aria-disabled="true"]{opacity:.55;pointer-events:none;}
 
     .p-crumbs{margin:0 0 10px;font-size:.85rem;color:#9ca3af;}
-    .p-crumbs a{color:#e5e7eb;text-decoration:underline;}
-    .p-crumbs a:hover{text-decoration:none;}
+    .p-crumbs a{
+      color:#e5e7eb;
+      text-decoration:underline;
+      text-decoration-thickness:0.08em;
+      text-underline-offset:0.18em;
+      font-weight:600;
+    }
+    .p-crumbs a:hover{text-decoration:underline;}
 
     .policy-links{
       margin-top:.6rem;
@@ -218,8 +235,7 @@
               decoding="async"
               fetchpriority="high"
               width="780"
-              height="520"
-              style="width:100%;height:auto;">
+              height="520">
           </picture>
         </div>
 
@@ -241,51 +257,64 @@
 
           <div class="p-price">$36.00</div>
 
-          <div class="p-row" style="margin-top:14px;">
-            <label for="size" class="p-muted" style="font-weight:800;color:#e5e7eb;">Select size</label>
-            <select id="size" class="p-select" aria-label="Select size">
-              <option value="" selected disabled>Select…</option>
-              <option value="S">S</option>
-              <option value="M">M</option>
-              <option value="L">L</option>
-              <option value="XL">XL</option>
-              <option value="2XL">2XL</option>
-              <option value="3XL">3XL</option>
-            </select>
-          </div>
+          <!-- ✅ Global buybox block wired by /scripts/buybox.js -->
+          <section
+            class="buybox"
+            data-sku-base="sb-supima-mens-natural-white"
+            data-name="Supima Men’s Tee — Natural White"
+            data-price="36.00"
+            data-image="/assets/supima/mens-natural-white_780.webp"
+            data-url="/product-supima-mens-natural-white/"
+          >
+            <div class="p-row" style="margin-top:14px;">
+              <label for="size" class="p-muted" style="font-weight:800;color:#e5e7eb;">Select size</label>
+              <select id="size" class="p-select" aria-label="Select size">
+                <option value="" selected disabled>Select…</option>
+                <option value="S">S</option>
+                <option value="M">M</option>
+                <option value="L">L</option>
+                <option value="XL">XL</option>
+                <option value="2XL">2XL</option>
+                <option value="3XL">3XL</option>
+              </select>
+            </div>
 
-          <div class="p-actions">
-            <button
-              type="button"
-              class="btn btn--gold"
-              data-add-to-cart="supima-mens-natural-white"
-              aria-disabled="true"
-              disabled>
-              Add to cart
-            </button>
-            <a class="btn btn--ghost" href="/cart/">Go to Cart</a>
-            <a class="btn btn--ghost" href="/supima/">Back to Supima</a>
-          </div>
+            <div class="p-actions">
+              <button
+                type="button"
+                class="btn btn--gold"
+                data-add-to-cart="supima-mens-natural-white"
+                aria-disabled="true"
+                disabled
+              >
+                Add to cart
+              </button>
+              <a class="btn btn--ghost" href="/cart/">Go to Cart</a>
+              <a class="btn btn--ghost" href="/supima/">Back to Supima</a>
+            </div>
 
-          <div class="p-note">
-            <strong>Fit note:</strong> true-to-size for a clean fitted look. Size up for relaxed.
-            <small>Men’s ref: Marcus wears a <strong>Men’s Medium</strong>.</small>
-          </div>
+            <p class="buybox__msg" role="status" aria-live="polite"></p>
 
-          <div style="margin-top:14px;">
-            <h2 style="margin:0 0 .45rem;font-size:1rem;font-weight:900;">Details</h2>
-            <ul class="p-specs">
-              <li>Supima cotton · soft hand feel</li>
-              <li>Men’s fit · clean silhouette</li>
-              <li>Colorway: Natural White</li>
-              <li>Price: $36</li>
-            </ul>
-          </div>
+            <div class="p-note">
+              <strong>Fit note:</strong> true-to-size for a clean fitted look. Size up for relaxed.
+              <small>Men’s ref: Marcus wears a <strong>Men’s Medium</strong>.</small>
+            </div>
 
-          <div class="policy-links">
-            <a href="/returns/#policy">30-day returns</a> ·
-            <a href="/returns/#supima">Supima care policy</a>
-          </div>
+            <div style="margin-top:14px;">
+              <h2 style="margin:0 0 .45rem;font-size:1rem;font-weight:900;">Details</h2>
+              <ul class="p-specs">
+                <li>Supima cotton · soft hand feel</li>
+                <li>Men’s fit · clean silhouette</li>
+                <li>Colorway: Natural White</li>
+                <li>Price: $36</li>
+              </ul>
+            </div>
+
+            <div class="policy-links">
+              <a href="/returns/#policy">30-day returns</a> ·
+              <a href="/returns/#supima">Supima care policy</a>
+            </div>
+          </section>
         </div>
       </aside>
     </div>
@@ -293,64 +322,5 @@
 
   <!-- FOOTER injection target -->
   <div id="site-footer"></div>
-
-  <!-- Page wiring for data-add-to-cart button -->
-  <script>
-  (function(){
-    const root = window;
-
-    function ready(fn){
-      if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", fn, { once:true });
-      } else {
-        fn();
-      }
-    }
-
-    ready(() => {
-      const sizeEl = document.getElementById("size");
-      const btn = document.querySelector('[data-add-to-cart="supima-mens-natural-white"]');
-      if (!sizeEl || !btn) return;
-
-      function setDisabled(disabled){
-        btn.disabled = !!disabled;
-        btn.setAttribute("aria-disabled", String(!!disabled));
-      }
-
-      // Start disabled until a size is picked
-      setDisabled(true);
-
-      sizeEl.addEventListener("change", () => {
-        setDisabled(!sizeEl.value);
-      });
-
-      btn.addEventListener("click", () => {
-        const size = String(sizeEl.value || "").trim();
-        if (!size) return;
-
-        if (!root.SB || !root.SB.cart || typeof root.SB.cart.add !== "function") {
-          console.warn("[sb-cart] SB.cart.add not ready yet");
-          return;
-        }
-
-        root.SB.cart.add({
-          item_id: "supima-mens-natural-white",
-          item_name: "Supima Men’s Tee — Natural White",
-          price: 36.00,
-          quantity: 1,
-          size: size,
-          variant: size,
-          image: "/assets/supima/mens-natural-white_780.webp",
-          url: "/product-supima-mens-natural-white/",
-          sku: "sb-supima-mens-natural-white"
-        });
-
-        const old = btn.textContent;
-        btn.textContent = "Added ✓";
-        setTimeout(() => (btn.textContent = old), 1100);
-      });
-    });
-  })();
-  </script>
 </body>
 </html>
