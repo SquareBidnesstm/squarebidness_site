@@ -5,18 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <title>Shop — Square Bidness Apparel</title>
-  <meta name="description" content="Shop the latest drops from Square Bidness Apparel. Explore exclusive collections, premium fabrics, and limited-run pieces like the VSOP Collection." />
+  <meta name="description" content="Shop the latest drops from Square Bidness Apparel. Explore men’s, women’s, and youth essentials plus limited-run pieces like the VSOP Collection." />
   <meta name="robots" content="index,follow" />
   <link rel="canonical" href="https://www.squarebidness.com/shop/" />
 
   <!-- Build stamp -->
-  <meta name="sb:build" content="v20251221-shop" />
+  <meta name="sb:build" content="v20251224-shop-categories" />
 
   <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com">
   <link rel="preconnect" href="https://www.google-analytics.com">
 
   <!-- CSS -->
+  <link rel="preload" href="/styles/style.css" as="style">
   <link rel="stylesheet" href="/styles/style.css" />
 
   <!-- Icons / PWA -->
@@ -47,20 +48,398 @@
   <script defer src="/scripts/global.js"></script>
   <script defer src="/scripts/partials.js"></script>
   <script defer src="/scripts/sw-register.js"></script>
+  <script defer src="/scripts/sb-analytics.js"></script>
+
+  <style>
+    .shop-wrap{
+      max-width:1120px;
+      margin:0 auto;
+      padding:24px 16px 56px;
+    }
+    .shop-kicker{
+      font-size:.8rem;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:#9ca3af;
+      margin-bottom:.35rem;
+    }
+    .shop-intro{
+      max-width:600px;
+      color:#9ca3af;
+      font-size:.95rem;
+      margin-top:.5rem;
+    }
+    .shop-sections{
+      margin-top:2rem;
+      display:flex;
+      flex-direction:column;
+      gap:2.25rem;
+    }
+    .shop-section-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:baseline;
+      gap:.75rem;
+      margin-bottom:1rem;
+    }
+    .shop-section-header h2{
+      font-size:1.15rem;
+      font-weight:800;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      margin:0;
+    }
+    .shop-section-header a{
+      font-size:.85rem;
+      color:#e5e7eb;
+      text-decoration:underline;
+      text-underline-offset:0.18em;
+    }
+    .shop-grid{
+      display:grid;
+      gap:1.25rem;
+      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    }
+    .shop-card{
+      background:#020617;
+      border-radius:16px;
+      border:1px solid rgba(148,163,184,.35);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      box-shadow:0 18px 40px rgba(15,23,42,.75);
+    }
+    .shop-card__media{
+      position:relative;
+      background:#000;
+      aspect-ratio:3 / 2;
+      overflow:hidden;
+    }
+    .shop-card__media img,
+    .shop-card__media picture{
+      width:100%;
+      height:100%;
+      display:block;
+    }
+    .shop-card__media img{
+      object-fit:cover;
+      background:#020617;
+    }
+    .shop-tag{
+      position:absolute;
+      left:.75rem;
+      bottom:.75rem;
+      padding:.18rem .6rem;
+      border-radius:999px;
+      font-size:.7rem;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      background:rgba(15,23,42,.9);
+      border:1px solid rgba(248,250,252,.2);
+      color:#e5e7eb;
+    }
+    .shop-card__body{
+      padding:.8rem .9rem 1rem;
+    }
+    .shop-card__title{
+      font-size:.98rem;
+      font-weight:700;
+      margin:0 0 .25rem;
+    }
+    .shop-card__price{
+      font-size:.9rem;
+      font-weight:800;
+      color:#f9fafb;
+      margin:0 0 .35rem;
+    }
+    .shop-card__meta{
+      font-size:.8rem;
+      color:#9ca3af;
+      margin:0 0 .45rem;
+    }
+    .shop-card__actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:.45rem;
+      align-items:center;
+    }
+    .btn-pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:.4rem .85rem;
+      border-radius:999px;
+      border:1px solid transparent;
+      font-size:.82rem;
+      font-weight:700;
+      text-decoration:none;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+    .btn-pill--gold{
+      background:#c9a227;
+      border-color:#c9a227;
+      color:#111827;
+      box-shadow:0 10px 26px rgba(201,162,39,.45);
+    }
+    .btn-pill--ghost{
+      background:rgba(15,23,42,.9);
+      border-color:rgba(148,163,184,.7);
+      color:#e5e7eb;
+    }
+    .shop-card-link{
+      display:block;
+      color:inherit;
+      text-decoration:none;
+    }
+    .shop-card-link:hover .shop-card__title{
+      text-decoration:underline;
+    }
+
+    @media (max-width:600px){
+      .shop-section-header{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+    }
+  </style>
 </head>
 
 <body class="theme-dark" id="top">
   <div id="site-header"></div>
 
-  <main class="section" id="main-content">
-    <div class="container">
-      <header class="page-hero">
+  <main id="main-content">
+    <div class="shop-wrap">
+      <header class="page-hero" style="padding-bottom:0;">
+        <div class="shop-kicker">Square Bidness</div>
         <h1 class="page-title">Shop</h1>
-        <p class="page-subtitle">Exclusives, drops, and culture — built right.</p>
+        <p class="shop-intro">
+          Men’s, women’s, and youth motion — Supima essentials, VSOP set, and seasonal drops built with discipline.
+        </p>
       </header>
 
-      <!-- Your shop renderer targets this -->
-      <div id="shop-grid"></div>
+      <section class="shop-sections" aria-label="Shop categories">
+
+        <!-- MEN -->
+        <section aria-labelledby="shop-men-heading">
+          <div class="shop-section-header">
+            <h2 id="shop-men-heading">Men</h2>
+            <a href="/supima/">View all men’s Supima →</a>
+          </div>
+          <div class="shop-grid">
+
+            <!-- VSOP Hooded Jacket -->
+            <article class="shop-card">
+              <a class="shop-card-link" href="/product-vsop-jacket/">
+                <div class="shop-card__media">
+                  <picture>
+                    <source
+                      type="image/webp"
+                      srcset="
+                        /assets/vsop-jacket_420.webp 420w,
+                        /assets/vsop-jacket_640.webp 640w,
+                        /assets/vsop-jacket_700.webp 700w,
+                        /assets/vsop-jacket_780.webp 780w
+                      "
+                      sizes="(max-width: 900px) 100vw, 320px"
+                    />
+                    <source
+                      type="image/jpeg"
+                      srcset="
+                        /assets/vsop-jacket_420.jpg 420w,
+                        /assets/vsop-jacket_640.jpg 640w,
+                        /assets/vsop-jacket_700.jpg 700w,
+                        /assets/vsop-jacket_780.jpg 780w
+                      "
+                      sizes="(max-width: 900px) 100vw, 320px"
+                    />
+                    <img
+                      src="/assets/vsop-jacket_780.jpg"
+                      alt="VSOP Hooded Jacket — Burgundy + Brown"
+                      width="780"
+                      height="520"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </picture>
+                  <span class="shop-tag">VSOP</span>
+                </div>
+                <div class="shop-card__body">
+                  <h3 class="shop-card__title">VSOP Hooded Jacket</h3>
+                  <p class="shop-card__price">$129.99 · Preorder</p>
+                  <p class="shop-card__meta">Burgundy + Brown · Full embroidery</p>
+                  <div class="shop-card__actions">
+                    <span class="btn-pill btn-pill--gold">View jacket</span>
+                    <span class="btn-pill btn-pill--ghost">Men’s outerwear</span>
+                  </div>
+                </div>
+              </a>
+            </article>
+
+            <!-- Supima Men’s Tee -->
+            <article class="shop-card">
+              <a class="shop-card-link" href="/product-supima-mens-natural-white/">
+                <div class="shop-card__media">
+                  <picture>
+                    <source
+                      type="image/webp"
+                      srcset="
+                        /assets/supima/mens-natural-white_420.webp 420w,
+                        /assets/supima/mens-natural-white_640.webp 640w,
+                        /assets/supima/mens-natural-white_700.webp 700w,
+                        /assets/supima/mens-natural-white_780.webp 780w
+                      "
+                      sizes="(max-width: 900px) 100vw, 320px"
+                    />
+                    <source
+                      type="image/jpeg"
+                      srcset="
+                        /assets/supima/mens-natural-white_420.jpg 420w,
+                        /assets/supima/mens-natural-white_640.jpg 640w,
+                        /assets/supima/mens-natural-white_700.jpg 700w,
+                        /assets/supima/mens-natural-white_780.jpg 780w
+                      "
+                      sizes="(max-width: 900px) 100vw, 320px"
+                    />
+                    <img
+                      src="/assets/supima/mens-natural-white_780.jpg"
+                      alt="Supima Men’s Tee — Natural White"
+                      width="780"
+                      height="520"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </picture>
+                  <span class="shop-tag">Supima</span>
+                </div>
+                <div class="shop-card__body">
+                  <h3 class="shop-card__title">Supima Men’s Tee — Natural White</h3>
+                  <p class="shop-card__price">$36.00</p>
+                  <p class="shop-card__meta">Supima cotton · Clean men’s fit</p>
+                  <div class="shop-card__actions">
+                    <span class="btn-pill btn-pill--gold">View tee</span>
+                    <span class="btn-pill btn-pill--ghost">Men’s essentials</span>
+                  </div>
+                </div>
+              </a>
+            </article>
+
+          </div>
+        </section>
+
+        <!-- WOMEN -->
+        <section aria-labelledby="shop-women-heading">
+          <div class="shop-section-header">
+            <h2 id="shop-women-heading">Women</h2>
+            <a href="/supima/">View all women’s Supima →</a>
+          </div>
+          <div class="shop-grid">
+
+            <!-- Supima Ladies Tee -->
+            <article class="shop-card">
+              <a class="shop-card-link" href="/product-supima-ladies-natural-white/">
+                <div class="shop-card__media">
+                  <picture>
+                    <source
+                      type="image/webp"
+                      srcset="
+                        /assets/supima/ladies-natural-white_420.webp 420w,
+                        /assets/supima/ladies-natural-white_640.webp 640w,
+                        /assets/supima/ladies-natural-white_700.webp 700w,
+                        /assets/supima/ladies-natural-white_780.webp 780w
+                      "
+                      sizes="(max-width: 900px) 100vw, 320px"
+                    />
+                    <source
+                      type="image/jpeg"
+                      srcset="
+                        /assets/supima/ladies-natural-white_420.jpg 420w,
+                        /assets/supima/ladies-natural-white_640.jpg 640w,
+                        /assets/supima/ladies-natural-white_700.jpg 700w,
+                        /assets/supima/ladies-natural-white_780.jpg 780w
+                      "
+                      sizes="(max-width: 900px) 100vw, 320px"
+                    />
+                    <img
+                      src="/assets/supima/ladies-natural-white_780.jpg"
+                      alt="Supima Ladies Tee — Natural White"
+                      width="780"
+                      height="520"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </picture>
+                  <span class="shop-tag">Supima</span>
+                </div>
+                <div class="shop-card__body">
+                  <h3 class="shop-card__title">Supima Ladies Tee — Natural White</h3>
+                  <p class="shop-card__price">$36.00</p>
+                  <p class="shop-card__meta">Supima cotton · Women’s cut</p>
+                  <div class="shop-card__actions">
+                    <span class="btn-pill btn-pill--gold">View tee</span>
+                    <span class="btn-pill btn-pill--ghost">Women’s essentials</span>
+                  </div>
+                </div>
+              </a>
+            </article>
+
+            <!-- Future women’s slot (placeholder copy, safe to keep or remove) -->
+            <article class="shop-card">
+              <a class="shop-card-link" href="/supima/">
+                <div class="shop-card__media">
+                  <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#020617;">
+                    <span style="font-size:.8rem;color:#9ca3af;text-transform:uppercase;letter-spacing:.18em;">
+                      More women’s styles loading
+                    </span>
+                  </div>
+                  <span class="shop-tag">Coming Soon</span>
+                </div>
+                <div class="shop-card__body">
+                  <h3 class="shop-card__title">Women’s Motion — Next Drops</h3>
+                  <p class="shop-card__meta">New cuts and colors slot here as you release.</p>
+                  <div class="shop-card__actions">
+                    <span class="btn-pill btn-pill--ghost">Explore Supima</span>
+                  </div>
+                </div>
+              </a>
+            </article>
+
+          </div>
+        </section>
+
+        <!-- KIDS / YOUTH -->
+        <section aria-labelledby="shop-kids-heading">
+          <div class="shop-section-header">
+            <h2 id="shop-kids-heading">Kids &amp; Youth</h2>
+            <span style="font-size:.85rem;color:#9ca3af;">Setting up this lane for future drops.</span>
+          </div>
+          <div class="shop-grid">
+            <article class="shop-card">
+              <div class="shop-card__media">
+                <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#020617;">
+                  <span style="font-size:.8rem;color:#9ca3af;text-transform:uppercase;letter-spacing:.18em;">
+                    Kids &amp; Youth Coming Soon
+                  </span>
+                </div>
+                <span class="shop-tag">Future Lane</span>
+              </div>
+              <div class="shop-card__body">
+                <h3 class="shop-card__title">Square Bidness Youth</h3>
+                <p class="shop-card__meta">
+                  When you’re ready to open this lane, we’ll slot in youth tees, hoodies, and school-ready pieces right here.
+                </p>
+                <div class="shop-card__actions">
+                  <a href="/linkme/" class="btn-pill btn-pill--ghost">Get notified</a>
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+      </section>
+
+      <!-- Optional: keep this for future JS-driven grid if you want -->
+      <div id="shop-grid" hidden aria-hidden="true"></div>
     </div>
   </main>
 
