@@ -10,13 +10,12 @@
   <link rel="preconnect" href="https://www.google-analytics.com" crossorigin>
   <link rel="preconnect" href="https://static.cloudflareinsights.com" crossorigin>
 
-
   <title>VSOP Collection — Square Bidness</title>
   <meta name="description" content="VSOP Collection — Burgundy + Brown set. Hooded jacket and matching shorts with full embroidery. Fall 2025 limited run from Square Bidness." />
   <link rel="canonical" href="https://www.squarebidness.com/vsop/" />
 
   <!-- Build stamp (used by /scripts/partials.js for cache busting) -->
-  <meta name="sb:build" content="v20251221-vsop" />
+  <meta name="sb:build" content="v20251224-vsop" />
 
   <!-- SEO / Social -->
   <meta property="og:type" content="website" />
@@ -43,147 +42,239 @@
   <link rel="manifest" href="/manifest.webmanifest" />
   <meta name="theme-color" content="#000000" />
 
-  <!-- ✅ Preload LCP hero image (use your new 780/420 WebP set) -->
- <link
-  rel="preload"
-  as="image"
-  href="/assets/hero_780.webp"
-  imagesrcset="/assets/hero_420.webp 420w, /assets/hero_640.webp 640w, /assets/hero_780.webp 780w"
-  imagesizes="(min-width:900px) 44vw, 100vw"
-  fetchpriority="high"
-/>
+  <!-- ✅ Preload LCP hero image (780 master with 420/640/780 cuts) -->
+  <link
+    rel="preload"
+    as="image"
+    href="/assets/hero_780.webp"
+    imagesrcset="/assets/hero_420.webp 420w, /assets/hero_640.webp 640w, /assets/hero_780.webp 780w"
+    imagesizes="(min-width:900px) 44vw, 100vw"
+    fetchpriority="high"
+  />
 
-  <!-- GA + cart -->
+  <!-- Scripts -->
   <script defer src="/scripts/ga.js"></script>
   <script defer src="/scripts/sb-cart.js"></script>
   <script defer src="/scripts/global.js"></script>
   <script defer src="/scripts/sb-analytics.js"></script>
-
-  <!-- ✅ Partials loader (nav/footer everywhere) -->
   <script defer src="/scripts/partials.js"></script>
+  <script defer src="/scripts/sw-register.js"></script>
 
-<style>
-  /* HERO stays the same (optional max width so it doesn’t feel huge on desktop) */
-  .vsop-hero { background:#05010a; border-bottom:1px solid #1f1f1f; }
-  .vsop-hero__inner{
-    max-width:1200px;margin:0 auto;padding:20px 16px 24px;
-    display:grid;gap:18px;align-items:center;
-  }
-  @media(min-width:900px){ .vsop-hero__inner{ grid-template-columns:1.1fr .9fr; } }
-
-  .vsop-hero__media{
-    /* keeps the hero image from getting comically wide on big monitors */
-    max-width:560px;
-    margin-left:auto;
-  }
-  @media(max-width:899px){
-    .vsop-hero__media{ max-width:none; margin-left:0; }
-  }
-
-  .vsop-hero__media img{
-    width:100%;
-    display:block;
-    border-radius:14px;
-    border:1px solid #1f1f1f;
-    background:#0b0b0b;
-    object-fit:cover;
-    aspect-ratio: 3 / 2; /* CLS guard */
-  }
-
-  /* SECTION NAV */
-  .section-nav{
-    max-width:1200px;margin:0 auto;padding:6px 16px 12px;
-    font-size:.85rem;color:#9ca3af;display:flex;
-    justify-content:space-between;gap:8px;flex-wrap:wrap;
-  }
-  .section-nav a{ color:#e5e7eb;text-decoration:none; }
-  .section-nav a:hover{ text-decoration:underline; }
-
-  /* ✅ PRODUCT GRID: side-by-side on desktop */
-  .vsop-grid{
-    max-width:1200px;
-    margin:0 auto;
-    padding:20px 16px 30px;
-    display:grid;
-    gap:16px;
-    grid-template-columns:1fr;         /* mobile */
-  }
-  @media(min-width:900px){
-    .vsop-grid{
-      grid-template-columns:repeat(2, minmax(0, 1fr)); /* desktop = 2 columns */
+  <style>
+    /* HERO */
+    .vsop-hero { background:#05010a; border-bottom:1px solid #1f1f1f; }
+    .vsop-hero__inner{
+      max-width:1200px;
+      margin:0 auto;
+      padding:20px 16px 24px;
+      display:grid;
       gap:18px;
+      align-items:center;
     }
-  }
+    @media(min-width:900px){
+      .vsop-hero__inner{ grid-template-columns:1.1fr .9fr; }
+    }
 
-  /* CARD */
-  .vsop-card{
-    background:#050308;
-    border-radius:14px;
-    border:1px solid #1f1f1f;
-    overflow:hidden;
-    display:flex;
-    flex-direction:column;
-    min-width:0; /* prevents overflow in grid */
-  }
+    .vsop-hero__copy h1{
+      margin:.1rem 0 .4rem;
+      font-size:clamp(1.9rem,2.7vw,2.4rem);
+      font-weight:900;
+      letter-spacing:-.02em;
+    }
+    .vsop-label{
+      font-size:.75rem;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:#9ca3af;
+      margin-bottom:.4rem;
+    }
+    .vsop-tagline{
+      margin:0 0 .5rem;
+      color:#e5e7eb;
+      font-size:.98rem;
+    }
+    .vsop-hero__copy p{
+      color:#9ca3af;
+      font-size:.95rem;
+      line-height:1.5;
+      margin:.2rem 0;
+      max-width:620px;
+    }
+    .vsop-hero__meta{
+      margin-top:.75rem;
+      display:flex;
+      flex-wrap:wrap;
+      gap:.5rem;
+      align-items:center;
+    }
+    .vsop-preorder-pill{
+      font-size:.78rem;
+      padding:.25rem .65rem;
+      border-radius:999px;
+      background:#7f1d1d;
+      color:#fef3c7;
+      border:1px solid rgba(248,250,252,.2);
+    }
 
-  /* ✅ PRODUCT IMAGE: keep it visually smaller + never crop the product */
-  .vsop-card__media{
-    background:#0b0b0b;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:10px;
-  }
+    .vsop-hero__media{
+      max-width:560px;
+      margin-left:auto;
+    }
+    @media(max-width:899px){
+      .vsop-hero__media{ max-width:none; margin-left:0; }
+    }
 
-  /* “frame” height so both cards line up clean on desktop */
-  .vsop-card__media img{
-    width:100%;
-    height:auto;
-    max-width:420px;     /* prevents huge product images on desktop */
-    object-fit:contain;  /* protects product (no crop) */
-    display:block;
-    border-radius:12px;
-    border:1px solid #1f1f1f;
-    background:#0b0b0b;
-  }
+    .vsop-hero__media img{
+      width:100%;
+      display:block;
+      border-radius:14px;
+      border:1px solid #1f1f1f;
+      background:#0b0b0b;
+      object-fit:cover;
+      aspect-ratio: 3 / 2; /* CLS guard */
+    }
 
-  .vsop-card__body{ padding:14px 14px 10px; }
-  .vsop-card__body h2{ margin:0 0 .15rem;font-size:1.05rem; }
-  .vsop-card__body p{ margin:0 0 .35rem;font-size:.93rem;color:#d7dae0; }
-  .vsop-price{ font-weight:700;color:#facc15;font-size:.97rem; }
-  .vsop-note{ font-size:.82rem;color:#9ca3af;margin-top:.4rem; }
+    /* SECTION NAV */
+    .section-nav{
+      max-width:1200px;
+      margin:0 auto;
+      padding:6px 16px 12px;
+      font-size:.85rem;
+      color:#9ca3af;
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .section-nav a{ color:#e5e7eb;text-decoration:none; }
+    .section-nav a:hover{ text-decoration:underline; }
 
-  .vsop-card__actions{
-    padding:0 14px 14px;
-    display:flex;
-    flex-wrap:wrap;
-    gap:.5rem;
-    align-items:center;
-  }
-  /* CLS guard for injected nav/footer (VSOP page) */
-#site-header { min-height: 80px; }
-#site-footer { min-height: 140px; }
+    /* SECTION TITLE */
+    .vsop-section-title{
+      max-width:1200px;
+      margin:0 auto;
+      padding:18px 16px 10px;
+    }
+    .vsop-section-title h2{
+      margin:0 0 .25rem;
+      font-size:1.2rem;
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+    .vsop-section-title p{
+      margin:0;
+      color:#9ca3af;
+      font-size:.95rem;
+      max-width:620px;
+    }
 
-/* CLS guard: reserve hero height so text/image/layout doesn't jump */
-header.vsop-hero { min-height: 520px; }
-@media (max-width: 899px){
-  header.vsop-hero { min-height: 0; } /* let mobile flow naturally */
-}
-</style>
+    /* PRODUCT GRID */
+    .vsop-grid{
+      max-width:1200px;
+      margin:0 auto;
+      padding:14px 16px 30px;
+      display:grid;
+      gap:16px;
+      grid-template-columns:1fr;
+    }
+    @media(min-width:900px){
+      .vsop-grid{
+        grid-template-columns:repeat(2, minmax(0, 1fr));
+        gap:18px;
+      }
+    }
+
+    /* CARD */
+    .vsop-card{
+      background:#050308;
+      border-radius:14px;
+      border:1px solid #1f1f1f;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      min-width:0;
+    }
+    .vsop-card__media{
+      background:#0b0b0b;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:10px;
+    }
+    .vsop-card__media img{
+      width:100%;
+      height:auto;
+      max-width:420px;
+      object-fit:contain;
+      display:block;
+      border-radius:12px;
+      border:1px solid #1f1f1f;
+      background:#0b0b0b;
+    }
+
+    .vsop-card__body{ padding:14px 14px 10px; }
+    .vsop-card__body h2{
+      margin:0 0 .15rem;
+      font-size:1.05rem;
+      font-weight:800;
+    }
+    .vsop-card__body p{
+      margin:0 0 .35rem;
+      font-size:.93rem;
+      color:#d7dae0;
+      line-height:1.5;
+    }
+    .vsop-price{
+      font-weight:700;
+      color:#facc15;
+      font-size:.97rem;
+    }
+    .vsop-note{
+      font-size:.82rem;
+      color:#9ca3af;
+      margin-top:.4rem;
+    }
+
+    .vsop-card__actions{
+      padding:0 14px 14px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:.5rem;
+      align-items:center;
+    }
+    .vsop-card__actions .btn{
+      white-space:nowrap;
+      min-height:40px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-size:.9rem;
+    }
+
+    /* CLS guard for injected nav/footer */
+    #site-header { min-height: 80px; }
+    #site-footer { min-height: 140px; }
+
+    /* CLS guard: reserve hero height on desktop, let mobile flow */
+    header.vsop-hero { min-height: 520px; }
+    @media (max-width: 899px){
+      header.vsop-hero { min-height: 0; }
+    }
+  </style>
 </head>
 
 <body class="theme-dark" id="top">
   <!-- NAV injected by /scripts/partials.js -->
   <div id="site-header"
-     aria-busy="true"
-     style="content-visibility:auto;contain-intrinsic-size:80px;"></div>
+       aria-busy="true"
+       style="content-visibility:auto;contain-intrinsic-size:80px;"></div>
 
   <!-- HERO -->
   <header class="vsop-hero">
     <div class="vsop-hero__inner">
       <div class="vsop-hero__copy">
         <div class="vsop-label">
-          <span aria-hidden="true"></span>
           VSOP Collection · Fall 2025
         </div>
 
@@ -209,30 +300,29 @@ header.vsop-hero { min-height: 520px; }
       </div>
 
       <div class="vsop-hero__media">
-       <picture>
-  <source
-    type="image/webp"
-    srcset="/assets/hero_420.webp 420w, /assets/hero_640.webp 640w, /assets/hero_780.webp 780w"
-    sizes="(min-width:900px) 44vw, 100vw"
-  />
-  <source
-    type="image/jpeg"
-    srcset="/assets/hero_420.jpg 420w, /assets/hero_640.jpg 640w, /assets/hero_780.jpg 780w"
-    sizes="(min-width:900px) 44vw, 100vw"
-  />
-  <img
-    src="/assets/hero_780.jpg"
-    srcset="/assets/hero_420.jpg 420w, /assets/hero_640.jpg 640w, /assets/hero_780.jpg 780w"
-    sizes="(min-width:900px) 44vw, 100vw"
-    alt="VSOP hooded jacket styled with matching shorts"
-    width="780"
-    height="520"
-    loading="eager"
-    decoding="async"
-    fetchpriority="high"
-    style="width:100%;height:auto;"
-  />
-</picture>
+        <picture>
+          <source
+            type="image/webp"
+            srcset="/assets/hero_420.webp 420w, /assets/hero_640.webp 640w, /assets/hero_780.webp 780w"
+            sizes="(min-width:900px) 44vw, 100vw"
+          />
+          <source
+            type="image/jpeg"
+            srcset="/assets/hero_420.jpg 420w, /assets/hero_640.jpg 640w, /assets/hero_780.jpg 780w"
+            sizes="(min-width:900px) 44vw, 100vw"
+          />
+          <img
+            src="/assets/hero_780.jpg"
+            srcset="/assets/hero_420.jpg 420w, /assets/hero_640.jpg 640w, /assets/hero_780.jpg 780w"
+            sizes="(min-width:900px) 44vw, 100vw"
+            alt="VSOP hooded jacket styled with matching shorts"
+            width="780"
+            height="520"
+            loading="eager"
+            decoding="async"
+            fetchpriority="high"
+          />
+        </picture>
       </div>
     </div>
   </header>
@@ -259,12 +349,14 @@ header.vsop-hero { min-height: 520px; }
         <article class="vsop-card">
           <div class="vsop-card__media">
             <picture>
-              <source type="image/webp"
-                      srcset="/assets/vsop-jacket_420.webp 420w, /assets/vsop-jacket_780.webp 780w"
-                      sizes="(max-width: 768px) 92vw, 520px">
-              <source type="image/jpeg"
-                      srcset="/assets/vsop-jacket_420.jpg 420w, /assets/vsop-jacket_780.jpg 780w"
-                      sizes="(max-width: 768px) 92vw, 520px">
+              <source
+                type="image/webp"
+                srcset="/assets/vsop-jacket_420.webp 420w, /assets/vsop-jacket_780.webp 780w"
+                sizes="(max-width: 768px) 92vw, 520px">
+              <source
+                type="image/jpeg"
+                srcset="/assets/vsop-jacket_420.jpg 420w, /assets/vsop-jacket_780.jpg 780w"
+                sizes="(max-width: 768px) 92vw, 520px">
               <img
                 src="/assets/vsop-jacket_780.jpg"
                 srcset="/assets/vsop-jacket_420.jpg 420w, /assets/vsop-jacket_780.jpg 780w"
@@ -275,7 +367,6 @@ header.vsop-hero { min-height: 520px; }
                 loading="lazy"
                 decoding="async"
                 onerror="this.onerror=null;this.src='/assets/placeholder.png';"
-                style="width:100%;height:auto;"
               >
             </picture>
           </div>
@@ -309,12 +400,14 @@ header.vsop-hero { min-height: 520px; }
         <article class="vsop-card">
           <div class="vsop-card__media">
             <picture>
-              <source type="image/webp"
-                      srcset="/assets/vsop-shorts_420.webp 420w, /assets/vsop-shorts_780.webp 780w"
-                      sizes="(max-width: 768px) 92vw, 520px">
-              <source type="image/jpeg"
-                      srcset="/assets/vsop-shorts_420.jpg 420w, /assets/vsop-shorts_780.jpg 780w"
-                      sizes="(max-width: 768px) 92vw, 520px">
+              <source
+                type="image/webp"
+                srcset="/assets/vsop-shorts_420.webp 420w, /assets/vsop-shorts_780.webp 780w"
+                sizes="(max-width: 768px) 92vw, 520px">
+              <source
+                type="image/jpeg"
+                srcset="/assets/vsop-shorts_420.jpg 420w, /assets/vsop-shorts_780.jpg 780w"
+                sizes="(max-width: 768px) 92vw, 520px">
               <img
                 src="/assets/vsop-shorts_780.jpg"
                 srcset="/assets/vsop-shorts_420.jpg 420w, /assets/vsop-shorts_780.jpg 780w"
@@ -325,7 +418,6 @@ header.vsop-hero { min-height: 520px; }
                 loading="lazy"
                 decoding="async"
                 onerror="this.onerror=null;this.src='/assets/placeholder.png';"
-                style="width:100%;height:auto;"
               >
             </picture>
           </div>
@@ -360,19 +452,17 @@ header.vsop-hero { min-height: 520px; }
 
   <!-- FOOTER injected by /scripts/partials.js -->
   <div id="site-footer"
-     aria-busy="true"
-     style="content-visibility:auto;contain-intrinsic-size:140px;"></div>
+       aria-busy="true"
+       style="content-visibility:auto;contain-intrinsic-size:140px;"></div>
 
-  <!-- ✅ Wire buttons to SB.cart.add() (safe + analytics-friendly) -->
+  <!-- ✅ Wire buttons to SB.cart.add() for this page -->
   <script>
   (function(){
     const root = window;
     root.SB = root.SB && typeof root.SB === "object" ? root.SB : {};
-    if (root.SB._cartUiBound) return; // prevent double-binding if reused
-    root.SB._cartUiBound = true;
+    if (root.SB._vsopCartUiBound) return;
+    root.SB._vsopCartUiBound = true;
 
-    // Minimal product map for this page.
-    // item_id MUST match data-add-to-cart value.
     const PRODUCTS = {
       "vsop-jacket": {
         item_id: "vsop-jacket",
@@ -407,16 +497,10 @@ header.vsop-hero { min-height: 520px; }
 
       root.SB.cart.add(item);
 
-      // Optional micro-feedback (won't break your UI)
       try {
-        btn.blur();
-        btn.dataset.state = "added";
         const original = btn.textContent;
         btn.textContent = "Added";
-        setTimeout(() => {
-          btn.textContent = original;
-          delete btn.dataset.state;
-        }, 900);
+        setTimeout(() => { btn.textContent = original; }, 900);
       } catch {}
     }
 
@@ -425,3 +509,4 @@ header.vsop-hero { min-height: 520px; }
   </script>
 </body>
 </html>
+
