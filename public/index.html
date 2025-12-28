@@ -14,7 +14,7 @@
   <meta name="color-scheme" content="dark light">
 
   <!-- Build/version stamp -->
-  <meta name="sb:build" content="v20251221-home" />
+  <meta name="sb:build" content="v20251226-home-funding" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
@@ -34,10 +34,9 @@
   <meta name="twitter:description" content="Veteran-owned Louisiana lifestyle brand. Apparel built on principles, morals, and business done right." />
   <meta name="twitter:image" content="https://www.squarebidness.com/assets/sb-social-card_1200.jpg" />
 
-  <!-- Perf (keep <= 4 preconnects; fonts removed unless you actually use them) -->
+  <!-- Perf (keep <= 4 preconnects) -->
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
   <link rel="preconnect" href="https://www.google-analytics.com" crossorigin>
-  
 
   <!-- ✅ Preload LCP hero image (WebP) -->
   <link
@@ -58,10 +57,10 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/icon-180.png">
   <link rel="manifest" href="/manifest.webmanifest">
 
-  <!-- ✅ Sitemap link should point to the canonical index (you redirect /sitemap.xml anyway) -->
+  <!-- ✅ Sitemap link -->
   <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap-index.xml">
 
-  <!-- Org JSON-LD (single, consolidated — no street address) -->
+  <!-- Org JSON-LD (no street address) -->
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
@@ -117,7 +116,7 @@
 
     .taxpass-pill{
       display:inline-flex;align-items:center;gap:.5rem;
-      margin:1rem 0 1.25rem;padding:.4rem .9rem;border-radius:999px;
+      margin:1rem 0 .75rem;padding:.4rem .9rem;border-radius:999px;
       border:1px solid #1f2933;background:radial-gradient(circle at top left,#111827,#020617);
       color:#e5e7eb;text-decoration:none;font-size:.8rem;line-height:1.4;
     }
@@ -126,6 +125,42 @@
     .taxpass-pill__tagline{ opacity:.8; }
     .taxpass-pill__arrow{ font-size:.9rem;margin-left:.15rem; }
     .taxpass-pill:hover{ border-color:#4b5563;background:radial-gradient(circle at top left,#111827,#030712); }
+
+    /* ✅ New small Funding banner — super light, no heavy layout */
+    .funding-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:.45rem;
+      margin:0 0 1.25rem;
+      padding:.4rem .85rem;
+      border-radius:999px;
+      border:1px solid rgba(250,204,21,.4);
+      background:radial-gradient(circle at top left,#111827,#020617);
+      color:#fefce8;
+      font-size:.78rem;
+      text-decoration:none;
+      white-space:nowrap;
+    }
+    .funding-pill__eyebrow{
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      font-size:.68rem;
+      opacity:.9;
+      color:#fde68a;
+    }
+    .funding-pill__text{
+      font-weight:700;
+    }
+    .funding-pill__tagline{
+      opacity:.9;
+    }
+    .funding-pill__arrow{
+      font-size:.9rem;
+    }
+    .funding-pill:hover{
+      border-color:#facc15;
+      background:radial-gradient(circle at top left,#1f2937,#020617);
+    }
 
     .sb-banner--overlay{
       position:absolute;bottom:1rem;left:1rem;right:auto;max-width:300px;
@@ -153,8 +188,6 @@
       border-radius:12px;
       border:1px solid #1f1f1f;
       background:#0f0f0f;
-
-      /* ✅ CLS fix: reserve space */
       aspect-ratio: 3 / 2;
       object-fit: cover;
     }
@@ -243,15 +276,23 @@
      aria-busy="true"
      style="content-visibility:auto;contain-intrinsic-size:80px;"></div>
 
-
   <header class="hero hero--dark">
     <div class="container">
+      <!-- Tax Pass pill -->
       <a href="/tax-pass/" class="taxpass-pill">
         <div>
           <div class="taxpass-pill__label">Square Bidness Tech Lab</div>
           <div class="taxpass-pill__title">Tax Pass™ <span class="taxpass-pill__arrow">→</span></div>
           <div class="taxpass-pill__tagline">Digital intake for tax offices.</div>
         </div>
+      </a>
+
+      <!-- ✅ New Funding Prep pill (links to lab.squarebidness.com/linkme/) -->
+      <a href="https://lab.squarebidness.com/linkme/" class="funding-pill">
+        <span class="funding-pill__eyebrow">SB Tech Lab · Funding Prep</span>
+        <span class="funding-pill__text">Need up to $250K for your business?</span>
+        <span class="funding-pill__tagline">Start funding prep with the SB method</span>
+        <span class="funding-pill__arrow">→</span>
       </a>
 
       <div class="hero__inner">
@@ -305,6 +346,7 @@
         <p class="section__lead">Everything live right now — VSOP, Supima, Winter Games, and the women’s lane loading.</p>
 
         <div class="home-grid">
+          <!-- existing product cards unchanged -->
           <article class="card" data-product-id="vsop-jacket">
             <div class="card__media">
               <picture>
@@ -540,7 +582,7 @@
     </section>
   </main>
 
-  <!-- ✅ Product hydration (text/price only; images already correct) -->
+  <!-- ✅ Product hydration -->
   <script>
     fetch("/products.json", { cache: "no-store" })
       .then(r => r.ok ? r.json() : null)
