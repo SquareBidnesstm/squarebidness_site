@@ -151,7 +151,7 @@
       flex-direction:column;
       min-height:100%;
 
-      /* ✅ Staggered fade-in gallery reveal */
+      /* Staggered fade-in gallery reveal */
       opacity:0;
       transform:translateY(12px);
       animation:comm-fade-in .6s ease-out forwards;
@@ -181,7 +181,7 @@
       overflow:hidden;
     }
 
-    /* ✅ Fixed 3:2 ratio for every card image */
+    /* ✅ All cards: same 3:2 frame height */
     .comm-card__media-inner{
       position:relative;
       width:100%;
@@ -200,9 +200,13 @@
       object-fit:cover;
       object-position:center;
     }
-    /* Bias crop upward where we want more headroom */
-    .comm-card__img--top{
-      object-position:center top;
+    /* Portraits: pull faces up */
+    .comm-card__img--portrait{
+      object-position:center 20%;
+    }
+    /* Crowd / hat: bias to top so SB hat + top-of-crowd show */
+    .comm-card__img--crowd{
+      object-position:center 15%;
     }
 
     .comm-tag{
@@ -305,7 +309,7 @@
                   srcset="/community/assets/marquesha-1_800.jpg 800w, /community/assets/marquesha-1-1200.jpg 1200w"
                   sizes="(max-width: 600px) 100vw, 360px">
                 <img
-                  class="comm-card__img--top"
+                  class="comm-card__img--portrait"
                   src="/community/assets/marquesha-1_800.jpg"
                   alt="Marquesha Baham wearing a custom Square Bidness denim set"
                   width="1200" height="800"
@@ -344,7 +348,7 @@
                   srcset="/courageaux/assets/amari_800.jpg 800w, /courageaux/assets/amari_1200.jpg 1200w"
                   sizes="(max-width: 600px) 100vw, 360px">
                 <img
-                  class="comm-card__img--top"
+                  class="comm-card__img--portrait"
                   src="/courageaux/assets/amari_800.jpg"
                   alt="Amari Wilford of Courageaux Aesthetics in Square Bidness Supima tee"
                   width="1200" height="800"
@@ -421,7 +425,7 @@
                   srcset="/assets/og-hoco_800.jpg 800w, /assets/og-hoco_1200.jpg 1200w"
                   sizes="(max-width: 600px) 100vw, 360px">
                 <img
-                  class="comm-card__img--top"
+                  class="comm-card__img--crowd"
                   src="/assets/og-hoco_1200.jpg"
                   alt="Square Bidness stories and community moments"
                   width="1200" height="800"
@@ -455,7 +459,7 @@
        aria-busy="true"
        style="content-visibility:auto;contain-intrinsic-size:140px;"></div>
 
-  <!-- ✅ Simple click tracking for community cards -->
+  <!-- Click tracking for community cards -->
   <script>
   (function(){
     const hasGtag = () => typeof window.gtag === "function";
