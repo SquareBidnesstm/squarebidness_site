@@ -148,9 +148,24 @@
       flex-direction:column;
       min-height:100%;
     }
-    .col-card__media{position:relative;overflow:hidden;background:#000;}
-    .col-card__media picture,.col-card__media img{display:block;width:100%;height:auto;}
-    .col-card__media img{object-fit:cover;}
+
+    /* 🔒 Lock card image frame */
+    .col-card__media{
+      position:relative;
+      overflow:hidden;
+      background:#000;
+      aspect-ratio:3 / 2; /* same for all cards */
+    }
+    .col-card__media picture,
+    .col-card__media img{
+      display:block;
+      width:100%;
+      height:100%;
+    }
+    .col-card__media img{
+      object-fit:cover;
+    }
+
     .col-tag{
       position:absolute; left:10px; top:10px;
       padding:4px 9px;border-radius:999px;font-size:.75rem;font-weight:800;
@@ -161,7 +176,10 @@
     .col-card__text{font-size:.9rem;color:var(--muted);margin:0;line-height:1.55;}
     .col-cta{margin-top:8px;display:inline-flex;align-items:center;gap:6px;font-size:.82rem;font-weight:900;}
     .col-cta span{transform:translateY(1px);display:inline-block;}
-    @media(hover:hover){ .col-card:hover{ border-color:#334155; } .col-card:hover .col-cta{ color:var(--gold);} }
+    @media(hover:hover){
+      .col-card:hover{ border-color:#334155; }
+      .col-card:hover .col-cta{ color:var(--gold);}
+    }
   </style>
 </head>
 
@@ -260,7 +278,7 @@
         </a>
       </article>
 
-      <!-- VSOP (image placeholder – swap to your real vsop hero assets) -->
+      <!-- VSOP -->
       <article class="col-card">
         <a href="/vsop/" style="display:block;color:inherit;">
           <div class="col-card__media">
