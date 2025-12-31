@@ -223,7 +223,25 @@
       white-space:nowrap;
       border:0;
     }
+        /* SIDE-BY-SIDE MEDIA ROW */
+    .wg-media-row{
+      display:grid;
+      gap:1.2rem;
+      margin-bottom:1.4rem;
+    }
+    .wg-media-row .wg-card{
+      margin-bottom:0; /* inside the grid we don't need extra bottom margin */
+    }
+
+    @media (min-width:900px){
+      .wg-media-row{
+        grid-template-columns:1.4fr 1fr; /* hero a bit wider than hat */
+        align-items:stretch;
+      }
+    }
+
   </style>
+
 </head>
 
 <body class="theme-dark wintergames-body" id="top">
@@ -238,28 +256,52 @@
     </div>
   </div>
 
-  <main class="wg-shell" id="main-content">
-    <article class="wg-card" aria-label="Winter Games hero">
-      <div class="wg-media wg-media--hero">
-        <picture>
-          <source type="image/webp"
-            srcset="/wintergames/assets/og-lil-soulja-slim_800.webp 800w, /wintergames/assets/og-lil-soulja-slim_1200.webp 1200w"
-            sizes="(max-width: 768px) 100vw, 980px" />
-          <source type="image/jpeg"
-            srcset="/wintergames/assets/og-lil-soulja-slim_800.jpg 800w, /wintergames/assets/og-lil-soulja-slim_1200.jpg 1200w"
-            sizes="(max-width: 768px) 100vw, 980px" />
-          <img
-            src="/wintergames/assets/og-lil-soulja-slim_800.jpg"
-            alt="OG Lil Soulja Slim in the Winter Games crewneck"
-            width="1200" height="675"
-            loading="eager"
-            decoding="async"
-            fetchpriority="high"
-            onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';" />
-        </picture>
-      </div>
-    </article>
+   <main class="wg-shell" id="main-content">
+    <!-- SIDE-BY-SIDE IMAGES -->
+    <div class="wg-media-row" aria-label="Winter Games visuals">
+      <article class="wg-card" aria-label="Winter Games hero">
+        <div class="wg-media wg-media--hero">
+          <picture>
+            <source type="image/webp"
+              srcset="/wintergames/assets/og-lil-soulja-slim_800.webp 800w, /wintergames/assets/og-lil-soulja-slim_1200.webp 1200w"
+              sizes="(max-width: 768px) 100vw, 980px" />
+            <source type="image/jpeg"
+              srcset="/wintergames/assets/og-lil-soulja-slim_800.jpg 800w, /wintergames/assets/og-lil-soulja-slim_1200.jpg 1200w"
+              sizes="(max-width: 768px) 100vw, 980px" />
+            <img
+              src="/wintergames/assets/og-lil-soulja-slim_800.jpg"
+              alt="OG Lil Soulja Slim in the Winter Games crewneck"
+              width="1200" height="675"
+              loading="eager"
+              decoding="async"
+              fetchpriority="high"
+              onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';" />
+          </picture>
+        </div>
+      </article>
 
+      <article class="wg-card" aria-label="Winter Games Waterproof Golf Hat">
+        <div class="wg-media wg-media--hat">
+          <picture>
+            <source type="image/webp"
+              srcset="/wintergames/assets/winter-game-hat_800.webp 800w, /wintergames/assets/winter-game-hat_1200.webp 1200w, /wintergames/assets/winter-game-hat_1600.webp 1600w"
+              sizes="(max-width: 768px) 100vw, 980px" />
+            <source type="image/jpeg"
+              srcset="/wintergames/assets/winter-game-hat_800.jpg 800w, /wintergames/assets/winter-game-hat_1200.jpg 1200w, /wintergames/assets/winter-game-hat_1600.jpg 1600w"
+              sizes="(max-width: 768px) 100vw, 980px" />
+            <img
+              src="/wintergames/assets/winter-game-hat_800.jpg"
+              alt="Square Bidness Winter Games waterproof golf hat overlooking the D.C. skyline."
+              width="1600" height="900"
+              loading="lazy"
+              decoding="async"
+              onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';" />
+          </picture>
+        </div>
+      </article>
+    </div>
+
+    <!-- CREWNECK CONTENT -->
     <section class="wg-content" aria-label="Winter Games crewneck">
       <p class="wg-eyebrow">Winter Games Collection</p>
       <h1 class="wg-title">Heavyweight Organic Cotton Crewneck</h1>
@@ -282,7 +324,6 @@
             <option value="2XL">2XL</option>
           </select>
 
-          <!-- ✅ sb-analytics begin_checkout tracking -->
           <a id="wg-checkout"
              class="btn btn--gold"
              href="#"
@@ -292,7 +333,6 @@
             Select size
           </a>
 
-          <!-- Optional: still track a custom click (separate from begin_checkout) -->
           <a class="btn btn--ghost" href="/shop/" data-track="view_shop" data-item="Shop">
             Back to Shop
           </a>
@@ -301,7 +341,6 @@
 
       <p class="wg-footnote">Ships from Louisiana. Taxes/shipping calculated at checkout.</p>
 
-      <!-- WINTERGAMES: Conversion Block (Trust + Shipping + Returns) -->
       <section class="buy-trust" style="margin-top:14px;border:1px solid #1f1f1f;border-radius:14px;background:#0e0e0e;padding:14px 14px 12px;">
         <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;">
           <strong style="font-size:.95rem;">Winter Games</strong>
@@ -330,26 +369,7 @@
       </section>
     </section>
 
-    <article class="wg-card" aria-label="Winter Games Waterproof Golf Hat">
-      <div class="wg-media wg-media--hat">
-        <picture>
-          <source type="image/webp"
-            srcset="/wintergames/assets/winter-game-hat_800.webp 800w, /wintergames/assets/winter-game-hat_1200.webp 1200w, /wintergames/assets/winter-game-hat_1600.webp 1600w"
-            sizes="(max-width: 768px) 100vw, 980px" />
-          <source type="image/jpeg"
-            srcset="/wintergames/assets/winter-game-hat_800.jpg 800w, /wintergames/assets/winter-game-hat_1200.jpg 1200w, /wintergames/assets/winter-game-hat_1600.jpg 1600w"
-            sizes="(max-width: 768px) 100vw, 980px" />
-          <img
-            src="/wintergames/assets/winter-game-hat_800.jpg"
-            alt="Square Bidness Winter Games waterproof golf hat overlooking the D.C. skyline."
-            width="1600" height="900"
-            loading="lazy"
-            decoding="async"
-            onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';" />
-        </picture>
-      </div>
-    </article>
-
+    <!-- HAT CONTENT -->
     <section class="wg-content" aria-label="Winter Games hat">
       <p class="wg-eyebrow">Winter Games Collection</p>
       <h2 class="wg-title" style="font-size:clamp(1.6rem,3vw,2rem);">Winter Games Waterproof Golf Hat</h2>
@@ -364,7 +384,6 @@
           <small>One size fits most.</small>
         </div>
         <div style="display:flex;gap:.55rem;align-items:center;flex-wrap:wrap;">
-          <!-- ✅ sb-analytics begin_checkout tracking -->
           <a class="btn btn--gold"
              href="https://buy.stripe.com/7sY7sLg4f5297U15sY8N20s"
              data-stripe-checkout="wintergames-hat"
@@ -381,6 +400,7 @@
       <p class="wg-footnote">Water-resistant crown and bill. Ships from Louisiana with the rest of the Winter Games line.</p>
     </section>
   </main>
+
 
   <div id="site-footer"
      aria-busy="true"
