@@ -79,16 +79,34 @@
 
     .wg-shell{max-width:980px;margin:0 auto;padding:1.5rem 1rem 4rem;}
 
+    .wg-grid{
+      display:grid;
+      gap:1.2rem;
+    }
+    @media (min-width:900px){
+      .wg-grid{
+        grid-template-columns:1.4fr 1fr; /* crewneck wider than hat */
+        align-items:start;
+      }
+    }
+
     .wg-card{
       background:#0a0a0a;
       border:1px solid rgba(255,255,255,.06);
       border-radius:18px;
       overflow:hidden;
       box-shadow:0 24px 42px rgba(0,0,0,.35);
-      margin-bottom:1.2rem;
+      display:flex;
+      flex-direction:column;
+      height:100%;
     }
 
-    .wg-media{ position:relative; width:100%; background:#070707; overflow:hidden; }
+    .wg-media{
+      position:relative;
+      width:100%;
+      background:#070707;
+      overflow:hidden;
+    }
     .wg-media--hero{aspect-ratio: 16 / 9;}
     .wg-media--hat{aspect-ratio: 16 / 9;}
 
@@ -102,7 +120,13 @@
     }
     .wg-media img{object-fit:cover;}
 
-    .wg-content{padding:1.25rem 1rem 1.5rem;}
+    .wg-card-body{
+      padding:1.25rem 1rem 1.5rem;
+      display:flex;
+      flex-direction:column;
+      gap:.75rem;
+      flex:1;
+    }
 
     .wg-eyebrow{
       display:inline-block;
@@ -113,19 +137,24 @@
       font-size:.65rem;
       letter-spacing:.08em;
       text-transform:uppercase;
-      margin-bottom:.6rem;
+      margin-bottom:.25rem;
     }
 
     .wg-title{
-      font-size:clamp(1.9rem,3.4vw,2.4rem);
+      font-size:clamp(1.7rem,3.2vw,2.2rem);
       font-weight:800;
       line-height:1.04;
-      margin:0 0 .45rem;
+      margin:0;
     }
 
-    .wg-sub{color:#e5e7eb;margin:.15rem 0 1rem;}
+    .wg-sub{
+      color:#e5e7eb;
+      margin:0;
+      font-size:.95rem;
+    }
 
     .wg-buybar{
+      margin-top:.25rem;
       background:rgba(11,11,11,.75);
       border:1px solid rgba(255,255,255,.08);
       border-radius:14px;
@@ -159,6 +188,7 @@
       transition:transform .12s ease-out;
       padding:.65rem 1.05rem;
       will-change:transform;
+      font-size:.9rem;
     }
     .btn:hover{transform:translateY(-1px);}
     .btn--gold{
@@ -173,17 +203,24 @@
       color:#fff;
     }
 
-    /* Make disabled anchors actually behave disabled */
     a[aria-disabled="true"]{
       opacity:.6;
       pointer-events:none;
       cursor:not-allowed;
     }
 
-    .wg-footnote{margin-top:.9rem;color:#a1a1aa;font-size:.85rem}
+    .wg-footnote{
+      margin-top:.4rem;
+      color:#a1a1aa;
+      font-size:.85rem;
+    }
 
-    @media (max-width:720px){
-      .wg-buybar{flex-direction:column;align-items:flex-start;}
+    .buy-trust{
+      margin-top:.6rem;
+      border:1px solid #1f1f1f;
+      border-radius:14px;
+      background:#0e0e0e;
+      padding:14px 14px 12px;
     }
 
     .wg-marquee{
@@ -223,25 +260,7 @@
       white-space:nowrap;
       border:0;
     }
-        /* SIDE-BY-SIDE MEDIA ROW */
-    .wg-media-row{
-      display:grid;
-      gap:1.2rem;
-      margin-bottom:1.4rem;
-    }
-    .wg-media-row .wg-card{
-      margin-bottom:0; /* inside the grid we don't need extra bottom margin */
-    }
-
-    @media (min-width:900px){
-      .wg-media-row{
-        grid-template-columns:1.4fr 1fr; /* hero a bit wider than hat */
-        align-items:stretch;
-      }
-    }
-
   </style>
-
 </head>
 
 <body class="theme-dark wintergames-body" id="top">
@@ -256,10 +275,10 @@
     </div>
   </div>
 
-   <main class="wg-shell" id="main-content">
-    <!-- SIDE-BY-SIDE IMAGES -->
-    <div class="wg-media-row" aria-label="Winter Games visuals">
-      <article class="wg-card" aria-label="Winter Games hero">
+  <main class="wg-shell" id="main-content" aria-label="Winter Games Collection">
+    <section class="wg-grid">
+      <!-- CARD 1: CREWNECK -->
+      <article class="wg-card" aria-label="Winter Games crewneck">
         <div class="wg-media wg-media--hero">
           <picture>
             <source type="image/webp"
@@ -278,8 +297,82 @@
               onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';" />
           </picture>
         </div>
+
+        <div class="wg-card-body">
+          <div>
+            <p class="wg-eyebrow">Winter Games Collection</p>
+            <h1 class="wg-title">Heavyweight Organic Cotton Crewneck</h1>
+            <p class="wg-sub">
+              Worn by Lil Soulja Slim. Winter energy for people who still handling business.
+            </p>
+          </div>
+
+          <div class="wg-buybar">
+            <div>
+              <strong>Winter Games Crewneck</strong><br />
+              <small>Pick size to checkout.</small>
+            </div>
+
+            <div style="display:flex;gap:.55rem;align-items:center;flex-wrap:wrap;">
+              <label class="sr-only" for="wg-size">Size</label>
+              <select id="wg-size" aria-label="Select size">
+                <option value="">Select size…</option>
+                <option value="S">S</option>
+                <option value="M" disabled>M — Sold out</option>
+                <option value="L">L</option>
+                <option value="XL">XL</option>
+                <option value="2XL">2XL</option>
+              </select>
+
+              <!-- ✅ sb-analytics begin_checkout tracking -->
+              <a id="wg-checkout"
+                 class="btn btn--gold"
+                 href="#"
+                 aria-disabled="true"
+                 target="_blank" rel="noopener"
+                 data-stripe-checkout="wintergames-crewneck">
+                Select size
+              </a>
+
+              <a class="btn btn--ghost" href="/shop/" data-track="view_shop" data-item="Shop">
+                Back to Shop
+              </a>
+            </div>
+          </div>
+
+          <p class="wg-footnote">Ships from Louisiana. Taxes/shipping calculated at checkout.</p>
+
+          <!-- WINTERGAMES: Conversion Block (Trust + Shipping + Returns) -->
+          <section class="buy-trust" aria-label="Shipping, returns, and security">
+            <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;">
+              <strong style="font-size:.95rem;">Winter Games</strong>
+              <span style="font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:#c9a227;">Limited run</span>
+            </div>
+
+            <ul style="list-style:none;padding:10px 0 0;margin:0;display:grid;gap:8px;">
+              <li style="display:flex;gap:10px;line-height:1.35;">
+                <span aria-hidden="true">🚚</span>
+                <span><strong>Fast shipping</strong> (U.S.). Tracking sent by email.</span>
+              </li>
+              <li style="display:flex;gap:10px;line-height:1.35;">
+                <span aria-hidden="true">↩️</span>
+                <span><strong>Returns &amp; Exchanges</strong> available. <a href="/returns/" style="color:#fff;text-decoration:underline;">Read policy</a></span>
+              </li>
+              <li style="display:flex;gap:10px;line-height:1.35;">
+                <span aria-hidden="true">🔒</span>
+                <span><strong>Secure checkout</strong>. Need help? <a href="/connect/" style="color:#fff;text-decoration:underline;">Contact us</a></span>
+              </li>
+            </ul>
+
+            <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;">
+              <span style="display:inline-block;border:1px solid #242426;border-radius:999px;padding:.35rem .6rem;font-size:.75rem;color:#d7dae0;background:#111;">Ships from Louisiana</span>
+              <span style="display:inline-block;border:1px solid #242426;border-radius:999px;padding:.35rem .6rem;font-size:.75rem;color:#d7dae0;background:#111;">Limited inventory</span>
+            </div>
+          </section>
+        </div>
       </article>
 
+      <!-- CARD 2: HAT -->
       <article class="wg-card" aria-label="Winter Games Waterproof Golf Hat">
         <div class="wg-media wg-media--hat">
           <picture>
@@ -298,109 +391,46 @@
               onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';" />
           </picture>
         </div>
+
+        <div class="wg-card-body">
+          <div>
+            <p class="wg-eyebrow">Winter Games Collection</p>
+            <h2 class="wg-title" style="font-size:clamp(1.6rem,3vw,2rem);">
+              Winter Games Waterproof Golf Hat
+            </h2>
+            <p class="wg-sub">
+              D.C. skyline, Winter Games patch, waterproof finish. For cold-weather rounds
+              and rooftop views where you’re still handling bidness.
+            </p>
+          </div>
+
+          <div class="wg-buybar">
+            <div>
+              <strong>Winter Games Waterproof Golf Hat</strong><br />
+              <small>One size fits most.</small>
+            </div>
+            <div style="display:flex;gap:.55rem;align-items:center;flex-wrap:wrap;">
+              <!-- ✅ sb-analytics begin_checkout tracking -->
+              <a class="btn btn--gold"
+                 href="https://buy.stripe.com/7sY7sLg4f5297U15sY8N20s"
+                 data-stripe-checkout="wintergames-hat"
+                 target="_blank" rel="noopener">
+                Checkout — $39.99
+              </a>
+
+              <a class="btn btn--ghost" href="/shop/" data-track="view_shop" data-item="Shop">
+                Back to Shop
+              </a>
+            </div>
+          </div>
+
+          <p class="wg-footnote">
+            Water-resistant crown and bill. Ships from Louisiana with the rest of the Winter Games line.
+          </p>
+        </div>
       </article>
-    </div>
-
-    <!-- CREWNECK CONTENT -->
-    <section class="wg-content" aria-label="Winter Games crewneck">
-      <p class="wg-eyebrow">Winter Games Collection</p>
-      <h1 class="wg-title">Heavyweight Organic Cotton Crewneck</h1>
-      <p class="wg-sub">Worn by Lil Soulja Slim. Winter energy for people who still handling business.</p>
-
-      <div class="wg-buybar">
-        <div>
-          <strong>Winter Games Crewneck</strong><br />
-          <small>Pick size to checkout.</small>
-        </div>
-
-        <div style="display:flex;gap:.55rem;align-items:center;flex-wrap:wrap;">
-          <label class="sr-only" for="wg-size">Size</label>
-          <select id="wg-size" aria-label="Select size">
-            <option value="">Select size…</option>
-            <option value="S">S</option>
-            <option value="M" disabled>M — Sold out</option>
-            <option value="L">L</option>
-            <option value="XL">XL</option>
-            <option value="2XL">2XL</option>
-          </select>
-
-          <a id="wg-checkout"
-             class="btn btn--gold"
-             href="#"
-             aria-disabled="true"
-             target="_blank" rel="noopener"
-             data-stripe-checkout="wintergames-crewneck">
-            Select size
-          </a>
-
-          <a class="btn btn--ghost" href="/shop/" data-track="view_shop" data-item="Shop">
-            Back to Shop
-          </a>
-        </div>
-      </div>
-
-      <p class="wg-footnote">Ships from Louisiana. Taxes/shipping calculated at checkout.</p>
-
-      <section class="buy-trust" style="margin-top:14px;border:1px solid #1f1f1f;border-radius:14px;background:#0e0e0e;padding:14px 14px 12px;">
-        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;">
-          <strong style="font-size:.95rem;">Winter Games</strong>
-          <span style="font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:#c9a227;">Limited run</span>
-        </div>
-
-        <ul style="list-style:none;padding:10px 0 0;margin:0;display:grid;gap:8px;">
-          <li style="display:flex;gap:10px;line-height:1.35;">
-            <span aria-hidden="true">🚚</span>
-            <span><strong>Fast shipping</strong> (U.S.). Tracking sent by email.</span>
-          </li>
-          <li style="display:flex;gap:10px;line-height:1.35;">
-            <span aria-hidden="true">↩️</span>
-            <span><strong>Returns &amp; Exchanges</strong> available. <a href="/returns/" style="color:#fff;text-decoration:underline;">Read policy</a></span>
-          </li>
-          <li style="display:flex;gap:10px;line-height:1.35;">
-            <span aria-hidden="true">🔒</span>
-            <span><strong>Secure checkout</strong>. Need help? <a href="/connect/" style="color:#fff;text-decoration:underline;">Contact us</a></span>
-          </li>
-        </ul>
-
-        <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;">
-          <span style="display:inline-block;border:1px solid #242426;border-radius:999px;padding:.35rem .6rem;font-size:.75rem;color:#d7dae0;background:#111;">Ships from Louisiana</span>
-          <span style="display:inline-block;border:1px solid #242426;border-radius:999px;padding:.35rem .6rem;font-size:.75rem;color:#d7dae0;background:#111;">Limited inventory</span>
-        </div>
-      </section>
-    </section>
-
-    <!-- HAT CONTENT -->
-    <section class="wg-content" aria-label="Winter Games hat">
-      <p class="wg-eyebrow">Winter Games Collection</p>
-      <h2 class="wg-title" style="font-size:clamp(1.6rem,3vw,2rem);">Winter Games Waterproof Golf Hat</h2>
-      <p class="wg-sub">
-        D.C. skyline, Winter Games patch, waterproof finish. For cold-weather rounds
-        and rooftop views where you’re still handling bidness.
-      </p>
-
-      <div class="wg-buybar">
-        <div>
-          <strong>Winter Games Waterproof Golf Hat</strong><br />
-          <small>One size fits most.</small>
-        </div>
-        <div style="display:flex;gap:.55rem;align-items:center;flex-wrap:wrap;">
-          <a class="btn btn--gold"
-             href="https://buy.stripe.com/7sY7sLg4f5297U15sY8N20s"
-             data-stripe-checkout="wintergames-hat"
-             target="_blank" rel="noopener">
-            Checkout — $39.99
-          </a>
-
-          <a class="btn btn--ghost" href="/shop/" data-track="view_shop" data-item="Shop">
-            Back to Shop
-          </a>
-        </div>
-      </div>
-
-      <p class="wg-footnote">Water-resistant crown and bill. Ships from Louisiana with the rest of the Winter Games line.</p>
     </section>
   </main>
-
 
   <div id="site-footer"
      aria-busy="true"
