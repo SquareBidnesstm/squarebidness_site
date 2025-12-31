@@ -151,7 +151,7 @@
       flex-direction:column;
       min-height:100%;
 
-      /* Fade-in stagger */
+      /* ✅ Staggered fade-in gallery reveal */
       opacity:0;
       transform:translateY(12px);
       animation:comm-fade-in .6s ease-out forwards;
@@ -160,7 +160,6 @@
     .comm-card:nth-child(2){animation-delay:0.08s;}
     .comm-card:nth-child(3){animation-delay:0.16s;}
     .comm-card:nth-child(4){animation-delay:0.24s;}
-    .comm-card:nth-child(5){animation-delay:0.32s;}
 
     @keyframes comm-fade-in{
       to{
@@ -182,7 +181,7 @@
       overflow:hidden;
     }
 
-    /* ✅ Fixed 3:2 ratio for EVERY card image */
+    /* ✅ Fixed 3:2 ratio for every card image */
     .comm-card__media-inner{
       position:relative;
       width:100%;
@@ -201,25 +200,9 @@
       object-fit:cover;
       object-position:center;
     }
-    /* Bias crop upward when we need heads fully visible */
+    /* Bias crop upward where we want more headroom */
     .comm-card__img--top{
       object-position:center top;
-    }
-
-    /* Placeholder visual */
-    .comm-card__media-inner--placeholder{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:radial-gradient(circle at top,rgba(201,162,39,.12),#020617 55%,#000 100%);
-    }
-    .comm-placeholder-copy{
-      font-size:.9rem;
-      letter-spacing:.14em;
-      text-transform:uppercase;
-      color:#e5e7eb;
-      opacity:.9;
-      text-align:center;
     }
 
     .comm-tag{
@@ -233,32 +216,6 @@
       background:#000;
       color:#f5f5f5;
       border:1px solid rgba(255,255,255,.16);
-    }
-    /* Seasonal / lane color accents */
-    .comm-tag--oct{
-      background:rgba(201,162,39,.96);
-      color:#111827;
-      border-color:rgba(250,250,250,.9);
-    }
-    .comm-tag--nov{
-      background:rgba(22,163,74,.95);
-      color:#ecfdf5;
-      border-color:rgba(187,247,208,.9);
-    }
-    .comm-tag--photo{
-      background:rgba(59,130,246,.92);
-      color:#eff6ff;
-      border-color:rgba(191,219,254,.9);
-    }
-    .comm-tag--stories{
-      background:rgba(147,51,234,.94);
-      color:#f5f3ff;
-      border-color:rgba(233,213,255,.9);
-    }
-    .comm-tag--upcoming{
-      background:rgba(248,113,113,.96);
-      color:#111827;
-      border-color:rgba(254,226,226,.9);
     }
 
     .comm-card__body{
@@ -356,7 +313,7 @@
                   onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';" />
               </picture>
             </div>
-            <div class="comm-tag comm-tag--oct">October Spotlight</div>
+            <div class="comm-tag">October Spotlight</div>
           </div>
           <div class="comm-card__body">
             <h2>October Spotlight — Marquesha Baham</h2>
@@ -395,7 +352,7 @@
                   onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';" />
               </picture>
             </div>
-            <div class="comm-tag comm-tag--nov">November Spotlight</div>
+            <div class="comm-tag">November Spotlight</div>
           </div>
           <div class="comm-card__body">
             <h2>November Spotlight — Courageaux Aesthetics</h2>
@@ -433,7 +390,7 @@
                   onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';" />
               </picture>
             </div>
-            <div class="comm-tag comm-tag--photo">Featured Photographer</div>
+            <div class="comm-tag">Featured Photographer</div>
           </div>
           <div class="comm-card__body">
             <h2>Pho-Matic Photography — Gieno Smith</h2>
@@ -472,7 +429,7 @@
                   onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';" />
               </picture>
             </div>
-            <div class="comm-tag comm-tag--stories">More Stories</div>
+            <div class="comm-tag">More Stories</div>
           </div>
           <div class="comm-card__body">
             <h2>Stories &amp; Day-Ones</h2>
@@ -482,33 +439,6 @@
             </p>
             <div class="comm-meta-small">Hammond · Pineville · Alexandria · Beyond</div>
             <div class="comm-cta">Visit Stories page <span>→</span></div>
-          </div>
-        </a>
-      </article>
-
-      <!-- Upcoming feature placeholder -->
-      <article class="comm-card">
-        <a
-          href="/linkme/"
-          style="display:block;color:inherit;"
-          data-track="community_card_click"
-          data-item="Upcoming Community Feature">
-          <div class="comm-card__media">
-            <div class="comm-card__media-inner comm-card__media-inner--placeholder">
-              <div class="comm-placeholder-copy">
-                NEXT COMMUNITY FEATURE LOADING
-              </div>
-            </div>
-            <div class="comm-tag comm-tag--upcoming">Upcoming</div>
-          </div>
-          <div class="comm-card__body">
-            <h2>Next Community Feature</h2>
-            <p>
-              The next spotlight is already in motion. Tap in to stay close to the lane and be the
-              first to see new community drops and day-one stories.
-            </p>
-            <div class="comm-meta-small">Northshore · Central Louisiana · Beyond</div>
-            <div class="comm-cta">Get notified <span>→</span></div>
           </div>
         </a>
       </article>
@@ -525,7 +455,7 @@
        aria-busy="true"
        style="content-visibility:auto;contain-intrinsic-size:140px;"></div>
 
-  <!-- Simple click tracking for community cards -->
+  <!-- ✅ Simple click tracking for community cards -->
   <script>
   (function(){
     const hasGtag = () => typeof window.gtag === "function";
@@ -556,4 +486,3 @@
   </script>
 </body>
 </html>
-
