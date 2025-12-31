@@ -27,7 +27,6 @@
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:image:alt" content="Square Bidness Community — Spotlights & Stories" />
-
   <!-- Optional WebP share variant -->
   <meta property="og:image" content="https://www.squarebidness.com/community/assets/marquesha-1-social-1200x630.webp" />
 
@@ -87,10 +86,19 @@
 
   <style>
     :root{
-      --bg:#050505; --fg:#f5f5f5; --stroke:#1f1f1f; --card:#0b0b0b; --gold:#c9a227;
+      --bg:#050505;
+      --fg:#f5f5f5;
+      --stroke:#1f1f1f;
+      --card:#0b0b0b;
+      --gold:#c9a227;
     }
     *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--fg);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    }
     a{color:inherit;text-decoration:none}
 
     /* CLS guard */
@@ -104,71 +112,210 @@
       background:radial-gradient(circle at top left,#111827,#020617 55%,#000 100%);
     }
     .comm-hero__inner{padding:26px 0 24px}
-    .comm-kicker{font-size:.8rem;text-transform:uppercase;letter-spacing:.18em;color:#9ca3af;margin-bottom:.35rem}
-    .comm-hero h1{margin:0 0 .25rem;font-size:clamp(1.7rem,3.5vw,2.4rem)}
-    .comm-tagline{margin:0;font-size:.95rem;color:#d1d5db;max-width:40rem}
-    .comm-meta{margin-top:.6rem;font-size:.86rem;color:#9ca3af}
+    .comm-kicker{
+      font-size:.8rem;
+      text-transform:uppercase;
+      letter-spacing:.18em;
+      color:#9ca3af;
+      margin-bottom:.35rem;
+    }
+    .comm-hero h1{
+      margin:0 0 .25rem;
+      font-size:clamp(1.7rem,3.5vw,2.4rem);
+    }
+    .comm-tagline{
+      margin:0;
+      font-size:.95rem;
+      color:#d1d5db;
+      max-width:40rem;
+    }
+    .comm-meta{
+      margin-top:.6rem;
+      font-size:.86rem;
+      color:#9ca3af;
+    }
 
     .comm-grid{
-      display:grid;gap:18px;margin:20px 0 32px;
+      display:grid;
+      gap:18px;
+      margin:20px 0 32px;
       grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
     }
 
     .comm-card{
       background:var(--card);
-      border-radius:16px;border:1px solid var(--stroke);
-      overflow:hidden;display:flex;flex-direction:column;min-height:100%;
+      border-radius:16px;
+      border:1px solid var(--stroke);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      min-height:100%;
+
+      /* Fade-in stagger */
+      opacity:0;
+      transform:translateY(12px);
+      animation:comm-fade-in .6s ease-out forwards;
+    }
+    .comm-card:nth-child(1){animation-delay:0s;}
+    .comm-card:nth-child(2){animation-delay:0.08s;}
+    .comm-card:nth-child(3){animation-delay:0.16s;}
+    .comm-card:nth-child(4){animation-delay:0.24s;}
+    .comm-card:nth-child(5){animation-delay:0.32s;}
+
+    @keyframes comm-fade-in{
+      to{
+        opacity:1;
+        transform:translateY(0);
+      }
+    }
+    @media (prefers-reduced-motion: reduce){
+      .comm-card{
+        animation:none;
+        opacity:1;
+        transform:none;
+      }
     }
 
-    /* 🔧 Image frame: same size for ALL cards */
     .comm-card__media{
       position:relative;
       background:#000;
-      aspect-ratio:3 / 2; /* lock height/width so all cards match */
       overflow:hidden;
     }
-    .comm-card__media picture,
-    .comm-card__media img{
-      display:block;
+
+    /* ✅ Fixed 3:2 ratio for EVERY card image */
+    .comm-card__media-inner{
+      position:relative;
+      width:100%;
+      aspect-ratio:3 / 2;
+      overflow:hidden;
+    }
+    .comm-card__media-inner picture,
+    .comm-card__media-inner img{
+      position:absolute;
+      inset:0;
       width:100%;
       height:100%;
+      display:block;
     }
-    .comm-card__media img{
+    .comm-card__media-inner img{
       object-fit:cover;
-      object-position:center center; /* default focus */
+      object-position:center;
     }
-
-    /* 🔧 Pull face a bit higher in frame (spotlights) */
-    .comm-card__media--focus-high img{
-      object-position:center 18%;
-    }
-
-    /* 🔧 Closer to top for crowd / group shots */
-    .comm-card__media--top img{
+    /* Bias crop upward when we need heads fully visible */
+    .comm-card__img--top{
       object-position:center top;
     }
 
-    .comm-tag{
-      position:absolute;top:10px;left:10px;
-      padding:4px 10px;border-radius:999px;font-size:.75rem;font-weight:700;
-      background:#000;color:#f5f5f5;border:1px solid rgba(255,255,255,.16);
+    /* Placeholder visual */
+    .comm-card__media-inner--placeholder{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:radial-gradient(circle at top,rgba(201,162,39,.12),#020617 55%,#000 100%);
     }
-    .comm-card__body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px;font-size:.92rem}
-    .comm-card__body h2{margin:0;font-size:1rem}
-    .comm-card__body p{margin:0;color:#d1d5db;line-height:1.45}
-    .comm-meta-small{font-size:.8rem;color:#9ca3af;margin-top:2px}
-    .comm-cta{margin-top:8px;display:inline-flex;align-items:center;gap:6px;font-size:.85rem;font-weight:700;color:var(--gold)}
+    .comm-placeholder-copy{
+      font-size:.9rem;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:#e5e7eb;
+      opacity:.9;
+      text-align:center;
+    }
+
+    .comm-tag{
+      position:absolute;
+      top:10px;
+      left:10px;
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:.75rem;
+      font-weight:700;
+      background:#000;
+      color:#f5f5f5;
+      border:1px solid rgba(255,255,255,.16);
+    }
+    /* Seasonal / lane color accents */
+    .comm-tag--oct{
+      background:rgba(201,162,39,.96);
+      color:#111827;
+      border-color:rgba(250,250,250,.9);
+    }
+    .comm-tag--nov{
+      background:rgba(22,163,74,.95);
+      color:#ecfdf5;
+      border-color:rgba(187,247,208,.9);
+    }
+    .comm-tag--photo{
+      background:rgba(59,130,246,.92);
+      color:#eff6ff;
+      border-color:rgba(191,219,254,.9);
+    }
+    .comm-tag--stories{
+      background:rgba(147,51,234,.94);
+      color:#f5f3ff;
+      border-color:rgba(233,213,255,.9);
+    }
+    .comm-tag--upcoming{
+      background:rgba(248,113,113,.96);
+      color:#111827;
+      border-color:rgba(254,226,226,.9);
+    }
+
+    .comm-card__body{
+      padding:12px 14px 14px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      font-size:.92rem;
+    }
+    .comm-card__body h2{
+      margin:0;
+      font-size:1rem;
+    }
+    .comm-card__body p{
+      margin:0;
+      color:#d1d5db;
+      line-height:1.45;
+    }
+    .comm-meta-small{
+      font-size:.8rem;
+      color:#9ca3af;
+      margin-top:2px;
+    }
+    .comm-cta{
+      margin-top:8px;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-size:.85rem;
+      font-weight:700;
+      color:var(--gold);
+    }
     .comm-cta span{transform:translateY(1px)}
-    @media(hover:hover){ .comm-card:hover{border-color:#262626} }
-    .comm-footnote{font-size:.85rem;color:#9ca3af;margin-bottom:26px}
+
+    @media(hover:hover){
+      .comm-card:hover{border-color:#262626}
+    }
+
+    .comm-footnote{
+      font-size:.85rem;
+      color:#9ca3af;
+      margin-bottom:26px;
+    }
+
+    a:focus-visible{
+      outline:2px solid rgba(201,162,39,.7);
+      outline-offset:3px;
+      border-radius:10px;
+    }
   </style>
 </head>
 
 <body class="theme-dark" id="top">
- <div id="site-header"
-     aria-busy="true"
-     style="content-visibility:auto;contain-intrinsic-size:80px;"></div>
- 
+  <div id="site-header"
+       aria-busy="true"
+       style="content-visibility:auto;contain-intrinsic-size:80px;"></div>
+
   <header class="comm-hero">
     <div class="wrap comm-hero__inner">
       <div class="comm-kicker">Square Bidness Community Lane</div>
@@ -186,23 +333,30 @@
 
       <!-- October Spotlight -->
       <article class="comm-card">
-        <a href="/october-spotlight/" style="display:block;color:inherit;">
-          <div class="comm-card__media comm-card__media--focus-high">
-            <picture>
-              <source type="image/webp"
-                srcset="/community/assets/marquesha-1_800.webp 800w, /community/assets/marquesha-1_1200.webp 1200w"
-                sizes="(max-width: 600px) 100vw, 360px">
-              <source type="image/jpeg"
-                srcset="/community/assets/marquesha-1_800.jpg 800w, /community/assets/marquesha-1_1200.jpg 1200w"
-                sizes="(max-width: 600px) 100vw, 360px">
-              <img
-                src="/community/assets/marquesha-1_800.jpg"
-                alt="Marquesha Baham wearing a custom Square Bidness denim set"
-                width="1200" height="800"
-                loading="eager" decoding="async" fetchpriority="high"
-                onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';" />
-            </picture>
-            <div class="comm-tag">October Spotlight</div>
+        <a
+          href="/october-spotlight/"
+          style="display:block;color:inherit;"
+          data-track="community_card_click"
+          data-item="October Spotlight — Marquesha Baham">
+          <div class="comm-card__media">
+            <div class="comm-card__media-inner">
+              <picture>
+                <source type="image/webp"
+                  srcset="/community/assets/marquesha-1_800.webp 800w, /community/assets/marquesha-1_1200.webp 1200w"
+                  sizes="(max-width: 600px) 100vw, 360px">
+                <source type="image/jpeg"
+                  srcset="/community/assets/marquesha-1_800.jpg 800w, /community/assets/marquesha-1-1200.jpg 1200w"
+                  sizes="(max-width: 600px) 100vw, 360px">
+                <img
+                  class="comm-card__img--top"
+                  src="/community/assets/marquesha-1_800.jpg"
+                  alt="Marquesha Baham wearing a custom Square Bidness denim set"
+                  width="1200" height="800"
+                  loading="eager" decoding="async" fetchpriority="high"
+                  onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';" />
+              </picture>
+            </div>
+            <div class="comm-tag comm-tag--oct">October Spotlight</div>
           </div>
           <div class="comm-card__body">
             <h2>October Spotlight — Marquesha Baham</h2>
@@ -218,23 +372,30 @@
 
       <!-- November Spotlight -->
       <article class="comm-card">
-        <a href="/november-spotlight/" style="display:block;color:inherit;">
-          <div class="comm-card__media comm-card__media--focus-high">
-            <picture>
-              <source type="image/webp"
-                srcset="/courageaux/assets/amari_800.webp 800w, /courageaux/assets/amari_1200.webp 1200w"
-                sizes="(max-width: 600px) 100vw, 360px">
-              <source type="image/jpeg"
-                srcset="/courageaux/assets/amari_800.jpg 800w, /courageaux/assets/amari_1200.jpg 1200w"
-                sizes="(max-width: 600px) 100vw, 360px">
-              <img
-                src="/courageaux/assets/amari_800.jpg"
-                alt="Amari Wilford of Courageaux Aesthetics in Square Bidness Supima tee"
-                width="1200" height="800"
-                loading="lazy" decoding="async"
-                onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';" />
-            </picture>
-            <div class="comm-tag">November Spotlight</div>
+        <a
+          href="/november-spotlight/"
+          style="display:block;color:inherit;"
+          data-track="community_card_click"
+          data-item="November Spotlight — Courageaux Aesthetics">
+          <div class="comm-card__media">
+            <div class="comm-card__media-inner">
+              <picture>
+                <source type="image/webp"
+                  srcset="/courageaux/assets/amari_800.webp 800w, /courageaux/assets/amari_1200.webp 1200w"
+                  sizes="(max-width: 600px) 100vw, 360px">
+                <source type="image/jpeg"
+                  srcset="/courageaux/assets/amari_800.jpg 800w, /courageaux/assets/amari_1200.jpg 1200w"
+                  sizes="(max-width: 600px) 100vw, 360px">
+                <img
+                  class="comm-card__img--top"
+                  src="/courageaux/assets/amari_800.jpg"
+                  alt="Amari Wilford of Courageaux Aesthetics in Square Bidness Supima tee"
+                  width="1200" height="800"
+                  loading="lazy" decoding="async"
+                  onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';" />
+              </picture>
+            </div>
+            <div class="comm-tag comm-tag--nov">November Spotlight</div>
           </div>
           <div class="comm-card__body">
             <h2>November Spotlight — Courageaux Aesthetics</h2>
@@ -250,23 +411,29 @@
 
       <!-- Pho-Matic -->
       <article class="comm-card">
-        <a href="/phomatic/" style="display:block;color:inherit;">
+        <a
+          href="/phomatic/"
+          style="display:block;color:inherit;"
+          data-track="community_card_click"
+          data-item="Pho-Matic Photography — Gieno Smith">
           <div class="comm-card__media">
-            <picture>
-              <source type="image/webp"
-                srcset="/phomatic/assets/gieno-1_800.webp 800w, /phomatic/assets/gieno-1_1200.webp 1200w"
-                sizes="(max-width: 600px) 100vw, 360px">
-              <source type="image/jpeg"
-                srcset="/phomatic/assets/gieno-1_800.jpg 800w, /phomatic/assets/gieno-1_1200.jpg 1200w"
-                sizes="(max-width: 600px) 100vw, 360px">
-              <img
-                src="/phomatic/assets/gieno-1_800.jpg"
-                alt="Pho-Matic Photography by Gieno Smith — community moments and event coverage"
-                width="1200" height="800"
-                loading="lazy" decoding="async"
-                onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';" />
-            </picture>
-            <div class="comm-tag">Featured Photographer</div>
+            <div class="comm-card__media-inner">
+              <picture>
+                <source type="image/webp"
+                  srcset="/phomatic/assets/gieno-1_800.webp 800w, /phomatic/assets/gieno-1_1200.webp 1200w"
+                  sizes="(max-width: 600px) 100vw, 360px">
+                <source type="image/jpeg"
+                  srcset="/phomatic/assets/gieno-1_800.jpg 800w, /phomatic/assets/gieno-1_1200.jpg 1200w"
+                  sizes="(max-width: 600px) 100vw, 360px">
+                <img
+                  src="/phomatic/assets/gieno-1_800.jpg"
+                  alt="Pho-Matic Photography by Gieno Smith — community moments and event coverage"
+                  width="1200" height="800"
+                  loading="lazy" decoding="async"
+                  onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';" />
+              </picture>
+            </div>
+            <div class="comm-tag comm-tag--photo">Featured Photographer</div>
           </div>
           <div class="comm-card__body">
             <h2>Pho-Matic Photography — Gieno Smith</h2>
@@ -282,23 +449,30 @@
 
       <!-- Stories -->
       <article class="comm-card">
-        <a href="/stories/" style="display:block;color:inherit;">
-          <div class="comm-card__media comm-card__media--top">
-            <picture>
-              <source type="image/webp"
-                srcset="/assets/og-hoco_800.webp 800w, /assets/og-hoco_1200.webp 1200w"
-                sizes="(max-width: 600px) 100vw, 360px">
-              <source type="image/jpeg"
-                srcset="/assets/og-hoco_800.jpg 800w, /assets/og-hoco_1200.jpg 1200w"
-                sizes="(max-width: 600px) 100vw, 360px">
-              <img
-                src="/assets/og-hoco_1200.jpg"
-                alt="Square Bidness stories and community moments"
-                width="1200" height="800"
-                loading="lazy" decoding="async"
-                onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';" />
-            </picture>
-            <div class="comm-tag">More Stories</div>
+        <a
+          href="/stories/"
+          style="display:block;color:inherit;"
+          data-track="community_card_click"
+          data-item="Stories & Day-Ones">
+          <div class="comm-card__media">
+            <div class="comm-card__media-inner">
+              <picture>
+                <source type="image/webp"
+                  srcset="/assets/og-hoco_800.webp 800w, /assets/og-hoco_1200.webp 1200w"
+                  sizes="(max-width: 600px) 100vw, 360px">
+                <source type="image/jpeg"
+                  srcset="/assets/og-hoco_800.jpg 800w, /assets/og-hoco_1200.jpg 1200w"
+                  sizes="(max-width: 600px) 100vw, 360px">
+                <img
+                  class="comm-card__img--top"
+                  src="/assets/og-hoco_1200.jpg"
+                  alt="Square Bidness stories and community moments"
+                  width="1200" height="800"
+                  loading="lazy" decoding="async"
+                  onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';" />
+              </picture>
+            </div>
+            <div class="comm-tag comm-tag--stories">More Stories</div>
           </div>
           <div class="comm-card__body">
             <h2>Stories &amp; Day-Ones</h2>
@@ -312,6 +486,33 @@
         </a>
       </article>
 
+      <!-- Upcoming feature placeholder -->
+      <article class="comm-card">
+        <a
+          href="/linkme/"
+          style="display:block;color:inherit;"
+          data-track="community_card_click"
+          data-item="Upcoming Community Feature">
+          <div class="comm-card__media">
+            <div class="comm-card__media-inner comm-card__media-inner--placeholder">
+              <div class="comm-placeholder-copy">
+                NEXT COMMUNITY FEATURE LOADING
+              </div>
+            </div>
+            <div class="comm-tag comm-tag--upcoming">Upcoming</div>
+          </div>
+          <div class="comm-card__body">
+            <h2>Next Community Feature</h2>
+            <p>
+              The next spotlight is already in motion. Tap in to stay close to the lane and be the
+              first to see new community drops and day-one stories.
+            </p>
+            <div class="comm-meta-small">Northshore · Central Louisiana · Beyond</div>
+            <div class="comm-cta">Get notified <span>→</span></div>
+          </div>
+        </a>
+      </article>
+
     </section>
 
     <p class="comm-footnote">
@@ -321,8 +522,38 @@
   </main>
 
   <div id="site-footer"
-     aria-busy="true"
-     style="content-visibility:auto;contain-intrinsic-size:140px;"></div>
+       aria-busy="true"
+       style="content-visibility:auto;contain-intrinsic-size:140px;"></div>
+
+  <!-- Simple click tracking for community cards -->
+  <script>
+  (function(){
+    const hasGtag = () => typeof window.gtag === "function";
+
+    document.addEventListener("click", (e) => {
+      const el = e.target.closest("[data-track]");
+      if (!el) return;
+
+      const action = el.getAttribute("data-track");
+      const item = el.getAttribute("data-item") || "community";
+
+      if (typeof window.sbTrack === "function") {
+        window.sbTrack(action, {
+          event_category: "community",
+          event_label: item
+        });
+        return;
+      }
+
+      if (hasGtag()) {
+        window.gtag("event", action, {
+          event_category: "community",
+          event_label: item
+        });
+      }
+    }, { passive: true });
+  })();
+  </script>
 </body>
 </html>
 
