@@ -8,13 +8,13 @@
   <meta name="description" content="Stories behind Square Bidness — events, collections, collaborations, and Louisiana motion." />
   <link rel="canonical" href="https://www.squarebidness.com/stories/" />
   <meta name="theme-color" content="#000000" />
-  <meta name="color-scheme" content="dark light">
-  <meta name="robots" content="index,follow">
+  <meta name="color-scheme" content="dark light" />
+  <meta name="robots" content="index,follow" />
 
   <!-- Build stamp -->
   <meta name="sb:build" content="v20260101-stories-prod" />
 
-  <!-- ✅ Preload LCP image (FIRST card: 2025 Round Up NYSE hero) -->
+  <!-- ✅ Preload LCP image (FIRST card) -->
   <link
     rel="preload"
     as="image"
@@ -32,6 +32,11 @@
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/icon-180.png" />
   <link rel="manifest" href="/manifest.webmanifest" />
+
+  <!-- Perf: preconnects -->
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
+  <link rel="preconnect" href="https://www.google-analytics.com" crossorigin />
+  <link rel="preconnect" href="https://static.cloudflareinsights.com" crossorigin />
 
   <!-- ✅ Styles (non-blocking) -->
   <link rel="preload" href="/styles/style.css" as="style" />
@@ -171,7 +176,7 @@
           "@type":"WebPage",
           "name":"Courageaux Aesthetics — Her Words & Bio",
           "description":"Courageaux Aesthetics — Amari Wilford in her own words, building calm and confident skin care on the Northshore.",
-          "url":"https://www.squarebidness.com/courageaux/her-words.html",
+          "url":"https://www.squarebidness.com/courageaux/her-words/",
           "datePublished":"2025-11-01",
           "image":["https://www.squarebidness.com/courageaux/assets/amari_hero_1200x630.jpg"],
           "publisher":{
@@ -195,7 +200,7 @@
   <!-- ✅ Delay GA load to reduce long tasks + improve LCP -->
   <script>
   (function(){
-    const GA_ID = "G-5GB7FQ316G"; // <- your GA4 ID
+    const GA_ID = "G-5GB7FQ316G";
     function loadGA(){
       if (window.__ga_loaded) return;
       window.__ga_loaded = true;
@@ -308,7 +313,13 @@
       cursor:pointer;
       padding:.5rem .85rem;
       user-select:none;
+
+      /* ✅ avoid non-composited animation warnings (NO letter-spacing transitions) */
+      transition: transform .12s ease, background-color .12s ease, border-color .12s ease, opacity .12s ease;
+      will-change: transform;
     }
+    .btn:active{ transform: translateY(1px); }
+
     .btn--ghost{
       background:rgba(15,23,42,.8);
       border-color:rgba(148,163,184,.6);
@@ -343,7 +354,8 @@
     .stories-footer-row a{ color:#e5e7eb; text-decoration:none; }
     .stories-footer-row a:hover{ text-decoration:underline; }
 
-    a:focus-visible{
+    a:focus-visible,
+    button:focus-visible{
       outline:2px solid rgba(201,162,39,.65);
       outline-offset:3px;
       border-radius:10px;
@@ -380,8 +392,7 @@
                   /stories/assets/2025-roundup-nyse_780.webp 780w,
                   /stories/assets/2025-roundup-nyse_800.webp 800w,
                   /stories/assets/2025-roundup-nyse_1200.webp 1200w
-                 "
-
+                "
                 sizes="(max-width: 768px) 100vw, 520px"
               />
               <source
@@ -390,7 +401,7 @@
                   /stories/assets/2025-roundup-nyse_420.jpg 420w,
                   /stories/assets/2025-roundup-nyse_640.jpg 640w,
                   /stories/assets/2025-roundup-nyse_700.jpg 700w,
-                  /stories/assets/2025-roundup-nyse_780.jpg 780w
+                  /stories/assets/2025-roundup-nyse_780.jpg 780w,
                   /stories/assets/2025-roundup-nyse_800.jpg 800w,
                   /stories/assets/2025-roundup-nyse_1200.jpg 1200w
                 "
@@ -424,23 +435,30 @@
         </a>
       </article>
 
-            <!-- 2) Courageaux -->
+      <!-- 2) Courageaux (single primary destination to keep HTML valid) -->
       <article class="story-card">
-        <div class="card-link">
+        <a class="card-link" href="/courageaux/her-words/">
           <div class="story-card__media">
             <picture>
-              <source type="image/webp"
+              <source
+                type="image/webp"
                 srcset="/collections/assets/amari_1_800.webp 800w, /collections/assets/amari_1_1200.webp 1200w"
-                sizes="(max-width: 768px) 100vw, 520px">
-              <source type="image/jpeg"
+                sizes="(max-width: 768px) 100vw, 520px"
+              />
+              <source
+                type="image/jpeg"
                 srcset="/collections/assets/amari_1_800.jpg 800w, /collections/assets/amari_1_1200.jpg 1200w"
-                sizes="(max-width: 768px) 100vw, 520px">
+                sizes="(max-width: 768px) 100vw, 520px"
+              />
               <img
                 src="/collections/assets/amari_1_800.jpg"
-                width="1200" height="800"
-                loading="lazy" decoding="async"
+                width="800"
+                height="533"
+                loading="lazy"
+                decoding="async"
                 alt="Courageaux Aesthetics — Her Words &amp; Bio"
-                onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';">
+                onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';"
+              />
             </picture>
             <div class="story-badge">Spotlight</div>
           </div>
@@ -452,37 +470,39 @@
               Amari’s story — calm, confident skin care built with intention on the Northshore.
             </p>
             <div class="story-cta">
-              <!-- Gold: direct to her-words feature -->
-              <a class="btn btn--gold" href="/courageaux/her-words/">
-                Read feature
-              </a>
-              <!-- Ghost: main Courageaux page -->
-              <a class="btn btn--ghost" href="/courageaux/">
+              <span class="btn btn--gold">Read feature</span>
+              <button class="btn btn--ghost" type="button" onclick="location.href='/courageaux/';">
                 Courageaux
-              </a>
+              </button>
             </div>
           </div>
-        </div>
+        </a>
       </article>
-
 
       <!-- 3) Winter Games -->
       <article class="story-card">
         <a class="card-link" href="/wintergames/">
           <div class="story-card__media">
             <picture>
-              <source type="image/webp"
+              <source
+                type="image/webp"
                 srcset="/wintergames/assets/og-lil-soulja-slim_800.webp 800w, /wintergames/assets/og-lil-soulja-slim_1200.webp 1200w"
-                sizes="(max-width: 768px) 100vw, 520px">
-              <source type="image/jpeg"
+                sizes="(max-width: 768px) 100vw, 520px"
+              />
+              <source
+                type="image/jpeg"
                 srcset="/wintergames/assets/og-lil-soulja-slim_800.jpg 800w, /wintergames/assets/og-lil-soulja-slim_1200.jpg 1200w"
-                sizes="(max-width: 768px) 100vw, 520px">
+                sizes="(max-width: 768px) 100vw, 520px"
+              />
               <img
                 src="/wintergames/assets/og-lil-soulja-slim_800.jpg"
-                width="1200" height="800"
-                loading="lazy" decoding="async"
+                width="800"
+                height="533"
+                loading="lazy"
+                decoding="async"
                 alt="Winter Games — Lil Soulja Slim in Hammond"
-                onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';">
+                onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';"
+              />
             </picture>
             <div class="story-badge">Collection</div>
           </div>
@@ -508,18 +528,12 @@
             <picture>
               <source
                 type="image/webp"
-                srcset="
-                  /stories/assets/stories-video-1_420.webp 420w,
-                  /stories/assets/stories-video-1_780.webp 780w
-                "
+                srcset="/stories/assets/stories-video-1_420.webp 420w, /stories/assets/stories-video-1_780.webp 780w"
                 sizes="(max-width: 768px) 100vw, 520px"
               />
               <source
                 type="image/jpeg"
-                srcset="
-                  /stories/assets/stories-video-1_420.jpg 420w,
-                  /stories/assets/stories-video-1_780.jpg 780w
-                "
+                srcset="/stories/assets/stories-video-1_420.jpg 420w, /stories/assets/stories-video-1_780.jpg 780w"
                 sizes="(max-width: 768px) 100vw, 520px"
               />
               <img
