@@ -182,10 +182,29 @@
     .press-page .feature-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;}
     .press-page .feature-card__img{position:relative;display:block;background:#000;}
 
-    /* CLS + consistent crop */
-    .press-page .feature-card__img picture,
-    .press-page .feature-card__img img{width:100%;height:auto;display:block;}
-    .press-page .feature-card__img img{object-fit:cover;}
+    /* Make ALL featured card images the same size */
+.press-page .feature-card__img{
+  position:relative;
+  display:block;
+  background:#000;
+  overflow:hidden;
+  border-radius:14px;
+}
+
+/* ✅ Uniform media box height (matches your 780x520 vibe) */
+.press-page .feature-card__img picture{
+  display:block;
+  width:100%;
+  height:260px;            /* adjust to taste: 240–300 */
+}
+
+.press-page .feature-card__img img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;        /* crops portrait to match landscape */
+  object-position:center;  /* change to: center top; if you want more face */
+}
 
     .press-page .badge{
       position:absolute;left:.75rem;bottom:.75rem;
@@ -462,45 +481,43 @@
             <!-- Featured founder -->
             <article class="sb-card">
               <a class="feature-card__img" href="/founder/" aria-label="Read Founder Bio">
-                <picture>
-                  <!-- WEBP -->
-  <source
-    type="image/webp"
-    srcset="
-      /founder/assets/founder-hero-420.webp 420w,
-      /founder/assets/founder-hero-640.webp 640w,
-      /founder/assets/founder-hero-800.webp 780w,
-      /founder/assets/founder-hero-800.webp 800w,
-      /founder/assets/founder-hero-1200.webp 1200w
-    "
-    sizes="(max-width: 768px) 100vw, 420px"
-  />
+  <picture>
+    <!-- WEBP -->
+    <source
+      type="image/webp"
+      srcset="
+        /founder/assets/founder-hero-420.webp 420w,
+        /founder/assets/founder-hero-640.webp 640w,
+        /founder/assets/founder-hero-800.webp 800w,
+        /founder/assets/founder-hero-1200.webp 1200w
+      "
+      sizes="(max-width: 768px) 100vw, 420px"
+    />
 
-  <!-- JPEG fallback -->
-  <source
-    type="image/jpeg"
-    srcset="
-      /founder/assets/founder-hero-420.jpg 420w,
-      /founder/assets/founder-hero-640.jpg 640w,
-      /founder/assets/founder-hero-800.jpg 780w,
-      /founder/assets/founder-hero-800.jpg 800w,
-      /founder/assets/founder-hero-1200.jpg 1200w
-    "
-    sizes="(max-width: 768px) 100vw, 420px"
-  />
+    <!-- JPEG -->
+    <source
+      type="image/jpeg"
+      srcset="
+        /founder/assets/founder-hero-420.jpg 420w,
+        /founder/assets/founder-hero-640.jpg 640w,
+        /founder/assets/founder-hero-800.jpg 800w,
+        /founder/assets/founder-hero-1200.jpg 1200w
+      "
+      sizes="(max-width: 768px) 100vw, 420px"
+    />
 
-  <img
-    src="/founder/assets/founder-hero-7800.jpg"
-    width="780"
-    height="520"
-    alt="Marcus Buckner — Founder of Square Bidness"
-    loading="lazy"
-    decoding="async"
-    onerror="this.onerror=null;this.src='/assets/placeholder-portrait.png';"
-  />
-</picture>
-               
-              </a>
+    <img
+      src="/founder/assets/founder-hero-800.jpg"
+      width="780"
+      height="520"
+      alt="Marcus Buckner — Founder of Square Bidness"
+      loading="lazy"
+      decoding="async"
+      onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';"
+    />
+  </picture>
+</a>
+
               <div class="sb-card__pad">
                 <div class="meta-line">
                   <span>Founder</span>
