@@ -11,10 +11,6 @@
   <!-- Build stamp -->
   <meta name="sb:build" content="v20251219-press-sweep" />
 
-  <!-- Perf -->
-  <link rel="preconnect" href="https://www.googletagmanager.com" />
-  <link rel="preconnect" href="https://www.google-analytics.com" />
-
   <!-- Global CSS -->
   <link rel="stylesheet" href="/styles/style.css" />
 
@@ -140,10 +136,12 @@
   <script defer src="/scripts/global.js"></script>
   <script defer src="/scripts/sb-analytics.js"></script>
   <script defer src="/scripts/sw-register.js"></script>
+  <script defer src="/scripts/partials.js"></script>
 
   <style>
-    /* CLS reserve for injected nav */
-    #nav-placeholder{min-height:72px;}
+    /* CLS guards for injected nav/footer */
+    #site-header{min-height:72px;}
+    #site-footer{min-height:140px;}
 
     /* =========================
        PRESS PAGE — GOLDMASTER CSS
@@ -180,31 +178,23 @@
     .press-page .press-list > li > a:focus-visible{outline:2px solid rgba(201,162,39,.65);outline-offset:3px;}
 
     .press-page .feature-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;}
-    .press-page .feature-card__img{position:relative;display:block;background:#000;}
 
-    /* Make ALL featured card images the same size */
-.press-page .feature-card__img{
-  position:relative;
-  display:block;
-  background:#000;
-  overflow:hidden;
-  border-radius:14px;
-}
-
-/* ✅ Uniform media box height (matches your 780x520 vibe) */
-.press-page .feature-card__img picture{
-  display:block;
-  width:100%;
-  height:260px;            /* adjust to taste: 240–300 */
-}
-
-.press-page .feature-card__img img{
-  display:block;
-  width:100%;
-  height:100%;
-  object-fit:cover;        /* crops portrait to match landscape */
-  object-position:center top;  /* change to: center top; if you want more face */
-}
+    /* ✅ Uniform featured card media box (same size for interview + founder) */
+    .press-page .feature-card__img{
+      position:relative;
+      display:block;
+      background:#000;
+      overflow:hidden;
+      border-radius:14px;
+    }
+    .press-page .feature-card__img picture{display:block;width:100%;height:260px;}
+    .press-page .feature-card__img img{
+      display:block;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      object-position:center top;
+    }
 
     .press-page .badge{
       position:absolute;left:.75rem;bottom:.75rem;
@@ -246,31 +236,39 @@
       font-size:.92rem;line-height:1.45;resize:vertical;white-space:pre-wrap;
     }
     .press-page .press-copy-status{margin-top:6px;font-size:.85rem;opacity:.8;}
-    .feature-card__img{ position:relative; display:block; overflow:hidden; }
-.play-badge{
-  position:absolute;
-  left:14px;
-  top:14px;
-  width:44px;
-  height:44px;
-  display:grid;
-  place-items:center;
-  border-radius:999px;
-  background:rgba(0,0,0,.55);
-  border:1px solid rgba(250,204,21,.55); /* gold edge */
-  backdrop-filter: blur(6px);
-}
-.play-badge svg{ display:block; }
-.play-badge circle{ fill: rgba(0,0,0,.45); }
-.play-badge path{ fill: #facc15; } /* gold triangle */
 
+    /* ✅ A11y: visually hidden labels */
+    .sr-only{
+      position:absolute!important;
+      width:1px;height:1px;
+      padding:0;margin:-1px;
+      overflow:hidden;clip:rect(0,0,0,0);
+      white-space:nowrap;border:0;
+    }
+
+    /* Play badge overlay (only shows on the video card since only that card includes the span) */
+    .play-badge{
+      position:absolute;
+      left:14px;
+      top:14px;
+      width:44px;
+      height:44px;
+      display:grid;
+      place-items:center;
+      border-radius:999px;
+      background:rgba(0,0,0,.55);
+      border:1px solid rgba(250,204,21,.55);
+      backdrop-filter: blur(6px);
+    }
+    .play-badge svg{ display:block; }
+    .play-badge circle{ fill: rgba(0,0,0,.45); }
+    .play-badge path{ fill: #facc15; }
   </style>
 </head>
 
 <body class="theme-dark press-page" id="top">
- <div id="site-header"
-     aria-busy="true"
-     style="content-visibility:auto;contain-intrinsic-size:80px;"></div>
+  <!-- NAV injected by /scripts/partials.js -->
+  <div id="site-header" aria-busy="true" style="content-visibility:auto;contain-intrinsic-size:80px;"></div>
 
   <main role="main">
     <section class="section">
@@ -415,108 +413,108 @@
         <section aria-label="Featured Press" style="margin-top:1.25rem;">
           <h2 class="section__title" style="margin:0 0 .6rem;">Featured</h2>
 
-         <div class="feature-cards">
-  <!-- Featured interview -->
-  <article class="sb-card">
-    <a class="feature-card__img" href="/press/youtube-interview/" aria-label="Watch Marcus Buckner Interview">
-      <picture>
-        <source
-          type="image/webp"
-          srcset="
-            /stories/assets/stories-video-1_420.webp 420w,
-            /stories/assets/stories-video-1_780.webp 780w
-          "
-          sizes="(max-width: 768px) 100vw, 420px"
-        />
-        <source
-          type="image/jpeg"
-          srcset="
-            /stories/assets/stories-video-1_420.jpg 420w,
-            /stories/assets/stories-video-1_780.jpg 780w
-          "
-          sizes="(max-width: 768px) 100vw, 420px"
-        />
-        <img
-          src="/stories/assets/stories-video-1_780.jpg"
-          width="780"
-          height="520"
-          alt="Marcus Buckner x Terrance Gangsta Williams — full interview"
-          loading="lazy"
-          decoding="async"
-          onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';"
-        />
-         <span class="play-badge" aria-hidden="true">
-  <svg viewBox="0 0 64 64" width="38" height="38" focusable="false">
-    <circle cx="32" cy="32" r="30"></circle>
-    <path d="M27 22 L27 42 L44 32 Z"></path>
-  </svg>
-</span>
-      </picture>
-    </a>
+          <div class="feature-cards">
+            <!-- Featured interview -->
+            <article class="sb-card">
+              <a class="feature-card__img" href="/press/youtube-interview/" aria-label="Watch Marcus Buckner Interview">
+                <picture>
+                  <source
+                    type="image/webp"
+                    srcset="
+                      /stories/assets/stories-video-1_420.webp 420w,
+                      /stories/assets/stories-video-1_780.webp 780w
+                    "
+                    sizes="(max-width: 768px) 100vw, 420px"
+                  />
+                  <source
+                    type="image/jpeg"
+                    srcset="
+                      /stories/assets/stories-video-1_420.jpg 420w,
+                      /stories/assets/stories-video-1_780.jpg 780w
+                    "
+                    sizes="(max-width: 768px) 100vw, 420px"
+                  />
+                  <img
+                    src="/stories/assets/stories-video-1_780.jpg"
+                    width="780"
+                    height="520"
+                    alt="Marcus Buckner x Terrance Gangsta Williams — full interview"
+                    loading="lazy"
+                    decoding="async"
+                    onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';"
+                  />
+                </picture>
 
-    <div class="sb-card__pad">
-      <div class="meta-line">
-        <time datetime="2025-11-03">Oct 10, 2025</time>
-        <span>•</span>
-        <span>Video</span>
-      </div>
+                <span class="play-badge" aria-hidden="true">
+                  <svg viewBox="0 0 64 64" width="38" height="38" focusable="false" aria-hidden="true">
+                    <circle cx="32" cy="32" r="30"></circle>
+                    <path d="M27 22 L27 42 L44 32 Z"></path>
+                  </svg>
+                </span>
 
-      <h3 class="sb-title" style="margin-top:0;">Marcus Buckner — Full Interview</h3>
+                <span class="badge">Interview</span>
+              </a>
 
-      <p class="sb-muted">
-        Legacy, discipline, and building Square Bidness from Louisiana to the world.
-      </p>
+              <div class="sb-card__pad">
+                <div class="meta-line">
+                  <time datetime="2025-11-03">Oct 10, 2025</time>
+                  <span>•</span>
+                  <span>Video</span>
+                </div>
 
-      <div class="sb-actions">
-        <a class="btn btn--gold" href="/press/youtube-interview/">Watch on Site</a>
-        <a class="btn btn--ghost" href="https://youtu.be/o2eKkE8NmFY" target="_blank" rel="noopener noreferrer">
-          Open on YouTube
-        </a>
-      </div>
-    </div>
-  </article>
+                <h3 class="sb-title" style="margin-top:0;">Marcus Buckner — Full Interview</h3>
 
+                <p class="sb-muted">
+                  Legacy, discipline, and building Square Bidness from Louisiana to the world.
+                </p>
 
+                <div class="sb-actions">
+                  <a class="btn btn--gold" href="/press/youtube-interview/">Watch on Site</a>
+                  <a class="btn btn--ghost" href="https://youtu.be/o2eKkE8NmFY" target="_blank" rel="noopener noreferrer">
+                    Open on YouTube
+                  </a>
+                </div>
+              </div>
+            </article>
 
             <!-- Featured founder -->
             <article class="sb-card">
               <a class="feature-card__img" href="/founder/" aria-label="Read Founder Bio">
-  <picture>
-    <!-- WEBP -->
-    <source
-      type="image/webp"
-      srcset="
-        /founder/assets/founder-hero-420.webp 420w,
-        /founder/assets/founder-hero-640.webp 640w,
-        /founder/assets/founder-hero-800.webp 800w,
-        /founder/assets/founder-hero-1200.webp 1200w
-      "
-      sizes="(max-width: 768px) 100vw, 420px"
-    />
-
-    <!-- JPEG -->
-    <source
-      type="image/jpeg"
-      srcset="
-        /founder/assets/founder-hero-420.jpg 420w,
-        /founder/assets/founder-hero-640.jpg 640w,
-        /founder/assets/founder-hero-800.jpg 800w,
-        /founder/assets/founder-hero-1200.jpg 1200w
-      "
-      sizes="(max-width: 768px) 100vw, 420px"
-    />
-
-    <img
-      src="/founder/assets/founder-hero-800.jpg"
-      width="780"
-      height="520"
-      alt="Marcus Buckner — Founder of Square Bidness"
-      loading="lazy"
-      decoding="async"
-      onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';"
-    />
-  </picture>
-</a>
+                <picture>
+                  <!-- WEBP -->
+                  <source
+                    type="image/webp"
+                    srcset="
+                      /founder/assets/founder-hero-420.webp 420w,
+                      /founder/assets/founder-hero-640.webp 640w,
+                      /founder/assets/founder-hero-800.webp 800w,
+                      /founder/assets/founder-hero-1200.webp 1200w
+                    "
+                    sizes="(max-width: 768px) 100vw, 420px"
+                  />
+                  <!-- JPEG -->
+                  <source
+                    type="image/jpeg"
+                    srcset="
+                      /founder/assets/founder-hero-420.jpg 420w,
+                      /founder/assets/founder-hero-640.jpg 640w,
+                      /founder/assets/founder-hero-800.jpg 800w,
+                      /founder/assets/founder-hero-1200.jpg 1200w
+                    "
+                    sizes="(max-width: 768px) 100vw, 420px"
+                  />
+                  <img
+                    src="/founder/assets/founder-hero-800.jpg"
+                    width="780"
+                    height="520"
+                    alt="Marcus Buckner — Founder of Square Bidness"
+                    loading="lazy"
+                    decoding="async"
+                    onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';"
+                  />
+                </picture>
+                <span class="badge">Founder</span>
+              </a>
 
               <div class="sb-card__pad">
                 <div class="meta-line">
@@ -551,7 +549,10 @@
                       <strong>Mission Statement</strong>
                       <button class="btn btn--ghost" type="button" data-copy="#sb_mission" data-status="#sb_mission_status">Copy</button>
                     </div>
+
+                    <label class="sr-only" for="sb_mission">Mission Statement (copy box)</label>
                     <textarea class="press-copy-box" id="sb_mission" readonly>Principles. Morals. Business Done Right.</textarea>
+
                     <div class="press-copy-status" id="sb_mission_status" aria-live="polite"></div>
                   </div>
 
@@ -560,7 +561,10 @@
                       <strong>One-Sentence Boilerplate</strong>
                       <button class="btn btn--ghost" type="button" data-copy="#sb_boilerplate" data-status="#sb_boilerplate_status">Copy</button>
                     </div>
+
+                    <label class="sr-only" for="sb_boilerplate">One-Sentence Boilerplate (copy box)</label>
                     <textarea class="press-copy-box" id="sb_boilerplate" readonly>Square Bidness Apparel is a Louisiana-based apparel brand founded on January 4, 2022 by veteran operator Marcus Buckner, building across casual, business-casual, tech-casual, and workwear categories with a focus on professionalism, durability, and real-world use.</textarea>
+
                     <div class="press-copy-status" id="sb_boilerplate_status" aria-live="polite"></div>
                   </div>
                 </div>
@@ -608,9 +612,8 @@
     </section>
   </main>
 
-  <div id="site-footer"
-     aria-busy="true"
-     style="content-visibility:auto;contain-intrinsic-size:140px;"></div>
+  <!-- FOOTER injected by /scripts/partials.js -->
+  <div id="site-footer" aria-busy="true" style="content-visibility:auto;contain-intrinsic-size:140px;"></div>
 
   <!-- ✅ Copy buttons (modern clipboard first, fallback to execCommand) -->
   <script>
@@ -649,34 +652,11 @@
       const text = (el.value || el.textContent || "").trim();
       let ok = false;
 
-      try {
-        ok = await doCopy(text);
-      } catch(_) {}
-
+      try { ok = await doCopy(text); } catch(_) {}
       if (!ok) ok = fallbackCopyFromEl(el);
 
       setStatus(statusSel, ok ? "Copied." : "Copy failed — select and copy manually.");
     });
-  })();
-  </script>
-
-  <!-- Inject nav/footer -->
-  <script>
-  (async () => {
-    const bust = `?v=${Date.now()}`;
-    async function injectPartial(url, targetId) {
-      try {
-        const res = await fetch(url + bust, { cache:'no-store', credentials:'same-origin' });
-        if (!res.ok) return;
-        const html = await res.text();
-        const el = document.getElementById(targetId);
-        if (!el) return;
-        el.innerHTML = html;
-        el.setAttribute('aria-busy', 'false');
-      } catch (_) {}
-    }
-    await injectPartial('/nav/index.html', 'nav-placeholder');
-    await injectPartial('/footer/index.html', 'footer-placeholder');
   })();
   </script>
 
