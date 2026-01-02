@@ -34,24 +34,66 @@
   <meta name="twitter:image" content="https://www.squarebidness.com/stories/assets/2025-roundup-nyse_1200.jpg" />
   <meta name="twitter:site" content="@squarebidnesstm" />
 
-  <!-- Perf -->
-  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
-  <link rel="preconnect" href="https://www.google-analytics.com" crossorigin>
-
-  <!-- Global CSS -->
-  <link rel="stylesheet" href="/styles/style.css" />
+  <!-- ✅ Preload LCP image (NYSE hero) -->
+  <link
+    rel="preload"
+    as="image"
+    href="/stories/assets/2025-roundup-nyse_1200.webp"
+    imagesrcset="
+      /stories/assets/2025-roundup-nyse_780.webp 780w,
+      /stories/assets/2025-roundup-nyse_800.webp 800w,
+      /stories/assets/2025-roundup-nyse_1200.webp 1200w
+    "
+    imagesizes="(min-width: 960px) 420px, 100vw"
+    fetchpriority="high"
+  />
 
   <!-- Icons / PWA -->
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/icon-180.png" />
   <link rel="manifest" href="/manifest.webmanifest" />
 
-  <!-- Scripts -->
-  <script defer src="/scripts/ga.js"></script>
-  <script defer src="/scripts/sb-analytics.js"></script>
-  <script defer src="/scripts/partials.js"></script>
-  <script defer src="/scripts/sw-register.js"></script>
+  <!-- ✅ Global CSS (non-blocking) -->
+  <link rel="preload" href="/styles/style.css" as="style" />
+  <link rel="stylesheet" href="/styles/style.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="/styles/style.css"></noscript>
 
+  <!-- ✅ Nav/Footer injection -->
+  <script defer src="/scripts/partials.js"></script>
+
+  <!-- ✅ Site-wide analytics script (per your rule) -->
+  <script defer src="/scripts/sb-analytics.js"></script>
+
+  <!-- ✅ Delay GA load to reduce long tasks + improve LCP -->
+  <script>
+  (function(){
+    const GA_ID = "G-5GB7FQ316G"; // your GA4 ID
+    function loadGA(){
+      if (window.__ga_loaded) return;
+      window.__ga_loaded = true;
+
+      const s = document.createElement("script");
+      s.async = true;
+      s.src = "https://www.googletagmanager.com/gtag/js?id=" + encodeURIComponent(GA_ID);
+      document.head.appendChild(s);
+
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){ dataLayer.push(arguments); }
+      window.gtag = gtag;
+
+      gtag("js", new Date());
+      gtag("config", GA_ID, { anonymize_ip: true });
+    }
+
+    if ("requestIdleCallback" in window) {
+      requestIdleCallback(loadGA, { timeout: 2500 });
+    } else {
+      setTimeout(loadGA, 1800);
+    }
+  })();
+  </script>
+
+  <!-- ✅ Page CSS -->
   <style>
     /* CLS guards for injected nav/footer */
     #site-header{min-height:72px;}
@@ -187,6 +229,12 @@
       color:#9ca3af;
     }
 
+    a:focus-visible{
+      outline:2px solid rgba(201,162,39,.65);
+      outline-offset:3px;
+      border-radius:10px;
+    }
+
     @media (prefers-reduced-motion:no-preference){
       .story-article{
         scroll-margin-top:96px;
@@ -278,7 +326,9 @@
               height="533"
               loading="eager"
               decoding="async"
+              fetchpriority="high"
               alt="Marcus Buckner outside the New York Stock Exchange — Square Bidness on, vision focused."
+              onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';"
             />
           </picture>
           <figcaption>
@@ -394,6 +444,7 @@
                 loading="lazy"
                 decoding="async"
                 alt="Marcus Buckner in the Financial District — Square Bidness tee on, VSOP shorts, head bowed. Protected by the Angels. Vision on ten."
+                onerror="this.onerror=null;this.src='/assets/placeholder-portrait.png';"
               />
             </picture>
             <figcaption>
