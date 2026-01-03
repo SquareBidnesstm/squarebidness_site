@@ -2,8 +2,23 @@
 <html lang="en">
 <head>
   <!-- Perf -->
-  <link rel="preconnect" href="https://www.googletagmanager.com">
-  <link rel="preconnect" href="https://www.google-analytics.com">
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+  <link rel="preconnect" href="https://www.google-analytics.com" crossorigin>
+  <link rel="preconnect" href="https://static.cloudflareinsights.com" crossorigin>
+
+  <!-- ✅ Preload HERO (likely LCP) -->
+  <link
+    rel="preload"
+    as="image"
+    href="/richardson/assets/richardson_780.webp"
+    imagesrcset="
+      /richardson/assets/richardson_420.webp 420w,
+      /richardson/assets/richardson_640.webp 640w,
+      /richardson/assets/richardson_780.webp 780w
+    "
+    imagesizes="(max-width: 900px) 100vw, 440px"
+    fetchpriority="high"
+  />
 
   <!-- GA4 (site-wide) -->
   <script defer src="/scripts/ga.js"></script>
@@ -11,9 +26,13 @@
   <!-- Basics -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Richardson Fashion — Suits & Formalwear | Hammond, LA</title>
+  <title>Richardson Fashion — Suits &amp; Formalwear | Hammond, LA</title>
   <meta name="description" content="Richardson Fashion — suits, tuxedos, and formalwear in Hammond, LA. Everyday suits, weddings, and special events. Call 985-662-5819 or book a wedding appointment." />
   <link rel="canonical" href="https://www.squarebidness.com/richardson/" />
+  <meta name="robots" content="index,follow" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="format-detection" content="telephone=no" />
 
   <!-- CSS -->
   <link rel="stylesheet" href="/styles/style.css" />
@@ -22,24 +41,22 @@
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="apple-touch-icon" href="/assets/icons/icon-180.png" />
   <link rel="manifest" href="/site.webmanifest" />
-  <meta name="theme-color" content="#000000" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Richardson Fashion" />
-  <meta property="og:title" content="Richardson Fashion — Suits & Formalwear in Hammond, LA" />
+  <meta property="og:title" content="Richardson Fashion — Suits &amp; Formalwear in Hammond, LA" />
   <meta property="og:description" content="Suits, tuxedos, and formalwear. Everyday business to wedding day — in Hammond, LA." />
   <meta property="og:url" content="https://www.squarebidness.com/richardson/" />
-  <!-- Swap this image later when you have his photos -->
-  <meta property="og:image" content="https://www.squarebidness.com/richardson/assets/richardson-hero_1200x630.jpg" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
+  <!-- ✅ Use an image that EXISTS in your repo -->
+  <meta property="og:image" content="https://www.squarebidness.com/richardson/assets/richardson_780.jpg" />
+  <meta property="og:image:secure_url" content="https://www.squarebidness.com/richardson/assets/richardson_780.jpg" />
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Richardson Fashion — Suits & Formalwear" />
+  <meta name="twitter:title" content="Richardson Fashion — Suits &amp; Formalwear" />
   <meta name="twitter:description" content="Suits, tuxedos, and formalwear. Everyday business to wedding day — in Hammond, LA." />
-  <meta name="twitter:image" content="https://www.squarebidness.com/richardson/assets/richardson-hero_1200x630.jpg" />
+  <meta name="twitter:image" content="https://www.squarebidness.com/richardson/assets/richardson_780.jpg" />
 
   <!-- LocalBusiness JSON-LD -->
   <script type="application/ld+json">
@@ -128,8 +145,13 @@
       padding:.65rem 1.05rem;
       text-decoration:none;
       cursor:pointer;
-      transition:transform .12s ease-out, box-shadow .12s ease-out, background .12s ease-out;
+
+      /* ✅ keep transitions composited (no letter-spacing transitions) */
+      transition:transform .12s ease-out, box-shadow .12s ease-out, background-color .12s ease-out, border-color .12s ease-out, opacity .12s ease-out;
+      will-change: transform;
     }
+    .btn:active { transform: translateY(1px); }
+
     .btn--gold {
       background:#c9a227;
       border-color:#c9a227;
@@ -324,13 +346,32 @@
 
       <div class="rf-hero-media">
         <picture>
-          <!-- You can replace these hero images later with his own photos -->
-          <source srcset="/richardson/assets/richardson-hero_1200.jpg" media="(min-width: 768px)" />
+          <source
+            type="image/webp"
+            srcset="
+              /richardson/assets/richardson_420.webp 420w,
+              /richardson/assets/richardson_640.webp 640w,
+              /richardson/assets/richardson_780.webp 780w
+            "
+            sizes="(max-width: 900px) 100vw, 440px"
+          />
+          <source
+            type="image/jpeg"
+            srcset="
+              /richardson/assets/richardson_420.jpg 420w,
+              /richardson/assets/richardson_640.jpg 640w,
+              /richardson/assets/richardson_780.jpg 780w
+            "
+            sizes="(max-width: 900px) 100vw, 440px"
+          />
           <img
-            src="/richardson/assets/richardson-hero_800.jpg"
+            src="/richardson/assets/richardson_780.jpg"
             alt="Suiting and formalwear at Richardson Fashion in Hammond, Louisiana"
+            width="780"
+            height="520"
             loading="eager"
             decoding="async"
+            fetchpriority="high"
             onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';"
           />
         </picture>
@@ -469,21 +510,20 @@
     </section>
   </main>
 
- <!-- FOOTER -->
-<footer class="sb-footer" style="background:#0b0b0b;border-top:1px solid #1a1a1a;padding:2.2rem 1rem;text-align:center;">
-  <div class="container" style="max-width:1000px;margin:0 auto;">
-    <p style="color:#a1a1aa;font-size:.9rem;line-height:1.6;">
-      © <span id="year"></span> <strong>Square Bidness Tech Lab</strong>
-      <a href="/linkme/" style="color:#c9a227;text-decoration:underline;font-weight:600;">Link Me</a> ·
-      <a href="/privacy/" style="color:#c9a227;text-decoration:underline;font-weight:600;">Privacy</a> ·
-    </p>
-  </div>
-</footer>
+  <!-- FOOTER -->
+  <footer class="sb-footer" style="background:#0b0b0b;border-top:1px solid #1a1a1a;padding:2.2rem 1rem;text-align:center;">
+    <div class="container" style="max-width:1000px;margin:0 auto;">
+      <p style="color:#a1a1aa;font-size:.9rem;line-height:1.6;margin:0;">
+        © <span id="year"></span> <strong>Square Bidness Tech Lab</strong>
+        <a href="/linkme/" style="color:#c9a227;text-decoration:underline;font-weight:600;">Link Me</a> ·
+        <a href="/privacy/" style="color:#c9a227;text-decoration:underline;font-weight:600;">Privacy</a>
+      </p>
+    </div>
+  </footer>
 
-<script>
-  // dynamic year
-  document.getElementById("year").textContent = new Date().getFullYear();
-</script>
-
+  <script>
+    // dynamic year
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
