@@ -208,32 +208,32 @@
     .rf-contact-block{ font-size:.9rem; color:#9ca3af; margin-top:1rem; }
     .rf-contact-block a{ color:#facc15; text-decoration:underline; }
 
-    /* ✅ Success / Error message (no redirect) */
-    .rf-form-status{
-      margin-top:.85rem;
-      padding:.75rem .9rem;
-      border-radius:12px;
-      border:1px solid rgba(148,163,184,.25);
-      background:rgba(15,23,42,.55);
-      color:#e5e7eb;
-      font-size:.9rem;
-      line-height:1.45;
-      display:none;
-    }
-    .rf-form-status--success{
-      border-color: rgba(34,197,94,.35);
-      background: rgba(34,197,94,.10);
-    }
-    .rf-form-status--error{
-      border-color: rgba(239,68,68,.35);
-      background: rgba(239,68,68,.10);
-    }
-
     a:focus-visible, button:focus-visible{
       outline:2px solid rgba(201,162,39,.65);
       outline-offset:3px;
       border-radius:10px;
     }
+
+    /* ✅ Inline success/error message (no redirect) */
+    .rf-status{
+      margin-top: .9rem;
+      padding: .9rem .95rem;
+      border-radius: 14px;
+      border: 1px solid #1f2937;
+      background: rgba(2,6,23,.65);
+      color: #e5e7eb;
+      font-size: .95rem;
+      line-height: 1.5;
+    }
+    .rf-status--success{
+      border-color: rgba(34,197,94,.35);
+      background: rgba(34,197,94,.08);
+    }
+    .rf-status--error{
+      border-color: rgba(239,68,68,.35);
+      background: rgba(239,68,68,.08);
+    }
+    .rf-status strong{ color:#fff; }
   </style>
 </head>
 
@@ -368,8 +368,11 @@
       <p>Use this form to start your reservation — especially for weddings, proms, or any big event where you need the suits lined up ahead of time.</p>
 
       <div class="rf-form-card">
+        <!-- ✅ Inline status (no redirect) -->
+        <div id="rfStatus" class="rf-status" role="status" aria-live="polite" hidden></div>
+
         <!-- ✅ Formspree endpoint + no page redirect (fetch submit below) -->
-        <form id="rf-appointment-form" action="https://formspree.io/f/mykzdqjp" method="POST">
+        <form id="rfForm" action="https://formspree.io/f/mykzdqjp" method="POST" novalidate>
           <!-- Optional subject line -->
           <input type="hidden" name="_subject" value="Richardson Fashion — Appointment Request">
           <!-- Honeypot spam trap -->
@@ -441,15 +444,12 @@
           </div>
 
           <div class="rf-form-actions">
-            <button class="btn btn--gold" type="submit" id="rf-submit-btn">Send Appointment Request</button>
+            <button id="rfSubmit" class="btn btn--gold" type="submit">Send Appointment Request</button>
             <div class="rf-badge">
               <span>Or call now:</span>
               <a class="btn btn--ghost" href="tel:+19855071718">985-507-1718</a>
             </div>
           </div>
-
-          <!-- ✅ Inline status (no redirect) -->
-          <div id="rf-form-status" class="rf-form-status" role="status" aria-live="polite"></div>
 
           <p class="rf-note">
             This form sends a request to the shop. Your appointment is not confirmed until someone from Richardson Fashion contacts you to lock in a time.
@@ -475,57 +475,69 @@
 
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
 
-    // ✅ AJAX submit to Formspree (shows success message, no page leave)
-    (function(){
-      const form = document.getElementById("rf-appointment-form");
-      if (!form) return;
+  <!-- ✅ AJAX submit to Formspree (shows success message, no page leave) -->
+  <script>
+  (function(){
+    const form = document.getElementById("rfForm");
+    const statusEl = document.getElementById("rfStatus");
+    const submitBtn = document.getElementById("rfSubmit");
 
-      const statusEl = document.getElementById("rf-form-status");
-      const btn = document.getElementById("rf-submit-btn");
+    if (!form || !statusEl || !submitBtn) return;
 
-      function showStatus(kind, msg){
-        statusEl.className = "rf-form-status " + (kind === "success" ? "rf-form-status--success" : "rf-form-status--error");
-        statusEl.textContent = msg;
-        statusEl.style.display = "block";
+    function setStatus(type, html){
+      statusEl.hidden = false;
+      statusEl.className = "rf-status " + (type ? ("rf-status--" + type) : "");
+      statusEl.innerHTML = html;
+      statusEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      // basic UX
+      submitBtn.disabled = true;
+      const oldText = submitBtn.textContent;
+      submitBtn.textContent = "Sending…";
+      statusEl.hidden = true;
+
+      try{
+        const formData = new FormData(form);
+
+        const res = await fetch(form.action, {
+          method: "POST",
+          body: formData,
+          headers: { "Accept": "application/json" }
+        });
+
+        if (res.ok){
+          form.reset();
+          setStatus("success",
+            "<strong>✅ Request received.</strong><br>Derek will reach out shortly to confirm details. If you need immediate help, call or text <strong>985-507-1718</strong>."
+          );
+        } else {
+          let msg = "We couldn’t send that right now. Please try again or call/text 985-507-1718.";
+          try{
+            const data = await res.json();
+            if (data && data.errors && data.errors.length){
+              msg = data.errors.map(e => e.message).join(" ");
+            }
+          } catch(_) {}
+          setStatus("error",
+            "<strong>⚠️ Submission failed.</strong><br>" + msg
+          );
+        }
+      } catch(err){
+        setStatus("error",
+          "<strong>⚠️ Network error.</strong><br>Please check your connection and try again, or call/text <strong>985-507-1718</strong>."
+        );
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = oldText;
       }
-
-      form.addEventListener("submit", async function(e){
-        e.preventDefault();
-
-        const action = form.getAttribute("action");
-        const data = new FormData(form);
-
-        if (btn){
-          btn.disabled = true;
-          btn.style.opacity = "0.85";
-          btn.textContent = "Sending…";
-        }
-
-        try {
-          const res = await fetch(action, {
-            method: "POST",
-            body: data,
-            headers: { "Accept": "application/json" }
-          });
-
-          if (res.ok) {
-            showStatus("success", "✅ Request sent. Derek will reach out to confirm your appointment time.");
-            form.reset();
-          } else {
-            showStatus("error", "⚠️ Something didn’t send. Please call 985-507-1718 and we’ll handle you.");
-          }
-        } catch (err) {
-          showStatus("error", "⚠️ Network issue. Please call 985-507-1718 and we’ll handle you.");
-        } finally {
-          if (btn){
-            btn.disabled = false;
-            btn.style.opacity = "1";
-            btn.textContent = "Send Appointment Request";
-          }
-        }
-      });
-    })();
+    });
+  })();
   </script>
 </body>
 </html>
