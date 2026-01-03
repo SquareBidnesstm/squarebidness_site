@@ -1,13 +1,9 @@
 <!-- public/nav/index.html -->
 <header class="site-header" style="background:#020617;border-bottom:1px solid #0b1220;color:#e5e7eb;">
   <style>
-    /* CLS FIX:
-       Reserve a stable minimum header height + stable mobile collapsed area.
-       This prevents layout jump when nav is injected + when JS runs.
-    */
+    /* CLS FIX: reserve stable header height */
     .site-header{min-height:64px;}
     @media (max-width:768px){
-      /* Reserve enough space for brand + toggle row even before links render */
       .site-header{min-height:108px;}
     }
 
@@ -37,8 +33,19 @@
       max-width:52ch;
     }
 
-    .nav__group{display:flex;align-items:center;gap:1.25rem;}
-    .nav__links{display:flex;align-items:center;gap:1.1rem;font-size:.9rem;flex-wrap:wrap;}
+    .nav__group{
+      display:flex;
+      align-items:center;
+      gap:1.25rem;
+    }
+
+    .nav__links{
+      display:flex;
+      align-items:center;
+      gap:1.1rem;
+      font-size:.9rem;
+      flex-wrap:wrap;
+    }
     .nav__links a{
       color:#e5e7eb;
       text-decoration:none;
@@ -47,7 +54,7 @@
     }
     .nav__links a:hover{color:#fff;}
 
-    /* Active link (loader can add .is-active + aria-current) */
+    /* Active link (partials.js adds .is-active + aria-current) */
     .nav__links a.is-active,
     .nav__links a[aria-current="page"]{
       color:#fff;
@@ -63,7 +70,13 @@
       border-radius:2px;
     }
 
-    .nav__right{display:flex;align-items:center;gap:.75rem;font-size:.85rem;flex-wrap:wrap;}
+    .nav__right{
+      display:flex;
+      align-items:center;
+      gap:.75rem;
+      font-size:.85rem;
+      flex-wrap:wrap;
+    }
 
     .nav-cart{
       display:inline-flex;
@@ -114,21 +127,18 @@
         flex-direction:column;
       }
 
-      /* CLS FIX:
-         Use max-height for smooth open/close without “display: none” jumps.
-         Start collapsed but reserve the container so injection doesn’t reflow later.
-      */
+      /* No display toggling — max-height animation only */
       .nav__group{
         width:100%;
-        display:block;              /* no display toggling */
+        display:block;
         overflow:hidden;
-        max-height:0;               /* collapsed */
+        max-height:0;
         padding-top:0;
         border-top:0;
-        transition:max-height .18s ease;
+        transition:max-height .18s ease, padding-top .18s ease, border-top-color .18s ease;
       }
       .site-header.is-open .nav__group{
-        max-height:420px;           /* enough for links + right side */
+        max-height:520px;
         padding-top:.6rem;
         border-top:1px solid #111827;
       }
@@ -147,7 +157,7 @@
 
   <div class="nav-shell">
     <!-- Brand -->
-    <a href="/" class="nav__brand nav__brand-row" aria-label="Square Bidness Home">
+    <a href="/" class="nav__brand-row" aria-label="Square Bidness Home">
       <img
         src="/assets/cleantextlogo.png"
         alt="Square Bidness"
@@ -161,13 +171,20 @@
     </a>
 
     <!-- Mobile toggle -->
-    <button id="navToggle" class="nav-menu-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">
+    <button
+      class="nav-menu-toggle"
+      type="button"
+      aria-label="Toggle navigation"
+      aria-expanded="false"
+      aria-controls="navGroup"
+      data-nav-toggle
+    >
       <span class="nav-menu-icon" aria-hidden="true">☰</span>
       <span>Menu</span>
     </button>
 
     <!-- Links + right side -->
-    <div id="navGroup" class="nav__group">
+    <div id="navGroup" class="nav__group" data-nav-group>
       <nav class="nav__links" aria-label="Main">
         <a href="/vsop/">VSOP</a>
         <a href="/wintergames/">Winter Games</a>
@@ -175,9 +192,9 @@
         <a href="/stories/">Stories</a>
         <a href="/community/">Community</a>
         <a href="/techlabs/">Tech Lab</a>
-     </nav>
+      </nav>
 
-        
+      <div class="nav__right" aria-label="Actions">
         <a href="/linkme/" style="color:#38bdf8;text-decoration:none;font-weight:600;">
           Link Me
         </a>
@@ -190,12 +207,15 @@
     </div>
   </div>
 
-  <!-- CLS-safe toggle (works even if global.js doesn’t run) -->
+  <!-- CLS-safe toggle (scoped to this header) -->
   <script>
     (function(){
-      const header = document.currentScript?.closest('.site-header') || document.querySelector('.site-header');
-      const btn = document.getElementById('navToggle');
-      if (!header || !btn) return;
+      const header = document.currentScript && document.currentScript.closest('.site-header');
+      if (!header) return;
+
+      const btn = header.querySelector('[data-nav-toggle]');
+      const group = header.querySelector('[data-nav-group]');
+      if (!btn || !group) return;
 
       btn.addEventListener('click', () => {
         const open = !header.classList.contains('is-open');
