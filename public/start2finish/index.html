@@ -12,20 +12,26 @@
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
 
+  <!-- Build stamp -->
+  <meta name="sb:build" content="v20260103-start2finish-gold" />
+
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Square Bidness — Start2Finish" />
   <meta property="og:title" content="Start2Finish — Contractor House Work (Free Estimates)" />
   <meta property="og:description" content="Doing it all — inside &amp; out. Free estimates. Alexandria-based. Schedule an on-site visit in under a minute." />
   <meta property="og:url" content="https://www.squarebidness.com/start2finish/" />
-  <meta property="og:image" content="https://www.squarebidness.com/start2finish/assets/start2finish_1200x630.jpg" />
-  <meta property="og:image:alt" content="Fresh LVP install — clean, bright living room finished by Start2Finish" />
+  <meta property="og:image" content="https://www.squarebidness.com/start2finish/assets/kitchen-corner_clean_1200x630.jpg" />
+  <meta property="og:image:alt" content="Clean kitchen corner finished by Start2Finish" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:type" content="image/jpeg" />
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Start2Finish — Contractor House Work (Free Estimates)" />
   <meta name="twitter:description" content="Doing it all — inside &amp; out. Free estimates. Alexandria-based. Schedule on the page." />
-  <meta name="twitter:image" content="https://www.squarebidness.com/start2finish/assets/start2finish_1200x630.jpg" />
+  <meta name="twitter:image" content="https://www.squarebidness.com/start2finish/assets/kitchen-corner_clean_1200x630.jpg" />
 
   <!-- Icons / PWA -->
   <link rel="icon" href="/favicon.ico" sizes="any" />
@@ -36,6 +42,16 @@
   <script defer src="/scripts/ga.js"></script>
   <script defer src="/scripts/sb-analytics.js"></script>
   <script defer src="/scripts/partials.js"></script>
+
+  <!-- ✅ Preload hero (LCP) -->
+  <link
+    rel="preload"
+    as="image"
+    href="/start2finish/assets/living-room-clean_780.webp"
+    imagesrcset="/start2finish/assets/living-room-clean_420.webp 420w, /start2finish/assets/living-room-clean_640.webp 640w, /start2finish/assets/living-room-clean_780.webp 780w"
+    imagesizes="(max-width: 900px) 100vw, 520px"
+    fetchpriority="high"
+  />
 
   <style>
     :root{
@@ -80,7 +96,7 @@
     .hero-img{
       overflow:hidden;border-radius:18px;border:1px solid var(--stroke);background:#111;
     }
-    .hero-img img{display:block;width:100%;height:auto}
+    .hero-img picture,.hero-img img{display:block;width:100%;height:auto}
 
     .cards{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
     .card{
@@ -121,8 +137,16 @@
       display:grid;gap:12px;
       grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
     }
-    .gallery img{
-      width:100%;height:auto;border-radius:14px;border:1px solid var(--stroke);display:block
+    .gallery figure{margin:0}
+    .gallery .shot{
+      width:100%;height:auto;border-radius:14px;border:1px solid var(--stroke);
+      display:block;background:#111;
+    }
+
+    a:focus-visible{
+      outline:2px solid rgba(212,175,55,.75);
+      outline-offset:3px;
+      border-radius:10px;
     }
   </style>
 
@@ -132,7 +156,7 @@
     "@context": "https://schema.org",
     "@type": "HomeAndConstructionBusiness",
     "name": "Start2Finish by Square Bidness",
-    "image": "https://www.squarebidness.com/start2finish/assets/living-room-clean_1200x630.jpg",
+    "image": "https://www.squarebidness.com/start2finish/assets/kitchen-corner_clean_1200x630.jpg",
     "telephone": "+1-318-612-2114",
     "email": "marcusbuckner@gmail.com",
     "address": {
@@ -181,13 +205,25 @@
       </div>
 
       <div class="hero-img">
-        <img
-          src="/start2finish/assets/living-room-clean_800.jpg"
-          srcset="/start2finish/assets/living-room-clean_800.jpg 800w, /start2finish/assets/living-room-clean_1200.jpg 1200w"
-          sizes="(max-width: 900px) 100vw, 520px"
-          alt="After — bright living room with new LVP and clean walls"
-          loading="eager"
-          decoding="async" />
+        <picture>
+          <source
+            type="image/webp"
+            srcset="/start2finish/assets/living-room-clean_420.webp 420w, /start2finish/assets/living-room-clean_640.webp 640w, /start2finish/assets/living-room-clean_780.webp 780w"
+            sizes="(max-width: 900px) 100vw, 520px"
+          />
+          <source
+            type="image/jpeg"
+            srcset="/start2finish/assets/living-room-clean_420.jpg 420w, /start2finish/assets/living-room-clean_640.jpg 640w, /start2finish/assets/living-room-clean_780.jpg 780w"
+            sizes="(max-width: 900px) 100vw, 520px"
+          />
+          <img
+            src="/start2finish/assets/living-room-clean_780.jpg"
+            width="780" height="520"
+            alt="After — bright living room with new LVP and clean walls"
+            loading="eager"
+            decoding="async"
+            fetchpriority="high" />
+        </picture>
       </div>
     </section>
 
@@ -238,37 +274,77 @@
       <h3 style="margin:0 0 8px">Recent Work</h3>
 
       <div class="gallery">
-        <img
-          src="/start2finish/assets/bedroom-clean_800.jpg"
-          srcset="/start2finish/assets/bedroom-clean_800.jpg 800w, /start2finish/assets/bedroom-clean_1200.jpg 1200w"
-          sizes="(max-width: 900px) 100vw, 520px"
-          alt="After — bedroom with cleaned walls and new LVP, move-in ready"
-          loading="lazy"
-          decoding="async" />
+        <!-- bedroom-clean -->
+        <figure>
+          <picture>
+            <source type="image/webp"
+              srcset="/start2finish/assets/bedroom-clean_420.webp 420w, /start2finish/assets/bedroom-clean_640.webp 640w, /start2finish/assets/bedroom-clean_780.webp 780w"
+              sizes="(max-width: 900px) 100vw, 520px" />
+            <source type="image/jpeg"
+              srcset="/start2finish/assets/bedroom-clean_420.jpg 420w, /start2finish/assets/bedroom-clean_640.jpg 640w, /start2finish/assets/bedroom-clean_780.jpg 780w"
+              sizes="(max-width: 900px) 100vw, 520px" />
+            <img class="shot"
+              src="/start2finish/assets/bedroom-clean_780.jpg"
+              width="780" height="520"
+              alt="After — bedroom with cleaned walls and new LVP, move-in ready"
+              loading="lazy"
+              decoding="async" />
+          </picture>
+        </figure>
 
-        <img
-          src="/start2finish/assets/bedroom-clean-2_800.jpg"
-          srcset="/start2finish/assets/bedroom-clean-2_800.jpg 800w, /start2finish/assets/bedroom-clean-2_1200.jpg 1200w"
-          sizes="(max-width: 900px) 100vw, 520px"
-          alt="After — alternate bedroom angle with new LVP"
-          loading="lazy"
-          decoding="async" />
+        <!-- bedroom-clean-2 -->
+        <figure>
+          <picture>
+            <source type="image/webp"
+              srcset="/start2finish/assets/bedroom-clean-2_420.webp 420w, /start2finish/assets/bedroom-clean-2_640.webp 640w, /start2finish/assets/bedroom-clean-2_780.webp 780w"
+              sizes="(max-width: 900px) 100vw, 520px" />
+            <source type="image/jpeg"
+              srcset="/start2finish/assets/bedroom-clean-2_420.jpg 420w, /start2finish/assets/bedroom-clean-2_640.jpg 640w, /start2finish/assets/bedroom-clean-2_780.jpg 780w"
+              sizes="(max-width: 900px) 100vw, 520px" />
+            <img class="shot"
+              src="/start2finish/assets/bedroom-clean-2_780.jpg"
+              width="780" height="520"
+              alt="After — alternate bedroom angle with new LVP"
+              loading="lazy"
+              decoding="async" />
+          </picture>
+        </figure>
 
-        <img
-          src="/start2finish/assets/kitchen-clean_800.jpg"
-          srcset="/start2finish/assets/kitchen-clean_800.jpg 800w, /start2finish/assets/kitchen-clean_1200.jpg 1200w"
-          sizes="(max-width: 900px) 100vw, 520px"
-          alt="After — kitchen refreshed with clean cabinetry"
-          loading="lazy"
-          decoding="async" />
+        <!-- kitchen-clean -->
+        <figure>
+          <picture>
+            <source type="image/webp"
+              srcset="/start2finish/assets/kitchen-clean_420.webp 420w, /start2finish/assets/kitchen-clean_640.webp 640w, /start2finish/assets/kitchen-clean_780.webp 780w"
+              sizes="(max-width: 900px) 100vw, 520px" />
+            <source type="image/jpeg"
+              srcset="/start2finish/assets/kitchen-clean_420.jpg 420w, /start2finish/assets/kitchen-clean_640.jpg 640w, /start2finish/assets/kitchen-clean_780.jpg 780w"
+              sizes="(max-width: 900px) 100vw, 520px" />
+            <img class="shot"
+              src="/start2finish/assets/kitchen-clean_780.jpg"
+              width="780" height="520"
+              alt="After — kitchen refreshed with clean cabinetry"
+              loading="lazy"
+              decoding="async" />
+          </picture>
+        </figure>
 
-        <img
-          src="/start2finish/assets/kitchen-corner_clean_800.jpg"
-          srcset="/start2finish/assets/kitchen-corner_clean_800.jpg 800w, /start2finish/assets/kitchen-corner_clean_1200.jpg 1200w"
-          sizes="(max-width: 900px) 100vw, 520px"
-          alt="After — compact kitchen corner, tightened up and clean"
-          loading="lazy"
-          decoding="async" />
+        <!-- kitchen-corner_clean -->
+        <figure>
+          <picture>
+            <source type="image/webp"
+              srcset="/start2finish/assets/kitchen-corner_clean_420.webp 420w, /start2finish/assets/kitchen-corner_clean_640.webp 640w, /start2finish/assets/kitchen-corner_clean_780.webp 780w"
+              sizes="(max-width: 900px) 100vw, 520px" />
+            <source type="image/jpeg"
+              srcset="/start2finish/assets/kitchen-corner_clean_420.jpg 420w, /start2finish/assets/kitchen-corner_clean_640.jpg 640w, /start2finish/assets/kitchen-corner_clean_780.jpg 780w"
+              sizes="(max-width: 900px) 100vw, 520px" />
+            <img class="shot"
+              src="/start2finish/assets/kitchen-corner_clean_780.jpg"
+              width="780" height="520"
+              alt="After — compact kitchen corner, tightened up and clean"
+              loading="lazy"
+              decoding="async" />
+          </picture>
+        </figure>
       </div>
 
       <p class="note" style="margin-top:8px">
@@ -279,9 +355,19 @@
 
     <!-- ESTIMATE FORM -->
     <section id="estimate" class="grid" style="margin-top:26px;grid-template-columns:1fr .9fr;" aria-label="Estimate request">
-      <form class="form" method="post" action="/start2finish/estimate" novalidate>
+      <!-- If you want a Thank-You redirect, easiest is FormSubmit.
+           Replace action="/start2finish/estimate" with the FormSubmit action below,
+           and add the hidden _next input.
+      -->
+      <form class="form" method="post" action="https://formsubmit.co/marcusbuckner@gmail.com" novalidate>
         <h2>Schedule Your Free Estimate</h2>
         <p class="note">Pick a preferred time, and we’ll confirm. Same- or next-day slots when available.</p>
+
+        <!-- FormSubmit settings -->
+        <input type="hidden" name="_subject" value="Start2Finish — Estimate Request" />
+        <input type="hidden" name="_captcha" value="false" />
+        <input type="hidden" name="_template" value="table" />
+        <input type="hidden" name="_next" value="https://www.squarebidness.com/start2finish/thank-you/" />
 
         <div class="row">
           <div>
@@ -352,32 +438,40 @@
         </ul>
 
         <div style="margin-top:14px" class="hero-img">
-          <img
-            src="/start2finish/assets/living-room-clean_800.jpg"
-            srcset="/start2finish/assets/living-room-clean_800.jpg 800w, /start2finish/assets/living-room-clean_1200.jpg 1200w"
-            sizes="(max-width: 900px) 100vw, 520px"
-            alt="Recent on-site work — cleaned living room after LVP install"
-            loading="lazy"
-            decoding="async" />
+          <picture>
+            <source type="image/webp"
+              srcset="/start2finish/assets/living-room-clean_420.webp 420w, /start2finish/assets/living-room-clean_640.webp 640w, /start2finish/assets/living-room-clean_780.webp 780w"
+              sizes="(max-width: 900px) 100vw, 520px" />
+            <source type="image/jpeg"
+              srcset="/start2finish/assets/living-room-clean_420.jpg 420w, /start2finish/assets/living-room-clean_640.jpg 640w, /start2finish/assets/living-room-clean_780.jpg 780w"
+              sizes="(max-width: 900px) 100vw, 520px" />
+            <img
+              src="/start2finish/assets/living-room-clean_780.jpg"
+              width="780" height="520"
+              alt="Recent on-site work — cleaned living room after LVP install"
+              loading="lazy"
+              decoding="async" />
+          </picture>
         </div>
       </aside>
     </section>
   </main>
 
   <footer class="wrap footer">
-    <div>© 2025 Start2Finish — Contractor House Work • Alexandria &amp; Hammond, LA</div>
+    <div>© <span id="year"></span> Start2Finish — Contractor House Work • Alexandria &amp; Hammond, LA</div>
     <div>
       Lead: Deante Culvert • Call/Text <a href="tel:+13186122114" style="color:#fff">(318) 612-2114</a> •
       <a href="mailto:marcusbuckner@gmail.com" style="color:#fff">marcusbuckner@gmail.com</a>
     </div>
-    <div style="margin-top:8px">Credit: <strong>2025 Square Bidness Tech Lab</strong></div>
+    <div style="margin-top:8px">Credit: <strong>Square Bidness Tech Lab</strong></div>
   </footer>
 
   <div id="site-footer" aria-busy="true"></div>
 
   <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
     (function () {
-      const form = document.querySelector('form[action="/start2finish/estimate"]');
+      const form = document.querySelector('form');
       if (!form) return;
 
       form.addEventListener('submit', (e) => {
