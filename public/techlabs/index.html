@@ -8,47 +8,51 @@
   <title>Square Bidness Tech Lab — Built By The Brand</title>
   <meta name="description" content="Square Bidness Tech Lab builds the tools behind the brand — Tax Pass™, content systems, and future data / AI infrastructure. Louisiana-rooted, veteran-owned, built for independent operators." />
   <link rel="canonical" href="https://www.squarebidness.com/techlabs/" />
+  <meta name="robots" content="index,follow" />
   <meta name="theme-color" content="#000000" />
-  <meta name="color-scheme" content="dark light">
-  <meta name="format-detection" content="telephone=no">
-  <meta name="robots" content="index,follow">
+  <meta name="color-scheme" content="dark light" />
+  <meta name="format-detection" content="telephone=no" />
+
+  <!-- Build stamp -->
+  <meta name="sb:build" content="v20260104-techlabs" />
 
   <!-- Perf -->
-  <link rel="preconnect" href="https://www.googletagmanager.com">
-  <link rel="preconnect" href="https://www.google-analytics.com">
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+  <link rel="preconnect" href="https://www.google-analytics.com" crossorigin>
+  <link rel="preconnect" href="https://static.cloudflareinsights.com" crossorigin>
   <link rel="preload" href="/styles/style.css" as="style" />
 
   <!-- CSS -->
   <link rel="stylesheet" href="/styles/style.css" />
 
   <!-- OG / Social -->
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Square Bidness">
-  <meta property="og:title" content="Square Bidness Tech Lab — Built By The Brand">
-  <meta property="og:description" content="The engineering arm behind Square Bidness — Tax Pass™, internal tools, and future data / AI infrastructure for independent operators.">
-  <meta property="og:url" content="https://www.squarebidness.com/techlabs/">
-  <meta property="og:image" content="https://www.squarebidness.com/assets/og/tech-lab-1200x630.jpg">
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Square Bidness" />
+  <meta property="og:title" content="Square Bidness Tech Lab — Built By The Brand" />
+  <meta property="og:description" content="The engineering arm behind Square Bidness — Tax Pass™, internal tools, and future data / AI infrastructure for independent operators." />
+  <meta property="og:url" content="https://www.squarebidness.com/techlabs/" />
+  <meta property="og:image" content="https://www.squarebidness.com/assets/og/tech-lab-1200x630.jpg" />
+  <meta property="og:image:alt" content="Square Bidness Tech Lab — tools behind the brand" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
+  <meta property="og:image:type" content="image/jpeg" />
 
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Square Bidness Tech Lab — Built By The Brand">
-  <meta name="twitter:description" content="Square Bidness Tech Lab builds the tools behind the brand — from Tax Pass™ to future data and AI infrastructure.">
-  <meta name="twitter:image" content="https://www.squarebidness.com/assets/og/tech-lab-1200x630.jpg">
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Square Bidness Tech Lab — Built By The Brand" />
+  <meta name="twitter:description" content="Square Bidness Tech Lab builds the tools behind the brand — from Tax Pass™ to future data and AI infrastructure." />
+  <meta name="twitter:image" content="https://www.squarebidness.com/assets/og/tech-lab-1200x630.jpg" />
 
   <!-- Icons / PWA -->
-  <link rel="icon" href="/favicon.ico" sizes="any">
-  <link rel="apple-touch-icon" href="/icon_180.png">
-  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/icon-180.png" />
+  <link rel="manifest" href="/manifest.webmanifest" />
 
-  <!-- GA -->
+  <!-- Scripts -->
   <script defer src="/scripts/ga.js"></script>
-
-  <!-- Site-wide analytics -->
   <script defer src="/scripts/sb-analytics.js"></script>
-
-  <!-- Partials loader (correct path for this repo) -->
+  <script defer src="/scripts/global.js"></script>
   <script defer src="/scripts/partials.js"></script>
+  <script defer src="/scripts/sw-register.js"></script>
 
   <style>
     :root{
@@ -71,10 +75,15 @@
     }
     a{color:inherit;text-decoration:none}
     a:hover{text-decoration:underline}
+    a:focus-visible{
+      outline:2px solid rgba(249,115,22,.75);
+      outline-offset:3px;
+      border-radius:10px;
+    }
 
-    /* Reserve space for nav/footer so content doesn't jump */
-    #nav-placeholder{min-height:72px;}
-    #footer-placeholder{min-height:120px;}
+    /* ✅ Reserve space for injected nav/footer (CLS guard) */
+    #site-header{min-height:72px;}
+    #site-footer{min-height:140px;}
 
     .wrap{max-width:1120px;margin:0 auto;padding:16px;}
 
@@ -145,6 +154,7 @@
       color:#e5e7eb;
       text-decoration:none;
     }
+    .btn:hover{ text-decoration:none; filter:brightness(1.03); }
     .btn-primary{
       background:linear-gradient(135deg,#f97316,#fb923c);
       color:#020617;
@@ -157,6 +167,7 @@
       margin-top:8px;
       font-size:.82rem;
       color:#9ca3af;
+      line-height:1.5;
     }
 
     .section{
@@ -167,7 +178,7 @@
       padding:16px 16px 14px;
     }
     .section h2{margin:0 0 6px;font-size:1.1rem;}
-    .section p{margin:0 0 10px;font-size:.9rem;color:var(--muted);}
+    .section p{margin:0 0 10px;font-size:.9rem;color:var(--muted);line-height:1.55;}
 
     .grid-3{display:grid;gap:12px;}
     @media(min-width:860px){.grid-3{grid-template-columns:repeat(3,1fr);}}
@@ -184,9 +195,11 @@
     }
     .card h3{margin:0;font-size:1rem;}
     .card p{margin:0;font-size:.86rem;color:#9ca3af;line-height:1.45;}
-    .card-footer{margin-top:6px;font-size:.82rem;color:#cbd5e1;}
+    .card-footer{margin-top:6px;font-size:.82rem;color:#cbd5e1;line-height:1.45;}
+    .card-footer a{color:#e5e7eb;text-decoration:underline;}
+    .card-footer a:hover{opacity:.95}
 
-    .list{margin:6px 0 0 18px;padding:0;font-size:.9rem;color:var(--muted);}
+    .list{margin:6px 0 0 18px;padding:0;font-size:.9rem;color:var(--muted);line-height:1.55;}
     .list li{margin:.25rem 0;}
 
     .callout{
@@ -197,7 +210,9 @@
       font-size:.85rem;
       color:#d4d4de;
       margin-top:10px;
+      line-height:1.55;
     }
+    .callout a{ text-decoration:underline; }
 
     .page-footer{
       max-width:1120px;
@@ -211,8 +226,10 @@
 </head>
 
 <body class="theme-dark" id="top">
-  <!-- NAV -->
-  <div id="nav-placeholder"></div>
+  <!-- NAV injected by /scripts/partials.js -->
+  <div id="site-header"
+       aria-busy="true"
+       style="content-visibility:auto;contain-intrinsic-size:80px;"></div>
 
   <main class="wrap" id="main">
     <header class="hero">
@@ -231,10 +248,13 @@
           <a class="btn btn-primary" href="/tax-pass/">
             Tax Pass™ — Learn More <span>→</span>
           </a>
+
           <a class="btn" href="https://lab.squarebidness.com/shortcuts/" target="_blank" rel="noopener">
             Internal Tools &amp; Shortcuts
           </a>
-          <a class="btn" href="/linkme/">
+
+          <!-- ✅ If LinkMe lives on lab subdomain, point there -->
+          <a class="btn" href="https://lab.squarebidness.com/linkme/" target="_blank" rel="noopener">
             Link Me <span>→</span>
           </a>
         </div>
@@ -312,7 +332,7 @@
 
       <div class="callout">
         Want to talk through Tax Pass™ or another idea?
-        Email <a href="mailto:info@squarebidness.com">info@squarebidness.com</a>.
+        Email <a href="mailto:techlab@squarebidness.com">techlab@squarebidness.com</a>.
       </div>
     </section>
   </main>
@@ -324,23 +344,23 @@
     </p>
   </div>
 
-  <!-- FOOTER -->
-  <div id="footer-placeholder"></div>
+  <!-- FOOTER injected by /scripts/partials.js -->
+  <div id="site-footer"
+       aria-busy="true"
+       style="content-visibility:auto;contain-intrinsic-size:140px;"></div>
 
-  <!-- KEEP BOTH PURPOSES:
-       1) /scripts/partials.js = your standard system
-       2) this inline fetch = hard fallback if partials.js isn’t active on this page -->
+  <!-- ✅ Optional: hard fallback ONLY if partials.js fails to inject -->
   <script>
     (function () {
-      const bust = `?v=${Date.now()}`;
+      const bust = `?v=${encodeURIComponent(document.querySelector('meta[name="sb:build"]')?.content || 'v1')}`;
 
       async function inject(url, id) {
         try {
           const el = document.getElementById(id);
           if (!el) return;
 
-          // If something (partials.js) already filled it, don’t overwrite.
-          if (el.innerHTML && el.innerHTML.trim().length > 0) return;
+          // If partials.js already filled it, don’t overwrite.
+          if ((el.innerHTML || "").trim().length > 0) return;
 
           const res = await fetch(url + bust, { cache: "no-store", credentials: "same-origin" });
           if (!res.ok) return;
@@ -348,14 +368,15 @@
         } catch (e) {}
       }
 
+      function run() {
+        inject("/nav/index.html", "site-header");
+        inject("/footer/index.html", "site-footer");
+      }
+
       if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", () => {
-          inject("/nav/index.html", "nav-placeholder");
-          inject("/footer/index.html", "footer-placeholder");
-        }, { once: true });
+        document.addEventListener("DOMContentLoaded", run, { once: true });
       } else {
-        inject("/nav/index.html", "nav-placeholder");
-        inject("/footer/index.html", "footer-placeholder");
+        run();
       }
     })();
   </script>
