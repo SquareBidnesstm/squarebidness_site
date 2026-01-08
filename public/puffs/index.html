@@ -204,133 +204,154 @@
   </div>
 
   <script>
-    // ------- DATA -------
-    const MENU = [
-      {section:'Individual', items:[
-        {id:'turkey_wings_ind', name:'Smoked Turkey Wings', price:10},
-        {id:'turkey_legs_ind',  name:'Smoked Turkey Legs',  price:12},
-      ]},
-      {section:'Plates', note:'All plates come with two sides and bread (excluding pig feet).', items:[
-        {id:'neck_bones_plate', name:'Pork Neck Bones Plate', price:20},
-        {id:'turkey_neck_plate', name:'Turkey Neck Plate', price:20},
-        {id:'rib_half_plate', name:'Rib Plate (Half Slab)', price:20},
-        {id:'turkey_wings_plate', name:'Turkey Wings Plate (2)', price:20},
-        {id:'pig_feet_plate', name:'Smoked Pig Feet Plate', price:15, badge:'Sunday only', subnote:'served with corn and potatoes'}
-      ]},
-      {section:'Sides / Add-ons', items:[
-        {id:'extra_corn', name:'Extra Corn', price:1},
-        {id:'potatoes', name:'Potatoes', price:1},
-        {id:'meat_only', name:'Meat Only', price:15}
-      ]}
-    ];
-    const TAX_RATE = 0.0895;
-    const PHONE = '+19859811777';
+  // ------- BUILD (cache-bust for menu.json) -------
+  const BUILD =
+    (document.querySelector('meta[name="sb:build"]')?.content || "v1");
 
-    // ------- CONFIG: Owner PIN -------
-    const ADMIN_PIN = '1777'; // <-- change this anytime
+  // ------- DATA (loaded from /puffs/menu.json) -------
+  let MENU = [];
+  let TAX_RATE = 0.0895;
+  let PHONE = "+19859811777";
 
-    // ------- ORDER CLOSED & SPECIALS KEYS -------
-    const STORAGE_KEY = 'puffsClosedFlag';
-    const SPECIALS_KEY = 'puffsSpecialsText';
+  async function loadMenuJSON() {
+    const res = await fetch(`/puffs/menu.json?v=${encodeURIComponent(BUILD)}`);
+    if (!res.ok) throw new Error("menu.json not found");
 
-    // ------- QUERYSTRING & OWNER MODE (PIN-GATED) -------
-    const qs = new URLSearchParams(location.search);
-    // remember owner session in THIS TAB only
-    let ownerMode = sessionStorage.getItem('puffsAdmin') === '1';
-    if (qs.get('owner') === '1' && !ownerMode) {
-      const entered = prompt('Owner PIN');
-      if (entered === ADMIN_PIN) {
-        ownerMode = true;
-        sessionStorage.setItem('puffsAdmin', '1');
-      } else {
-        alert('Incorrect PIN.');
-      }
+    const data = await res.json();
+
+    MENU = Array.isArray(data.sections) ? data.sections : [];
+    TAX_RATE = Number.isFinite(Number(data.taxRate)) ? Number(data.taxRate) : 0.0895;
+    PHONE = data.phone || "+19859811777";
+
+    // Specials bar (allow ?special=... to override)
+    const specialFromLink = qs.get("special");
+    if (specialFromLink) renderSpecials(decodeURIComponent(specialFromLink));
+    else renderSpecials(data.special || "");
+
+    // Open/Closed from JSON (allow URL overrides)
+    // data.open === true -> OPEN
+    // data.open === false -> CLOSED
+    const closedFromJSON = data.open === false;
+
+    // if forceClosed was set via URL, getClosed() will handle it.
+    // Otherwise, we use JSON open/closed and mirror it into localStorage for consistency.
+    if (forceClosed === null) {
+      localStorage.setItem(STORAGE_KEY, closedFromJSON ? "1" : "0");
+      applyClosedState(closedFromJSON);
+    } else {
+      applyClosedState(getClosed());
     }
 
-    // Force open/closed via URL if provided
-    const forceClosed = qs.get('closed') === '1' ? true
-                      : qs.get('open') === '1' ? false
-                      : null;
+    return data;
+  }
 
-    function getClosed() {
-      if (forceClosed !== null) return forceClosed;
-      const v = localStorage.getItem(STORAGE_KEY);
-      return v === '1';
+  // ------- CONFIG: Owner PIN -------
+  const ADMIN_PIN = '1777'; // <-- change this anytime
+
+  // ------- ORDER CLOSED & SPECIALS KEYS -------
+  const STORAGE_KEY = 'puffsClosedFlag';
+  const SPECIALS_KEY = 'puffsSpecialsText';
+
+  // ------- QUERYSTRING & OWNER MODE (PIN-GATED) -------
+  const qs = new URLSearchParams(location.search);
+  // remember owner session in THIS TAB only
+  let ownerMode = sessionStorage.getItem('puffsAdmin') === '1';
+  if (qs.get('owner') === '1' && !ownerMode) {
+    const entered = prompt('Owner PIN');
+    if (entered === ADMIN_PIN) {
+      ownerMode = true;
+      sessionStorage.setItem('puffsAdmin', '1');
+    } else {
+      alert('Incorrect PIN.');
     }
-    function setClosed(v) {
-      localStorage.setItem(STORAGE_KEY, v ? '1' : '0');
-      applyClosedState(v);
+  }
+
+  // Force open/closed via URL if provided
+  const forceClosed = qs.get('closed') === '1' ? true
+                    : qs.get('open') === '1' ? false
+                    : null;
+
+  function getClosed() {
+    if (forceClosed !== null) return forceClosed;
+    const v = localStorage.getItem(STORAGE_KEY);
+    return v === '1';
+  }
+  function setClosed(v) {
+    localStorage.setItem(STORAGE_KEY, v ? '1' : '0');
+    applyClosedState(v);
+  }
+  function applyClosedState(isClosed){
+    const disabledCls = 'disabled';
+    document.querySelectorAll('.qty button, #btnText, #btnCopy, #btnClear').forEach(el=>{
+      if(isClosed) el.classList.add(disabledCls); else el.classList.remove(disabledCls);
+    });
+    document.getElementById('closedBanner').style.display = isClosed ? '' : 'none';
+    document.getElementById('closedOverlay').style.display = isClosed ? 'flex' : 'none';
+    const t = document.getElementById('toggleClosed');
+    if (t) t.checked = isClosed;
+  }
+
+  // ------- SPECIALS -------
+  function renderSpecials(text){
+    const bar = document.getElementById('specialsBar');
+    const el = document.getElementById('specialsText');
+    if (text && text.trim().length){
+      el.textContent = text.trim();
+      bar.style.display = '';
+    } else {
+      bar.style.display = 'none';
+      el.textContent = '';
     }
-    function applyClosedState(isClosed){
-      const disabledCls = 'disabled';
-      document.querySelectorAll('.qty button, #btnText, #btnCopy, #btnClear').forEach(el=>{
-        if(isClosed) el.classList.add(disabledCls); else el.classList.remove(disabledCls);
-      });
-      document.getElementById('closedBanner').style.display = isClosed ? '' : 'none';
-      document.getElementById('closedOverlay').style.display = isClosed ? 'flex' : 'none';
-      const t = document.getElementById('toggleClosed');
-      if (t) t.checked = isClosed;
-    }
+  }
+  function saveSpecials(text){
+    localStorage.setItem(SPECIALS_KEY, text || '');
+    renderSpecials(text);
+  }
 
-    // ------- SPECIALS -------
-    function renderSpecials(text){
-      const bar = document.getElementById('specialsBar');
-      const el = document.getElementById('specialsText');
-      if (text && text.trim().length){
-        el.textContent = text.trim();
-        bar.style.display = '';
-      } else {
-        bar.style.display = 'none';
-        el.textContent = '';
-      }
-    }
-    function saveSpecials(text){
-      localStorage.setItem(SPECIALS_KEY, text || '');
-      renderSpecials(text);
-    }
-    // Allow promo links like ?special=Wing%20Basket%20at%20First%20Street
-    const specialFromLink = qs.get('special');
-    if (specialFromLink){ renderSpecials(decodeURIComponent(specialFromLink)); }
-    else { renderSpecials(localStorage.getItem(SPECIALS_KEY) || ''); }
+  // ------- OWNER PANEL WIRING -------
+  if (ownerMode) {
+    document.getElementById('ownerPanel').style.display = 'block';
 
-    // ------- OWNER PANEL WIRING -------
-    if (ownerMode) {
-      document.getElementById('ownerPanel').style.display = 'block';
-      // closed toggle
-      const toggle = document.getElementById('toggleClosed');
-      toggle.checked = getClosed();
-      toggle.addEventListener('change', (e)=> setClosed(e.target.checked));
+    // closed toggle
+    const toggle = document.getElementById('toggleClosed');
+    toggle.checked = getClosed();
+    toggle.addEventListener('change', (e)=> setClosed(e.target.checked));
 
-      // specials
-      const box = document.getElementById('ownerSpecials');
-      box.value = localStorage.getItem(SPECIALS_KEY) || '';
-      document.getElementById('saveSpecial').onclick = ()=> saveSpecials(box.value);
-      document.getElementById('clearSpecial').onclick = ()=> { box.value=''; saveSpecials(''); };
+    // specials (device-local)
+    const box = document.getElementById('ownerSpecials');
+    box.value = localStorage.getItem(SPECIALS_KEY) || '';
+    document.getElementById('saveSpecial').onclick = ()=> saveSpecials(box.value);
+    document.getElementById('clearSpecial').onclick = ()=> { box.value=''; saveSpecials(''); };
 
-      // copy promo link
-      document.getElementById('copyLink').onclick = ()=>{
-        const txt = (box.value || '').trim();
-        if (!txt){ alert('Enter a special first.'); return; }
-        const url = new URL(location.href.split('#')[0]);
-        url.searchParams.set('special', txt);
-        // do not leak owner=1 or PIN state
-        url.searchParams.delete('owner');
-        navigator.clipboard.writeText(url.toString()).then(()=> alert('Promo link copied!')).catch(()=> alert('Copy failed.'));
-      };
+    // copy promo link
+    document.getElementById('copyLink').onclick = ()=>{
+      const txt = (box.value || '').trim();
+      if (!txt){ alert('Enter a special first.'); return; }
+      const url = new URL(location.href.split('#')[0]);
+      url.searchParams.set('special', txt);
+      // do not leak owner=1 or PIN state
+      url.searchParams.delete('owner');
+      navigator.clipboard.writeText(url.toString()).then(()=> alert('Promo link copied!')).catch(()=> alert('Copy failed.'));
+    };
 
-      // sign out (clear owner session)
-      document.getElementById('signOut').onclick = ()=>{
-        sessionStorage.removeItem('puffsAdmin');
-        location.href = location.pathname; // reload without owner param
-      };
-    }
+    // sign out (clear owner session)
+    document.getElementById('signOut').onclick = ()=>{
+      sessionStorage.removeItem('puffsAdmin');
+      location.href = location.pathname; // reload without owner param
+    };
+  }
 
-    document.getElementById('overlayOk').onclick = ()=> document.getElementById('closedOverlay').style.display = 'none';
+  document.getElementById('overlayOk').onclick = ()=> {
+    document.getElementById('closedOverlay').style.display = 'none';
+  };
 
-    // ------- CART -------
-    const cart = new Map();
+  // ------- CART -------
+  const cart = new Map();
 
+  function renderMenu() {
     const $menu = document.getElementById('menuContent');
+    $menu.innerHTML = "";
+
     $menu.append(
       ...MENU.map(sec => {
         const wrap = document.createElement('section');
@@ -348,14 +369,17 @@
           wrap.append(n);
         }
 
-        sec.items.forEach(item => {
+        (sec.items || []).forEach(item => {
           const row = document.createElement('div');
           row.className = 'row';
+
           const name = document.createElement('div');
           name.innerHTML = `<strong>${item.name}</strong>${item.subnote ? `<div class="tiny muted">${item.subnote}</div>`:''}${item.badge?` <span class="pill" style="margin-left:6px">${item.badge}</span>`:''}`;
+
           const price = document.createElement('div');
           price.className = 'price';
-          price.textContent = `$${item.price}`;
+          price.textContent = `$${Number(item.price || 0)}`;
+
           const qty = document.createElement('div');
           qty.className = 'qty';
           const minus = document.createElement('button'); minus.textContent = '–';
@@ -364,6 +388,7 @@
           minus.onclick = () => update(item.id, -1);
           plus.onclick  = () => update(item.id, +1);
           qty.append(minus, v, plus);
+
           row.append(name, price, qty);
           wrap.append(row);
 
@@ -374,132 +399,149 @@
         return wrap;
       })
     );
+  }
 
-    function update(id, delta){
-      if (getClosed()) { applyClosedState(true); return; }
-      const q = Math.max(0, (cart.get(id)||0) + delta);
-      if (q === 0) cart.delete(id); else cart.set(id, q);
-      const qtySpan = document.querySelector(`[data-bind-qty="${id}"]`);
-      if (qtySpan) qtySpan.textContent = q;
-      renderCart();
-    }
-
-    function money(n){ return `$${n.toFixed(2)}`; }
-
-    function renderCart(){
-      const $lines = document.getElementById('cartLines');
-      $lines.innerHTML = '';
-      let sub = 0;
-
-      for (const sec of MENU){
-        for (const item of sec.items){
-          const q = cart.get(item.id) || 0;
-          if (!q) continue;
-          const line = document.createElement('div');
-          line.textContent = `${q} × ${item.name}`;
-          const right = document.createElement('div'); right.textContent = money(q*item.price);
-          const flex = document.createElement('div'); flex.style.display='flex'; flex.style.justifyContent='space-between';
-          flex.append(line, right);
-          $lines.append(flex);
-          sub += q*item.price;
-        }
-      }
-      if (sub === 0) $lines.textContent = 'No items yet.';
-
-      const tax = sub * TAX_RATE;
-      const tot = sub + tax;
-      document.getElementById('sub').textContent = money(sub);
-      document.getElementById('tax').textContent = money(tax);
-      document.getElementById('tot').textContent = money(tot);
-    }
-
-    // Actions
-    document.getElementById('btnClear').onclick = () => {
-      if (getClosed()) { applyClosedState(true); return; }
-      cart.clear(); document.querySelectorAll('[data-bind-qty]').forEach(s=>s.textContent='0'); renderCart();
-    };
-
-    document.getElementById('btnCopy').onclick = () => {
-      if (getClosed()) { applyClosedState(true); return; }
-      const summary = buildSummary();
-      navigator.clipboard.writeText(summary).then(()=> alert('Order copied.')).catch(()=> alert('Copy failed'));
-    };
-
-    document.getElementById('btnText').onclick = () => {
-      if (getClosed()) { applyClosedState(true); return; }
-      if (cart.size === 0) { alert('Add something to the cart first.'); return; }
-      const summary = encodeURIComponent(buildSummary());
-      window.location.href = `sms:${PHONE}?&body=${summary}`;
-    };
-
-    function buildSummary(){
-      const when = document.getElementById('pickup').value;
-      const name = document.getElementById('custName').value || '—';
-      const phone = document.getElementById('custPhone').value || '—';
-      const notes = document.getElementById('custNotes').value || '—';
-
-      let lines = [
-        `Puff’s Smokehouse — Pickup Order`,
-        `Pickup: ${when}`,
-        `Name: ${name}`,
-        `Phone: ${phone}`,
-        '',
-        'Items:'
-      ];
-      let sub = 0;
-      for (const sec of MENU){
-        for (const item of sec.items){
-          const q = cart.get(item.id) || 0; if (!q) continue;
-          lines.push(`• ${q} × ${item.name}  $${(q*item.price).toFixed(2)}`);
-          sub += q*item.price;
-        }
-      }
-      const tax = sub*TAX_RATE, tot = sub+tax;
-      lines.push(
-        '',
-        `Subtotal: $${sub.toFixed(2)}`,
-        `Tax: $${tax.toFixed(2)}`,
-        `Total: $${tot.toFixed(2)}`,
-        '',
-        `Notes: ${notes}`
-      );
-      return lines.join('\n');
-    }
-
-    // Boot
+  function update(id, delta){
+    if (getClosed()) { applyClosedState(true); return; }
+    const q = Math.max(0, (cart.get(id)||0) + delta);
+    if (q === 0) cart.delete(id); else cart.set(id, q);
+    const qtySpan = document.querySelector(`[data-bind-qty="${id}"]`);
+    if (qtySpan) qtySpan.textContent = q;
     renderCart();
-    applyClosedState(getClosed());
-  </script>
+  }
 
-  <!-- Single, final Owner Login link rewriter (absolute + preserves params + cache-buster) -->
-  <script>
-    (function () {
-      const link = document.getElementById('ownerLogin');
-      if (!link) return;
+  function money(n){ return `$${n.toFixed(2)}`; }
 
-      // Start with absolute /puffs/ URL
-      const base = new URL(window.location.origin + '/puffs/');
+  function renderCart(){
+    const $lines = document.getElementById('cartLines');
+    $lines.innerHTML = '';
+    let sub = 0;
 
-      // Copy current query params except 'owner'
-      const current = new URL(window.location.href);
-      current.searchParams.forEach((val, key) => {
-        if (key !== 'owner') base.searchParams.set(key, val);
-      });
-
-      // Force owner mode + cache-buster
-      base.searchParams.set('owner','1');
-      base.searchParams.set('v','2');
-
-      // Set the href (absolute path + query)
-      link.href = base.pathname + '?' + base.searchParams.toString();
-    })();
-  </script>
-
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/puffs/sw.js', { scope: '/puffs/' }).catch(()=>{});
+    for (const sec of MENU){
+      for (const item of (sec.items || [])){
+        const q = cart.get(item.id) || 0;
+        if (!q) continue;
+        const line = document.createElement('div');
+        line.textContent = `${q} × ${item.name}`;
+        const right = document.createElement('div'); right.textContent = money(q * Number(item.price || 0));
+        const flex = document.createElement('div'); flex.style.display='flex'; flex.style.justifyContent='space-between';
+        flex.append(line, right);
+        $lines.append(flex);
+        sub += q * Number(item.price || 0);
+      }
     }
-  </script>
+    if (sub === 0) $lines.textContent = 'No items yet.';
 
+    const tax = sub * TAX_RATE;
+    const tot = sub + tax;
+    document.getElementById('sub').textContent = money(sub);
+    document.getElementById('tax').textContent = money(tax);
+    document.getElementById('tot').textContent = money(tot);
+  }
+
+  // Actions
+  document.getElementById('btnClear').onclick = () => {
+    if (getClosed()) { applyClosedState(true); return; }
+    cart.clear();
+    document.querySelectorAll('[data-bind-qty]').forEach(s=>s.textContent='0');
+    renderCart();
+  };
+
+  document.getElementById('btnCopy').onclick = () => {
+    if (getClosed()) { applyClosedState(true); return; }
+    const summary = buildSummary();
+    navigator.clipboard.writeText(summary).then(()=> alert('Order copied.')).catch(()=> alert('Copy failed'));
+  };
+
+  document.getElementById('btnText').onclick = () => {
+    if (getClosed()) { applyClosedState(true); return; }
+    if (cart.size === 0) { alert('Add something to the cart first.'); return; }
+    const summary = encodeURIComponent(buildSummary());
+    window.location.href = `sms:${PHONE}?&body=${summary}`;
+  };
+
+  function buildSummary(){
+    const when = document.getElementById('pickup').value;
+    const name = document.getElementById('custName').value || '—';
+    const phone = document.getElementById('custPhone').value || '—';
+    const notes = document.getElementById('custNotes').value || '—';
+
+    let lines = [
+      `Puff’s Smokehouse — Pickup Order`,
+      `Pickup: ${when}`,
+      `Name: ${name}`,
+      `Phone: ${phone}`,
+      '',
+      'Items:'
+    ];
+    let sub = 0;
+    for (const sec of MENU){
+      for (const item of (sec.items || [])){
+        const q = cart.get(item.id) || 0; if (!q) continue;
+        const p = Number(item.price || 0);
+        lines.push(`• ${q} × ${item.name}  $${(q*p).toFixed(2)}`);
+        sub += q*p;
+      }
+    }
+    const tax = sub*TAX_RATE, tot = sub+tax;
+    lines.push(
+      '',
+      `Subtotal: $${sub.toFixed(2)}`,
+      `Tax: $${tax.toFixed(2)}`,
+      `Total: $${tot.toFixed(2)}`,
+      '',
+      `Notes: ${notes}`,
+      '',
+      `Sent from SquareBidness.com/puffs`
+    );
+    return lines.join('\n');
+  }
+
+  // Boot
+  (async function boot(){
+    try {
+      await loadMenuJSON();
+      renderMenu();
+      renderCart();
+      applyClosedState(getClosed()); // respects URL overrides if present
+    } catch (e) {
+      console.warn("[puffs] boot failed:", e);
+      const $menu = document.getElementById('menuContent');
+      if ($menu) $menu.innerHTML = `<div class="tiny" style="color:#ffb3b3">Menu failed to load. Please refresh.</div>`;
+      renderCart();
+      applyClosedState(getClosed());
+    }
+  })();
+</script>
+
+<!-- Single, final Owner Login link rewriter (absolute + preserves params + cache-buster) -->
+<script>
+  (function () {
+    const link = document.getElementById('ownerLogin');
+    if (!link) return;
+
+    // Start with absolute /puffs/ URL
+    const base = new URL(window.location.origin + '/puffs/');
+
+    // Copy current query params except 'owner'
+    const current = new URL(window.location.href);
+    current.searchParams.forEach((val, key) => {
+      if (key !== 'owner') base.searchParams.set(key, val);
+    });
+
+    // Force owner mode + cache-buster
+    base.searchParams.set('owner','1');
+    base.searchParams.set('v','2');
+
+    // Set the href (absolute path + query)
+    link.href = base.pathname + '?' + base.searchParams.toString();
+  })();
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/puffs/sw.js', { scope: '/puffs/' }).catch(()=>{});
+  }
+</script>
 </body>
 </html>
