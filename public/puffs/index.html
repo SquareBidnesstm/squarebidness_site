@@ -47,7 +47,6 @@
     --bg:#0b0b0b; --card:#111; --ink:#f7f7f7; --muted:#b9b9b9;
     --brand:#ff9f1a; --line:#232323; --accent:#ffd28a; --danger:#ff4d4d;
   }
-
   *{box-sizing:border-box}
 
   html,body{
@@ -57,8 +56,9 @@
     font-family:system-ui,Segoe UI,Roboto,Arial;
   }
 
+  /* text contrast */
   p{ color:#e9e9e9; }
-  p.sub{ margin:0; color:#d6d6d6; } /* ✅ single source of truth */
+  p.sub{ margin:0; color:#d6d6d6; }
 
   .wrap{max-width:1100px;margin:0 auto;padding:16px}
 
@@ -69,46 +69,63 @@
   }
   header.hero .wrap{padding:14px 16px 10px}
 
- /* ✅ Desktop: menu + order same width + same height */
-.grid{
-  display:grid;
-  gap:16px;
-  grid-template-columns: 1fr 1fr;  /* ✅ same width */
-  align-items:stretch;            /* ✅ same height */
-}
-
-@media (max-width: 900px){
-  .grid{ grid-template-columns:1fr; }
-}
-
-/* ✅ Make both cards fill the row height */
-#menu.card,
-.grid > aside.card{
-  height:100%;
-}
-
+  /* ✅ Desktop: menu + order same width + same height */
+  .grid{
+    display:grid;
+    gap:16px;
+    grid-template-columns: 1fr 1fr;
+    align-items:stretch; /* equal height */
+  }
+  @media (max-width: 900px){ .grid{ grid-template-columns:1fr; } }
 
   .card{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
   .card h2{margin:0;font-size:1.1rem;padding:12px 14px;border-bottom:1px solid var(--line);background:rgba(255,159,26,.08)}
   .sect{padding:14px}
+
+  /* ✅ Make BOTH cards actually stretch */
+  #menu.card{ display:flex; flex-direction:column; height:100%; }
+  #menu .sect{ flex:1; }
+
+  /* ✅ ORDER CARD: fill height + space nicely */
+  .grid > aside.card{ display:flex; flex-direction:column; height:100%; }
+  .grid > aside.card .sect{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    flex:1;
+    min-height:0;
+  }
+
+  /* reserve some space to reduce “pressed” feel + keep layout stable */
+  #cartLines{ min-height:140px; }
+  #menuContent{ min-height:380px; }
+
+  /* menu rows */
   .row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px dashed #222}
   .row:last-child{border-bottom:0}
   .price{opacity:.9;white-space:nowrap}
   .qty{display:flex;align-items:center;gap:6px}
   .qty button{width:28px;height:28px;border-radius:8px;border:1px solid #2a2a2a;background:#141414;color:#fff;cursor:pointer}
 
+  .muted{color:var(--muted)}
+  .note{font-size:.85rem;color:var(--accent)}
+  .pill{display:inline-block;padding:3px 8px;border-radius:999px;border:1px solid #333;font-size:.75rem;color:#ddd}
+  .cartTotal{display:flex;justify-content:space-between;margin:4px 0}
+
+  input, select, textarea{
+    background:#0f0f0f;border:1px solid #2a2a2a;color:#fff;border-radius:10px;padding:10px 12px;width:100%
+  }
+  label{font-size:.9rem;color:#d5d5d5}
+  .stack{display:grid;gap:10px}
+  footer{color:#8b8b8b;border-top:1px solid var(--line);padding:18px 0;margin-top:18px;font-size:.9rem}
+  .tiny{font-size:.85rem;color:#9b9b9b}
+
   /* ✅ Buttons (contrast bump) */
   .btn{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    padding:12px 14px;
-    border-radius:12px;
-    background:#1b1b1b;
-    border:1px solid #3a3a3a;
-    color:#fff;
-    text-decoration:none;
-    cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;
+    padding:12px 14px;border-radius:12px;
+    background:#1b1b1b;border:1px solid #3a3a3a;color:#fff;
+    text-decoration:none;cursor:pointer
   }
   .btn:hover{ background:#232323; border-color:#4a4a4a; }
   .btn:focus-visible{ outline:3px solid rgba(255,159,26,.55); outline-offset:2px; }
@@ -149,15 +166,20 @@
   /* ✅ Icon-sized hero (top-left) */
   .hero-shell{display:flex;flex-direction:column;align-items:flex-start;gap:10px;width:auto;margin:0}
   .hero-img{
-    display:block;
-    width:140px;
-    height:auto;
-    max-width:none;
-    border-radius:20px;
-    border:1px solid var(--line);
-    background:#111;
+    display:block;width:140px;height:auto;max-width:none;
+    border-radius:20px;border:1px solid var(--line);background:#111;
   }
   @media (max-width: 480px){ .hero-img{ width:120px; border-radius:18px; } }
+
+  /* ✅ Order card “pretty spacing”: push actions to bottom */
+  .order-actions{
+    margin-top:auto;
+    padding-top:12px;
+    border-top:1px solid #222;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
 </style>
 </head>
 
@@ -188,26 +210,26 @@
         </picture>
 
         <p class="sub">
-  Order online — pick up when you arrive. N 3rd St, Ponchatoula, LA 70454 ·
-  <a
-    href="https://www.google.com/maps/search/?api=1&query=N%203rd%20St%20Ponchatoula%2C%20LA%2070454"
-    target="_blank"
-    rel="noopener"
-    style="color:#fff;text-decoration:underline"
-  >Get directions</a>
-  <span class="pill">Preview</span>
-</p>
+          Order online — pick up when you arrive. N 3rd St, Ponchatoula, LA 70454 ·
+          <a
+            href="https://www.google.com/maps/search/?api=1&query=N%203rd%20St%20Ponchatoula%2C%20LA%2070454"
+            target="_blank"
+            rel="noopener"
+            style="color:#fff;text-decoration:underline"
+          >Get directions</a>
+          <span class="pill">Preview</span>
+        </p>
       </div>
     </div>
   </header>
 
- <!-- Specials bar (CLS-safe: keeps height reserved) -->
-<div id="specialsBar" class="specialsBar is-hidden" aria-hidden="true">
-  <div class="wrap">
-    <span class="specialsBadge">Today’s Special</span>
-    <span id="specialsText" class="specialsText"></span>
+  <!-- Specials bar (CLS-safe: keeps height reserved) -->
+  <div id="specialsBar" class="specialsBar is-hidden" aria-hidden="true">
+    <div class="wrap">
+      <span class="specialsBadge">Today’s Special</span>
+      <span id="specialsText" class="specialsText"></span>
+    </div>
   </div>
-</div>
 
   <main class="wrap grid">
     <!-- MENU -->
@@ -220,12 +242,11 @@
     <aside class="card">
       <h2>Your Order</h2>
       <div class="sect">
-        <div id="cartLines" class="stack tiny" style="min-height:80px">No items yet.</div>
+        <div id="cartLines" class="stack tiny">No items yet.</div>
+
         <div class="cartTotal"><span class="muted">Subtotal</span><strong id="sub">$0.00</strong></div>
         <div class="cartTotal"><span class="muted">Tax (8.95%)</span><strong id="tax">$0.00</strong></div>
         <div class="cartTotal" style="border-top:1px solid #222;padding-top:6px"><span>Total</span><strong id="tot">$0.00</strong></div>
-
-        <hr style="border:none;border-top:1px solid #222;margin:14px 0">
 
         <div class="stack">
           <label>Pickup time
@@ -241,32 +262,37 @@
           <label>Notes (no onions, extra sauce, etc.) <textarea id="custNotes" rows="3"></textarea></label>
         </div>
 
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
-          <button class="btn primary" id="btnText">Text Order</button>
-          <button class="btn" id="btnCopy">Copy Summary</button>
-          <button class="btn" id="btnClear">Clear</button>
-        </div>
-
-        <p class="tiny" style="margin-top:10px">You’ll pay at pickup. Prices and availability subject to change. “Smoked Pig Feet Plate” available <strong>Sunday only</strong>.</p>
-
-        <!-- Owner panel -->
-        <div id="ownerPanel" class="owner">
-          <div class="rowBtns">
-            <label><input type="checkbox" id="toggleClosed"> Mark orders CLOSED</label>
-            <button class="btn signout" id="signOut">Sign out</button>
+        <!-- ✅ pushes to bottom + breathes -->
+        <div class="order-actions">
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn primary" id="btnText">Text Order</button>
+            <button class="btn" id="btnCopy">Copy Summary</button>
+            <button class="btn" id="btnClear">Clear</button>
           </div>
 
-          <div class="stack" style="margin-top:12px">
-            <label for="ownerSpecials" style="display:block;font-weight:600">Today’s Special (shows in gold bar)</label>
-            <textarea id="ownerSpecials" rows="3" placeholder="e.g., Friday: Wing Basket at First Street Park · $12 · 11am–3pm"></textarea>
+          <p class="tiny" style="margin:0">
+            You’ll pay at pickup. Prices and availability subject to change. “Smoked Pig Feet Plate” available <strong>Sunday only</strong>.
+          </p>
+
+          <!-- Owner panel -->
+          <div id="ownerPanel" class="owner">
             <div class="rowBtns">
-              <button class="btn" id="saveSpecial">Save Special</button>
-              <button class="btn" id="clearSpecial">Clear Special</button>
-              <button class="btn" id="copyLink">Copy Promo Link</button>
+              <label><input type="checkbox" id="toggleClosed"> Mark orders CLOSED</label>
+              <button class="btn signout" id="signOut">Sign out</button>
             </div>
-            <div class="tiny">Saved on this device. “Copy Promo Link” creates a shareable URL (adds <code>?special=...</code>) that shows the special for anyone who opens it.</div>
+
+            <div class="stack" style="margin-top:12px">
+              <label for="ownerSpecials" style="display:block;font-weight:600">Today’s Special (shows in gold bar)</label>
+              <textarea id="ownerSpecials" rows="3" placeholder="e.g., Friday: Wing Basket at First Street Park · $12 · 11am–3pm"></textarea>
+              <div class="rowBtns">
+                <button class="btn" id="saveSpecial">Save Special</button>
+                <button class="btn" id="clearSpecial">Clear Special</button>
+                <button class="btn" id="copyLink">Copy Promo Link</button>
+              </div>
+              <div class="tiny">Saved on this device. “Copy Promo Link” creates a shareable URL (adds <code>?special=...</code>) that shows the special for anyone who opens it.</div>
+            </div>
           </div>
-        </div>
+        </div><!-- /order-actions -->
       </div>
     </aside>
   </main>
@@ -357,21 +383,21 @@
   }
 
   // ------- SPECIALS -------
- function renderSpecials(text){
-  const bar = document.getElementById('specialsBar');
-  const el = document.getElementById('specialsText');
-  const t = (text || '').trim();
+  function renderSpecials(text){
+    const bar = document.getElementById('specialsBar');
+    const el = document.getElementById('specialsText');
+    const t = (text || '').trim();
 
-  if (t.length){
-    el.textContent = t;
-    bar.classList.remove('is-hidden');
-    bar.setAttribute('aria-hidden','false');
-  } else {
-    el.textContent = '';
-    bar.classList.add('is-hidden');
-    bar.setAttribute('aria-hidden','true');
+    if (t.length){
+      el.textContent = t;
+      bar.classList.remove('is-hidden');
+      bar.setAttribute('aria-hidden','false');
+    } else {
+      el.textContent = '';
+      bar.classList.add('is-hidden');
+      bar.setAttribute('aria-hidden','true');
+    }
   }
-}
 
   function saveSpecials(text) {
     localStorage.setItem(SPECIALS_KEY, text || "");
