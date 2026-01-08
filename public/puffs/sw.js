@@ -1,25 +1,24 @@
 // /puffs/sw.js — cache-first for static, network-first for pages
 const CACHE = 'puffs-v2';
 
-// ✅ Only pre-cache files that 100% exist
 const ASSETS = [
   '/puffs/',
   '/puffs/index.html',
   '/puffs/manifest.webmanifest',
   '/puffs/menu.json',
 
-  // background + social
+  // Background + social/meta
   '/puffs/assets/menu_hero.jpg',
   '/puffs/assets/puffs_hero_1200x630.jpg',
 
-  // on-page hero icon image
+  // On-page icon hero (make sure this exists)
   '/puffs/assets/puffs_512.png',
 
-  // optional small icon variants (keep ONLY if they exist)
+  // Small icon variants (you confirmed these exist)
   '/puffs/assets/puffs_140.png',
   '/puffs/assets/puffs_140.webp',
 
-  // PWA icons
+  // PWA icons (you confirmed these exist)
   '/puffs/icons/icon-180.png',
   '/puffs/icons/icon-192.png',
   '/puffs/icons/icon-512.png',
@@ -49,7 +48,7 @@ self.addEventListener('fetch', (e) => {
   // Only handle our scope
   if (!url.pathname.startsWith('/puffs/')) return;
 
-  // HTML/doc navigation: network-first (so updates go live), fallback to cache
+  // HTML/doc navigation: network-first (keeps updates fresh), fallback to cache
   if (req.mode === 'navigate' || req.destination === 'document') {
     e.respondWith(
       fetch(req)
