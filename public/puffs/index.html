@@ -404,33 +404,36 @@
     renderSpecials(text);
   }
 
-  async function loadMenuJSON() {
-    const res = await fetch(`/puffs/menu.json?v=${encodeURIComponent(BUILD)}`);
-    if (!res.ok) throw new Error("menu.json not found");
+ async function loadMenuJSON() {
+  const res = await fetch(`/puffs/menu.json?v=${encodeURIComponent(BUILD)}`);
+  if (!res.ok) throw new Error("menu.json not found");
 
-    const data = await res.json();
+  const data = await res.json();
 
-    MENU = Array.isArray(data.sections) ? data.sections : [];
-    TAX_RATE = Number.isFinite(Number(data.taxRate)) ? Number(data.taxRate) : 0.0895;
-    PHONE = data.phone || "+19859811777";
+  MENU = Array.isArray(data.sections) ? data.sections : [];
+  TAX_RATE = Number.isFinite(Number(data.taxRate)) ? Number(data.taxRate) : 0.0895;
+  PHONE = data.phone || "+19859811777";
 
-    // Specials: URL overrides JSON
-    const specialFromLink = qs.get("special");
-    if (specialFromLink) renderSpecials(decodeURIComponent(specialFromLink));
-    else renderSpecials(data.special || "");
+  // ✅ Specials: URL overrides JSON
+  const specialFromLink = qs.get("special");
+  if (specialFromLink) renderSpecials(decodeURIComponent(specialFromLink));
+  else renderSpecials(data.special || "");
 
-    // Open/Closed: JSON unless URL override
-    const closedFromJSON = data.open === false;
+  // ✅ Open/Closed: JSON unless URL override
+  const closedFromJSON = data.open === false;
 
-    if (forceClosed === null) {
-      localStorage.setItem(STORAGE_KEY, closedFromJSON ? "1" : "0");
-      applyClosedState(closedFromJSON);
-    } else {
-      applyClosedState(getClosed());
-    }
-
-    return data;
+  if (forceClosed === null) {
+    // Use JSON as default state (and persist it)
+    localStorage.setItem(STORAGE_KEY, closedFromJSON ? "1" : "0");
+    applyClosedState(closedFromJSON);
+  } else {
+    // URL overrides everything
+    applyClosedState(getClosed());
   }
+
+  return data;
+}
+
 
   // ------- OWNER PANEL -------
   if (ownerMode) {
