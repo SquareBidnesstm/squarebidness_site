@@ -114,11 +114,29 @@
   .owner .rowBtns{display:flex;gap:10px;flex-wrap:wrap}
   .owner .signout{margin-left:auto}
 
-  /* Specials bar */
-  .specialsBar{background:linear-gradient(90deg,#2b210f,#1b1b1b);border-bottom:1px solid #3a2a0a}
-  .specialsBar .wrap{padding:10px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-  .specialsBadge{background:var(--brand);color:#000;font-weight:800;padding:4px 10px;border-radius:999px}
-  .specialsText{color:#ffe7bf}
+ /* Specials bar (CLS-safe) */
+.specialsBar{
+  background:linear-gradient(90deg,#2b210f,#1b1b1b);
+  border-bottom:1px solid #3a2a0a;
+  min-height:44px;                 /* ✅ reserves space so nothing shifts */
+}
+.specialsBar .wrap{
+  padding:10px 16px;
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.specialsBadge{background:var(--brand);color:#000;font-weight:800;padding:4px 10px;border-radius:999px}
+.specialsText{color:#ffe7bf}
+
+/* hide without removing from layout */
+.specialsBar.is-hidden{
+  visibility:hidden;
+  opacity:0;
+  pointer-events:none;
+}
+
 
   /* ✅ Icon-sized hero (top-left) */
   .hero-shell{display:flex;flex-direction:column;align-items:flex-start;gap:10px;width:auto;margin:0}
@@ -175,13 +193,13 @@
     </div>
   </header>
 
-  <!-- Specials bar (hidden if no special text) -->
-  <div id="specialsBar" class="specialsBar" style="display:none">
-    <div class="wrap">
-      <span class="specialsBadge">Today’s Special</span>
-      <span id="specialsText" class="specialsText"></span>
-    </div>
+ <!-- Specials bar (CLS-safe: keeps height reserved) -->
+<div id="specialsBar" class="specialsBar is-hidden" aria-hidden="true">
+  <div class="wrap">
+    <span class="specialsBadge">Today’s Special</span>
+    <span id="specialsText" class="specialsText"></span>
   </div>
+</div>
 
   <main class="wrap grid">
     <!-- MENU -->
@@ -331,19 +349,21 @@
   }
 
   // ------- SPECIALS -------
-  function renderSpecials(text) {
-    const bar = document.getElementById("specialsBar");
-    const el = document.getElementById("specialsText");
-    const cleaned = (text || "").trim();
+ function renderSpecials(text){
+  const bar = document.getElementById('specialsBar');
+  const el = document.getElementById('specialsText');
+  const t = (text || '').trim();
 
-    if (cleaned.length) {
-      el.textContent = cleaned;
-      bar.style.display = "";
-    } else {
-      el.textContent = "";
-      bar.style.display = "none";
-    }
+  if (t.length){
+    el.textContent = t;
+    bar.classList.remove('is-hidden');
+    bar.setAttribute('aria-hidden','false');
+  } else {
+    el.textContent = '';
+    bar.classList.add('is-hidden');
+    bar.setAttribute('aria-hidden','true');
   }
+}
 
   function saveSpecials(text) {
     localStorage.setItem(SPECIALS_KEY, text || "");
