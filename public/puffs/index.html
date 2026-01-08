@@ -43,39 +43,44 @@
   <meta name="twitter:image" content="https://www.squarebidness.com/puffs/assets/puffs_hero_1200x630.jpg" />
 
   <style>
-  :root{ --bg:#0b0b0b; --card:#111; --ink:#f7f7f7; --muted:#b9b9b9; --brand:#ff9f1a; --line:#232323; --accent:#ffd28a; --danger:#ff4d4d; }
-  *{box-sizing:border-box}
-  html,body{
-  margin:0;
-  background:var(--bg);
-  color:#f2f2f2; /* ✅ a touch stronger than before */
-  font-family:system-ui,Segoe UI,Roboto,Arial;
-}
-p{ color:#e9e9e9; }        /* ✅ helps Lighthouse “p” + “body” */
-p.sub{ color:#d6d6d6; }     /* ✅ keep it “muted” but readable */
+  :root{
+    --bg:#0b0b0b; --card:#111; --ink:#f7f7f7; --muted:#b9b9b9;
+    --brand:#ff9f1a; --line:#232323; --accent:#ffd28a; --danger:#ff4d4d;
+  }
 
+  *{box-sizing:border-box}
+
+  html,body{
+    margin:0;
+    background:var(--bg);
+    color:#f2f2f2;
+    font-family:system-ui,Segoe UI,Roboto,Arial;
+  }
+
+  p{ color:#e9e9e9; }
+  p.sub{ margin:0; color:#d6d6d6; } /* ✅ single source of truth */
+
+  .wrap{max-width:1100px;margin:0 auto;padding:16px}
 
   /* ✅ ONE HERO ONLY (no background image) */
   header.hero{
     border-bottom:1px solid var(--line);
-    background: linear-gradient(0deg,#000000b3 0%,#00000088 35%,#00000055 60%,#0000 100%);
+    background:linear-gradient(0deg,#000000b3 0%,#00000088 35%,#00000055 60%,#0000 100%);
   }
   header.hero .wrap{padding:14px 16px 10px}
-
-  p.sub{margin:0;color:var(--muted)}
 
   /* ✅ CLS FIXES (stop right column jump) */
   .grid{
     display:grid;
     gap:16px;
     grid-template-columns:1.1fr .9fr;
-    align-items:start;            /* key */
+    align-items:start;
   }
-  @media (max-width: 900px){.grid{grid-template-columns:1fr}}
+  @media (max-width: 900px){ .grid{grid-template-columns:1fr} }
 
-  aside.card{align-self:start}    /* key */
-  #cartLines{min-height:180px}    /* reserve space */
-  #menuContent{min-height:420px}  /* reserve space */
+  aside.card{align-self:start}
+  #cartLines{min-height:180px}
+  #menuContent{min-height:420px}
 
   .card{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
   .card h2{margin:0;font-size:1.1rem;padding:12px 14px;border-bottom:1px solid var(--line);background:rgba(255,159,26,.08)}
@@ -86,28 +91,22 @@ p.sub{ color:#d6d6d6; }     /* ✅ keep it “muted” but readable */
   .qty{display:flex;align-items:center;gap:6px}
   .qty button{width:28px;height:28px;border-radius:8px;border:1px solid #2a2a2a;background:#141414;color:#fff;cursor:pointer}
 
-  /* ✅ Contrast bump (accessibility) */
-  /* Buttons */
-.btn{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  padding:12px 14px;
-  border-radius:12px;
-
-  /* ✅ higher contrast */
-  background:#1b1b1b;
-  border:1px solid #3a3a3a;
-  color:#ffffff;
-
-  text-decoration:none;
-  cursor:pointer;
-}
-.btn:hover{ background:#232323; border-color:#4a4a4a; }
-.btn:focus-visible{ outline:3px solid rgba(255,159,26,.55); outline-offset:2px; }
-
-.btn.primary{ background:#fff; color:#000; font-weight:800; border-color:#fff; }
-
+  /* ✅ Buttons (contrast bump) */
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:12px 14px;
+    border-radius:12px;
+    background:#1b1b1b;
+    border:1px solid #3a3a3a;
+    color:#fff;
+    text-decoration:none;
+    cursor:pointer;
+  }
+  .btn:hover{ background:#232323; border-color:#4a4a4a; }
+  .btn:focus-visible{ outline:3px solid rgba(255,159,26,.55); outline-offset:2px; }
+  .btn.primary{ background:#fff; color:#000; font-weight:800; border-color:#fff; }
 
   /* Closed banner + overlay */
   .closedBanner{background:linear-gradient(90deg,#2a0000,#5a0000);color:#fff;border-bottom:1px solid #3a0a0a}
@@ -124,29 +123,22 @@ p.sub{ color:#d6d6d6; }     /* ✅ keep it “muted” but readable */
   .owner .rowBtns{display:flex;gap:10px;flex-wrap:wrap}
   .owner .signout{margin-left:auto}
 
- /* Specials bar (CLS-safe) */
-.specialsBar{
-  background:linear-gradient(90deg,#2b210f,#1b1b1b);
-  border-bottom:1px solid #3a2a0a;
-  min-height:44px;                 /* ✅ reserves space so nothing shifts */
-}
-.specialsBar .wrap{
-  padding:10px 16px;
-  display:flex;
-  gap:10px;
-  align-items:center;
-  flex-wrap:wrap;
-}
-.specialsBadge{background:var(--brand);color:#000;font-weight:800;padding:4px 10px;border-radius:999px}
-.specialsText{color:#ffe7bf}
-
-/* hide without removing from layout */
-.specialsBar.is-hidden{
-  visibility:hidden;
-  opacity:0;
-  pointer-events:none;
-}
-
+  /* Specials bar (CLS-safe) */
+  .specialsBar{
+    background:linear-gradient(90deg,#2b210f,#1b1b1b);
+    border-bottom:1px solid #3a2a0a;
+    min-height:44px;
+  }
+  .specialsBar .wrap{
+    padding:10px 16px;
+    display:flex;
+    gap:10px;
+    align-items:center;
+    flex-wrap:wrap;
+  }
+  .specialsBadge{background:var(--brand);color:#000;font-weight:800;padding:4px 10px;border-radius:999px}
+  .specialsText{color:#ffe7bf}
+  .specialsBar.is-hidden{ visibility:hidden; opacity:0; pointer-events:none; }
 
   /* ✅ Icon-sized hero (top-left) */
   .hero-shell{display:flex;flex-direction:column;align-items:flex-start;gap:10px;width:auto;margin:0}
