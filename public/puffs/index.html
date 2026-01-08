@@ -69,18 +69,24 @@
   }
   header.hero .wrap{padding:14px 16px 10px}
 
-  /* ✅ CLS FIXES (stop right column jump) */
-  .grid{
-    display:grid;
-    gap:16px;
-    grid-template-columns:1.1fr .9fr;
-    align-items:start;
-  }
-  @media (max-width: 900px){ .grid{grid-template-columns:1fr} }
+ /* ✅ Desktop: menu + order same width + same height */
+.grid{
+  display:grid;
+  gap:16px;
+  grid-template-columns: 1fr 1fr;  /* ✅ same width */
+  align-items:stretch;            /* ✅ same height */
+}
 
-  aside.card{align-self:start}
-  #cartLines{min-height:180px}
-  #menuContent{min-height:420px}
+@media (max-width: 900px){
+  .grid{ grid-template-columns:1fr; }
+}
+
+/* ✅ Make both cards fill the row height */
+#menu.card,
+.grid > aside.card{
+  height:100%;
+}
+
 
   .card{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
   .card h2{margin:0;font-size:1.1rem;padding:12px 14px;border-bottom:1px solid var(--line);background:rgba(255,159,26,.08)}
