@@ -90,6 +90,28 @@
     .specialsBar .wrap{padding:10px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
     .specialsBadge{background:var(--brand);color:#000;font-weight:800;padding:4px 10px;border-radius:999px}
     .specialsText{color:#ffe7bf}
+
+
+    .hero-shell{
+  max-width: 860px;         /* ✅ desktop cap so it won’t be huge */
+  margin: 0 auto;           /* center */
+  padding: 10px 0 2px;
+}
+
+.hero-img{
+  display:block;
+  width:100%;
+  height:auto;
+  border-radius:16px;
+  border:1px solid var(--line);
+  background:#111;
+}
+
+/* optional: slightly bigger on big screens without going full width */
+@media (min-width: 1100px){
+  .hero-shell{ max-width: 920px; }
+}
+
   </style>
 </head>
 <body>
@@ -101,56 +123,54 @@
     </div>
   </div>
 
-  <header class="hero">
+ <header class="hero">
   <div class="wrap">
-    <picture>
-      <!-- Small / mobile -->
-      <source
-        media="(max-width: 480px)"
-        srcset="/puffs/assets/puffs_hero_420.jpg"
-      />
+    <div class="hero-shell">
+      <picture>
+        <!-- Small / mobile -->
+        <source
+          media="(max-width: 480px)"
+          srcset="/puffs/assets/puffs_hero_420.jpg"
+        />
 
-      <!-- Medium -->
-      <source
-        media="(max-width: 900px)"
-        srcset="/puffs/assets/puffs_hero_640.jpg"
-      />
+        <!-- Medium -->
+        <source
+          media="(max-width: 900px)"
+          srcset="/puffs/assets/puffs_hero_640.jpg"
+        />
 
-      <!-- Large / desktop -->
-      <source
-        media="(min-width: 901px)"
-        srcset="/puffs/assets/puffs_hero_780.jpg"
-      />
+        <!-- Large / desktop -->
+        <source
+          media="(min-width: 901px)"
+          srcset="/puffs/assets/puffs_hero_780.jpg"
+        />
 
-      <!-- Fallback -->
-      <img
-        src="/puffs/assets/puffs_hero_780.jpg"
-        alt="Puff’s Smokehouse — Smoked Turkey Wings, Ribs, and Plates"
-        width="780"
-        height="520"
-        loading="eager"
-        decoding="async"
-        fetchpriority="high"
-        style="width:100%;height:auto;border-radius:16px;"
-      />
-    </picture>
+        <!-- Fallback -->
+        <img
+          src="/puffs/assets/puffs_hero_780.jpg"
+          alt="Puff’s Smokehouse — Smoked Turkey Wings, Ribs, and Plates"
+          width="780"
+          height="520"
+          loading="eager"
+          decoding="async"
+          fetchpriority="high"
+          class="hero-img"
+        />
+      </picture>
 
-    <p class="sub" style="margin-top:12px">
-      Order online — pick up when you arrive. Ponchatoula, LA ·
-      <a
-        href="https://www.google.com/maps/search/?api=1&query=Ponchatoula%2C%20LA%20Puff%27s%20Smokehouse"
-        target="_blank"
-        rel="noopener"
-        style="color:#fff;text-decoration:underline"
-      >
-        Get directions
-      </a>
-      <span class="pill">Preview</span>
-    </p>
+      <p class="sub">
+        Order online — pick up when you arrive. Ponchatoula, LA ·
+        <a
+          href="https://www.google.com/maps/search/?api=1&query=Ponchatoula%2C%20LA%20Puff%27s%20Smokehouse"
+          target="_blank"
+          rel="noopener"
+          style="color:#fff;text-decoration:underline"
+        >Get directions</a>
+        <span class="pill">Preview</span>
+      </p>
+    </div>
   </div>
 </header>
-
-
 
   <!-- Specials bar (hidden if no special text) -->
   <div id="specialsBar" class="specialsBar" style="display:none">
