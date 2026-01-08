@@ -40,11 +40,20 @@
     :root{ --bg:#0b0b0b; --card:#111; --ink:#f7f7f7; --muted:#b9b9b9; --brand:#ff9f1a; --line:#232323; --accent:#ffd28a; --danger:#ff4d4d; }
     *{box-sizing:border-box}
     html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,Segoe UI,Roboto,Arial}
+
+    /* ✅ Keep site content wide, but cap ONLY the hero image */
     .wrap{max-width:1100px;margin:0 auto;padding:16px}
-    header.hero{border-bottom:1px solid var(--line);background:
-      linear-gradient(0deg,#000000b3 0%,#00000088 35%,#00000055 60%,#0000 100%),
-      url('/puffs/assets/menu_hero.jpg') center/cover no-repeat}
-    header .wrap{padding:26px 16px}
+
+    header.hero{
+      border-bottom:1px solid var(--line);
+      background:
+        linear-gradient(0deg,#000000b3 0%,#00000088 35%,#00000055 60%,#0000 100%),
+        url('/puffs/assets/menu_hero.jpg') center/cover no-repeat;
+    }
+
+    /* ✅ reduce hero padding so it feels smaller */
+    header.hero .wrap{padding:14px 16px 10px}
+
     h1{margin:0 0 6px;font-size:1.9rem}
     p.sub{margin:0;color:var(--muted)}
     .grid{display:grid;gap:16px;grid-template-columns:1.1fr .9fr}
@@ -91,29 +100,30 @@
     .specialsBadge{background:var(--brand);color:#000;font-weight:800;padding:4px 10px;border-radius:999px}
     .specialsText{color:#ffe7bf}
 
-
+    /* ✅ HARD CAP HERO IMAGE SIZE (this is the real fix) */
     .hero-shell{
-  max-width: 860px;         /* ✅ desktop cap so it won’t be huge */
-  margin: 0 auto;           /* center */
-  padding: 10px 0 2px;
-}
-
-.hero-img{
-  display:block;
-  width:100%;
-  height:auto;
-  border-radius:16px;
-  border:1px solid var(--line);
-  background:#111;
-}
-
-/* optional: slightly bigger on big screens without going full width */
-@media (min-width: 1100px){
-  .hero-shell{ max-width: 920px; }
-}
-
+      width:100%;
+      max-width:620px;   /* 👈 make desktop hero smaller. change to 680 if you want a touch bigger */
+      margin:0 auto;
+    }
+    .hero-shell picture, .hero-shell img{display:block}
+    .hero-img{
+      width:100%;
+      height:auto;
+      max-width:620px;   /* 👈 forces cap even if something overrides */
+      border-radius:16px;
+      border:1px solid var(--line);
+      background:#111;
+    }
+    @media (max-width: 900px){
+      .hero-shell, .hero-img{max-width:680px;} /* tablet can breathe */
+    }
+    @media (max-width: 480px){
+      .hero-shell, .hero-img{max-width:100%;} /* mobile full width */
+    }
   </style>
 </head>
+
 <body>
   <!-- Closed banner -->
   <div id="closedBanner" class="closedBanner" style="display:none">
@@ -123,38 +133,38 @@
     </div>
   </div>
 
- <header class="hero">
-  <div class="wrap">
-    <div class="hero-shell">
-      <picture>
-        <source media="(max-width: 480px)" srcset="/puffs/assets/puffs_hero_420.jpg" />
-        <source media="(max-width: 900px)" srcset="/puffs/assets/puffs_hero_640.jpg" />
-        <source media="(min-width: 901px)" srcset="/puffs/assets/puffs_hero_780.jpg" />
-        <img
-          src="/puffs/assets/puffs_hero_780.jpg"
-          alt="Puff’s Smokehouse — Smoked Turkey Wings, Ribs, and Plates"
-          width="780"
-          height="520"
-          loading="eager"
-          decoding="async"
-          fetchpriority="high"
-          class="hero-img"
-        />
-      </picture>
+  <header class="hero">
+    <div class="wrap">
+      <div class="hero-shell">
+        <picture>
+          <source media="(max-width: 480px)" srcset="/puffs/assets/puffs_hero_420.jpg" />
+          <source media="(max-width: 900px)" srcset="/puffs/assets/puffs_hero_640.jpg" />
+          <source media="(min-width: 901px)" srcset="/puffs/assets/puffs_hero_780.jpg" />
+          <img
+            src="/puffs/assets/puffs_hero_780.jpg"
+            alt="Puff’s Smokehouse — Smoked Turkey Wings, Ribs, and Plates"
+            width="780"
+            height="520"
+            loading="eager"
+            decoding="async"
+            fetchpriority="high"
+            class="hero-img"
+          />
+        </picture>
 
-      <p class="sub" style="margin-top:12px">
-        Order online — pick up when you arrive. Ponchatoula, LA ·
-        <a
-          href="https://www.google.com/maps/search/?api=1&query=Ponchatoula%2C%20LA%20Puff%27s%20Smokehouse"
-          target="_blank"
-          rel="noopener"
-          style="color:#fff;text-decoration:underline"
-        >Get directions</a>
-        <span class="pill">Preview</span>
-      </p>
+        <p class="sub" style="margin-top:12px">
+          Order online — pick up when you arrive. Ponchatoula, LA ·
+          <a
+            href="https://www.google.com/maps/search/?api=1&query=Ponchatoula%2C%20LA%20Puff%27s%20Smokehouse"
+            target="_blank"
+            rel="noopener"
+            style="color:#fff;text-decoration:underline"
+          >Get directions</a>
+          <span class="pill">Preview</span>
+        </p>
+      </div>
     </div>
-  </div>
-</header>
+  </header>
 
   <!-- Specials bar (hidden if no special text) -->
   <div id="specialsBar" class="specialsBar" style="display:none">
@@ -242,9 +252,7 @@
         rel="noopener noreferrer"
         style="color:#ff9f1a;text-decoration:underline;font-weight:700;"
         aria-label="Powered by Square Bidness Tech Lab"
-      >
-        Square Bidness Tech Lab
-      </a>
+      >Square Bidness Tech Lab</a>
     </p>
   </footer>
 
@@ -258,45 +266,12 @@
 
   <script>
   // ------- BUILD (cache-bust for menu.json) -------
-  const BUILD =
-    (document.querySelector('meta[name="sb:build"]')?.content || "v1");
+  const BUILD = (document.querySelector('meta[name="sb:build"]')?.content || "v1");
 
   // ------- DATA (loaded from /puffs/menu.json) -------
   let MENU = [];
   let TAX_RATE = 0.0895;
   let PHONE = "+19859811777";
-
-  async function loadMenuJSON() {
-    const res = await fetch(`/puffs/menu.json?v=${encodeURIComponent(BUILD)}`);
-    if (!res.ok) throw new Error("menu.json not found");
-
-    const data = await res.json();
-
-    MENU = Array.isArray(data.sections) ? data.sections : [];
-    TAX_RATE = Number.isFinite(Number(data.taxRate)) ? Number(data.taxRate) : 0.0895;
-    PHONE = data.phone || "+19859811777";
-
-    // Specials bar (allow ?special=... to override)
-    const specialFromLink = qs.get("special");
-    if (specialFromLink) renderSpecials(decodeURIComponent(specialFromLink));
-    else renderSpecials(data.special || "");
-
-    // Open/Closed from JSON (allow URL overrides)
-    // data.open === true -> OPEN
-    // data.open === false -> CLOSED
-    const closedFromJSON = data.open === false;
-
-    // if forceClosed was set via URL, getClosed() will handle it.
-    // Otherwise, we use JSON open/closed and mirror it into localStorage for consistency.
-    if (forceClosed === null) {
-      localStorage.setItem(STORAGE_KEY, closedFromJSON ? "1" : "0");
-      applyClosedState(closedFromJSON);
-    } else {
-      applyClosedState(getClosed());
-    }
-
-    return data;
-  }
 
   // ------- CONFIG: Owner PIN -------
   const ADMIN_PIN = '1777'; // <-- change this anytime
@@ -307,6 +282,7 @@
 
   // ------- QUERYSTRING & OWNER MODE (PIN-GATED) -------
   const qs = new URLSearchParams(location.search);
+
   // remember owner session in THIS TAB only
   let ownerMode = sessionStorage.getItem('puffsAdmin') === '1';
   if (qs.get('owner') === '1' && !ownerMode) {
@@ -336,7 +312,7 @@
   function applyClosedState(isClosed){
     const disabledCls = 'disabled';
     document.querySelectorAll('.qty button, #btnText, #btnCopy, #btnClear').forEach(el=>{
-      if(isClosed) el.classList.add(disabledCls); else el.classList.remove(disabledCls);
+      if (isClosed) el.classList.add(disabledCls); else el.classList.remove(disabledCls);
     });
     document.getElementById('closedBanner').style.display = isClosed ? '' : 'none';
     document.getElementById('closedOverlay').style.display = isClosed ? 'flex' : 'none';
@@ -361,6 +337,34 @@
     renderSpecials(text);
   }
 
+  async function loadMenuJSON() {
+    const res = await fetch(`/puffs/menu.json?v=${encodeURIComponent(BUILD)}`);
+    if (!res.ok) throw new Error("menu.json not found");
+
+    const data = await res.json();
+
+    MENU = Array.isArray(data.sections) ? data.sections : [];
+    TAX_RATE = Number.isFinite(Number(data.taxRate)) ? Number(data.taxRate) : 0.0895;
+    PHONE = data.phone || "+19859811777";
+
+    // Specials bar (allow ?special=... to override)
+    const specialFromLink = qs.get("special");
+    if (specialFromLink) renderSpecials(decodeURIComponent(specialFromLink));
+    else renderSpecials(data.special || "");
+
+    // Open/Closed from JSON (allow URL overrides)
+    const closedFromJSON = data.open === false;
+
+    if (forceClosed === null) {
+      localStorage.setItem(STORAGE_KEY, closedFromJSON ? "1" : "0");
+      applyClosedState(closedFromJSON);
+    } else {
+      applyClosedState(getClosed());
+    }
+
+    return data;
+  }
+
   // ------- OWNER PANEL WIRING -------
   if (ownerMode) {
     document.getElementById('ownerPanel').style.display = 'block';
@@ -382,8 +386,7 @@
       if (!txt){ alert('Enter a special first.'); return; }
       const url = new URL(location.href.split('#')[0]);
       url.searchParams.set('special', txt);
-      // do not leak owner=1 or PIN state
-      url.searchParams.delete('owner');
+      url.searchParams.delete('owner'); // do not leak owner mode
       navigator.clipboard.writeText(url.toString()).then(()=> alert('Promo link copied!')).catch(()=> alert('Copy failed.'));
     };
 
@@ -409,6 +412,7 @@
       ...MENU.map(sec => {
         const wrap = document.createElement('section');
         wrap.className = 'stack';
+
         const h = document.createElement('h3');
         h.textContent = sec.section;
         h.style.margin = '0';
@@ -435,13 +439,15 @@
 
           const qty = document.createElement('div');
           qty.className = 'qty';
+
           const minus = document.createElement('button'); minus.textContent = '–';
           const v = document.createElement('span'); v.textContent = '0'; v.style.minWidth='16px'; v.style.textAlign='center';
           const plus = document.createElement('button'); plus.textContent = '+';
+
           minus.onclick = () => update(item.id, -1);
           plus.onclick  = () => update(item.id, +1);
-          qty.append(minus, v, plus);
 
+          qty.append(minus, v, plus);
           row.append(name, price, qty);
           wrap.append(row);
 
@@ -458,8 +464,10 @@
     if (getClosed()) { applyClosedState(true); return; }
     const q = Math.max(0, (cart.get(id)||0) + delta);
     if (q === 0) cart.delete(id); else cart.set(id, q);
+
     const qtySpan = document.querySelector(`[data-bind-qty="${id}"]`);
     if (qtySpan) qtySpan.textContent = q;
+
     renderCart();
   }
 
@@ -474,19 +482,29 @@
       for (const item of (sec.items || [])){
         const q = cart.get(item.id) || 0;
         if (!q) continue;
+        const p = Number(item.price || 0);
+
         const line = document.createElement('div');
         line.textContent = `${q} × ${item.name}`;
-        const right = document.createElement('div'); right.textContent = money(q * Number(item.price || 0));
-        const flex = document.createElement('div'); flex.style.display='flex'; flex.style.justifyContent='space-between';
+
+        const right = document.createElement('div');
+        right.textContent = money(q * p);
+
+        const flex = document.createElement('div');
+        flex.style.display='flex';
+        flex.style.justifyContent='space-between';
         flex.append(line, right);
+
         $lines.append(flex);
-        sub += q * Number(item.price || 0);
+        sub += q * p;
       }
     }
+
     if (sub === 0) $lines.textContent = 'No items yet.';
 
     const tax = sub * TAX_RATE;
     const tot = sub + tax;
+
     document.getElementById('sub').textContent = money(sub);
     document.getElementById('tax').textContent = money(tax);
     document.getElementById('tot').textContent = money(tot);
@@ -527,6 +545,7 @@
       '',
       'Items:'
     ];
+
     let sub = 0;
     for (const sec of MENU){
       for (const item of (sec.items || [])){
@@ -536,7 +555,9 @@
         sub += q*p;
       }
     }
+
     const tax = sub*TAX_RATE, tot = sub+tax;
+
     lines.push(
       '',
       `Subtotal: $${sub.toFixed(2)}`,
@@ -547,17 +568,18 @@
       '',
       `Sent from SquareBidness.com/puffs`
     );
+
     return lines.join('\n');
   }
 
   // Boot
   (async function boot(){
-    try {
+    try{
       await loadMenuJSON();
       renderMenu();
       renderCart();
-      applyClosedState(getClosed()); // respects URL overrides if present
-    } catch (e) {
+      applyClosedState(getClosed());
+    } catch(e){
       console.warn("[puffs] boot failed:", e);
       const $menu = document.getElementById('menuContent');
       if ($menu) $menu.innerHTML = `<div class="tiny" style="color:#ffb3b3">Menu failed to load. Please refresh.</div>`;
@@ -565,36 +587,32 @@
       applyClosedState(getClosed());
     }
   })();
-</script>
+  </script>
 
-<!-- Single, final Owner Login link rewriter (absolute + preserves params + cache-buster) -->
-<script>
+  <!-- Single, final Owner Login link rewriter (absolute + preserves params + cache-buster) -->
+  <script>
   (function () {
     const link = document.getElementById('ownerLogin');
     if (!link) return;
 
-    // Start with absolute /puffs/ URL
     const base = new URL(window.location.origin + '/puffs/');
-
-    // Copy current query params except 'owner'
     const current = new URL(window.location.href);
+
     current.searchParams.forEach((val, key) => {
       if (key !== 'owner') base.searchParams.set(key, val);
     });
 
-    // Force owner mode + cache-buster
     base.searchParams.set('owner','1');
     base.searchParams.set('v','2');
 
-    // Set the href (absolute path + query)
     link.href = base.pathname + '?' + base.searchParams.toString();
   })();
-</script>
+  </script>
 
-<script>
+  <script>
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/puffs/sw.js', { scope: '/puffs/' }).catch(()=>{});
   }
-</script>
+  </script>
 </body>
 </html>
