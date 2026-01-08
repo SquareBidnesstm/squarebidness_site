@@ -7,23 +7,20 @@ const ASSETS = [
   '/puffs/manifest.webmanifest',
   '/puffs/menu.json',
 
-  // Background + social/meta
   '/puffs/assets/menu_hero.jpg',
   '/puffs/assets/puffs_hero_1200x630.jpg',
 
-  // On-page icon hero (make sure this exists)
   '/puffs/assets/puffs_512.png',
-
-  // Small icon variants (you confirmed these exist)
+  '/puffs/assets/puffs_512.webp',
   '/puffs/assets/puffs_140.png',
   '/puffs/assets/puffs_140.webp',
 
-  // PWA icons (you confirmed these exist)
   '/puffs/icons/icon-180.png',
   '/puffs/icons/icon-192.png',
   '/puffs/icons/icon-512.png',
   '/puffs/icons/maskable-512.png'
 ];
+
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
