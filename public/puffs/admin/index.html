@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Puff’s Smokehouse — Owner Menu Editor</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#0b0b0b" />
+
+  <!-- Icons / PWA (Puff’s) -->
+  <link rel="icon" href="/puffs/icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/puffs/icons/icon-180.png">
+  <link rel="manifest" href="/puffs/manifest.webmanifest">
+
+  <style>
+    :root{ --bg:#0b0b0b; --card:#111; --ink:#f7f7f7; --muted:#b9b9b9; --brand:#ff9f1a; --line:#232323; --accent:#ffd28a; --danger:#ff4d4d; }
+    *{box-sizing:border-box}
+    html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,Segoe UI,Roboto,Arial}
+    .wrap{max-width:1100px;margin:0 auto;padding:16px}
+    header{border-bottom:1px solid var(--line);padding:14px 0;margin-bottom:12px}
+    h1{margin:0 0 6px;font-size:1.35rem}
+    .sub{margin:0;color:var(--muted)}
+    .grid{display:grid;gap:14px;grid-template-columns:1fr}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+    .card h2{margin:0;font-size:1.05rem;padding:12px 14px;border-bottom:1px solid var(--line);background:rgba(255,159,26,.08)}
+    .sect{padding:14px}
+    label{display:block;font-size:.9rem;color:#d5d5d5;margin:8px 0 6px}
+    input, textarea, select{
+      background:#0f0f0f;border:1px solid #2a2a2a;color:#fff;border-radius:10px;padding:10px 12px;width:100%;
+    }
+    textarea{min-height:80px;resize:vertical}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media (max-width:900px){.row{grid-template-columns:1fr}}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:10px 12px;border-radius:12px;border:1px solid var(--line);
+      background:#141414;color:#fff;cursor:pointer;text-decoration:none;
+    }
+    .btn.primary{background:#fff;color:#000;font-weight:900}
+    .btn.danger{background:linear-gradient(90deg,#2a0000,#5a0000);border-color:#3a0a0a}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .muted{color:var(--muted)}
+    .tiny{font-size:.85rem;color:#9b9b9b}
+    .pill{display:inline-block;padding:3px 8px;border-radius:999px;border:1px solid #333;font-size:.75rem;color:#ddd}
+    .sectionBox{border:1px dashed #2b2b2b;border-radius:14px;padding:12px;margin-top:10px}
+    .itemRow{display:grid;grid-template-columns:1.2fr .6fr .8fr .8fr .6fr;gap:8px;align-items:center;margin:8px 0}
+    @media (max-width:900px){.itemRow{grid-template-columns:1fr 1fr}}
+    .divider{border:none;border-top:1px solid #232323;margin:12px 0}
+    pre{background:#0f0f0f;border:1px solid #2a2a2a;border-radius:12px;padding:12px;overflow:auto;max-height:320px}
+    a:focus-visible{outline:2px solid rgba(255,159,26,.6);outline-offset:3px;border-radius:10px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>🍖 Puff’s Smokehouse — Owner Menu Editor</h1>
+      <p class="sub">
+        Edit the menu, then click <span class="pill">Download menu.json</span>. Send it to Marcus to publish.
+      </p>
+      <p class="tiny" style="margin:8px 0 0">
+        Note: this page can’t publish changes by itself (static site). It generates the updated <code>menu.json</code> file.
+      </p>
+    </header>
+
+    <div class="grid">
+      <section class="card">
+        <h2>Store Controls</h2>
+        <div class="sect">
+          <div class="row">
+            <div>
+              <label for="openFlag">Orders status</label>
+              <select id="openFlag">
+                <option value="true">OPEN</option>
+                <option value="false">CLOSED</option>
+              </select>
+              <p class="tiny">If CLOSED, the ordering buttons will disable and a “Closed” overlay will show.</p>
+            </div>
+            <div>
+              <label for="special">Today’s Special (optional)</label>
+              <input id="special" placeholder="e.g., Friday Wing Basket · $12 · 11am–3pm" />
+              <p class="tiny">Shows in the gold bar at the top.</p>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:10px">
+            <div>
+              <label for="phone">Order phone (SMS)</label>
+              <input id="phone" placeholder="+19859811777" />
+            </div>
+            <div>
+              <label for="taxRate">Tax rate (decimal)</label>
+              <input id="taxRate" placeholder="0.0895" inputmode="decimal" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Menu Sections & Items</h2>
+        <div class="sect">
+          <div id="sections"></div>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+            <button class="btn" id="addSection">+ Add Section</button>
+            <button class="btn primary" id="refreshPreview">Refresh JSON Preview</button>
+          </div>
+
+          <hr class="divider" />
+
+          <h3 style="margin:0 0 8px">JSON Preview</h3>
+          <pre id="preview" class="tiny">Loading…</pre>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+            <button class="btn primary" id="download">Download menu.json</button>
+            <button class="btn" id="copy">Copy JSON</button>
+          </div>
+
+          <p class="tiny" style="margin-top:10px">
+            After downloading, send <strong>menu.json</strong> to Marcus to publish (or later: edit it directly in GitHub).
+          </p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const MENU_URL = "/puffs/menu.json";
+
+    const state = {
+      open: true,
+      special: "",
+      phone: "+19859811777",
+      taxRate: 0.0895,
+      sections: []
+    };
+
+    function uid(prefix="id") {
+      return prefix + "_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16);
+    }
+
+    function asNumber(v, fallback) {
+      const n = Number(v);
+      return Number.isFinite(n) ? n : fallback;
+    }
+
+    async function loadMenu() {
+      const res = await fetch(MENU_URL + "?v=" + Date.now());
+      if (!res.ok) throw new Error("Could not load menu.json");
+      const data = await res.json();
+
+      state.open = !!data.open;
+      state.special = data.special || "";
+      state.phone = data.phone || "+19859811777";
+      state.taxRate = asNumber(data.taxRate, 0.0895);
+      state.sections = Array.isArray(data.sections) ? data.sections : [];
+
+      document.getElementById("openFlag").value = String(state.open);
+      document.getElementById("special").value = state.special;
+      document.getElementById("phone").value = state.phone;
+      document.getElementById("taxRate").value = String(state.taxRate);
+
+      renderSections();
+      renderPreview();
+    }
+
+    function renderSections() {
+      const wrap = document.getElementById("sections");
+      wrap.innerHTML = "";
+
+      state.sections.forEach((sec, secIdx) => {
+        const box = document.createElement("div");
+        box.className = "sectionBox";
+
+        const head = document.createElement("div");
+        head.style.display = "flex";
+        head.style.gap = "10px";
+        head.style.flexWrap = "wrap";
+        head.style.alignItems = "center";
+        head.style.justifyContent = "space-between";
+
+        const title = document.createElement("div");
+        title.innerHTML = `<strong style="font-size:1rem">${sec.section || "Untitled Section"}</strong>`;
+
+        const actions = document.createElement("div");
+        actions.style.display = "flex";
+        actions.style.gap = "8px";
+        actions.style.flexWrap = "wrap";
+
+        const del = document.createElement("button");
+        del.className = "btn danger";
+        del.textContent = "Delete Section";
+        del.onclick = () => {
+          if (!confirm("Delete this section?")) return;
+          state.sections.splice(secIdx, 1);
+          renderSections();
+          renderPreview();
+        };
+
+        const addItem = document.createElement("button");
+        addItem.className = "btn";
+        addItem.textContent = "+ Add Item";
+        addItem.onclick = () => {
+          sec.items = Array.isArray(sec.items) ? sec.items : [];
+          sec.items.push({ id: uid("item"), name: "New Item", price: 0 });
+          renderSections();
+          renderPreview();
+        };
+
+        actions.append(addItem, del);
+        head.append(title, actions);
+        box.append(head);
+
+        // section fields
+        const secRow = document.createElement("div");
+        secRow.className = "row";
+        secRow.style.marginTop = "10px";
+
+        const secName = document.createElement("div");
+        secName.innerHTML = `
+          <label>Section name</label>
+          <input value="${escapeHtml(sec.section || "")}" />
+        `;
+        secName.querySelector("input").oninput = (e) => {
+          sec.section = e.target.value;
+          renderPreview();
+          // update headline quickly
+          title.innerHTML = `<strong style="font-size:1rem">${escapeHtml(sec.section || "Untitled Section")}</strong>`;
+        };
+
+        const secNote = document.createElement("div");
+        secNote.innerHTML = `
+          <label>Section note (optional)</label>
+          <input value="${escapeHtml(sec.note || "")}" />
+        `;
+        secNote.querySelector("input").oninput = (e) => {
+          sec.note = e.target.value;
+          renderPreview();
+        };
+
+        secRow.append(secName, secNote);
+        box.append(secRow);
+
+        // items table
+        const items = Array.isArray(sec.items) ? sec.items : [];
+        const list = document.createElement("div");
+        list.style.marginTop = "10px";
+
+        const header = document.createElement("div");
+        header.className = "itemRow";
+        header.style.fontWeight = "800";
+        header.style.color = "#d5d5d5";
+        header.innerHTML = `
+          <div>Item name</div>
+          <div>Price</div>
+          <div>Badge</div>
+          <div>Subnote</div>
+          <div></div>
+        `;
+        list.append(header);
+
+        items.forEach((it, itIdx) => {
+          if (!it.id) it.id = uid("item");
+          const row = document.createElement("div");
+          row.className = "itemRow";
+
+          row.innerHTML = `
+            <div><input value="${escapeHtml(it.name || "")}" /></div>
+            <div><input value="${typeof it.price === "number" ? it.price : ""}" inputmode="decimal" /></div>
+            <div><input value="${escapeHtml(it.badge || "")}" placeholder="e.g., Sunday only" /></div>
+            <div><input value="${escapeHtml(it.subnote || "")}" placeholder="optional note" /></div>
+            <div><button class="btn danger">Remove</button></div>
+          `;
+
+          const [nameEl, priceEl, badgeEl, subnoteEl] = row.querySelectorAll("input");
+          nameEl.oninput = (e) => { it.name = e.target.value; renderPreview(); };
+          priceEl.oninput = (e) => { it.price = asNumber(e.target.value, 0); renderPreview(); };
+          badgeEl.oninput = (e) => { it.badge = e.target.value; renderPreview(); };
+          subnoteEl.oninput = (e) => { it.subnote = e.target.value; renderPreview(); };
+
+          row.querySelector("button").onclick = () => {
+            if (!confirm("Remove this item?")) return;
+            items.splice(itIdx, 1);
+            sec.items = items;
+            renderSections();
+            renderPreview();
+          };
+
+          list.append(row);
+        });
+
+        box.append(list);
+        wrap.append(box);
+      });
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#39;");
+    }
+
+    function collect() {
+      state.open = document.getElementById("openFlag").value === "true";
+      state.special = document.getElementById("special").value || "";
+      state.phone = document.getElementById("phone").value || "+19859811777";
+      state.taxRate = asNumber(document.getElementById("taxRate").value, 0.0895);
+
+      // clean items (remove empty)
+      state.sections.forEach(sec => {
+        sec.items = (sec.items || []).filter(it => (it.name || "").trim().length);
+        sec.items.forEach(it => {
+          if (!it.id) it.id = uid("item");
+          it.price = asNumber(it.price, 0);
+          if (!it.badge) delete it.badge;
+          if (!it.subnote) delete it.subnote;
+        });
+        if (!sec.note) sec.note = "";
+      });
+
+      return {
+        open: state.open,
+        special: state.special,
+        phone: state.phone,
+        taxRate: state.taxRate,
+        sections: state.sections
+      };
+    }
+
+    function renderPreview() {
+      const data = collect();
+      document.getElementById("preview").textContent = JSON.stringify(data, null, 2);
+    }
+
+    function downloadJSON() {
+      const data = collect();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "menu.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    async function copyJSON() {
+      const data = collect();
+      const text = JSON.stringify(data, null, 2);
+      try {
+        await navigator.clipboard.writeText(text);
+        alert("JSON copied.");
+      } catch {
+        alert("Copy failed. Use the preview box and copy manually.");
+      }
+    }
+
+    document.getElementById("addSection").onclick = () => {
+      state.sections.push({ section: "New Section", note: "", items: [{ id: uid("item"), name: "New Item", price: 0 }] });
+      renderSections();
+      renderPreview();
+    };
+
+    document.getElementById("refreshPreview").onclick = renderPreview;
+    document.getElementById("download").onclick = downloadJSON;
+    document.getElementById("copy").onclick = copyJSON;
+
+    // live update controls
+    ["openFlag","special","phone","taxRate"].forEach(id => {
+      document.getElementById(id).addEventListener("input", renderPreview);
+      document.getElementById(id).addEventListener("change", renderPreview);
+    });
+
+    loadMenu().catch(err => {
+      document.getElementById("preview").textContent = "Error: " + err.message + "\n\nMake sure /puffs/menu.json exists.";
+    });
+  </script>
+</body>
+</html>
