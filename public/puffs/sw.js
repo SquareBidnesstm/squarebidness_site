@@ -1,5 +1,5 @@
 // /puffs/sw.js — cache-first for static, network-first for pages
-const CACHE = 'puffs-v2';
+const CACHE = 'puffs-v3';
 
 const ASSETS = [
   '/puffs/',
@@ -7,20 +7,28 @@ const ASSETS = [
   '/puffs/manifest.webmanifest',
   '/puffs/menu.json',
 
-  '/puffs/assets/menu_hero.jpg',
+  // ✅ hero background sizes that actually exist
+  '/puffs/assets/menu_hero_420.jpg',
+  '/puffs/assets/menu_hero_640.jpg',
+  '/puffs/assets/menu_hero_780.jpg',
+
+  // ✅ social meta image
   '/puffs/assets/puffs_hero_1200x630.jpg',
 
+  // ✅ on-page logo hero
   '/puffs/assets/puffs_512.png',
   '/puffs/assets/puffs_512.webp',
+
+  // ✅ smaller icons (optional but fine)
   '/puffs/assets/puffs_140.png',
   '/puffs/assets/puffs_140.webp',
 
+  // ✅ PWA icons
   '/puffs/icons/icon-180.png',
   '/puffs/icons/icon-192.png',
   '/puffs/icons/icon-512.png',
   '/puffs/icons/maskable-512.png'
 ];
-
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
@@ -42,10 +50,9 @@ self.addEventListener('fetch', (e) => {
   const req = e.request;
   const url = new URL(req.url);
 
-  // Only handle our scope
   if (!url.pathname.startsWith('/puffs/')) return;
 
-  // HTML/doc navigation: network-first (keeps updates fresh), fallback to cache
+  // HTML: network-first
   if (req.mode === 'navigate' || req.destination === 'document') {
     e.respondWith(
       fetch(req)
@@ -54,20 +61,20 @@ self.addEventListener('fetch', (e) => {
           caches.open(CACHE).then((c) => c.put(req, copy));
           return r;
         })
-        .catch(() => caches.match(req) || caches.match('/puffs/'))
+        .catch(() => caches.match(req))
     );
     return;
   }
 
-  // Static: cache-first, then network
+  // Static: cache-first
   e.respondWith(
-    caches.match(req).then((hit) => {
-      if (hit) return hit;
-      return fetch(req).then((r) => {
+    caches.match(req).then((hit) =>
+      hit ||
+      fetch(req).then((r) => {
         const copy = r.clone();
         caches.open(CACHE).then((c) => c.put(req, copy));
         return r;
-      });
-    })
+      })
+    )
   );
 });
