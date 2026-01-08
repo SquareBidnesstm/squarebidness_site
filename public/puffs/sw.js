@@ -40,11 +40,15 @@ self.addEventListener('install', (e) => {
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
-    caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
-      .then(() => self.clients.claim())
+    (async () => {
+      // ✅ delete ALL old caches starting with "puffs-"
+      const keys = await caches.keys();
+      await Promise.all(keys.map((k) => (k.startsWith('puffs-') ? caches.delete(k) : Promise.resolve())));
+      await self.clients.claim();
+    })()
   );
 });
+
 
 self.addEventListener('fetch', (e) => {
   const req = e.request;
