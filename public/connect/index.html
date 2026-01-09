@@ -49,35 +49,6 @@
   <!-- Nav/Footer loader -->
   <script defer src="/partials/partials.js"></script>
 
-  <!-- Nav/Footer fallback injection (guaranteed) -->
-  <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-      const navTarget =
-        document.getElementById("nav-placeholder") || document.getElementById("nav");
-      const footerTarget =
-        document.getElementById("footer-placeholder") || document.getElementById("footer");
-
-      async function inject(target, candidates) {
-        if (!target) return false;
-        for (const url of candidates) {
-          try {
-            const res = await fetch(url, { cache: "force-cache" });
-            if (!res.ok) continue;
-            target.innerHTML = await res.text();
-            target.removeAttribute("aria-busy");
-            return true;
-          } catch (_) {}
-        }
-        target.removeAttribute("aria-busy");
-        return false;
-      }
-
-      // Try common locations (matches your project patterns)
-      await inject(navTarget, ["/nav/index.html", "/nav/nav.html", "/partials/nav.html"]);
-      await inject(footerTarget, ["/footer/index.html", "/footer/footer.html", "/partials/footer.html"]);
-    });
-  </script>
-
   <style>
     #nav-placeholder{min-height:72px;}
 
@@ -123,7 +94,7 @@
     .pill-dot{ width:.45rem; height:.45rem; border-radius:999px; background:#22c55e; }
 
     .connect-list { list-style:none; padding:0; margin:.25rem 0 0; font-size:.95rem; }
-    .connect-list li { margin-bottom:.4rem; }
+    .connect-list li { margin-bottom:.6rem; }
     .connect-list a { color:#e5e7eb; text-decoration:none; }
     .connect-list a:hover { text-decoration:underline; }
 
@@ -145,8 +116,6 @@
 
 <body class="theme-dark" id="top">
   <div id="nav-placeholder" aria-busy="true"></div>
-  <!-- Hidden fallbacks in case a loader expects different IDs -->
-  <div id="nav" style="display:none;"></div>
 
   <header class="page-hero">
     <div class="container">
@@ -169,8 +138,8 @@
         <ul class="connect-list" style="margin-top:.75rem;">
           <li>
             <span class="label">Email</span>
-            <a href="mailto:info@squarebidness.com">info@squarebidness.com</a>
-            <div class="muted-small">General, partnerships, and media.</div>
+            <a href="mailto:marcusbuckner@squarebidness.com">marcusbuckner@squarebidness.com</a>
+            <div class="muted-small">Partnerships, wholesale, media, and community.</div>
           </li>
 
           <li style="margin-top:.6rem;">
@@ -181,12 +150,12 @@
         </ul>
 
         <div class="connect-cta-row">
-          <a class="btn btn--gold" href="mailto:info@squarebidness.com?subject=Square%20Bidness%20%7C%20Partnership%20Intro">Email Square Bidness</a>
+          <a class="btn btn--gold" href="mailto:marcusbuckner@squarebidness.com?subject=Square%20Bidness%20%7C%20Connect">Email Marcus</a>
           <a class="btn btn--outline-light" href="/linkme/">Link Me Page</a>
         </div>
 
         <p class="connect-note">
-          For existing projects or in-person conversations, mention how we met — event, city, or who sent you. That helps us route it faster.
+          In your subject line, use <strong>“Wholesale”</strong>, <strong>“Media”</strong>, or <strong>“Community”</strong> so it routes clean.
         </p>
       </section>
 
@@ -231,7 +200,5 @@
   </main>
 
   <div id="footer-placeholder" aria-busy="true"></div>
-  <!-- Hidden fallback -->
-  <div id="footer" style="display:none;"></div>
 </body>
 </html>
