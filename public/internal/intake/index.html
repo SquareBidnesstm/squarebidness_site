@@ -1,119 +1,369 @@
-<!DOCTYPE html>
+<!-- /public/internal/intake/index.html -->
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SB Intake Router</title>
+  <!-- Basics -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Intake — SB Tech Lab</title>
 
+  <!-- Canonical (fine even if noindex) -->
+  <link rel="canonical" href="https://www.squarebidness.com/internal/intake/" />
+
+  <!-- SEO (internal tool) -->
   <meta name="robots" content="noindex,nofollow" />
-  <meta name="sb:build" content="v20260113-intake" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="format-detection" content="telephone=no" />
 
+  <!-- Build stamp -->
+  <meta name="sb:build" content="v20260110-intake" />
+
+  <!-- Perf -->
+  <link rel="preconnect" href="https://www.googletagmanager.com" />
+  <link rel="preconnect" href="https://www.google-analytics.com" />
+
+  <!-- Styles -->
   <link rel="stylesheet" href="/styles/style.css" />
+
+  <!-- Icons / PWA -->
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" href="/assets/icons/icon-180.png" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+
+  <!-- Analytics -->
+  <script defer src="/scripts/ga.js"></script>
+  <script defer src="/scripts/sb-analytics.js"></script>
+
+  <!-- Partials -->
   <script defer src="/scripts/partials.js"></script>
 
   <style>
-    #nav-placeholder{min-height:72px}
-    #footer-placeholder{min-height:120px}
+    /* CLS guard for injected nav/footer */
+    #site-header{min-height:72px;}
+    #site-footer{min-height:120px;}
 
-    .wrap{max-width:640px;margin:0 auto;padding:2.5rem 1rem}
-    h1{margin:0 0 .5rem}
-    p.sub{opacity:.8;margin:0 0 1.5rem}
+    .page-hero{
+      padding:2.25rem 0 1.25rem;
+      border-bottom:1px solid #0b1220;
+      background:radial-gradient(circle at top left,#020617,#020617 45%,#020617 100%);
+    }
+    .hero-wrap{max-width:980px;margin:0 auto;padding:0 16px;}
+    .pill{
+      display:inline-flex;align-items:center;gap:.45rem;
+      padding:.2rem .65rem;border-radius:999px;
+      border:1px solid #1d4ed8;
+      color:#bfdbfe;
+      background:radial-gradient(circle at top left,#0b1220,#020617);
+      font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
+    }
+    .pill-dot{width:.45rem;height:.45rem;border-radius:999px;background:#22c55e;}
+    .page-title{margin:.65rem 0 .35rem;font-size:clamp(1.55rem,2.6vw,2.1rem);line-height:1.1;}
+    .page-subtitle{margin:0;max-width:72ch;color:#9ca3af;font-size:.95rem;line-height:1.55;}
 
-    form{display:grid;gap:1rem}
-    label{font-size:.85rem;opacity:.8}
+    .main{max-width:980px;margin:0 auto;padding:1.25rem 16px 2.75rem;}
+
+    .grid{display:grid;gap:14px;}
+    @media(min-width:980px){ .grid{grid-template-columns:minmax(0,1.45fr) minmax(0,.95fr);} }
+
+    .panel{
+      border:1px solid #0f172a;
+      border-radius:18px;
+      background:linear-gradient(145deg,#020617,#050b1c);
+      padding:14px;
+      box-shadow:0 18px 45px rgba(15,23,42,.35);
+    }
+
+    .label{
+      display:block;
+      font-size:.72rem;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      opacity:.75;
+      margin:0 0 .35rem;
+    }
+
     input,select,textarea{
       width:100%;
-      padding:.7rem .8rem;
-      border-radius:10px;
+      border-radius:14px;
       border:1px solid #1f2937;
       background:#020617;
       color:#e5e7eb;
+      padding:.8rem .9rem;
+      font-size:.98rem;
+      outline:none;
     }
-    textarea{min-height:120px}
+    textarea{min-height:140px;resize:vertical;}
+    input:focus,select:focus,textarea:focus{border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,.15);}
 
-    button{
-      margin-top:.5rem;
-      padding:.8rem 1rem;
-      border-radius:12px;
-      border:0;
-      background:#f5c451;
-      color:#000;
-      font-weight:700;
-      cursor:pointer;
+    .row{display:grid;gap:12px;}
+    @media(min-width:720px){ .row.two{grid-template-columns:1fr 1fr;} }
+
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+      border-radius:999px;border:1px solid #1f2937;
+      padding:.65rem 1.05rem;
+      font-weight:800;font-size:.9rem;
+      background:#020617;color:#e5e7eb;
+      text-decoration:none; cursor:pointer;
+      transition:transform .12s ease, background .12s ease, border-color .12s ease, opacity .12s ease;
+      will-change:transform;
+    }
+    .btn:active{transform:translateY(1px);}
+    .btn--gold{background:linear-gradient(135deg,#facc15,#fb923c);border-color:#facc15;color:#111827;}
+    .btn--ghost:hover{background:#0b1220;border-color:#374151;}
+
+    .actions{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:12px;}
+
+    .mini{
+      margin-top:10px;
+      font-size:.85rem;
+      color:#9ca3af;
+      line-height:1.55;
     }
 
-    .note{font-size:.8rem;opacity:.7;margin-top:.75rem}
+    .outbox{
+      margin-top:12px;
+      border-radius:16px;
+      border:1px dashed #1f2937;
+      background:#020617;
+      padding:12px;
+      font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size:.85rem;
+      white-space:pre-wrap;
+      word-break:break-word;
+      color:#e5e7eb;
+      min-height:120px;
+    }
+
+    .k{
+      display:inline-block;
+      padding:.18rem .5rem;
+      border-radius:999px;
+      border:1px solid #1f2937;
+      background:#0b1220;
+      color:#cbd5e1;
+      font-size:.72rem;
+      margin-right:.35rem;
+    }
   </style>
 </head>
 
-<body class="theme-dark">
-  <div id="nav-placeholder" aria-busy="true"></div>
+<body class="theme-dark" id="top">
+  <div id="site-header" aria-busy="true" style="content-visibility:auto;contain-intrinsic-size:80px;"></div>
 
-  <main class="wrap">
-    <h1>Square Bidness Intake</h1>
-    <p class="sub">Route requests cleanly to the right lane.</p>
+  <header class="page-hero">
+    <div class="hero-wrap">
+      <p class="pill"><span class="pill-dot"></span>SB Tech Lab • Internal Tool</p>
+      <h1 class="page-title">Intake</h1>
+      <p class="page-subtitle">
+        One reusable lane for requests: builds, edits, fixes, routing, pages, domains, payments, and ops.
+        This generates a clean email + a copyable summary.
+      </p>
+    </div>
+  </header>
 
-    <form id="intakeForm">
-      <div>
-        <label>Name</label>
-        <input required id="name" />
-      </div>
+  <main class="main" role="main">
+    <div class="grid">
 
-      <div>
-        <label>Email</label>
-        <input type="email" required id="email" />
-      </div>
+      <!-- FORM -->
+      <section class="panel" aria-label="Intake form">
+        <div class="row two">
+          <div>
+            <span class="label">Request type</span>
+            <select id="type">
+              <option value="Build">Build (new page/site)</option>
+              <option value="Fix">Fix (bug / broken link)</option>
+              <option value="Update">Update (copy, images, pricing)</option>
+              <option value="Routing">Routing (redirects, DNS, email)</option>
+              <option value="Payments">Payments (Stripe/Coinbase)</option>
+              <option value="Ops">Ops (contracts, admin, docs)</option>
+            </select>
+          </div>
+          <div>
+            <span class="label">Priority</span>
+            <select id="priority">
+              <option value="Normal">Normal</option>
+              <option value="High">High</option>
+              <option value="Urgent">Urgent</option>
+            </select>
+          </div>
+        </div>
 
-      <div>
-        <label>Request Type</label>
-        <select required id="type">
-          <option value="">Select…</option>
-          <option value="support@squarebidness.com">Wholesale / Retail</option>
-          <option value="media@squarebidness.com">Media / Press</option>
-          <option value="techlab@squarebidness.com">Tech / Platform</option>
-          <option value="ops@squarebidness.com">Operations</option>
-          <option value="hello@squarebidness.com">General</option>
-        </select>
-      </div>
+        <div class="row two" style="margin-top:12px;">
+          <div>
+            <span class="label">Client / partner name</span>
+            <input id="client" placeholder="e.g., Puff’s Smokehouse" />
+          </div>
+          <div>
+            <span class="label">Best contact</span>
+            <input id="contact" placeholder="Name + phone/email" />
+          </div>
+        </div>
 
-      <div>
-        <label>Message</label>
-        <textarea required id="message"></textarea>
-      </div>
+        <div class="row two" style="margin-top:12px;">
+          <div>
+            <span class="label">Target URL / page</span>
+            <input id="url" placeholder="e.g., /puffs/ or https://..." />
+          </div>
+          <div>
+            <span class="label">Deadline</span>
+            <input id="deadline" placeholder="e.g., Today, Monday AM, Jan 15" />
+          </div>
+        </div>
 
-      <button type="submit">Route Request</button>
-    </form>
+        <div class="row" style="margin-top:12px;">
+          <div>
+            <span class="label">What’s the request?</span>
+            <textarea id="details" placeholder="State it clean. What you want done, what success looks like, and any links/assets."></textarea>
+          </div>
+        </div>
 
-    <p class="note">
-      This routes directly into Square Bidness infrastructure.  
-      Built by SB Tech Lab.
-    </p>
+        <div class="row two" style="margin-top:12px;">
+          <div>
+            <span class="label">Assets / files</span>
+            <input id="assets" placeholder="e.g., /assets/... , Google Drive link, or 'none'" />
+          </div>
+          <div>
+            <span class="label">Internal note (optional)</span>
+            <input id="internal" placeholder="Anything only for SB Tech Lab eyes" />
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn--gold" id="btnEmail" type="button">Generate email draft →</button>
+          <button class="btn btn--ghost" id="btnCopy" type="button">Copy summary</button>
+          <button class="btn btn--ghost" id="btnClear" type="button">Clear</button>
+        </div>
+
+        <p class="mini">
+          Tip: keep it simple. If it’s a redirect, include <span class="k">from</span> and <span class="k">to</span>.
+          If it’s SEO/indexing, include the exact page URL + sitemap entry.
+        </p>
+      </section>
+
+      <!-- OUTPUT -->
+      <aside class="panel" aria-label="Generated output">
+        <span class="label">Generated summary</span>
+        <div id="out" class="outbox">Fill the form, then click “Generate email draft”.</div>
+
+        <div class="actions">
+          <a class="btn btn--ghost" href="/connect/" data-sb="intake-connect">Connect</a>
+          <a class="btn btn--ghost" href="/work/" data-sb="intake-work">Work</a>
+          <a class="btn btn--ghost" href="/linkme/" data-sb="intake-linkme">Link Me</a>
+        </div>
+
+        <p class="mini">
+          Destination: <strong>marcusbuckner@squarebidness.com</strong><br/>
+          Subject format: <span class="k">[TYPE]</span> <span class="k">[PRIORITY]</span> <span class="k">Client</span> — Short title
+        </p>
+      </aside>
+
+    </div>
   </main>
 
-  <div id="footer-placeholder" aria-busy="true"></div>
+  <div id="site-footer" aria-busy="true" style="content-visibility:auto;contain-intrinsic-size:140px;"></div>
 
   <script>
-    document.getElementById("intakeForm").addEventListener("submit", e => {
-      e.preventDefault();
+    (function () {
+      const $ = (id) => document.getElementById(id);
 
-      const name = encodeURIComponent(nameInput.value);
-      const email = encodeURIComponent(emailInput.value);
-      const type = typeSelect.value;
-      const msg = encodeURIComponent(messageInput.value);
+      const DEST = "marcusbuckner@squarebidness.com";
 
-      const subject = encodeURIComponent(`[Intake] ${name}`);
-      const body =
-        `Name: ${nameInput.value}\n` +
-        `Email: ${emailInput.value}\n\n` +
-        `${messageInput.value}`;
+      function val(id){ return ($(id).value || "").trim(); }
 
-      window.location.href = `mailto:${type}?subject=${subject}&body=${encodeURIComponent(body)}`;
-    });
+      function buildSummary() {
+        const type = val("type");
+        const priority = val("priority");
+        const client = val("client") || "—";
+        const contact = val("contact") || "—";
+        const url = val("url") || "—";
+        const deadline = val("deadline") || "—";
+        const details = val("details") || "—";
+        const assets = val("assets") || "—";
+        const internal = val("internal");
 
-    const nameInput = document.getElementById("name");
-    const emailInput = document.getElementById("email");
-    const typeSelect = document.getElementById("type");
-    const messageInput = document.getElementById("message");
+        const lines = [
+          "SB TECH LAB — INTAKE",
+          "--------------------",
+          `Type: ${type}`,
+          `Priority: ${priority}`,
+          `Client/Partner: ${client}`,
+          `Best contact: ${contact}`,
+          `Target URL/Page: ${url}`,
+          `Deadline: ${deadline}`,
+          "",
+          "Request:",
+          details,
+          "",
+          `Assets/Files: ${assets}`
+        ];
+
+        if (internal) {
+          lines.push("", "Internal note:", internal);
+        }
+
+        return lines.join("\n");
+      }
+
+      function buildSubject() {
+        const type = val("type") || "Request";
+        const priority = val("priority") || "Normal";
+        const client = val("client") || "Client";
+        const url = val("url");
+
+        const short = url ? url.replace(/^https?:\/\/(www\.)?/,"").slice(0,40) : "intake";
+        return `[${type}] [${priority}] ${client} — ${short}`;
+      }
+
+      function render() {
+        const summary = buildSummary();
+        $("out").textContent = summary;
+        return summary;
+      }
+
+      $("btnEmail").addEventListener("click", () => {
+        const summary = render();
+        const subject = encodeURIComponent(buildSubject());
+        const body = encodeURIComponent(summary);
+        const href = `mailto:${encodeURIComponent(DEST)}?subject=${subject}&body=${body}`;
+        window.location.href = href;
+
+        try{
+          if (typeof window.gtag === "function") {
+            window.gtag("event","intake_generate_email",{ event_category:"intake", event_label:"mailto" });
+          }
+        } catch(_) {}
+      });
+
+      $("btnCopy").addEventListener("click", async () => {
+        const summary = render();
+        try{
+          await navigator.clipboard.writeText(summary);
+          alert("Copied.");
+        } catch(e){
+          alert("Copy failed.");
+        }
+        try{
+          if (typeof window.gtag === "function") {
+            window.gtag("event","intake_copy",{ event_category:"intake", event_label:"summary" });
+          }
+        } catch(_) {}
+      });
+
+      $("btnClear").addEventListener("click", () => {
+        ["client","contact","url","deadline","details","assets","internal"].forEach(id => $(id).value = "");
+        $("type").value = "Build";
+        $("priority").value = "Normal";
+        $("out").textContent = "Cleared. Fill the form, then click “Generate email draft”.";
+      });
+
+      // Live preview as you type (lightweight)
+      ["type","priority","client","contact","url","deadline","details","assets","internal"].forEach(id => {
+        $(id).addEventListener("input", () => render());
+        $(id).addEventListener("change", () => render());
+      });
+    })();
   </script>
 </body>
 </html>
