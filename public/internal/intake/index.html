@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SB Intake Router</title>
+
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="sb:build" content="v20260113-intake" />
+
+  <link rel="stylesheet" href="/styles/style.css" />
+  <script defer src="/scripts/partials.js"></script>
+
+  <style>
+    #nav-placeholder{min-height:72px}
+    #footer-placeholder{min-height:120px}
+
+    .wrap{max-width:640px;margin:0 auto;padding:2.5rem 1rem}
+    h1{margin:0 0 .5rem}
+    p.sub{opacity:.8;margin:0 0 1.5rem}
+
+    form{display:grid;gap:1rem}
+    label{font-size:.85rem;opacity:.8}
+    input,select,textarea{
+      width:100%;
+      padding:.7rem .8rem;
+      border-radius:10px;
+      border:1px solid #1f2937;
+      background:#020617;
+      color:#e5e7eb;
+    }
+    textarea{min-height:120px}
+
+    button{
+      margin-top:.5rem;
+      padding:.8rem 1rem;
+      border-radius:12px;
+      border:0;
+      background:#f5c451;
+      color:#000;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    .note{font-size:.8rem;opacity:.7;margin-top:.75rem}
+  </style>
+</head>
+
+<body class="theme-dark">
+  <div id="nav-placeholder" aria-busy="true"></div>
+
+  <main class="wrap">
+    <h1>Square Bidness Intake</h1>
+    <p class="sub">Route requests cleanly to the right lane.</p>
+
+    <form id="intakeForm">
+      <div>
+        <label>Name</label>
+        <input required id="name" />
+      </div>
+
+      <div>
+        <label>Email</label>
+        <input type="email" required id="email" />
+      </div>
+
+      <div>
+        <label>Request Type</label>
+        <select required id="type">
+          <option value="">Select…</option>
+          <option value="support@squarebidness.com">Wholesale / Retail</option>
+          <option value="media@squarebidness.com">Media / Press</option>
+          <option value="techlab@squarebidness.com">Tech / Platform</option>
+          <option value="ops@squarebidness.com">Operations</option>
+          <option value="hello@squarebidness.com">General</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Message</label>
+        <textarea required id="message"></textarea>
+      </div>
+
+      <button type="submit">Route Request</button>
+    </form>
+
+    <p class="note">
+      This routes directly into Square Bidness infrastructure.  
+      Built by SB Tech Lab.
+    </p>
+  </main>
+
+  <div id="footer-placeholder" aria-busy="true"></div>
+
+  <script>
+    document.getElementById("intakeForm").addEventListener("submit", e => {
+      e.preventDefault();
+
+      const name = encodeURIComponent(nameInput.value);
+      const email = encodeURIComponent(emailInput.value);
+      const type = typeSelect.value;
+      const msg = encodeURIComponent(messageInput.value);
+
+      const subject = encodeURIComponent(`[Intake] ${name}`);
+      const body =
+        `Name: ${nameInput.value}\n` +
+        `Email: ${emailInput.value}\n\n` +
+        `${messageInput.value}`;
+
+      window.location.href = `mailto:${type}?subject=${subject}&body=${encodeURIComponent(body)}`;
+    });
+
+    const nameInput = document.getElementById("name");
+    const emailInput = document.getElementById("email");
+    const typeSelect = document.getElementById("type");
+    const messageInput = document.getElementById("message");
+  </script>
+</body>
+</html>
