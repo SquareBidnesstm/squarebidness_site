@@ -18,10 +18,20 @@
   <meta name="sb:build" content="v20260109-techlabs" />
 
   <!-- Perf -->
-  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
-  <link rel="preconnect" href="https://www.google-analytics.com" crossorigin>
-  <link rel="preconnect" href="https://static.cloudflareinsights.com" crossorigin>
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
+  <link rel="preconnect" href="https://www.google-analytics.com" crossorigin />
+  <link rel="preconnect" href="https://static.cloudflareinsights.com" crossorigin />
   <link rel="preload" href="/styles/style.css" as="style" />
+
+  <!-- ✅ Preload hero (match the image actually used) -->
+  <link
+    rel="preload"
+    as="image"
+    href="/assets/tech-lab/hero_blueprint_640.webp"
+    imagesrcset="/assets/tech-lab/hero_blueprint_420.webp 420w, /assets/tech-lab/hero_blueprint_640.webp 640w"
+    imagesizes="(min-width: 860px) 420px, 100vw"
+    fetchpriority="high"
+  />
 
   <!-- CSS -->
   <link rel="stylesheet" href="/styles/style.css" />
@@ -33,7 +43,7 @@
   <meta property="og:title" content="SB Tech Lab — Infrastructure Behind Square Bidness" />
   <meta property="og:description" content="The internal engineering arm behind Square Bidness — Tax Pass™, internal tools, and real systems installed for brand operations and select partners." />
   <meta property="og:url" content="https://www.squarebidness.com/techlabs/" />
-  <meta property="og:image" content="https://www.squarebidness.com/assets/og/tech-lab-1200x630.jpg" />
+  <meta property="og:image" content="https://www.squarebidness.com/assets/tech-lab/hero_blueprint_1200x630.jpg" />
   <meta property="og:image:alt" content="Square Bidness Tech Lab — infrastructure behind the brand" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -43,7 +53,7 @@
   <meta name="twitter:site" content="@squarebidnesstm" />
   <meta name="twitter:title" content="SB Tech Lab — Infrastructure Behind Square Bidness" />
   <meta name="twitter:description" content="Tax Pass™, internal tools, and documented systems behind Square Bidness — built in Louisiana, operated with a veteran-led execution engine." />
-  <meta name="twitter:image" content="https://www.squarebidness.com/assets/og/tech-lab-1200x630.jpg" />
+  <meta name="twitter:image" content="https://www.squarebidness.com/assets/tech-lab/hero_blueprint_1200x630.jpg" />
   <meta name="twitter:image:alt" content="Square Bidness Tech Lab — infrastructure behind the brand" />
 
   <!-- Structured data (lightweight, brand-side) -->
@@ -181,13 +191,33 @@
       border-color:#f97316;
       font-weight:800;
     }
-    .btn span{font-size:.95rem;}
 
     .hero-note{
       margin-top:8px;
       font-size:.82rem;
       color:#9ca3af;
       line-height:1.5;
+    }
+
+    /* ✅ Blueprint hero media block */
+    .hero-media{
+      width:100%;
+      max-width:420px;
+    }
+    .hero-frame{
+      border-radius:18px;
+      border:1px solid #1f2937;
+      overflow:hidden;
+      background:#020617;
+      box-shadow:0 18px 45px rgba(15,23,42,.55);
+    }
+    .hero-frame img{
+      width:100%;
+      height:auto;
+      display:block;
+      aspect-ratio: 16 / 10; /* CLS guard */
+      object-fit:cover;
+      background:#020617;
     }
 
     .section{
@@ -283,9 +313,34 @@
         </p>
       </div>
 
-      <div>
-        <div class="badge-pill">
+      <!-- ✅ Blueprint hero image -->
+      <div class="hero-media" aria-label="SB Tech Lab blueprint hero">
+        <div class="badge-pill" style="margin-bottom:10px;">
           <span></span> Built by Square Bidness Tech Lab · Louisiana
+        </div>
+
+        <div class="hero-frame">
+          <picture>
+            <source
+              type="image/webp"
+              srcset="/assets/tech-lab/hero_blueprint_420.webp 420w, /assets/tech-lab/hero_blueprint_640.webp 684w"
+              sizes="(min-width: 860px) 420px, 100vw"
+            />
+            <source
+              type="image/jpeg"
+              srcset="/assets/tech-lab/hero_blueprint_420.jpg 420w, /assets/tech-lab/hero_blueprint_640.jpg 640w"
+              sizes="(min-width: 860px) 420px, 100vw"
+            />
+            <img
+              src="/assets/tech-lab/hero_blueprint_680.jpg"
+              alt="Blueprint-style SB Tech Lab workspace visual"
+              width="680"
+              height="425"
+              loading="eager"
+              decoding="async"
+              fetchpriority="high"
+            />
+          </picture>
         </div>
       </div>
     </header>
@@ -306,7 +361,7 @@
             you work from a clean office queue.
           </p>
           <div class="card-footer">
-            Live pilot: Tax Pass™ (Alexandria, LA).<br>
+            Live pilot: Tax Pass™ (Alexandria, LA).<br />
             <a href="/tax-pass/">See Tax Pass overview →</a>
           </div>
         </article>
@@ -357,7 +412,7 @@
 
   <div class="page-footer">
     <p>
-      <strong>Square Bidness Tech Lab</strong> — the engineering arm of Square Bidness Apparel.<br>
+      <strong>Square Bidness Tech Lab</strong> — the engineering arm of Square Bidness Apparel.<br />
       Principles. Morals. Business Done Right — in fabric and in infrastructure.
     </p>
   </div>
@@ -376,8 +431,6 @@
         try {
           const el = document.getElementById(id);
           if (!el) return;
-
-          // If partials.js already filled it, don’t overwrite.
           if ((el.innerHTML || "").trim().length > 0) return;
 
           const res = await fetch(url + bust, { cache: "no-store", credentials: "same-origin" });
