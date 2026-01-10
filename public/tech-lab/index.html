@@ -1,15 +1,17 @@
 <!-- /public/tech-lab/index.html  (Field Tools page) -->
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <!-- Basics -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>SB Tech Lab — Field Tools & Infrastructure | Square Bidness</title>
+
+  <!-- Canonical -->
   <link rel="canonical" href="https://www.squarebidness.com/tech-lab/" />
 
   <!-- SEO -->
-  <meta name="description" content="SB Tech Lab is where Square Bidness documents installs, maps breakers, plans recessed lighting, and trains for future datacenter and infrastructure work — separate subdomain, same discipline." />
+  <meta name="description" content="SB Tech Lab is the field-tools lane for Square Bidness — install documentation, breaker maps, recessed layouts, and infrastructure prep. Separate subdomain, same discipline." />
   <meta name="robots" content="index,follow" />
 
   <!-- Theme -->
@@ -17,95 +19,131 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="format-detection" content="telephone=no" />
 
-  <!-- Perf / GA4 -->
-  <link rel="preconnect" href="https://www.googletagmanager.com">
-  <link rel="preconnect" href="https://www.google-analytics.com">
-  <script defer src="/scripts/ga.js"></script>
+  <!-- Build stamp -->
+  <meta name="sb:build" content="v20260109-tech-lab" />
 
-  <!-- Site-wide analytics -->
-  <script defer src="/scripts/sb-analytics.js"></script>
+  <!-- Perf -->
+  <link rel="preconnect" href="https://www.googletagmanager.com" />
+  <link rel="preconnect" href="https://www.google-analytics.com" />
+  <link rel="preload" href="/styles/style.css" as="style" />
 
-  <!-- Partials loader (correct path for this repo) -->
-  <script defer src="/scripts/partials.js"></script>
+  <!-- ✅ Preload hero (matches srcset) -->
+  <link
+    rel="preload"
+    as="image"
+    href="/assets/tech-lab/tech-lab-hero-1600.webp"
+    imagesrcset="/assets/tech-lab/tech-lab-hero-800.webp 800w, /assets/tech-lab/tech-lab-hero-1600.webp 1600w"
+    imagesizes="(max-width: 900px) 100vw, 720px"
+    fetchpriority="high"
+  />
 
   <!-- Styles -->
   <link rel="stylesheet" href="/styles/style.css" />
 
   <!-- Icons / PWA -->
-  <link rel="icon" href="/favicon.ico" sizes="any">
-  <link rel="apple-touch-icon" href="/icon_180.png">
-  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" href="/icon_180.png" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+
+  <!-- Analytics -->
+  <script defer src="/scripts/ga.js"></script>
+  <script defer src="/scripts/sb-analytics.js"></script>
+
+  <!-- Partials loader -->
+  <script defer src="/scripts/partials.js"></script>
 
   <!-- Open Graph -->
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Square Bidness">
-  <meta property="og:title" content="SB Tech Lab — Field Tools & Infrastructure">
-  <meta property="og:description" content="Field docs, recessed layouts, breaker maps and training lanes connecting HQ1, HQ2 and Start2Finish to future data center work.">
-  <meta property="og:url" content="https://www.squarebidness.com/tech-lab/">
-  <meta property="og:image" content="https://www.squarebidness.com/assets/og/tech-lab-1200x630.jpg">
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Square Bidness" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:title" content="SB Tech Lab — Field Tools & Infrastructure" />
+  <meta property="og:description" content="Field docs, recessed layouts, breaker maps and infrastructure prep connecting HQ installs to future compute work." />
+  <meta property="og:url" content="https://www.squarebidness.com/tech-lab/" />
+  <meta property="og:image" content="https://www.squarebidness.com/assets/og/tech-lab-1200x630.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="SB Tech Lab — Field Tools & Infrastructure" />
 
   <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="SB Tech Lab — Field Tools & Infrastructure">
-  <meta name="twitter:description" content="Square Bidness Tech Lab lives at lab.squarebidness.com — built for field tools, documentation, and infrastructure prep.">
-  <meta name="twitter:image" content="https://www.squarebidness.com/assets/og/tech-lab-1200x630.jpg">
-
-  <!-- Preload hero -->
-  <!-- Preload hero (pick the same file the browser will actually use) -->
-<link
-  rel="preload"
-  as="image"
-  href="/assets/tech-lab/tech-lab-hero-800.webp"
-  media="(max-width: 899px)"
-  fetchpriority="high"
-/>
-<link
-  rel="preload"
-  as="image"
-  href="/assets/tech-lab/tech-lab-hero-1600.webp"
-  media="(min-width: 900px)"
-  fetchpriority="high"
-/>
-
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="SB Tech Lab — Field Tools & Infrastructure" />
+  <meta name="twitter:description" content="Square Bidness Tech Lab lives at lab.squarebidness.com — built for field tools, documentation, and infrastructure prep." />
+  <meta name="twitter:image" content="https://www.squarebidness.com/assets/og/tech-lab-1200x630.jpg" />
 
   <!-- JSON-LD -->
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
     "@type":"WebPage",
-    "name":"SB Tech Lab — Field Tools & Infrastructure | Square Bidness",
+    "name":"SB Tech Lab — Field Tools & Infrastructure",
     "url":"https://www.squarebidness.com/tech-lab/",
+    "isPartOf":{
+      "@type":"WebSite",
+      "name":"Square Bidness",
+      "url":"https://www.squarebidness.com/"
+    },
     "about":[
-      {"@type":"Organization","name":"Square Bidness Apparel"},
-      {"@type":"WebSite","name":"SB Tech Lab","url":"https://lab.squarebidness.com/"}
+      {"@type":"Organization","name":"Square Bidness"},
+      {"@type":"WebSite","name":"Square Bidness Tech Lab","url":"https://lab.squarebidness.com/"}
     ]
   }
   </script>
 
   <style>
-    body{background:#000;color:#fff}
+    :root{
+      --bg:#000;
+      --fg:#fff;
+      --muted:#b3b3b3;
+      --panel:#050505;
+      --border:#1f1f1f;
+      --gold:#c9a227;
+    }
+
+    body{background:var(--bg);color:var(--fg)}
+
+    /* ✅ CLS guard for injected nav/footer */
+    #site-header{min-height:72px;}
+    #site-footer{min-height:140px;}
+
     .page-wrap{max-width:960px;margin:0 auto;padding:24px 16px 40px}
-    .lab-kicker{font-size:.8rem;text-transform:uppercase;letter-spacing:.12em;color:#b3b3b3}
+
+    .lab-kicker{font-size:.8rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
     .lab-title{font-size:clamp(24px,5vw,32px);margin:4px 0 6px}
     .lab-sub{font-size:.95rem;color:#ddd;max-width:640px}
-    .badge-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+
+    .badge-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
     .badge{font-size:.78rem;padding:3px 10px;border-radius:999px;border:1px solid #2a2a2a;color:#bdbdbd}
-    .badge--gold{border-color:#c4a46e;color:#c4a46e}
+    .badge--gold{border-color:var(--gold);color:var(--gold)}
+
     .lab-hero-img{margin:18px 0 14px;border-radius:18px;overflow:hidden;border:1px solid #1b1b1b}
     .lab-hero-frame{width:100%;margin:0 auto}
     @media(min-width:900px){.lab-hero-frame{max-width:720px}}
+
     .section{margin-top:22px;font-size:.96rem;line-height:1.7}
     .cards-grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
-    .card-link{border:1px solid #1f1f1f;border-radius:14px;padding:10px 12px;background:#050505;color:#f5f5f5;text-decoration:none}
+
+    .card-link{
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:10px 12px;
+      background:var(--panel);
+      color:#f5f5f5;
+      text-decoration:none;
+      display:block;
+    }
     .card-link:hover{background:#0b0b0b}
-    .card-chip{font-size:.75rem;padding:2px 8px;border-radius:999px;background:#f5f5f5;color:#000;font-weight:600;width:fit-content}
+    .card-title{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .card-chip{font-size:.75rem;padding:2px 8px;border-radius:999px;background:#f5f5f5;color:#000;font-weight:700;width:fit-content}
+
     .small-note{font-size:.8rem;color:#9a9a9a}
   </style>
 </head>
 
 <body class="theme-dark">
-  <!-- Partials target (partials.js will fill these if configured) -->
-  <div id="nav-placeholder"></div>
+  <!-- NAV injected by /scripts/partials.js -->
+  <div id="site-header"
+       aria-busy="true"
+       style="content-visibility:auto;contain-intrinsic-size:80px;"></div>
 
   <main class="page-wrap">
     <header>
@@ -113,66 +151,82 @@
       <h1 class="lab-title">Field Tools & Infrastructure for Square Bidness</h1>
       <p class="lab-sub">
         SB Tech Lab lives on its own subdomain at <strong>lab.squarebidness.com</strong>.
-        It documents installs, breaker maps, recessed layouts, and infrastructure prep.
+        This page is the “field tools” gateway — documentation, breaker maps, recessed layouts, and infrastructure prep.
       </p>
 
       <div class="lab-hero-img">
         <div class="lab-hero-frame">
           <img
-  src="/assets/tech-lab/tech-lab-hero-1600.webp"
-  srcset="/assets/tech-lab/tech-lab-hero-800.webp 800w, /assets/tech-lab/tech-lab-hero-1600.webp 1600w"
-  sizes="(max-width: 900px) 100vw, 720px"
-  width="1600" height="900"
-  alt="SB Tech Lab dashboard and field tools"
-  loading="eager"
-  fetchpriority="high"
-  decoding="async"
-  style="width:100%;height:auto;display:block"
-/>
+            src="/assets/tech-lab/tech-lab-hero-1600.webp"
+            srcset="/assets/tech-lab/tech-lab-hero-800.webp 800w, /assets/tech-lab/tech-lab-hero-1600.webp 1600w"
+            sizes="(max-width: 900px) 100vw, 720px"
+            width="1600"
+            height="900"
+            alt="SB Tech Lab dashboard and field tools"
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+            style="width:100%;height:auto;display:block"
+          />
         </div>
       </div>
 
       <div class="badge-row">
         <span class="badge badge--gold">lab.squarebidness.com</span>
-        <span class="badge">HQ1 · HQ2 · Start2Finish</span>
-        <span class="badge">Breaker maps · Print sheets</span>
+        <span class="badge">HQ installs · partner installs</span>
+        <span class="badge">Breaker maps · print sheets · layouts</span>
       </div>
     </header>
 
-    <!-- LINKS STAY -->
     <section class="section">
       <h2>Active Lab Links</h2>
+
       <div class="cards-grid">
-        <a class="card-link" href="https://lab.squarebidness.com/shortcuts/" target="_blank" rel="noopener">🛠️ Tech Lab Shortcuts <div class="card-chip">Hub</div></a>
-        <a class="card-link" href="https://lab.squarebidness.com/lab/hq1/" target="_blank" rel="noopener">🏠 HQ1 — Hammond <div class="card-chip">HQ1</div></a>
-        <a class="card-link" href="https://lab.squarebidness.com/lab/hq2/" target="_blank" rel="noopener">🏠 HQ2 — Pineville <div class="card-chip">HQ2</div></a>
-        <a class="card-link" href="https://lab.squarebidness.com/lab/start2finish-progress/" target="_blank" rel="noopener">⚡ Start2Finish Progress <div class="card-chip">Live</div></a>
-        <a class="card-link" href="https://lab.squarebidness.com/lab/install-method/" target="_blank" rel="noopener">📐 Install Method <div class="card-chip">Method</div></a>
+        <a class="card-link" href="https://lab.squarebidness.com/shortcuts/" target="_blank" rel="noopener">
+          <div class="card-title">🛠️ Tech Lab Shortcuts <span class="card-chip">Hub</span></div>
+        </a>
+
+        <a class="card-link" href="https://lab.squarebidness.com/lab/hq1/" target="_blank" rel="noopener">
+          <div class="card-title">🏠 HQ1 — Hammond <span class="card-chip">HQ1</span></div>
+        </a>
+
+        <a class="card-link" href="https://lab.squarebidness.com/lab/hq2/" target="_blank" rel="noopener">
+          <div class="card-title">🏠 HQ2 — Pineville <span class="card-chip">HQ2</span></div>
+        </a>
+
+        <a class="card-link" href="https://lab.squarebidness.com/lab/start2finish-progress/" target="_blank" rel="noopener">
+          <div class="card-title">⚡ Start2Finish Progress <span class="card-chip">Live</span></div>
+        </a>
+
+        <a class="card-link" href="https://lab.squarebidness.com/lab/install-method/" target="_blank" rel="noopener">
+          <div class="card-title">📐 Install Method <span class="card-chip">Method</span></div>
+        </a>
       </div>
 
-      <p class="small-note">
-        SB Tech Lab is a back-of-house control room — not a store — proving Square Bidness
-        documents infrastructure with the same discipline as product.
+      <p class="small-note" style="margin-top:10px;">
+        SB Tech Lab is a back-of-house control room — not a store — proving Square Bidness documents infrastructure
+        with the same discipline as product.
       </p>
     </section>
   </main>
 
-  <div id="footer-placeholder"></div>
+  <!-- FOOTER injected by /scripts/partials.js -->
+  <div id="site-footer"
+       aria-busy="true"
+       style="content-visibility:auto;contain-intrinsic-size:140px;"></div>
 
-  <!-- KEEP BOTH PURPOSES:
-       1) /scripts/partials.js = your standard system
-       2) this inline fetch = hard fallback if partials.js isn’t active on this page -->
+  <!-- ✅ Hard fallback ONLY if partials.js fails to inject -->
   <script>
     (function () {
-      const bust = `?v=${Date.now()}`;
+      const bust = `?v=${encodeURIComponent(document.querySelector('meta[name="sb:build"]')?.content || 'v1')}`;
 
       async function inject(url, id) {
         try {
           const el = document.getElementById(id);
           if (!el) return;
 
-          // If something (partials.js) already filled it, don’t overwrite.
-          if (el.innerHTML && el.innerHTML.trim().length > 0) return;
+          // If partials.js already filled it, don’t overwrite.
+          if ((el.innerHTML || "").trim().length > 0) return;
 
           const res = await fetch(url + bust, { cache: "no-store", credentials: "same-origin" });
           if (!res.ok) return;
@@ -180,15 +234,15 @@
         } catch (e) {}
       }
 
-      // Run after DOM is ready (so placeholders exist)
+      function run() {
+        inject("/nav/index.html", "site-header");
+        inject("/footer/index.html", "site-footer");
+      }
+
       if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", () => {
-          inject("/nav/index.html", "nav-placeholder");
-          inject("/footer/index.html", "footer-placeholder");
-        }, { once: true });
+        document.addEventListener("DOMContentLoaded", run, { once: true });
       } else {
-        inject("/nav/index.html", "nav-placeholder");
-        inject("/footer/index.html", "footer-placeholder");
+        run();
       }
     })();
   </script>
