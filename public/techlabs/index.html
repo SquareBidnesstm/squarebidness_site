@@ -23,20 +23,10 @@
   <link rel="preconnect" href="https://static.cloudflareinsights.com" crossorigin />
   <link rel="preload" href="/styles/style.css" as="style" />
 
-  <!-- ✅ Preload hero (match the image actually used) -->
-  <link
-    rel="preload"
-    as="image"
-    href="/assets/tech-lab/hero_blueprint_640.webp"
-    imagesrcset="/assets/tech-lab/hero_blueprint_420.webp 420w, /assets/tech-lab/hero_blueprint_640.webp 640w"
-    imagesizes="(min-width: 860px) 420px, 100vw"
-    fetchpriority="high"
-  />
-
   <!-- CSS -->
   <link rel="stylesheet" href="/styles/style.css" />
 
-  <!-- OG / Social -->
+  <!-- OG / Social (keep meta image) -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Square Bidness" />
   <meta property="og:locale" content="en_US" />
@@ -82,7 +72,7 @@
   <script defer src="/scripts/sb-analytics.js"></script>
   <script defer src="/scripts/global.js"></script>
   <script defer src="/scripts/partials.js"></script>
-  <script defer src="/scripts/sw-register.js"></script>
+  <script defer src="/sw-register.js"></script>
 
   <style>
     :root{
@@ -121,11 +111,13 @@
       margin:10px 0 18px;
       display:flex;
       flex-wrap:wrap;
-      justify-content:space-between;
       gap:12px;
       align-items:flex-start;
     }
-    .brand-block{max-width:680px;}
+
+    /* ✅ No on-page hero image: give copy a clean max width */
+    .brand-block{max-width:760px;}
+
     .eyebrow{
       text-transform:uppercase;
       letter-spacing:.16em;
@@ -150,20 +142,6 @@
       font-size:.85rem;
       color:#e5e7eb;
     }
-
-    .badge-pill{
-      border-radius:999px;
-      border:1px solid #1f2937;
-      padding:6px 12px;
-      font-size:.82rem;
-      background:#020617;
-      color:var(--muted);
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      white-space:nowrap;
-    }
-    .badge-pill span{width:8px;height:8px;border-radius:999px;background:var(--good);}
 
     .hero-links{
       margin-top:10px;
@@ -197,27 +175,6 @@
       font-size:.82rem;
       color:#9ca3af;
       line-height:1.5;
-    }
-
-    /* ✅ Blueprint hero media block */
-    .hero-media{
-      width:100%;
-      max-width:420px;
-    }
-    .hero-frame{
-      border-radius:18px;
-      border:1px solid #1f2937;
-      overflow:hidden;
-      background:#020617;
-      box-shadow:0 18px 45px rgba(15,23,42,.55);
-    }
-    .hero-frame img{
-      width:100%;
-      height:auto;
-      display:block;
-      aspect-ratio: 16 / 10; /* CLS guard */
-      object-fit:cover;
-      background:#020617;
     }
 
     .section{
@@ -311,37 +268,6 @@
         <p class="hero-note">
           Tech Lab is where we experiment first — then roll the best pieces out to the brand, partners, and select offices.
         </p>
-      </div>
-
-      <!-- ✅ Blueprint hero image -->
-      <div class="hero-media" aria-label="SB Tech Lab blueprint hero">
-        <div class="badge-pill" style="margin-bottom:10px;">
-          <span></span> Built by Square Bidness Tech Lab · Louisiana
-        </div>
-
-        <div class="hero-frame">
-          <picture>
-            <source
-              type="image/webp"
-              srcset="/assets/tech-lab/hero_blueprint_420.webp 420w, /assets/tech-lab/hero_blueprint_640.webp 684w"
-              sizes="(min-width: 860px) 420px, 100vw"
-            />
-            <source
-              type="image/jpeg"
-              srcset="/assets/tech-lab/hero_blueprint_420.jpg 420w, /assets/tech-lab/hero_blueprint_640.jpg 640w"
-              sizes="(min-width: 860px) 420px, 100vw"
-            />
-            <img
-              src="/assets/tech-lab/hero_blueprint_680.jpg"
-              alt="Blueprint-style SB Tech Lab workspace visual"
-              width="680"
-              height="425"
-              loading="eager"
-              decoding="async"
-              fetchpriority="high"
-            />
-          </picture>
-        </div>
       </div>
     </header>
 
