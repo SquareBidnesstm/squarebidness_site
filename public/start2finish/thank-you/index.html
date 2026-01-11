@@ -1,3 +1,4 @@
+<!-- /public/start2finish/thank-you/index.html -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -6,22 +7,31 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
 
   <title>Thank You — Start2Finish</title>
-  <meta name="description" content="Your Start2Finish estimate request has been received. We’ll confirm your time window and next steps." />
+  <meta name="description" content="Your Start2Finish request has been received. We’ll confirm next steps by call or text." />
   <link rel="canonical" href="https://www.squarebidness.com/start2finish/thank-you/" />
   <meta name="robots" content="noindex,follow" />
   <meta name="theme-color" content="#000000" />
   <meta name="color-scheme" content="dark light" />
 
   <!-- Build stamp -->
-  <meta name="sb:build" content="v20260103-start2finish-thanks" />
+  <meta name="sb:build" content="v20260111-start2finish-thanks" />
 
-  <!-- Open Graph -->
+  <!-- Open Graph (clean: one image) -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Start2Finish" />
   <meta property="og:title" content="Thank You — Start2Finish" />
-  <meta property="og:description" content="Request received. We’ll confirm your estimate time window and next steps." />
+  <meta property="og:description" content="Request received. We’ll confirm next steps by call or text." />
   <meta property="og:url" content="https://www.squarebidness.com/start2finish/thank-you/" />
-  <meta property="og:image" content="https://www.squarebidness.com/start2finish/assets/kitchen-corner_clean_1200x630.jpg" />
+  <meta property="og:image" content="https://www.squarebidness.com/start2finish/assets/start2finish_meta_1200x630.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Start2Finish — Request received" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Thank You — Start2Finish" />
+  <meta name="twitter:description" content="Request received. We’ll confirm next steps by call or text." />
+  <meta name="twitter:image" content="https://www.squarebidness.com/start2finish/assets/start2finish_meta_1200x630.jpg" />
 
   <!-- Icons / PWA -->
   <link rel="icon" href="/favicon.ico" sizes="any" />
@@ -104,8 +114,8 @@
 
       <h1>We got it.</h1>
 
-      <p>
-        Your estimate request is in. We’ll confirm your time window and next steps by call or text.
+      <p id="msg">
+        Your request is in. We’ll confirm next steps by call or text.
       </p>
 
       <p>
@@ -114,11 +124,11 @@
 
       <div class="row">
         <a class="btn" href="tel:+13186122114">Call: (318) 612-2114</a>
-        <a class="btn alt" href="sms:+13186122114?body=Hi%20Start2Finish%2C%20just%20submitted%20the%20estimate%20form.%20Want%20to%20confirm%20timing.">Text Us</a>
+        <a class="btn alt" id="smsLink" href="sms:+13186122114?body=Hi%20Start2Finish%2C%20just%20submitted%20a%20request.%20Want%20to%20confirm%20next%20steps.">Text Us</a>
         <a class="btn alt" href="/start2finish/">Back to Start2Finish</a>
       </div>
 
-      <p class="note">
+      <p class="note" id="note">
         Typical response window: same day or next business day depending on workload.
       </p>
 
@@ -145,6 +155,32 @@
 
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
+
+    // Optional: personalize thank-you copy based on ?type=
+    // /start2finish/thank-you/?type=sell | rental | estimate
+    (function () {
+      const params = new URLSearchParams(location.search);
+      const type = (params.get("type") || "").toLowerCase();
+
+      const msg = document.getElementById("msg");
+      const note = document.getElementById("note");
+      const sms = document.getElementById("smsLink");
+
+      if (!msg || !sms) return;
+
+      if (type === "sell") {
+        msg.textContent = "Your Sell-Your-House inquiry is received. We’ll reach out by call or text with next steps.";
+        sms.href = "sms:+13186122114?body=Hi%20Start2Finish%2C%20I%20just%20submitted%20a%20Sell%20Your%20House%20inquiry.%20Can%20we%20talk%20next%20steps%3F";
+        if (note) note.textContent = "We’ll follow up quickly. If you have photos, reply to the text thread and we’ll take it from there.";
+      } else if (type === "rental") {
+        msg.textContent = "Your Rental/Availability inquiry is received. We’ll follow up by call or text with what’s open.";
+        sms.href = "sms:+13186122114?body=Hi%20Start2Finish%2C%20I%20just%20submitted%20a%20Rental%20Availability%20inquiry.%20What%27s%20open%20right%20now%3F";
+        if (note) note.textContent = "We’ll follow up quickly. If you have a target budget + move-in date, text it here.";
+      } else if (type === "estimate") {
+        msg.textContent = "Your estimate request is received. We’ll confirm your time window and next steps by call or text.";
+        sms.href = "sms:+13186122114?body=Hi%20Start2Finish%2C%20just%20submitted%20the%20estimate%20form.%20Want%20to%20confirm%20timing.";
+      }
+    })();
   </script>
 </body>
 </html>
