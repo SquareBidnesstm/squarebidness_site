@@ -8,7 +8,7 @@
   <title>Start2Finish — Contractor House Work | Free Estimates</title>
 
   <link rel="canonical" href="https://www.squarebidness.com/start2finish/" />
-  <meta name="description" content="Start2Finish — contractor house work, free estimates, houses for sale, rentals available, and sell-your-house inquiries. Alexandria, LA." />
+  <meta name="description" content="Start2Finish — contractor house work, free estimates, houses for sale, rentals available, buy-a-house requests, and sell-your-house inquiries. Alexandria, LA." />
   <meta name="theme-color" content="#000000" />
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="index,follow" />
@@ -21,7 +21,7 @@
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Start2Finish" />
   <meta property="og:title" content="Start2Finish — Contractor Work & Property Inquiries" />
-  <meta property="og:description" content="Contractor house work, free estimates, houses for sale, rentals available, and sell-your-house inquiries. Alexandria, LA." />
+  <meta property="og:description" content="Contractor house work, free estimates, rentals available, buy-a-house requests, and sell-your-house inquiries. Alexandria, LA." />
   <meta property="og:url" content="https://www.squarebidness.com/start2finish/" />
   <meta property="og:image" content="https://www.squarebidness.com/start2finish/assets/start2finish_meta_1200x630.jpg" />
   <meta property="og:image:width" content="1200" />
@@ -31,7 +31,7 @@
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Start2Finish — Contractor Work & Property Inquiries" />
-  <meta name="twitter:description" content="Free estimates. Contractor work. Houses for sale. Rentals available. Alexandria, LA." />
+  <meta name="twitter:description" content="Free estimates. Contractor work. Buy a house. Rentals available. Sell your house. Alexandria, LA." />
   <meta name="twitter:image" content="https://www.squarebidness.com/start2finish/assets/start2finish_meta_1200x630.jpg" />
 
   <!-- Icons / PWA -->
@@ -164,15 +164,16 @@
       <h1>Contractor Work + Property Inquiries</h1>
       <p>
         Free estimates for repairs &amp; remodels — plus a clean lane for
-        <strong>rentals</strong> and <strong>sell-your-house</strong> inquiries.
+        <strong>buying</strong>, <strong>rentals</strong>, and <strong>sell-your-house</strong> inquiries.
       </p>
 
       <div class="hero-cta">
         <a class="btn" href="#inquiry">Start an Inquiry</a>
+        <a class="btn alt" href="/start2finish/buy/">Buy a House</a>
         <a class="btn alt" href="/start2finish/sell/">Sell Your House</a>
         <a class="btn alt" href="/start2finish/rentals/">Find Rentals</a>
         <a class="btn alt" href="tel:+13186122114">Call: (318) 612-2114</a>
-        <a class="btn alt" href="sms:+13186122114?body=Hi%20Start2Finish%2C%20I%27d%20like%20to%20inquire%20about%20work%2C%20rentals%2C%20or%20selling%20a%20house.">Text Us</a>
+        <a class="btn alt" href="sms:+13186122114?body=Hi%20Start2Finish%2C%20I%27d%20like%20to%20inquire%20about%20work%2C%20buying%2C%20rentals%2C%20or%20selling%20a%20house.">Text Us</a>
         <a class="btn alt" href="mailto:start2finish@squarebidness.com?subject=Start2Finish%20Inquiry">Email</a>
       </div>
 
@@ -233,13 +234,14 @@
         <input id="subject" type="hidden" name="_subject" value="Start2Finish — Estimate Request" />
         <input type="hidden" name="_captcha" value="false" />
         <input type="hidden" name="_template" value="table" />
-        <input type="hidden" name="_next" value="https://www.squarebidness.com/start2finish/thank-you/?type=estimate" />
+        <input id="nextUrl" type="hidden" name="_next" value="https://www.squarebidness.com/start2finish/thank-you/?type=estimate" />
 
         <div class="row">
           <div>
             <label for="inquiryType">Inquiry Type</label>
             <select id="inquiryType" name="inquiry_type" required>
               <option value="estimate">I need work / estimate</option>
+              <option value="buy">I’m looking to buy a house</option>
               <option value="sell">I want to sell my house</option>
               <option value="rental">I’m looking for a rental / available property</option>
             </select>
@@ -325,7 +327,7 @@
         <div class="row single">
           <div>
             <label for="details">Details</label>
-            <textarea id="details" name="details" placeholder="Estimate: describe work. Sell: condition/repairs + any issues. Rental: what you’re looking for + budget range."></textarea>
+            <textarea id="details" name="details" placeholder="Estimate: describe work. Buy: what you’re looking for + budget. Sell: condition/repairs + any issues. Rental: what you’re looking for + budget range."></textarea>
           </div>
         </div>
 
@@ -343,6 +345,7 @@
         <h3>Quick Lanes</h3>
         <ul class="list">
           <li><strong>Work / Estimate:</strong> free estimate + clear scope.</li>
+          <li><strong>Buy:</strong> tell us city + budget + beds/baths.</li>
           <li><strong>Rentals:</strong> ask what’s open + requirements.</li>
           <li><strong>Selling:</strong> request an offer / next steps.</li>
         </ul>
@@ -388,44 +391,53 @@
       const subject = document.getElementById("subject");
       const service = document.getElementById("service");
       const serviceHint = document.getElementById("serviceHint");
+      const nextUrl = document.getElementById("nextUrl");
 
       function applyRouting() {
         const v = inquiry?.value || "estimate";
 
-        // Route email subject clean
+        // ✅ Route email subject clean
         if (subject) {
           if (v === "sell") subject.value = "Start2Finish — Sell Your House Inquiry";
           else if (v === "rental") subject.value = "Start2Finish — Rental / Availability Inquiry";
+          else if (v === "buy") subject.value = "Start2Finish — House Buyer Inquiry";
           else subject.value = "Start2Finish — Estimate Request";
         }
 
-       // Only require "Service Needed" for estimate
-if (service) {
-  const needsService = (v === "estimate");
-  service.required = needsService;
+        // ✅ Route thank-you type so you can customize later if you want
+        if (nextUrl) {
+          nextUrl.value = `https://www.squarebidness.com/start2finish/thank-you/?type=${encodeURIComponent(v)}`;
+        }
 
-  if (needsService) {
-    service.disabled = false;
-    service.style.opacity = "1";
-    if (serviceHint) serviceHint.textContent = "Required for estimate requests.";
-    // optional: clear sell/rental placeholder value
-    if (service.value === "Sell Your House" || service.value === "Rental / Availability") {
-      service.value = "";
-    }
-  } else {
-    // keep context in email even if disabled
-    service.value = (v === "sell") ? "Sell Your House" : "Rental / Availability";
-    service.disabled = true;
-    service.style.opacity = ".65";
-    if (serviceHint) serviceHint.textContent = "Not required for Sell/Rental inquiries.";
-  }
-}
+        // ✅ Only require "Service Needed" for estimate
+        if (service) {
+          const needsService = (v === "estimate");
+          service.required = needsService;
 
+          if (needsService) {
+            service.disabled = false;
+            service.style.opacity = "1";
+            if (serviceHint) serviceHint.textContent = "Required for estimate requests.";
+            if (service.value === "Sell Your House" || service.value === "Rental / Availability" || service.value === "Buy a House") {
+              service.value = "";
+            }
+          } else {
+            // keep context in email even if disabled
+            service.value =
+              (v === "sell") ? "Sell Your House" :
+              (v === "rental") ? "Rental / Availability" :
+              "Buy a House";
+            service.disabled = true;
+            service.style.opacity = ".65";
+            if (serviceHint) serviceHint.textContent = "Not required for Buy/Sell/Rental inquiries.";
+          }
+        }
+      }
 
       applyRouting();
       inquiry?.addEventListener("change", applyRouting);
 
-      // Validate required fields (respect disabled)
+      // ✅ Validate required fields (respect disabled)
       form.addEventListener("submit", (e) => {
         applyRouting();
 
