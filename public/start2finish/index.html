@@ -169,6 +169,8 @@
 
       <div class="hero-cta">
         <a class="btn" href="#inquiry">Start an Inquiry</a>
+        <a class="btn alt" href="/start2finish/sell/">Sell Your House</a>
+        <a class="btn alt" href="/start2finish/rentals/">Find Rentals</a>
         <a class="btn alt" href="tel:+13186122114">Call: (318) 612-2114</a>
         <a class="btn alt" href="sms:+13186122114?body=Hi%20Start2Finish%2C%20I%27d%20like%20to%20inquire%20about%20work%2C%20rentals%2C%20or%20selling%20a%20house.">Text Us</a>
         <a class="btn alt" href="mailto:start2finish@squarebidness.com?subject=Start2Finish%20Inquiry">Email</a>
@@ -397,24 +399,28 @@
           else subject.value = "Start2Finish — Estimate Request";
         }
 
-        // Only require "Service Needed" for estimate
-        if (service) {
-          const needsService = (v === "estimate");
-          service.required = needsService;
+       // Only require "Service Needed" for estimate
+if (service) {
+  const needsService = (v === "estimate");
+  service.required = needsService;
 
-          if (!needsService) {
-            // keep context in email even if disabled
-            if (!service.value) service.value = (v === "sell") ? "Sell Your House" : "Rental / Availability";
-            service.disabled = true;
-            service.style.opacity = ".65";
-            if (serviceHint) serviceHint.textContent = "Not required for Sell/Rental inquiries.";
-          } else {
-            service.disabled = false;
-            service.style.opacity = "1";
-            if (serviceHint) serviceHint.textContent = "Required for estimate requests.";
-          }
-        }
-      }
+  if (needsService) {
+    service.disabled = false;
+    service.style.opacity = "1";
+    if (serviceHint) serviceHint.textContent = "Required for estimate requests.";
+    // optional: clear sell/rental placeholder value
+    if (service.value === "Sell Your House" || service.value === "Rental / Availability") {
+      service.value = "";
+    }
+  } else {
+    // keep context in email even if disabled
+    service.value = (v === "sell") ? "Sell Your House" : "Rental / Availability";
+    service.disabled = true;
+    service.style.opacity = ".65";
+    if (serviceHint) serviceHint.textContent = "Not required for Sell/Rental inquiries.";
+  }
+}
+
 
       applyRouting();
       inquiry?.addEventListener("change", applyRouting);
