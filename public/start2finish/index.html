@@ -17,11 +17,11 @@
   <!-- Build stamp -->
   <meta name="sb:build" content="v20260111-start2finish" />
 
-  <!-- Open Graph (keep clean: one image) -->
+  <!-- Open Graph (clean: one image) -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Start2Finish" />
   <meta property="og:title" content="Start2Finish — Contractor House Work (Free Estimates)" />
-  <meta property="og:description" content="Doing it all — inside &amp; out. Free estimates. Alexandria-based. Schedule an on-site visit in under a minute." />
+  <meta property="og:description" content="Doing it all — inside &amp; out. Free estimates. Alexandria-based. Start an inquiry in under a minute." />
   <meta property="og:url" content="https://www.squarebidness.com/start2finish/" />
   <meta property="og:image" content="https://www.squarebidness.com/start2finish/assets/kitchen-corner_clean_1200x630.jpg" />
   <meta property="og:image:alt" content="Start2Finish — contractor work in Louisiana (finished interior example)" />
@@ -32,7 +32,7 @@
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Start2Finish — Contractor House Work (Free Estimates)" />
-  <meta name="twitter:description" content="Doing it all — inside &amp; out. Free estimates. Alexandria-based. Schedule on the page." />
+  <meta name="twitter:description" content="Doing it all — inside &amp; out. Free estimates. Alexandria-based. Start an inquiry on the page." />
   <meta name="twitter:image" content="https://www.squarebidness.com/start2finish/assets/kitchen-corner_clean_1200x630.jpg" />
 
   <!-- Icons / PWA -->
@@ -107,6 +107,7 @@
     }
     textarea{min-height:110px;resize:vertical}
     .note{font-size:12px;color:var(--muted)}
+    .hr{height:1px;background:var(--stroke);margin:14px 0}
 
     .footer{
       margin:40px 0 20px;border-top:1px solid var(--stroke);
@@ -160,22 +161,23 @@
   </header>
 
   <main class="wrap">
-    <!-- HERO (text-first, no on-page image) -->
+    <!-- HERO (text-first, no on-page images) -->
     <section class="hero">
-      <h1>Contractor House Work — We Do It All</h1>
+      <h1>Contractor Work + Property Inquiries</h1>
       <p>
-        From punch-lists to full remodels: paint, floors, drywall, trim, pressure wash, roofing repairs,
-        kitchens &amp; baths, doors &amp; windows, fencing, clean-ups and more. We show up, finish, and leave it tight.
+        Free estimates for repairs &amp; remodels — plus a clean lane for
+        <strong>rentals</strong>, <strong>houses for sale</strong>, and <strong>selling your house</strong>.
       </p>
 
       <div class="hero-cta">
-        <a class="btn" href="#estimate">Schedule a Free Estimate</a>
+        <a class="btn" href="#inquiry">Start an Inquiry</a>
         <a class="btn alt" href="tel:+13186122114">Call: (318) 612-2114</a>
-        <a class="btn alt" href="sms:+13186122114?body=Hi%20Start2Finish%2C%20I%27d%20like%20an%20estimate.">Text Us</a>
-        <a class="btn alt" href="mailto:start2finish@squarebidness.com?subject=Start2Finish%20Estimate%20Request">Email</a>
+        <a class="btn alt" href="sms:+13186122114?body=Hi%20Start2Finish%2C%20I%27d%20like%20to%20inquire%20about%20work%2C%20rentals%2C%20buying%20or%20selling.">Text Us</a>
+        <a class="btn alt" href="mailto:start2finish@squarebidness.com?subject=Start2Finish%20Inquiry">Email</a>
       </div>
+
       <p class="note" style="margin-top:10px;">
-        Fast response. Clear scope. Clean finish. City/state only — address shared after scheduling.
+        City/state only on this form. Exact property details shared after we connect.
       </p>
     </section>
 
@@ -221,17 +223,35 @@
       </div>
     </section>
 
-    <!-- ESTIMATE FORM -->
-    <section id="estimate" class="grid" style="margin-top:26px;grid-template-columns:1fr .9fr;" aria-label="Estimate request">
+    <!-- INQUIRY FORM (estimate + buy + rent + sell) -->
+    <section id="inquiry" class="grid" style="margin-top:26px;grid-template-columns:1fr .9fr;" aria-label="Inquiry">
       <form class="form" method="post" action="https://formsubmit.co/start2finish@squarebidness.com" novalidate>
-        <h2>Schedule Your Free Estimate</h2>
-        <p class="note">Pick a preferred time, and we’ll confirm. Same- or next-day slots when available.</p>
+        <h2>Start an Inquiry</h2>
+        <p class="note">Choose your inquiry type and we’ll route it clean.</p>
 
         <!-- FormSubmit settings -->
-        <input type="hidden" name="_subject" value="Start2Finish — Estimate Request" />
+        <input type="hidden" name="_subject" value="Start2Finish — New Inquiry" />
         <input type="hidden" name="_captcha" value="false" />
         <input type="hidden" name="_template" value="table" />
         <input type="hidden" name="_next" value="https://www.squarebidness.com/start2finish/thank-you/" />
+
+        <div class="row">
+          <div>
+            <label for="inquiry_type">Inquiry Type</label>
+            <select id="inquiry_type" name="inquiry_type" required>
+              <option value="">Choose one…</option>
+              <option value="Contractor Estimate">Contractor Estimate (Free)</option>
+              <option value="House for Sale Inquiry">House for Sale Inquiry</option>
+              <option value="Rental Availability Inquiry">Rental Availability Inquiry</option>
+              <option value="Sell Your House (Request Offer)">Sell Your House (Request Offer)</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="city">City</label>
+            <input id="city" name="city" type="text" placeholder="Alexandria, LA" required />
+          </div>
+        </div>
 
         <div class="row">
           <div>
@@ -250,15 +270,71 @@
             <input id="email" name="email" type="email" placeholder="you@example.com" autocomplete="email" />
           </div>
           <div>
-            <label for="city">City</label>
-            <input id="city" name="city" type="text" placeholder="Alexandria, LA" required />
+            <label for="timeline">Timeline (optional)</label>
+            <select id="timeline" name="timeline">
+              <option value="">Choose one…</option>
+              <option>ASAP</option>
+              <option>1–2 weeks</option>
+              <option>3–4 weeks</option>
+              <option>1–3 months</option>
+              <option>Just gathering info</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="hr" role="separator" aria-hidden="true"></div>
+
+        <div class="row">
+          <div>
+            <label for="budget">Budget Range (optional)</label>
+            <select id="budget" name="budget">
+              <option value="">Choose one…</option>
+              <option>Under $1,000</option>
+              <option>$1,000–$2,500</option>
+              <option>$2,500–$5,000</option>
+              <option>$5,000–$10,000</option>
+              <option>$10,000+</option>
+              <option>Not sure yet</option>
+            </select>
+          </div>
+          <div>
+            <label for="beds_baths">Beds/Baths (optional)</label>
+            <input id="beds_baths" name="beds_baths" type="text" placeholder="e.g., 3 bed / 2 bath" />
           </div>
         </div>
 
         <div class="row">
           <div>
-            <label for="service">Service Needed</label>
-            <select id="service" name="service" required>
+            <label for="property_type">Property Type (optional)</label>
+            <select id="property_type" name="property_type">
+              <option value="">Choose one…</option>
+              <option>Single-family</option>
+              <option>Multi-family</option>
+              <option>Mobile / Manufactured</option>
+              <option>Land</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div>
+            <label for="occupancy">Occupancy (optional)</label>
+            <select id="occupancy" name="occupancy">
+              <option value="">Choose one…</option>
+              <option>Owner-occupied</option>
+              <option>Tenant-occupied</option>
+              <option>Vacant</option>
+              <option>Not sure</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="preferred_date">Preferred Date (optional)</label>
+            <input id="preferred_date" name="preferred_date" type="date" />
+          </div>
+          <div>
+            <label for="service">Service Needed (for contractor work)</label>
+            <select id="service" name="service">
               <option value="">Choose one…</option>
               <option>Interior Paint / Drywall</option>
               <option>Flooring (LVP/Tile)</option>
@@ -269,36 +345,32 @@
               <option>Other</option>
             </select>
           </div>
-          <div>
-            <label for="date">Preferred Date</label>
-            <input id="date" name="date" type="date" />
-          </div>
         </div>
 
         <div class="row single">
           <div>
-            <label for="details">Project Notes</label>
-            <textarea id="details" name="details" placeholder="Tell us what you need done. Include any measurements or photos you’ll text/email."></textarea>
+            <label for="details">Details</label>
+            <textarea id="details" name="details" placeholder="For selling: condition + any known issues. For rental/buying: what you’re looking for. For work: describe the project."></textarea>
           </div>
         </div>
 
         <div class="hero-cta" style="margin-top:10px">
-          <button class="btn" type="submit">Request My Estimate</button>
+          <button class="btn" type="submit">Send Inquiry</button>
           <a class="btn alt" href="tel:+13186122114">Or Call Now</a>
         </div>
 
         <p class="note" style="margin-top:8px">
-          Submitting this form sends your request to Start2Finish. We respond quickly.
+          Submitting this sends your request to Start2Finish. We respond quickly.
         </p>
       </form>
 
-      <aside class="card" aria-label="Why Start2Finish">
-        <h3>Why Start2Finish?</h3>
+      <aside class="card" aria-label="Quick lanes">
+        <h3>Quick Lanes</h3>
         <ul class="list">
-          <li>Show up. Finish. Clean up. — Every time.</li>
-          <li>Clear pricing &amp; written scope before work.</li>
-          <li>Locally-owned. Community first.</li>
-          <li>Flexible scheduling · Weekends available.</li>
+          <li><strong>Contractor:</strong> Free estimate + clear scope.</li>
+          <li><strong>For Sale:</strong> Ask what’s available + how to tour.</li>
+          <li><strong>Rentals:</strong> Ask what’s open + requirements.</li>
+          <li><strong>Selling:</strong> Request an offer / next steps.</li>
         </ul>
 
         <p class="note" style="margin-top:10px;">
