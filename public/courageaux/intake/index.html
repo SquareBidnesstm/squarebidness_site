@@ -4,9 +4,31 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+
   <title>Courageaux Aesthetics — Client Intake Form</title>
   <meta name="description" content="Client intake form for Courageaux Aesthetics — Hammond, Ponchatoula, Albany, Independence, Amite and surrounding areas." />
+  <link rel="canonical" href="https://www.squarebidness.com/courageaux/intake/" />
+
   <meta name="theme-color" content="#0b0b0b" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="sb:build" content="v20260112-courageaux-intake" />
+
+  <!-- Performance -->
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+  <link rel="preconnect" href="https://www.google-analytics.com" crossorigin>
+
+  <!-- GA4 -->
+  <script defer src="/scripts/ga.js"></script>
+  <!-- SB site-wide analytics -->
+  <script defer src="/scripts/sb-analytics.js"></script>
+
+  <!-- Icons -->
+  <link rel="icon" href="/courageaux/assets/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/courageaux/assets/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/courageaux/assets/favicon-16.png" />
+  <link rel="apple-touch-icon" href="/courageaux/assets/icon_180.png" />
 
   <style>
     :root{
@@ -24,6 +46,7 @@
       background:var(--bg);
       color:var(--ink);
       font-family:system-ui,Segoe UI,Roboto,Arial;
+      line-height:1.45;
     }
     a{color:var(--gold);text-decoration:none}
     a:hover{text-decoration:underline}
@@ -41,13 +64,14 @@
     h1{
       margin:0 0 6px;
       font-size:clamp(1.6rem,3.4vw,2.1rem);
+      letter-spacing:-.01em;
     }
     .sub{
       margin:0;
       color:var(--muted);
       font-size:.95rem;
+      max-width:72ch;
     }
-
     .back-link{margin-bottom:8px;font-size:.9rem}
 
     form{
@@ -67,7 +91,7 @@
     }
     legend{
       padding:0 6px;
-      font-weight:700;
+      font-weight:800;
       font-size:.95rem;
       color:#e9e9e9;
     }
@@ -99,8 +123,14 @@
       background:#070707;
       color:var(--ink);
       font:inherit;
+      outline:none;
     }
     textarea{min-height:80px;resize:vertical}
+
+    input:focus, textarea:focus, select:focus{
+      border-color:#3c3c3c;
+      box-shadow:0 0 0 3px rgba(201,162,39,.12);
+    }
 
     .inline-check{
       display:flex;
@@ -113,7 +143,7 @@
       margin-bottom:0;
       display:inline-flex;
       align-items:center;
-      gap:5px;
+      gap:6px;
       cursor:pointer;
       font-size:.86rem;
     }
@@ -133,33 +163,53 @@
       border-radius:999px;
       border:1px solid var(--gold);
       padding:10px 20px;
-      font-weight:800;
+      font-weight:900;
       cursor:pointer;
       font:inherit;
     }
-    .btn-primary{
-      background:var(--gold);
-      color:#000;
-    }
-    .btn-ghost{
-      background:transparent;
-      color:var(--ink);
-      border-color:#3a3a3a;
-    }
+    .btn-primary{background:var(--gold);color:#000}
+    .btn-ghost{background:transparent;color:var(--ink);border-color:#3a3a3a}
 
     .disclaimer{
       font-size:.78rem;
       color:var(--muted);
       line-height:1.5;
     }
+
     .error{
       display:none;
-      font-size:.8rem;
-      color:var(--danger);
-      margin-bottom:4px;
+      font-size:.86rem;
+      color:#ffd1d1;
+      background:rgba(255,92,92,.12);
+      border:1px solid rgba(255,92,92,.35);
+      padding:10px 12px;
+      border-radius:12px;
+    }
+
+    /* small helper row */
+    .hint-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      margin-top:6px;
+      color:var(--muted);
+      font-size:.82rem;
+    }
+
+    /* print-friendly */
+    @media print{
+      .back-link, .actions, .hint-row{display:none !important;}
+      body{background:#fff;color:#000}
+      form{border:1px solid #ddd;background:#fff}
+      fieldset{border:1px solid #ddd}
+      input, textarea, select{border:1px solid #ddd;background:#fff;color:#000}
+      .error{display:none !important;}
     }
   </style>
 </head>
+
 <body>
   <div class="wrap">
     <header>
@@ -171,18 +221,22 @@
         Please complete this form before your first appointment. This helps Amari create a safe,
         personalized treatment plan for your skin.
       </p>
+      <div class="hint-row">
+        <span>Fields marked with <span style="color:var(--gold);font-weight:900">*</span> are required.</span>
+        <span><a href="#" onclick="window.print();return false;">Print / Save PDF</a></span>
+      </div>
     </header>
 
-    <form id="intakeForm">
+    <form id="intakeForm" novalidate>
       <div id="errorMsg" class="error">Please complete all required fields (marked with *).</div>
 
       <!-- Contact -->
       <fieldset>
-        <legend>Contact & Basic Info</legend>
+        <legend>Contact &amp; Basic Info</legend>
         <div class="grid-2">
           <div>
             <label for="name">Full Name<span class="req">*</span></label>
-            <input id="name" name="name" type="text" required>
+            <input id="name" name="name" type="text" autocomplete="name" required>
           </div>
           <div>
             <label for="dob">Date of Birth<span class="req">*</span></label>
@@ -190,15 +244,15 @@
           </div>
           <div>
             <label for="phone">Mobile Phone<span class="req">*</span></label>
-            <input id="phone" name="phone" type="tel" placeholder="(xxx) xxx-xxxx" required>
+            <input id="phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="(xxx) xxx-xxxx" required>
           </div>
           <div>
             <label for="email">Email<span class="req">*</span></label>
-            <input id="email" name="email" type="email" required>
+            <input id="email" name="email" type="email" autocomplete="email" inputmode="email" required>
           </div>
           <div>
             <label for="city">City / Town</label>
-            <input id="city" name="city" type="text" placeholder="Hammond, Ponchatoula, Albany, Independence, Amite…">
+            <input id="city" name="city" type="text" autocomplete="address-level2" placeholder="Hammond, Ponchatoula, Albany, Independence, Amite…">
           </div>
           <div>
             <label for="hear">How did you hear about Courageaux?</label>
@@ -209,7 +263,7 @@
 
       <!-- Skin / Health -->
       <fieldset>
-        <legend>Skin & Health History</legend>
+        <legend>Skin &amp; Health History</legend>
 
         <div class="grid-2">
           <div>
@@ -223,6 +277,7 @@
               <label><input type="checkbox" name="concern" value="sensitivity"> Sensitivity</label>
               <label><input type="checkbox" name="concern" value="other"> Other</label>
             </div>
+            <p class="note">Select at least one concern.</p>
           </div>
           <div>
             <label for="routine">Current skin routine (products you use)</label>
@@ -267,7 +322,7 @@
 
       <!-- Goals -->
       <fieldset>
-        <legend>Treatment Goals & Preferences</legend>
+        <legend>Treatment Goals &amp; Preferences</legend>
         <div class="grid-2">
           <div>
             <label for="goals">What are your top 3 skin goals?</label>
@@ -282,7 +337,7 @@
 
       <!-- Consent -->
       <fieldset>
-        <legend>Consent & Acknowledgement</legend>
+        <legend>Consent &amp; Acknowledgement</legend>
         <p class="disclaimer">
           By submitting this form, you confirm that the information provided is accurate to the best of your knowledge.
           You understand that professional skincare services are not a substitute for medical care and that you will
@@ -317,19 +372,45 @@
   </div>
 
   <script>
-    // Simple front-end required check so she doesn't lose time on half-filled forms
-    document.getElementById('intakeForm').addEventListener('submit', function(e){
-      const form = e.target;
-      if (!form.checkValidity()){
-        e.preventDefault();
-        document.getElementById('errorMsg').style.display = 'block';
-        return;
+    // ✅ Front-end validation: require at least one "Primary skin concern"
+    (function () {
+      const form = document.getElementById('intakeForm');
+      const errorMsg = document.getElementById('errorMsg');
+      const concernBoxes = Array.from(document.querySelectorAll('input[name="concern"]'));
+
+      function hasConcernChecked() {
+        return concernBoxes.some(cb => cb.checked);
       }
-      document.getElementById('errorMsg').style.display = 'none';
-      // Remove this preventDefault once you wire to email/backend
-      e.preventDefault();
-      alert('Thank you! Your intake form is ready to save or screenshot.');
-    });
+
+      form.addEventListener('submit', function (e) {
+        // browser field validity
+        const validFields = form.checkValidity();
+        const validConcerns = hasConcernChecked();
+
+        if (!validFields || !validConcerns) {
+          e.preventDefault();
+
+          errorMsg.style.display = 'block';
+
+          // Focus first invalid input OR the first concern checkbox area
+          const firstInvalid = form.querySelector(':invalid');
+          if (firstInvalid) {
+            firstInvalid.focus({ preventScroll: true });
+            firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          } else if (!validConcerns && concernBoxes[0]) {
+            concernBoxes[0].focus({ preventScroll: true });
+            concernBoxes[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          return;
+        }
+
+        errorMsg.style.display = 'none';
+
+        // Remove this preventDefault once you wire to email/backend
+        e.preventDefault();
+        alert('Thank you! Your intake form is ready to save or print.');
+      });
+    })();
   </script>
 </body>
 </html>
