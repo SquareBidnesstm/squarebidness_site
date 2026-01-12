@@ -14,7 +14,7 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="sb:build" content="v20260112-courageaux" />
+  <meta name="sb:build" content="v20260112-courageaux-textfirst" />
 
   <!-- Performance -->
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
@@ -32,7 +32,7 @@
   <link rel="apple-touch-icon" href="/courageaux/assets/icon_180.png" />
   <link rel="manifest" href="/courageaux/manifest.webmanifest" />
 
-  <!-- Open Graph -->
+  <!-- Open Graph (keep share image) -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Courageaux Aesthetics" />
   <meta property="og:title" content="Courageaux Aesthetics — Hammond, LA" />
@@ -46,17 +46,10 @@
   <meta name="twitter:description" content="Clean, calm, confident skin. New client consults open • Northshore • Southeastern Louisiana." />
   <meta name="twitter:image" content="https://www.squarebidness.com/courageaux/assets/amari_hero_1200x630.jpg" />
 
-  <!-- Preload HERO (LCP) -->
-  <link
-    rel="preload"
-    as="image"
-    href="/courageaux/assets/amari_780.webp"
-    imagesrcset="/courageaux/assets/amari_420.webp 420w, /courageaux/assets/amari_640.webp 640w, /courageaux/assets/amari_780.webp 780w"
-    imagesizes="(min-width:900px) 48vw, 100vw"
-    fetchpriority="high"
-  />
+  <!-- ✅ TEXT-FIRST: Remove preload for hero so LCP is your headline/actions -->
+  <!-- (Hero will load naturally as a secondary element) -->
 
-  <!-- Structured Data (privacy-safe: no street address, no geo pin-drop) -->
+  <!-- Structured Data (privacy-safe) -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -81,13 +74,7 @@
           "https://instagram.com/courageuxaesthetics",
           "https://courageauxaesthetics.glossgenius.com/"
         ],
-        "description": "Clean, calm, confident skin. Licensed esthetician serving the Northshore and broader Southeastern Louisiana region. New client consults open.",
-        "founder": { "@id": "https://www.squarebidness.com/courageaux/#person" },
-        "parentOrganization": {
-          "@type": "Organization",
-          "name": "Square Bidness",
-          "url": "https://www.squarebidness.com/"
-        }
+        "description": "Clean, calm, confident skin. Licensed esthetician serving the Northshore and broader Southeastern Louisiana region. New client consults open."
       },
       {
         "@type": "Person",
@@ -96,9 +83,7 @@
         "jobTitle": "Licensed Esthetician",
         "worksFor": { "@id": "https://www.squarebidness.com/courageaux/#business" },
         "url": "https://www.squarebidness.com/courageaux/",
-        "sameAs": [
-          "https://instagram.com/courageuxaesthetics"
-        ]
+        "sameAs": [ "https://instagram.com/courageuxaesthetics" ]
       }
     ]
   }
@@ -111,17 +96,62 @@
     a{color:inherit}
 
     .container{max-width:1200px;margin:0 auto;padding:0 16px}
-    .btn{display:inline-block;padding:12px 16px;border-radius:12px;text-decoration:none;font-weight:800}
+    .btn{display:inline-block;padding:12px 16px;border-radius:12px;text-decoration:none;font-weight:900}
     .btn--gold{background:var(--gold);color:#000;border:1px solid var(--gold)}
     .btn--ghost{background:#0f0f0f;color:#fff;border:1px solid #2a2a2a}
+    @media (hover:hover){ .btn:hover{opacity:.93} }
 
+    /* TEXT-FIRST HERO SHELL */
     .cx-hero{border-bottom:1px solid var(--stroke)}
-    .cx-hero__inner{max-width:1200px;margin:0 auto;padding:18px 16px;display:grid;gap:18px}
-    @media(min-width:900px){.cx-hero__inner{grid-template-columns:1.05fr .95fr}}
+    .cx-hero__inner{max-width:1200px;margin:0 auto;padding:18px 16px;display:grid;gap:18px;align-items:start}
+    @media(min-width:900px){.cx-hero__inner{grid-template-columns:1.05fr .95fr;gap:22px;align-items:center}}
 
-    .cx-badge{display:inline-flex;gap:8px;align-items:center;background:#fff;color:#000;border-radius:999px;padding:6px 10px;font-weight:800;font-size:.8rem}
+    .cx-badge{
+      display:inline-flex;gap:8px;align-items:center;background:#fff;color:#000;border-radius:999px;
+      padding:6px 10px;font-weight:900;font-size:.8rem;letter-spacing:.02em
+    }
     .cx-badge img{height:18px;width:18px;display:block}
 
+    .muted{color:var(--muted)}
+    h1{margin:.55rem 0 .25rem;font-size:clamp(1.75rem,4vw,2.4rem);line-height:1.08;letter-spacing:-.01em}
+    .lead{margin:.25rem 0 0;color:#d7dae0;max-width:52ch;line-height:1.55}
+
+    /* Quiet system links */
+    .cx-system{
+      margin-top:14px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      opacity:.98;
+    }
+    .cx-system a{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:10px 12px;border-radius:999px;
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.03);
+      text-decoration:none;
+      font-weight:900;
+      font-size:12px;
+      color:#f5f5f5;
+      white-space:nowrap;
+    }
+    .cx-system a:hover{background:rgba(255,255,255,.06)}
+
+    /* “Business in” strip */
+    .cx-strip{
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:14px;
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.02);
+      color:#d7dae0;
+      font-size:.92rem;
+      line-height:1.5;
+      max-width:70ch;
+    }
+    .cx-strip strong{color:#fff}
+
+    /* Secondary visual (not LCP) */
     .cx-hero__media{display:flex;align-items:center;justify-content:center}
     .cx-hero__media picture{display:block;width:100%}
     .cx-hero__media img{
@@ -129,11 +159,9 @@
       border-radius:14px;
       border:1px solid var(--stroke);
       display:block;
+      /* ✅ Make it feel intentional even while loading */
+      background:linear-gradient(135deg,#101010,#050505);
     }
-
-    .kicker{letter-spacing:.12em;text-transform:uppercase;color:var(--gold);font-weight:800;font-size:.85rem}
-    .card{background:#121212;border:1px solid #1f1f1f;border-radius:16px;padding:16px}
-    .muted{color:var(--muted)}
 
     /* Desktop: cropped frame */
     @media(min-width:900px){
@@ -149,25 +177,9 @@
       }
     }
 
-    /* Quiet system links */
-    .cx-system{
-      margin-top:14px;
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      opacity:.95;
-    }
-    .cx-system a{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:10px 12px;border-radius:999px;
-      border:1px solid var(--stroke);
-      background:rgba(255,255,255,.03);
-      text-decoration:none;
-      font-weight:800;
-      font-size:12px;
-      color:#f5f5f5;
-    }
-    .cx-system a:hover{background:rgba(255,255,255,.06)}
+    /* Sections */
+    .kicker{letter-spacing:.12em;text-transform:uppercase;color:var(--gold);font-weight:900;font-size:.85rem}
+    .card{background:#121212;border:1px solid #1f1f1f;border-radius:16px;padding:16px}
 
     /* Local footer */
     .cx-footer{
@@ -186,7 +198,12 @@
     .cx-footer a{
       color:var(--gold);
       text-decoration:underline;
-      font-weight:700;
+      font-weight:900;
+    }
+
+    /* Mobile: hide image entirely to keep it “system-first” */
+    @media (max-width:640px){
+      .cx-hero__media{display:none}
     }
   </style>
 </head>
@@ -195,6 +212,8 @@
   <main id="main">
     <header class="cx-hero">
       <div class="cx-hero__inner">
+
+        <!-- TEXT-FIRST: business in -->
         <div>
           <span class="cx-badge">
             <img
@@ -209,45 +228,48 @@
           </span>
 
           <h1>Clean, calm, confident skin.</h1>
-          <p class="muted">New client consults open • Northshore • Southeastern Louisiana.</p>
+          <p class="lead">New client consults open • Northshore • Southeastern Louisiana.</p>
 
           <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
-            <a class="btn btn--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book a facial</a>
-            <a class="btn btn--ghost" href="https://instagram.com/courageuxaesthetics" target="_blank" rel="me noopener noreferrer">@courageuxaesthetics</a>
+            <a class="btn btn--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book now</a>
+            <a class="btn btn--ghost" href="https://instagram.com/courageuxaesthetics" target="_blank" rel="me noopener noreferrer">Instagram</a>
           </div>
 
-          <!-- Quiet "system" (internal lanes) -->
+          <!-- Quiet “system lanes” -->
           <div class="cx-system" aria-label="Client flow">
             <a href="/courageaux/consultation/">Consultation</a>
             <a href="/courageaux/intake/">Client Intake</a>
             <a href="/courageaux/appointments/">Appointments</a>
           </div>
 
-          <p class="muted" style="margin-top:10px;font-size:.9rem;line-height:1.5;">
-            Business-first flow: book → confirm → intake → service. Clean documentation. No confusion.
-          </p>
+          <div class="cx-strip">
+            <strong>Business-first flow:</strong> book → confirm → intake → service.
+            Clean documentation. No confusion.
+          </div>
         </div>
 
-        <div class="cx-hero__media">
+        <!-- Secondary image (not the main load priority) -->
+        <div class="cx-hero__media" aria-hidden="true">
           <picture>
             <source
               type="image/webp"
               srcset="/courageaux/assets/amari_420.webp 420w, /courageaux/assets/amari_640.webp 640w, /courageaux/assets/amari_780.webp 780w"
-              sizes="(max-width:900px) 100vw, 48vw">
+              sizes="(min-width:900px) 420px, 100vw">
             <source
               type="image/jpeg"
               srcset="/courageaux/assets/amari_420.jpg 420w, /courageaux/assets/amari_640.jpg 640w, /courageaux/assets/amari_780.jpg 780w"
-              sizes="(max-width:900px) 100vw, 48vw">
+              sizes="(min-width:900px) 420px, 100vw">
             <img
-              src="/courageaux/assets/amari_780.jpg"
+              src="/courageaux/assets/amari_640.jpg"
               width="780"
               height="975"
-              loading="eager"
+              loading="lazy"
               decoding="async"
-              fetchpriority="high"
-              alt="Amari Wilford — licensed esthetician at Courageaux Aesthetics in Hammond, Louisiana">
+              fetchpriority="low"
+              alt="">
           </picture>
         </div>
+
       </div>
     </header>
 
@@ -255,7 +277,7 @@
       <div class="card">
         <div class="kicker">Her Story</div>
         <h2>Why Courageaux Aesthetics exists</h2>
-        <p>
+        <p class="muted">
           Read Amari’s own words about how Courageaux Aesthetics started, her inspiration from Joshua 1:9,
           and her mission to bring corrective skin care to people of color across the Northshore and Southeastern Louisiana.
         </p>
@@ -263,33 +285,26 @@
       </div>
     </section>
 
-    <!-- Directions block (privacy-safe: no street address shown) -->
     <section class="container" style="padding:0 16px 32px">
       <div class="card">
         <div class="kicker">Visit Courageaux</div>
         <h2>How to get there</h2>
-        <p>
+        <p class="muted">
           Courageaux Aesthetics serves clients in <strong>Hammond, Louisiana</strong> and the <strong>Northshore</strong>.
           Book online to confirm your appointment details and exact location.
         </p>
-        <ul>
+        <ul class="muted">
           <li>Convenient to the Hammond &amp; Northshore area.</li>
           <li>Easy drive from Southeastern Louisiana University and surrounding towns.</li>
           <li>Client parking available (details provided after booking).</li>
         </ul>
-        <p>For turn-by-turn navigation, search in your maps app:</p>
-        <a
-          class="btn btn--gold"
-          href="https://maps.google.com/?q=Courageaux+Aesthetics+Hammond+LA&hl=en"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <p class="muted">For turn-by-turn navigation, search in your maps app:</p>
+        <a class="btn btn--gold" href="https://maps.google.com/?q=Courageaux+Aesthetics+Hammond+LA&hl=en" target="_blank" rel="noopener noreferrer">
           Get directions
         </a>
       </div>
     </section>
 
-    <!-- Local footer -->
     <footer class="cx-footer">
       <p>
         © <span id="year"></span> <strong>Courageaux Aesthetics</strong> ·
@@ -299,12 +314,7 @@
 
       <p style="margin:.85rem 0 0;color:#6b7280;font-size:.85rem;line-height:1.5;">
         Powered by
-        <a
-          href="https://lab.squarebidness.com/"
-          target="_blank"
-          rel="noopener noreferrer"
-          style="color:#c9a227;text-decoration:underline;font-weight:700;"
-        >
+        <a href="https://lab.squarebidness.com/" target="_blank" rel="noopener noreferrer" style="color:#c9a227;text-decoration:underline;font-weight:900;">
           Square Bidness Tech Lab
         </a>
       </p>
