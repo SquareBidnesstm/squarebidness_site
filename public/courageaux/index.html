@@ -38,7 +38,10 @@
   <meta property="og:title" content="Courageaux Aesthetics — Hammond, LA" />
   <meta property="og:description" content="Clean, calm, confident skin. New client consults open • Northshore • Southeastern Louisiana." />
   <meta property="og:url" content="https://www.squarebidness.com/courageaux/" />
-  <meta property="og:image" content="https://www.squarebidness.com/courageaux/assets/amari_hero_1200x630.jpg" />
+  <meta property="og:image" content="https://www.squarebidness.com/courageaux/assets/amari_hero_1200x630.jpg"/> 
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
@@ -151,17 +154,27 @@
     }
     .cx-strip strong{color:#fff}
 
-    /* Secondary visual (not LCP) */
-    .cx-hero__media{display:flex;align-items:center;justify-content:center}
-    .cx-hero__media picture{display:block;width:100%}
-    .cx-hero__media img{
-      width:100%;
-      border-radius:14px;
-      border:1px solid var(--stroke);
-      display:block;
-      /* ✅ Make it feel intentional even while loading */
-      background:linear-gradient(135deg,#101010,#050505);
-    }
+   /* Secondary visual (not LCP) */
+.cx-hero__media{display:flex;align-items:center;justify-content:center}
+.cx-hero__media picture{display:block;width:100%}
+.cx-hero__media img{
+  width:100%;
+  border-radius:14px;
+  border:1px solid var(--stroke);
+  display:block;
+  background:linear-gradient(135deg,#101010,#050505);
+
+  /* fade-in when loaded */
+  opacity:0;
+  transform:translateY(4px);
+  transition:opacity .35s ease, transform .35s ease;
+}
+.cx-hero__media img.is-loaded{
+  opacity:1;
+  transform:none;
+}
+
+
 
     /* Desktop: cropped frame */
     @media(min-width:900px){
@@ -320,9 +333,24 @@
       </p>
     </footer>
   </main>
+<script>
+  document.getElementById("year").textContent = new Date().getFullYear();
+</script>
 
-  <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
-  </script>
+<script>
+  (function () {
+    const img = document.querySelector(".cx-hero__media img");
+    if (!img) return;
+
+    const markLoaded = () => img.classList.add("is-loaded");
+
+    if (img.complete && img.naturalWidth > 0) {
+      markLoaded();
+    } else {
+      img.addEventListener("load", markLoaded, { once: true });
+      img.addEventListener("error", markLoaded, { once: true }); // don’t stay invisible on error
+    }
+  })();
+</script>
 </body>
 </html>
