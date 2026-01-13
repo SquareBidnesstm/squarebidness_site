@@ -21,6 +21,8 @@
 
   <!-- GA4 (site-wide) -->
   <script defer src="/scripts/ga.js"></script>
+  <script defer src="/scripts/sb-analytics.js"></script>
+
 
   <!-- Basics -->
   <meta charset="UTF-8" />
@@ -32,6 +34,8 @@
   <meta name="theme-color" content="#000000" />
   <meta name="color-scheme" content="dark light" />
   <meta name="format-detection" content="telephone=no" />
+  <meta name="sb:build" content="v20260112-richardson" />
+
 
   <!-- CSS -->
   <link rel="stylesheet" href="/styles/style.css" />
@@ -57,43 +61,42 @@
   <meta name="twitter:image" content="https://www.squarebidness.com/richardson/assets/richardson_hero_1200x630.jpg" />
 
   <!-- LocalBusiness + Owner JSON-LD -->
-  <script type="application/ld+json">
-  {
-    "@context":"https://schema.org",
-    "@graph":[
-      {
-        "@type":"ClothingStore",
-        "@id":"https://www.squarebidness.com/richardson/#store",
-        "name":"Richardson Fashion",
-        "description":"Men's suits, tuxedos, and formalwear in Hammond, Louisiana.",
-        "url":"https://www.squarebidness.com/richardson/",
-        "telephone":"+1-985-507-1718",
-        "image":"https://www.squarebidness.com/richardson/assets/richardson_780.jpg",
-        "areaServed":"Hammond, LA",
-        "address":{
-          "@type":"PostalAddress",
-          "streetAddress":"2751 W Thomas St C",
-          "addressLocality":"Hammond",
-          "addressRegion":"LA",
-          "postalCode":"70403",
-          "addressCountry":"US"
-        },
-        "founder":{
-          "@id":"https://www.squarebidness.com/richardson/#derek-richardson"
-        }
+ <script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@graph":[
+    {
+      "@type":"ClothingStore",
+      "@id":"https://www.squarebidness.com/richardson/#store",
+      "name":"Richardson Fashion",
+      "description":"Men's suits, tuxedos, and formalwear in Hammond, Louisiana.",
+      "url":"https://www.squarebidness.com/richardson/",
+      "telephone":"+1-985-507-1718",
+      "image":"https://www.squarebidness.com/richardson/assets/richardson_780.jpg",
+      "areaServed":["Hammond, LA","Northshore Louisiana"],
+      "address":{
+        "@type":"PostalAddress",
+        "addressLocality":"Hammond",
+        "addressRegion":"LA",
+        "addressCountry":"US"
       },
-      {
-        "@type":"Person",
-        "@id":"https://www.squarebidness.com/richardson/#derek-richardson",
-        "name":"Derek Richardson",
-        "jobTitle":"Owner",
-        "worksFor":{
-          "@id":"https://www.squarebidness.com/richardson/#store"
-        }
+      "founder":{
+        "@id":"https://www.squarebidness.com/richardson/#derek-richardson"
       }
-    ]
-  }
-  </script>
+    },
+    {
+      "@type":"Person",
+      "@id":"https://www.squarebidness.com/richardson/#derek-richardson",
+      "name":"Derek Richardson",
+      "jobTitle":"Owner",
+      "worksFor":{
+        "@id":"https://www.squarebidness.com/richardson/#store"
+      }
+    }
+  ]
+}
+</script>
+
 
   <style>
     body.theme-dark.richardson-body{ background:#020617; color:#fff; }
@@ -460,23 +463,23 @@
     </section>
   </main>
 <footer class="sb-footer" style="background:#0b0b0b;border-top:1px solid #1a1a1a;padding:2.2rem 1rem;text-align:center;">
-  <div class="container" style="max-width:1000px;margin:0 auto;">
+  <div style="max-width:1000px;margin:0 auto;padding:0 16px;">
     <p style="color:#a1a1aa;font-size:.9rem;line-height:1.6;margin:0;">
       © <span id="year"></span> <strong>Richardson Fashion</strong>
       <a href="/privacy/" style="color:#c9a227;text-decoration:underline;font-weight:600;">Privacy</a>
     </p>
 
-   <p style="margin:.85rem 0 0;color:#6b7280;font-size:.85rem;line-height:1.5;">
-  Powered by
-  <a
-    href="https://lab.squarebidness.com/linkme/"
-    target="_blank"
-    rel="noopener noreferrer"
-    style="color:#c9a227;text-decoration:underline;font-weight:700;"
-  >
-    Square Bidness Tech Lab
-  </a>
-</p>
+    <p style="margin:.85rem 0 0;color:#6b7280;font-size:.85rem;line-height:1.5;">
+      Powered by
+      <a
+        href="https://lab.squarebidness.com/linkme/"
+        target="_blank"
+        rel="noopener noreferrer"
+        style="color:#c9a227;text-decoration:underline;font-weight:700;"
+      >
+        Square Bidness Tech Lab
+      </a>
+    </p>
   </div>
 </footer>
 
@@ -484,76 +487,64 @@
   document.getElementById("year").textContent = new Date().getFullYear();
 </script>
 
+<!-- ✅ AJAX submit to Formspree (shows success message, no page leave) -->
 <script>
-  document.getElementById("year").textContent = new Date().getFullYear();
-</script>
+(function(){
+  const form = document.getElementById("rfForm");
+  const statusEl = document.getElementById("rfStatus");
+  const submitBtn = document.getElementById("rfSubmit");
+  if (!form || !statusEl || !submitBtn) return;
 
+  function setStatus(type, html){
+    statusEl.hidden = false;
+    statusEl.className = "rf-status " + (type ? ("rf-status--" + type) : "");
+    statusEl.innerHTML = html;
+    statusEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
 
-  <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
-  </script>
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-  <!-- ✅ AJAX submit to Formspree (shows success message, no page leave) -->
-  <script>
-  (function(){
-    const form = document.getElementById("rfForm");
-    const statusEl = document.getElementById("rfStatus");
-    const submitBtn = document.getElementById("rfSubmit");
+    submitBtn.disabled = true;
+    const oldText = submitBtn.textContent;
+    submitBtn.textContent = "Sending…";
+    statusEl.hidden = true;
 
-    if (!form || !statusEl || !submitBtn) return;
+    try{
+      const formData = new FormData(form);
+      const res = await fetch(form.action, {
+        method: "POST",
+        body: formData,
+        headers: { "Accept": "application/json" }
+      });
 
-    function setStatus(type, html){
-      statusEl.hidden = false;
-      statusEl.className = "rf-status " + (type ? ("rf-status--" + type) : "");
-      statusEl.innerHTML = html;
-      statusEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    }
-
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      // basic UX
-      submitBtn.disabled = true;
-      const oldText = submitBtn.textContent;
-      submitBtn.textContent = "Sending…";
-      statusEl.hidden = true;
-
-      try{
-        const formData = new FormData(form);
-
-        const res = await fetch(form.action, {
-          method: "POST",
-          body: formData,
-          headers: { "Accept": "application/json" }
-        });
-
-        if (res.ok){
-          form.reset();
-          setStatus("success",
-            "<strong>✅ Request received.</strong><br>Derek will reach out shortly to confirm details. If you need immediate help, call or text <strong>985-507-1718</strong>."
-          );
-        } else {
-          let msg = "We couldn’t send that right now. Please try again or call/text 985-507-1718.";
-          try{
-            const data = await res.json();
-            if (data && data.errors && data.errors.length){
-              msg = data.errors.map(e => e.message).join(" ");
-            }
-          } catch(_) {}
-          setStatus("error",
-            "<strong>⚠️ Submission failed.</strong><br>" + msg
-          );
-        }
-      } catch(err){
-        setStatus("error",
-          "<strong>⚠️ Network error.</strong><br>Please check your connection and try again, or call/text <strong>985-507-1718</strong>."
+      if (res.ok){
+        form.reset();
+        setStatus("success",
+          "<strong>✅ Request received.</strong><br>Derek will reach out shortly to confirm details. If you need immediate help, call or text <strong>985-507-1718</strong>."
         );
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = oldText;
+      } else {
+        let msg = "We couldn’t send that right now. Please try again or call/text 985-507-1718.";
+        try{
+          const data = await res.json();
+          if (data && data.errors && data.errors.length){
+            msg = data.errors.map(e => e.message).join(" ");
+          }
+        } catch(_) {}
+        setStatus("error", "<strong>⚠️ Submission failed.</strong><br>" + msg);
       }
-    });
-  })();
-  </script>
+    } catch(err){
+      setStatus("error",
+        "<strong>⚠️ Network error.</strong><br>Please check your connection and try again, or call/text <strong>985-507-1718</strong>."
+      );
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = oldText;
+    }
+  });
+})();
+</script>
 </body>
 </html>
+
+
