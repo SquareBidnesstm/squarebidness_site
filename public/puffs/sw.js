@@ -1,10 +1,10 @@
 // /puffs/sw.js — static cache-first, HTML network-first (indexing-safe)
-const CACHE = "puffs-v5";
+const CACHE = "puffs-v6";
 
 // IMPORTANT: include the entry HTML so navigation fallback works
 const ASSETS = [
-  "/puffs/",                 // ✅ allows caches.match("/puffs/") to work
-  "/puffs/index.html",       // ✅ also safe if your host serves it
+  "/puffs/",
+  "/puffs/index.html",
   "/puffs/manifest.webmanifest",
   "/puffs/menu.json",
 
@@ -24,42 +24,27 @@ const ASSETS = [
 async function safePut(request, response) {
   try {
     if (!response || !response.ok) return;
-    if (response.type !== "basic") return; // avoid opaque/redirect weirdness
+    if (response.type !== "basic") return; // avoid opaque/redirect issues
     const cache = await caches.open(CACHE);
     await cache.put(request, response);
-  } catch (err) {}
+  } catch (_) {}
 }
-
-if (req.mode === "navigate" || req.destination === "document") {
-  e.respondWith((async () => {
-    try {
-      const res = await fetch(req, { cache: "no-store" });
-
-      // ✅ correct: pass BOTH args
-      e.waitUntil(safePut(new Request("/puffs/index.html"), res.clone()));
-
-      return res;
-    } catch (err) {
-      return (await caches.match("/puffs/index.html")) || (await caches.match("/puffs/"));
-    }
-  })());
-  return;
-}
-
 
 self.addEventListener("install", (e) => {
   e.waitUntil(
     caches.open(CACHE)
       .then((c) => c.addAll(ASSETS))
       .then(() => self.skipWaiting())
-      .catch(() => self.skipWaiting()) // don’t brick install if one asset 404s
+      .catch(() => self.skipWaiting()) // don't brick install if one asset 404s
   );
 });
 
 self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) =>
+        Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
+      )
       .then(() => self.clients.claim())
   );
 });
@@ -72,7 +57,7 @@ self.addEventListener("fetch", (e) => {
   if (url.origin !== self.location.origin) return;
   if (!url.pathname.startsWith("/puffs/")) return;
 
-  // Only handle GET (prevents caching POST / weird requests)
+  // Only cache GET
   if (req.method !== "GET") return;
 
   // HTML/doc: network-first (best for SEO + freshness)
@@ -80,32 +65,31 @@ self.addEventListener("fetch", (e) => {
     e.respondWith((async () => {
       try {
         const res = await fetch(req, { cache: "no-store" });
-        // Optionally update cached shell for offline:
-        e.waitUntil(safePut("/puffs/", res.clone()));
+        // ✅ correct usage: pass BOTH args
+        e.waitUntil(safePut(new Request("/puffs/index.html"), res.clone()));
         return res;
-      } catch (err) {
-        // ✅ real fallback
-        return (await caches.match("/puffs/")) || (await caches.match("/puffs/index.html"));
+      } catch (_) {
+        return (await caches.match("/puffs/index.html")) || (await caches.match("/puffs/"));
       }
     })());
     return;
   }
 
-  // menu.json: network-first (keep menu fresh), fallback cache
+  // menu.json: network-first, fallback cache
   if (url.pathname === "/puffs/menu.json") {
     e.respondWith((async () => {
       try {
-        const res = await fetch(req);
+        const res = await fetch(req, { cache: "no-store" });
         e.waitUntil(safePut(req, res.clone()));
         return res;
-      } catch (err) {
+      } catch (_) {
         return await caches.match(req);
       }
     })());
     return;
   }
 
-  // Everything else under /puffs/: cache-first with network fallback + safe cache update
+  // Everything else under /puffs/: cache-first
   e.respondWith((async () => {
     const hit = await caches.match(req);
     if (hit) return hit;
@@ -114,9 +98,8 @@ self.addEventListener("fetch", (e) => {
       const res = await fetch(req);
       e.waitUntil(safePut(req, res.clone()));
       return res;
-    } catch (err) {
-      // last resort: return a cached shell if they’re offline
-      return (await caches.match("/puffs/")) || (await caches.match("/puffs/index.html"));
+    } catch (_) {
+      return (await caches.match("/puffs/index.html")) || (await caches.match("/puffs/"));
     }
   })());
 });
