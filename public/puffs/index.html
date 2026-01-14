@@ -744,8 +744,12 @@
 
   <script>
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("/puffs/sw.js", { scope: "/puffs/" }).catch(()=>{});
+    window.addEventListener("load", () => {
+      navigator.serviceWorker
+        .register("/puffs/sw.js", { scope: "/puffs/" })
+        .catch((err) => console.warn("[puffs] sw register failed", err));
+    });
   }
-  </script>
+</script>
 </body>
 </html>
