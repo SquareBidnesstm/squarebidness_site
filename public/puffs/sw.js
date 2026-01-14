@@ -23,14 +23,29 @@ const ASSETS = [
 // Safe cache write helper (prevents Promise.then spam)
 async function safePut(request, response) {
   try {
-    // Only cache successful basic responses
     if (!response || !response.ok) return;
+    if (response.type !== "basic") return; // avoid opaque/redirect weirdness
     const cache = await caches.open(CACHE);
     await cache.put(request, response);
-  } catch (err) {
-    // swallow cache errors (quota, opaque, etc.)
-  }
+  } catch (err) {}
 }
+
+if (req.mode === "navigate" || req.destination === "document") {
+  e.respondWith((async () => {
+    try {
+      const res = await fetch(req, { cache: "no-store" });
+
+      // ✅ correct: pass BOTH args
+      e.waitUntil(safePut(new Request("/puffs/index.html"), res.clone()));
+
+      return res;
+    } catch (err) {
+      return (await caches.match("/puffs/index.html")) || (await caches.match("/puffs/"));
+    }
+  })());
+  return;
+}
+
 
 self.addEventListener("install", (e) => {
   e.waitUntil(
