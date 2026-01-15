@@ -5,8 +5,9 @@
   <!-- Basics -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Puff’s Smokehouse — Pay Online (Plates & Quick Orders)</title>
-  <meta name="description" content="Pay online for Puff’s Smokehouse plates and quick orders. Secure checkout. Automatic receipt." />
+
+  <title>Puff’s Smokehouse — Pay Online</title>
+  <meta name="description" content="Puff’s Smokehouse accepts secure online payments for plates, pickup orders, and catering deposits. Payment links are sent by Puff’s after confirmation. Receipts are sent automatically." />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
   <meta name="theme-color" content="#0b0b0b" />
@@ -17,12 +18,12 @@
 
   <!-- Open Graph -->
   <meta property="og:title" content="Puff’s Smokehouse — Pay Online" />
-  <meta property="og:description" content="Pay online for plates and quick orders. Secure checkout. Automatic receipt." />
+  <meta property="og:description" content="Secure online payments for plates, pickup orders, and catering deposits. Payment links are sent by Puff’s after confirmation. Automatic receipts." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://www.squarebidness.com/puffs/pay/" />
 
   <!-- Build stamp -->
-  <meta name="sb:build" content="v20260112-puffs-pay" />
+  <meta name="sb:build" content="v20260115-puffs-pay-invoice" />
 
   <!-- Optional: favicons (if you already have them) -->
   <link rel="icon" href="/assets/favicon.ico" />
@@ -57,9 +58,7 @@
       display:flex; align-items:center; justify-content:space-between;
       gap:12px; margin-bottom:18px;
     }
-    .brand{
-      display:flex; flex-direction:column; gap:2px;
-    }
+    .brand{display:flex; flex-direction:column; gap:2px}
     .brand b{font-size:14px; letter-spacing:.06em; text-transform:uppercase}
     .brand span{font-size:12px; color:var(--muted)}
     .pill{
@@ -116,6 +115,11 @@
     .btn:active{transform: translateY(1px)}
     .btn.primary{background:var(--btn); color:var(--btnText)}
     .btn.ghost{background:var(--btnGhost); color:var(--text); border-color: var(--line)}
+    .btn[aria-disabled="true"]{
+      opacity:.75;
+      cursor:not-allowed;
+      pointer-events:none;
+    }
     .note{
       margin-top:10px;
       font-size:12px;
@@ -149,8 +153,48 @@
     footer a{color:var(--muted)}
   </style>
 
-  <!-- Site-wide analytics (per your rule) -->
+  <!-- Site-wide analytics -->
   <script defer src="/scripts/sb-analytics.js"></script>
+
+  <!-- Lightweight IoT / telemetry hook (optional, safe no-op if endpoint not set) -->
+  <script>
+    (function () {
+      // Set window.PUFFS_IOT_ENDPOINT to your collector (or leave blank to disable quietly)
+      var endpoint = window.PUFFS_IOT_ENDPOINT || "";
+      if (!endpoint) return;
+
+      function send(event, extra) {
+        try {
+          var payload = {
+            event: event,
+            page: location.pathname,
+            ts: new Date().toISOString(),
+            ua: navigator.userAgent,
+            ref: document.referrer || null
+          };
+          if (extra && typeof extra === "object") {
+            for (var k in extra) payload[k] = extra[k];
+          }
+          navigator.sendBeacon(endpoint, new Blob([JSON.stringify(payload)], { type: "application/json" }));
+        } catch (_) {}
+      }
+
+      window.PuffsIoT = { send: send };
+
+      // page view
+      send("view");
+
+      // click tracking for any button that has data-iot
+      document.addEventListener("click", function (e) {
+        var el = e.target && e.target.closest ? e.target.closest("[data-iot]") : null;
+        if (!el) return;
+        send("click", {
+          label: el.getAttribute("data-iot") || null,
+          href: el.getAttribute("href") || null
+        });
+      }, { passive: true });
+    })();
+  </script>
 </head>
 
 <body>
@@ -160,49 +204,67 @@
         <b>Puff’s Smokehouse</b>
         <span>Pay Online</span>
       </div>
-      <div class="pill">Secure checkout • Receipt sent automatically</div>
+      <div class="pill">Secure payment • Automatic receipts</div>
     </div>
 
     <section class="hero">
-      <h1>Order Plates — Pay Online</h1>
-      <p>Secure payment for plates and pickup orders. Receipt sent automatically.</p>
+      <h1>Puff’s Smokehouse — Pay Online</h1>
+      <p>
+        Puff’s Smokehouse accepts secure online payments for plates, pickup orders, and catering deposits.
+        Payment links are sent directly by Puff’s after your order or quote is confirmed.
+        Receipts are sent automatically once payment is submitted.
+      </p>
     </section>
 
     <section class="grid" aria-label="Payment options">
       <article class="card half">
-        <h2>Plates (Quick Pay)</h2>
-        <p>Use this for standard plates and quick orders.</p>
+        <h2>Plates & Pickup Orders</h2>
+        <p>After your order is confirmed, Puff’s will send a secure payment link for fast checkout.</p>
+
         <div class="btnrow">
-          <!-- ✅ Replace href with your Stripe Payment Link -->
-          <a class="btn primary" href="https://buy.stripe.com/REPLACE_PLATES_LINK" rel="noopener">Pay for Plates</a>
-          <a class="btn ghost" href="/puffs/" rel="noopener">Back to Puff’s</a>
+          <!-- Informational (invoice link is sent after confirmation) -->
+          <a class="btn primary" href="#" aria-disabled="true" data-iot="plates-status">Payment link sent by Puff’s</a>
+          <a class="btn ghost" href="/puffs/" rel="noopener" data-iot="back-to-puffs">Back to Puff’s</a>
         </div>
-        <div class="note">Tip: keep the label simple. If they ask what it is, say “plates + quick orders.”</div>
+
+        <div class="note">No account required • Pay from your phone • Receipt sent automatically</div>
       </article>
 
       <article class="card half">
-        <h2>Family Packs / Specials</h2>
-        <p>Use this for family packs, specials, and larger quick orders.</p>
+        <h2>Catering Deposits</h2>
+        <p>
+          A <b>50% deposit</b> secures your date and covers preparation.
+          The remaining balance is due prior to or on the event date.
+        </p>
+
         <div class="btnrow">
-          <!-- ✅ Replace href with your Stripe Payment Link -->
-          <a class="btn primary" href="https://buy.stripe.com/REPLACE_SPECIALS_LINK" rel="noopener">Pay for Family Packs / Specials</a>
-          <a class="btn ghost" href="/puffs/catering/" rel="noopener">Catering deposits</a>
+          <!-- Informational (invoice link is sent after confirmation) -->
+          <a class="btn primary" href="#" aria-disabled="true" data-iot="catering-status">Catering payment link sent by Puff’s</a>
+          <a class="btn ghost" href="/puffs/catering/" rel="noopener" data-iot="catering-info">Catering details</a>
         </div>
-        <div class="note">If you only want ONE link here, delete this card and keep Plates only.</div>
 
         <div class="qr">
           <div>
             <div class="cap">Optional QR caption</div>
             <div style="font-weight:700">Scan · Pay · Pickup</div>
           </div>
-          <div class="tag">QR code goes on flyers / pickup sign</div>
+          <div class="tag">QR code can point here</div>
         </div>
+      </article>
+
+      <article class="card">
+        <h2>What to expect after payment</h2>
+        <p>
+          • Confirmation receipt sent automatically<br>
+          • Puff’s follows up directly for final details<br>
+          • Payment records are securely stored
+        </p>
       </article>
     </section>
 
     <footer>
-      <div>Need catering? Use the catering deposit lane: <a href="/puffs/catering/">/puffs/catering/</a></div>
-      <div>Quietly powered by Square Bidness infrastructure.</div>
+      <div>Need catering? See: <a href="/puffs/catering/" data-iot="footer-catering-link">/puffs/catering/</a></div>
+      <div>Powered by secure Square Bidness payment infrastructure.</div>
     </footer>
   </div>
 </body>
