@@ -23,9 +23,9 @@
   <meta property="og:url" content="https://www.squarebidness.com/puffs/pay/" />
 
   <!-- Build stamp -->
-  <meta name="sb:build" content="v20260115-puffs-pay-invoice" />
+  <meta name="sb:build" content="v20260116-puffs-pay-invoice" />
 
-  <!-- Optional: favicons (if you already have them) -->
+  <!-- Optional: favicons -->
   <link rel="icon" href="/assets/favicon.ico" />
 
   <style>
@@ -81,6 +81,7 @@
     }
     .hero h1{margin:0 0 6px; font-size:22px}
     .hero p{margin:0; color:var(--muted)}
+    .hero .cta{margin-top:12px; display:flex; flex-wrap:wrap; gap:10px}
 
     .grid{
       display:grid;
@@ -115,7 +116,7 @@
     .btn:active{transform: translateY(1px)}
     .btn.primary{background:var(--btn); color:var(--btnText)}
     .btn.ghost{background:var(--btnGhost); color:var(--text); border-color: var(--line)}
-    .btn[aria-disabled="true"]{
+    .btn.disabled{
       opacity:.75;
       cursor:not-allowed;
       pointer-events:none;
@@ -159,7 +160,6 @@
   <!-- Lightweight IoT / telemetry hook (optional, safe no-op if endpoint not set) -->
   <script>
     (function () {
-      // Set window.PUFFS_IOT_ENDPOINT to your collector (or leave blank to disable quietly)
       var endpoint = window.PUFFS_IOT_ENDPOINT || "";
       if (!endpoint) return;
 
@@ -180,18 +180,12 @@
       }
 
       window.PuffsIoT = { send: send };
-
-      // page view
       send("view");
 
-      // click tracking for any button that has data-iot
       document.addEventListener("click", function (e) {
         var el = e.target && e.target.closest ? e.target.closest("[data-iot]") : null;
         if (!el) return;
-        send("click", {
-          label: el.getAttribute("data-iot") || null,
-          href: el.getAttribute("href") || null
-        });
+        send("click", { label: el.getAttribute("data-iot") || null, href: el.getAttribute("href") || null });
       }, { passive: true });
     })();
   </script>
@@ -214,6 +208,16 @@
         Payment links are sent directly by Puff’s after your order or quote is confirmed.
         Receipts are sent automatically once payment is submitted.
       </p>
+
+      <!-- ✅ NEW: easy action for customers -->
+      <div class="cta">
+        <!-- IMPORTANT: update the phone number if Puff’s uses a different line -->
+        <a class="btn primary"
+           href="sms:+19859811777?&body=Hi%20Puff%E2%80%99s%20Smokehouse%20%E2%80%94%20please%20send%20me%20a%20secure%20payment%20link%20for%20my%20order.%20Name%3A%20%0AOrder%3A%20%0APickup%20time%3A%20"
+           data-iot="request-link-sms">Request a payment link</a>
+
+        <a class="btn ghost" href="/puffs/" data-iot="hero-back">Back to Puff’s</a>
+      </div>
     </section>
 
     <section class="grid" aria-label="Payment options">
@@ -222,8 +226,8 @@
         <p>After your order is confirmed, Puff’s will send a secure payment link for fast checkout.</p>
 
         <div class="btnrow">
-          <!-- Informational (invoice link is sent after confirmation) -->
-          <a class="btn primary" href="#" aria-disabled="true" data-iot="plates-status">Payment link sent by Puff’s</a>
+          <!-- informational -->
+          <span class="btn primary disabled" role="button" aria-disabled="true" data-iot="plates-status">Payment link sent by Puff’s</span>
           <a class="btn ghost" href="/puffs/" rel="noopener" data-iot="back-to-puffs">Back to Puff’s</a>
         </div>
 
@@ -238,8 +242,8 @@
         </p>
 
         <div class="btnrow">
-          <!-- Informational (invoice link is sent after confirmation) -->
-          <a class="btn primary" href="#" aria-disabled="true" data-iot="catering-status">Catering payment link sent by Puff’s</a>
+          <!-- informational -->
+          <span class="btn primary disabled" role="button" aria-disabled="true" data-iot="catering-status">Catering payment link sent by Puff’s</span>
           <a class="btn ghost" href="/puffs/catering/" rel="noopener" data-iot="catering-info">Catering details</a>
         </div>
 
