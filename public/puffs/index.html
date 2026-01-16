@@ -2,224 +2,703 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- Basics -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
 
-  <title>Puff’s Smokehouse — Order Pickup</title>
-  <meta name="description" content="Order Puff’s Smokehouse plates and pickup on arrival. Turkey wings, ribs, neck bones, sides and more. Ponchatoula, LA." />
+  <title>Puff’s Smokehouse — BBQ · Smokehouse · Catering (Louisiana)</title>
+  <meta name="description" content="Puff’s Smokehouse — BBQ, smokehouse plates, and catering in Louisiana. Order online and pick up on arrival. Turkey wings, ribs, neck bones, sides, and more." />
   <link rel="canonical" href="https://www.squarebidness.com/puffs/" />
   <meta name="robots" content="index,follow" />
+  <meta name="author" content="Denerian Collins" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="theme-color" content="#0b0b0b" />
-  <meta name="color-scheme" content="dark light" />
-
-  <!-- Open Graph -->
-  <meta property="og:title" content="Puff’s Smokehouse — Order Pickup" />
-  <meta property="og:description" content="Order plates and pickup on arrival. Turkey wings, ribs, neck bones, sides and more." />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://www.squarebidness.com/puffs/" />
 
   <!-- Build stamp -->
-  <meta name="sb:build" content="v20260116-puffs-index" />
+  <meta name="sb:build" content="v20260116-puffs-index-restore" />
 
-  <!-- Optional favicon -->
-  <link rel="icon" href="/assets/favicon.ico" />
+  <!-- PWA -->
+  <link rel="manifest" href="/puffs/manifest.webmanifest" />
+  <meta name="theme-color" content="#0b0b0b" />
+  <link rel="icon" href="/puffs/icons/icon-192.png" type="image/png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/puffs/icons/icon-180.png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <meta name="apple-mobile-web-app-title" content="Puff’s Smokehouse" />
 
-  <!-- Site-wide analytics (per your rule) -->
-  <script defer src="/scripts/sb-analytics.js"></script>
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Puff’s Smokehouse" />
+  <meta property="og:title" content="Puff’s Smokehouse — Order Pickup" />
+  <meta property="og:description" content="Order online, pickup on arrival. Plates include two sides and bread (except pig feet). Louisiana." />
+  <meta property="og:url" content="https://www.squarebidness.com/puffs/" />
+  <meta property="og:image" content="https://www.squarebidness.com/puffs/assets/puffs_hero_1200x630.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Puff’s Smokehouse — Order Pickup" />
+  <meta name="twitter:description" content="Order online, pickup on arrival. Louisiana." />
+  <meta name="twitter:image" content="https://www.squarebidness.com/puffs/assets/puffs_hero_1200x630.jpg" />
 
   <style>
     :root{
-      --bg:#0b0b0b;
-      --card:#121212;
-      --text:#f3f3f3;
-      --muted:#b8b8b8;
-      --line:rgba(255,255,255,.10);
-      --btn:#ffffff;
-      --btnText:#0b0b0b;
-      --btnGhost:rgba(255,255,255,.10);
-      --shadow: 0 12px 40px rgba(0,0,0,.45);
-      --r:18px;
-      --max:980px;
+      --bg:#0b0b0b; --card:#111; --ink:#f7f7f7; --muted:#b9b9b9;
+      --brand:#ff9f1a; --line:#232323; --accent:#ffd28a; --danger:#ff4d4d;
     }
     *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      background:
-        radial-gradient(1200px 600px at 30% -10%, rgba(255,255,255,.08), transparent 55%),
-        radial-gradient(800px 500px at 90% 20%, rgba(255,255,255,.06), transparent 55%),
-        var(--bg);
-      color:var(--text);
-      font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-    }
-    a{color:inherit}
-    .wrap{max-width:var(--max); margin:0 auto; padding:28px 18px 40px}
+    html,body{margin:0;background:var(--bg);color:#f2f2f2;font-family:system-ui,Segoe UI,Roboto,Arial}
+    p{ color:#e9e9e9; }
+    p.sub{ margin:0; color:#d6d6d6; }
 
-    .topbar{
-      display:flex; align-items:center; justify-content:space-between;
-      gap:12px; margin-bottom:18px;
-    }
-    .brandRow{display:flex; align-items:center; gap:12px; min-width:0}
-    .logo{
-      width:46px; height:46px; border-radius:16px;
-      border:1px solid var(--line);
-      background: rgba(255,255,255,.04);
-      overflow:hidden;
-      display:flex; align-items:center; justify-content:center;
-      box-shadow: 0 10px 24px rgba(0,0,0,.25);
-      flex:0 0 auto;
-    }
-    .logo img{width:100%; height:100%; object-fit:cover; display:block}
-    .brand{display:flex; flex-direction:column; gap:2px; min-width:0}
-    .brand b{font-size:14px; letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-    .brand span{font-size:12px; color:var(--muted)}
-    .pill{
-      border:1px solid var(--line);
-      padding:8px 10px;
-      border-radius:999px;
-      font-size:12px;
-      color:var(--muted);
-      background: rgba(255,255,255,.04);
-      white-space:nowrap;
-    }
+    .wrap{max-width:1100px;margin:0 auto;padding:16px}
 
-    .hero{
-      border:1px solid var(--line);
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-      border-radius: calc(var(--r) + 6px);
-      padding:22px 18px;
-      box-shadow: var(--shadow);
-      margin-bottom:16px;
+    header.hero{
+      border-bottom:1px solid var(--line);
+      background:linear-gradient(0deg,#000000b3 0%,#00000088 35%,#00000055 60%,#0000 100%);
     }
-    .hero h1{margin:0 0 6px; font-size:22px}
-    .hero p{margin:0; color:var(--muted)}
-    .hero .cta{margin-top:12px; display:flex; flex-wrap:wrap; gap:10px}
+    header.hero .wrap{padding:14px 16px 12px}
 
     .grid{
-      display:grid;
-      grid-template-columns: repeat(12, 1fr);
-      gap:12px;
+      display:grid; gap:16px;
+      grid-template-columns: 1fr 1fr;
+      align-items:stretch;
     }
-    .card{
-      grid-column: span 12;
-      border:1px solid var(--line);
-      background: rgba(255,255,255,.03);
-      border-radius: var(--r);
-      padding:16px;
-    }
-    @media (min-width: 860px){
-      .card.half{grid-column: span 6;}
-    }
-    .card h2{margin:0 0 6px; font-size:16px}
-    .card p{margin:0 0 12px; color:var(--muted); font-size:14px}
+    @media (max-width: 900px){ .grid{ grid-template-columns:1fr; } }
 
-    .btnrow{display:flex; flex-wrap:wrap; gap:10px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+    .card h2{margin:0;font-size:1.1rem;padding:12px 14px;border-bottom:1px solid var(--line);background:rgba(255,159,26,.08)}
+    .sect{padding:14px}
+
+    #menu.card{ display:flex; flex-direction:column; height:100%; }
+    #menu .sect{ flex:1; }
+
+    .grid > aside.card{ display:flex; flex-direction:column; height:100%; }
+    .grid > aside.card .sect{
+      display:flex; flex-direction:column; gap:12px;
+      flex:1; min-height:0;
+    }
+
+    #cartLines{ min-height:140px; }
+    #menuContent{ min-height:380px; }
+
+    .row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px dashed #222}
+    .row:last-child{border-bottom:0}
+    .price{opacity:.9;white-space:nowrap}
+    .qty{display:flex;align-items:center;gap:6px}
+    .qty button{width:28px;height:28px;border-radius:8px;border:1px solid #2a2a2a;background:#141414;color:#fff;cursor:pointer}
+
+    .muted{color:var(--muted)}
+    .note{font-size:.85rem;color:var(--accent)}
+    .pill{display:inline-block;padding:3px 8px;border-radius:999px;border:1px solid #333;font-size:.75rem;color:#ddd}
+    .cartTotal{display:flex;justify-content:space-between;margin:4px 0}
+
+    input, select, textarea{
+      background:#0f0f0f;border:1px solid #2a2a2a;color:#fff;border-radius:10px;padding:10px 12px;width:100%
+    }
+    label{font-size:.9rem;color:#d5d5d5}
+    .stack{display:grid;gap:10px}
+
+    footer{color:#8b8b8b;border-top:1px solid var(--line);padding:18px 0;margin-top:18px;font-size:.9rem}
+    .tiny{font-size:.85rem;color:#9b9b9b}
+
     .btn{
-      display:inline-flex; align-items:center; justify-content:center;
-      padding:12px 14px;
-      border-radius: 14px;
-      border:1px solid transparent;
-      text-decoration:none;
-      font-weight:700;
-      letter-spacing:.01em;
-      transition: transform .06s ease, opacity .15s ease, background .15s ease;
-      user-select:none;
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:12px 14px;border-radius:12px;
+      background:#1b1b1b;border:1px solid #3a3a3a;color:#fff;
+      text-decoration:none;cursor:pointer
     }
-    .btn:active{transform: translateY(1px)}
-    .btn.primary{background:var(--btn); color:var(--btnText)}
-    .btn.ghost{background:var(--btnGhost); color:var(--text); border-color: var(--line)}
-    .note{margin-top:10px; font-size:12px; color:var(--muted)}
+    .btn:hover{ background:#232323; border-color:#4a4a4a; }
+    .btn:focus-visible{ outline:3px solid rgba(255,159,26,.55); outline-offset:2px; }
+    .btn.primary{ background:#fff; color:#000; font-weight:800; border-color:#fff; }
 
-    .list{
-      margin:0; padding-left:18px; color:var(--muted); font-size:14px;
+    .closedBanner{background:linear-gradient(90deg,#2a0000,#5a0000);color:#fff;border-bottom:1px solid #3a0a0a}
+    .closedBanner .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px 16px}
+    .overlay{position:fixed;inset:0;background:#000a;backdrop-filter:blur(2px);display:none;align-items:center;justify-content:center;z-index:40}
+    .overlay .box{background:#111;border:1px solid #2b2b2b;border-radius:16px;padding:18px;max-width:560px;margin:16px}
+    .overlay h3{margin:0 0 6px}
+    .disabled{opacity:.6;pointer-events:none}
+
+    .owner{display:none;border-top:1px dashed #333;margin-top:12px;padding-top:12px}
+    .owner label{display:flex;align-items:center;gap:8px}
+    .owner input[type="checkbox"]{transform:scale(1.2)}
+    .owner .rowBtns{display:flex;gap:10px;flex-wrap:wrap}
+    .owner .signout{margin-left:auto}
+
+    .specialsBar{
+      background:linear-gradient(90deg,#2b210f,#1b1b1b);
+      border-bottom:1px solid #3a2a0a;
+      min-height:44px;
     }
+    .specialsBar .wrap{
+      padding:10px 16px;
+      display:flex; gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .specialsBadge{background:var(--brand);color:#000;font-weight:800;padding:4px 10px;border-radius:999px}
+    .specialsText{color:#ffe7bf}
+    .specialsBar.is-hidden{ visibility:hidden; opacity:0; pointer-events:none; }
 
-    footer{
-      margin-top:18px;
-      padding-top:14px;
-      border-top:1px solid var(--line);
+    .hero-shell{display:flex;flex-direction:column;align-items:flex-start;gap:10px;width:auto;margin:0}
+    .hero-img{
+      display:block;width:140px;height:auto;max-width:none;
+      border-radius:20px;border:1px solid var(--line);background:#111;
+    }
+    @media (max-width: 480px){ .hero-img{ width:120px; border-radius:18px; } }
+
+    .hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+
+    .order-actions{
+      margin-top:auto;
+      padding-top:12px;
+      border-top:1px solid #222;
       display:flex;
       flex-direction:column;
-      gap:8px;
-      color:var(--muted);
-      font-size:12px;
+      gap:10px;
     }
-    footer a{color:var(--muted)}
   </style>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Restaurant",
+    "name": "Puff’s Smokehouse",
+    "url": "https://www.squarebidness.com/puffs/",
+    "telephone": "+19859811777",
+    "servesCuisine": ["Barbecue", "Southern"],
+    "priceRange": "$",
+    "image": ["https://www.squarebidness.com/puffs/assets/puffs_hero_1200x630.jpg"],
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Ponchatoula",
+      "addressRegion": "LA",
+      "addressCountry": "US"
+    },
+    "founder": {
+      "@type": "Person",
+      "name": "Denerian Collins"
+    },
+    "hasMenu": "https://www.squarebidness.com/puffs/",
+    "makesOffer": [
+      {"@type":"Offer","name":"BBQ Plates (Pickup)","availability":"https://schema.org/InStock","url":"https://www.squarebidness.com/puffs/"},
+      {"@type":"Offer","name":"Catering","availability":"https://schema.org/InStock","url":"https://www.squarebidness.com/puffs/catering/"}
+    ]
+  }
+  </script>
+
+  <!-- Site-wide analytics -->
+  <script defer src="/scripts/sb-analytics.js"></script>
 </head>
 
 <body>
-  <div class="wrap">
-    <div class="topbar">
-      <div class="brandRow">
-        <!-- Update this path if your Puff’s icon lives elsewhere -->
-        <div class="logo" aria-hidden="true">
-          <img src="/assets/puffs/icon-512.png" alt="" loading="eager" decoding="async" />
-        </div>
-        <div class="brand">
-          <b>Puff’s Smokehouse</b>
-          <span>Order Pickup • Ponchatoula, LA</span>
+  <!-- Closed banner -->
+  <div id="closedBanner" class="closedBanner" style="display:none">
+    <div class="wrap">
+      <strong style="color:var(--accent)">Orders are currently CLOSED</strong>
+      <span class="tiny">Please check back during open hours or call <a href="tel:+19859811777" style="color:#fff;text-decoration:underline">(985) 981-1777</a>.</span>
+    </div>
+  </div>
+
+  <header class="hero">
+    <div class="wrap">
+      <div class="hero-shell">
+        <picture>
+          <source srcset="/puffs/assets/puffs_140.webp" type="image/webp" />
+          <img
+            src="/puffs/assets/puffs_140.png"
+            alt="Puff’s Smokehouse"
+            width="140"
+            height="140"
+            loading="eager"
+            decoding="async"
+            fetchpriority="high"
+            class="hero-img"
+          />
+        </picture>
+
+        <p class="sub">
+          BBQ · Smokehouse · Catering — order online and pick up when you arrive. Ponchatoula, LA ·
+          <a
+            href="https://www.google.com/maps/search/?api=1&query=Puff%E2%80%99s%20Smokehouse%20Ponchatoula%20LA"
+            target="_blank"
+            rel="noopener"
+            style="color:#fff;text-decoration:underline"
+          >Get directions</a>
+          <span class="pill">Preview</span>
+        </p>
+
+        <div class="hero-actions">
+          <a class="btn primary" href="/puffs/pay/" aria-label="Pay online">Pay Online</a>
+          <a class="btn" href="/puffs/catering/" aria-label="Catering deposits">Catering Deposits</a>
         </div>
       </div>
-      <div class="pill">Text to order • Pickup on arrival</div>
+    </div>
+  </header>
+
+  <!-- Specials bar (CLS-safe) -->
+  <div id="specialsBar" class="specialsBar is-hidden" aria-hidden="true">
+    <div class="wrap">
+      <span class="specialsBadge">Today’s Special</span>
+      <span id="specialsText" class="specialsText"></span>
+    </div>
+  </div>
+
+  <main class="wrap grid">
+    <!-- MENU -->
+    <section class="card" id="menu">
+      <h2>Menu</h2>
+      <div class="sect" id="menuContent"><!-- injected --></div>
+    </section>
+
+    <!-- CART / CHECKOUT -->
+    <aside class="card">
+      <h2>Your Order</h2>
+      <div class="sect">
+        <div id="cartLines" class="stack tiny">No items yet.</div>
+
+        <div class="cartTotal"><span class="muted">Subtotal</span><strong id="sub">$0.00</strong></div>
+        <div class="cartTotal"><span class="muted">Tax (8.95%)</span><strong id="tax">$0.00</strong></div>
+        <div class="cartTotal" style="border-top:1px solid #222;padding-top:6px"><span>Total</span><strong id="tot">$0.00</strong></div>
+
+        <div class="stack">
+          <label>Pickup time
+            <select id="pickup">
+              <option value="ASAP">ASAP</option>
+              <option>In 15 minutes</option>
+              <option>In 30 minutes</option>
+              <option>Top of the hour</option>
+            </select>
+          </label>
+          <label>Your name <input id="custName" placeholder="Name"></label>
+          <label>Phone <input id="custPhone" placeholder="(xxx) xxx-xxxx"></label>
+          <label>Notes (no onions, extra sauce, etc.) <textarea id="custNotes" rows="3"></textarea></label>
+        </div>
+
+        <div class="order-actions">
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn primary" id="btnText" type="button">Text Order</button>
+            <button class="btn" id="btnCopy" type="button">Copy Summary</button>
+            <button class="btn" id="btnClear" type="button">Clear</button>
+          </div>
+
+          <a class="btn" href="/puffs/pay/" aria-label="Pay online after Puff's confirms your order">Pay Online (after confirmation)</a>
+
+          <p class="tiny" style="margin:0">
+            You’ll pay at pickup (or by invoice link). Prices and availability subject to change. “Smoked Pig Feet Plate” available <strong>Sunday only</strong>.
+          </p>
+
+          <!-- Owner panel -->
+          <div id="ownerPanel" class="owner">
+            <div class="rowBtns">
+              <label><input type="checkbox" id="toggleClosed"> Mark orders CLOSED</label>
+              <button class="btn signout" id="signOut" type="button">Sign out</button>
+            </div>
+
+            <div class="stack" style="margin-top:12px">
+              <label for="ownerSpecials" style="display:block;font-weight:600">Today’s Special (shows in gold bar)</label>
+              <textarea id="ownerSpecials" rows="3" placeholder="e.g., Friday: Wing Basket at First Street Park · $12 · 11am–3pm"></textarea>
+              <div class="rowBtns">
+                <button class="btn" id="saveSpecial" type="button">Save Special</button>
+                <button class="btn" id="clearSpecial" type="button">Clear Special</button>
+                <button class="btn" id="copyLink" type="button">Copy Promo Link</button>
+              </div>
+              <div class="tiny">Saved on this device. “Copy Promo Link” creates a shareable URL (adds <code>?special=...</code>) that shows the special for anyone who opens it.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="wrap">
+    <div>
+      © 2026 Puff’s Smokehouse ·
+      <a href="tel:+19859811777" style="color:#fff;text-decoration:underline">(985) 981-1777</a>
+      <span style="opacity:.5"> · </span>
+      <a id="ownerLogin" href="/puffs/?owner=1&v=2" style="color:#fff;text-decoration:underline">Owner Login</a>
     </div>
 
-    <section class="hero">
-      <h1>Order plates • Pickup on arrival</h1>
-      <p>
-        Text your order, get it confirmed, then pull up for pickup.
-        For online payments, Puff’s will send a secure payment link after confirmation.
-      </p>
+    <p style="margin:.85rem 0 0;color:#6b7280;font-size:.85rem;line-height:1.5;">
+      Powered by
+      <a
+        href="https://lab.squarebidness.com/linkme/"
+        target="_blank"
+        rel="noopener noreferrer"
+        style="color:#ff9f1a;text-decoration:underline;font-weight:700;"
+        aria-label="Powered by Square Bidness Tech Lab"
+      >Square Bidness Tech Lab</a>
+    </p>
+  </footer>
 
-      <div class="cta">
-        <!-- Update phone if needed -->
-        <a class="btn primary" href="sms:+19859811777?&body=Hi%20Puff%E2%80%99s%20Smokehouse%20%E2%80%94%20I%E2%80%99d%20like%20to%20place%20an%20order.%0A%0AName%3A%20%0AOrder%3A%20%0APickup%20time%3A%20" rel="noopener">Text to Order</a>
-        <a class="btn ghost" href="tel:+19859811777" rel="noopener">Call Puff’s</a>
-        <a class="btn ghost" href="/puffs/pay/" rel="noopener">Pay Online Info</a>
-      </div>
-
-      <div class="note">Tip: include your name, plate(s), sides, and pickup time.</div>
-    </section>
-
-    <section class="grid" aria-label="Info">
-      <article class="card half">
-        <h2>Popular plates</h2>
-        <p>Ask what’s available today.</p>
-        <ul class="list">
-          <li>Smoked turkey wings</li>
-          <li>Ribs</li>
-          <li>Neck bones</li>
-          <li>Sides + specials</li>
-        </ul>
-      </article>
-
-      <article class="card half">
-        <h2>Catering</h2>
-        <p>Have an event? Puff’s can handle catering orders with a deposit to secure your date.</p>
-        <div class="btnrow">
-          <a class="btn primary" href="/puffs/catering/" rel="noopener">Catering details</a>
-          <a class="btn ghost" href="/puffs/pay/" rel="noopener">Payment info</a>
-        </div>
-        <div class="note">Catering deposits are invoiced after the quote is confirmed.</div>
-      </article>
-
-      <article class="card">
-        <h2>How it works</h2>
-        <p>
-          1) Text or call to order<br>
-          2) Puff’s confirms your order + total<br>
-          3) Pickup on arrival (or pay online via secure link)<br>
-          4) Receipt is sent automatically when you pay online
-        </p>
-      </article>
-    </section>
-
-    <footer>
-      <div>Payments are handled securely via invoice links sent by Puff’s after confirmation.</div>
-      <div>Powered by Square Bidness infrastructure.</div>
-    </footer>
+  <div id="closedOverlay" class="overlay">
+    <div class="box">
+      <h3 style="color:var(--danger);margin-bottom:8px">Orders are closed</h3>
+      <p class="tiny" style="margin:0 0 10px">Online ordering is currently unavailable. Please visit us during open hours or call <a href="tel:+19859811777" style="color:#fff;text-decoration:underline">(985) 981-1777</a>.</p>
+      <button class="btn" id="overlayOk" type="button">OK</button>
+    </div>
   </div>
+
+  <script>
+    const BUILD = (document.querySelector('meta[name="sb:build"]')?.content || "v1");
+
+    let MENU = [];
+    let TAX_RATE = 0.0895;
+    let PHONE = "+19859811777";
+
+    const ADMIN_PIN = "1777";
+
+    const STORAGE_KEY = "puffsClosedFlag";
+    const SPECIALS_KEY = "puffsSpecialsText";
+
+    const qs = new URLSearchParams(location.search);
+
+    let ownerMode = sessionStorage.getItem("puffsAdmin") === "1";
+    if (qs.get("owner") === "1" && !ownerMode) {
+      const entered = prompt("Owner PIN");
+      if (entered === ADMIN_PIN) {
+        ownerMode = true;
+        sessionStorage.setItem("puffsAdmin", "1");
+      } else {
+        alert("Incorrect PIN.");
+      }
+    }
+
+    const forceClosed = qs.get("closed") === "1" ? true
+                      : qs.get("open") === "1" ? false
+                      : null;
+
+    function getClosed() {
+      if (forceClosed !== null) return forceClosed;
+      return localStorage.getItem(STORAGE_KEY) === "1";
+    }
+
+    function applyClosedState(isClosed) {
+      const disabledCls = "disabled";
+      document.querySelectorAll(".qty button, #btnText, #btnCopy, #btnClear").forEach(el => {
+        if (isClosed) el.classList.add(disabledCls);
+        else el.classList.remove(disabledCls);
+      });
+      document.getElementById("closedBanner").style.display = isClosed ? "" : "none";
+      document.getElementById("closedOverlay").style.display = isClosed ? "flex" : "none";
+      const t = document.getElementById("toggleClosed");
+      if (t) t.checked = isClosed;
+    }
+
+    function setClosed(v) {
+      localStorage.setItem(STORAGE_KEY, v ? "1" : "0");
+      applyClosedState(v);
+    }
+
+    function renderSpecials(text){
+      const bar = document.getElementById('specialsBar');
+      const el = document.getElementById('specialsText');
+      const t = (text || '').trim();
+
+      if (t.length){
+        el.textContent = t;
+        bar.classList.remove('is-hidden');
+        bar.setAttribute('aria-hidden','false');
+      } else {
+        el.textContent = '';
+        bar.classList.add('is-hidden');
+        bar.setAttribute('aria-hidden','true');
+      }
+    }
+
+    async function loadMenuJSON() {
+      const res = await fetch(`/puffs/menu.json?v=${encodeURIComponent(BUILD)}`);
+      if (!res.ok) throw new Error("menu.json not found");
+
+      const data = await res.json();
+
+      MENU = Array.isArray(data.sections) ? data.sections : [];
+      TAX_RATE = Number.isFinite(Number(data.taxRate)) ? Number(data.taxRate) : 0.0895;
+      PHONE = data.phone || "+19859811777";
+
+      const specialFromLink = qs.get("special");
+      if (specialFromLink) renderSpecials(decodeURIComponent(specialFromLink));
+      else renderSpecials(data.special || "");
+
+      const closedFromJSON = data.open === false;
+
+      if (forceClosed === null) {
+        localStorage.setItem(STORAGE_KEY, closedFromJSON ? "1" : "0");
+        applyClosedState(closedFromJSON);
+      } else {
+        applyClosedState(getClosed());
+      }
+
+      return data;
+    }
+
+    if (ownerMode) {
+      document.getElementById("ownerPanel").style.display = "block";
+
+      const toggle = document.getElementById("toggleClosed");
+      toggle.checked = getClosed();
+      toggle.addEventListener("change", (e) => setClosed(e.target.checked));
+
+      const box = document.getElementById("ownerSpecials");
+      box.value = localStorage.getItem(SPECIALS_KEY) || "";
+
+      document.getElementById("saveSpecial").onclick = () => {
+        localStorage.setItem(SPECIALS_KEY, box.value || "");
+        renderSpecials(box.value || "");
+      };
+
+      document.getElementById("clearSpecial").onclick = () => {
+        box.value = "";
+        localStorage.setItem(SPECIALS_KEY, "");
+        renderSpecials("");
+      };
+
+      document.getElementById("copyLink").onclick = () => {
+        const txt = (box.value || "").trim();
+        if (!txt) { alert("Enter a special first."); return; }
+        const url = new URL(location.href.split("#")[0]);
+        url.searchParams.set("special", txt);
+        url.searchParams.delete("owner");
+        navigator.clipboard.writeText(url.toString())
+          .then(() => alert("Promo link copied!"))
+          .catch(() => alert("Copy failed."));
+      };
+
+      document.getElementById("signOut").onclick = () => {
+        sessionStorage.removeItem("puffsAdmin");
+        location.href = location.pathname;
+      };
+    }
+
+    document.getElementById("overlayOk").onclick = () => {
+      document.getElementById("closedOverlay").style.display = "none";
+    };
+
+    const cart = new Map();
+
+    function money(n) { return `$${n.toFixed(2)}`; }
+
+    function renderMenu() {
+      const $menu = document.getElementById("menuContent");
+      $menu.innerHTML = "";
+
+      MENU.forEach(sec => {
+        const wrap = document.createElement("section");
+        wrap.className = "stack";
+
+        const h = document.createElement("h3");
+        h.textContent = sec.section || "";
+        h.style.margin = "0";
+        h.style.fontSize = "1.05rem";
+        wrap.append(h);
+
+        if (sec.note) {
+          const n = document.createElement("div");
+          n.className = "note";
+          n.textContent = sec.note;
+          wrap.append(n);
+        }
+
+        (sec.items || []).forEach(item => {
+          const row = document.createElement("div");
+          row.className = "row";
+
+          const name = document.createElement("div");
+          name.innerHTML =
+            `<strong>${item.name || ""}</strong>` +
+            (item.subnote ? `<div class="tiny muted">${item.subnote}</div>` : "") +
+            (item.badge ? ` <span class="pill" style="margin-left:6px">${item.badge}</span>` : "");
+
+          const price = document.createElement("div");
+          price.className = "price";
+          price.textContent = `$${Number(item.price || 0)}`;
+
+          const qty = document.createElement("div");
+          qty.className = "qty";
+
+          const minus = document.createElement("button");
+          minus.type = "button";
+          minus.textContent = "–";
+
+          const v = document.createElement("span");
+          v.textContent = "0";
+          v.style.minWidth = "16px";
+          v.style.textAlign = "center";
+          v.dataset.bindQty = item.id;
+
+          const plus = document.createElement("button");
+          plus.type = "button";
+          plus.textContent = "+";
+
+          minus.onclick = () => update(item.id, -1);
+          plus.onclick = () => update(item.id, +1);
+
+          qty.append(minus, v, plus);
+          row.append(name, price, qty);
+          wrap.append(row);
+        });
+
+        $menu.append(wrap);
+      });
+    }
+
+    function renderCart() {
+      const $lines = document.getElementById("cartLines");
+      $lines.innerHTML = "";
+      let sub = 0;
+
+      for (const sec of MENU) {
+        for (const item of (sec.items || [])) {
+          const q = cart.get(item.id) || 0;
+          if (!q) continue;
+
+          const p = Number(item.price || 0);
+          const left = document.createElement("div");
+          left.textContent = `${q} × ${item.name}`;
+
+          const right = document.createElement("div");
+          right.textContent = money(q * p);
+
+          const flex = document.createElement("div");
+          flex.style.display = "flex";
+          flex.style.justifyContent = "space-between";
+          flex.append(left, right);
+
+          $lines.append(flex);
+          sub += q * p;
+        }
+      }
+
+      if (sub === 0) $lines.textContent = "No items yet.";
+
+      const tax = sub * TAX_RATE;
+      const tot = sub + tax;
+
+      document.getElementById("sub").textContent = money(sub);
+      document.getElementById("tax").textContent = money(tax);
+      document.getElementById("tot").textContent = money(tot);
+    }
+
+    function update(id, delta) {
+      if (getClosed()) { applyClosedState(true); return; }
+
+      const q = Math.max(0, (cart.get(id) || 0) + delta);
+      if (q === 0) cart.delete(id);
+      else cart.set(id, q);
+
+      const qtySpan = document.querySelector(`[data-bind-qty="${CSS.escape(id)}"]`);
+      if (qtySpan) qtySpan.textContent = q;
+
+      renderCart();
+    }
+
+    document.getElementById("btnClear").onclick = () => {
+      if (getClosed()) { applyClosedState(true); return; }
+      cart.clear();
+      document.querySelectorAll("[data-bind-qty]").forEach(s => s.textContent = "0");
+      renderCart();
+    };
+
+    document.getElementById("btnCopy").onclick = () => {
+      if (getClosed()) { applyClosedState(true); return; }
+      const summary = buildSummary();
+      navigator.clipboard.writeText(summary).then(() => alert("Order copied.")).catch(() => alert("Copy failed"));
+    };
+
+    document.getElementById("btnText").onclick = () => {
+      if (getClosed()) { applyClosedState(true); return; }
+      if (cart.size === 0) { alert("Add something to the cart first."); return; }
+      const summary = encodeURIComponent(buildSummary());
+      window.location.href = `sms:${PHONE}?&body=${summary}`;
+    };
+
+    function buildSummary() {
+      const when = document.getElementById("pickup").value;
+      const name = document.getElementById("custName").value || "—";
+      const phone = document.getElementById("custPhone").value || "—";
+      const notes = document.getElementById("custNotes").value || "—";
+
+      let lines = [
+        "Puff’s Smokehouse — Pickup Order",
+        `Pickup: ${when}`,
+        `Name: ${name}`,
+        `Phone: ${phone}`,
+        "",
+        "Items:"
+      ];
+
+      let sub = 0;
+      for (const sec of MENU) {
+        for (const item of (sec.items || [])) {
+          const q = cart.get(item.id) || 0;
+          if (!q) continue;
+          const p = Number(item.price || 0);
+          lines.push(`• ${q} × ${item.name}  $${(q * p).toFixed(2)}`);
+          sub += q * p;
+        }
+      }
+
+      const tax = sub * TAX_RATE;
+      const tot = sub + tax;
+
+      lines.push(
+        "",
+        `Subtotal: $${sub.toFixed(2)}`,
+        `Tax: $${tax.toFixed(2)}`,
+        `Total: $${tot.toFixed(2)}`,
+        "",
+        `Notes: ${notes}`,
+        "",
+        "Pay link: squarebidness.com/puffs/pay (after confirmation)",
+        "Sent from SquareBidness.com/puffs"
+      );
+
+      return lines.join("\n");
+    }
+
+    (async function boot() {
+      try {
+        await loadMenuJSON();
+        renderMenu();
+        renderCart();
+        applyClosedState(getClosed());
+      } catch (e) {
+        console.warn("[puffs] boot failed:", e);
+        const $menu = document.getElementById("menuContent");
+        if ($menu) $menu.innerHTML = `<div class="tiny" style="color:#ffb3b3">Menu failed to load. Please refresh.</div>`;
+        renderCart();
+        applyClosedState(getClosed());
+      }
+    })();
+  </script>
+
+  <script>
+    (function () {
+      const link = document.getElementById("ownerLogin");
+      if (!link) return;
+
+      const base = new URL(window.location.origin + "/puffs/");
+      const current = new URL(window.location.href);
+
+      current.searchParams.forEach((val, key) => {
+        if (key !== "owner") base.searchParams.set(key, val);
+      });
+
+      base.searchParams.set("owner", "1");
+      base.searchParams.set("v", "2");
+
+      link.href = base.pathname + "?" + base.searchParams.toString();
+    })();
+  </script>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker
+          .register("/puffs/sw.js", { scope: "/puffs/" })
+          .catch((err) => console.warn("[puffs] sw register failed", err));
+      });
+    }
+  </script>
 </body>
 </html>
