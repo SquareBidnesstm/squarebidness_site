@@ -1,4 +1,4 @@
-<!-- /public/puffs/pay/index.html -->
+<!-- /public/puffs/index.html -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -6,27 +6,28 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
 
-  <title>Puff’s Smokehouse — Pay Online</title>
-  <meta name="description" content="Puff’s Smokehouse accepts secure online payments for plates, pickup orders, and catering deposits. Payment links are sent by Puff’s after confirmation. Receipts are sent automatically." />
+  <title>Puff’s Smokehouse — Order Pickup</title>
+  <meta name="description" content="Order Puff’s Smokehouse plates and pickup on arrival. Turkey wings, ribs, neck bones, sides and more. Ponchatoula, LA." />
+  <link rel="canonical" href="https://www.squarebidness.com/puffs/" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
   <meta name="theme-color" content="#0b0b0b" />
   <meta name="color-scheme" content="dark light" />
 
-  <!-- Canonical -->
-  <link rel="canonical" href="https://www.squarebidness.com/puffs/pay/" />
-
   <!-- Open Graph -->
-  <meta property="og:title" content="Puff’s Smokehouse — Pay Online" />
-  <meta property="og:description" content="Secure online payments for plates, pickup orders, and catering deposits. Payment links are sent by Puff’s after confirmation. Automatic receipts." />
+  <meta property="og:title" content="Puff’s Smokehouse — Order Pickup" />
+  <meta property="og:description" content="Order plates and pickup on arrival. Turkey wings, ribs, neck bones, sides and more." />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://www.squarebidness.com/puffs/pay/" />
+  <meta property="og:url" content="https://www.squarebidness.com/puffs/" />
 
   <!-- Build stamp -->
-  <meta name="sb:build" content="v20260116-puffs-pay-invoice-logo-sms-call" />
+  <meta name="sb:build" content="v20260116-puffs-index" />
 
-  <!-- Optional: favicons -->
+  <!-- Optional favicon -->
   <link rel="icon" href="/assets/favicon.ico" />
+
+  <!-- Site-wide analytics (per your rule) -->
+  <script defer src="/scripts/sb-analytics.js"></script>
 
   <style>
     :root{
@@ -46,33 +47,31 @@
     html,body{height:100%}
     body{
       margin:0;
-      background: radial-gradient(1200px 600px at 30% -10%, rgba(255,255,255,.08), transparent 55%),
-                  radial-gradient(800px 500px at 90% 20%, rgba(255,255,255,.06), transparent 55%),
-                  var(--bg);
+      background:
+        radial-gradient(1200px 600px at 30% -10%, rgba(255,255,255,.08), transparent 55%),
+        radial-gradient(800px 500px at 90% 20%, rgba(255,255,255,.06), transparent 55%),
+        var(--bg);
       color:var(--text);
       font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
     }
     a{color:inherit}
     .wrap{max-width:var(--max); margin:0 auto; padding:28px 18px 40px}
 
-    /* top bar */
     .topbar{
       display:flex; align-items:center; justify-content:space-between;
       gap:12px; margin-bottom:18px;
     }
     .brandRow{display:flex; align-items:center; gap:12px; min-width:0}
-    .logoLink{
-      display:inline-flex; align-items:center; justify-content:center;
-      width:42px; height:42px;
-      border-radius: 14px;
+    .logo{
+      width:46px; height:46px; border-radius:16px;
       border:1px solid var(--line);
       background: rgba(255,255,255,.04);
       overflow:hidden;
-      text-decoration:none;
-      flex: 0 0 auto;
+      display:flex; align-items:center; justify-content:center;
       box-shadow: 0 10px 24px rgba(0,0,0,.25);
+      flex:0 0 auto;
     }
-    .logoLink img{width:100%; height:100%; object-fit:cover; display:block}
+    .logo img{width:100%; height:100%; object-fit:cover; display:block}
     .brand{display:flex; flex-direction:column; gap:2px; min-width:0}
     .brand b{font-size:14px; letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
     .brand span{font-size:12px; color:var(--muted)}
@@ -86,7 +85,6 @@
       white-space:nowrap;
     }
 
-    /* hero */
     .hero{
       border:1px solid var(--line);
       background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
@@ -99,7 +97,6 @@
     .hero p{margin:0; color:var(--muted)}
     .hero .cta{margin-top:12px; display:flex; flex-wrap:wrap; gap:10px}
 
-    /* grid/cards */
     .grid{
       display:grid;
       grid-template-columns: repeat(12, 1fr);
@@ -118,7 +115,6 @@
     .card h2{margin:0 0 6px; font-size:16px}
     .card p{margin:0 0 12px; color:var(--muted); font-size:14px}
 
-    /* buttons */
     .btnrow{display:flex; flex-wrap:wrap; gap:10px}
     .btn{
       display:inline-flex; align-items:center; justify-content:center;
@@ -134,29 +130,10 @@
     .btn:active{transform: translateY(1px)}
     .btn.primary{background:var(--btn); color:var(--btnText)}
     .btn.ghost{background:var(--btnGhost); color:var(--text); border-color: var(--line)}
-    .btn.disabled{
-      opacity:.75;
-      cursor:not-allowed;
-      pointer-events:none;
-    }
-    .note{
-      margin-top:10px;
-      font-size:12px;
-      color:var(--muted);
-    }
+    .note{margin-top:10px; font-size:12px; color:var(--muted)}
 
-    .qr{
-      display:flex; gap:14px; align-items:center; justify-content:space-between;
-      border-top:1px solid var(--line);
-      margin-top:14px; padding-top:14px;
-    }
-    .qr .cap{font-size:12px; color:var(--muted)}
-    .qr .tag{
-      border:1px dashed rgba(255,255,255,.22);
-      padding:10px 12px;
-      border-radius: 14px;
-      font-size:12px;
-      color:var(--muted);
+    .list{
+      margin:0; padding-left:18px; color:var(--muted); font-size:14px;
     }
 
     footer{
@@ -171,133 +148,77 @@
     }
     footer a{color:var(--muted)}
   </style>
-
-  <!-- Site-wide analytics -->
-  <script defer src="/scripts/sb-analytics.js"></script>
-
-  <!-- Lightweight IoT / telemetry hook (optional, safe no-op if endpoint not set) -->
-  <script>
-    (function () {
-      var endpoint = window.PUFFS_IOT_ENDPOINT || "";
-      if (!endpoint) return;
-
-      function send(event, extra) {
-        try {
-          var payload = {
-            event: event,
-            page: location.pathname,
-            ts: new Date().toISOString(),
-            ua: navigator.userAgent,
-            ref: document.referrer || null
-          };
-          if (extra && typeof extra === "object") {
-            for (var k in extra) payload[k] = extra[k];
-          }
-          navigator.sendBeacon(endpoint, new Blob([JSON.stringify(payload)], { type: "application/json" }));
-        } catch (_) {}
-      }
-
-      window.PuffsIoT = { send: send };
-      send("view");
-
-      document.addEventListener("click", function (e) {
-        var el = e.target && e.target.closest ? e.target.closest("[data-iot]") : null;
-        if (!el) return;
-        send("click", { label: el.getAttribute("data-iot") || null, href: el.getAttribute("href") || null });
-      }, { passive: true });
-    })();
-  </script>
 </head>
 
 <body>
   <div class="wrap">
     <div class="topbar">
       <div class="brandRow">
-        <!-- ✅ Corner logo icon (trust + “you’re in the right place”) -->
-        <!-- Update src if your logo lives somewhere else -->
-        <a class="logoLink" href="/puffs/" aria-label="Back to Puff’s Smokehouse" data-iot="logo-home">
-          <img src="/assets/puffs/icon-512.png" alt="Puff’s Smokehouse logo" loading="eager" decoding="async" />
-        </a>
-
+        <!-- Update this path if your Puff’s icon lives elsewhere -->
+        <div class="logo" aria-hidden="true">
+          <img src="/assets/puffs/icon-512.png" alt="" loading="eager" decoding="async" />
+        </div>
         <div class="brand">
           <b>Puff’s Smokehouse</b>
-          <span>Pay Online</span>
+          <span>Order Pickup • Ponchatoula, LA</span>
         </div>
       </div>
-
-      <div class="pill">Secure payment • Automatic receipts</div>
+      <div class="pill">Text to order • Pickup on arrival</div>
     </div>
 
     <section class="hero">
-      <h1>Puff’s Smokehouse — Pay Online</h1>
+      <h1>Order plates • Pickup on arrival</h1>
       <p>
-        Puff’s Smokehouse accepts secure online payments for plates, pickup orders, and catering deposits.
-        Payment links are sent directly by Puff’s after your order or quote is confirmed.
-        Receipts are sent automatically once payment is submitted.
+        Text your order, get it confirmed, then pull up for pickup.
+        For online payments, Puff’s will send a secure payment link after confirmation.
       </p>
 
-      <!-- ✅ NEW: customer actions (both) -->
       <div class="cta">
         <!-- Update phone if needed -->
-        <a class="btn primary"
-           href="sms:+19859811777?&body=Hi%20Puff%E2%80%99s%20Smokehouse%20%E2%80%94%20please%20send%20me%20a%20secure%20payment%20link%20for%20my%20order.%0A%0AName%3A%20%0AOrder%3A%20%0APickup%20time%3A%20"
-           data-iot="request-link-sms">Request a payment link (Text)</a>
-
-        <a class="btn ghost" href="tel:+19859811777" data-iot="call-puffs">Call Puff’s</a>
-
-        <a class="btn ghost" href="/puffs/" data-iot="hero-back">Back to Puff’s</a>
+        <a class="btn primary" href="sms:+19859811777?&body=Hi%20Puff%E2%80%99s%20Smokehouse%20%E2%80%94%20I%E2%80%99d%20like%20to%20place%20an%20order.%0A%0AName%3A%20%0AOrder%3A%20%0APickup%20time%3A%20" rel="noopener">Text to Order</a>
+        <a class="btn ghost" href="tel:+19859811777" rel="noopener">Call Puff’s</a>
+        <a class="btn ghost" href="/puffs/pay/" rel="noopener">Pay Online Info</a>
       </div>
+
+      <div class="note">Tip: include your name, plate(s), sides, and pickup time.</div>
     </section>
 
-    <section class="grid" aria-label="Payment options">
+    <section class="grid" aria-label="Info">
       <article class="card half">
-        <h2>Plates & Pickup Orders</h2>
-        <p>After your order is confirmed, Puff’s will send a secure payment link for fast checkout.</p>
-
-        <div class="btnrow">
-          <!-- informational -->
-          <span class="btn primary disabled" role="button" aria-disabled="true" data-iot="plates-status">Payment link sent by Puff’s</span>
-          <a class="btn ghost" href="/puffs/" rel="noopener" data-iot="back-to-puffs">Back to Puff’s</a>
-        </div>
-
-        <div class="note">No account required • Pay from your phone • Receipt sent automatically</div>
+        <h2>Popular plates</h2>
+        <p>Ask what’s available today.</p>
+        <ul class="list">
+          <li>Smoked turkey wings</li>
+          <li>Ribs</li>
+          <li>Neck bones</li>
+          <li>Sides + specials</li>
+        </ul>
       </article>
 
       <article class="card half">
-        <h2>Catering Deposits</h2>
-        <p>
-          A <b>50% deposit</b> secures your date and covers preparation.
-          The remaining balance is due prior to or on the event date.
-        </p>
-
+        <h2>Catering</h2>
+        <p>Have an event? Puff’s can handle catering orders with a deposit to secure your date.</p>
         <div class="btnrow">
-          <!-- informational -->
-          <span class="btn primary disabled" role="button" aria-disabled="true" data-iot="catering-status">Catering payment link sent by Puff’s</span>
-          <a class="btn ghost" href="/puffs/catering/" rel="noopener" data-iot="catering-info">Catering details</a>
+          <a class="btn primary" href="/puffs/catering/" rel="noopener">Catering details</a>
+          <a class="btn ghost" href="/puffs/pay/" rel="noopener">Payment info</a>
         </div>
-
-        <div class="qr">
-          <div>
-            <div class="cap">Optional QR caption</div>
-            <div style="font-weight:700">Scan · Pay · Pickup</div>
-          </div>
-          <div class="tag">QR code can point here</div>
-        </div>
+        <div class="note">Catering deposits are invoiced after the quote is confirmed.</div>
       </article>
 
       <article class="card">
-        <h2>What to expect after payment</h2>
+        <h2>How it works</h2>
         <p>
-          • Confirmation receipt sent automatically<br>
-          • Puff’s follows up directly for final details<br>
-          • Payment records are securely stored
+          1) Text or call to order<br>
+          2) Puff’s confirms your order + total<br>
+          3) Pickup on arrival (or pay online via secure link)<br>
+          4) Receipt is sent automatically when you pay online
         </p>
       </article>
     </section>
 
     <footer>
-      <div>Need catering? See: <a href="/puffs/catering/" data-iot="footer-catering-link">/puffs/catering/</a></div>
-      <div>Powered by secure Square Bidness payment infrastructure.</div>
+      <div>Payments are handled securely via invoice links sent by Puff’s after confirmation.</div>
+      <div>Powered by Square Bidness infrastructure.</div>
     </footer>
   </div>
 </body>
