@@ -23,7 +23,7 @@
   <meta property="og:url" content="https://www.squarebidness.com/puffs/pay/" />
 
   <!-- Build stamp -->
-  <meta name="sb:build" content="v20260116-puffs-pay-invoice" />
+  <meta name="sb:build" content="v20260116-puffs-pay-invoice-logo-sms-call" />
 
   <!-- Optional: favicons -->
   <link rel="icon" href="/assets/favicon.ico" />
@@ -54,12 +54,27 @@
     }
     a{color:inherit}
     .wrap{max-width:var(--max); margin:0 auto; padding:28px 18px 40px}
+
+    /* top bar */
     .topbar{
       display:flex; align-items:center; justify-content:space-between;
       gap:12px; margin-bottom:18px;
     }
-    .brand{display:flex; flex-direction:column; gap:2px}
-    .brand b{font-size:14px; letter-spacing:.06em; text-transform:uppercase}
+    .brandRow{display:flex; align-items:center; gap:12px; min-width:0}
+    .logoLink{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:42px; height:42px;
+      border-radius: 14px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      overflow:hidden;
+      text-decoration:none;
+      flex: 0 0 auto;
+      box-shadow: 0 10px 24px rgba(0,0,0,.25);
+    }
+    .logoLink img{width:100%; height:100%; object-fit:cover; display:block}
+    .brand{display:flex; flex-direction:column; gap:2px; min-width:0}
+    .brand b{font-size:14px; letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
     .brand span{font-size:12px; color:var(--muted)}
     .pill{
       border:1px solid var(--line);
@@ -71,6 +86,7 @@
       white-space:nowrap;
     }
 
+    /* hero */
     .hero{
       border:1px solid var(--line);
       background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
@@ -83,6 +99,7 @@
     .hero p{margin:0; color:var(--muted)}
     .hero .cta{margin-top:12px; display:flex; flex-wrap:wrap; gap:10px}
 
+    /* grid/cards */
     .grid{
       display:grid;
       grid-template-columns: repeat(12, 1fr);
@@ -101,6 +118,7 @@
     .card h2{margin:0 0 6px; font-size:16px}
     .card p{margin:0 0 12px; color:var(--muted); font-size:14px}
 
+    /* buttons */
     .btnrow{display:flex; flex-wrap:wrap; gap:10px}
     .btn{
       display:inline-flex; align-items:center; justify-content:center;
@@ -194,10 +212,19 @@
 <body>
   <div class="wrap">
     <div class="topbar">
-      <div class="brand">
-        <b>Puff’s Smokehouse</b>
-        <span>Pay Online</span>
+      <div class="brandRow">
+        <!-- ✅ Corner logo icon (trust + “you’re in the right place”) -->
+        <!-- Update src if your logo lives somewhere else -->
+        <a class="logoLink" href="/puffs/" aria-label="Back to Puff’s Smokehouse" data-iot="logo-home">
+          <img src="/assets/puffs/icon-512.png" alt="Puff’s Smokehouse logo" loading="eager" decoding="async" />
+        </a>
+
+        <div class="brand">
+          <b>Puff’s Smokehouse</b>
+          <span>Pay Online</span>
+        </div>
       </div>
+
       <div class="pill">Secure payment • Automatic receipts</div>
     </div>
 
@@ -209,12 +236,14 @@
         Receipts are sent automatically once payment is submitted.
       </p>
 
-      <!-- ✅ NEW: easy action for customers -->
+      <!-- ✅ NEW: customer actions (both) -->
       <div class="cta">
-        <!-- IMPORTANT: update the phone number if Puff’s uses a different line -->
+        <!-- Update phone if needed -->
         <a class="btn primary"
-           href="sms:+19859811777?&body=Hi%20Puff%E2%80%99s%20Smokehouse%20%E2%80%94%20please%20send%20me%20a%20secure%20payment%20link%20for%20my%20order.%20Name%3A%20%0AOrder%3A%20%0APickup%20time%3A%20"
-           data-iot="request-link-sms">Request a payment link</a>
+           href="sms:+19859811777?&body=Hi%20Puff%E2%80%99s%20Smokehouse%20%E2%80%94%20please%20send%20me%20a%20secure%20payment%20link%20for%20my%20order.%0A%0AName%3A%20%0AOrder%3A%20%0APickup%20time%3A%20"
+           data-iot="request-link-sms">Request a payment link (Text)</a>
+
+        <a class="btn ghost" href="tel:+19859811777" data-iot="call-puffs">Call Puff’s</a>
 
         <a class="btn ghost" href="/puffs/" data-iot="hero-back">Back to Puff’s</a>
       </div>
