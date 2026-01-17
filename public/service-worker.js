@@ -1,9 +1,13 @@
-/* Square Bidness — site SW (network-first for pages + partial HTML)
+/* Square Bidness — site SW (network-first HTML, cache-first assets)
    v20260117c — FIX: never cache 206/partial, never cache media/range, same-origin only
 */
 
 const CACHE = "sb-site-v20260117c";
 const ASSET_CACHE = "sb-assets-v20260117c";
+
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") self.skipWaiting();
+});
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
