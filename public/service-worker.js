@@ -1,7 +1,8 @@
 /* Square Bidness — site SW (network-first for pages + partial HTML) */
+/* v20260117a — media bypass + range-safe + destination-aware + nav preload */
 
-const CACHE = "sb-site-v20251223a";
-const ASSET_CACHE = "sb-assets-v20251223a";
+const CACHE = "sb-site-v20260117a";
+const ASSET_CACHE = "sb-assets-v20260117a";
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
@@ -26,6 +27,14 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     (async () => {
+      // Enable navigation preload for faster HTML
+      try {
+        if (self.registration && self.registration.navigationPreload) {
+          await self.registration.navigationPreload.enable();
+        }
+      } catch (_) {}
+
+      // Cleanup old caches
       const keys = await caches.keys();
       await Promise.all(
         keys.map((k) => {
@@ -34,6 +43,7 @@ self.addEventListener("activate", (event) => {
           }
         })
       );
+
       await self.clients.claim();
     })()
   );
@@ -62,29 +72,47 @@ function isHTMLLikeRequest(req) {
   return false;
 }
 
-/* ✅ NEW: never cache media / range requests (fixes 206 + Cache.put errors) */
-function isMediaRequest(req) {
+/* ✅ NEVER cache media / range / partials */
+function isMediaOrRange(req) {
   try {
-    const url = new URL(req.url);
-    const p = url.pathname.toLowerCase();
+    // request.destination is the cleanest signal
+    const d = req.destination;
+    if (d === "video" || d === "audio") return true;
 
-    // Skip any video/audio extensions
-    if (p.endsWith(".mp4") || p.endsWith(".webm") || p.endsWith(".mov") || p.endsWith(".m4v")) return true;
-    if (p.endsWith(".mp3") || p.endsWith(".wav") || p.endsWith(".aac") || p.endsWith(".m4a")) return true;
-
-    // If browser is requesting a byte-range, treat as media-like
+    // If browser requests a byte-range, treat as media-like
     const range = req.headers.get("range");
     if (range) return true;
+
+    // Extension fallback (covers odd cases where destination is empty)
+    const url = new URL(req.url);
+    const p = url.pathname.toLowerCase();
+    if (p.endsWith(".mp4") || p.endsWith(".webm") || p.endsWith(".mov") || p.endsWith(".m4v")) return true;
+    if (p.endsWith(".mp3") || p.endsWith(".wav") || p.endsWith(".aac") || p.endsWith(".m4a")) return true;
   } catch {}
+
   return false;
 }
 
-async function networkFirstHTML(req) {
+function isSameOrigin(req) {
   try {
-    const fresh = await fetch(req, { cache: "no-store" });
+    return new URL(req.url).origin === self.location.origin;
+  } catch {
+    return false;
+  }
+}
 
-    // ✅ Only cache full successful responses (avoid 206/range)
-    if (fresh && fresh.ok && fresh.status === 200) {
+function okToCache(res) {
+  // Only cache full, successful, non-opaque responses
+  return !!(res && res.ok && res.status === 200 && res.type !== "opaque");
+}
+
+async function networkFirstHTML(req, event) {
+  try {
+    // Use navigation preload response if available (faster)
+    const preload = event && event.preloadResponse ? await event.preloadResponse : null;
+    const fresh = preload || (await fetch(req, { cache: "no-store" }));
+
+    if (okToCache(fresh) && isSameOrigin(req)) {
       const cache = await caches.open(CACHE);
       await cache.put(req, fresh.clone());
     }
@@ -108,15 +136,15 @@ self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (!isGET(req)) return;
 
-  // ✅ Media should bypass SW caching entirely (fixes your hero.mp4 issues)
-  if (isMediaRequest(req)) {
+  // ✅ Media + range should bypass SW caching entirely (fixes hero.mp4 / 206 / Cache.put)
+  if (isMediaOrRange(req)) {
     event.respondWith(fetch(req));
     return;
   }
 
   // HTML + nav/footer partial HTML: NETWORK FIRST
   if (isHTMLLikeRequest(req)) {
-    event.respondWith(networkFirstHTML(req));
+    event.respondWith(networkFirstHTML(req, event));
     return;
   }
 
@@ -135,7 +163,7 @@ self.addEventListener("fetch", (event) => {
     }
   } catch {}
 
-  // Assets: CACHE FIRST
+  // Assets: CACHE FIRST (same-origin only)
   event.respondWith(
     (async () => {
       const cached = await caches.match(req);
@@ -144,8 +172,8 @@ self.addEventListener("fetch", (event) => {
       try {
         const fresh = await fetch(req);
 
-        // ✅ Only cache full successful responses (avoid partial 206)
-        if (fresh && fresh.ok && fresh.status === 200) {
+        // ✅ Only cache full successful responses AND same-origin
+        if (okToCache(fresh) && isSameOrigin(req)) {
           const cache = await caches.open(ASSET_CACHE);
           await cache.put(req, fresh.clone());
         }
