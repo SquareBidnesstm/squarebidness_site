@@ -1,17 +1,22 @@
-<!-- /public/nae-doll/index.html (private inspiration page) -->
+<!-- FILE NAME + PATH:
+     /public/nae-doll/index.html
+
+     HERO VIDEO FILE (MP4):
+     /public/nae-doll/assets/hero.mp4
+     (poster fallback uses: /nae-doll/assets/nae-doll-2_1200.jpg)
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
 
-  <title>Biker Girl Nae Doll — Star in the Making</title>
-  <meta name="description" content="Private preview for Biker Girl Nae Doll — throttle-ready confidence and star energy. This ain’t for sale; this is what your lane could look like." />
+  <title>Nae Doll — Star Time</title>
+  <meta name="description" content="Private inspiration page for Nae Doll — star energy, throttle-ready confidence, and a brand lane that matches the moment." />
 
-  <!-- Canonical (optional) -->
   <link rel="canonical" href="https://www.squarebidness.com/nae-doll/" />
 
-  <!-- Theme -->
   <meta name="theme-color" content="#000000" />
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="noindex,nofollow" />
@@ -19,23 +24,23 @@
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Square Bidness" />
-  <meta property="og:title" content="Biker Girl Nae Doll — Star in the Making" />
-  <meta property="og:description" content="This ain’t for sale — this is what your lane could look like. You are a star, it’s time to fill your role." />
+  <meta property="og:title" content="Nae Doll — Star Time" />
+  <meta property="og:description" content="You’re the hottest. Embrace it. It’s time. This is what your lane can look like when you move like the star you already are." />
   <meta property="og:image" content="https://www.squarebidness.com/nae-doll/assets/nae-doll-2_1200x630.webp" />
   <meta property="og:url" content="https://www.squarebidness.com/nae-doll/" />
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Biker Girl Nae Doll — Star in the Making" />
-  <meta name="twitter:description" content="This ain’t for sale — this is what your lane could look like. You are a star, it’s time to fill your role." />
+  <meta name="twitter:title" content="Nae Doll — Star Time" />
+  <meta name="twitter:description" content="You’re the hottest. Embrace it. It’s time. Move like the star you already are." />
   <meta name="twitter:image" content="https://www.squarebidness.com/nae-doll/assets/nae-doll-2_1200x630.webp" />
 
-  <!-- ✅ Preload hero (LCP) WEBP -->
+  <!-- Optional preload poster (fast first paint) -->
   <link
     rel="preload"
     as="image"
-    href="/nae-doll/assets/nae-doll-2_1200.webp"
-    imagesrcset="/nae-doll/assets/nae-doll-2_800.webp 800w, /nae-doll/assets/nae-doll-2_1200.webp 1200w"
+    href="/nae-doll/assets/nae-doll-2_1200.jpg"
+    imagesrcset="/nae-doll/assets/nae-doll-2_800.jpg 800w, /nae-doll/assets/nae-doll-2_1200.jpg 1200w"
     imagesizes="100vw"
     fetchpriority="high"
   />
@@ -71,15 +76,24 @@
         radial-gradient(80% 70% at 50% 12%, rgba(199,166,92,.18), transparent 62%),
         linear-gradient(to bottom, rgba(0,0,0,.40), rgba(0,0,0,.86));
     }
+
+    /* VIDEO BACKGROUND */
     .hero__bg{
       position:absolute;inset:0;z-index:-2;
       background:#000;
     }
-    .hero__bg img{
-      width:100%;height:100%;object-fit:cover;display:block;
-      filter:saturate(1.05) contrast(1.05);
-      transform:scale(1.02);
+    .hero__video-wrap{
+      position:absolute;inset:0;z-index:-2;
+      overflow:hidden;background:#000;
     }
+    .hero-video{
+      width:100%;height:100%;
+      object-fit:cover;
+      object-position:center;
+      filter:saturate(1.05) contrast(1.05);
+    }
+    .hero-video::-webkit-media-controls{display:none!important}
+
     .hero__shade{
       position:absolute;inset:0;z-index:-1;
       background:
@@ -88,7 +102,7 @@
     }
     .hero__inner{text-align:center;padding:0 10px;}
     .hero h1{
-      margin:0 0 .5rem;
+      margin:0 0 .55rem;
       font-size:clamp(1.75rem, 3.2vw, 2.6rem);
       letter-spacing:.4px;
       animation:fadeUp .7s ease-out both;
@@ -141,7 +155,7 @@
       border-bottom:1px solid var(--stroke);
     }
     .message p{
-      max-width:70ch;margin:.55rem auto;
+      max-width:72ch;margin:.55rem auto;
       font-size:1.05rem;line-height:1.65;color:rgba(255,255,255,.86);
       padding:0 16px;
     }
@@ -158,7 +172,6 @@
       .hero h1,.sub{animation:none}
       .banner{animation:none}
       .card{transition:none}
-      .hero__bg img{transform:none}
     }
 
     @keyframes fadeUp{
@@ -173,32 +186,28 @@
 </head>
 
 <body>
-  <!-- HERO -->
+  <!-- HERO (VIDEO BACKGROUND) -->
   <section class="hero" aria-label="Nae Doll private preview">
-    <div class="hero__bg" aria-hidden="true">
-      <!-- ✅ WEBP first + JPG fallback (same paths, just .webp added) -->
-      <picture>
-        <source type="image/webp"
-          srcset="/nae-doll/assets/nae-doll-2_800.webp 800w, /nae-doll/assets/nae-doll-2_1200.webp 1200w"
-          sizes="100vw">
-        <source type="image/jpeg"
-          srcset="/nae-doll/assets/nae-doll-2_800.jpg 800w, /nae-doll/assets/nae-doll-2_1200.jpg 1200w"
-          sizes="100vw">
-        <img
-          src="/nae-doll/assets/nae-doll-2_1200.jpg"
-          width="1200" height="800"
-          alt=""
-          loading="eager"
-          decoding="async"
-          fetchpriority="high">
-      </picture>
+    <div class="hero__video-wrap" aria-hidden="true">
+      <video
+        class="hero-video"
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="metadata"
+        poster="/nae-doll/assets/nae-doll-2_1200.jpg"
+      >
+        <source src="/nae-doll/assets/hero.mp4" type="video/mp4" />
+      </video>
     </div>
+
     <div class="hero__shade" aria-hidden="true"></div>
 
     <div class="container hero__inner">
-      <h1>✨ Biker Girl Nae Doll — Star Energy ✨</h1>
-      <div class="sub">“They won’t believe until you do.”</div>
-      <div class="banner">Throttle-ready confidence • True Rider • Star in the Making</div>
+      <h1>✨ You’re the hottest — embrace it. ✨</h1>
+      <div class="sub">It’s time. Move like the star you already are.</div>
+      <div class="banner">Star time • Throttle-ready • Don’t play small</div>
     </div>
   </section>
 
@@ -219,7 +228,7 @@
               width="1200" height="800"
               loading="lazy"
               decoding="async"
-              alt="Biker Girl Nae Doll — look one">
+              alt="Nae Doll — look one">
           </picture>
         </figure>
 
@@ -236,7 +245,7 @@
               width="1200" height="800"
               loading="lazy"
               decoding="async"
-              alt="Biker Girl Nae Doll — look two">
+              alt="Nae Doll — look two">
           </picture>
         </figure>
       </div>
@@ -245,11 +254,20 @@
 
   <!-- PERSONAL MESSAGE -->
   <section class="message" aria-label="Message">
-    <p><strong>This ain’t for sale</strong> — this is what your lane could look like.
-      This is what a brand presentation feels like when the concept and visuals come together.</p>
-    <p>You’ve got the look, the energy, the heart — now it’s time to <strong>fill your role</strong> and move like the star you already are.</p>
+    <p>
+      <strong>You’re the hottest.</strong> Not in an ego way — in a <em>presence</em> way.
+      In a “when you walk in, the room changes” way.
+    </p>
+    <p>
+      <strong>Embrace it.</strong> Stop shrinking it. Stop doubting it.
+      The only thing missing is you moving like it’s real — because it is.
+    </p>
+    <p>
+      <strong>It’s time.</strong> Put the confidence on like a helmet. Take the lane. Hold the line.
+      This is star time — and you’re built for it.
+    </p>
   </section>
 
-  <footer>Private showcase • Square Bidness Tech Lab © 2025</footer>
+  <footer>Private showcase • Square Bidness Tech Lab © 2026</footer>
 </body>
 </html>
