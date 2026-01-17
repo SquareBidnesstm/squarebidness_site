@@ -1,9 +1,9 @@
-/* Square Bidness — site SW (network-first HTML, cache-first assets)
-   v20260117b — FIX: never cache 206/partial/range, never cache video/audio
+/* Square Bidness — site SW (network-first for pages + partial HTML)
+   v20260117c — FIX: never cache 206/partial, never cache media/range, same-origin only
 */
 
-const CACHE = "sb-site-v20260117b";
-const ASSET_CACHE = "sb-assets-v20260117b";
+const CACHE = "sb-site-v20260117c";
+const ASSET_CACHE = "sb-assets-v20260117c";
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
@@ -49,6 +49,19 @@ self.addEventListener("activate", (event) => {
 
 const isGET = (req) => req.method === "GET";
 
+function isSameOrigin(req) {
+  try {
+    return new URL(req.url).origin === self.location.origin;
+  } catch {
+    return false;
+  }
+}
+
+function okToCache(res) {
+  // ✅ only cache full 200 OK responses; blocks 206 forever
+  return !!(res && res.ok && res.status === 200 && res.type !== "opaque");
+}
+
 function isHTMLLikeRequest(req) {
   if (req.mode === "navigate") return true;
 
@@ -66,16 +79,16 @@ function isHTMLLikeRequest(req) {
   return false;
 }
 
-// ✅ Hard stop: never SW-cache range/media. Always stream from network.
-function shouldBypassCache(req) {
+/* ✅ Critical: bypass SW caching for range + media (prevents 206 Cache.put crash) */
+function shouldBypass(req) {
   try {
     const url = new URL(req.url);
     const p = url.pathname.toLowerCase();
 
-    // Any byte-range request means the response may be 206
+    // Any range request can return 206
     if (req.headers.get("range")) return true;
 
-    // Destination-based bypass
+    // Destination-based (best signal)
     if (req.destination === "video" || req.destination === "audio") return true;
 
     // Extension fallback
@@ -83,19 +96,6 @@ function shouldBypassCache(req) {
     if (p.endsWith(".mp3") || p.endsWith(".wav") || p.endsWith(".aac") || p.endsWith(".m4a")) return true;
   } catch {}
   return false;
-}
-
-function isSameOrigin(req) {
-  try {
-    return new URL(req.url).origin === self.location.origin;
-  } catch {
-    return false;
-  }
-}
-
-function okToCache(res) {
-  // ✅ only cache full success; this blocks 206 forever
-  return !!(res && res.ok && res.status === 200 && res.type !== "opaque");
 }
 
 async function networkFirstHTML(req, event) {
@@ -126,8 +126,8 @@ self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (!isGET(req)) return;
 
-  // ✅ Bypass cache completely for media/range (solves your error)
-  if (shouldBypassCache(req)) {
+  // ✅ Stream media/range from network only
+  if (shouldBypass(req)) {
     event.respondWith(fetch(req));
     return;
   }
@@ -138,7 +138,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Always try network for core JS (prevents stuck scripts)
+  // Core JS: always try network no-store (prevents stale scripts)
   try {
     const url = new URL(req.url);
     if (
@@ -153,7 +153,7 @@ self.addEventListener("fetch", (event) => {
     }
   } catch {}
 
-  // Assets: cache-first
+  // Assets: cache-first (same-origin only)
   event.respondWith(
     (async () => {
       const cached = await caches.match(req);
@@ -162,7 +162,6 @@ self.addEventListener("fetch", (event) => {
       try {
         const fresh = await fetch(req);
 
-        // ✅ never cache anything except 200 OK
         if (okToCache(fresh) && isSameOrigin(req)) {
           const cache = await caches.open(ASSET_CACHE);
           await cache.put(req, fresh.clone());
