@@ -1,11 +1,6 @@
-<!-- ✅ FILE NAME + PATH:
-     /public/nae-doll/index.html
-
-     ✅ HERO VIDEO (convert .mov → .mp4 and name it exactly):
-     /public/nae-doll/assets/hero.mp4
-
-     ✅ POSTER IMAGE (already in your folder):
-     /public/nae-doll/assets/nae-doll-2_1200.jpg
+<!-- /public/nae-doll/index.html
+     HERO: /public/nae-doll/assets/hero.mp4
+     POSTER: /public/nae-doll/assets/nae-doll-2_1200.jpg
 -->
 
 <!DOCTYPE html>
@@ -16,7 +11,6 @@
 
   <title>Nae Doll — Star Time</title>
   <meta name="description" content="Private inspiration page for Nae Doll — star energy, throttle-ready confidence, and a brand lane that matches the moment." />
-
   <link rel="canonical" href="https://www.squarebidness.com/nae-doll/" />
 
   <meta name="theme-color" content="#000000" />
@@ -37,7 +31,7 @@
   <meta name="twitter:description" content="You’re the hottest. Embrace it. It’s time. Move like the star you already are." />
   <meta name="twitter:image" content="https://www.squarebidness.com/nae-doll/assets/nae-doll-2_1200x630.webp" />
 
-  <!-- Optional preload poster (fast first paint) -->
+  <!-- Preload poster (fast first paint) -->
   <link
     rel="preload"
     as="image"
@@ -49,12 +43,8 @@
 
   <style>
     :root{
-      --bg:#000;
-      --fg:#fff;
-      --muted:rgba(255,255,255,.78);
-      --stroke:rgba(255,255,255,.10);
-      --gold:#c7a65c;
-      --card:#0b0b0b;
+      --bg:#000; --fg:#fff; --stroke:rgba(255,255,255,.10);
+      --gold:#c7a65c; --card:#0b0b0b;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -64,34 +54,42 @@
       -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
     }
     a{color:inherit}
-
     .container{max-width:1100px;margin:0 auto;padding:0 16px;}
 
     /* HERO */
     .hero{
       position:relative;isolation:isolate;overflow:hidden;
       min-height:62vh;display:grid;place-items:center;
-      padding:3.2rem 0;
-      border-bottom:1px solid var(--stroke);
+      padding:3.2rem 0;border-bottom:1px solid var(--stroke);
       background:
         radial-gradient(80% 70% at 50% 12%, rgba(199,166,92,.18), transparent 62%),
         linear-gradient(to bottom, rgba(0,0,0,.40), rgba(0,0,0,.86));
     }
 
-    /* VIDEO BACKGROUND */
+    /* ✅ Poster layer (prevents black hero ever) */
+    .hero__poster{
+      position:absolute; inset:0; z-index:-3;
+      background:url("/nae-doll/assets/nae-doll-2_1200.jpg") center/cover no-repeat;
+      filter:saturate(1.05) contrast(1.05);
+      transform:scale(1.02);
+    }
+
+    /* VIDEO */
     .hero__video-wrap{
       position:absolute;inset:0;z-index:-2;
       overflow:hidden;background:#000;
     }
     .hero-video{
+      position:absolute; inset:0;
       width:100%;height:100%;
-      object-fit:cover;
-      object-position:center;
+      object-fit:cover; object-position:center;
       filter:saturate(1.05) contrast(1.05);
+      opacity:0; transition:opacity .35s ease;
     }
+    .hero.is-playing .hero-video{opacity:1}
     .hero-video::-webkit-media-controls{display:none!important}
 
-    /* If video fails, poster still shows. This shade keeps text readable. */
+    /* Shade */
     .hero__shade{
       position:absolute;inset:0;z-index:-1;
       background:
@@ -106,11 +104,7 @@
       letter-spacing:.4px;
       animation:fadeUp .7s ease-out both;
     }
-    .sub{
-      color:rgba(255,255,255,.72);
-      font-size:1rem;
-      animation:fadeUp .9s ease-out both;
-    }
+    .sub{color:rgba(255,255,255,.72);font-size:1rem;animation:fadeUp .9s ease-out both;}
     .banner{
       display:inline-flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:.4rem;
       margin:1rem auto 0;padding:.45rem 1rem;
@@ -124,10 +118,7 @@
 
     /* GRID */
     .grid-wrap{padding:1.4rem 0 2.2rem;}
-    .grid{
-      display:grid;gap:1rem;
-      grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
-    }
+    .grid{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));}
     .card{
       position:relative;border-radius:18px;overflow:hidden;background:var(--card);
       box-shadow:0 0 0 1px rgba(255,255,255,.08), 0 20px 40px rgba(0,0,0,.6);
@@ -138,18 +129,14 @@
       background:radial-gradient(80% 80% at 50% 10%, rgba(199,166,92,.25), transparent 55%);
       pointer-events:none;mix-blend:screen;
     }
-    .card:hover{
-      transform:translateY(-4px);
-      box-shadow:0 0 0 1px rgba(255,255,255,.12), 0 28px 60px rgba(0,0,0,.7);
-    }
+    .card:hover{transform:translateY(-4px);box-shadow:0 0 0 1px rgba(255,255,255,.12), 0 28px 60px rgba(0,0,0,.7);}
     .card picture,.card img{display:block;width:100%;height:auto}
     .card img{object-fit:cover;background:#000}
 
     /* MESSAGE */
     .message{
       margin:0 auto 2.6rem;
-      padding:1.6rem 0;
-      text-align:center;
+      padding:1.6rem 0;text-align:center;
       border-top:1px solid var(--stroke);
       border-bottom:1px solid var(--stroke);
     }
@@ -159,43 +146,34 @@
       padding:0 16px;
     }
     .message strong{color:var(--gold);}
+    footer{padding:1.6rem 0 2.2rem;text-align:center;color:rgba(255,255,255,.55);font-size:.9rem;}
 
-    footer{
-      padding:1.6rem 0 2.2rem;
-      text-align:center;color:rgba(255,255,255,.55);
-      font-size:.9rem;
-    }
-
-    /* reduced motion */
     @media (prefers-reduced-motion: reduce){
-      .hero h1,.sub{animation:none}
-      .banner{animation:none}
+      .hero h1,.sub,.banner{animation:none}
       .card{transition:none}
+      .hero-video{transition:none}
     }
-
-    @keyframes fadeUp{
-      from{opacity:0;transform:translateY(10px)}
-      to{opacity:1;transform:translateY(0)}
-    }
-    @keyframes glow{
-      0%{box-shadow:0 0 0 rgba(199,166,92,0)}
-      100%{box-shadow:0 0 30px rgba(199,166,92,.12)}
-    }
+    @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes glow{0%{box-shadow:0 0 0 rgba(199,166,92,0)}100%{box-shadow:0 0 30px rgba(199,166,92,.12)}}
   </style>
 </head>
 
 <body>
-  <!-- HERO (VIDEO BACKGROUND) -->
-  <section class="hero" aria-label="Nae Doll private preview">
+  <section class="hero" id="hero" aria-label="Nae Doll private preview">
+    <div class="hero__poster" aria-hidden="true"></div>
+
     <div class="hero__video-wrap" aria-hidden="true">
       <video
         class="hero-video"
+        id="heroVideo"
         autoplay
         muted
         loop
         playsinline
+        webkit-playsinline
         preload="metadata"
         poster="/nae-doll/assets/nae-doll-2_1200.jpg"
+        disablepictureinpicture
       >
         <source src="/nae-doll/assets/hero.mp4" type="video/mp4" />
       </video>
@@ -222,12 +200,7 @@
             <source type="image/jpeg"
               srcset="/nae-doll/assets/nae-doll_800.jpg 800w, /nae-doll/assets/nae-doll_1200.jpg 1200w"
               sizes="(max-width: 768px) 100vw, 540px">
-            <img
-              src="/nae-doll/assets/nae-doll_1200.jpg"
-              width="1200" height="800"
-              loading="lazy"
-              decoding="async"
-              alt="Nae Doll — look one">
+            <img src="/nae-doll/assets/nae-doll_1200.jpg" width="1200" height="800" loading="lazy" decoding="async" alt="Nae Doll — look one">
           </picture>
         </figure>
 
@@ -239,12 +212,7 @@
             <source type="image/jpeg"
               srcset="/nae-doll/assets/nae-doll-2_800.jpg 800w, /nae-doll/assets/nae-doll-2_1200.jpg 1200w"
               sizes="(max-width: 768px) 100vw, 540px">
-            <img
-              src="/nae-doll/assets/nae-doll-2_1200.jpg"
-              width="1200" height="800"
-              loading="lazy"
-              decoding="async"
-              alt="Nae Doll — look two">
+            <img src="/nae-doll/assets/nae-doll-2_1200.jpg" width="1200" height="800" loading="lazy" decoding="async" alt="Nae Doll — look two">
           </picture>
         </figure>
       </div>
@@ -253,30 +221,38 @@
 
   <!-- PERSONAL MESSAGE -->
   <section class="message" aria-label="Message">
-    <p>
-      <strong>You’re the hottest.</strong> Not in an ego way — in a <em>presence</em> way.
-      In a “when you walk in, the room changes” way.
-    </p>
-    <p>
-      <strong>Embrace it.</strong> Stop shrinking it. Stop doubting it.
-      The only thing missing is you moving like it’s real — because it is.
-    </p>
-    <p>
-      <strong>It’s time.</strong> Put the confidence on like a helmet. Take the lane. Hold the line.
-      This is star time — and you’re built for it.
-    </p>
+    <p><strong>You’re the hottest.</strong> Not in an ego way — in a <em>presence</em> way. In a “when you walk in, the room changes” way.</p>
+    <p><strong>Embrace it.</strong> Stop shrinking it. Stop doubting it. The only thing missing is you moving like it’s real — because it is.</p>
+    <p><strong>It’s time.</strong> Put the confidence on like a helmet. Take the lane. Hold the line. This is star time — and you’re built for it.</p>
   </section>
 
   <footer>Private showcase • Square Bidness Tech Lab © 2026</footer>
 
-  <!-- ✅ OPTIONAL: If autoplay gets blocked on some devices, this “nudges” play on first tap. -->
   <script>
+    // Fade video in only if it actually starts playing (poster stays if autoplay blocked)
     (function () {
-      const v = document.querySelector('.hero-video');
-      if (!v) return;
-      const tryPlay = () => v.play().catch(() => {});
-      document.addEventListener('click', tryPlay, { once: true });
-      document.addEventListener('touchstart', tryPlay, { once: true, passive: true });
+      const hero = document.getElementById("hero");
+      const v = document.getElementById("heroVideo");
+      if (!hero || !v) return;
+
+      const markPlaying = () => hero.classList.add("is-playing");
+      const markStopped = () => hero.classList.remove("is-playing");
+
+      v.addEventListener("playing", markPlaying, { passive: true });
+      v.addEventListener("pause", markStopped, { passive: true });
+      v.addEventListener("ended", markStopped, { passive: true });
+
+      const tryPlay = () => {
+        const p = v.play();
+        if (p && typeof p.catch === "function") p.catch(() => {});
+      };
+
+      // Try once on load; then one gentle nudge on first interaction
+      if (document.readyState === "complete" || document.readyState === "interactive") tryPlay();
+      else document.addEventListener("DOMContentLoaded", tryPlay, { once: true });
+
+      document.addEventListener("click", tryPlay, { once: true });
+      document.addEventListener("touchstart", tryPlay, { once: true, passive: true });
     })();
   </script>
 </body>
