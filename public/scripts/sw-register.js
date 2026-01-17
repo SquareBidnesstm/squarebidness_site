@@ -2,8 +2,8 @@
 (async () => {
   if (!("serviceWorker" in navigator)) return;
 
-  // ✅ NORMAL MODE
-  const PURGE = true;
+  // ✅ Set TRUE once if you need to kill old SW + caches, then set back FALSE.
+  const PURGE = false;
 
   if (PURGE) {
     try {
@@ -20,16 +20,20 @@
     return;
   }
 
-  // Use build stamp to help update SW file fetch
   const BUILD =
     (window.SB_BUILD ||
       document.querySelector('meta[name="sb:build"]')?.content ||
-      "v1");
+      "v20260117c");
 
   try {
-    const reg = await navigator.serviceWorker.register(`/service-worker.js?v=${encodeURIComponent(BUILD)}`, {
-      scope: "/",
-    });
+    const reg = await navigator.serviceWorker.register(
+      `/service-worker.js?v=${encodeURIComponent(BUILD)}`,
+      { scope: "/" }
+    );
+
+    // If there is a waiting SW, activate it now
+    if (reg.waiting) reg.waiting.postMessage({ type: "SKIP_WAITING" });
+
     console.log("[SW] registered with scope:", reg.scope);
   } catch (err) {
     console.warn("[SW] registration failed:", err);
