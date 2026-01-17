@@ -1,9 +1,11 @@
-<!-- FILE NAME + PATH:
+<!-- ✅ FILE NAME + PATH:
      /public/nae-doll/index.html
 
-     HERO VIDEO FILE (MP4):
+     ✅ HERO VIDEO (convert .mov → .mp4 and name it exactly):
      /public/nae-doll/assets/hero.mp4
-     (poster fallback uses: /nae-doll/assets/nae-doll-2_1200.jpg)
+
+     ✅ POSTER IMAGE (already in your folder):
+     /public/nae-doll/assets/nae-doll-2_1200.jpg
 -->
 
 <!DOCTYPE html>
@@ -64,7 +66,6 @@
     a{color:inherit}
 
     .container{max-width:1100px;margin:0 auto;padding:0 16px;}
-    .visually-hidden{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(1px,1px,1px,1px);white-space:nowrap}
 
     /* HERO */
     .hero{
@@ -78,10 +79,6 @@
     }
 
     /* VIDEO BACKGROUND */
-    .hero__bg{
-      position:absolute;inset:0;z-index:-2;
-      background:#000;
-    }
     .hero__video-wrap{
       position:absolute;inset:0;z-index:-2;
       overflow:hidden;background:#000;
@@ -94,12 +91,14 @@
     }
     .hero-video::-webkit-media-controls{display:none!important}
 
+    /* If video fails, poster still shows. This shade keeps text readable. */
     .hero__shade{
       position:absolute;inset:0;z-index:-1;
       background:
         radial-gradient(80% 70% at 50% 15%, rgba(199,166,92,.18), transparent 60%),
-        linear-gradient(to bottom, rgba(0,0,0,.40), rgba(0,0,0,.86));
+        linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,.88));
     }
+
     .hero__inner{text-align:center;padding:0 10px;}
     .hero h1{
       margin:0 0 .55rem;
@@ -269,6 +268,16 @@
   </section>
 
   <footer>Private showcase • Square Bidness Tech Lab © 2026</footer>
+
+  <!-- ✅ OPTIONAL: If autoplay gets blocked on some devices, this “nudges” play on first tap. -->
+  <script>
+    (function () {
+      const v = document.querySelector('.hero-video');
+      if (!v) return;
+      const tryPlay = () => v.play().catch(() => {});
+      document.addEventListener('click', tryPlay, { once: true });
+      document.addEventListener('touchstart', tryPlay, { once: true, passive: true });
+    })();
+  </script>
 </body>
 </html>
-
