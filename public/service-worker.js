@@ -62,14 +62,33 @@ function isHTMLLikeRequest(req) {
   return false;
 }
 
+/* ✅ NEW: never cache media / range requests (fixes 206 + Cache.put errors) */
+function isMediaRequest(req) {
+  try {
+    const url = new URL(req.url);
+    const p = url.pathname.toLowerCase();
+
+    // Skip any video/audio extensions
+    if (p.endsWith(".mp4") || p.endsWith(".webm") || p.endsWith(".mov") || p.endsWith(".m4v")) return true;
+    if (p.endsWith(".mp3") || p.endsWith(".wav") || p.endsWith(".aac") || p.endsWith(".m4a")) return true;
+
+    // If browser is requesting a byte-range, treat as media-like
+    const range = req.headers.get("range");
+    if (range) return true;
+  } catch {}
+  return false;
+}
+
 async function networkFirstHTML(req) {
   try {
     const fresh = await fetch(req, { cache: "no-store" });
 
-    if (fresh && fresh.ok) {
+    // ✅ Only cache full successful responses (avoid 206/range)
+    if (fresh && fresh.ok && fresh.status === 200) {
       const cache = await caches.open(CACHE);
-      cache.put(req, fresh.clone());
+      await cache.put(req, fresh.clone());
     }
+
     return fresh;
   } catch (_) {
     const cached = await caches.match(req);
@@ -88,6 +107,12 @@ async function noStoreFirst(req) {
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (!isGET(req)) return;
+
+  // ✅ Media should bypass SW caching entirely (fixes your hero.mp4 issues)
+  if (isMediaRequest(req)) {
+    event.respondWith(fetch(req));
+    return;
+  }
 
   // HTML + nav/footer partial HTML: NETWORK FIRST
   if (isHTMLLikeRequest(req)) {
@@ -118,10 +143,13 @@ self.addEventListener("fetch", (event) => {
 
       try {
         const fresh = await fetch(req);
-        if (fresh && fresh.ok) {
+
+        // ✅ Only cache full successful responses (avoid partial 206)
+        if (fresh && fresh.ok && fresh.status === 200) {
           const cache = await caches.open(ASSET_CACHE);
-          cache.put(req, fresh.clone());
+          await cache.put(req, fresh.clone());
         }
+
         return fresh;
       } catch (_) {
         return cached || Response.error();
