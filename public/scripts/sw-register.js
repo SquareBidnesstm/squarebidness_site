@@ -3,7 +3,7 @@
   if (!("serviceWorker" in navigator)) return;
 
   // ✅ NORMAL MODE
-  const PURGE = false;
+  const PURGE = true;
 
   if (PURGE) {
     try {
