@@ -3,7 +3,7 @@
   if (!("serviceWorker" in navigator)) return;
 
   // ✅ Set TRUE once if you need to kill old SW + caches, then set back FALSE.
-  const PURGE = false;
+  const PURGE = true;
 
   if (PURGE) {
     try {
