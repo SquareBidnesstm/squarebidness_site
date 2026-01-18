@@ -52,7 +52,7 @@
   <meta name="twitter:description" content="Clean, calm, confident skin. New client consults open • Northshore • Southeastern Louisiana." />
   <meta name="twitter:image" content="https://www.squarebidness.com/courageaux/assets/courageaux_hero_1200x630.jpg" />
   <meta name="twitter:image:alt" content="Courageaux Aesthetics — clean, calm, confident skin" />
-  
+  <meta name="twitter:site" content="@squarebidness" />
 
   <!-- Structured Data (privacy-safe + brand-safe image) -->
   <script type="application/ld+json">
@@ -68,7 +68,7 @@
         "description": "Clean, calm, confident skin. Licensed esthetician serving the Northshore and broader Southeastern Louisiana region. New client consults open.",
         "address": {
           "@type": "PostalAddress",
-          "addressLocality": "Hammond",
+          "addressLocality": "Northshore",
           "addressRegion": "LA",
           "addressCountry": "US"
         },
@@ -95,7 +95,316 @@
   </script>
 
   <style>
-    /* your CSS block exactly as-is */
+    :root{
+      --bg:#0b0b0b;
+      --fg:#ffffff;
+      --muted:#bdbdbd;
+      --muted2:#a1a1aa;
+      --soft:#121212;
+      --soft2:#0f0f0f;
+      --stroke:#1f1f1f;
+      --stroke2:#2a2a2a;
+      --gold:#c9a227;
+      --shadow: 0 18px 40px rgba(0,0,0,.35);
+      --r:16px;
+      --r2:14px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:
+        radial-gradient(900px 420px at 18% -10%, rgba(201,162,39,.12), rgba(0,0,0,0) 60%),
+        radial-gradient(900px 420px at 90% 0%, rgba(255,255,255,.06), rgba(0,0,0,0) 55%),
+        linear-gradient(180deg, #080808, #0b0b0b 40%, #080808 100%);
+      color:var(--fg);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      line-height:1.55;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    a{color:inherit}
+    img{max-width:100%;height:auto;display:block}
+    .container{max-width:1200px;margin:0 auto;padding:0 16px}
+
+    /* Buttons */
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      padding:12px 16px;
+      border-radius:12px;
+      text-decoration:none;
+      font-weight:900;
+      border:1px solid transparent;
+      transition: transform .12s ease, opacity .12s ease, background .12s ease, border-color .12s ease;
+      user-select:none;
+      white-space:nowrap;
+    }
+    .btn:active{transform: translateY(1px)}
+    .btn--gold{background:var(--gold);color:#000;border-color:rgba(201,162,39,.95)}
+    .btn--ghost{background:rgba(255,255,255,.03);color:#fff;border-color:rgba(255,255,255,.14)}
+    @media (hover:hover){
+      .btn:hover{opacity:.95}
+      .btn--ghost:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.22)}
+    }
+    .btn:focus-visible{outline:3px solid rgba(201,162,39,.55); outline-offset:2px}
+
+    /* Top nav */
+    .cx-topnav{
+      position:sticky;
+      top:0;
+      z-index:50;
+      border-bottom:1px solid var(--stroke);
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(10px);
+    }
+    .cx-topnav__inner{
+      max-width:1200px;
+      margin:0 auto;
+      padding:12px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .cx-brand{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      text-decoration:none;
+      color:inherit;
+      font-weight:950;
+      letter-spacing:-.01em;
+    }
+    .cx-brand img{
+      width:22px;height:22px;
+      border-radius:7px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.95);
+      padding:2px;
+    }
+    .cx-links{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+    }
+    .cx-pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:9px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.04);
+      color:#f5f5f5;
+      text-decoration:none;
+      font-weight:900;
+      font-size:.92rem;
+      white-space:nowrap;
+      transition: background .12s ease, border-color .12s ease, transform .12s ease;
+    }
+    .cx-pill:active{transform: translateY(1px)}
+    .cx-pill:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.22)}
+    .cx-pill--gold{
+      border-color:rgba(201,162,39,.85);
+      background:rgba(201,162,39,.95);
+      color:#000;
+    }
+
+    /* Hero */
+    .cx-hero{
+      border-bottom:1px solid var(--stroke);
+    }
+    .cx-hero__inner{
+      max-width:1200px;
+      margin:0 auto;
+      padding:22px 16px;
+      display:grid;
+      gap:18px;
+      align-items:start;
+    }
+    @media(min-width:900px){
+      .cx-hero__inner{
+        grid-template-columns: 1.1fr .9fr;
+        gap:28px;
+        align-items:center;
+        padding:28px 16px;
+      }
+    }
+
+    .cx-badge{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      background:#fff;
+      color:#000;
+      border-radius:999px;
+      padding:6px 10px;
+      font-weight:950;
+      font-size:.82rem;
+      letter-spacing:.02em;
+      box-shadow: 0 10px 30px rgba(0,0,0,.18);
+    }
+    .cx-badge img{height:18px;width:18px;display:block}
+
+    h1{
+      margin:.65rem 0 .2rem;
+      font-size:clamp(1.85rem,4vw,2.55rem);
+      line-height:1.08;
+      letter-spacing:-.02em;
+    }
+    .lead{
+      margin:.25rem 0 0;
+      color:#d7dae0;
+      max-width:56ch;
+      line-height:1.6;
+    }
+
+    .cx-actions{
+      margin-top:14px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .cx-system{
+      margin-top:14px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+    .cx-system a{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.03);
+      text-decoration:none;
+      font-weight:900;
+      font-size:12px;
+      color:#f5f5f5;
+      white-space:nowrap;
+      transition: background .12s ease, border-color .12s ease, transform .12s ease;
+    }
+    .cx-system a:active{transform: translateY(1px)}
+    .cx-system a:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.22)}
+
+    .cx-strip{
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(0,0,0,.35);
+      color:#d7dae0;
+      font-size:.93rem;
+      line-height:1.55;
+      max-width:72ch;
+    }
+    .cx-strip strong{color:#fff}
+
+    /* Hero media */
+    .cx-hero__media{display:flex;align-items:center;justify-content:center}
+    .cx-hero__media picture{
+      width:100%;
+      max-width:420px;
+      border-radius:var(--r2);
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.12);
+      background:linear-gradient(135deg,#101010,#050505);
+      box-shadow: var(--shadow);
+    }
+    .cx-hero__media img{
+      width:100%;
+      height:auto;
+      opacity:0;
+      transform:translateY(4px);
+      transition:opacity .35s ease, transform .35s ease;
+    }
+    .cx-hero__media img.is-loaded{opacity:1;transform:none}
+
+    @media(min-width:900px){
+      .cx-hero__media picture{aspect-ratio:4/5}
+      .cx-hero__media img{height:100%;object-fit:cover}
+    }
+
+    /* Mobile: keep it system-first */
+    @media (max-width:640px){
+      .cx-hero__media{display:none}
+      .cx-topnav__inner{padding:12px 16px}
+    }
+
+    /* Sections */
+    .section{padding:22px 0}
+    .card{
+      background: rgba(18,18,18,.92);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:16px;
+      padding:18px;
+      box-shadow: 0 12px 30px rgba(0,0,0,.25);
+    }
+
+    .kicker{
+      display:inline-block;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:rgba(201,162,39,.95);
+      font-weight:950;
+      font-size:.82rem;
+      margin-bottom:8px;
+    }
+
+    h2{
+      margin:0 0 8px;
+      font-size:1.22rem;
+      letter-spacing:-.01em;
+    }
+
+    .muted{color:var(--muted);margin:0}
+    .muted + .muted{margin-top:10px}
+
+    .card-actions{
+      margin-top:12px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .list{
+      margin:10px 0 0 18px;
+      padding:0;
+      color:var(--muted);
+    }
+    .list li{margin:8px 0}
+
+    /* Footer */
+    .cx-footer{
+      margin-top:10px;
+      border-top:1px solid var(--stroke);
+      background:rgba(0,0,0,.35);
+      padding:22px 16px;
+      text-align:center;
+    }
+    .cx-footer p{
+      margin:0;
+      color:var(--muted2);
+      font-size:.92rem;
+      line-height:1.65;
+    }
+    .cx-footer a{
+      color:var(--gold);
+      text-decoration:underline;
+      font-weight:950;
+    }
   </style>
 </head>
 
@@ -104,7 +413,7 @@
     <div class="cx-topnav__inner">
       <a class="cx-brand" href="/courageaux/">
         <img
-          src="/courageaux/assets/icon_courageaux_512.png"
+          src="/courageaux/assets/icon_courageaux.svg"
           alt="Courageaux Aesthetics"
           width="22"
           height="22"
@@ -132,14 +441,21 @@
 
         <div>
           <span class="cx-badge">
-            <img src="/courageaux/assets/logo_courageaux_black_400.png" alt="Courageaux Aesthetics logo" width="18" height="18" loading="eager" decoding="async">
-            Courageaux Aesthetics · Hammond, LA
+            <img
+              src="/courageaux/assets/logo_courageaux_black_400.png"
+              alt="Courageaux Aesthetics logo"
+              width="18"
+              height="18"
+              loading="eager"
+              decoding="async"
+            >
+            Courageaux Aesthetics · Northshore, LA
           </span>
 
           <h1>Clean, calm, confident skin.</h1>
           <p class="lead">New client consults open • Northshore • Southeastern Louisiana.</p>
 
-          <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
+          <div class="cx-actions">
             <a class="btn btn--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book now</a>
             <a class="btn btn--ghost" href="https://instagram.com/courageuxaesthetics" target="_blank" rel="me noopener noreferrer">Instagram</a>
           </div>
@@ -151,7 +467,7 @@
           </div>
 
           <div class="cx-strip">
-            <strong>Business-first flow:</strong> book → confirm → intake → service. Clean documentation. No confusion.
+            <strong>How it works:</strong> book → confirm → intake → service. Calm experience. Clear documentation.
           </div>
         </div>
 
@@ -180,53 +496,63 @@
       </div>
     </header>
 
-    <section class="container" style="padding:24px 16px">
-      <div class="card">
-        <div class="kicker">Her Story</div>
-        <h2>Why Courageaux Aesthetics exists</h2>
-        <p class="muted">
-          Read Amari’s own words about how Courageaux Aesthetics started, her inspiration from Joshua 1:9,
-          and her mission to bring corrective skin care to people of color across the Northshore and Southeastern Louisiana.
-        </p>
-        <a class="btn btn--ghost" href="/courageaux/her-words/">Read Her Words &amp; Bio</a>
+    <section class="section">
+      <div class="container">
+        <div class="card">
+          <div class="kicker">Her Story</div>
+          <h2>Why Courageaux Aesthetics exists</h2>
+          <p class="muted">
+            Read Amari’s own words on how Courageaux Aesthetics started, the inspiration behind the brand,
+            and the mission to bring corrective skincare to clients across the Northshore and broader Southeastern Louisiana region.
+          </p>
+          <div class="card-actions">
+            <a class="btn btn--ghost" href="/courageaux/her-words/">Read Her Words &amp; Bio</a>
+          </div>
+        </div>
       </div>
     </section>
 
-    <section class="container" style="padding:0 16px 32px">
-      <div class="card">
-        <div class="kicker">Coming Soon</div>
-        <h2>Courageaux Products</h2>
-        <p class="muted">
-          Small-batch skincare products will release in controlled batches — routine-first, clear instructions, and a clean client experience.
-        </p>
-        <a class="btn btn--ghost" href="/courageaux/products/">Join the product launch list</a>
-        <p class="muted" style="margin-top:10px;font-size:.9rem">(This page is live as a launch list. Commerce turns on later.)</p>
+    <section class="section" style="padding-top:0">
+      <div class="container">
+        <div class="card">
+          <div class="kicker">Coming Soon</div>
+          <h2>Courageaux Products</h2>
+          <p class="muted">
+            Courageaux skincare is in development. Products will be introduced only when formulas, usage guidance,
+            and the full client experience are fully ready.
+          </p>
+          <div class="card-actions">
+            <a class="btn btn--ghost" href="/courageaux/products/">Get product updates</a>
+          </div>
+          <p class="muted" style="margin-top:10px;font-size:.92rem">
+            (Updates only — no shopping until everything is ready.)
+          </p>
+        </div>
       </div>
     </section>
 
-    
-    <section class="container" style="padding:0 16px 32px">
-  <div class="card">
-    <div class="kicker">Visit Courageaux</div>
-    <h2>Appointment-only</h2>
-    <p class="muted">
-      Courageaux Aesthetics serves clients across the <strong>Northshore, Louisiana</strong>.
-      To keep the studio experience calm and private, location details are shared after booking.
-    </p>
-    <ul class="muted">
-      <li>Book online to confirm your appointment.</li>
-      <li>You’ll receive the exact location + arrival notes in your confirmation.</li>
-      <li>Need help choosing a service? Start with Consultation.</li>
-    </ul>
+    <section class="section" style="padding-top:0">
+      <div class="container">
+        <div class="card">
+          <div class="kicker">Visit Courageaux</div>
+          <h2>Appointment-only</h2>
+          <p class="muted">
+            Courageaux Aesthetics serves clients across the <strong>Northshore, Louisiana</strong>.
+            To keep the studio experience calm and private, location details are shared after booking.
+          </p>
+          <ul class="list">
+            <li>Book online to confirm your appointment.</li>
+            <li>You’ll receive the exact location details in your confirmation.</li>
+            <li>Need help choosing a service? Start with Consultation.</li>
+          </ul>
 
-    <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
-      <a class="btn btn--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book now</a>
-      <a class="btn btn--ghost" href="/courageaux/consultation/">Consultation</a>
-    </div>
-  </div>
-</section>
-
-
+          <div class="card-actions">
+            <a class="btn btn--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book now</a>
+            <a class="btn btn--ghost" href="/courageaux/consultation/">Consultation</a>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <footer class="cx-footer">
       <p>
@@ -235,9 +561,9 @@
         <a href="https://courageauxaesthetics.glossgenius.com/" target="_blank" rel="noopener noreferrer">Book Online</a>
       </p>
 
-      <p style="margin:.85rem 0 0;color:#6b7280;font-size:.85rem;line-height:1.5;">
+      <p style="margin:.85rem 0 0;color:#6b7280;font-size:.9rem;line-height:1.6;">
         Powered by
-        <a href="https://lab.squarebidness.com/" target="_blank" rel="noopener noreferrer" style="color:#c9a227;text-decoration:underline;font-weight:900;">
+        <a href="https://lab.squarebidness.com/" target="_blank" rel="noopener noreferrer">
           Square Bidness Tech Lab
         </a>
       </p>
