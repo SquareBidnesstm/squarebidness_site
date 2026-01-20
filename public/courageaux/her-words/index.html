@@ -1,4 +1,4 @@
-<!-- public/courageaux/her-words/index.html -->
+<!-- public/courageaux/her-words/index.html (enterprise split + exact Stories gold + caption) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -15,7 +15,7 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="sb:build" content="v20260119-courageaux-her-words" />
+  <meta name="sb:build" content="v20260120-courageaux-her-words-enterprise" />
 
   <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
@@ -58,10 +58,8 @@
       --muted:#bdbdbd;
       --muted2:#a1a1aa;
       --soft:#121212;
-      --soft2:#0f0f0f;
       --stroke:#1f1f1f;
-      --stroke2:#2a2a2a;
-      --gold:#c9a227;
+      --gold:#c9a227; /* Stories gold */
       --shadow: 0 18px 40px rgba(0,0,0,.35);
       --r:16px;
       --r2:14px;
@@ -108,9 +106,10 @@
     .btn:active{transform: translateY(1px)}
     .btn:hover{opacity:.95}
     .btn--gold{
-      background:rgba(201,162,39,.95);
-      border-color:rgba(201,162,39,.85);
-      color:#000;
+      background:var(--gold);
+      border-color:var(--gold);
+      color:#111;
+      box-shadow:0 10px 28px rgba(201,162,39,.35);
     }
     .btn:focus-visible{
       outline:3px solid rgba(201,162,39,.55);
@@ -181,17 +180,16 @@
       color:#000;
     }
 
-    /* Page header */
-    .page{
-      padding:20px 0 28px;
-    }
+    /* Page shell */
+    .page{padding:22px 0 28px;}
     .page-hero{
-      padding:22px 0 14px;
+      padding:22px 0 16px;
       border-bottom:1px solid var(--stroke);
       background:
         radial-gradient(circle at top left, rgba(201,162,39,.10), rgba(0,0,0,0) 55%),
         linear-gradient(180deg, rgba(0,0,0,.75), rgba(0,0,0,.25));
     }
+
     .badge{
       display:inline-flex;
       align-items:center;
@@ -228,28 +226,53 @@
       align-items:center;
     }
 
-    /* Portrait — left aligned, not huge */
-    .portrait{
-      margin-top:14px;
-      display:block;
-      max-width:420px; /* tighten size */
+    /* ✅ STORIES-STYLE SPLIT (text left, image right) */
+    .hw-split{
+      display:grid;
+      gap:18px;
+      align-items:start;
+      margin-top:18px;
     }
-    .portrait picture{
-      width:100%;
-      border-radius:16px;
+    @media(min-width:900px){
+      .hw-split{
+        grid-template-columns: 1.15fr .85fr;
+        gap:28px;
+        align-items:start;
+      }
+    }
+
+    .hw-text{max-width:68ch;}
+
+    /* Image card with Stories gold + trim */
+    .hw-media{
+      position:relative;
+      border-radius:18px;
       overflow:hidden;
-      border:1px solid rgba(255,255,255,.12);
-      background:linear-gradient(135deg,#101010,#050505);
-      box-shadow: var(--shadow);
+      border:1px solid rgba(201,162,39,.85); /* exact Stories gold family */
+      background:#000;
+      box-shadow:0 18px 42px rgba(0,0,0,.55);
     }
-    .portrait img{
+    .hw-media picture,
+    .hw-media img{
       width:100%;
-      height:auto;
+      height:100%;
       display:block;
-      object-fit:cover;
     }
-    @media (max-width:520px){
-      .portrait{ max-width:320px; }
+    .hw-media img{object-fit:cover;}
+
+    /* Subtle caption / faith reference */
+    .hw-caption{
+      margin-top:10px;
+      color:var(--muted2);
+      font-size:.9rem;
+      line-height:1.55;
+    }
+    .hw-caption strong{color:#e5e7eb;}
+    .hw-caption em{color:rgba(201,162,39,.95);font-style:normal;font-weight:900;}
+
+    /* Mobile polish */
+    @media(max-width:899px){
+      .hw-media{max-width:420px;}
     }
 
     /* Cards */
@@ -284,6 +307,24 @@
       font-size:.92rem;
     }
     .bio p{margin:.65rem 0;color:#d7dae0}
+
+    /* Reusable grid block (Products / Founder / Press) */
+    .grid-3{
+      display:grid;
+      gap:12px;
+      margin-top:12px;
+    }
+    @media(min-width:900px){
+      .grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    }
+    .tile{
+      padding:12px 12px 14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.02);
+    }
+    .tile h3{margin:0 0 6px;font-size:.98rem;letter-spacing:-.01em}
+    .tile p{margin:0;color:var(--muted);font-size:.92rem;line-height:1.55}
 
     /* Footer */
     .footer{
@@ -342,27 +383,6 @@
       <h1>Her Words &amp; Story</h1>
       <p class="sub">The heart behind Courageaux Aesthetics — in Amari Wilford’s own words, plus a short bio for new clients.</p>
 
-      <!-- Portrait (Option A: amari_1_*) -->
-      <section class="portrait" aria-label="Portrait of Amari Wilford">
-        <picture>
-          <source
-            type="image/webp"
-            srcset="/courageaux/assets/amari_1_420.webp 420w, /courageaux/assets/amari_1_640.webp 640w, /courageaux/assets/amari_1_780.webp 780w"
-            sizes="420px">
-          <source
-            type="image/jpeg"
-            srcset="/courageaux/assets/amari_1_420.jpg 420w, /courageaux/assets/amari_1_640.jpg 640w, /courageaux/assets/amari_1_780.jpg 780w"
-            sizes="420px">
-          <img
-            src="/courageaux/assets/amari_1_640.jpg"
-            width="780"
-            height="975"
-            loading="lazy"
-            decoding="async"
-            alt="Amari Wilford, licensed esthetician behind Courageaux Aesthetics">
-        </picture>
-      </section>
-
       <div class="nav-row" aria-label="Courageaux navigation">
         <a class="btn" href="/courageaux/">&larr; Back to Courageaux</a>
         <a class="btn btn--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book now</a>
@@ -375,6 +395,85 @@
 
   <main class="page">
     <div class="container">
+
+      <!-- ✅ Stories-style split hero -->
+      <section class="hw-split" aria-label="Her Words introduction">
+        <!-- LEFT -->
+        <div class="hw-text">
+          <div class="kicker">Her Words</div>
+          <h2 style="margin:0 0 8px;font-size:1.22rem;letter-spacing:-.01em;">Faith. Discipline. Corrective care.</h2>
+          <p class="sub" style="margin:0;color:var(--muted);">
+            Courageaux Aesthetics is built for clean, calm, confident skin — with a routine-first approach and a private, appointment-only experience.
+          </p>
+
+          <div class="nav-row" style="margin-top:14px">
+            <a class="btn btn--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book on GlossGenius</a>
+            <a class="btn" href="/courageaux/intake/">Client Intake</a>
+            <a class="btn" href="mailto:courageaux@squarebidness.com">Email</a>
+          </div>
+        </div>
+
+        <!-- RIGHT -->
+        <div>
+          <div class="hw-media" aria-label="Portrait of Amari Wilford">
+            <picture>
+              <source
+                type="image/webp"
+                srcset="
+                  /courageaux/assets/amari_1_420.webp 420w,
+                  /courageaux/assets/amari_1_640.webp 640w,
+                  /courageaux/assets/amari_1_780.webp 780w
+                "
+                sizes="(min-width:900px) 420px, 100vw">
+              <source
+                type="image/jpeg"
+                srcset="
+                  /courageaux/assets/amari_1_420.jpg 420w,
+                  /courageaux/assets/amari_1_640.jpg 640w,
+                  /courageaux/assets/amari_1_780.jpg 780w
+                "
+                sizes="(min-width:900px) 420px, 100vw">
+              <img
+                src="/courageaux/assets/amari_1_640.jpg"
+                width="780"
+                height="975"
+                loading="eager"
+                decoding="async"
+                fetchpriority="high"
+                alt="Amari Wilford, licensed esthetician behind Courageaux Aesthetics">
+            </picture>
+          </div>
+
+          <div class="hw-caption">
+            <strong>Inspiration:</strong> <em>Joshua 1:9</em> — “Be courageous.”
+            <span style="display:block;margin-top:4px;">A calm space. A clear process. A standard of luxury for people of color.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Reusable enterprise pattern: Products / Founder / Press -->
+      <section class="card" aria-labelledby="enterprise-block">
+        <div class="kicker" id="enterprise-block">Enterprise Blocks</div>
+        <h2>Reuse this pattern for Products • Founder • Press</h2>
+        <p class="sub" style="margin:0;color:var(--muted);">
+          Same structure, different copy. Drop-in tiles below can become dedicated sections or separate pages later.
+        </p>
+
+        <div class="grid-3" aria-label="Reusable content tiles">
+          <div class="tile">
+            <h3>Products (Coming Soon)</h3>
+            <p>Release only when formulas, usage guidance, and the full client experience are fully ready.</p>
+          </div>
+          <div class="tile">
+            <h3>Founder / Practice Standard</h3>
+            <p>Credentialed, routine-first corrective care with calm documentation and private appointment flow.</p>
+          </div>
+          <div class="tile">
+            <h3>Press / Features</h3>
+            <p>Future-ready space for placements, announcements, and trusted references without changing the tone.</p>
+          </div>
+        </div>
+      </section>
 
       <section class="card" aria-labelledby="from-amari">
         <div class="kicker" id="from-amari">From Amari</div>
@@ -407,6 +506,7 @@
         <div class="nav-row" style="margin-top:12px">
           <a class="btn btn--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book on GlossGenius</a>
           <a class="btn" href="/courageaux/intake/">Client Intake</a>
+          <a class="btn" href="mailto:courageaux@squarebidness.com">Email</a>
         </div>
       </section>
 
