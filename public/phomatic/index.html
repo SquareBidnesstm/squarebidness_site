@@ -15,144 +15,143 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Pho-Matic Photography — By Gieno Smith</title>
-  <meta name="description" content="Pho-Matic Photography by Gieno Smith — the eye behind the VSOP product shots. Hammond / Louisiana based. Available for events, brand shoots, and product work." />
+  <meta name="description" content="Pho-Matic Photography by Gieno Smith — portraits, events, and product work in Louisiana." />
   <link rel="canonical" href="https://www.squarebidness.com/phomatic/" />
 
-  <!-- Build stamp -->
-  <meta name="sb:build" content="v20260103-phomatic-420-640-780" />
+  <!-- Build stamp (bump this to force iPhone/SW refresh) -->
+  <meta name="sb:build" content="v20260120-phomatic-hero-fix" />
 
   <!-- Theme / indexing -->
   <meta name="theme-color" content="#000000" />
   <meta name="color-scheme" content="dark light">
   <meta name="robots" content="index,follow">
 
-  <!-- ✅ Preload hero (LCP) WEBP -->
- <link
-  rel="preload"
-  as="image"
-  href="/phomatic/assets/hero-780x411.webp"
-  imagesrcset="
-    /phomatic/assets/hero-420x221.webp 420w,
-    /phomatic/assets/hero-640x337.webp 640w,
-    /phomatic/assets/hero-780x411.webp 780w,
-    /phomatic/assets/hero-1200x630.webp 1200w"
-  imagesizes="(max-width:879px) 92vw, 45vw"
-  fetchpriority="high"
-/>
+  <!-- ✅ Preload hero (LCP) -->
+  <link
+    rel="preload"
+    as="image"
+    href="/phomatic/assets/hero-780x411.webp"
+    imagesrcset="
+      /phomatic/assets/hero-420x221.webp 420w,
+      /phomatic/assets/hero-640x337.webp 640w,
+      /phomatic/assets/hero-780x411.webp 780w,
+      /phomatic/assets/hero-1200x630.webp 1200w"
+    imagesizes="(max-width:879px) 92vw, 45vw"
+    fetchpriority="high"
+  />
 
   <!-- CSS -->
   <link rel="stylesheet" href="/styles/style.css" />
   <link rel="stylesheet" href="/styles/phomatic.min.css" />
 
- <style>
-  /* HERO + FADE-IN */
-  .phomatic-hero{
-    background:#000;
-    border-bottom:1px solid #1f1f1f;
-
-    /* iPhone-safe: default visible */
-    opacity:1;
-    transform:none;
-
-    /* desktop/modern browsers still get the fade */
-    animation:heroFadeUp 1.1s ease-out forwards;
-    animation-delay:.3s;
-  }
-  @keyframes heroFadeUp{to{opacity:1;transform:translateY(0)}}
-
-  /* If motion is allowed, start hidden then animate in */
-  @media (prefers-reduced-motion: no-preference){
+  <style>
+    /* HERO + FADE-IN (iPhone-safe: visible by default) */
     .phomatic-hero{
-      opacity:0;
-      transform:translateY(25px);
+      background:#000;
+      border-bottom:1px solid #1f1f1f;
+      opacity:1;
+      transform:none;
+      animation:heroFadeUp 1.1s ease-out forwards;
+      animation-delay:.3s;
     }
-  }
+    @keyframes heroFadeUp{to{opacity:1;transform:translateY(0)}}
 
-  .phomatic-hero__inner{
-    max-width:1100px;
-    margin:0 auto;
-    padding:1.5rem 1rem 2.5rem;
-    display:grid;
-    gap:1.5rem;
-  }
-  @media(min-width:880px){
-    .phomatic-hero__inner{grid-template-columns:1.1fr .9fr;align-items:center;}
-  }
-
-  .phomatic-hero__copy h1{
-    font-size:clamp(1.8rem,2.4vw,2.5rem);
-    font-weight:800;
-    margin:0 0 .4rem;
-  }
-  .phomatic-hero__copy p{margin:0 0 .75rem;color:#b9bcc5;max-width:50rem;}
-  .phomatic-hero__meta{display:flex;gap:.6rem;flex-wrap:wrap;margin:.75rem 0 0;}
-  .phomatic-badge{
-    background:rgba(201,162,39,.12);
-    border:1px solid rgba(201,162,39,.5);
-    border-radius:999px;
-    padding:.35rem .75rem;
-    font-size:.7rem;
-    text-transform:uppercase;
-    letter-spacing:.04em;
-    color:#fff;
-    font-weight:600;
-  }
-
-  /* HERO IMAGE (iPhone-safe sizing) */
-  .phomatic-hero__media{width:100%;max-width:100%;}
-  .phomatic-hero__media picture,
-  .phomatic-hero__media img{
-    border-radius:16px;
-    overflow:hidden;
-    border:1px solid #1f1f1f;
-    display:block;
-    background:#0d0d0d;
-  }
-  .phomatic-hero__media picture{width:100%;max-width:100%;}
-  .phomatic-hero__media img{
-    width:100%;
-    height:auto;
-    max-width:100%;
-    object-fit:cover;
-  }
-
-  /* ✅ iOS / accessibility fix — if motion is reduced, keep it visible */
-  @media (prefers-reduced-motion: reduce) {
-    .phomatic-hero {
-      opacity: 1 !important;
-      transform: none !important;
-      animation: none !important;
+    /* If motion is allowed, start hidden then animate in */
+    @media (prefers-reduced-motion: no-preference){
+      .phomatic-hero{
+        opacity:0;
+        transform:translateY(25px);
+      }
     }
-  }
 
-  /* BODY */
-  .phomatic-body{max-width:1100px;margin:0 auto;padding:2rem 1rem 4rem;display:grid;gap:2.5rem;}
-  .phomatic-section-title{font-size:1.2rem;font-weight:700;margin:0 0 .5rem;}
-  .phomatic-gallery{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));}
-  .phomatic-photo{background:#0e0e0e;border:1px solid #1f1f1f;border-radius:14px;overflow:hidden;box-shadow:0 12px 32px rgba(0,0,0,.35);}
-  .phomatic-photo img{width:100%;height:auto;display:block;object-fit:cover;background:#000;}
+    .phomatic-hero__inner{
+      max-width:1100px;
+      margin:0 auto;
+      padding:1.5rem 1rem 2.5rem;
+      display:grid;
+      gap:1.5rem;
+    }
+    @media(min-width:880px){
+      .phomatic-hero__inner{grid-template-columns:1.1fr .9fr;align-items:center;}
+    }
 
-  /* VSOP Pair */
-  .vsop-pair{display:flex;flex-direction:column;gap:8px;}
-  .vsop-link{display:block;border-radius:10px;overflow:hidden;transition:transform .25s ease,box-shadow .25s ease;}
-  .vsop-link img{width:100%;height:auto;display:block;object-fit:cover;}
-  .vsop-link:hover{transform:scale(1.02);box-shadow:0 6px 22px rgba(0,0,0,.45);}
+    .phomatic-hero__copy h1{
+      font-size:clamp(1.8rem,2.4vw,2.5rem);
+      font-weight:800;
+      margin:0 0 .4rem;
+    }
+    .phomatic-hero__copy p{margin:0 0 .75rem;color:#b9bcc5;max-width:50rem;}
+    .phomatic-hero__meta{display:flex;gap:.6rem;flex-wrap:wrap;margin:.75rem 0 0;}
+    .phomatic-badge{
+      background:rgba(201,162,39,.12);
+      border:1px solid rgba(201,162,39,.5);
+      border-radius:999px;
+      padding:.35rem .75rem;
+      font-size:.7rem;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+      color:#fff;
+      font-weight:600;
+    }
 
-  /* Scroll Fade */
-  .fade-in-on-scroll{opacity:0;transform:translateY(20px);transition:opacity .9s ease-out,transform .9s ease-out;}
-  .fade-in-on-scroll.is-visible{opacity:1;transform:translateY(0);}
+    /* HERO IMAGE (iPhone-proof) */
+    .phomatic-hero__media{
+      width:100%;
+      max-width:100%;
+    }
+    .phomatic-hero__media picture{
+      display:block;
+      width:100%;
+      max-width:100%;
+      border-radius:16px;
+      overflow:hidden;
+      border:1px solid #1f1f1f;
+      background:#0d0d0d;
+    }
+    .phomatic-hero__media img{
+      display:block;
+      width:100%;
+      height:auto;
+      max-width:100%;
+      object-fit:cover;
+    }
 
-  /* Credit Blocks */
-  .phomatic-credit{background:#0f1113;border:1px solid #1f1f1f;border-radius:14px;padding:1.2rem;}
-  .phomatic-links{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.75rem;}
-  .phomatic-link{background:#151516;border:1px solid #242426;border-radius:999px;padding:.5rem .85rem;font-size:.8rem;color:#fff;text-decoration:none;}
-  .phomatic-link:hover{background:#1f1f1f;}
-  .vsop-credit{background:rgba(128,0,32,.08);border:1px solid rgba(255,215,0,.28);border-radius:14px;padding:1rem;}
-  .vsop-credit h3{margin:0 0 .35rem;font-size:1rem;font-weight:700;}
-  .vsop-credit p{margin:0;color:#d5d5d5;font-size:.9rem;}
-  .vsop-credit small{display:block;margin-top:.5rem;font-size:.7rem;opacity:.7;}
-</style>
+    /* If motion is reduced, keep hero visible */
+    @media (prefers-reduced-motion: reduce) {
+      .phomatic-hero {
+        opacity: 1 !important;
+        transform: none !important;
+        animation: none !important;
+      }
+    }
 
+    /* BODY */
+    .phomatic-body{max-width:1100px;margin:0 auto;padding:2rem 1rem 4rem;display:grid;gap:2.5rem;}
+    .phomatic-section-title{font-size:1.2rem;font-weight:700;margin:0 0 .5rem;}
+    .phomatic-gallery{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));}
+    .phomatic-photo{background:#0e0e0e;border:1px solid #1f1f1f;border-radius:14px;overflow:hidden;box-shadow:0 12px 32px rgba(0,0,0,.35);}
+    .phomatic-photo img{width:100%;height:auto;display:block;object-fit:cover;background:#000;}
+
+    /* VSOP Pair */
+    .vsop-pair{display:flex;flex-direction:column;gap:8px;}
+    .vsop-link{display:block;border-radius:10px;overflow:hidden;transition:transform .25s ease,box-shadow .25s ease;}
+    .vsop-link img{width:100%;height:auto;display:block;object-fit:cover;}
+    .vsop-link:hover{transform:scale(1.02);box-shadow:0 6px 22px rgba(0,0,0,.45);}
+
+    /* Scroll Fade */
+    .fade-in-on-scroll{opacity:0;transform:translateY(20px);transition:opacity .9s ease-out,transform .9s ease-out;}
+    .fade-in-on-scroll.is-visible{opacity:1;transform:translateY(0);}
+
+    /* Credit Blocks */
+    .phomatic-credit{background:#0f1113;border:1px solid #1f1f1f;border-radius:14px;padding:1.2rem;}
+    .phomatic-links{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.75rem;}
+    .phomatic-link{background:#151516;border:1px solid #242426;border-radius:999px;padding:.5rem .85rem;font-size:.8rem;color:#fff;text-decoration:none;}
+    .phomatic-link:hover{background:#1f1f1f;}
+    .vsop-credit{background:rgba(128,0,32,.08);border:1px solid rgba(255,215,0,.28);border-radius:14px;padding:1rem;}
+    .vsop-credit h3{margin:0 0 .35rem;font-size:1rem;font-weight:700;}
+    .vsop-credit p{margin:0;color:#d5d5d5;font-size:.9rem;}
+    .vsop-credit small{display:block;margin-top:.5rem;font-size:.7rem;opacity:.7;}
+  </style>
 
   <!-- OG / Social -->
   <meta property="og:type" content="website" />
@@ -184,7 +183,7 @@
       "@id": "https://www.squarebidness.com/phomatic/#webpage",
       "url": "https://www.squarebidness.com/phomatic/",
       "name": "Pho-Matic Photography — By Gieno Smith",
-      "description": "Pho-Matic Photography by Gieno Smith — the eye behind the VSOP product shots. Hammond / Louisiana based. Available for events, brand shoots, and product work.",
+      "description": "Pho-Matic Photography by Gieno Smith — portraits, event coverage, brand shoots, and product photography based in Louisiana.",
       "isPartOf": { "@id": "https://www.squarebidness.com/#website" },
       "about": { "@id": "https://www.squarebidness.com/phomatic/#business" },
       "mainEntity": { "@id": "https://www.squarebidness.com/phomatic/#business" },
@@ -281,39 +280,35 @@
 
       <div class="phomatic-hero__media">
         <picture>
-  <source
-    type="image/webp"
-    srcset="
-      /phomatic/assets/hero-420x221.webp 420w,
-      /phomatic/assets/hero-640x337.webp 640w,
-      /phomatic/assets/hero-780x411.webp 780w,
-      /phomatic/assets/hero-1200x630.webp 1200w"
-    sizes="(max-width: 879px) 92vw, 45vw"
-  />
-  <source
-    type="image/jpeg"
-    srcset="
-      /phomatic/assets/hero-420x221.jpg 420w,
-      /phomatic/assets/hero-640x337.jpg 640w,
-      /phomatic/assets/hero-780x411.jpg 780w,
-      /phomatic/assets/hero-1200x630.jpg 1200w"
-    sizes="(max-width: 879px) 92vw, 45vw"
-  />
-  <img
-    src="/phomatic/assets/hero-780x411.jpg"
-    alt="Pho-Matic Photography — Gieno Smith on location wearing Square Bidness Apparel"
-    width="780"
-    height="411"
-    loading="eager"
-    decoding="async"
-    fetchpriority="high"
-  />
-</picture>
+          <source
+            type="image/webp"
+            srcset="
+              /phomatic/assets/hero-420x221.webp 420w,
+              /phomatic/assets/hero-640x337.webp 640w,
+              /phomatic/assets/hero-780x411.webp 780w,
+              /phomatic/assets/hero-1200x630.webp 1200w"
+            sizes="(max-width: 879px) 92vw, 45vw">
+          <source
+            type="image/jpeg"
+            srcset="
+              /phomatic/assets/hero-420x221.jpg 420w,
+              /phomatic/assets/hero-640x337.jpg 640w,
+              /phomatic/assets/hero-780x411.jpg 780w,
+              /phomatic/assets/hero-1200x630.jpg 1200w"
+            sizes="(max-width: 879px) 92vw, 45vw">
+          <img
+            src="/phomatic/assets/hero-780x411.jpg"
+            alt="Pho-Matic Photography — Gieno Smith on location wearing Square Bidness Apparel"
+            width="780" height="411"
+            loading="eager"
+            decoding="async"
+            fetchpriority="high">
+        </picture>
       </div>
     </div>
   </header>
 
-  <!-- BODY (this wrapper is what keeps images from looking huge) -->
+  <!-- BODY -->
   <main class="phomatic-body">
 
     <section>
@@ -446,16 +441,16 @@
       </p>
 
       <p style="margin:.85rem 0 0;color:#6b7280;font-size:.85rem;line-height:1.5;">
-  Powered by
-  <a
-    href="https://lab.squarebidness.com/linkme/"
-    target="_blank"
-    rel="noopener noreferrer"
-    style="color:#c9a227;text-decoration:underline;font-weight:700;"
-  >
-    Square Bidness Tech Lab
-  </a>
-</p>
+        Powered by
+        <a
+          href="https://lab.squarebidness.com/linkme/"
+          target="_blank"
+          rel="noopener noreferrer"
+          style="color:#c9a227;text-decoration:underline;font-weight:700;"
+        >
+          Square Bidness Tech Lab
+        </a>
+      </p>
     </div>
   </footer>
 
