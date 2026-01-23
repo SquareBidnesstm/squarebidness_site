@@ -13,7 +13,7 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="sb:build" content="v20260122-taxslayer-client-enterprise-v2" />
+  <meta name="sb:build" content="v20260122-taxslayer-client-branded-no-sb-nav" />
 
   <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
@@ -51,9 +51,6 @@
   <script defer src="/scripts/ga.js"></script>
   <script defer src="/scripts/sb-analytics.js"></script>
 
-  <!-- Partials (nav/footer) -->
-  <script defer src="/scripts/partials.js"></script>
-
   <style>
     :root{
       --bg:#0b0b0b;
@@ -65,20 +62,95 @@
       --line:#232323;
       --line2:#2d2d2d;
 
-      /* Client brand accent (Tax Pass / Tax Slayer orange) */
+      /* Client brand accent */
       --accent:#f97316;
       --accent2:#fb923c;
 
-      --good:#22c55e;
       --radius:18px;
       --radius2:24px;
       --shadow:0 18px 48px rgba(0,0,0,.65);
     }
 
-    body.theme-dark{ background:var(--bg); color:var(--text); }
-    #site-header{min-height:72px}
-    #site-footer{min-height:120px}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background: radial-gradient(900px 420px at 18% -10%, rgba(249,115,22,.12), rgba(0,0,0,0) 60%),
+                  radial-gradient(900px 420px at 90% 0%, rgba(255,255,255,.06), rgba(0,0,0,0) 55%),
+                  linear-gradient(180deg, #080808, var(--bg) 40%, #080808 100%);
+      color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      line-height:1.55;
+      -webkit-font-smoothing:antialiased;
+      text-rendering:optimizeLegibility;
+    }
 
+    a{color:inherit}
+    img{max-width:100%;height:auto;display:block}
+
+    /* Client header */
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:50;
+      border-bottom:1px solid var(--line);
+      background:rgba(0,0,0,.55);
+      backdrop-filter: blur(10px);
+    }
+    .topbar__inner{
+      max-width:1120px;
+      margin:0 auto;
+      padding:12px 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .brand{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      text-decoration:none;
+      font-weight:950;
+      letter-spacing:-.01em;
+      white-space:nowrap;
+    }
+    .brand .mark{
+      width:10px;height:10px;border-radius:999px;
+      background:var(--accent);
+      box-shadow:0 0 0 4px rgba(249,115,22,.15);
+    }
+    .top-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:9px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.04);
+      color:#f5f5f5;
+      text-decoration:none;
+      font-weight:900;
+      font-size:.92rem;
+      white-space:nowrap;
+      transition: background .12s ease, border-color .12s ease, transform .12s ease;
+    }
+    .pill:active{transform: translateY(1px)}
+    .pill:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.22)}
+    .pill--accent{
+      border-color:rgba(249,115,22,.6);
+      background:linear-gradient(180deg,var(--accent2),var(--accent));
+      color:#140a03;
+    }
+
+    /* Layout */
     .wrap{max-width:1120px;margin:0 auto;padding:24px}
     @media(max-width:900px){ .wrap{padding:18px} }
 
@@ -113,6 +185,7 @@
       border:1px solid var(--line);
       border-radius:var(--radius);
       padding:16px;
+      box-shadow:0 10px 28px rgba(0,0,0,.25);
     }
 
     .frame{
@@ -121,25 +194,6 @@
       overflow:hidden;
       background:#000;
       box-shadow: var(--shadow);
-    }
-
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:7px 10px;
-      border-radius:999px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.14);
-      color:#fff;
-      font-weight:900;
-      font-size:12px;
-      letter-spacing:.02em;
-    }
-    .dot{
-      width:8px;height:8px;border-radius:999px;
-      background:var(--accent);
-      box-shadow:0 0 0 4px rgba(249,115,22,.15);
     }
 
     .btnrow{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
@@ -160,10 +214,6 @@
     .btn:hover{ opacity:.96; }
 
     .btn.primary{
-      background:linear-gradient(180deg,#ffffff,#f3f4f6);
-      color:#000;
-    }
-    .btn.accent{
       background:linear-gradient(180deg,var(--accent2),var(--accent));
       color:#140a03;
       border-color:rgba(249,115,22,.55);
@@ -213,7 +263,6 @@
       max-width:66ch;
     }
 
-    /* Form */
     label{ display:block; margin-bottom:6px; color:var(--muted); font-size:14px; }
     input,select,textarea{
       width:100%;
@@ -232,7 +281,6 @@
 
     .hr{ height:1px; background:var(--line); border:0; margin:18px 0; }
 
-    /* Sticky CTA card (right column) */
     .sticky{ position:sticky; top:92px; }
     @media(max-width:900px){ .sticky{ position:static; top:auto; } }
 
@@ -248,8 +296,9 @@
     }
     .callout strong{ color:#fff; }
 
-    /* Footer override (client brand + powered by) */
+    /* Client footer (no SB links) */
     .client-footer{
+      margin-top:18px;
       padding:18px 0 30px;
       color:#a3a3a3;
       font-size:13px;
@@ -262,7 +311,6 @@
     }
     .client-footer a:hover{ border-bottom-color:rgba(255,255,255,.4); }
 
-    /* Accessibility helper */
     .sr-only{
       position:absolute!important;
       width:1px;height:1px;
@@ -299,15 +347,28 @@
 </head>
 
 <body class="theme-dark">
-  <div id="site-header" aria-busy="true"></div>
+  <!-- CLIENT NAV (Tax Slayer only) -->
+  <nav class="topbar" aria-label="Tax Slayer navigation">
+    <div class="topbar__inner">
+      <a class="brand" href="#top" aria-label="Tax Slayer home">
+        <span class="mark" aria-hidden="true"></span>
+        Tax Slayer — Jessica Porter
+      </a>
+
+      <div class="top-actions" aria-label="Quick actions">
+        <a class="pill pill--accent" href="#book">Book</a>
+        <a class="pill" href="#taxpass">Tax Pass</a>
+        <a class="pill" href="tel:+13184277990">Call</a>
+        <a class="pill" href="sms:+13184277990?body=Hi%20Tax%20Slayer%2C%20I%27d%20like%20to%20book%20a%20tax%20appointment.">Text</a>
+      </div>
+    </div>
+  </nav>
 
   <main class="wrap" id="top">
     <!-- HERO (ONE IMAGE ONLY) -->
     <section class="grid hero" aria-label="Tax Slayer hero">
       <div>
-        <span class="badge"><span class="dot" aria-hidden="true"></span> Alexandria, LA · Tax Preparation</span>
-        <p class="kicker" style="margin-top:12px">Income Tax Filing</p>
-
+        <p class="kicker">Income Tax Filing</p>
         <h1>Fast, Accurate Tax Preparation<br />&amp; E-File Support</h1>
 
         <p class="muted" style="max-width:70ch">
@@ -322,7 +383,7 @@
         </div>
 
         <div class="btnrow" role="group" aria-label="Primary actions">
-          <a class="btn accent" href="#book">Book an Appointment</a>
+          <a class="btn primary" href="#book">Book an Appointment</a>
           <a class="btn ghost" href="tel:+13184277990">Call</a>
           <a class="btn ghost" href="sms:+13184277990?body=Hi%20Tax%20Slayer%2C%20I%27d%20like%20to%20book%20a%20tax%20appointment.">Text</a>
           <a class="btn ghost" href="#taxpass">Start with Tax Pass</a>
@@ -367,7 +428,7 @@
           </ul>
 
           <div class="btnrow" style="margin-top:12px">
-            <a class="btn accent pill" href="https://lab.squarebidness.com/tax-pass/?office=EFHO7IRV">Start with Tax Pass</a>
+            <a class="btn primary pill" href="https://lab.squarebidness.com/tax-pass/?office=EFHO7IRV">Start with Tax Pass</a>
             <a class="btn ghost pill" href="https://lab.squarebidness.com/tax-pass/status.html?office=EFHO7IRV">Check my status</a>
           </div>
 
@@ -444,7 +505,7 @@
           </div>
 
           <div class="btnrow" style="margin-top:12px">
-            <button type="submit" class="btn accent" style="border:0">Request Booking</button>
+            <button type="submit" class="btn primary" style="border:0">Request Booking</button>
             <a class="btn ghost" href="tel:+13184277990">Call Instead</a>
           </div>
 
@@ -473,7 +534,7 @@
           </ul>
 
           <div class="btnrow" style="margin-top:14px">
-            <a class="btn accent pill" href="https://lab.squarebidness.com/tax-pass/?office=EFHO7IRV">Start Tax Pass</a>
+            <a class="btn primary pill" href="https://lab.squarebidness.com/tax-pass/?office=EFHO7IRV">Start Tax Pass</a>
             <a class="btn ghost pill" href="#top">Back to top</a>
           </div>
 
@@ -484,7 +545,7 @@
       </div>
     </section>
 
-    <!-- FOOTER (CLIENT BRAND + POWERED BY TECH LAB) -->
+    <!-- CLIENT FOOTER (no Square Bidness nav/footer) -->
     <section class="client-footer" aria-label="Footer">
       <hr class="hr" />
       <p>
@@ -497,8 +558,6 @@
       </p>
     </section>
   </main>
-
-  <div id="site-footer" aria-busy="true"></div>
 
   <script>
     // Footer year
