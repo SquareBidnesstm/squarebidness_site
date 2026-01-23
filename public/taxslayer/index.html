@@ -13,22 +13,31 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
+  <meta name="sb:build" content="v20260122-taxslayer-client-enterprise-v2" />
+
+  <!-- Perf -->
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+  <link rel="preconnect" href="https://www.google-analytics.com" crossorigin>
+  <link rel="preconnect" href="https://static.cloudflareinsights.com" crossorigin>
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="Tax Slayer" />
+  <meta property="og:site_name" content="Tax Slayer — Jessica Porter" />
   <meta property="og:title" content="Tax Slayer — Tax Preparation & E-File" />
   <meta property="og:description" content="Free consult · Same-day e-file support · W-2 · 1099 · Small business · Start your file online with Tax Pass." />
   <meta property="og:url" content="https://www.squarebidness.com/taxslayer/" />
   <meta property="og:image" content="https://www.squarebidness.com/taxslayer/assets/taxslayer_og_1200x630.jpg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Tax Slayer — Jessica Porter (Alexandria, Louisiana)" />
+  <meta property="og:locale" content="en_US" />
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Tax Slayer — Tax Preparation & E-File" />
   <meta name="twitter:description" content="Free consult · Same-day e-file support · W-2 · 1099 · Small business · Start your file online with Tax Pass." />
   <meta name="twitter:image" content="https://www.squarebidness.com/taxslayer/assets/taxslayer_og_1200x630.jpg" />
+  <meta name="twitter:image:alt" content="Tax Slayer — Jessica Porter (Alexandria, Louisiana)" />
 
   <!-- CSS -->
   <link rel="stylesheet" href="/styles/style.css" />
@@ -45,9 +54,6 @@
   <!-- Partials (nav/footer) -->
   <script defer src="/scripts/partials.js"></script>
 
-  <!-- Build stamp -->
-  <meta name="sb:build" content="v20260122-taxslayer-client-enterprise" />
-
   <style>
     :root{
       --bg:#0b0b0b;
@@ -58,9 +64,12 @@
       --muted2:#9ca3af;
       --line:#232323;
       --line2:#2d2d2d;
-      --accent:#f97316;
-      --good:#22c55e;
 
+      /* Client brand accent (Tax Pass / Tax Slayer orange) */
+      --accent:#f97316;
+      --accent2:#fb923c;
+
+      --good:#22c55e;
       --radius:18px;
       --radius2:24px;
       --shadow:0 18px 48px rgba(0,0,0,.65);
@@ -89,6 +98,7 @@
       font-size:11px;
       color:var(--accent);
       margin:0 0 8px;
+      font-weight:900;
     }
 
     h1{ margin:8px 0 10px; line-height:1.08; letter-spacing:-0.01em; }
@@ -113,6 +123,25 @@
       box-shadow: var(--shadow);
     }
 
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:7px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.14);
+      color:#fff;
+      font-weight:900;
+      font-size:12px;
+      letter-spacing:.02em;
+    }
+    .dot{
+      width:8px;height:8px;border-radius:999px;
+      background:var(--accent);
+      box-shadow:0 0 0 4px rgba(249,115,22,.15);
+    }
+
     .btnrow{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
     .btn{
       display:inline-flex; align-items:center; justify-content:center;
@@ -120,14 +149,36 @@
       padding:12px 14px;
       border-radius:14px;
       text-decoration:none;
-      font-weight:800;
+      font-weight:900;
       border:1px solid transparent;
       user-select:none;
       cursor:pointer;
+      transition: transform .12s ease, opacity .12s ease, background .12s ease, border-color .12s ease;
+      white-space:nowrap;
     }
-    .btn.primary{ background:#fff; color:#000; }
-    .btn.ghost{ background:transparent; color:#fff; border-color:var(--line2); }
-    .btn.pill{ border-radius:999px; font-weight:800; padding:10px 14px; }
+    .btn:active{ transform: translateY(1px); }
+    .btn:hover{ opacity:.96; }
+
+    .btn.primary{
+      background:linear-gradient(180deg,#ffffff,#f3f4f6);
+      color:#000;
+    }
+    .btn.accent{
+      background:linear-gradient(180deg,var(--accent2),var(--accent));
+      color:#140a03;
+      border-color:rgba(249,115,22,.55);
+    }
+    .btn.ghost{
+      background:transparent;
+      color:#fff;
+      border-color:var(--line2);
+    }
+    .btn.pill{ border-radius:999px; font-weight:900; padding:10px 14px; }
+
+    .btn:focus-visible{
+      outline:3px solid rgba(249,115,22,.55);
+      outline-offset:2px;
+    }
 
     .meta{
       margin-top:10px;
@@ -135,7 +186,11 @@
       line-height:1.55;
       color:var(--muted);
     }
-    .meta a{ color:#fff; text-decoration:none; border-bottom:1px solid rgba(255,255,255,.18); }
+    .meta a{
+      color:#fff;
+      text-decoration:none;
+      border-bottom:1px solid rgba(255,255,255,.18);
+    }
     .meta a:hover{ border-bottom-color:rgba(255,255,255,.4); }
 
     .split{
@@ -178,15 +233,22 @@
     .hr{ height:1px; background:var(--line); border:0; margin:18px 0; }
 
     /* Sticky CTA card (right column) */
-    .sticky{
-      position:sticky;
-      top:92px;
-    }
-    @media(max-width:900px){
-      .sticky{ position:static; top:auto; }
-    }
+    .sticky{ position:sticky; top:92px; }
+    @media(max-width:900px){ .sticky{ position:static; top:auto; } }
 
-    /* Footer override (enterprise + powered by) */
+    .callout{
+      border:1px solid rgba(249,115,22,.35);
+      background:rgba(249,115,22,.08);
+      border-radius:16px;
+      padding:12px 12px;
+      margin-top:12px;
+      color:#e5e7eb;
+      font-size:13px;
+      line-height:1.55;
+    }
+    .callout strong{ color:#fff; }
+
+    /* Footer override (client brand + powered by) */
     .client-footer{
       padding:18px 0 30px;
       color:#a3a3a3;
@@ -215,8 +277,15 @@
   {
     "@context":"https://schema.org",
     "@type":"AccountingService",
+    "@id":"https://www.squarebidness.com/taxslayer/#business",
     "name":"Tax Slayer — Jessica Porter",
-    "areaServed":"Louisiana",
+    "url":"https://www.squarebidness.com/taxslayer/",
+    "image":"https://www.squarebidness.com/taxslayer/assets/taxslayer_og_1200x630.jpg",
+    "areaServed":[
+      {"@type":"AdministrativeArea","name":"Alexandria, Louisiana"},
+      {"@type":"AdministrativeArea","name":"Central Louisiana"},
+      {"@type":"AdministrativeArea","name":"Louisiana"}
+    ],
     "address":{
       "@type":"PostalAddress",
       "addressLocality":"Alexandria",
@@ -224,9 +293,7 @@
       "addressCountry":"US"
     },
     "telephone":"+13184277990",
-    "email":"taxslayer2020@outlook.com",
-    "url":"https://www.squarebidness.com/taxslayer/",
-    "image":"https://www.squarebidness.com/taxslayer/assets/taxslayer_og_1200x630.jpg"
+    "email":"taxslayer2020@outlook.com"
   }
   </script>
 </head>
@@ -238,7 +305,9 @@
     <!-- HERO (ONE IMAGE ONLY) -->
     <section class="grid hero" aria-label="Tax Slayer hero">
       <div>
-        <p class="kicker">Income Tax Filing</p>
+        <span class="badge"><span class="dot" aria-hidden="true"></span> Alexandria, LA · Tax Preparation</span>
+        <p class="kicker" style="margin-top:12px">Income Tax Filing</p>
+
         <h1>Fast, Accurate Tax Preparation<br />&amp; E-File Support</h1>
 
         <p class="muted" style="max-width:70ch">
@@ -253,10 +322,14 @@
         </div>
 
         <div class="btnrow" role="group" aria-label="Primary actions">
-          <a class="btn primary" href="#book">Book an Appointment</a>
+          <a class="btn accent" href="#book">Book an Appointment</a>
           <a class="btn ghost" href="tel:+13184277990">Call</a>
           <a class="btn ghost" href="sms:+13184277990?body=Hi%20Tax%20Slayer%2C%20I%27d%20like%20to%20book%20a%20tax%20appointment.">Text</a>
           <a class="btn ghost" href="#taxpass">Start with Tax Pass</a>
+        </div>
+
+        <div class="callout" role="note" aria-label="Quick note">
+          <strong>Quick start:</strong> Use <strong>Tax Pass™</strong> to send documents and details ahead of time so your appointment stays fast and focused.
         </div>
 
         <p class="fineprint">
@@ -294,7 +367,7 @@
           </ul>
 
           <div class="btnrow" style="margin-top:12px">
-            <a class="btn primary pill" href="https://lab.squarebidness.com/tax-pass/?office=EFHO7IRV">Start with Tax Pass</a>
+            <a class="btn accent pill" href="https://lab.squarebidness.com/tax-pass/?office=EFHO7IRV">Start with Tax Pass</a>
             <a class="btn ghost pill" href="https://lab.squarebidness.com/tax-pass/status.html?office=EFHO7IRV">Check my status</a>
           </div>
 
@@ -322,7 +395,7 @@
     <!-- BOOKING -->
     <section id="book" class="grid" style="margin-top:18px" aria-label="Booking section">
       <div class="split">
-        <form class="card" method="post" action="/taxslayer/book" novalidate>
+        <form class="card" method="post" action="/taxslayer/book" novalidate aria-label="Booking form">
           <h2>Book Your Appointment</h2>
           <p class="muted" style="font-size:14px;margin-top:-4px">
             Pick a preferred time — we’ll confirm and send prep instructions.
@@ -371,7 +444,7 @@
           </div>
 
           <div class="btnrow" style="margin-top:12px">
-            <button type="submit" class="btn primary" style="border:0">Request Booking</button>
+            <button type="submit" class="btn accent" style="border:0">Request Booking</button>
             <a class="btn ghost" href="tel:+13184277990">Call Instead</a>
           </div>
 
@@ -400,7 +473,7 @@
           </ul>
 
           <div class="btnrow" style="margin-top:14px">
-            <a class="btn primary pill" href="https://lab.squarebidness.com/tax-pass/?office=EFHO7IRV">Start Tax Pass</a>
+            <a class="btn accent pill" href="https://lab.squarebidness.com/tax-pass/?office=EFHO7IRV">Start Tax Pass</a>
             <a class="btn ghost pill" href="#top">Back to top</a>
           </div>
 
