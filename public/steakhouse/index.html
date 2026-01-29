@@ -34,9 +34,17 @@
   <!-- CSS -->
   <link rel="stylesheet" href="/steakhouse/styles/steakhouse.css" />
 
-  <!-- Preload hero (optional but fast) -->
-  <link rel="preload" as="image" href="/steakhouse/assets/hero_1920x1080.webp" type="image/webp">
-  <link rel="preload" as="image" href="/steakhouse/assets/hero_1920x1080.jpg" type="image/jpeg">
+  <!-- Perf: preload hero (webp first) -->
+<link rel="preload" as="image" href="/steakhouse/assets/hero_1920x1080.webp" type="image/webp" fetchpriority="high">
+<link rel="preload" as="image" href="/steakhouse/assets/hero_1920x1080.jpg" fetchpriority="high">
+
+<!-- Perf: hint connections (only if you keep OpenTable iframe on same page) -->
+<link rel="preconnect" href="https://www.opentable.com" crossorigin>
+<link rel="preconnect" href="https://www.google.com" crossorigin>
+<link rel="preconnect" href="https://www.google.com/maps" crossorigin>
+
+  <script defer src="/steakhouse/scripts/schema.js"></script>
+  
 
   <style>
     /* Smooth anchor jumps */
@@ -351,5 +359,6 @@
     })();
   </script>
   <script src="/steakhouse/scripts/menu.js" defer></script>
+  <script defer src="/steakhouse/scripts/track.js"></script>
 </body>
 </html>
