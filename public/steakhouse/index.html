@@ -288,5 +288,49 @@
   <script>
     document.getElementById("year").textContent = String(new Date().getFullYear());
   </script>
+  <!-- ✅ JS (paste before </body>) -->
+<script>
+  (function(){
+    const drawer = document.getElementById("shMobileMenu");
+    if(!drawer) return;
+
+    const openBtn = document.querySelector("[data-menu-open]");
+    const closeBtns = drawer.querySelectorAll("[data-menu-close]");
+    const panel = drawer.querySelector(".sh-drawer__panel");
+
+    const setOpen = (isOpen) => {
+      drawer.classList.toggle("is-open", isOpen);
+      drawer.setAttribute("aria-hidden", String(!isOpen));
+      if (openBtn) openBtn.setAttribute("aria-expanded", String(isOpen));
+      document.documentElement.classList.toggle("no-scroll", isOpen);
+      document.body.classList.toggle("no-scroll", isOpen);
+
+      if(isOpen){
+        // focus first link for accessibility
+        const firstLink = drawer.querySelector(".sh-drawer__nav a");
+        firstLink && firstLink.focus();
+      } else {
+        openBtn && openBtn.focus();
+      }
+    };
+
+    openBtn && openBtn.addEventListener("click", () => setOpen(true));
+    closeBtns.forEach(btn => btn.addEventListener("click", () => setOpen(false)));
+
+    // Close on ESC
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && drawer.classList.contains("is-open")) setOpen(false);
+    });
+
+    // Click outside panel closes (backdrop already wired), but keep panel clicks from bubbling
+    panel && panel.addEventListener("click", (e) => e.stopPropagation());
+
+    // Prevent background scroll when menu is open
+    const style = document.createElement("style");
+    style.textContent = ".no-scroll{overflow:hidden !important}";
+    document.head.appendChild(style);
+  })();
+</script>
+
 </body>
 </html>
