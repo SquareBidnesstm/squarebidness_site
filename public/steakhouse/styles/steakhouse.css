@@ -238,3 +238,44 @@ section{
 }
 section h2{
   font
+
+  /* ===== FIX: Drawer readability (override all earlier blur/alpha) ===== */
+
+/* Make overlay solid dark */
+.sh-drawer__backdrop{
+  background: rgba(0,0,0,.92) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Make panel solid (no transparency / no blur) */
+.sh-drawer__panel{
+  background: #0b0b0b !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Mobile: full width drawer */
+@media (max-width: 620px){
+  .sh-drawer__panel{
+    width: 100vw !important;
+    right: 0 !important;
+    border-left: 0 !important;
+  }
+}
+
+
+  /* ===== Mobile hero sizing ===== */
+@media (max-width: 620px){
+  .sh-hero{ min-height: 68vh; }              /* bigger visual, less dead space */
+  .sh-hero .wrap{ padding: 4.25rem 1rem 2.25rem; }
+
+  .sh-hero h1{ font-size: clamp(1.85rem, 7.2vw, 2.5rem); }
+  .sh-hero p{ font-size: 1rem; }
+
+  .hours{
+    grid-template-columns: 1fr;
+    max-width: 520px;
+  }
+}
+
