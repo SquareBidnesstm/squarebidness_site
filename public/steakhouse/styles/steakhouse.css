@@ -384,4 +384,116 @@ section h2{
     .sh-drawer, .sh-drawer__panel{transition:none !important}
     .sh-menu-btn{transition:none !important}
   }
+/* =========================
+   Header polish (hover + scroll)
+   ========================= */
+
+:root{
+  --sh-topbar-bg: rgba(16,16,16,.72);
+  --sh-topbar-bg-solid: #101010;
+  --sh-topbar-border: rgba(255,255,255,.10);
+  --sh-topbar-shadow: 0 14px 30px rgba(0,0,0,.28);
+}
+
+/* Sticky header with smooth blur */
+.sh-topbar{
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--sh-topbar-bg);
+  border-bottom: 1px solid var(--sh-topbar-border);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: background .22s ease, box-shadow .22s ease, border-color .22s ease;
+}
+
+/* When user scrolls, make it feel more "locked" */
+.sh-topbar.is-scrolled{
+  background: rgba(16,16,16,.92);
+  box-shadow: var(--sh-topbar-shadow);
+  border-bottom-color: rgba(255,255,255,.14);
+}
+
+/* Brand link feel */
+.sh-brand{
+  display:flex;
+  align-items:center;
+  gap:.75rem;
+  text-decoration:none;
+  transition: transform .12s ease;
+}
+.sh-brand:active{ transform: scale(.99); }
+
+/* Icon hover micro-interaction */
+.sh-mark--img{
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+  transform: translateZ(0);
+}
+.sh-brand:hover .sh-mark--img{
+  transform: translateY(-1px);
+  border-color: rgba(255,255,255,.22);
+  background: rgba(255,255,255,.06);
+  box-shadow: 0 14px 30px rgba(0,0,0,.36);
+}
+
+/* Nav links (premium underline) */
+.sh-nav a{
+  position: relative;
+  padding: .45rem .35rem;
+  border-radius: 10px;
+  transition: background .16s ease, color .16s ease;
+}
+.sh-nav a:hover{
+  background: rgba(255,255,255,.06);
+}
+.sh-nav a::after{
+  content:"";
+  position:absolute;
+  left: .5rem;
+  right: .5rem;
+  bottom: .22rem;
+  height: 2px;
+  border-radius: 2px;
+  background: rgba(179,139,43,.78);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .18s ease;
+}
+.sh-nav a:hover::after{ transform: scaleX(1); }
+
+/* Reserve button polish */
+.btn.btn--small{
+  transition: transform .12s ease, background .16s ease, color .16s ease, border-color .16s ease;
+}
+.btn.btn--small:hover{ transform: translateY(-1px); }
+.btn.btn--small:active{ transform: translateY(0px); }
+
+/* =========================
+   Mobile header lock (no clutter)
+   ========================= */
+@media (max-width: 820px){
+  /* Keep brand + reserve. Hide the full nav. */
+  .sh-nav{ display:none; }
+
+  /* Tighten spacing */
+  .sh-topbar{ padding: .55rem .6rem; }
+  .sh-topbar-inner{ gap: .6rem; }
+
+  /* Slightly smaller icon on mobile */
+  .sh-mark--img{ width:40px; height:40px; border-radius: 13px; }
+
+  /* Shorten the subtitle on small screens (optional) */
+  .sh-brandtext em{ display:none; }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce){
+  .sh-topbar,
+  .sh-brand,
+  .sh-mark--img,
+  .sh-nav a,
+  .btn.btn--small{
+    transition:none !important;
+  }
+}
 
