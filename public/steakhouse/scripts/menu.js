@@ -55,7 +55,8 @@
   };
 
   // Hard reset on load (prevents any weird cached open state)
-  setOpen(false);
+  setOpen(false); // ensure closed on load
+
 
   // Open / Close handlers
   openBtn.addEventListener("click", () => setOpen(true));
