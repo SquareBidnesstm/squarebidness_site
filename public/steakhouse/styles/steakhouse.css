@@ -231,6 +231,33 @@ a:hover{opacity:.95}
   .hours{grid-template-columns:repeat(3,minmax(0,1fr));}
 }
 
+/* =========================
+   MOBILE HERO SIZE FIX
+   ========================= */
+
+@media (max-width: 620px){
+  .sh-hero{
+    min-height: 72svh; /* dynamic viewport-safe */
+  }
+
+  .sh-hero .wrap{
+    padding: 4rem 1rem 2.2rem;
+  }
+
+  .sh-hero h1{
+    font-size: clamp(1.8rem, 7vw, 2.6rem);
+  }
+
+  .sh-ctas{
+    gap: .75rem;
+  }
+
+  .hours{
+    margin-top: .8rem;
+    font-size: .9rem;
+  }
+}
+
 /* Sections */
 section{
   padding:3rem 0;
@@ -277,5 +304,39 @@ section h2{
     grid-template-columns: 1fr;
     max-width: 520px;
   }
+}
+  /* =========================
+   MOBILE DRAWER — HARD ISOLATION FIX
+   ========================= */
+
+/* Kill hero bleed-through completely */
+.sh-drawer.is-open {
+  isolation: isolate;
+}
+
+/* Make panel truly opaque */
+.sh-drawer__panel{
+  background: #0b0b0b; /* solid, not rgba */
+}
+
+/* Stronger backdrop so hero disappears */
+.sh-drawer__backdrop{
+  background: rgba(0,0,0,.92);
+}
+
+/* Ensure drawer always sits above hero */
+.sh-drawer,
+.sh-drawer__panel{
+  z-index: 999;
+}
+
+/* Boost menu text contrast */
+.sh-drawer__nav a{
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.sh-drawer__panel{
+  box-shadow: -24px 0 60px rgba(0,0,0,.65);
 }
 
