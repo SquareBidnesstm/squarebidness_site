@@ -1,6 +1,7 @@
 /* /public/steakhouse/scripts/menu.js
-   The SteaKhouse — Mobile Drawer + Sticky Header Scroll State
-   (no deps, safe to include on every page)
+   The SteaKhouse — Mobile Drawer + Sticky Header Scroll State (v1.2)
+   - Fixes iOS/Safari "drawer stays open after nav"
+   - Safe to include on every page (QR page exits clean)
 */
 (function () {
   const topbar = document.querySelector(".sh-topbar");
@@ -28,6 +29,7 @@
 
   const closeBtns = drawer.querySelectorAll("[data-menu-close]");
   const panel = drawer.querySelector(".sh-drawer__panel");
+
   const focusableSelector =
     'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
@@ -38,21 +40,22 @@
     drawer.setAttribute("aria-hidden", String(!isOpen));
     openBtn.setAttribute("aria-expanded", String(isOpen));
 
-    // lock scroll (your CSS already supports .no-scroll)
+    // lock scroll (your CSS supports .no-scroll)
     document.documentElement.classList.toggle("no-scroll", isOpen);
     document.body.classList.toggle("no-scroll", isOpen);
 
     if (isOpen) {
       lastFocus = document.activeElement;
-      // focus first link/button inside the panel
       const first = panel?.querySelector(focusableSelector);
       if (first) first.focus();
     } else {
-      // restore focus
       if (lastFocus && typeof lastFocus.focus === "function") lastFocus.focus();
       else openBtn.focus();
     }
   };
+
+  // Hard reset on load (prevents any weird cached open state)
+  setOpen(false);
 
   // Open / Close handlers
   openBtn.addEventListener("click", () => setOpen(true));
@@ -61,6 +64,11 @@
   // Close on ESC
   window.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && drawer.classList.contains("is-open")) setOpen(false);
+  });
+
+  // Click outside panel closes (backdrop behavior)
+  drawer.addEventListener("click", () => {
+    if (drawer.classList.contains("is-open")) setOpen(false);
   });
 
   // Clicks inside the panel shouldn't close via backdrop
@@ -89,8 +97,20 @@
     }
   });
 
-  // Close drawer when clicking any internal anchor (optional safety)
-  drawer.querySelectorAll(".sh-drawer__nav a, .sh-drawer__cta a[data-menu-close]").forEach((a) => {
-    a.addEventListener("click", () => setOpen(false));
-  });
+  // ✅ Critical iOS/Safari fix:
+  // Close drawer on ANY tap/click of a link inside it (CAPTURE PHASE)
+  // This runs before navigation starts.
+  drawer.addEventListener(
+    "click",
+    (e) => {
+      const a = e.target && e.target.closest && e.target.closest("a");
+      if (!a) return;
+      if (!drawer.classList.contains("is-open")) return;
+      setOpen(false);
+    },
+    true
+  );
+
+  // ✅ Safari back/forward cache can restore an open drawer — force closed
+  window.addEventListener("pageshow", () => setOpen(false));
 })();
