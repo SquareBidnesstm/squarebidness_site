@@ -31,19 +31,13 @@
   <meta property="og:image" content="/steakhouse/assets/the-steakhouse_og_1200x630.jpg" />
   <meta name="twitter:card" content="summary_large_image" />
 
+  <!-- Perf (optional, safe) -->
+  <link rel="preload" as="image" href="/steakhouse/assets/hero_1920x1080.webp" type="image/webp" fetchpriority="high">
+  <link rel="preload" as="image" href="/steakhouse/assets/hero_1920x1080.jpg" fetchpriority="high">
+  <link rel="preconnect" href="https://www.google.com" crossorigin>
+  <link rel="preconnect" href="https://www.google.com/maps" crossorigin>
 
-  <!-- Perf: preload hero (webp first) -->
-<link rel="preload" as="image" href="/steakhouse/assets/hero_1920x1080.webp" type="image/webp" fetchpriority="high">
-<link rel="preload" as="image" href="/steakhouse/assets/hero_1920x1080.jpg" fetchpriority="high">
-
-<!-- Perf: hint connections (only if you keep OpenTable iframe on same page) -->
-<link rel="preconnect" href="https://www.opentable.com" crossorigin>
-<link rel="preconnect" href="https://www.google.com" crossorigin>
-<link rel="preconnect" href="https://www.google.com/maps" crossorigin>
- 
-  
   <script defer src="/steakhouse/scripts/schema.js"></script>
-
 
   <!-- CSS -->
   <link rel="stylesheet" href="/steakhouse/styles/steakhouse.css" />
@@ -63,7 +57,7 @@
 </head>
 
 <body>
-  <!-- Header (same system as home: includes mobile drawer) -->
+  <!-- Header -->
   <header class="sh-topbar">
     <div class="wrap sh-topbar-inner">
       <a class="sh-brand" href="/steakhouse/" aria-label="The SteaKhouse home">
@@ -82,64 +76,60 @@
         </span>
       </a>
 
-      <!-- Desktop nav -->
-<nav class="sh-nav" aria-label="Primary">
-  <a href="/steakhouse/menu/">Menu</a>
-  <a href="/steakhouse/private-events/">Private Events</a>
-  <a href="/steakhouse/about/">About</a>
-  <a href="/steakhouse/contact/">Contact</a>
-</nav>
+      <nav class="sh-nav" aria-label="Primary">
+        <a href="/steakhouse/menu/">Menu</a>
+        <a href="/steakhouse/private-events/">Private Events</a>
+        <a href="/steakhouse/about/">About</a>
+        <a href="/steakhouse/contact/">Contact</a>
+      </nav>
 
-     <div class="sh-actions">
-  <a class="btn btn--small sh-reserve" href="/steakhouse/#reserve">Reserve</a>
+      <div class="sh-actions">
+        <a class="btn btn--small sh-reserve" href="/steakhouse/#reserve">Reserve</a>
 
-  <!-- Mobile menu button -->
-  <button
-    class="sh-menu-btn"
-    type="button"
-    aria-label="Open menu"
-    aria-controls="shMobileMenu"
-    aria-expanded="false"
-    data-menu-open
-  >
-    <span class="sh-menu-icon" aria-hidden="true"></span>
-  </button>
-</div>
-</div>
-
-<!-- Mobile Drawer -->
-<div class="sh-drawer" id="shMobileMenu" aria-hidden="true">
-  <div class="sh-drawer__backdrop" data-menu-close></div>
-
-  <div class="sh-drawer__panel" role="dialog" aria-modal="true" aria-label="Site menu">
-    <div class="sh-drawer__top">
-  <div class="sh-drawer__brand">
-    <img
-      src="/steakhouse/assets/icons/mark_128.png"
-      width="38"
-      height="38"
-      alt=""
-      aria-hidden="true"
-      class="sh-mark sh-mark--img"
-    />
-    <div>
-      <strong style="display:block;line-height:1.05">The SteaKhouse</strong>
-      <span class="muted" style="font-size:.92rem">Hammond, Louisiana</span>
-    </div>
-  </div>
-
-  <button class="sh-drawer__close" type="button" aria-label="Close menu" data-menu-close>✕</button>
-</div>
+        <button
+          class="sh-menu-btn"
+          type="button"
+          aria-label="Open menu"
+          aria-controls="shMobileMenu"
+          aria-expanded="false"
+          data-menu-open
+        >
+          <span class="sh-menu-icon" aria-hidden="true"></span>
+        </button>
+      </div>
     </div>
 
-<!-- Drawer nav -->
-<nav class="sh-drawer__nav" aria-label="Mobile">
-  <a href="/steakhouse/menu/" data-menu-close>Menu</a>
-  <a href="/steakhouse/private-events/" data-menu-close>Private Events</a>
-  <a href="/steakhouse/about/" data-menu-close>About</a>
-  <a href="/steakhouse/contact/" data-menu-close>Contact</a>
-  <a href="/steakhouse/qr-flyer.html" data-menu-close>Quick Links (QR)</a>
-</nav>
+    <!-- Mobile Drawer -->
+    <div class="sh-drawer" id="shMobileMenu" aria-hidden="true">
+      <div class="sh-drawer__backdrop" data-menu-close></div>
+
+      <div class="sh-drawer__panel" role="dialog" aria-modal="true" aria-label="Site menu">
+        <div class="sh-drawer__top">
+          <div class="sh-drawer__brand">
+            <img
+              src="/steakhouse/assets/icons/mark_128.png"
+              width="38"
+              height="38"
+              alt=""
+              aria-hidden="true"
+              class="sh-mark sh-mark--img"
+            />
+            <div>
+              <strong style="display:block;line-height:1.05">The SteaKhouse</strong>
+              <span class="muted" style="font-size:.92rem">Hammond, Louisiana</span>
+            </div>
+          </div>
+
+          <button class="sh-drawer__close" type="button" aria-label="Close menu" data-menu-close>✕</button>
+        </div>
+
+        <nav class="sh-drawer__nav" aria-label="Mobile">
+          <a href="/steakhouse/menu/" data-menu-close>Menu</a>
+          <a href="/steakhouse/private-events/" data-menu-close>Private Events</a>
+          <a href="/steakhouse/about/" data-menu-close>About</a>
+          <a href="/steakhouse/contact/" data-menu-close>Contact</a>
+          <a href="/steakhouse/qr-flyer.html" data-menu-close>Quick Links (QR)</a>
+        </nav>
 
         <div class="sh-drawer__cta">
           <a class="btn" href="/steakhouse/#reserve" data-menu-close>Reserve Now</a>
@@ -214,13 +204,14 @@
     </section>
   </main>
 
-  <nav class="wrap foot-links" aria-label="Footer">
-  <a href="/steakhouse/menu/">Menu</a>
-  <a href="/steakhouse/private-events/">Private Events</a>
-  <a href="/steakhouse/about/">About</a>
-  <a href="/steakhouse/contact/">Contact</a>
-</nav>
-
+  <!-- Footer -->
+  <footer class="sh-foot">
+    <nav class="wrap foot-links" aria-label="Footer">
+      <a href="/steakhouse/menu/">Menu</a>
+      <a href="/steakhouse/private-events/">Private Events</a>
+      <a href="/steakhouse/about/">About</a>
+      <a href="/steakhouse/contact/">Contact</a>
+    </nav>
 
     <p class="muted wrap">
       © <span id="year"></span> <strong>The SteaKhouse</strong> ·
@@ -240,59 +231,7 @@
     document.getElementById("year").textContent = String(new Date().getFullYear());
   </script>
 
-  <!-- Topbar scroll state -->
-  <script>
-    (function () {
-      const topbar = document.querySelector(".sh-topbar");
-      if (!topbar) return;
-
-      const onScroll = () => {
-        if (window.scrollY > 8) topbar.classList.add("is-scrolled");
-        else topbar.classList.remove("is-scrolled");
-      };
-
-      onScroll();
-      window.addEventListener("scroll", onScroll, { passive: true });
-    })();
-  </script>
-
-  <!-- Mobile drawer -->
-  <script>
-    (function(){
-      const drawer = document.getElementById("shMobileMenu");
-      if(!drawer) return;
-
-      const openBtn = document.querySelector("[data-menu-open]");
-      const closeBtns = drawer.querySelectorAll("[data-menu-close]");
-      const panel = drawer.querySelector(".sh-drawer__panel");
-
-      const setOpen = (isOpen) => {
-        drawer.classList.toggle("is-open", isOpen);
-        drawer.setAttribute("aria-hidden", String(!isOpen));
-        if (openBtn) openBtn.setAttribute("aria-expanded", String(isOpen));
-        document.documentElement.classList.toggle("no-scroll", isOpen);
-        document.body.classList.toggle("no-scroll", isOpen);
-
-        if(isOpen){
-          const firstLink = drawer.querySelector(".sh-drawer__nav a");
-          firstLink && firstLink.focus();
-        } else {
-          openBtn && openBtn.focus();
-        }
-      };
-
-      openBtn && openBtn.addEventListener("click", () => setOpen(true));
-      closeBtns.forEach(btn => btn.addEventListener("click", () => setOpen(false)));
-
-      window.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && drawer.classList.contains("is-open")) setOpen(false);
-      });
-
-      panel && panel.addEventListener("click", (e) => e.stopPropagation());
-    })();
-  </script>
-  <script src="/steakhouse/scripts/menu.js" defer></script>
+  <script defer src="/steakhouse/scripts/menu.js"></script>
   <script defer src="/steakhouse/scripts/track.js"></script>
-
 </body>
 </html>
