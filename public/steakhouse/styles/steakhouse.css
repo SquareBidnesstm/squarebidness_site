@@ -249,3 +249,139 @@ section h2{
 @media (max-width:900px){
   .sh-nav{display:none}
 }
+<!-- ✅ CSS (paste into /public/steakhouse/styles/steakhouse.css) -->
+
+  /* Actions group (Reserve + menu btn) */
+  .sh-actions{display:flex;align-items:center;gap:.6rem}
+
+  /* Mobile menu button */
+  .sh-menu-btn{
+    display:none;
+    width:42px;height:42px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.14);
+    background:rgba(255,255,255,.04);
+    color:#fff;
+    cursor:pointer;
+    padding:0;
+    transition:transform .12s ease, background .16s ease, border-color .16s ease;
+  }
+  .sh-menu-btn:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.22);transform:translateY(-1px)}
+  .sh-menu-btn:active{transform:translateY(0)}
+
+  /* Hamburger icon */
+  .sh-menu-icon{
+    position:relative;
+    display:block;
+    width:18px;height:2px;
+    margin:0 auto;
+    background:rgba(255,255,255,.92);
+    border-radius:2px;
+  }
+  .sh-menu-icon::before,
+  .sh-menu-icon::after{
+    content:"";
+    position:absolute;
+    left:0;
+    width:18px;height:2px;
+    background:rgba(255,255,255,.92);
+    border-radius:2px;
+  }
+  .sh-menu-icon::before{top:-6px}
+  .sh-menu-icon::after{top:6px}
+
+  /* Drawer shell */
+  .sh-drawer{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    opacity:0;
+    transition:opacity .18s ease;
+    z-index:60;
+  }
+  .sh-drawer.is-open{
+    pointer-events:auto;
+    opacity:1;
+  }
+
+  .sh-drawer__backdrop{
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+
+  .sh-drawer__panel{
+    position:absolute;
+    top:0;right:0;
+    width:min(92vw, 420px);
+    height:100%;
+    background:#0b0b0b;
+    border-left:1px solid rgba(255,255,255,.10);
+    box-shadow: -18px 0 40px rgba(0,0,0,.45);
+    transform:translateX(100%);
+    transition:transform .22s ease;
+    display:flex;
+    flex-direction:column;
+  }
+  .sh-drawer.is-open .sh-drawer__panel{transform:translateX(0)}
+
+  .sh-drawer__top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:1rem;
+    border-bottom:1px solid rgba(255,255,255,.08);
+  }
+
+  .sh-drawer__brand{display:flex;align-items:center;gap:.75rem}
+
+  .sh-drawer__close{
+    width:40px;height:40px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.14);
+    background:rgba(255,255,255,.04);
+    color:#fff;
+    cursor:pointer;
+  }
+  .sh-drawer__close:hover{background:rgba(255,255,255,.06)}
+
+  .sh-drawer__nav{
+    padding: .6rem 1rem 1rem;
+    display:flex;
+    flex-direction:column;
+    gap:.2rem;
+  }
+  .sh-drawer__nav a{
+    padding:.85rem .9rem;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.10);
+    background:rgba(255,255,255,.03);
+    color:#fff;
+    font-weight:650;
+  }
+  .sh-drawer__nav a:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.16)}
+
+  .sh-drawer__cta{
+    margin-top:auto;
+    padding:1rem;
+    border-top:1px solid rgba(255,255,255,.08);
+    display:grid;
+    gap:.7rem;
+  }
+
+  /* Mobile behavior */
+  @media (max-width: 820px){
+    .sh-nav{display:none}
+    .sh-menu-btn{display:inline-flex;align-items:center;justify-content:center}
+    .sh-brandtext em{display:none}
+  }
+
+  /* Reduce motion */
+  @media (prefers-reduced-motion: reduce){
+    .sh-drawer, .sh-drawer__panel{transition:none !important}
+    .sh-menu-btn{transition:none !important}
+  }
+
