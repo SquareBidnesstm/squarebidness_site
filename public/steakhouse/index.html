@@ -33,106 +33,116 @@
 
   <!-- CSS -->
   <link rel="stylesheet" href="/steakhouse/styles/steakhouse.css" />
-</head>
 
+  <!-- Preload hero (optional but fast) -->
+  <link rel="preload" as="image" href="/steakhouse/assets/hero_1920x1080.webp" type="image/webp">
+  <link rel="preload" as="image" href="/steakhouse/assets/hero_1920x1080.jpg" type="image/jpeg">
+
+  <style>
+    /* Smooth anchor jumps */
+    html{scroll-behavior:smooth}
+
+    /* Prevent background scroll when drawer open */
+    .no-scroll{overflow:hidden !important}
+  </style>
+</head>
 
 <body>
   <!-- Header -->
-<header class="sh-topbar">
-  <div class="wrap sh-topbar-inner">
-    <a class="sh-brand" href="/steakhouse/" aria-label="The SteaKhouse home">
-      <img
-        class="sh-mark sh-mark--img"
-        src="/steakhouse/assets/icons/mark_128.png"
-        width="44"
-        height="44"
-        alt="The SteaKhouse"
-        loading="eager"
-        decoding="async"
-      />
-      <span class="sh-brandtext">
-        <strong>The SteaKhouse</strong>
-        <em>Hammond, Louisiana</em>
-      </span>
-    </a>
+  <header class="sh-topbar">
+    <div class="wrap sh-topbar-inner">
+      <a class="sh-brand" href="/steakhouse/" aria-label="The SteaKhouse home">
+        <img
+          class="sh-mark sh-mark--img"
+          src="/steakhouse/assets/icons/mark_128.png"
+          width="44"
+          height="44"
+          alt="The SteaKhouse"
+          loading="eager"
+          decoding="async"
+        />
+        <span class="sh-brandtext">
+          <strong>The SteaKhouse</strong>
+          <em>Hammond, Louisiana</em>
+        </span>
+      </a>
 
-    <!-- Desktop nav (unchanged) -->
-    <nav class="sh-nav" aria-label="Primary">
-      <a href="/steakhouse/menu/">Menu</a>
-      <a href="/steakhouse/private-events/">Private Events</a>
-      <a href="/steakhouse/about/">About</a>
-      <a href="/steakhouse/contact/">Contact</a>
-      <a href="/steakhouse/press/">Press</a>
-    </nav>
-
-    <div class="sh-actions">
-      <a class="btn btn--small sh-reserve" href="#reserve">Reserve</a>
-
-      <!-- Mobile menu button -->
-      <button
-        class="sh-menu-btn"
-        type="button"
-        aria-label="Open menu"
-        aria-controls="shMobileMenu"
-        aria-expanded="false"
-        data-menu-open
-      >
-        <span class="sh-menu-icon" aria-hidden="true"></span>
-      </button>
-    </div>
-  </div>
-
-  <!-- Mobile Drawer -->
-  <div class="sh-drawer" id="shMobileMenu" aria-hidden="true">
-    <div class="sh-drawer__backdrop" data-menu-close></div>
-
-    <div class="sh-drawer__panel" role="dialog" aria-modal="true" aria-label="Site menu">
-      <div class="sh-drawer__top">
-        <div class="sh-drawer__brand">
-          <img
-            src="/steakhouse/assets/icons/mark_128.png"
-            width="38"
-            height="38"
-            alt=""
-            aria-hidden="true"
-            class="sh-mark sh-mark--img"
-          />
-          <div>
-            <strong style="display:block;line-height:1.05">The SteaKhouse</strong>
-            <span class="muted" style="font-size:.92rem">Hammond, Louisiana</span>
-          </div>
-        </div>
-
-        <button class="sh-drawer__close" type="button" aria-label="Close menu" data-menu-close>✕</button>
-      </div>
-
-      <nav class="sh-drawer__nav" aria-label="Mobile">
+      <!-- Desktop nav -->
+      <nav class="sh-nav" aria-label="Primary">
         <a href="/steakhouse/menu/">Menu</a>
         <a href="/steakhouse/private-events/">Private Events</a>
         <a href="/steakhouse/about/">About</a>
         <a href="/steakhouse/contact/">Contact</a>
         <a href="/steakhouse/press/">Press</a>
-        <a href="/steakhouse/qr-flyer.html">Quick Links (QR)</a>
       </nav>
 
-      <div class="sh-drawer__cta">
-        <a class="btn" href="#reserve" data-menu-close>Reserve Now</a>
-        <a class="btn btn--ghost" href="tel:+19856625090">(985) 662-5090</a>
-        <a
-          class="btn btn--ghost"
-          target="_blank"
-          rel="noopener"
-          href="https://maps.google.com/?q=200+SW+Railroad+Ave+Hammond+LA+70401"
-        >Directions</a>
+      <div class="sh-actions">
+        <a class="btn btn--small sh-reserve" href="#reserve">Reserve</a>
+
+        <!-- Mobile menu button -->
+        <button
+          class="sh-menu-btn"
+          type="button"
+          aria-label="Open menu"
+          aria-controls="shMobileMenu"
+          aria-expanded="false"
+          data-menu-open
+        >
+          <span class="sh-menu-icon" aria-hidden="true"></span>
+        </button>
       </div>
     </div>
-  </div>
-</header>
 
+    <!-- Mobile Drawer -->
+    <div class="sh-drawer" id="shMobileMenu" aria-hidden="true">
+      <div class="sh-drawer__backdrop" data-menu-close></div>
+
+      <div class="sh-drawer__panel" role="dialog" aria-modal="true" aria-label="Site menu">
+        <div class="sh-drawer__top">
+          <div class="sh-drawer__brand">
+            <img
+              src="/steakhouse/assets/icons/mark_128.png"
+              width="38"
+              height="38"
+              alt=""
+              aria-hidden="true"
+              class="sh-mark sh-mark--img"
+            />
+            <div>
+              <strong style="display:block;line-height:1.05">The SteaKhouse</strong>
+              <span class="muted" style="font-size:.92rem">Hammond, Louisiana</span>
+            </div>
+          </div>
+
+          <button class="sh-drawer__close" type="button" aria-label="Close menu" data-menu-close>✕</button>
+        </div>
+
+        <!-- Drawer nav (all close on tap) -->
+        <nav class="sh-drawer__nav" aria-label="Mobile">
+          <a href="/steakhouse/menu/" data-menu-close>Menu</a>
+          <a href="/steakhouse/private-events/" data-menu-close>Private Events</a>
+          <a href="/steakhouse/about/" data-menu-close>About</a>
+          <a href="/steakhouse/contact/" data-menu-close>Contact</a>
+          <a href="/steakhouse/press/" data-menu-close>Press</a>
+          <a href="/steakhouse/qr-flyer.html" data-menu-close>Quick Links (QR)</a>
+        </nav>
+
+        <div class="sh-drawer__cta">
+          <a class="btn" href="#reserve" data-menu-close>Reserve Now</a>
+          <a class="btn btn--ghost" href="tel:+19856625090">(985) 662-5090</a>
+          <a
+            class="btn btn--ghost"
+            target="_blank"
+            rel="noopener"
+            href="https://maps.google.com/?q=200+SW+Railroad+Ave+Hammond+LA+70401"
+          >Directions</a>
+        </div>
+      </div>
+    </div>
+  </header>
 
   <main>
     <!-- Hero -->
-    <!-- UPDATED HERO IMAGE PATH + WEBP FIRST FALLBACK JPG -->
     <section class="sh-hero"
       style="background-image:url('/steakhouse/assets/hero_1920x1080.webp'),url('/steakhouse/assets/hero_1920x1080.jpg');">
       <div class="wrap">
@@ -289,64 +299,56 @@
     document.getElementById("year").textContent = String(new Date().getFullYear());
   </script>
 
+  <!-- Topbar scroll state -->
   <script>
-  (function () {
-    const topbar = document.querySelector(".sh-topbar");
-    if (!topbar) return;
+    (function () {
+      const topbar = document.querySelector(".sh-topbar");
+      if (!topbar) return;
 
-    const onScroll = () => {
-      if (window.scrollY > 8) topbar.classList.add("is-scrolled");
-      else topbar.classList.remove("is-scrolled");
-    };
+      const onScroll = () => {
+        if (window.scrollY > 8) topbar.classList.add("is-scrolled");
+        else topbar.classList.remove("is-scrolled");
+      };
 
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-  })();
-</script>
+      onScroll();
+      window.addEventListener("scroll", onScroll, { passive: true });
+    })();
+  </script>
 
-  <!-- ✅ JS (paste before </body>) -->
-<script>
-  (function(){
-    const drawer = document.getElementById("shMobileMenu");
-    if(!drawer) return;
+  <!-- Mobile drawer -->
+  <script>
+    (function(){
+      const drawer = document.getElementById("shMobileMenu");
+      if(!drawer) return;
 
-    const openBtn = document.querySelector("[data-menu-open]");
-    const closeBtns = drawer.querySelectorAll("[data-menu-close]");
-    const panel = drawer.querySelector(".sh-drawer__panel");
+      const openBtn = document.querySelector("[data-menu-open]");
+      const closeBtns = drawer.querySelectorAll("[data-menu-close]");
+      const panel = drawer.querySelector(".sh-drawer__panel");
 
-    const setOpen = (isOpen) => {
-      drawer.classList.toggle("is-open", isOpen);
-      drawer.setAttribute("aria-hidden", String(!isOpen));
-      if (openBtn) openBtn.setAttribute("aria-expanded", String(isOpen));
-      document.documentElement.classList.toggle("no-scroll", isOpen);
-      document.body.classList.toggle("no-scroll", isOpen);
+      const setOpen = (isOpen) => {
+        drawer.classList.toggle("is-open", isOpen);
+        drawer.setAttribute("aria-hidden", String(!isOpen));
+        if (openBtn) openBtn.setAttribute("aria-expanded", String(isOpen));
+        document.documentElement.classList.toggle("no-scroll", isOpen);
+        document.body.classList.toggle("no-scroll", isOpen);
 
-      if(isOpen){
-        // focus first link for accessibility
-        const firstLink = drawer.querySelector(".sh-drawer__nav a");
-        firstLink && firstLink.focus();
-      } else {
-        openBtn && openBtn.focus();
-      }
-    };
+        if(isOpen){
+          const firstLink = drawer.querySelector(".sh-drawer__nav a");
+          firstLink && firstLink.focus();
+        } else {
+          openBtn && openBtn.focus();
+        }
+      };
 
-    openBtn && openBtn.addEventListener("click", () => setOpen(true));
-    closeBtns.forEach(btn => btn.addEventListener("click", () => setOpen(false)));
+      openBtn && openBtn.addEventListener("click", () => setOpen(true));
+      closeBtns.forEach(btn => btn.addEventListener("click", () => setOpen(false)));
 
-    // Close on ESC
-    window.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && drawer.classList.contains("is-open")) setOpen(false);
-    });
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && drawer.classList.contains("is-open")) setOpen(false);
+      });
 
-    // Click outside panel closes (backdrop already wired), but keep panel clicks from bubbling
-    panel && panel.addEventListener("click", (e) => e.stopPropagation());
-
-    // Prevent background scroll when menu is open
-    const style = document.createElement("style");
-    style.textContent = ".no-scroll{overflow:hidden !important}";
-    document.head.appendChild(style);
-  })();
-</script>
-
+      panel && panel.addEventListener("click", (e) => e.stopPropagation());
+    })();
+  </script>
 </body>
 </html>
