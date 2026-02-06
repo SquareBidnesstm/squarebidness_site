@@ -28,21 +28,23 @@
   <meta property="og:description" content="Steaks, seafood, house favorites, and private events. Reserve with OpenTable." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://squarebidness.com/steakhouse/" />
-  <meta property="og:image" content="/steakhouse/assets/the-steakhouse_og_1200x630.jpg" />
+  <meta property="og:image" content="https://squarebidness.com/steakhouse/assets/the-steakhouse_og_1200x630.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="The SteaKhouse — Hammond, Louisiana" />
   <meta name="twitter:card" content="summary_large_image" />
 
   <!-- CSS -->
   <link rel="stylesheet" href="/steakhouse/styles/steakhouse.css" />
 
-  <!-- Perf: preload hero -->
+  <!-- Perf: preload HERO (real LCP image) -->
   <link rel="preload" as="image" href="/steakhouse/assets/hero_1920x1080.webp" type="image/webp" fetchpriority="high">
-  <link rel="preload" as="image" href="/steakhouse/assets/hero_1920x1080.jpg" fetchpriority="high">
 
   <!-- Perf: hint connections (OpenTable + Maps embeds) -->
   <link rel="preconnect" href="https://www.opentable.com" crossorigin>
   <link rel="preconnect" href="https://www.google.com" crossorigin>
 
-  <!-- Site-wide schema (recommended). If schema.js outputs JSON-LD, remove inline JSON-LD from this page. -->
+  <!-- Site-wide schema -->
   <script defer src="/steakhouse/scripts/schema.js"></script>
 </head>
 
@@ -139,56 +141,61 @@
   </header>
 
   <main>
-   <!-- Hero -->
-<section class="sh-hero">
-  <!-- Real LCP image (discoverable) -->
-  <picture class="sh-hero__media">
-    <source
-      type="image/webp"
-      srcset="/steakhouse/assets/hero_640.webp 640w, /steakhouse/assets/hero_1280.webp 1280w, /steakhouse/assets/hero_1920.webp 1920w"
-      sizes="100vw"
-    />
-    <source
-      type="image/jpeg"
-      srcset="/steakhouse/assets/hero_640.jpg 640w, /steakhouse/assets/hero_1280.jpg 1280w, /steakhouse/assets/hero_1920x1080.jpg 1920w"
-      sizes="100vw"
-    />
-    <img
-      src="/steakhouse/assets/hero_1280.jpg"
-      alt="The SteaKhouse — classic steakhouse dining in Hammond, Louisiana"
-      width="1920"
-      height="1080"
-      loading="eager"
-      decoding="async"
-      fetchpriority="high"
-    />
-  </picture>
+    <!-- Hero (REAL LCP image, not CSS background) -->
+    <section class="sh-hero">
+      <div class="sh-hero__media" aria-hidden="true">
+        <picture>
+          <!-- Mobile-first: smaller file you actually have -->
+          <source
+            type="image/webp"
+            media="(max-width: 620px)"
+            srcset="/steakhouse/assets/hero_820x547.webp"
+          />
+          <!-- Desktop: your real hero -->
+          <source
+            type="image/webp"
+            srcset="/steakhouse/assets/hero_1920x1080.webp"
+          />
+          <source
+            type="image/jpeg"
+            srcset="/steakhouse/assets/hero_1920x1080.jpg"
+          />
+          <img
+            src="/steakhouse/assets/hero_1920x1080.jpg"
+            alt=""
+            width="1920"
+            height="1080"
+            loading="eager"
+            decoding="async"
+            fetchpriority="high"
+          />
+        </picture>
+      </div>
 
-  <div class="wrap sh-hero__content">
-    <p class="sh-kicker">Steaks • Seafood • Classics</p>
-    <h1>Classic steakhouse energy — built around the cut.</h1>
-    <p>
-      Hand-cut steaks, Louisiana seafood, and house favorites.
-      Reserve online with OpenTable or call ahead.
-    </p>
+      <div class="wrap sh-hero__content">
+        <p class="sh-kicker">Steaks • Seafood • Classics</p>
+        <h1>Classic steakhouse energy — built around the cut.</h1>
+        <p>
+          Hand-cut steaks, Louisiana seafood, and house favorites.
+          Reserve online with OpenTable or call ahead.
+        </p>
 
-    <div class="sh-ctas">
-      <a class="btn" href="/steakhouse/menu/">See Menu</a>
-      <a class="btn btn--ghost" href="tel:+19856625090">(985) 662-5090</a>
-      <a class="btn btn--ghost" href="/steakhouse/#reserve">Reserve Now</a>
-    </div>
+        <div class="sh-ctas">
+          <a class="btn" href="/steakhouse/menu/">See Menu</a>
+          <a class="btn btn--ghost" href="tel:+19856625090">(985) 662-5090</a>
+          <a class="btn btn--ghost" href="/steakhouse/#reserve">Reserve Now</a>
+        </div>
 
-    <ul class="hours" aria-label="Hours">
-      <li><strong>Tue</strong> 5–8</li>
-      <li><strong>Wed</strong> 5–9</li>
-      <li><strong>Thu</strong> 5–9</li>
-      <li><strong>Fri</strong> 5–10</li>
-      <li><strong>Sat</strong> 3–10</li>
-      <li><strong>Sun/Mon</strong> Closed</li>
-    </ul>
-  </div>
-</section>
-
+        <ul class="hours" aria-label="Hours">
+          <li><strong>Tue</strong> 5–8</li>
+          <li><strong>Wed</strong> 5–9</li>
+          <li><strong>Thu</strong> 5–9</li>
+          <li><strong>Fri</strong> 5–10</li>
+          <li><strong>Sat</strong> 3–10</li>
+          <li><strong>Sun/Mon</strong> Closed</li>
+        </ul>
+      </div>
+    </section>
 
     <!-- House Favorites -->
     <section class="wrap">
@@ -198,39 +205,39 @@
       <div class="cards">
         <article class="card">
           <img
-  src="/steakhouse/assets/photos/placeholder_640.webp"
-  width="640"
-  height="480"
-  alt="Spicy Sweet Chili Shrimp"
-  loading="lazy"
-  decoding="async"
-/>
+            src="/steakhouse/assets/photos/placeholder.jpg"
+            width="800"
+            height="600"
+            alt="Spicy Sweet Chili Shrimp"
+            loading="lazy"
+            decoding="async"
+          />
           <h3>Spicy Sweet Chili Shrimp</h3>
           <p>Sweet heat, clean finish.</p>
         </article>
 
         <article class="card">
           <img
-  src="/steakhouse/assets/photos/placeholder_640.webp"
-  width="640"
-  height="480"
-  alt="Spicy Sweet Chili Shrimp"
-  loading="lazy"
-  decoding="async"
-/>
+            src="/steakhouse/assets/photos/placeholder.jpg"
+            width="800"
+            height="600"
+            alt="Jumbo Lump Crab Cakes"
+            loading="lazy"
+            decoding="async"
+          />
           <h3>Jumbo Lump Crab Cakes</h3>
           <p>Classic, rich, built to share.</p>
         </article>
 
         <article class="card">
           <img
-  src="/steakhouse/assets/photos/placeholder_640.webp"
-  width="640"
-  height="480"
-  alt="Spicy Sweet Chili Shrimp"
-  loading="lazy"
-  decoding="async"
-/>
+            src="/steakhouse/assets/photos/placeholder.jpg"
+            width="800"
+            height="600"
+            alt="Surf-n-Turf plate"
+            loading="lazy"
+            decoding="async"
+          />
           <h3>Fat Willie’s Surf-n-Turf</h3>
           <p>12 oz ribeye + spicy sweet chili shrimp + fries.</p>
         </article>
@@ -261,15 +268,15 @@
       </div>
     </section>
 
-    <!-- Reserve -->
+    <!-- Reserve (deferred OpenTable improves LCP/TBT) -->
     <section id="reserve" class="wrap">
       <h2>Reserve a Table</h2>
       <p class="muted">Book online through OpenTable.</p>
 
       <div class="ot-embed" data-ot>
-  <button class="btn" type="button" id="loadOT">Load Reservations</button>
-  <p class="muted small" style="margin:.7rem 0 0;">Loads OpenTable widget on demand.</p>
-</div>
+        <button class="btn" type="button" id="loadOT">Load Reservations</button>
+        <p class="muted small" style="margin:.7rem 0 0;">Loads the OpenTable widget on demand.</p>
+      </div>
 
       <p class="muted small" style="margin-top:.9rem">
         Prefer to call? <a href="tel:+19856625090">(985) 662-5090</a>
@@ -303,30 +310,31 @@
   <script>
     document.getElementById("year").textContent = String(new Date().getFullYear());
   </script>
-<script src="/steakhouse/scripts/menu.js" defer></script>
-<script defer src="/steakhouse/scripts/track.js"></script>
+
+  <script defer src="/steakhouse/scripts/menu.js"></script>
+  <script defer src="/steakhouse/scripts/track.js"></script>
+
+  <!-- Deferred OpenTable loader -->
   <script>
-  (function () {
-    const btn = document.getElementById("loadOT");
-    const host = document.querySelector("[data-ot]");
-    if (!btn || !host) return;
+    (function () {
+      const btn = document.getElementById("loadOT");
+      const host = document.querySelector("[data-ot]");
+      if (!btn || !host) return;
 
-    btn.addEventListener("click", () => {
-      btn.remove();
+      btn.addEventListener("click", () => {
+        btn.remove();
 
-      const iframe = document.createElement("iframe");
-      iframe.src = "https://www.opentable.com/widget/reservation/canvas?rid=1390426&theme=standard&color=1&dark=false&iframe=true&domain=com&lang=en-US";
-      iframe.title = "Reserve at The SteaKhouse";
-      iframe.loading = "lazy";
-      iframe.style.width = "100%";
-      iframe.style.height = "520px";
-      iframe.style.border = "0";
+        const iframe = document.createElement("iframe");
+        iframe.src = "https://www.opentable.com/widget/reservation/canvas?rid=1390426&theme=standard&color=1&dark=false&iframe=true&domain=com&lang=en-US";
+        iframe.title = "Reserve at The SteaKhouse";
+        iframe.loading = "lazy";
+        iframe.style.width = "100%";
+        iframe.style.height = "520px";
+        iframe.style.border = "0";
 
-      host.appendChild(iframe);
-    }, { once:true });
-  })();
-</script>
-
-
+        host.appendChild(iframe);
+      }, { once: true });
+    })();
+  </script>
 </body>
 </html>
