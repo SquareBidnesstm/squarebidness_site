@@ -161,56 +161,46 @@ a:hover{opacity:.95}
 .sh-actions{display:flex;align-items:center;gap:.6rem}
 
 /* Hero */
+/* Hero (LCP as real image) */
 .sh-hero{
+  position:relative;
   min-height:56vh;
   display:grid;
   place-items:center;
   text-align:center;
-  background-size:cover;
-  background-position:center;
-  position:relative;
+  overflow:hidden;
 }
+
+.sh-hero__media{
+  position:absolute;
+  inset:0;
+  z-index:0;
+}
+
+.sh-hero__media img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+/* Overlays */
 .sh-hero::before{
   content:"";
   position:absolute;
   inset:0;
+  z-index:1;
   background:
     radial-gradient(900px 520px at 20% 10%, rgba(179,139,43,.20), transparent 60%),
     linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.78));
 }
-.sh-hero .wrap{
+
+.sh-hero__content{
   position:relative;
+  z-index:2;
   padding:5rem 1rem 3rem;
 }
-.sh-kicker{
-  display:inline-block;
-  border:1px solid rgba(255,255,255,.14);
-  padding:.35rem .7rem;
-  border-radius:999px;
-  color:rgba(255,255,255,.78);
-  letter-spacing:.12em;
-  text-transform:uppercase;
-  font-size:.78rem;
-  margin:0 0 .9rem;
-}
-.sh-hero h1{
-  font-size:clamp(2rem,6vw,4rem);
-  margin:.2rem 0;
-  letter-spacing:-.02em;
-}
-.sh-hero p{
-  color:var(--muted);
-  max-width:52ch;
-  margin:.55rem auto 1.5rem;
-  line-height:1.6;
-}
-.sh-ctas{
-  display:flex;
-  gap:1rem;
-  justify-content:center;
-  flex-wrap:wrap;
-  margin-bottom:1.25rem;
-}
+
 .hours{
   list-style:none;
   padding:0;
