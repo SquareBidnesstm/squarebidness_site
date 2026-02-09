@@ -386,6 +386,86 @@
 @media (prefers-reduced-motion: reduce){
   .pm-about__media img{ transition:none; transform:none; }
 }
+    /* ===== Featured Work strip ===== */
+.pm-featured{
+  display:grid;
+  gap:1rem;
+  grid-template-columns:repeat(12, 1fr);
+  margin-top:1rem;
+}
+
+.pm-shot{
+  grid-column:span 12;
+  display:block;
+  text-decoration:none;
+  color:#fff;
+  border-radius:var(--pm-radius);
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.03);
+  box-shadow:var(--pm-shadow);
+  transform:translateY(0);
+  transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+
+@media(min-width:920px){
+  .pm-shot{ grid-column:span 4; }
+}
+
+.pm-shot__media{
+  position:relative;
+  aspect-ratio: 4 / 3;
+  overflow:hidden;
+  background:#000;
+}
+.pm-shot__media img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  filter:contrast(1.05) brightness(.98);
+  transform:scale(1.02);
+  transition:transform .35s ease, filter .35s ease;
+}
+
+/* subtle gradient footer */
+.pm-shot__cap{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:.75rem;
+  padding:.9rem 1rem;
+  background:linear-gradient(180deg, rgba(0,0,0,.0), rgba(0,0,0,.14));
+}
+.pm-shot__cap strong{
+  font-weight:950;
+  letter-spacing:-.01em;
+  font-size:.95rem;
+}
+.pm-shot__cap span{
+  color:var(--pm-dim);
+  font-size:.82rem;
+  font-weight:900;
+  white-space:nowrap;
+}
+
+/* hover lift */
+@media (hover:hover){
+  .pm-shot:hover{
+    transform:translateY(-3px);
+    box-shadow:0 18px 58px rgba(0,0,0,.58);
+    border-color:rgba(201,162,39,.22);
+  }
+  .pm-shot:hover img{
+    transform:scale(1.06);
+    filter:contrast(1.06) brightness(1.0);
+  }
+}
+
+/* reduced motion */
+@media (prefers-reduced-motion: reduce){
+  .pm-shot, .pm-shot__media img{ transition:none; transform:none; }
+}
   </style>
 </head>
 
@@ -510,6 +590,101 @@
         </div>
       </div>
     </section>
+
+    <!-- FEATURED WORK -->
+<section class="pm-card" aria-label="Featured Work">
+  <div class="pm-card__pad">
+    <div class="pm-sectionhead">
+      <div>
+        <h2>Featured Work</h2>
+        <p>Three quick examples — view the full portfolio for more.</p>
+      </div>
+      <div>
+        <a class="pm-cta" href="/phomatic/portfolio/">View full portfolio →</a>
+      </div>
+    </div>
+
+    <div class="pm-featured" style="margin-top:1rem;">
+      <!-- 1 -->
+      <a class="pm-shot" href="/phomatic/portfolio/" aria-label="View portfolio — Portraits">
+        <div class="pm-shot__media">
+          <picture>
+            <source type="image/webp"
+              srcset="/phomatic/assets/hero-420x221.webp 420w, /phomatic/assets/hero-640x337.webp 640w, /phomatic/assets/hero-780x411.webp 780w"
+              sizes="(max-width:879px) 92vw, 340px">
+            <source type="image/jpeg"
+              srcset="/phomatic/assets/hero-420x221.jpg 420w, /phomatic/assets/hero-640x337.jpg 640w, /phomatic/assets/hero-780x411.jpg 780w"
+              sizes="(max-width:879px) 92vw, 340px">
+            <img src="/phomatic/assets/hero-780x411.jpg"
+                 alt="Pho-Matic Photography portrait by Gieno Smith in Hammond, Louisiana"
+                 loading="lazy" decoding="async" width="780" height="411">
+          </picture>
+        </div>
+        <div class="pm-shot__cap">
+          <div>
+            <strong>Portraits</strong><br>
+            <span style="color:var(--pm-muted);font-size:.85rem;font-weight:800;">Clean direction · real environments</span>
+          </div>
+          <span>See more</span>
+        </div>
+      </a>
+
+      <!-- 2 -->
+      <a class="pm-shot" href="/phomatic/portfolio/" aria-label="View portfolio — Events">
+        <div class="pm-shot__media">
+          <picture>
+            <source type="image/webp"
+              srcset="/phomatic/assets/hero-420x221.webp 420w, /phomatic/assets/hero-640x337.webp 640w, /phomatic/assets/hero-780x411.webp 780w"
+              sizes="(max-width:879px) 92vw, 340px">
+            <source type="image/jpeg"
+              srcset="/phomatic/assets/hero-420x221.jpg 420w, /phomatic/assets/hero-640x337.jpg 640w, /phomatic/assets/hero-780x411.jpg 780w"
+              sizes="(max-width:879px) 92vw, 340px">
+            <img src="/phomatic/assets/hero-780x411.jpg"
+                 alt="Pho-Matic Photography event coverage by Gieno Smith in Louisiana"
+                 loading="lazy" decoding="async" width="780" height="411">
+          </picture>
+        </div>
+        <div class="pm-shot__cap">
+          <div>
+            <strong>Events</strong><br>
+            <span style="color:var(--pm-muted);font-size:.85rem;font-weight:800;">Energy · moments · details</span>
+          </div>
+          <span>See more</span>
+        </div>
+      </a>
+
+      <!-- 3 -->
+      <a class="pm-shot" href="/phomatic/portfolio/" aria-label="View portfolio — Product">
+        <div class="pm-shot__media">
+          <picture>
+            <source type="image/webp"
+              srcset="/phomatic/assets/hero-420x221.webp 420w, /phomatic/assets/hero-640x337.webp 640w, /phomatic/assets/hero-780x411.webp 780w"
+              sizes="(max-width:879px) 92vw, 340px">
+            <source type="image/jpeg"
+              srcset="/phomatic/assets/hero-420x221.jpg 420w, /phomatic/assets/hero-640x337.jpg 640w, /phomatic/assets/hero-780x411.jpg 780w"
+              sizes="(max-width:879px) 92vw, 340px">
+            <img src="/phomatic/assets/hero-780x411.jpg"
+                 alt="Pho-Matic Photography product photography by Gieno Smith"
+                 loading="lazy" decoding="async" width="780" height="411">
+          </picture>
+        </div>
+        <div class="pm-shot__cap">
+          <div>
+            <strong>Product</strong><br>
+            <span style="color:var(--pm-muted);font-size:.85rem;font-weight:800;">Color-true · consistent lighting</span>
+          </div>
+          <span>See more</span>
+        </div>
+      </a>
+    </div>
+
+    <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem;">
+      <a class="pm-cta pm-cta--gold" href="/phomatic/portfolio/">Open Portfolio</a>
+      <a class="pm-cta" href="/phomatic/book/">Book a session</a>
+    </div>
+  </div>
+</section>
+
 
     <!-- SERVICES -->
     <section id="services" class="pm-card pm-watermark">
