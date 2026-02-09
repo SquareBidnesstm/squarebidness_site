@@ -1,28 +1,34 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- Analytics -->
+  <link rel="preconnect" href="https://www.googletagmanager.com">
+  <link rel="preconnect" href="https://www.google-analytics.com">
+
   <script defer src="/scripts/ga.js"></script>
   <script defer src="/scripts/sb-analytics.js"></script>
 
-  <!-- Basics -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
 
-  <title>Book — Pho-Matic Photography (Gieno Smith)</title>
-  <meta name="description" content="Book a session with Pho-Matic Photography by Gieno Smith. Choose a service and lock your time. Based in Hammond, Louisiana. Available U.S. + abroad." />
+  <title>Book a Session | Pho-Matic Photography — Gieno Smith</title>
+  <meta name="description" content="Book a Pho-Matic Photography session with Gieno Smith. Choose a service and lock your time. Based in Hammond, Louisiana. Available U.S. + abroad." />
   <link rel="canonical" href="https://www.squarebidness.com/phomatic/book/" />
 
-  <meta name="sb:build" content="v20260208-phomatic-book-embed-acuity" />
+  <meta name="sb:build" content="v20260209-phomatic-book-embed" />
+
   <meta name="theme-color" content="#000000" />
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
 
+  <link rel="stylesheet" href="/styles/style.css" />
+  <link rel="stylesheet" href="/styles/phomatic.min.css" />
+
   <!-- OG -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Book — Pho-Matic Photography" />
-  <meta property="og:description" content="Choose a service and lock your time. Powered by Acuity (embedded)." />
+  <meta property="og:site_name" content="Square Bidness" />
+  <meta property="og:title" content="Book a Session | Pho-Matic Photography — Gieno Smith" />
+  <meta property="og:description" content="Choose a service and lock your time — embedded booking, premium flow." />
   <meta property="og:url" content="https://www.squarebidness.com/phomatic/book/" />
   <meta property="og:image" content="https://www.squarebidness.com/phomatic/assets/brand/og-1200x630.webp" />
   <meta name="twitter:card" content="summary_large_image" />
@@ -34,13 +40,39 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/phomatic/assets/brand/icon-180.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/phomatic/assets/brand/icon-192.png" />
   <link rel="icon" type="image/png" sizes="512x512" href="/phomatic/assets/brand/icon-512.png" />
+  <link rel="manifest" href="/phomatic/manifest.webmanifest" />
 
-  <link rel="stylesheet" href="/styles/style.css" />
-  <link rel="stylesheet" href="/styles/phomatic.min.css" />
+  <!-- JSON-LD -->
+  <script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@graph":[
+    {
+      "@type":"WebPage",
+      "@id":"https://www.squarebidness.com/phomatic/book/#webpage",
+      "url":"https://www.squarebidness.com/phomatic/book/",
+      "name":"Book a Session | Pho-Matic Photography — Gieno Smith",
+      "description":"Book a Pho-Matic Photography session with Gieno Smith. Choose a service and lock your time.",
+      "isPartOf":{"@id":"https://www.squarebidness.com/#website"},
+      "about":{"@id":"https://www.squarebidness.com/phomatic/#business"},
+      "mainEntity":{"@id":"https://www.squarebidness.com/phomatic/#business"}
+    },
+    {
+      "@type":"BreadcrumbList",
+      "@id":"https://www.squarebidness.com/phomatic/book/#breadcrumbs",
+      "itemListElement":[
+        {"@type":"ListItem","position":1,"name":"Home","item":"https://www.squarebidness.com/"},
+        {"@type":"ListItem","position":2,"name":"Pho-Matic","item":"https://www.squarebidness.com/phomatic/"},
+        {"@type":"ListItem","position":3,"name":"Book","item":"https://www.squarebidness.com/phomatic/book/"}
+      ]
+    }
+  ]
+}
+  </script>
 
   <style>
     :root{
-      --pm-bg:#070707; --pm-panel:#0b0b0b; --pm-panel2:#0f1113;
+      --pm-bg:#070707; --pm-panel:#0b0b0b;
       --pm-line:#1f1f1f; --pm-line2:#242426;
       --pm-text:#e7e7ea; --pm-muted:#b9bcc5; --pm-dim:#8b8f98;
       --pm-gold:#c9a227; --pm-goldSoft:rgba(201,162,39,.12);
@@ -80,16 +112,14 @@
     }
     .pm-nav a:hover{background:rgba(255,255,255,.08);}
 
-    .pm-wrap{max-width:1100px;margin:0 auto;padding:1.6rem 1rem 3.5rem;display:grid;gap:1rem;}
-    .pm-card{
-      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0));
-      border:1px solid var(--pm-line);
-      border-radius:var(--pm-radius);
-      box-shadow:var(--pm-shadow);
-      overflow:hidden;
+    .pm-hero{
+      border-bottom:1px solid var(--pm-line);
+      background:
+        radial-gradient(1200px 520px at 30% 10%, rgba(201,162,39,.10), transparent 60%),
+        radial-gradient(900px 460px at 90% 0%, rgba(255,255,255,.06), transparent 55%),
+        var(--pm-bg);
     }
-    .pm-card__pad{padding:1.1rem;}
-
+    .pm-hero__inner{max-width:1100px;margin:0 auto;padding:1.7rem 1rem 1.7rem;}
     .pm-badge{
       display:inline-flex;align-items:center;gap:.45rem;
       background:var(--pm-goldSoft); border:1px solid rgba(201,162,39,.45);
@@ -97,68 +127,72 @@
       font-size:.72rem; text-transform:uppercase; letter-spacing:.06em;
       color:#fff; font-weight:950;
     }
-    .pm-head h1{margin:.7rem 0 .35rem;font-size:clamp(1.8rem,2.3vw,2.25rem);font-weight:950;letter-spacing:-.02em;}
-    .pm-head p{margin:0;color:var(--pm-muted);max-width:62rem;line-height:1.6}
+    .pm-lockup{
+      display:block;max-width:270px;width:100%;height:auto;
+      margin:.9rem 0 .35rem;opacity:.98;
+      filter:drop-shadow(0 10px 22px rgba(0,0,0,.35));
+    }
+    .pm-hero h1{font-size:clamp(2.0rem,2.6vw,2.6rem);font-weight:950;margin:.55rem 0 .35rem;letter-spacing:-.02em;}
+    .pm-hero p{margin:0;color:var(--pm-muted);max-width:62rem;font-size:1.0rem;line-height:1.6}
+    .pm-hero__meta{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1rem;align-items:center;}
 
-    .pm-note{
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.03);
-      border-radius:14px;
-      padding:.9rem 1rem;
-      color:var(--pm-muted);
-      line-height:1.6;
-    }
-    .pm-note strong{color:#fff}
-
-    .pm-embed{
-      background:var(--pm-panel);
-      border-top:1px solid var(--pm-line);
-    }
-    /* Premium iframe frame */
-    .pm-iframe-wrap{
-      padding:0;
-      background:var(--pm-panel);
-    }
-    .pm-iframe{
-      width:100%;
-      height:920px; /* desktop */
-      border:0;
-      display:block;
-      background:#000;
-    }
-    @media (max-width: 879px){
-      .pm-iframe{height:1050px;} /* mobile gives more room */
-    }
-
-    .pm-actions{
-      display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.9rem;
-    }
-    .pm-btn{
+    .pm-cta{
       display:inline-flex;align-items:center;justify-content:center;
       border-radius:999px;padding:.62rem 1.05rem;text-decoration:none;
       font-weight:950;letter-spacing:.01em;
       border:1px solid rgba(255,255,255,.12);
       background:rgba(255,255,255,.05); color:#fff;
     }
-    .pm-btn:hover{background:rgba(255,255,255,.09);}
-    .pm-btn--gold{background:rgba(201,162,39,.16);border-color:rgba(201,162,39,.55);}
-    .pm-btn--gold:hover{background:rgba(201,162,39,.22);}
+    .pm-cta:hover{background:rgba(255,255,255,.09);}
+    .pm-cta--gold{background:rgba(201,162,39,.16);border-color:rgba(201,162,39,.55);}
+    .pm-cta--gold:hover{background:rgba(201,162,39,.22);}
 
-    .pm-footer{
-      margin-top:.4rem;
-      color:#6b7280;
-      font-size:.85rem;
-      line-height:1.5;
-      text-align:center;
-      padding:1.6rem 1rem 2.2rem;
-      border-top:1px solid rgba(255,255,255,.08);
-      background:#0b0b0b;
+    .pm-body{max-width:1100px;margin:0 auto;padding:1.5rem 1rem 4rem;display:grid;gap:1rem;}
+
+    .pm-card{
+      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0));
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:var(--pm-radius);
+      box-shadow:var(--pm-shadow);
+      overflow:hidden;
     }
-    .pm-footer a{color:#c9a227;text-decoration:underline;font-weight:950;}
+    .pm-card__pad{padding:1.1rem;}
+
+    /* Premium embedded frame */
+    .pm-embed{
+      border-radius:14px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.12);
+      background:#0b0b0b;
+      position:relative;
+      min-height: 740px;
+    }
+    .pm-embed iframe{
+      width:100%;
+      height: 820px;
+      border:0;
+      display:block;
+      background:#fff; /* Acuity loads white */
+    }
+    @media(max-width:520px){
+      .pm-embed{min-height: 720px;}
+      .pm-embed iframe{height: 900px;}
+    }
+
+    .pm-note{color:var(--pm-muted);margin:0;line-height:1.6;font-size:.95rem}
+    .pm-mini{color:var(--pm-dim);font-weight:850;font-size:.85rem;margin:.65rem 0 0;}
+    .pm-linkpill{
+      background:#151516;border:1px solid var(--pm-line2);
+      border-radius:999px;padding:.5rem .85rem;
+      font-size:.8rem;color:#fff;text-decoration:none;
+      font-weight:900;
+    }
+    .pm-linkpill:hover{background:#1f1f1f;}
   </style>
 </head>
 
 <body class="theme-dark" id="top">
+
   <!-- TOP BAR -->
   <div class="pm-topbar">
     <div class="pm-topbar__inner">
@@ -169,62 +203,105 @@
                style="display:block;width:100%;height:100%;object-fit:contain;" />
         </div>
         <div class="pm-brand__text">
-          <strong>Book Pho-Matic</strong>
-          <small>By Gieno Smith · U.S. + Abroad</small>
+          <strong>Pho-Matic Photography</strong>
+          <small>Book · Gieno Smith</small>
         </div>
       </a>
 
       <nav class="pm-nav" aria-label="Pho-Matic navigation">
         <a href="/phomatic/">Home</a>
         <a href="/phomatic/portfolio/">Portfolio</a>
-        <a href="/phomatic/#rates">Rates</a>
         <a href="https://www.instagram.com/datpholife" target="_blank" rel="me noopener">Instagram</a>
-        <a href="https://pho-maticphotography.as.me/schedule/a0a34b41" target="_blank" rel="noopener">Open in Acuity</a>
       </nav>
     </div>
   </div>
 
-  <main class="pm-wrap">
-    <!-- HEADER -->
-    <section class="pm-card pm-head">
+  <!-- HERO -->
+  <header class="pm-hero">
+    <div class="pm-hero__inner">
+      <span class="pm-badge">Book · Choose service · Lock your time</span>
+
+      <img class="pm-lockup"
+           src="/phomatic/assets/brand/phomatic-logo-lockup.png"
+           alt="Pho-Matic Photography"
+           width="520" height="180"
+           loading="eager" decoding="async" />
+
+      <h1>Book a Session</h1>
+      <p>
+        Pick your service, choose a time, and you’re locked in.
+        If you need to align on goals first, start with a <strong>consultation</strong>.
+      </p>
+
+      <div class="pm-hero__meta">
+        <a class="pm-cta pm-cta--gold" href="#scheduler">Open scheduler</a>
+        <a class="pm-cta" href="/phomatic/portfolio/">View portfolio</a>
+        <a class="pm-cta" href="/phomatic/">Back to home</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="pm-body">
+
+    <section class="pm-card" aria-label="Booking instructions">
       <div class="pm-card__pad">
-        <span class="pm-badge">Booking Portal · Powered by Acuity</span>
-        <h1>Select your appointment and lock your time.</h1>
-        <p>
-          Pho-Matic Photography is home based in <strong>Hammond, Louisiana</strong> and available across the <strong>United States</strong> and abroad.
-          For brand jobs, leave details in the booking notes (goal, location, timeline).
+        <p class="pm-note">
+          <strong>Tip:</strong> For events and weddings, include location + start time + total hours in the booking notes.
+          For portraits, include outfit vibe + backdrop preference.
         </p>
-
-        <div class="pm-actions">
-          <a class="pm-btn pm-btn--gold" href="https://pho-maticphotography.as.me/schedule/a0a34b41" target="_blank" rel="noopener">Open booking in new tab</a>
-          <a class="pm-btn" href="/phomatic/portfolio/">View portfolio</a>
-          <a class="pm-btn" href="/phomatic/">Back to home</a>
-        </div>
-
-        <div class="pm-note" style="margin-top:1rem;">
-          <strong>Tip:</strong> Not sure which service to pick? Book a <strong>Consultation</strong> first — we’ll align on goals, location, styling, and deliverables.
-        </div>
+        <p class="pm-mini">
+          If the embed ever loads slow on your device, use the direct link:
+          <a href="https://pho-maticphotography.as.me/schedule/a0a34b41" target="_blank" rel="noopener" style="color:var(--pm-gold);text-decoration:underline;font-weight:950;">
+            Open booking in a new tab
+          </a>
+        </p>
       </div>
     </section>
 
     <!-- EMBED -->
-    <section class="pm-card pm-embed" aria-label="Acuity embedded scheduler">
-      <div class="pm-iframe-wrap">
-        <iframe
-          class="pm-iframe"
-          title="Pho-Matic Photography Scheduling"
-          src="https://pho-maticphotography.as.me/schedule/a0a34b41"
-          loading="lazy"
-          referrerpolicy="strict-origin-when-cross-origin"
-          allow="payment *; clipboard-write *"
-        ></iframe>
+    <section id="scheduler" class="pm-card" aria-label="Acuity embedded scheduler">
+      <div class="pm-card__pad">
+        <div class="pm-embed">
+          <iframe
+            title="Pho-Matic Photography Booking"
+            loading="lazy"
+            src="https://pho-maticphotography.as.me/schedule/a0a34b41"
+            referrerpolicy="no-referrer-when-downgrade"
+            allow="payment *; fullscreen *">
+          </iframe>
+        </div>
       </div>
     </section>
+
+    <section style="display:flex;gap:.6rem;flex-wrap:wrap;">
+      <a class="pm-cta pm-cta--gold" href="/phomatic/portfolio/">See work examples</a>
+      <a class="pm-cta" href="/phomatic/">Back to home</a>
+    </section>
+
   </main>
 
-  <footer class="pm-footer">
-    © <span id="year"></span> <strong>Pho-Matic Photography</strong> — by Gieno Smith · Hammond, Louisiana · U.S. + Abroad<br>
-    Powered by <a href="https://lab.squarebidness.com/linkme/" target="_blank" rel="noopener noreferrer">Square Bidness Tech Lab</a>
+  <!-- FOOTER -->
+  <footer style="background:#0b0b0b;border-top:1px solid #1a1a1a;padding:2.2rem 1rem;text-align:center;">
+    <div style="max-width:1100px;margin:0 auto;">
+      <p style="color:#a1a1aa;font-size:.9rem;line-height:1.6;margin:0;">
+        © <span id="year"></span> <strong>Pho-Matic Photography</strong> — by Gieno Smith · Hammond, Louisiana
+      </p>
+
+      <p style="margin:.75rem 0 0;display:flex;justify-content:center;gap:.6rem;flex-wrap:wrap;">
+        <a class="pm-linkpill" href="https://www.instagram.com/datpholife" target="_blank" rel="me noopener noreferrer">@datpholife</a>
+        <a class="pm-linkpill" href="https://www.facebook.com/Pho-Matic-Photography-By-Gieno-Smith" target="_blank" rel="me noopener noreferrer">Facebook</a>
+        <a class="pm-linkpill" href="/phomatic/portfolio/">Portfolio</a>
+        <a class="pm-linkpill" href="/phomatic/">Home</a>
+      </p>
+
+      <p style="margin:.85rem 0 0;color:#6b7280;font-size:.85rem;line-height:1.5;">
+        Powered by
+        <a href="https://lab.squarebidness.com/linkme/" target="_blank" rel="noopener noreferrer"
+           style="color:#c9a227;text-decoration:underline;font-weight:950;">
+          Square Bidness Tech Lab
+        </a>
+      </p>
+    </div>
   </footer>
 
   <script>
