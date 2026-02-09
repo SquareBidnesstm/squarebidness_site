@@ -345,6 +345,47 @@
       border-radius:999px;padding:.35rem .65rem;
       color:#d9dbe1;font-size:.78rem;font-weight:900;
     }
+    /* ===== Premium About image treatment (CSS-only) ===== */
+.pm-about__media{
+  position:relative;
+}
+
+/* cinematic B&W + crisp contrast */
+.pm-about__media img{
+  filter: grayscale(1) contrast(1.08) brightness(.96);
+  transform: scale(1.01);
+  transition: filter .35s ease, transform .35s ease;
+}
+
+/* subtle film grain overlay */
+.pm-about__media::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:.10;
+  mix-blend-mode:overlay;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(255,255,255,.08), rgba(255,255,255,.08) 1px, rgba(0,0,0,0) 2px, rgba(0,0,0,0) 4px),
+    radial-gradient(circle at 30% 20%, rgba(255,255,255,.10), transparent 55%),
+    radial-gradient(circle at 80% 60%, rgba(255,255,255,.08), transparent 60%);
+}
+
+/* soft gold edge + lift on hover (desktop) */
+@media (hover:hover){
+  .pm-about__media:hover img{
+    filter: grayscale(.35) contrast(1.06) brightness(1.0);
+    transform: scale(1.03);
+  }
+  .pm-about__media:hover{
+    box-shadow: 0 14px 44px rgba(0,0,0,.55), 0 0 0 1px rgba(201,162,39,.25) inset;
+  }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce){
+  .pm-about__media img{ transition:none; transform:none; }
+}
   </style>
 </head>
 
