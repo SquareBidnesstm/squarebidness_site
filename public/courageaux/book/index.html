@@ -1,3 +1,4 @@
+<!-- public/courageaux/book/index.html -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -12,7 +13,7 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="sb:build" content="v20260211-courageaux-book-embed" />
+  <meta name="sb:build" content="v20260211-courageaux-book-embed-walkins-address" />
 
   <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
@@ -67,6 +68,51 @@
     .badge img{height:18px;width:18px}
     h1{margin:.6rem 0 .2rem;font-size:clamp(1.6rem,3.6vw,2.25rem);letter-spacing:-.01em}
     .sub{margin:0;color:#d7dae0;max-width:70ch}
+
+    /* NEW: quick info row */
+    .quick{
+      margin-top:10px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+      color:#d7dae0;
+      font-size:.92rem;
+    }
+    .quick strong{color:#fff}
+    .quick a{
+      color:#d7dae0;
+      text-decoration:underline;
+      font-weight:950;
+      text-underline-offset:3px;
+    }
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.04);
+      font-weight:900;
+      font-size:.85rem;
+      color:#f3f3f3;
+      white-space:nowrap;
+      line-height:1;
+    }
+    .ico{
+      width:18px;height:18px;
+      display:inline-flex;align-items:center;justify-content:center;
+      border-radius:6px;
+      font-size:.9rem;font-weight:900;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.12);
+    }
+    .chip--ok{border-color:rgba(25,195,125,.35);background:rgba(25,195,125,.08)}
+    .chip--ok .ico{border-color:rgba(25,195,125,.55);background:rgba(25,195,125,.14)}
+    .chip--walkin{border-color:rgba(201,162,39,.35);background:rgba(201,162,39,.08)}
+    .chip--walkin .ico{border-color:rgba(201,162,39,.55);background:rgba(201,162,39,.14)}
+
     .row{margin-top:12px;display:flex;flex-wrap:wrap;gap:10px}
 
     .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 16px;border-radius:12px;font-weight:900;border:1px solid transparent}
@@ -85,6 +131,15 @@
 
     footer{border-top:1px solid var(--stroke);padding:16px 0 26px;color:#a1a1aa;text-align:center;font-size:.9rem}
     footer a{color:var(--gold);text-decoration:underline;font-weight:950}
+
+    /* Helpful fallback text under embed */
+    .fallback{
+      margin:-8px 0 18px;
+      color:var(--muted);
+      font-size:.9rem;
+      line-height:1.55;
+    }
+    .fallback a{color:#d7dae0;text-decoration:underline;font-weight:950;text-underline-offset:3px}
   </style>
 </head>
 
@@ -118,6 +173,22 @@
         use “Open booking” to book directly on the official page.
       </p>
 
+      <!-- NEW: walk-ins + address -->
+      <div class="quick" aria-label="Quick info">
+        <span class="chip chip--ok" title="Online booking is handled on GlossGenius">
+          <span class="ico" aria-hidden="true">✓</span>
+          Online booking (GlossGenius)
+        </span>
+        <span class="chip chip--walkin" title="Walk-ins are welcomed when availability allows">
+          <span class="ico" aria-hidden="true">⌁</span>
+          Walk-ins welcome (when available)
+        </span>
+        <span>
+          <strong>42334 Deluxe Plaza 1, Hammond, LA 70403</strong> ·
+          <a href="https://www.google.com/maps?q=42334+Deluxe+Plaza+1,+Hammond,+LA+70403" target="_blank" rel="noopener noreferrer">Directions</a>
+        </span>
+      </div>
+
       <div class="row">
         <a class="btn btn--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Open booking in new tab</a>
         <a class="btn btn--ghost" href="/courageaux/appointments/">⟵ Back to Appointments</a>
@@ -134,6 +205,12 @@
         referrerpolicy="no-referrer-when-downgrade"
       ></iframe>
     </div>
+
+    <p class="fallback">
+      If the calendar area is blank, your device or browser may block embedded booking pages.
+      Use <a href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Open booking</a>
+      to book directly.
+    </p>
   </main>
 
   <footer>
