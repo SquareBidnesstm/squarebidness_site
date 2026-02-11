@@ -1,4 +1,4 @@
-<!-- public/courageaux/index.html (v2 micro-sweep + hero injected) -->
+<!-- public/courageaux/index.html (v2 micro-sweep + hero injected + premium flush contain) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -15,7 +15,7 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="sb:build" content="v20260211-courageaux-index-walkins-address-hero-webp" />
+  <meta name="sb:build" content="v20260211-courageaux-index-walkins-address-hero-webp-premiumflush" />
 
   <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
@@ -243,7 +243,7 @@
     }
     @media(min-width:900px){
       .cx-hero__inner{
-        grid-template-columns: 1.05fr .95fr; /* ✅ now 2-col because hero image is back */
+        grid-template-columns: 1.05fr .95fr;
         gap:22px;
         padding:28px 16px;
         align-items:center;
@@ -369,19 +369,27 @@
       vertical-align:-3px;
     }
 
-    /* ✅ HERO MEDIA (new) */
-    .cx-hero__media picture, .cx-hero__media img{width:100%}
-    .cx-hero__media img{
-      width:100%;
-      height:auto;
+    /* ✅ HERO MEDIA (premium, no crop, flush) */
+    .cx-hero__media{
       border-radius:16px;
+      overflow:hidden;
       border:1px solid rgba(255,255,255,.10);
       box-shadow: var(--shadow);
       background:#000;
+      aspect-ratio: 16 / 9;
     }
-    @media(min-width:900px){
-      .cx-hero__media{height:100%;display:flex}
-      .cx-hero__media img{height:100%;object-fit:cover}
+    .cx-hero__media picture,
+    .cx-hero__media img{
+      width:100%;
+      height:100%;
+      display:block;
+    }
+    .cx-hero__media img{
+      object-fit: contain;      /* 👈 no cropping */
+      object-position: center;
+    }
+    @media (min-width: 1200px){
+      .cx-hero__media{ max-height: 420px; }
     }
 
     /* Sections */
@@ -600,9 +608,10 @@
           </div>
         </div>
 
-        <!-- ✅ HERO IMAGE (WebP + JPG fallback; responsive) -->
+        <!-- Hero media (index only) -->
         <div class="cx-hero__media" aria-label="Courageaux hero image">
           <picture>
+            <!-- WebP (preferred) -->
             <source
               type="image/webp"
               srcset="
@@ -610,16 +619,24 @@
                 /courageaux/assets/hero_index_1200.webp 1200w,
                 /courageaux/assets/hero_index_1600.webp 1600w
               "
-              sizes="(min-width: 900px) 46vw, 100vw"
+              sizes="(max-width: 900px) 100vw, 1200px"
             />
+
+            <!-- JPG fallback -->
             <img
               src="/courageaux/assets/hero_index_1200.jpg"
-              alt="Courageaux Aesthetics — Clean, Calm, Confident Skin"
+              srcset="
+                /courageaux/assets/hero_index_960.jpg 960w,
+                /courageaux/assets/hero_index_1200.jpg 1200w,
+                /courageaux/assets/hero_index_1600.jpg 1600w
+              "
+              sizes="(max-width: 900px) 100vw, 1200px"
               width="1600"
               height="900"
               loading="eager"
               decoding="async"
               fetchpriority="high"
+              alt="Courageaux Aesthetics — clean, calm, confident skin"
             />
           </picture>
         </div>
