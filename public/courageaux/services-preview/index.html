@@ -1,4 +1,3 @@
-<!-- public/courageaux/services-preview/index.html (sweep + fix) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -14,7 +13,7 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="sb:build" content="v20260211-courageaux-services-preview-sync" />
+  <meta name="sb:build" content="v20260211-courageaux-services-nohero-start-here-faq" />
 
   <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
@@ -48,206 +47,82 @@
   <meta name="twitter:description" content="Preview services, then book through the official GlossGenius calendar." />
   <meta name="twitter:image" content="https://www.squarebidness.com/courageaux/assets/courageaux_hero_1200x630.jpg" />
 
-  <!-- Preload hero -->
-  <link rel="preload" as="image" href="/courageaux/assets/courageaux_hero_1200x630.jpg" fetchpriority="high" />
-
   <style>
     :root{
       --bg:#0b0b0b; --fg:#fff; --muted:#bdbdbd; --stroke:#1f1f1f;
       --gold:#c9a227; --soft:#121212;
+      --ok:#20c997;
     }
     *{box-sizing:border-box}
-    html,body{
-      margin:0;
-      background:var(--bg);
-      color:var(--fg);
-      font-family:system-ui,Segoe UI,Roboto,Arial;
-      line-height:1.5;
-    }
+    html,body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,Segoe UI,Roboto,Arial;line-height:1.5}
     a{color:inherit;text-decoration:none}
 
     .container{max-width:1200px;margin:0 auto;padding:0 16px}
 
     .btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      padding:10px 14px;
-      border-radius:12px;
-      font-weight:900;
-      border:1px solid transparent;
-      white-space:nowrap;
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 14px;border-radius:12px;font-weight:900;border:1px solid transparent;white-space:nowrap;
     }
     .btn--gold{background:var(--gold);color:#000;border-color:var(--gold)}
     .btn--ghost{background:#0f0f0f;color:#fff;border-color:#2a2a2a}
     @media (hover:hover){ .btn:hover{opacity:.93} }
 
-    /* TOP NAV */
-    .cx-topnav{
-      border-bottom:1px solid var(--stroke,#1f1f1f);
-      background:rgba(0,0,0,.35);
-    }
+    /* Top nav */
+    .cx-topnav{border-bottom:1px solid var(--stroke,#1f1f1f);background:rgba(0,0,0,.35)}
     .cx-topnav__inner{
-      max-width:1200px;
-      margin:0 auto;
-      padding:14px 16px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
+      max-width:1200px;margin:0 auto;padding:14px 16px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
     }
-    .cx-brand{
-      display:inline-flex;
-      align-items:center;
-      gap:10px;
-      text-decoration:none;
-      color:inherit;
-      font-weight:900;
-    }
-    .cx-brand img{
-      height:22px;width:22px;display:block;
-      border-radius:6px;
-      background:#fff;
-    }
-    .cx-links{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      align-items:center;
-    }
+    .cx-brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:inherit;font-weight:900}
+    .cx-brand img{height:22px;width:22px;display:block;border-radius:6px;background:#fff}
+    .cx-links{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
     .cx-pill{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:9px 12px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.04);
-      color:#f5f5f5;
-      text-decoration:none;
-      font-weight:900;
-      font-size:.9rem;
-      white-space:nowrap;
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:9px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.04);color:#f5f5f5;text-decoration:none;font-weight:900;font-size:.9rem;white-space:nowrap;
     }
     .cx-pill:hover{background:rgba(255,255,255,.07)}
-    .cx-pill--gold{
-      border-color:rgba(201,162,39,.85);
-      background:rgba(201,162,39,.95);
-      color:#000;
-    }
+    .cx-pill--gold{border-color:rgba(201,162,39,.85);background:rgba(201,162,39,.95);color:#000}
 
-    /* HERO / HEADER */
-    .hero{
-      border-bottom:1px solid var(--stroke);
-      background:#0b0b0b;
-    }
-    .hero__inner{
-      max-width:1200px;
-      margin:0 auto;
-      padding:18px 16px 18px;
-      display:grid;
-      gap:14px;
-      align-items:center;
-    }
-    @media(min-width:900px){
-      .hero__inner{grid-template-columns:1.05fr .95fr;gap:20px}
-    }
-
+    /* Header (no hero image) */
+    .hero{border-bottom:1px solid var(--stroke);background:#0b0b0b}
+    .hero__inner{max-width:1200px;margin:0 auto;padding:18px 16px 16px;display:grid;gap:12px;align-items:center}
     .badge{
-      background:#fff;
-      color:#000;
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:6px 10px;
-      border-radius:999px;
-      font-size:.8rem;
-      font-weight:900;
-      letter-spacing:.02em;
+      background:#fff;color:#000;display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;font-size:.8rem;font-weight:950;letter-spacing:.02em;
+      width:max-content;
     }
     .badge img{height:18px;width:18px;display:block}
 
-    .hero h1{
-      margin:.55rem 0 .25rem;
-      font-size:clamp(1.55rem,4vw,2.25rem);
-      font-weight:900;
-      letter-spacing:-.01em;
-    }
-    .hero p{
-      margin:.15rem 0 0;
-      color:var(--muted);
-      max-width:70ch;
+    .mood-strip{
+      height:8px;border-radius:999px;margin-top:10px;
+      background:linear-gradient(90deg, rgba(201,162,39,.55), rgba(255,255,255,.10), rgba(201,162,39,.25));
+      border:1px solid rgba(255,255,255,.10);
     }
 
-    .hero__actions{
-      margin-top:12px;
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-    }
+    .hero h1{margin:.4rem 0 .15rem;font-size:clamp(1.55rem,4vw,2.25rem);font-weight:950;letter-spacing:-.01em}
+    .hero p{margin:.15rem 0 0;color:var(--muted);max-width:78ch}
 
-    .hero__media img{
-      width:100%;
-      height:auto;
-      border-radius:14px;
-      border:1px solid var(--stroke);
-      display:block;
-      object-fit:cover;
-    }
+    .hero__actions{margin-top:10px;display:flex;flex-wrap:wrap;gap:10px}
 
-    /* BOOKING STATUS STRIP (matches your other pages) */
-    .cx-status{
-      margin-top:10px;
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      align-items:center;
-    }
+    /* Booking status strip */
+    .cx-status{margin-top:8px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
     .cx-chip{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:7px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.04);
-      font-weight:900;
-      font-size:.82rem;
-      color:#f3f3f3;
-      white-space:nowrap;
-      line-height:1;
-      letter-spacing:.02em;
+      display:inline-flex;align-items:center;gap:8px;padding:7px 10px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);
+      font-weight:900;font-size:.82rem;color:#f3f3f3;white-space:nowrap;line-height:1;
     }
-    .cx-dot{
-      width:8px;height:8px;border-radius:50%;
-      background:#9aa3ad;
-      box-shadow:0 0 0 3px rgba(255,255,255,.06) inset;
-    }
-    .cx-dot--ok{background:#20c997}
+    .cx-dot{width:8px;height:8px;border-radius:50%;background:#9aa3ad;box-shadow:0 0 0 3px rgba(255,255,255,.06) inset}
+    .cx-dot--ok{background:var(--ok)}
     .cx-dot--soon{background:var(--gold)}
     .cx-chip strong{color:var(--gold)}
 
-    /* SECTION TITLES */
-    .section-title{
-      font-size:1.2rem;
-      font-weight:900;
-      margin:26px 0 8px;
-    }
-    .section-sub{
-      color:var(--muted);
-      margin:0 0 14px;
-      max-width:70ch;
-      font-size:.95rem;
-    }
+    /* Section titles */
+    .section-title{font-size:1.2rem;font-weight:950;margin:26px 0 8px}
+    .section-sub{color:var(--muted);margin:0 0 14px;max-width:80ch;font-size:.95rem}
 
-    /* GRID + CARDS */
-    .grid{
-      display:grid;
-      gap:18px;
-      padding:12px 0 4px;
-    }
+    /* Grid + cards */
+    .grid{display:grid;gap:18px;padding:12px 0 4px}
     @media(min-width:780px){ .grid{grid-template-columns:1fr 1fr} }
     @media(min-width:1100px){ .grid{grid-template-columns:1fr 1fr 1fr} }
 
@@ -262,82 +137,53 @@
       min-height:210px;
     }
     .pill{
-      display:inline-flex;
-      align-items:center;
-      width:max-content;
-      padding:4px 10px;
-      border-radius:999px;
-      font-size:.8rem;
-      font-weight:900;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.10);
-      color:#f3f4f6;
+      display:inline-flex;align-items:center;width:max-content;
+      padding:4px 10px;border-radius:999px;font-size:.8rem;font-weight:950;
+      background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);color:#f3f4f6;
     }
-    .card h3{
-      margin:0;
-      font-size:1.05rem;
-      font-weight:900;
-      letter-spacing:-.005em;
-    }
-    .card p{
-      margin:0;
-      color:#d7dae0;
-      font-size:.95rem;
-    }
-    .price{
-      font-weight:900;
-      color:var(--gold);
-      margin-top:auto;
-      font-size:1rem;
-    }
-    .card .book{
-      margin-top:8px;
-      width:100%;
-    }
+    .card h3{margin:0;font-size:1.05rem;font-weight:950;letter-spacing:-.005em}
+    .card p{margin:0;color:#d7dae0;font-size:.95rem}
+    .price{font-weight:950;color:var(--gold);margin-top:auto;font-size:1rem}
+    .card .book{margin-top:8px;width:100%}
 
-    /* HOURS */
-    .hours{
-      margin-top:18px;
-      background:var(--soft);
-      border:1px solid var(--stroke);
+    /* Start Here block */
+    .start-here{
+      margin-top:16px;
+      border:1px solid rgba(201,162,39,.32);
+      background:rgba(201,162,39,.08);
       border-radius:16px;
-      padding:16px;
+      padding:14px 14px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
     }
-    .hours h2{
-      margin:0 0 .4rem;
-      font-size:1.05rem;
-      font-weight:900;
-    }
-    .hours p{margin:0 0 .8rem;color:var(--muted);font-size:.9rem}
-    .hours-grid{
-      display:grid;
-      grid-template-columns:1fr auto;
-      row-gap:4px;
-      font-size:.9rem;
-      color:#e5e7eb;
-    }
+    .start-here strong{color:#fff}
+    .start-here p{margin:0;color:#d7dae0;font-size:.93rem;line-height:1.5;max-width:78ch}
+    .start-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 
-    /* FOOTER */
-    footer{
-      padding:20px 0 30px;
-      border-top:1px solid var(--stroke);
-      margin-top:34px;
-      background:#0b0b0b;
-    }
+    /* FAQ */
+    .faq{margin-top:18px;background:var(--soft);border:1px solid var(--stroke);border-radius:16px;padding:16px}
+    .faq h2{margin:0 0 .35rem;font-size:1.05rem;font-weight:950}
+    .faq p{margin:0 0 .85rem;color:var(--muted);font-size:.9rem}
+    .faq details{border-top:1px solid var(--stroke);padding:10px 0}
+    .faq details:first-of-type{border-top:0}
+    .faq summary{cursor:pointer;font-weight:950;color:#f3f4f6}
+    .faq .ans{margin-top:6px;color:#d7dae0;font-size:.95rem;line-height:1.55}
+
+    /* Hours (trust-safe) */
+    .hours{margin-top:18px;background:var(--soft);border:1px solid var(--stroke);border-radius:16px;padding:16px}
+    .hours h2{margin:0 0 .4rem;font-size:1.05rem;font-weight:950}
+    .hours p{margin:0;color:var(--muted);font-size:.9rem}
+
+    /* Footer */
+    footer{padding:20px 0 30px;border-top:1px solid var(--stroke);margin-top:34px;background:#0b0b0b}
     .credit{
-      padding:10px 14px;
-      border:1px solid var(--stroke);
-      border-radius:12px;
-      background:#0e0e0e;
-      color:var(--muted);
-      text-align:center;
-      font-size:.9rem;
+      padding:10px 14px;border:1px solid var(--stroke);border-radius:12px;background:#0e0e0e;
+      color:var(--muted);text-align:center;font-size:.9rem;
     }
-    .credit a{
-      color:var(--gold);
-      text-decoration:underline;
-      font-weight:900;
-    }
+    .credit a{color:var(--gold);text-decoration:underline;font-weight:950}
   </style>
 </head>
 
@@ -345,14 +191,7 @@
   <nav class="cx-topnav" aria-label="Courageaux navigation">
     <div class="cx-topnav__inner">
       <a class="cx-brand" href="/courageaux/">
-        <img
-          src="/courageaux/assets/icon_courageaux_512.png"
-          alt="Courageaux Aesthetics"
-          width="22"
-          height="22"
-          loading="eager"
-          decoding="async"
-        >
+        <img src="/courageaux/assets/icon_courageaux_512.png" alt="Courageaux Aesthetics" width="22" height="22" loading="eager" decoding="async">
         Courageaux Aesthetics
       </a>
 
@@ -376,17 +215,12 @@
           Courageaux Aesthetics · Services
         </span>
 
-        <p class="cx-tagline" style="margin-top:8px;color:var(--muted);font-size:.85rem;">
-          Clean • Calm • Professional · Hammond, Louisiana
-        </p>
-
         <h1>Services overview.</h1>
         <p>
           A clean visual preview of top treatments offered by Courageaux Aesthetics — facials, corrective care,
-          waxing, and signature experiences.
+          waxing, and signature experiences. For live availability and exact options, book through GlossGenius.
         </p>
 
-        <!-- Booking Status (minimal, matches consultation page) -->
         <div class="cx-status" aria-label="Booking status">
           <div class="cx-chip" title="Live booking is handled on GlossGenius">
             <span class="cx-dot cx-dot--ok" aria-hidden="true"></span>
@@ -399,64 +233,59 @@
         </div>
 
         <div class="hero__actions">
-          <a class="btn btn--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">
-            Book on GlossGenius
-          </a>
-          <a class="btn btn--ghost" href="/courageaux/">
-            ⟵ Back to Courageaux
-          </a>
-          <a class="btn btn--ghost" href="/courageaux/consultation/">
-            Consultation &amp; policies
-          </a>
-          <a class="btn btn--ghost" href="/courageaux/appointments/">
-            Appointments
-          </a>
-          <a class="btn btn--ghost" href="/courageaux/intake/">
-            Client intake
-          </a>
+          <a class="btn btn--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book on GlossGenius</a>
+          <a class="btn btn--ghost" href="/courageaux/">⟵ Back to Courageaux</a>
+          <a class="btn btn--ghost" href="/courageaux/consultation/">Consultation &amp; policies</a>
+          <a class="btn btn--ghost" href="/courageaux/appointments/">Appointments</a>
+          <a class="btn btn--ghost" href="/courageaux/intake/">Client intake</a>
         </div>
-      </div>
 
-      <div class="hero__media">
-        <img
-          src="/courageaux/assets/courageaux_hero_1200x630.jpg"
-          width="1200" height="630"
-          loading="eager" decoding="async" fetchpriority="high"
-          alt="Courageaux Aesthetics — service preview mood image">
+        <div class="mood-strip" aria-hidden="true"></div>
+
+        <div class="start-here" style="margin-top:14px">
+          <div>
+            <p>
+              <strong>New here?</strong> Start with the “Hard Reset” first-time facial or a consultation to get a clear recommendation.
+            </p>
+          </div>
+          <div class="start-actions">
+            <a class="btn btn--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Start here</a>
+            <a class="btn btn--ghost" href="/courageaux/consultation/">Read Consultation</a>
+          </div>
+        </div>
       </div>
     </div>
   </header>
 
   <main class="container">
-
     <!-- SIGNATURE SERVICES -->
     <h2 class="section-title">Signature services</h2>
     <p class="section-sub">Top recommended treatments for first-time clients and monthly maintenance.</p>
 
     <div class="grid">
-      <article class="card">
+      <div class="card">
         <span class="pill">Client favorite</span>
         <h3>First Time “Hard Reset” Facial — 75 min</h3>
         <p>Deep cleanse, exfoliation, extractions, massage, and a personalized skin plan. Perfect for first-timers.</p>
         <div class="price">$85</div>
         <a class="btn btn--gold book" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book</a>
-      </article>
+      </div>
 
-      <article class="card">
+      <div class="card">
         <span class="pill">Glow facial</span>
         <h3>Amari’s Signature Glow — 50 min</h3>
         <p>Hydro-microdermabrasion + brightening serums for a smooth, glossy, even finish.</p>
         <div class="price">$85</div>
         <a class="btn btn--gold book" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book</a>
-      </article>
+      </div>
 
-      <article class="card">
+      <div class="card">
         <span class="pill">Maintenance</span>
         <h3>Returning Client Facial — 60 min</h3>
         <p>Steady glow upkeep, tailored to your ongoing routine and progress.</p>
         <div class="price">$95</div>
         <a class="btn btn--gold book" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book</a>
-      </article>
+      </div>
     </div>
 
     <!-- ADVANCED SERVICES -->
@@ -464,59 +293,59 @@
     <p class="section-sub">Higher-level services focused on correction, smoothing, brightening, or unique experiences.</p>
 
     <div class="grid">
-      <article class="card">
+      <div class="card">
         <span class="pill">Luxury</span>
         <h3>Dream Facial by Circadia</h3>
         <p>Premium corrective treatment using professional Circadia products for deep hydration &amp; brightening.</p>
         <div class="price">$175</div>
         <a class="btn btn--gold book" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book</a>
-      </article>
+      </div>
 
-      <article class="card">
+      <div class="card">
         <span class="pill">Corrective</span>
         <h3>Microdermabrasion</h3>
         <p>Exfoliation treatment to smooth texture, brighten dull skin, and fade dark spots over time.</p>
         <div class="price">$85</div>
         <a class="btn btn--gold book" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book</a>
-      </article>
+      </div>
 
-      <article class="card">
+      <div class="card">
         <span class="pill">Instant smooth</span>
         <h3>Dermaplaning — 10 min</h3>
         <p>Removes peach fuzz + dead skin for a flawless, smooth makeup-ready base.</p>
         <div class="price">$50</div>
         <a class="btn btn--gold book" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book</a>
-      </article>
+      </div>
     </div>
 
-    <!-- SPECIALTY SERVICES -->
+    <!-- SPECIAL SERVICES -->
     <h2 class="section-title">Specialty services</h2>
     <p class="section-sub">Unique offerings tailored for different client needs.</p>
 
     <div class="grid">
-      <article class="card">
+      <div class="card">
         <span class="pill">Men’s grooming</span>
         <h3>Kings Facial — 60 min</h3>
         <p>Designed for men’s skin needs — exfoliation, hydration, beard-area care, and relaxation.</p>
         <div class="price">$100</div>
         <a class="btn btn--gold book" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book</a>
-      </article>
+      </div>
 
-      <article class="card">
+      <div class="card">
         <span class="pill">Bundle</span>
         <h3>Soft Girl Package — 120 min</h3>
         <p>Facial + dermaplaning + wax package for a full “fresh start” transformation.</p>
         <div class="price">$150</div>
         <a class="btn btn--gold book" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book</a>
-      </article>
+      </div>
 
-      <article class="card">
+      <div class="card">
         <span class="pill">Experience</span>
         <h3>Couples Glow — 80 min</h3>
         <p>Side-by-side double appointment — glow &amp; relax together. Perfect for birthdays &amp; anniversaries.</p>
         <div class="price">$255</div>
         <a class="btn btn--gold book" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book</a>
-      </article>
+      </div>
     </div>
 
     <!-- WAXING -->
@@ -524,46 +353,66 @@
     <p class="section-sub">Full-service waxing for women and men.</p>
 
     <div class="grid">
-      <article class="card">
+      <div class="card">
         <span class="pill">Wax</span>
         <h3>Brazilian Wax</h3>
         <p>Clean &amp; precise — hygiene-focused waxing for smooth results.</p>
         <div class="price">$55</div>
         <a class="btn btn--gold book" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book</a>
-      </article>
+      </div>
 
-      <article class="card">
+      <div class="card">
         <span class="pill">Wax</span>
         <h3>Eyebrow Sculpt</h3>
         <p>Shape, clean, and refine for natural balance.</p>
         <div class="price">$15</div>
         <a class="btn btn--gold book" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book</a>
-      </article>
+      </div>
 
-      <article class="card">
+      <div class="card">
         <span class="pill">Wax</span>
         <h3>Full Face Wax</h3>
         <p>Removes facial hair gently while protecting skin sensitivity.</p>
         <div class="price">$45</div>
         <a class="btn btn--gold book" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book</a>
-      </article>
+      </div>
     </div>
 
-    <!-- HOURS (synced to your consultation page hours block) -->
-    <section class="hours" aria-label="Studio hours">
-      <h2>Studio hours</h2>
-      <p>Hours may shift with holidays and demand. Always confirm availability inside the GlossGenius booking calendar.</p>
-      <div class="hours-grid">
-        <span>Monday</span>    <span>Closed</span>
-        <span>Tuesday</span>   <span>10:00 AM – 8:00 PM</span>
-        <span>Wednesday</span> <span>9:00 AM – 8:00 PM</span>
-        <span>Thursday</span>  <span>9:00 AM – 8:00 PM</span>
-        <span>Friday</span>    <span>9:30 AM – 8:00 PM</span>
-        <span>Saturday</span>  <span>9:30 AM – 4:30 PM</span>
-        <span>Sunday</span>    <span>Closed</span>
-      </div>
+    <!-- FAQ -->
+    <section class="faq" aria-label="FAQ">
+      <h2>FAQ</h2>
+      <p>Quick answers to common booking questions.</p>
+
+      <details>
+        <summary>Do I need a consultation first?</summary>
+        <div class="ans">
+          If you’re not sure what to book, start with the Consultation page. Many first-time clients choose the “Hard Reset” facial as a safe starting point.
+          <a href="/courageaux/consultation/" style="color:var(--gold);text-decoration:underline;font-weight:950;">Consultation &amp; policies</a>
+        </div>
+      </details>
+
+      <details>
+        <summary>What if I’m not sure what to book?</summary>
+        <div class="ans">
+          Book the “Hard Reset” first-time facial or review the consultation guidance first. The goal is calm, routine-first care — no guesswork.
+          <a href="/courageaux/consultation/" style="color:var(--gold);text-decoration:underline;font-weight:950;">Start here</a>
+        </div>
+      </details>
+
+      <details>
+        <summary>How do I reschedule or cancel?</summary>
+        <div class="ans">
+          Use the reschedule/cancel links in your GlossGenius confirmation email or text. Policies and fees (if any) are listed in the GlossGenius booking flow.
+          <a href="https://courageauxaesthetics.glossgenius.com/" target="_blank" rel="noopener noreferrer" style="color:var(--gold);text-decoration:underline;font-weight:950;">Open GlossGenius</a>
+        </div>
+      </details>
     </section>
 
+    <!-- HOURS (trust-safe) -->
+    <section class="hours">
+      <h2>Hours</h2>
+      <p>Hours vary — confirm current availability inside the GlossGenius calendar.</p>
+    </section>
   </main>
 
   <footer>
