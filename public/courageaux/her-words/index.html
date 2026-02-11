@@ -1,4 +1,4 @@
-<!-- public/courageaux/her-words/index.html (enterprise split + exact Stories gold + caption) -->
+<!-- public/courageaux/her-words/index.html (flush + premium portrait media) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -15,7 +15,7 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="sb:build" content="v20260120-courageaux-her-words-enterprise" />
+  <meta name="sb:build" content="v20260211-courageaux-her-words-flush-premium" />
 
   <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
@@ -62,9 +62,7 @@
       --gold:#c9a227; /* Stories gold */
       --shadow: 0 18px 40px rgba(0,0,0,.35);
       --r:16px;
-      --r2:14px;
     }
-
     *{box-sizing:border-box}
     html,body{height:100%}
 
@@ -80,48 +78,52 @@
       -webkit-font-smoothing:antialiased;
       text-rendering:optimizeLegibility;
     }
-
     a{color:inherit}
     img{max-width:100%;height:auto;display:block}
-
     .container{max-width:980px;margin:0 auto;padding:0 16px}
 
-    /* Buttons */
+    /* ✅ Standard buttons (match polished set) */
     .btn{
       display:inline-flex;
       align-items:center;
       justify-content:center;
       gap:10px;
-      padding:10px 14px;
-      border-radius:999px;
+      padding:12px 16px;
+      border-radius:12px;
       text-decoration:none;
-      font-weight:900;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.04);
+      font-weight:950;
+      border:1px solid transparent;
+      background:rgba(255,255,255,.03);
       color:#fff;
       user-select:none;
       white-space:nowrap;
       transition: transform .12s ease, opacity .12s ease, background .12s ease, border-color .12s ease;
+      cursor:pointer;
     }
     .btn:active{transform: translateY(1px)}
-    .btn:hover{opacity:.95}
+    @media(hover:hover){ .btn:hover{opacity:.95} }
     .btn--gold{
       background:var(--gold);
-      border-color:var(--gold);
+      border-color:rgba(201,162,39,.95);
       color:#111;
       box-shadow:0 10px 28px rgba(201,162,39,.35);
     }
-    .btn:focus-visible{
-      outline:3px solid rgba(201,162,39,.55);
-      outline-offset:2px;
+    .btn--ghost{
+      background:rgba(255,255,255,.03);
+      border-color:rgba(255,255,255,.14);
+      color:#fff;
     }
+    @media(hover:hover){
+      .btn--ghost:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.22)}
+    }
+    .btn:focus-visible{outline:3px solid rgba(201,162,39,.55); outline-offset:2px}
 
-    /* Top nav (match Courageaux index) */
+    /* ✅ Standard top nav (same pill order) */
     .cx-topnav{
       position:sticky;
       top:0;
       z-index:50;
-      border-bottom:1px solid var(--stroke);
+      border-bottom:1px solid rgba(255,255,255,.10);
       background:rgba(0,0,0,.55);
       backdrop-filter: blur(10px);
     }
@@ -151,12 +153,7 @@
       background:rgba(255,255,255,.95);
       padding:2px;
     }
-    .cx-links{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      align-items:center;
-    }
+    .cx-links{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
     .cx-pill{
       display:inline-flex;
       align-items:center;
@@ -167,29 +164,29 @@
       background:rgba(255,255,255,.04);
       color:#f5f5f5;
       text-decoration:none;
-      font-weight:900;
+      font-weight:950;
       font-size:.92rem;
       white-space:nowrap;
       transition: background .12s ease, border-color .12s ease, transform .12s ease;
     }
-    .cx-pill:active{transform: translateY(1px)}
     .cx-pill:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.22)}
+    .cx-pill:active{transform: translateY(1px)}
     .cx-pill--gold{
       border-color:rgba(201,162,39,.85);
       background:rgba(201,162,39,.95);
       color:#000;
     }
 
-    /* Page shell */
-    .page{padding:22px 0 28px;}
+    /* Hero shell */
     .page-hero{
       padding:22px 0 16px;
-      border-bottom:1px solid var(--stroke);
+      border-bottom:1px solid rgba(255,255,255,.10);
       background:
         radial-gradient(circle at top left, rgba(201,162,39,.10), rgba(0,0,0,0) 55%),
         linear-gradient(180deg, rgba(0,0,0,.75), rgba(0,0,0,.25));
     }
 
+    /* ✅ Standard badge */
     .badge{
       display:inline-flex;
       align-items:center;
@@ -217,65 +214,81 @@
       font-size:.95rem;
       max-width:75ch;
     }
+    .nav-row{margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 
-    .nav-row{
-      margin-top:12px;
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      align-items:center;
-    }
-
-    /* ✅ STORIES-STYLE SPLIT (text left, image right) */
-    .hw-split{
-      display:grid;
-      gap:18px;
-      align-items:start;
-      margin-top:18px;
-    }
+    /* ✅ Portrait/content-first split */
+    .hw-split{display:grid;gap:18px;align-items:start;margin-top:18px}
     @media(min-width:900px){
-      .hw-split{
-        grid-template-columns: 1.15fr .85fr;
-        gap:28px;
-        align-items:start;
-      }
+      .hw-split{grid-template-columns:1.15fr .85fr;gap:28px}
     }
+    .hw-text{max-width:68ch}
 
-    .hw-text{max-width:68ch;}
-
-    /* Image card with Stories gold + trim */
+    /* ✅ PREMIUM, FLUSH IMAGE CARD */
     .hw-media{
       position:relative;
       border-radius:18px;
-      overflow:hidden;
-      border:1px solid rgba(201,162,39,.85); /* exact Stories gold family */
+      overflow:hidden;                  /* flush edges */
+      border:1px solid rgba(201,162,39,.85);
       background:#000;
-      box-shadow:0 18px 42px rgba(0,0,0,.55);
+      box-shadow:0 20px 46px rgba(0,0,0,.60);
+      isolation:isolate;
     }
+    /* gold trim + inner stroke like “premium frame” */
+    .hw-media::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      border-radius:18px;
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,.10),
+        inset 0 0 0 2px rgba(201,162,39,.18);
+    }
+    /* subtle vignette to feel cinematic */
+    .hw-media::after{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      pointer-events:none;
+      background:
+        radial-gradient(120% 80% at 50% 20%, rgba(255,255,255,.06), rgba(0,0,0,0) 55%),
+        radial-gradient(110% 85% at 50% 85%, rgba(0,0,0,.55), rgba(0,0,0,0) 55%);
+      mix-blend-mode: multiply;
+      opacity:.9;
+    }
+
     .hw-media picture,
     .hw-media img{
       width:100%;
       height:100%;
       display:block;
     }
-    .hw-media img{object-fit:cover;}
+    /* ✅ flush + premium rendering */
+    .hw-media img{
+      object-fit:cover;
+      object-position:center;
+      transform: translateZ(0);
+      backface-visibility:hidden;
+      filter: contrast(1.03) saturate(1.02);
+    }
 
-    /* Subtle caption / faith reference */
+    /* Set a stable portrait ratio so it always feels intentional */
+    .hw-media{aspect-ratio: 4 / 5;}
+    @media(min-width:900px){
+      .hw-media{aspect-ratio: 4 / 5;}
+    }
+
     .hw-caption{
       margin-top:10px;
       color:var(--muted2);
       font-size:.9rem;
       line-height:1.55;
     }
-    .hw-caption strong{color:#e5e7eb;}
-    .hw-caption em{color:rgba(201,162,39,.95);font-style:normal;font-weight:900;}
-
-    /* Mobile polish */
-    @media(max-width:899px){
-      .hw-media{max-width:420px;}
-    }
+    .hw-caption strong{color:#e5e7eb}
+    .hw-caption em{color:rgba(201,162,39,.95);font-style:normal;font-weight:950}
 
     /* Cards */
+    .page{padding:22px 0 28px}
     .card{
       background:rgba(18,18,18,.92);
       border:1px solid rgba(255,255,255,.10);
@@ -301,41 +314,19 @@
       line-height:1.75;
     }
     blockquote p{margin:.6rem 0}
-    .meta{
-      margin-top:10px;
-      color:var(--muted);
-      font-size:.92rem;
-    }
+    .meta{margin-top:10px;color:var(--muted);font-size:.92rem}
     .bio p{margin:.65rem 0;color:#d7dae0}
 
-    /* Reusable grid block (Products / Founder / Press) */
-    .grid-3{
-      display:grid;
-      gap:12px;
-      margin-top:12px;
-    }
-    @media(min-width:900px){
-      .grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
-    }
-    .tile{
-      padding:12px 12px 14px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.02);
-    }
-    .tile h3{margin:0 0 6px;font-size:.98rem;letter-spacing:-.01em}
-    .tile p{margin:0;color:var(--muted);font-size:.92rem;line-height:1.55}
-
-    /* Footer */
-    .footer{
+    /* ✅ Standard footer */
+    .cx-footer{
       margin-top:22px;
-      border-top:1px solid var(--stroke);
-      padding:16px 0 26px;
-      color:var(--muted2);
-      font-size:.9rem;
+      border-top:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.35);
+      padding:18px 16px 22px;
       text-align:center;
     }
-    .footer a{color:var(--gold);font-weight:950;text-decoration:underline}
+    .cx-footer p{margin:0;color:#9ca3af;font-size:.92rem;line-height:1.65}
+    .cx-footer a{color:var(--gold);text-decoration:underline;font-weight:950}
   </style>
 </head>
 
@@ -344,7 +335,7 @@
     <div class="cx-topnav__inner">
       <a class="cx-brand" href="/courageaux/">
         <img
-          src="/courageaux/assets/icon_courageaux_512.png"
+          src="/courageaux/assets/icon_courageaux.svg"
           alt="Courageaux Aesthetics"
           width="22"
           height="22"
@@ -383,12 +374,12 @@
       <h1>Her Words &amp; Story</h1>
       <p class="sub">The heart behind Courageaux Aesthetics — in Amari Wilford’s own words, plus a short bio for new clients.</p>
 
-      <div class="nav-row" aria-label="Courageaux navigation">
-        <a class="btn" href="/courageaux/">&larr; Back to Courageaux</a>
+      <div class="nav-row">
+        <a class="btn btn--ghost" href="/courageaux/">&larr; Back to Courageaux</a>
         <a class="btn btn--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book now</a>
-        <a class="btn" href="/courageaux/consultation/">Consultation</a>
-        <a class="btn" href="/courageaux/appointments/">Appointments</a>
-        <a class="btn" href="/courageaux/services-preview/">Services</a>
+        <a class="btn btn--ghost" href="/courageaux/consultation/">Consultation</a>
+        <a class="btn btn--ghost" href="/courageaux/appointments/">Appointments</a>
+        <a class="btn btn--ghost" href="/courageaux/services-preview/">Services</a>
       </div>
     </div>
   </header>
@@ -396,24 +387,21 @@
   <main class="page">
     <div class="container">
 
-      <!-- ✅ Stories-style split hero -->
       <section class="hw-split" aria-label="Her Words introduction">
-        <!-- LEFT -->
         <div class="hw-text">
           <div class="kicker">Her Words</div>
           <h2 style="margin:0 0 8px;font-size:1.22rem;letter-spacing:-.01em;">Faith. Discipline. Corrective care.</h2>
           <p class="sub" style="margin:0;color:var(--muted);">
-            Courageaux Aesthetics is built for clean, calm, confident skin — with a routine-first approach and a private, appointment-only experience.
+            Courageaux Aesthetics is built for clean, calm, confident skin — with a routine-first approach and a private, appointment-first experience.
           </p>
 
           <div class="nav-row" style="margin-top:14px">
             <a class="btn btn--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book on GlossGenius</a>
-            <a class="btn" href="/courageaux/intake/">Client Intake</a>
+            <a class="btn btn--ghost" href="/courageaux/intake/">Client Intake</a>
             <a class="btn btn--ghost" href="mailto:courageauxaesthetics@gmail.com">Email the studio</a>
           </div>
         </div>
 
-        <!-- RIGHT -->
         <div>
           <div class="hw-media" aria-label="Portrait of Amari Wilford">
             <picture>
@@ -424,7 +412,7 @@
                   /courageaux/assets/amari_1_640.webp 640w,
                   /courageaux/assets/amari_1_780.webp 780w
                 "
-                sizes="(min-width:900px) 420px, 100vw">
+                sizes="(min-width:900px) 360px, (min-width:600px) 420px, 92vw">
               <source
                 type="image/jpeg"
                 srcset="
@@ -432,7 +420,7 @@
                   /courageaux/assets/amari_1_640.jpg 640w,
                   /courageaux/assets/amari_1_780.jpg 780w
                 "
-                sizes="(min-width:900px) 420px, 100vw">
+                sizes="(min-width:900px) 360px, (min-width:600px) 420px, 92vw">
               <img
                 src="/courageaux/assets/amari_1_640.jpg"
                 width="780"
@@ -481,17 +469,26 @@
 
         <div class="nav-row" style="margin-top:12px">
           <a class="btn btn--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book on GlossGenius</a>
-          <a class="btn" href="/courageaux/intake/">Client Intake</a>
+          <a class="btn btn--ghost" href="/courageaux/intake/">Client Intake</a>
           <a class="btn btn--ghost" href="mailto:courageauxaesthetics@gmail.com">Email the studio</a>
         </div>
       </section>
 
-      <div class="footer">
-        © <span id="year"></span> Courageaux Aesthetics · Powered by
-        <a href="https://lab.squarebidness.com/" target="_blank" rel="noopener noreferrer">Square Bidness Tech Lab</a>
-      </div>
-
     </div>
+
+    <footer class="cx-footer">
+      <div class="container">
+        <p>
+          © <span id="year"></span> <strong>Courageaux Aesthetics</strong> ·
+          <a href="/courageaux/">Home</a> ·
+          <a href="https://instagram.com/courageuxaesthetics" target="_blank" rel="me noopener noreferrer">Instagram</a> ·
+          <a href="https://courageauxaesthetics.glossgenius.com/" target="_blank" rel="noopener noreferrer">Book Online</a>
+        </p>
+        <p style="margin:.85rem 0 0;color:#6b7280;font-size:.9rem;line-height:1.6;">
+          Powered by <a href="https://lab.squarebidness.com/" target="_blank" rel="noopener noreferrer">Square Bidness Tech Lab</a>
+        </p>
+      </div>
+    </footer>
   </main>
 
   <script>
