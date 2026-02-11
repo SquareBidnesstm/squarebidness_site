@@ -1,4 +1,3 @@
-<!-- public/courageaux/products/index.html -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -14,7 +13,7 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="sb:build" content="v20260211-courageaux-products-waitlist-no-backend" />
+  <meta name="sb:build" content="v20260211-courageaux-products-nohero-status" />
 
   <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
@@ -71,194 +70,110 @@
     :root{
       --bg:#0b0b0b; --fg:#fff; --muted:#bdbdbd;
       --soft:#121212; --stroke:#1f1f1f; --gold:#c9a227;
+      --ok:#20c997;
     }
     *{box-sizing:border-box}
-    html,body{
-      margin:0;
-      background:var(--bg);
-      color:var(--fg);
-      font-family:system-ui,Segoe UI,Roboto,Arial;
-      line-height:1.5;
-    }
+    html,body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,Segoe UI,Roboto,Arial;line-height:1.5}
     a{color:inherit;text-decoration:none}
     .container{max-width:1100px;margin:0 auto;padding:0 16px}
 
-    /* Top nav (enterprise vibe) */
-    .cx-topnav{
-      border-bottom:1px solid var(--stroke);
-      background:rgba(0,0,0,.35);
-    }
+    /* Top nav */
+    .cx-topnav{border-bottom:1px solid var(--stroke);background:rgba(0,0,0,.35)}
     .cx-topnav__inner{
       max-width:1200px;margin:0 auto;padding:14px 16px;
       display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
     }
-    .cx-brand{
-      display:inline-flex;align-items:center;gap:10px;
-      text-decoration:none;color:inherit;font-weight:900;
-    }
-    .cx-brand img{
-      height:22px;width:22px;display:block;border-radius:6px;background:#fff;
-    }
+    .cx-brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:inherit;font-weight:900}
+    .cx-brand img{height:22px;width:22px;display:block;border-radius:6px;background:#fff}
     .cx-links{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
     .cx-pill{
       display:inline-flex;align-items:center;justify-content:center;
-      padding:9px 12px;border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.04);
-      color:#f5f5f5;font-weight:900;font-size:.9rem;white-space:nowrap;
+      padding:9px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.04);color:#f5f5f5;text-decoration:none;font-weight:900;font-size:.9rem;white-space:nowrap;
     }
     .cx-pill:hover{background:rgba(255,255,255,.07)}
-    .cx-pill--gold{
-      border-color:rgba(201,162,39,.85);
-      background:rgba(201,162,39,.95);
-      color:#000;
-    }
+    .cx-pill--gold{border-color:rgba(201,162,39,.85);background:rgba(201,162,39,.95);color:#000}
 
-    /* Hero */
-    .hero{
-      border-bottom:1px solid var(--stroke);
-      padding:20px 0 22px;
-    }
+    /* Header (no hero image) */
+    .hero{border-bottom:1px solid var(--stroke);padding:20px 0 18px}
     .badge{
-      display:inline-flex;align-items:center;gap:8px;
-      background:#fff;color:#000;border-radius:999px;
-      padding:6px 10px;font-weight:900;font-size:.8rem;letter-spacing:.02em;
+      display:inline-flex;align-items:center;gap:8px;background:#fff;color:#000;border-radius:999px;
+      padding:6px 10px;font-weight:950;font-size:.8rem;letter-spacing:.02em;
+      width:max-content;
     }
     .badge img{height:18px;width:18px;display:block}
-    h1{
-      margin:.6rem 0 .25rem;
-      font-size:clamp(1.7rem,4vw,2.4rem);
-      line-height:1.08;
-      letter-spacing:-.01em;
+    h1{margin:.6rem 0 .25rem;font-size:clamp(1.7rem,4vw,2.4rem);line-height:1.08;letter-spacing:-.01em}
+    .lead{margin:.25rem 0 0;color:#d7dae0;max-width:72ch}
+
+    .mood-strip{
+      height:8px;border-radius:999px;margin-top:12px;
+      background:linear-gradient(90deg, rgba(201,162,39,.55), rgba(255,255,255,.10), rgba(201,162,39,.25));
+      border:1px solid rgba(255,255,255,.10);
     }
-    .lead{margin:.25rem 0 0;color:#d7dae0;max-width:62ch}
 
     .actions{margin-top:12px;display:flex;flex-wrap:wrap;gap:10px}
     .btn{
       display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      padding:11px 16px;border-radius:12px;font-weight:900;white-space:nowrap;
-      border:1px solid transparent;
-      background:transparent;
-      color:inherit;
-      cursor:pointer;
+      padding:11px 16px;border-radius:12px;text-decoration:none;font-weight:950;white-space:nowrap;border:1px solid transparent;
     }
     .btn--gold{background:var(--gold);color:#000;border-color:var(--gold)}
     .btn--ghost{background:#0f0f0f;color:#fff;border-color:#2a2a2a}
     @media(hover:hover){.btn:hover{opacity:.93}}
 
-    .strip{
-      margin-top:14px;
-      border:1px solid var(--stroke);
-      background:rgba(255,255,255,.02);
-      border-radius:14px;
-      padding:12px 14px;
-      color:#d7dae0;
-      max-width:72ch;
+    /* Status strip */
+    .cx-status{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+    .cx-chip{
+      display:inline-flex;align-items:center;gap:8px;padding:7px 10px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);
+      font-weight:900;font-size:.82rem;color:#f3f3f3;white-space:nowrap;line-height:1;
     }
-    .strip strong{color:#fff}
+    .cx-dot{width:8px;height:8px;border-radius:50%;background:#9aa3ad;box-shadow:0 0 0 3px rgba(255,255,255,.06) inset}
+    .cx-dot--ok{background:var(--ok)}
+    .cx-dot--soon{background:var(--gold)}
+    .cx-chip strong{color:var(--gold)}
 
     /* Layout */
     main{padding:18px 0 30px}
     .grid{display:grid;gap:14px}
     @media(min-width:900px){.grid{grid-template-columns:1.05fr .95fr;gap:18px}}
-    .card{
-      background:var(--soft);
-      border:1px solid var(--stroke);
-      border-radius:16px;
-      padding:16px;
-    }
-    .kicker{
-      letter-spacing:.12em;text-transform:uppercase;color:var(--gold);
-      font-weight:900;font-size:.85rem;
-    }
-    .title{
-      margin:8px 0 6px;
-      font-size:1.1rem;
-      font-weight:900;
-    }
-    .muted{color:var(--muted);margin:0}
-
+    .card{background:var(--soft);border:1px solid var(--stroke);border-radius:16px;padding:16px}
+    .kicker{letter-spacing:.12em;text-transform:uppercase;color:var(--gold);font-weight:950;font-size:.85rem}
+    .title{margin:8px 0 6px;font-size:1.1rem;font-weight:950}
+    .muted{color:var(--muted)}
     .step-row{display:grid;gap:8px;margin-top:10px}
     @media(min-width:640px){.step-row{grid-template-columns:repeat(3,minmax(0,1fr))}}
-    .step-pill{
-      border-radius:999px;border:1px solid var(--stroke);
-      padding:8px 12px;font-size:.85rem;color:#e0e0e0;background:#101010;
-    }
-    .step-pill span{font-weight:900;margin-right:4px;color:var(--gold)}
+    .step-pill{border-radius:999px;border:1px solid var(--stroke);padding:8px 12px;font-size:.85rem;color:#e0e0e0;background:#101010}
+    .step-pill span{font-weight:950;margin-right:4px;color:var(--gold)}
 
     /* Waitlist form */
     form{display:grid;gap:12px;margin-top:10px}
     label{font-size:.88rem;color:#d7dae0;font-weight:800}
     input, select{
-      width:100%;
-      padding:10px 12px;
-      border-radius:12px;
-      border:1px solid #2a2a2a;
-      background:#070707;
-      color:#fff;
-      font:inherit;
-      outline:none;
+      width:100%;padding:10px 12px;border-radius:12px;border:1px solid #2a2a2a;
+      background:#070707;color:#fff;font:inherit;outline:none;
     }
-    input:focus, select:focus{
-      border-color:#3c3c3c;
-      box-shadow:0 0 0 3px rgba(201,162,39,.12);
-    }
+    input:focus, select:focus{border-color:#3c3c3c;box-shadow:0 0 0 3px rgba(201,162,39,.12)}
     .row{display:grid;gap:10px}
     @media(min-width:720px){.row--2{grid-template-columns:1fr 1fr}}
-
-    .checks{
-      display:flex;flex-wrap:wrap;gap:10px 14px;
-      margin-top:2px;color:#d0d0d0;font-size:.88rem;
-    }
-    .checks label{
-      display:inline-flex;align-items:center;gap:8px;
-      font-weight:700;color:#d0d0d0;
-    }
+    .checks{display:flex;flex-wrap:wrap;gap:10px 14px;margin-top:2px;color:#d0d0d0;font-size:.88rem}
+    .checks label{display:inline-flex;align-items:center;gap:8px;font-weight:700;color:#d0d0d0}
     .checks input{accent-color:var(--gold)}
-
-    .note{font-size:.82rem;color:var(--muted);line-height:1.5;margin:.35rem 0 0}
+    .note{font-size:.82rem;color:var(--muted);line-height:1.5}
     .req{color:var(--gold);margin-left:4px}
-
     .submit-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:flex-end}
 
     .success{
-      display:none;
-      border-radius:14px;
-      border:1px solid rgba(74,222,128,.35);
-      background:rgba(74,222,128,.08);
-      padding:12px 14px;
-      color:#dcfce7;
-      font-weight:800;
-      margin-top:10px;
+      display:none;border-radius:14px;border:1px solid rgba(74,222,128,.35);
+      background:rgba(74,222,128,.08);padding:12px 14px;color:#dcfce7;font-weight:800;
     }
     .error{
-      display:none;
-      border-radius:14px;
-      border:1px solid rgba(248,113,113,.35);
-      background:rgba(248,113,113,.08);
-      padding:12px 14px;
-      color:#fee2e2;
-      font-weight:800;
-      margin-top:10px;
+      display:none;border-radius:14px;border:1px solid rgba(248,113,113,.35);
+      background:rgba(248,113,113,.08);padding:12px 14px;color:#fee2e2;font-weight:800;
     }
 
-    /* Footer */
-    footer{
-      border-top:1px solid var(--stroke);
-      padding:18px 0 26px;
-      background:#0b0b0b;
-    }
-    .credit{
-      text-align:center;
-      color:#a1a1aa;
-      font-size:.9rem;
-      line-height:1.6;
-    }
-    .credit a{
-      color:var(--gold);
-      text-decoration:underline;
-      font-weight:900;
-    }
+    footer{border-top:1px solid var(--stroke);padding:18px 0 26px;background:#0b0b0b}
+    .credit{text-align:center;color:#a1a1aa;font-size:.9rem;line-height:1.6}
+    .credit a{color:var(--gold);text-decoration:underline;font-weight:950}
   </style>
 </head>
 
@@ -266,14 +181,7 @@
   <nav class="cx-topnav" aria-label="Courageaux navigation">
     <div class="cx-topnav__inner">
       <a class="cx-brand" href="/courageaux/">
-        <img
-          src="/courageaux/assets/icon_courageaux_512.png"
-          alt="Courageaux Aesthetics"
-          width="22"
-          height="22"
-          loading="eager"
-          decoding="async"
-        >
+        <img src="/courageaux/assets/icon_courageaux_512.png" alt="Courageaux Aesthetics" width="22" height="22" loading="eager" decoding="async">
         Courageaux Aesthetics
       </a>
 
@@ -299,21 +207,29 @@
         Routine-first, calm, and clear. Products will be introduced in limited quantities with simple guidance and a consistent client experience.
       </p>
 
+      <div class="cx-status" aria-label="Booking status">
+        <div class="cx-chip" title="Live booking is handled on GlossGenius">
+          <span class="cx-dot cx-dot--ok" aria-hidden="true"></span>
+          <strong>LIVE</strong> · GlossGenius
+        </div>
+        <div class="cx-chip" title="Direct booking will be enabled later">
+          <span class="cx-dot cx-dot--soon" aria-hidden="true"></span>
+          <strong>SOON</strong> · Direct
+        </div>
+      </div>
+
       <div class="actions">
         <a class="btn btn--gold" href="#waitlist">Join the launch list</a>
         <a class="btn btn--ghost" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book a consult</a>
         <a class="btn btn--ghost" href="/courageaux/">Back to Courageaux</a>
       </div>
 
-      <div class="strip">
-        <strong>How it works:</strong> join the list → get the first release alert → receive simple routine guidance.
-      </div>
+      <div class="mood-strip" aria-hidden="true"></div>
     </div>
   </header>
 
   <main class="container">
     <div class="grid">
-      <!-- Left: product positioning -->
       <section class="card" aria-labelledby="skincare-preview">
         <div class="kicker">Coming soon</div>
         <h2 id="skincare-preview" class="title">Courageaux Skincare (in development)</h2>
@@ -338,12 +254,11 @@
         </div>
       </section>
 
-      <!-- Right: waitlist form -->
       <section class="card" id="waitlist" aria-labelledby="waitlist-title">
         <div class="kicker">Stay informed</div>
         <h2 id="waitlist-title" class="title">Get notified when the first skincare release is ready.</h2>
         <p class="muted" style="margin:.3rem 0 0">
-          Leave your details below. This is a simple sign-up (no automated emails yet). We’ll connect the live system next.
+          Leave your details below. This page is an early sign-up (no automated emails yet). We’ll connect the live system next.
         </p>
 
         <div id="success" class="success" role="status" aria-live="polite">
@@ -416,7 +331,7 @@
         <div style="margin-top:12px;border-top:1px solid var(--stroke);padding-top:12px">
           <p class="note" style="margin:0">
             Prefer guidance now? Book a consultation to get a routine recommendation.
-            <a href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer" style="color:var(--gold);text-decoration:underline;font-weight:900;">
+            <a href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer" style="color:var(--gold);text-decoration:underline;font-weight:950;">
               Book on GlossGenius
             </a>
           </p>
@@ -473,8 +388,6 @@
         hide(error);
         show(success);
         success.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-        // do NOT auto-clear; keep data visible so user trusts it
       });
     })();
   </script>
