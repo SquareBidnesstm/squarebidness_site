@@ -1,4 +1,4 @@
-<!-- public/courageaux/appointments/index.html (v2 sweep + premium hero) -->
+<!-- public/courageaux/appointments/index.html (v3 hero_index_* implemented) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -14,7 +14,7 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="sb:build" content="v20260211-courageaux-appointments-walkins-address-hero-premium" />
+  <meta name="sb:build" content="v20260211-courageaux-appointments-walkins-address-hero-index-webp-premium" />
 
   <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
@@ -48,8 +48,14 @@
   <meta name="twitter:description" content="Book online anytime or walk in when available with Courageaux Aesthetics." />
   <meta name="twitter:image" content="https://www.squarebidness.com/courageaux/assets/courageaux_hero_1200x630.jpg" />
 
-  <!-- Preload hero (Appointments keeps hero) -->
-  <link rel="preload" as="image" href="/courageaux/assets/courageaux_hero_1200x630.jpg" fetchpriority="high" />
+  <!-- Preload hero (LCP) -->
+  <link
+    rel="preload"
+    as="image"
+    href="/courageaux/assets/hero_index_1600.webp"
+    fetchpriority="high"
+    type="image/webp"
+  />
 
   <style>
     :root{
@@ -77,7 +83,7 @@
       padding:11px 16px;
       border-radius:12px;
       text-decoration:none;
-      font-weight:900;
+      font-weight:950;
       white-space:nowrap;
       font-size:.95rem;
       border:1px solid transparent;
@@ -483,25 +489,41 @@
         </div>
       </div>
 
-      <!-- ✅ Premium hero (no crop, flush) -->
+      <!-- ✅ HERO: hero_index_* (WebP + JPG fallback) -->
       <div class="cx-hero__media" aria-label="Courageaux appointments hero image">
         <picture>
+          <!-- WebP (preferred) -->
+          <source
+            type="image/webp"
+            srcset="
+              /courageaux/assets/hero_index_960.webp 960w,
+              /courageaux/assets/hero_index_1200.webp 1200w,
+              /courageaux/assets/hero_index_1600.webp 1600w
+            "
+            sizes="(max-width: 900px) 100vw, 1200px"
+          />
+          <!-- JPG fallback -->
           <img
-            src="/courageaux/assets/courageaux_hero_1200x630.jpg"
-            alt="Courageaux Aesthetics appointment and studio mood"
-            width="1200"
-            height="630"
+            src="/courageaux/assets/hero_index_1200.jpg"
+            srcset="
+              /courageaux/assets/hero_index_960.jpg 960w,
+              /courageaux/assets/hero_index_1200.jpg 1200w,
+              /courageaux/assets/hero_index_1600.jpg 1600w
+            "
+            sizes="(max-width: 900px) 100vw, 1200px"
+            width="1600"
+            height="900"
             loading="eager"
             decoding="async"
             fetchpriority="high"
-          >
+            alt="Courageaux Aesthetics — clean, calm, confident skin"
+          />
         </picture>
       </div>
     </div>
   </header>
 
   <main>
-
     <!-- CURRENT BOOKING FLOW -->
     <section class="container" style="padding:18px 16px 18px">
       <div class="card-grid card-grid--two">
@@ -556,7 +578,6 @@
         </article>
       </div>
     </section>
-
   </main>
 
   <!-- FOOTER CREDIT -->
