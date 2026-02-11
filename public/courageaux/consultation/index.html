@@ -14,23 +14,23 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="sb:build" content="v20260112-courageaux-consultation" />
+  <meta name="sb:build" content="v20260211-courageaux-consultation-status-strip" />
 
   <!-- Perf -->
-<link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
-<link rel="preconnect" href="https://www.google-analytics.com" crossorigin>
-<link rel="preconnect" href="https://static.cloudflareinsights.com" crossorigin>
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+  <link rel="preconnect" href="https://www.google-analytics.com" crossorigin>
+  <link rel="preconnect" href="https://static.cloudflareinsights.com" crossorigin>
 
-<!-- Analytics -->
-<script defer src="/scripts/ga.js"></script>
-<script defer src="/scripts/sb-analytics.js"></script>
+  <!-- Analytics -->
+  <script defer src="/scripts/ga.js"></script>
+  <script defer src="/scripts/sb-analytics.js"></script>
 
-<!-- Icons -->
-<link rel="icon" href="/courageaux/assets/favicon.ico" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="/courageaux/assets/favicon-32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/courageaux/assets/favicon-16.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/courageaux/assets/icon_180.png">
-<link rel="manifest" href="/courageaux/manifest.webmanifest">
+  <!-- Icons -->
+  <link rel="icon" href="/courageaux/assets/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/courageaux/assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/courageaux/assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/courageaux/assets/icon_180.png">
+  <link rel="manifest" href="/courageaux/manifest.webmanifest">
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
@@ -42,7 +42,6 @@
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:locale" content="en_US" />
-
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
@@ -138,6 +137,65 @@
       margin:.25rem 0 .4rem;
       color:#d7dae0;
       max-width:46rem;
+    }
+
+    /* BOOKING STATUS STRIP (system badge) */
+    .cx-status{
+      margin-top:10px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+    }
+    .cx-status__label{
+      font-weight:900;
+      font-size:.82rem;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:var(--muted);
+      margin-right:2px;
+    }
+    .cx-chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.04);
+      font-weight:900;
+      font-size:.85rem;
+      color:#f3f3f3;
+      white-space:nowrap;
+      line-height:1;
+    }
+    .cx-ico{
+      width:18px;
+      height:18px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:6px;
+      font-size:.9rem;
+      font-weight:900;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.12);
+    }
+    .cx-chip--ok{
+      border-color:rgba(25,195,125,.35);
+      background:rgba(25,195,125,.08);
+    }
+    .cx-chip--ok .cx-ico{
+      border-color:rgba(25,195,125,.55);
+      background:rgba(25,195,125,.14);
+    }
+    .cx-chip--soon{
+      border-color:rgba(201,162,39,.35);
+      background:rgba(201,162,39,.08);
+    }
+    .cx-chip--soon .cx-ico{
+      border-color:rgba(201,162,39,.55);
+      background:rgba(201,162,39,.14);
     }
 
     .cx-hero__meta{
@@ -245,61 +303,62 @@
       font-weight:900;
     }
   </style>
+
   <style>
-  .cx-topnav{
-    border-bottom:1px solid var(--stroke,#1f1f1f);
-    background:rgba(0,0,0,.35);
-  }
-  .cx-topnav__inner{
-    max-width:1200px;
-    margin:0 auto;
-    padding:14px 16px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:12px;
-    flex-wrap:wrap;
-  }
-  .cx-brand{
-    display:inline-flex;
-    align-items:center;
-    gap:10px;
-    text-decoration:none;
-    color:inherit;
-    font-weight:900;
-  }
-  .cx-brand img{
-    height:22px;width:22px;display:block;
-    border-radius:6px;
-    background:#fff;
-  }
-  .cx-links{
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-    align-items:center;
-  }
-  .cx-pill{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    padding:9px 12px;
-    border-radius:999px;
-    border:1px solid rgba(255,255,255,.14);
-    background:rgba(255,255,255,.04);
-    color:#f5f5f5;
-    text-decoration:none;
-    font-weight:900;
-    font-size:.9rem;
-    white-space:nowrap;
-  }
-  .cx-pill:hover{background:rgba(255,255,255,.07)}
-  .cx-pill--gold{
-    border-color:rgba(201,162,39,.85);
-    background:rgba(201,162,39,.95);
-    color:#000;
-  }
-</style>
+    .cx-topnav{
+      border-bottom:1px solid var(--stroke,#1f1f1f);
+      background:rgba(0,0,0,.35);
+    }
+    .cx-topnav__inner{
+      max-width:1200px;
+      margin:0 auto;
+      padding:14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .cx-brand{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      text-decoration:none;
+      color:inherit;
+      font-weight:900;
+    }
+    .cx-brand img{
+      height:22px;width:22px;display:block;
+      border-radius:6px;
+      background:#fff;
+    }
+    .cx-links{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+    }
+    .cx-pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:9px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.04);
+      color:#f5f5f5;
+      text-decoration:none;
+      font-weight:900;
+      font-size:.9rem;
+      white-space:nowrap;
+    }
+    .cx-pill:hover{background:rgba(255,255,255,.07)}
+    .cx-pill--gold{
+      border-color:rgba(201,162,39,.85);
+      background:rgba(201,162,39,.95);
+      color:#000;
+    }
+  </style>
 </head>
 
 <body>
@@ -317,18 +376,17 @@
         Courageaux Aesthetics
       </a>
 
-
-    <div class="cx-links">
-      <a class="cx-pill cx-pill--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book</a>
-      <a class="cx-pill" href="/courageaux/services-preview/">Services</a>
-      <a class="cx-pill" href="/courageaux/consultation/">Consultation</a>
-      <a class="cx-pill" href="/courageaux/appointments/">Appointments</a>
-      <a class="cx-pill" href="/courageaux/her-words/">Her Words</a>
-      <a class="cx-pill" href="/courageaux/products/">Products</a>
-      <a class="cx-pill" href="https://instagram.com/courageuxaesthetics" target="_blank" rel="me noopener noreferrer">Instagram</a>
+      <div class="cx-links">
+        <a class="cx-pill cx-pill--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book</a>
+        <a class="cx-pill" href="/courageaux/services-preview/">Services</a>
+        <a class="cx-pill" href="/courageaux/consultation/">Consultation</a>
+        <a class="cx-pill" href="/courageaux/appointments/">Appointments</a>
+        <a class="cx-pill" href="/courageaux/her-words/">Her Words</a>
+        <a class="cx-pill" href="/courageaux/products/">Products</a>
+        <a class="cx-pill" href="https://instagram.com/courageuxaesthetics" target="_blank" rel="me noopener noreferrer">Instagram</a>
+      </div>
     </div>
-  </div>
-</nav>
+  </nav>
 
   <!-- HERO -->
   <header class="cx-hero">
@@ -345,6 +403,21 @@
           This page is where new and returning clients can review how Courageaux Aesthetics handles
           consultations, expectations, and studio policies before booking.
         </p>
+
+        <!-- Booking Status (system badge) -->
+        <div class="cx-status" aria-label="Booking status">
+          <div class="cx-status__label">Booking status</div>
+
+          <div class="cx-chip cx-chip--ok" title="Live booking is handled on GlossGenius">
+            <span class="cx-ico" aria-hidden="true">✓</span>
+            Live on GlossGenius
+          </div>
+
+          <div class="cx-chip cx-chip--soon" title="Direct booking will be enabled later">
+            <span class="cx-ico" aria-hidden="true">⏳</span>
+            Direct booking coming soon
+          </div>
+        </div>
 
         <div class="cx-hero__meta">
           <a class="btn btn--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">
