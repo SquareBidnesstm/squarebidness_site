@@ -1,4 +1,4 @@
-<!-- public/courageaux/consultation/index.html -->
+<!-- public/courageaux/consultation/index.html (hero_index_* implemented) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -14,7 +14,7 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="sb:build" content="v20260211-courageaux-consultation-walkins-address-hours" />
+  <meta name="sb:build" content="v20260211-courageaux-consultation-hero-index-webp-premium" />
 
   <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
@@ -32,7 +32,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/courageaux/assets/icon_180.png">
   <link rel="manifest" href="/courageaux/manifest.webmanifest">
 
-  <!-- Open Graph -->
+  <!-- Open Graph (share image stays consultation-specific) -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Courageaux Aesthetics" />
   <meta property="og:title" content="Courageaux Aesthetics — Consultation & Policies" />
@@ -49,14 +49,21 @@
   <meta name="twitter:description" content="New client consults, expectations, and booking details with Courageaux Aesthetics in Hammond, Louisiana." />
   <meta name="twitter:image" content="https://www.squarebidness.com/courageaux/assets/consultation_1200x630.jpg" />
 
-  <!-- Preload hero -->
-  <link rel="preload" as="image" href="/courageaux/assets/consultation_1200x630.jpg" fetchpriority="high" />
+  <!-- Preload hero (LCP) -->
+  <link
+    rel="preload"
+    as="image"
+    href="/courageaux/assets/hero_index_1600.webp"
+    fetchpriority="high"
+    type="image/webp"
+  />
 
   <style>
     :root{
       --bg:#0b0b0b; --fg:#fff; --muted:#bdbdbd;
       --soft:#121212; --stroke:#1f1f1f; --gold:#c9a227;
       --ok:#20c997;
+      --shadow: 0 18px 40px rgba(0,0,0,.35);
     }
     *{box-sizing:border-box}
     html,body{
@@ -80,10 +87,12 @@
       font-weight:900;
       white-space:nowrap;
       font-size:.95rem;
+      border:1px solid transparent;
     }
-    .btn--gold{background:var(--gold);color:#000;border:1px solid var(--gold)}
-    .btn--ghost{background:#0f0f0f;color:#fff;border:1px solid #2a2a2a}
+    .btn--gold{background:var(--gold);color:#000;border-color:var(--gold)}
+    .btn--ghost{background:#0f0f0f;color:#fff;border-color:#2a2a2a}
     @media (hover:hover){ .btn:hover{opacity:.93} }
+    .btn:focus-visible{outline:3px solid rgba(201,162,39,.45); outline-offset:2px}
 
     /* HERO */
     .cx-hero{
@@ -96,7 +105,7 @@
       padding:18px 16px 22px;
       display:grid;
       gap:18px;
-      align-items:end;
+      align-items:start;
     }
     @media (min-width:900px){
       .cx-hero__inner{
@@ -115,9 +124,10 @@
       color:#000;
       border-radius:999px;
       padding:6px 10px;
-      font-weight:900;
+      font-weight:950;
       font-size:.8rem;
       letter-spacing:.02em;
+      box-shadow: 0 10px 30px rgba(0,0,0,.18);
     }
     .cx-badge img{height:18px;width:18px;display:block}
 
@@ -155,7 +165,7 @@
       border-radius:999px;
       border:1px solid rgba(255,255,255,.14);
       background:rgba(255,255,255,.04);
-      font-weight:900;
+      font-weight:950;
       font-size:.82rem;
       color:#f3f3f3;
       white-space:nowrap;
@@ -185,7 +195,7 @@
     .cx-loc a{
       color:#d7dae0;
       text-decoration:underline;
-      font-weight:900;
+      font-weight:950;
       text-underline-offset:3px;
     }
     .cx-pin{
@@ -208,18 +218,29 @@
       margin-top:.55rem;
     }
 
+    /* ✅ HERO MEDIA (premium, no crop, flush) */
+    .cx-hero__media{
+      border-radius:16px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow: var(--shadow);
+      background:#000;
+      aspect-ratio: 16 / 9;
+    }
     .cx-hero__media picture,
-    .cx-hero__media img{display:block;width:100%}
     .cx-hero__media img{
-      height:auto;
-      object-fit:cover;
-      border-radius:14px;
-      border:1px solid var(--stroke);
+      width:100%;
+      height:100%;
+      display:block;
+    }
+    /* IMPORTANT: banner graphic must NOT crop */
+    .cx-hero__media img{
+      object-fit: contain;
+      object-position: center;
       filter:contrast(1.03) saturate(1.02);
     }
-    @media (min-width:900px){
-      .cx-hero__media{height:100%;display:flex}
-      .cx-hero__media img{height:100%;width:100%;object-fit:cover}
+    @media (min-width: 1200px){
+      .cx-hero__media{ max-height: 420px; }
     }
 
     /* SECTIONS */
@@ -227,12 +248,12 @@
       letter-spacing:.12em;
       text-transform:uppercase;
       color:var(--gold);
-      font-weight:900;
+      font-weight:950;
       font-size:.85rem;
     }
     .section-title{
       font-size:1.15rem;
-      font-weight:900;
+      font-weight:950;
       margin:10px 0 4px;
     }
     .section-sub{
@@ -303,7 +324,7 @@
     .credit-strip a{
       color:var(--gold);
       text-decoration:underline;
-      font-weight:900;
+      font-weight:950;
     }
   </style>
 
@@ -311,6 +332,7 @@
     .cx-topnav{
       border-bottom:1px solid var(--stroke,#1f1f1f);
       background:rgba(0,0,0,.35);
+      backdrop-filter: blur(10px);
     }
     .cx-topnav__inner{
       max-width:1200px;
@@ -328,12 +350,15 @@
       gap:10px;
       text-decoration:none;
       color:inherit;
-      font-weight:900;
+      font-weight:950;
+      letter-spacing:-.01em;
     }
     .cx-brand img{
       height:22px;width:22px;display:block;
-      border-radius:6px;
-      background:#fff;
+      border-radius:7px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.95);
+      padding:2px;
     }
     .cx-links{
       display:flex;
@@ -351,11 +376,13 @@
       background:rgba(255,255,255,.04);
       color:#f5f5f5;
       text-decoration:none;
-      font-weight:900;
+      font-weight:950;
       font-size:.9rem;
       white-space:nowrap;
+      transition: background .12s ease, border-color .12s ease, transform .12s ease;
     }
-    .cx-pill:hover{background:rgba(255,255,255,.07)}
+    .cx-pill:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.22)}
+    .cx-pill:active{transform: translateY(1px)}
     .cx-pill--gold{
       border-color:rgba(201,162,39,.85);
       background:rgba(201,162,39,.95);
@@ -369,7 +396,7 @@
     <div class="cx-topnav__inner">
       <a class="cx-brand" href="/courageaux/">
         <img
-          src="/courageaux/assets/icon_courageaux_512.png"
+          src="/courageaux/assets/icon_courageaux.svg"
           alt="Courageaux Aesthetics"
           width="22"
           height="22"
@@ -439,9 +466,6 @@
           <a class="btn btn--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">
             Book on GlossGenius
           </a>
-          <a class="btn btn--ghost" href="/courageaux/book/">
-            Open embedded booking
-          </a>
           <a class="btn btn--ghost" href="/courageaux/appointments/">
             Appointments
           </a>
@@ -454,15 +478,38 @@
         </div>
       </div>
 
-      <div class="cx-hero__media">
+      <!-- ✅ HERO: hero_index_* (WebP + JPG fallback) -->
+      <div class="cx-hero__media" aria-label="Courageaux hero image">
         <picture>
+          <!-- WebP (preferred) -->
+          <source
+            type="image/webp"
+            srcset="
+              /courageaux/assets/hero_index_960.webp 960w,
+              /courageaux/assets/hero_index_1200.webp 1200w,
+              /courageaux/assets/hero_index_1600.webp 1600w
+            "
+            sizes="(max-width: 900px) 100vw, 1200px"
+          />
+          <!-- JPG fallback (create these to match) -->
           <img
-            src="/courageaux/assets/consultation_1200x630.jpg"
-            alt="Consultation and skincare planning with Courageaux Aesthetics"
-            width="1200" height="630"
-            loading="eager" decoding="async" fetchpriority="high">
+            src="/courageaux/assets/hero_index_1200.jpg"
+            srcset="
+              /courageaux/assets/hero_index_960.jpg 960w,
+              /courageaux/assets/hero_index_1200.jpg 1200w,
+              /courageaux/assets/hero_index_1600.jpg 1600w
+            "
+            sizes="(max-width: 900px) 100vw, 1200px"
+            width="1600"
+            height="900"
+            loading="eager"
+            decoding="async"
+            fetchpriority="high"
+            alt="Courageaux Aesthetics — clean, calm, confident skin"
+          />
         </picture>
       </div>
+
     </div>
   </header>
 
