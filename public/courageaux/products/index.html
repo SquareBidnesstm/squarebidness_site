@@ -1,3 +1,4 @@
+<!-- public/courageaux/products/index.html (v2 consistency polish — no hero media, standard nav/badge/buttons/footer) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -13,7 +14,7 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="sb:build" content="v20260211-courageaux-products-nohero-status" />
+  <meta name="sb:build" content="v20260211-courageaux-products-nohero-consistency-standard" />
 
   <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
@@ -71,38 +72,132 @@
       --bg:#0b0b0b; --fg:#fff; --muted:#bdbdbd;
       --soft:#121212; --stroke:#1f1f1f; --gold:#c9a227;
       --ok:#20c997;
+      --shadow: 0 18px 40px rgba(0,0,0,.35);
     }
     *{box-sizing:border-box}
-    html,body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,Segoe UI,Roboto,Arial;line-height:1.5}
+    html,body{
+      margin:0;
+      background:var(--bg);
+      color:var(--fg);
+      font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      line-height:1.5
+    }
     a{color:inherit;text-decoration:none}
     .container{max-width:1100px;margin:0 auto;padding:0 16px}
 
-    /* Top nav */
-    .cx-topnav{border-bottom:1px solid var(--stroke);background:rgba(0,0,0,.35)}
-    .cx-topnav__inner{
-      max-width:1200px;margin:0 auto;padding:14px 16px;
-      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    /* ✅ Standard buttons */
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      padding:12px 16px;
+      border-radius:12px;
+      text-decoration:none;
+      font-weight:950;
+      border:1px solid transparent;
+      transition: transform .12s ease, opacity .12s ease, background .12s ease, border-color .12s ease;
+      user-select:none;
+      white-space:nowrap;
+      font:inherit;
+      cursor:pointer;
     }
-    .cx-brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:inherit;font-weight:900}
-    .cx-brand img{height:22px;width:22px;display:block;border-radius:6px;background:#fff}
-    .cx-links{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-    .cx-pill{
-      display:inline-flex;align-items:center;justify-content:center;
-      padding:9px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.04);color:#f5f5f5;text-decoration:none;font-weight:900;font-size:.9rem;white-space:nowrap;
+    .btn:active{transform: translateY(1px)}
+    .btn--gold{background:var(--gold);color:#000;border-color:rgba(201,162,39,.95)}
+    .btn--ghost{background:rgba(255,255,255,.03);color:#fff;border-color:rgba(255,255,255,.14)}
+    @media (hover:hover){
+      .btn:hover{opacity:.95}
+      .btn--ghost:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.22)}
     }
-    .cx-pill:hover{background:rgba(255,255,255,.07)}
-    .cx-pill--gold{border-color:rgba(201,162,39,.85);background:rgba(201,162,39,.95);color:#000}
+    .btn:focus-visible{outline:3px solid rgba(201,162,39,.55); outline-offset:2px}
 
-    /* Header (no hero image) */
-    .hero{border-bottom:1px solid var(--stroke);padding:20px 0 18px}
+    /* ✅ Standard top nav */
+    .cx-topnav{
+      position:sticky;
+      top:0;
+      z-index:50;
+      border-bottom:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(10px);
+    }
+    .cx-topnav__inner{
+      max-width:1200px;
+      margin:0 auto;
+      padding:12px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .cx-brand{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      text-decoration:none;
+      color:inherit;
+      font-weight:950;
+      letter-spacing:-.01em;
+    }
+    .cx-brand img{
+      width:22px;height:22px;
+      border-radius:7px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.95);
+      padding:2px;
+      display:block;
+    }
+    .cx-links{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+    }
+    .cx-pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:9px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.04);
+      color:#f5f5f5;
+      text-decoration:none;
+      font-weight:950;
+      font-size:.92rem;
+      white-space:nowrap;
+      transition: background .12s ease, border-color .12s ease, transform .12s ease;
+    }
+    .cx-pill:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.22)}
+    .cx-pill:active{transform: translateY(1px)}
+    .cx-pill--gold{
+      border-color:rgba(201,162,39,.85);
+      background:rgba(201,162,39,.95);
+      color:#000;
+    }
+
+    /* ✅ No-hero header */
+    .hero{border-bottom:1px solid rgba(255,255,255,.10);padding:18px 0 18px;background:#0b0b0b}
+    .hero__inner{display:grid;gap:10px;align-items:center}
+
+    /* ✅ Standard badge */
     .badge{
-      display:inline-flex;align-items:center;gap:8px;background:#fff;color:#000;border-radius:999px;
-      padding:6px 10px;font-weight:950;font-size:.8rem;letter-spacing:.02em;
+      background:#fff;
+      color:#000;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:.82rem;
+      font-weight:950;
+      letter-spacing:.02em;
       width:max-content;
+      box-shadow: 0 10px 30px rgba(0,0,0,.18);
     }
     .badge img{height:18px;width:18px;display:block}
-    h1{margin:.6rem 0 .25rem;font-size:clamp(1.7rem,4vw,2.4rem);line-height:1.08;letter-spacing:-.01em}
+
+    h1{margin:.6rem 0 .2rem;font-size:clamp(1.7rem,4vw,2.4rem);line-height:1.08;letter-spacing:-.01em}
     .lead{margin:.25rem 0 0;color:#d7dae0;max-width:72ch}
 
     .mood-strip{
@@ -112,13 +207,6 @@
     }
 
     .actions{margin-top:12px;display:flex;flex-wrap:wrap;gap:10px}
-    .btn{
-      display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      padding:11px 16px;border-radius:12px;text-decoration:none;font-weight:950;white-space:nowrap;border:1px solid transparent;
-    }
-    .btn--gold{background:var(--gold);color:#000;border-color:var(--gold)}
-    .btn--ghost{background:#0f0f0f;color:#fff;border-color:#2a2a2a}
-    @media(hover:hover){.btn:hover{opacity:.93}}
 
     /* Status strip */
     .cx-status{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
@@ -136,7 +224,13 @@
     main{padding:18px 0 30px}
     .grid{display:grid;gap:14px}
     @media(min-width:900px){.grid{grid-template-columns:1.05fr .95fr;gap:18px}}
-    .card{background:var(--soft);border:1px solid var(--stroke);border-radius:16px;padding:16px}
+    .card{
+      background:var(--soft);
+      border:1px solid var(--stroke);
+      border-radius:16px;
+      padding:16px;
+      box-shadow: 0 12px 30px rgba(0,0,0,.20);
+    }
     .kicker{letter-spacing:.12em;text-transform:uppercase;color:var(--gold);font-weight:950;font-size:.85rem}
     .title{margin:8px 0 6px;font-size:1.1rem;font-weight:950}
     .muted{color:var(--muted)}
@@ -149,8 +243,14 @@
     form{display:grid;gap:12px;margin-top:10px}
     label{font-size:.88rem;color:#d7dae0;font-weight:800}
     input, select{
-      width:100%;padding:10px 12px;border-radius:12px;border:1px solid #2a2a2a;
-      background:#070707;color:#fff;font:inherit;outline:none;
+      width:100%;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid #2a2a2a;
+      background:#070707;
+      color:#fff;
+      font:inherit;
+      outline:none;
     }
     input:focus, select:focus{border-color:#3c3c3c;box-shadow:0 0 0 3px rgba(201,162,39,.12)}
     .row{display:grid;gap:10px}
@@ -171,9 +271,24 @@
       background:rgba(248,113,113,.08);padding:12px 14px;color:#fee2e2;font-weight:800;
     }
 
-    footer{border-top:1px solid var(--stroke);padding:18px 0 26px;background:#0b0b0b}
-    .credit{text-align:center;color:#a1a1aa;font-size:.9rem;line-height:1.6}
-    .credit a{color:var(--gold);text-decoration:underline;font-weight:950}
+    /* ✅ Standard footer */
+    .cx-footer{
+      border-top:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.35);
+      padding:18px 16px 22px;
+      text-align:center;
+    }
+    .cx-footer p{
+      margin:0;
+      color:#9ca3af;
+      font-size:.92rem;
+      line-height:1.65;
+    }
+    .cx-footer a{
+      color:var(--gold);
+      text-decoration:underline;
+      font-weight:950;
+    }
   </style>
 </head>
 
@@ -181,40 +296,52 @@
   <nav class="cx-topnav" aria-label="Courageaux navigation">
     <div class="cx-topnav__inner">
       <a class="cx-brand" href="/courageaux/">
-        <img src="/courageaux/assets/icon_courageaux_512.png" alt="Courageaux Aesthetics" width="22" height="22" loading="eager" decoding="async">
+        <img
+          src="/courageaux/assets/icon_courageaux.svg"
+          alt="Courageaux Aesthetics"
+          width="22"
+          height="22"
+          loading="eager"
+          decoding="async"
+        >
         Courageaux Aesthetics
       </a>
 
+      <!-- ✅ Standard pill order -->
       <div class="cx-links">
-        <a class="cx-pill cx-pill--gold" href="#waitlist">Join list</a>
+        <a class="cx-pill cx-pill--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book</a>
         <a class="cx-pill" href="/courageaux/services-preview/">Services</a>
         <a class="cx-pill" href="/courageaux/consultation/">Consultation</a>
         <a class="cx-pill" href="/courageaux/appointments/">Appointments</a>
-        <a class="cx-pill" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book</a>
+        <a class="cx-pill" href="/courageaux/her-words/">Her Words</a>
+        <a class="cx-pill" href="/courageaux/products/">Products</a>
+        <a class="cx-pill" href="https://instagram.com/courageuxaesthetics" target="_blank" rel="me noopener noreferrer">Instagram</a>
       </div>
     </div>
   </nav>
 
   <header class="hero">
-    <div class="container">
-      <span class="badge">
+    <div class="container hero__inner">
+      <!-- ✅ Standard badge copy -->
+      <div class="badge">
         <img src="/courageaux/assets/logo_courageaux_black_400.png" alt="Courageaux logo" width="18" height="18" loading="eager" decoding="async">
-        Courageaux Skincare · Coming Soon
-      </span>
+        Courageaux Aesthetics · Hammond · Northshore · Southeastern, Louisiana
+      </div>
 
-      <h1>Skincare, developed with intention.</h1>
+      <h1>Products — launch list.</h1>
       <p class="lead">
-        Routine-first, calm, and clear. Products will be introduced in limited quantities with simple guidance and a consistent client experience.
+        Small-batch skincare drops — routine-first, calm, and clear.
+        Join the list to be notified when the first release is ready.
       </p>
 
-      <div class="cx-status" aria-label="Booking status">
-        <div class="cx-chip" title="Live booking is handled on GlossGenius">
+      <div class="cx-status" aria-label="Status">
+        <div class="cx-chip" title="Booking is live on GlossGenius">
           <span class="cx-dot cx-dot--ok" aria-hidden="true"></span>
-          <strong>LIVE</strong> · GlossGenius
+          <strong>LIVE</strong> · Booking (GlossGenius)
         </div>
-        <div class="cx-chip" title="Direct booking will be enabled later">
+        <div class="cx-chip" title="Products will be released when ready">
           <span class="cx-dot cx-dot--soon" aria-hidden="true"></span>
-          <strong>SOON</strong> · Direct
+          <strong>SOON</strong> · Products
         </div>
       </div>
 
@@ -340,14 +467,17 @@
     </div>
   </main>
 
-  <footer>
+  <footer class="cx-footer">
     <div class="container">
-      <div class="credit">
+      <p>
         © <span id="year"></span> <strong>Courageaux Aesthetics</strong> ·
-        <a href="/courageaux/">Courageaux Home</a> ·
-        <a href="https://instagram.com/courageuxaesthetics" target="_blank" rel="me noopener noreferrer">Instagram</a><br>
+        <a href="/courageaux/">Home</a> ·
+        <a href="https://instagram.com/courageuxaesthetics" target="_blank" rel="me noopener noreferrer">Instagram</a> ·
+        <a href="https://courageauxaesthetics.glossgenius.com/" target="_blank" rel="noopener noreferrer">Book Online</a>
+      </p>
+      <p style="margin:.85rem 0 0;color:#6b7280;font-size:.9rem;line-height:1.6;">
         Powered by <a href="https://lab.squarebidness.com/" target="_blank" rel="noopener noreferrer">Square Bidness Tech Lab</a>
-      </div>
+      </p>
     </div>
   </footer>
 
