@@ -1,4 +1,3 @@
-<!-- public/courageaux/book/index.html -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -13,7 +12,7 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="sb:build" content="v20260211-courageaux-book-embed-walkins-address" />
+  <meta name="sb:build" content="v20260211-courageaux-book-nohero" />
 
   <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
@@ -48,12 +47,14 @@
     :root{
       --bg:#0b0b0b; --fg:#fff; --muted:#bdbdbd;
       --soft:#121212; --stroke:#1f1f1f; --gold:#c9a227;
+      --ok:#20c997;
     }
     *{box-sizing:border-box}
     html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:system-ui,Segoe UI,Roboto,Arial;line-height:1.5}
     a{color:inherit;text-decoration:none}
     .container{max-width:1200px;margin:0 auto;padding:0 16px}
 
+    /* Top nav */
     .cx-topnav{border-bottom:1px solid var(--stroke);background:rgba(0,0,0,.55);backdrop-filter:blur(10px);position:sticky;top:0;z-index:50}
     .cx-topnav__inner{max-width:1200px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
     .cx-brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:inherit;font-weight:950}
@@ -63,56 +64,18 @@
     .cx-pill:hover{background:rgba(255,255,255,.07)}
     .cx-pill--gold{border-color:rgba(201,162,39,.85);background:rgba(201,162,39,.95);color:#000}
 
+    /* Header */
     .hero{border-bottom:1px solid var(--stroke);padding:18px 0 16px}
+    .mood-strip{
+      height:8px;border-radius:999px;margin:12px 0 0;
+      background:
+        linear-gradient(90deg, rgba(201,162,39,.55), rgba(255,255,255,.10), rgba(201,162,39,.25));
+      border:1px solid rgba(255,255,255,.10);
+    }
     .badge{display:inline-flex;align-items:center;gap:8px;background:#fff;color:#000;border-radius:999px;padding:6px 10px;font-weight:950;font-size:.82rem}
     .badge img{height:18px;width:18px}
     h1{margin:.6rem 0 .2rem;font-size:clamp(1.6rem,3.6vw,2.25rem);letter-spacing:-.01em}
     .sub{margin:0;color:#d7dae0;max-width:70ch}
-
-    /* NEW: quick info row */
-    .quick{
-      margin-top:10px;
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      align-items:center;
-      color:#d7dae0;
-      font-size:.92rem;
-    }
-    .quick strong{color:#fff}
-    .quick a{
-      color:#d7dae0;
-      text-decoration:underline;
-      font-weight:950;
-      text-underline-offset:3px;
-    }
-    .chip{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:8px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.04);
-      font-weight:900;
-      font-size:.85rem;
-      color:#f3f3f3;
-      white-space:nowrap;
-      line-height:1;
-    }
-    .ico{
-      width:18px;height:18px;
-      display:inline-flex;align-items:center;justify-content:center;
-      border-radius:6px;
-      font-size:.9rem;font-weight:900;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.12);
-    }
-    .chip--ok{border-color:rgba(25,195,125,.35);background:rgba(25,195,125,.08)}
-    .chip--ok .ico{border-color:rgba(25,195,125,.55);background:rgba(25,195,125,.14)}
-    .chip--walkin{border-color:rgba(201,162,39,.35);background:rgba(201,162,39,.08)}
-    .chip--walkin .ico{border-color:rgba(201,162,39,.55);background:rgba(201,162,39,.14)}
-
     .row{margin-top:12px;display:flex;flex-wrap:wrap;gap:10px}
 
     .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 16px;border-radius:12px;font-weight:900;border:1px solid transparent}
@@ -120,26 +83,25 @@
     .btn--ghost{background:#0f0f0f;color:#fff;border-color:#2a2a2a}
     @media (hover:hover){.btn:hover{opacity:.93}}
 
-    .frame-wrap{
-      margin:14px auto 24px;
-      border:1px solid var(--stroke);
-      border-radius:16px;
-      overflow:hidden;
-      background:#000;
+    /* Status strip (mini) */
+    .cx-status{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+    .cx-chip{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:7px 10px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.04);
+      font-weight:900;font-size:.82rem;color:#f3f3f3;white-space:nowrap;line-height:1;
     }
+    .cx-dot{width:8px;height:8px;border-radius:50%;background:#9aa3ad;box-shadow:0 0 0 3px rgba(255,255,255,.06) inset}
+    .cx-dot--ok{background:var(--ok)}
+    .cx-dot--soon{background:var(--gold)}
+    .cx-chip strong{color:var(--gold)}
+
+    .frame-wrap{margin:14px auto 24px;border:1px solid var(--stroke);border-radius:16px;overflow:hidden;background:#000}
     iframe{width:100%;height:86vh;min-height:680px;border:0;display:block;background:#000}
 
     footer{border-top:1px solid var(--stroke);padding:16px 0 26px;color:#a1a1aa;text-align:center;font-size:.9rem}
     footer a{color:var(--gold);text-decoration:underline;font-weight:950}
-
-    /* Helpful fallback text under embed */
-    .fallback{
-      margin:-8px 0 18px;
-      color:var(--muted);
-      font-size:.9rem;
-      line-height:1.55;
-    }
-    .fallback a{color:#d7dae0;text-decoration:underline;font-weight:950;text-underline-offset:3px}
   </style>
 </head>
 
@@ -173,26 +135,23 @@
         use “Open booking” to book directly on the official page.
       </p>
 
-      <!-- NEW: walk-ins + address -->
-      <div class="quick" aria-label="Quick info">
-        <span class="chip chip--ok" title="Online booking is handled on GlossGenius">
-          <span class="ico" aria-hidden="true">✓</span>
-          Online booking (GlossGenius)
-        </span>
-        <span class="chip chip--walkin" title="Walk-ins are welcomed when availability allows">
-          <span class="ico" aria-hidden="true">⌁</span>
-          Walk-ins welcome (when available)
-        </span>
-        <span>
-          <strong>42334 Deluxe Plaza 1, Hammond, LA 70403</strong> ·
-          <a href="https://www.google.com/maps?q=42334+Deluxe+Plaza+1,+Hammond,+LA+70403" target="_blank" rel="noopener noreferrer">Directions</a>
-        </span>
+      <div class="cx-status" aria-label="Booking status">
+        <div class="cx-chip" title="Live booking is handled on GlossGenius">
+          <span class="cx-dot cx-dot--ok" aria-hidden="true"></span>
+          <strong>LIVE</strong> · GlossGenius
+        </div>
+        <div class="cx-chip" title="Direct booking will be enabled later">
+          <span class="cx-dot cx-dot--soon" aria-hidden="true"></span>
+          <strong>SOON</strong> · Direct
+        </div>
       </div>
 
       <div class="row">
         <a class="btn btn--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Open booking in new tab</a>
         <a class="btn btn--ghost" href="/courageaux/appointments/">⟵ Back to Appointments</a>
       </div>
+
+      <div class="mood-strip" aria-hidden="true"></div>
     </div>
   </header>
 
@@ -205,12 +164,6 @@
         referrerpolicy="no-referrer-when-downgrade"
       ></iframe>
     </div>
-
-    <p class="fallback">
-      If the calendar area is blank, your device or browser may block embedded booking pages.
-      Use <a href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Open booking</a>
-      to book directly.
-    </p>
   </main>
 
   <footer>
