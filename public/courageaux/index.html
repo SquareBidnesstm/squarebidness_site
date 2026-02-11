@@ -1,4 +1,4 @@
-<!-- public/courageaux/index.html (v2 micro-sweep) -->
+<!-- public/courageaux/index.html (v2 micro-sweep + hero injected) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -15,7 +15,7 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="sb:build" content="v20260211-courageaux-index-walkins-address" />
+  <meta name="sb:build" content="v20260211-courageaux-index-walkins-address-hero-webp" />
 
   <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
@@ -41,6 +41,7 @@
   <meta property="og:title" content="Courageaux Aesthetics — Hammond | Northshore, LA" />
   <meta property="og:description" content="Clean, calm, confident skin. Walk-ins welcome when available • Book online anytime • Hammond, Louisiana." />
   <meta property="og:url" content="https://www.squarebidness.com/courageaux/" />
+  <!-- Social preview stays JPG -->
   <meta property="og:image" content="https://www.squarebidness.com/courageaux/assets/courageaux_hero_1200x630.jpg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -54,6 +55,15 @@
   <meta name="twitter:image" content="https://www.squarebidness.com/courageaux/assets/courageaux_hero_1200x630.jpg" />
   <meta name="twitter:image:alt" content="Courageaux Aesthetics — clean, calm, confident skin" />
   <meta name="twitter:site" content="@squarebidness" />
+
+  <!-- Preload hero (best LCP) -->
+  <link
+    rel="preload"
+    as="image"
+    href="/courageaux/assets/hero_index_1600.webp"
+    fetchpriority="high"
+    type="image/webp"
+  />
 
   <!-- Structured Data -->
   <script type="application/ld+json">
@@ -222,9 +232,7 @@
     }
 
     /* Hero */
-    .cx-hero{
-      border-bottom:1px solid var(--stroke);
-    }
+    .cx-hero{border-bottom:1px solid var(--stroke)}
     .cx-hero__inner{
       max-width:1200px;
       margin:0 auto;
@@ -235,9 +243,10 @@
     }
     @media(min-width:900px){
       .cx-hero__inner{
-        grid-template-columns: 1fr;
-        gap:18px;
+        grid-template-columns: 1.05fr .95fr; /* ✅ now 2-col because hero image is back */
+        gap:22px;
         padding:28px 16px;
+        align-items:center;
       }
     }
 
@@ -332,7 +341,7 @@
     }
     .cx-strip strong{color:#fff}
 
-    /* NEW: Location line in hero */
+    /* Location line in hero */
     .cx-loc{
       margin:.55rem 0 0;
       color:var(--muted);
@@ -358,6 +367,21 @@
       line-height:1;
       margin-right:6px;
       vertical-align:-3px;
+    }
+
+    /* ✅ HERO MEDIA (new) */
+    .cx-hero__media picture, .cx-hero__media img{width:100%}
+    .cx-hero__media img{
+      width:100%;
+      height:auto;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow: var(--shadow);
+      background:#000;
+    }
+    @media(min-width:900px){
+      .cx-hero__media{height:100%;display:flex}
+      .cx-hero__media img{height:100%;object-fit:cover}
     }
 
     /* Sections */
@@ -576,8 +600,30 @@
           </div>
         </div>
 
-        <!-- Enterprise: hero image intentionally removed.
-             Portrait photography lives on /courageaux/her-words/ -->
+        <!-- ✅ HERO IMAGE (WebP + JPG fallback; responsive) -->
+        <div class="cx-hero__media" aria-label="Courageaux hero image">
+          <picture>
+            <source
+              type="image/webp"
+              srcset="
+                /courageaux/assets/hero_index_960.webp 960w,
+                /courageaux/assets/hero_index_1200.webp 1200w,
+                /courageaux/assets/hero_index_1600.webp 1600w
+              "
+              sizes="(min-width: 900px) 46vw, 100vw"
+            />
+            <img
+              src="/courageaux/assets/hero_index_1200.jpg"
+              alt="Courageaux Aesthetics — Clean, Calm, Confident Skin"
+              width="1600"
+              height="900"
+              loading="eager"
+              decoding="async"
+              fetchpriority="high"
+            />
+          </picture>
+        </div>
+
       </div>
     </header>
 
