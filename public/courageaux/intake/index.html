@@ -1,7 +1,8 @@
-<!-- public/courageaux/intake/index.html -->
+<!-- public/courageaux/intake/index.html (v2 consistency polish — standardized nav/badge/buttons/footer) -->
 <!doctype html>
 <html lang="en">
 <head>
+  <!-- Basics -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
 
@@ -13,7 +14,7 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="noindex,nofollow,nosnippet" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="sb:build" content="v20260211-courageaux-intake-privacy-line" />
+  <meta name="sb:build" content="v20260211-courageaux-intake-consistency-nav-badge-buttons-footer" />
 
   <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
@@ -40,13 +41,18 @@
       --stroke:#232323;
       --gold:#c9a227;
       --danger:#ff5c5c;
+
+      /* shared */
+      --soft:#121212;
+      --shadow: 0 18px 40px rgba(0,0,0,.35);
     }
+
     *{box-sizing:border-box}
     html,body{
       margin:0;
       background:var(--bg);
       color:var(--ink);
-      font-family:system-ui,Segoe UI,Roboto,Arial;
+      font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       line-height:1.45;
     }
     a{color:var(--gold);text-decoration:none}
@@ -55,17 +61,130 @@
     .wrap{
       max-width:900px;
       margin:0 auto;
-      padding:20px 16px 32px;
+      padding:18px 16px 30px;
     }
+
+    /* ✅ Standard buttons */
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      padding:12px 16px;
+      border-radius:12px;
+      text-decoration:none;
+      font-weight:900;
+      border:1px solid transparent;
+      transition: transform .12s ease, opacity .12s ease, background .12s ease, border-color .12s ease;
+      user-select:none;
+      white-space:nowrap;
+      font:inherit;
+      cursor:pointer;
+    }
+    .btn:active{transform: translateY(1px)}
+    .btn--gold{background:var(--gold);color:#000;border-color:rgba(201,162,39,.95)}
+    .btn--ghost{background:rgba(255,255,255,.03);color:#fff;border-color:rgba(255,255,255,.14)}
+    @media (hover:hover){
+      .btn:hover{opacity:.95}
+      .btn--ghost:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.22)}
+    }
+    .btn:focus-visible{outline:3px solid rgba(201,162,39,.55); outline-offset:2px}
+
+    /* ✅ Standard top nav */
+    .cx-topnav{
+      position:sticky;
+      top:0;
+      z-index:50;
+      border-bottom:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(10px);
+    }
+    .cx-topnav__inner{
+      max-width:1200px;
+      margin:0 auto;
+      padding:12px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .cx-brand{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      text-decoration:none;
+      color:inherit;
+      font-weight:950;
+      letter-spacing:-.01em;
+    }
+    .cx-brand img{
+      width:22px;height:22px;
+      border-radius:7px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.95);
+      padding:2px;
+      display:block;
+    }
+    .cx-links{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+    }
+    .cx-pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:9px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.04);
+      color:#f5f5f5;
+      text-decoration:none;
+      font-weight:950;
+      font-size:.92rem;
+      white-space:nowrap;
+      transition: background .12s ease, border-color .12s ease, transform .12s ease;
+    }
+    .cx-pill:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.22)}
+    .cx-pill:active{transform: translateY(1px)}
+    .cx-pill--gold{
+      border-color:rgba(201,162,39,.85);
+      background:rgba(201,162,39,.95);
+      color:#000;
+    }
+
+    /* Header */
     header{
-      padding:10px 0 18px;
+      padding:14px 0 18px;
       border-bottom:1px solid var(--stroke);
       margin-bottom:18px;
     }
+
+    /* ✅ Standard badge */
+    .badge{
+      background:#fff;
+      color:#000;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:.82rem;
+      font-weight:950;
+      letter-spacing:.02em;
+      width:max-content;
+      box-shadow: 0 10px 30px rgba(0,0,0,.18);
+      margin-bottom:10px;
+    }
+    .badge img{height:18px;width:18px;display:block}
+
     h1{
       margin:0 0 6px;
       font-size:clamp(1.6rem,3.4vw,2.1rem);
       letter-spacing:-.01em;
+      line-height:1.2;
     }
     .sub{
       margin:0;
@@ -73,15 +192,26 @@
       font-size:.95rem;
       max-width:72ch;
     }
-    .back-link{margin-bottom:8px;font-size:.9rem}
+
+    .hint-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      margin-top:10px;
+      color:var(--muted);
+      font-size:.82rem;
+    }
 
     form{
       background:var(--card);
       border-radius:16px;
       border:1px solid var(--stroke);
-      padding:18px 16px 20px;
+      padding:18px 16px 18px;
       display:grid;
       gap:16px;
+      box-shadow: 0 12px 30px rgba(0,0,0,.25);
     }
 
     fieldset{
@@ -92,7 +222,7 @@
     }
     legend{
       padding:0 6px;
-      font-weight:800;
+      font-weight:900;
       font-size:.95rem;
       color:#e9e9e9;
     }
@@ -110,6 +240,7 @@
       font-size:.88rem;
       margin-bottom:4px;
       color:#d7dae0;
+      font-weight:800;
     }
     input[type="text"],
     input[type="email"],
@@ -118,7 +249,7 @@
     textarea,
     select{
       width:100%;
-      padding:9px 11px;
+      padding:10px 11px;
       border-radius:10px;
       border:1px solid #2a2a2a;
       background:#070707;
@@ -147,34 +278,19 @@
       gap:6px;
       cursor:pointer;
       font-size:.86rem;
+      font-weight:800;
+      color:#d7dae0;
     }
     .inline-check input{accent-color:var(--gold)}
 
-    .note{font-size:.8rem;color:var(--muted);margin-top:2px}
-    .req{color:var(--gold);margin-left:3px}
-
-    .actions{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      justify-content:flex-end;
-      margin-top:4px;
-    }
-    button{
-      border-radius:999px;
-      border:1px solid var(--gold);
-      padding:10px 20px;
-      font-weight:900;
-      cursor:pointer;
-      font:inherit;
-    }
-    .btn-primary{background:var(--gold);color:#000}
-    .btn-ghost{background:transparent;color:var(--ink);border-color:#3a3a3a}
+    .note{font-size:.8rem;color:var(--muted);margin-top:4px}
+    .req{color:var(--gold);margin-left:3px;font-weight:950}
 
     .disclaimer{
       font-size:.78rem;
       color:var(--muted);
       line-height:1.5;
+      margin:0;
     }
 
     .error{
@@ -187,89 +303,51 @@
       border-radius:12px;
     }
 
-    .hint-row{
+    .actions{
       display:flex;
       flex-wrap:wrap;
       gap:10px;
-      align-items:center;
-      justify-content:space-between;
-      margin-top:6px;
-      color:var(--muted);
-      font-size:.82rem;
+      justify-content:flex-end;
+      margin-top:2px;
     }
 
     .bottom-helper{
-      margin-top:10px;
+      margin-top:12px;
       color:var(--muted);
       font-size:.82rem;
-      line-height:1.5;
+      line-height:1.55;
       text-align:left;
     }
 
+    /* ✅ Standard footer */
+    .cx-footer{
+      margin-top:18px;
+      border-top:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.35);
+      padding:18px 16px 22px;
+      text-align:center;
+    }
+    .cx-footer p{
+      margin:0;
+      color:#9ca3af;
+      font-size:.92rem;
+      line-height:1.65;
+    }
+    .cx-footer a{
+      color:var(--gold);
+      text-decoration:underline;
+      font-weight:950;
+    }
+
     @media print{
-      .back-link, .actions, .hint-row{display:none !important;}
+      .cx-topnav, .actions, .hint-row, .cx-footer{display:none !important;}
       body{background:#fff;color:#000}
-      form{border:1px solid #ddd;background:#fff}
+      form{border:1px solid #ddd;background:#fff;box-shadow:none}
       fieldset{border:1px solid #ddd}
       input, textarea, select{border:1px solid #ddd;background:#fff;color:#000}
       .error{display:none !important;}
       .bottom-helper{color:#333}
-    }
-  </style>
-
-  <style>
-    .cx-topnav{
-      border-bottom:1px solid var(--stroke,#1f1f1f);
-      background:rgba(0,0,0,.35);
-    }
-    .cx-topnav__inner{
-      max-width:1200px;
-      margin:0 auto;
-      padding:14px 16px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-    }
-    .cx-brand{
-      display:inline-flex;
-      align-items:center;
-      gap:10px;
-      text-decoration:none;
-      color:inherit;
-      font-weight:900;
-    }
-    .cx-brand img{
-      height:22px;width:22px;display:block;
-      border-radius:6px;
-      background:#fff;
-    }
-    .cx-links{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      align-items:center;
-    }
-    .cx-pill{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:9px 12px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.04);
-      color:#f5f5f5;
-      text-decoration:none;
-      font-weight:900;
-      font-size:.9rem;
-      white-space:nowrap;
-    }
-    .cx-pill:hover{background:rgba(255,255,255,.07)}
-    .cx-pill--gold{
-      border-color:rgba(201,162,39,.85);
-      background:rgba(201,162,39,.95);
-      color:#000;
+      .badge{box-shadow:none}
     }
   </style>
 </head>
@@ -278,10 +356,18 @@
   <nav class="cx-topnav" aria-label="Courageaux navigation">
     <div class="cx-topnav__inner">
       <a class="cx-brand" href="/courageaux/">
-        <img src="/courageaux/assets/icon_courageaux_512.png" alt="Courageaux Aesthetics" width="22" height="22" loading="eager" decoding="async">
+        <img
+          src="/courageaux/assets/icon_courageaux.svg"
+          alt="Courageaux Aesthetics"
+          width="22"
+          height="22"
+          loading="eager"
+          decoding="async"
+        >
         Courageaux Aesthetics
       </a>
 
+      <!-- ✅ Standard pill order -->
       <div class="cx-links">
         <a class="cx-pill cx-pill--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book</a>
         <a class="cx-pill" href="/courageaux/services-preview/">Services</a>
@@ -296,22 +382,33 @@
 
   <div class="wrap">
     <header>
-      <div class="back-link">
-        <a href="/courageaux/">&larr; Back to Courageaux</a>
+      <!-- ✅ Standard badge copy -->
+      <div class="badge">
+        <img
+          src="/courageaux/assets/logo_courageaux_black_400.png"
+          alt="Courageaux Aesthetics logo"
+          width="18"
+          height="18"
+          loading="eager"
+          decoding="async"
+        >
+        Courageaux Aesthetics · Hammond · Northshore · Southeastern, Louisiana
       </div>
-      <h1>Courageaux Aesthetics — Client Intake</h1>
+
+      <h1>Client intake form.</h1>
       <p class="sub">
         Please complete this form before your first appointment. This helps Amari create a safe,
         personalized treatment plan for your skin.
       </p>
+
       <div class="hint-row">
-        <span>Fields marked with <span style="color:var(--gold);font-weight:900">*</span> are required.</span>
+        <span>Fields marked with <span style="color:var(--gold);font-weight:950">*</span> are required.</span>
         <span><a href="#" onclick="window.print();return false;">Print / Save PDF</a></span>
       </div>
     </header>
 
     <form id="intakeForm" novalidate>
-      <div id="errorMsg" class="error">Please complete all required fields (marked with *).</div>
+      <div id="errorMsg" class="error">Please complete all required fields (marked with *), including at least one primary skin concern.</div>
 
       <!-- Contact -->
       <fieldset>
@@ -362,6 +459,7 @@
             </div>
             <p class="note">Select at least one concern.</p>
           </div>
+
           <div>
             <label for="routine">Current skin routine (products you use)</label>
             <textarea id="routine" name="routine" placeholder="Cleanser, exfoliants, serums, prescription creams, etc."></textarea>
@@ -378,6 +476,7 @@
               <label><input type="checkbox" name="actives" value="waxing"> Waxing / hair removal</label>
             </div>
           </div>
+
           <div>
             <label for="allergies">Allergies or sensitivities</label>
             <textarea id="allergies" name="allergies" placeholder="Ingredients, medications, latex, nuts, fragrances, etc."></textarea>
@@ -396,6 +495,7 @@
             </div>
             <p class="note">Please list details or medications below.</p>
           </div>
+
           <div>
             <label for="meds">Medications or medical notes</label>
             <textarea id="meds" name="meds"></textarea>
@@ -427,7 +527,7 @@
           inform Courageaux Aesthetics of any changes to your health, medications, or skin condition.
         </p>
 
-        <div class="inline-check" style="margin-top:6px">
+        <div class="inline-check" style="margin-top:10px">
           <label>
             <input type="checkbox" id="agree" required>
             I have read and agree to the policies above.<span class="req">*</span>
@@ -447,21 +547,36 @@
       </fieldset>
 
       <div class="actions">
-        <button type="reset" class="btn-ghost">Clear</button>
+        <button type="reset" class="btn btn--ghost">Clear</button>
         <!-- change type="submit" to "button" + wire backend when ready -->
-        <button type="submit" class="btn-primary">Submit intake</button>
+        <button type="submit" class="btn btn--gold">Submit intake</button>
       </div>
 
       <!-- ✅ Compressed privacy + print option (single line) -->
-      <p class="bottom-helper" style="margin-top:12px">
+      <p class="bottom-helper">
         Your information is used only for your care and appointment preparation (not sold); if you prefer not to submit online, you can
         <a href="#" onclick="window.print();return false;">print this form</a>
         and bring a copy.
       </p>
     </form>
+
+    <!-- ✅ Standard footer -->
+    <footer class="cx-footer">
+      <p>
+        © <span id="year"></span> <strong>Courageaux Aesthetics</strong> ·
+        <a href="/courageaux/">Home</a> ·
+        <a href="https://courageauxaesthetics.glossgenius.com/" target="_blank" rel="noopener noreferrer">Book Online</a>
+      </p>
+      <p style="margin:.85rem 0 0;color:#6b7280;font-size:.9rem;line-height:1.6;">
+        Powered by
+        <a href="https://lab.squarebidness.com/" target="_blank" rel="noopener noreferrer">Square Bidness Tech Lab</a>
+      </p>
+    </footer>
   </div>
 
   <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+
     // ✅ Front-end validation: require at least one "Primary skin concern"
     (function () {
       const form = document.getElementById('intakeForm');
@@ -478,7 +593,6 @@
 
         if (!validFields || !validConcerns) {
           e.preventDefault();
-
           errorMsg.style.display = 'block';
 
           const firstInvalid = form.querySelector(':invalid');
