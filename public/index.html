@@ -14,7 +14,7 @@
   <meta name="color-scheme" content="dark light">
 
   <!-- Build/version stamp -->
-  <meta name="sb:build" content="v20260212-home-naeday72" />
+  <meta name="sb:build" content="v20260212-home-hero-video" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
@@ -38,12 +38,12 @@
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
   <link rel="preconnect" href="https://www.google-analytics.com" crossorigin>
 
-  <!-- ✅ Preload LCP hero image (WebP) -->
+  <!-- ✅ Preload hero poster (LCP) -->
   <link
     rel="preload"
     as="image"
-    href="/assets/hero_1200.webp"
-    imagesrcset="/assets/hero_600.webp 600w, /assets/hero_800.webp 800w, /assets/hero_1200.webp 1200w"
+    href="/nae-day/assets/nae-day_780.jpg"
+    imagesrcset="/nae-day/assets/nae-day_420.webp 420w, /nae-day/assets/nae-day_640.webp 640w, /nae-day/assets/nae-day_780.webp 780w"
     imagesizes="(max-width: 768px) 90vw, 52vw"
     fetchpriority="high"
   />
@@ -126,25 +126,13 @@
     .taxpass-pill__arrow{ font-size:.9rem;margin-left:.15rem; }
     .taxpass-pill:hover{ border-color:#4b5563;background:radial-gradient(circle at top left,#111827,#030712); }
 
-    /* 🎉 Happy New Year banner */
-    .ny-banner{
-      display:flex; flex-wrap:wrap; align-items:center; justify-content:center;
-      gap:.75rem; padding:.5rem 1rem;
-      background:radial-gradient(circle at top,#0f172a,#020617);
-      border-bottom:1px solid #1f2937;
-      font-size:.8rem; color:#e5e7eb; text-align:center; z-index:35;
-    }
-    .ny-banner__tag{ text-transform:uppercase; letter-spacing:.14em; font-size:.7rem; color:#facc15; font-weight:800; }
-    .ny-banner__text{ opacity:.9; }
-    .ny-banner__link{ font-weight:700; color:#facc15; text-decoration:none; white-space:nowrap; }
-    .ny-banner__link:hover{ text-decoration:underline; }
-
     .sb-banner--overlay{
       position:absolute;bottom:1rem;left:1rem;right:auto;max-width:300px;
       padding:.65rem .85rem;border-radius:12px;border:1px solid rgba(255,215,0,.3);
       box-shadow:0 10px 30px rgba(0,0,0,.65);
       text-align:left;text-decoration:none;display:flex;flex-direction:column;gap:.15rem;
       font-size:.8rem;line-height:1.3;background:#800020;color:#FFD700;
+      z-index:3;
     }
     .sb-banner--overlay .sb-banner__eyebrow{ font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;opacity:.9; }
     .sb-banner--overlay strong{ font-size:.9rem; }
@@ -157,17 +145,71 @@
     @media(min-width:768px){
       .hero__inner{ grid-template-columns:1fr 1fr;align-items:center; }
     }
+
+    /* HERO VIDEO CARD */
     .hero__media{ position:relative; }
-    .hero__media img{
-      width:100%;
-      height:auto;
-      display:block;
+
+    .heroMedia{
+      position:relative;
       border-radius:12px;
       border:1px solid #1f1f1f;
-      background:#0f0f0f;
+      overflow:hidden;
+      background:#0b0b0b;
       aspect-ratio: 3 / 2;
-      object-fit: cover;
     }
+
+    .heroMedia__poster,
+    .heroMedia__video,
+    .heroMedia__shade{
+      position:absolute; inset:0; width:100%; height:100%;
+    }
+
+    .heroMedia__poster picture,
+    .heroMedia__poster img{ width:100%; height:100%; display:block; }
+
+    .heroMedia__poster img{
+      object-fit:cover;
+      object-position:center;
+      transform:scale(1.02);
+      filter:saturate(1.05) contrast(1.05);
+    }
+
+    .heroMedia__video video{
+      width:100%; height:100%;
+      object-fit:cover;
+      object-position:center;
+      display:block;
+      opacity:0;
+      transition:opacity .35s ease;
+      transform:scale(1.06);
+    }
+    .heroMedia.is-playing .heroMedia__video video{ opacity:1; }
+
+    .heroMedia__shade{
+      pointer-events:none;
+      background: radial-gradient(900px 520px at 45% 35%, rgba(0,0,0,.05), rgba(0,0,0,.55));
+    }
+
+    .heroPlay{
+      position:absolute; inset:0;
+      display:none; place-items:center;
+      z-index:4;
+      background:transparent;
+      border:0;
+      cursor:pointer;
+      color:#fff;
+    }
+    .heroPlay__pill{
+      padding:.55rem 1rem;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(0,0,0,.35);
+      backdrop-filter:blur(6px);
+      font:600 14px system-ui,-apple-system,Segoe UI,Roboto,Inter,sans-serif;
+      letter-spacing:.02em;
+      text-transform:lowercase;
+    }
+
     header.hero.hero--dark{ min-height:260px; }
     @media (min-width: 900px){
       header.hero.hero--dark{ min-height:520px; }
@@ -204,24 +246,6 @@
     .loop-strip a:hover{ text-decoration:underline; }
 
     [hidden]{ display:none !important; }
-
-    .sb-update-banner{
-      position:sticky;top:0;z-index:40;
-      display:flex;align-items:center;justify-content:space-between;
-      gap:.75rem;padding:.5rem 1rem;background:#111827;color:#e5e7eb;
-      font-size:.8rem;border-bottom:1px solid #1f2937;
-    }
-    .sb-update-banner__btn{
-      border-radius:999px;border:1px solid #4b5563;
-      padding:.25rem .75rem;background:#facc15;color:#111827;
-      font-size:.8rem;cursor:pointer;font-weight:600;white-space:nowrap;
-    }
-    .sb-update-banner__close{
-      border:none;background:transparent;color:#9ca3af;cursor:pointer;font-size:1rem;line-height:1;
-    }
-    @media (max-width:600px){
-      .sb-update-banner{ align-items:flex-start;flex-direction:column; }
-    }
 
     /* =========================
        NAE DAY — 72HR TAKEOVER
@@ -338,23 +362,6 @@
 </head>
 
 <body class="theme-dark" id="top">
-  <!-- 🎉 Happy New Year banner -->
-  <div class="ny-banner" role="status">
-    <span class="ny-banner__tag">Happy New Year 2026</span>
-    <span class="ny-banner__text">Thank you for riding with Square Bidness — new lanes, new motion, same principles.</span>
-    <a class="ny-banner__link" href="/vsop/">Tap VSOP to start the year →</a>
-  </div>
-
-  <div class="sb-update-banner" id="sb-update-banner" hidden aria-live="polite">
-    <span class="sb-update-banner__text">
-      Square Bidness just pushed a fresh site update. If anything looks off, refresh to see the latest.
-    </span>
-    <div style="display:flex;align-items:center;gap:.5rem;">
-      <button class="sb-update-banner__btn" type="button" id="sb-update-refresh">Refresh page</button>
-      <button class="sb-update-banner__close" type="button" id="sb-update-close" aria-label="Dismiss">×</button>
-    </div>
-  </div>
-
   <div id="site-header" aria-busy="true" style="content-visibility:auto;contain-intrinsic-size:80px;"></div>
 
   <!-- NAE DAY — 72HR TAKEOVER (public) -->
@@ -367,7 +374,7 @@
       playsinline
       preload="auto"
       poster="/nae-day/assets/nae-day_780.jpg">
-      <source src="/nae-day/assets/nae-day-v4.mp4" type="video/mp4">
+      <source src="/nae-day/assets/nae-day.mp4" type="video/mp4">
     </video>
 
     <div class="nae-takeover__shade" aria-hidden="true"></div>
@@ -404,31 +411,48 @@
 
       <div class="hero__inner">
         <div class="hero__media">
-          <picture>
-            <source type="image/webp"
-              srcset="/assets/hero_600.webp 600w, /assets/hero_800.webp 800w, /assets/hero_1200.webp 1200w"
-              sizes="(max-width: 768px) 90vw, 52vw">
-            <source type="image/jpeg"
-              srcset="/assets/hero_800.jpg 800w, /assets/hero_1200.jpg 1200w"
-              sizes="(max-width: 768px) 90vw, 52vw" />
-            <img
-              src="/assets/hero_1200.jpg"
-              srcset="/assets/hero_800.jpg 800w, /assets/hero_1200.jpg 1200w"
-              sizes="(max-width: 768px) 90vw, 52vw"
-              width="1200"
-              height="800"
-              alt="Square Bidness hero image"
-              loading="eager"
-              decoding="async"
-              fetchpriority="high"
-            />
-          </picture>
+          <div class="heroMedia" id="homeHeroMedia" aria-label="Square Bidness hero video">
+            <!-- Poster -->
+            <div class="heroMedia__poster" aria-hidden="true">
+              <picture>
+                <source type="image/webp"
+                  srcset="/nae-day/assets/nae-day_420.webp 420w, /nae-day/assets/nae-day_640.webp 640w, /nae-day/assets/nae-day_780.webp 780w"
+                  sizes="(max-width: 768px) 90vw, 52vw">
+                <source type="image/jpeg"
+                  srcset="/nae-day/assets/nae-day_420.jpg 420w, /nae-day/assets/nae-day_640.jpg 640w, /nae-day/assets/nae-day_780.jpg 780w"
+                  sizes="(max-width: 768px) 90vw, 52vw">
+                <img src="/nae-day/assets/nae-day_780.jpg" alt="" decoding="async" fetchpriority="high">
+              </picture>
+            </div>
 
-          <a href="/vsop/" class="sb-banner sb-banner--overlay" rel="noopener">
-            <span class="sb-banner__eyebrow">VSOP Collection</span>
-            <strong>Preorders Live · Ships Feb 1, 2026</strong>
-            <span class="sb-banner__cta">Tap in and see the set →</span>
-          </a>
+            <!-- Video -->
+            <div class="heroMedia__video" aria-hidden="true">
+              <video
+                id="homeHeroVideo"
+                autoplay
+                muted
+                playsinline
+                webkit-playsinline
+                loop
+                preload="metadata"
+                poster="/nae-day/assets/nae-day_780.jpg">
+                <source src="/nae-day/assets/nae-day.mp4" type="video/mp4">
+              </video>
+            </div>
+
+            <div class="heroMedia__shade" aria-hidden="true"></div>
+
+            <!-- Fallback play -->
+            <button id="homeHeroPlay" class="heroPlay" type="button" aria-label="Play video">
+              <span class="heroPlay__pill">play</span>
+            </button>
+
+            <a href="/vsop/" class="sb-banner sb-banner--overlay" rel="noopener">
+              <span class="sb-banner__eyebrow">VSOP Collection</span>
+              <strong>Preorders Live · Ships Feb 1, 2026</strong>
+              <span class="sb-banner__cta">Tap in and see the set →</span>
+            </a>
+          </div>
         </div>
 
         <div class="hero__copy">
@@ -553,23 +577,39 @@
               <a class="btn btn--ghost btn--secondary" href="/wintergames/">Winter Games Page</a>
             </div>
           </article>
-<article class="card">
-  <div class="card__media">
-    <picture>
-      ...
-    </picture>
-    <span class="badge">Women Coming</span>
-  </div>
-  <div class="card__content">
-    <h3>Women’s Lane — Coming Soon</h3>
-    <p class="card__description">
-      Marquesha setting the tone for the women’s side — presence, posture, and Square Bidness written all over it.
-    </p>
-  </div>
-  <div class="card__actions">
-    <a class="btn btn--ghost btn--secondary" href="/community/">Watch the Community Lane</a>
-  </div>
-</article>
+
+          <!-- WOMEN COMING SOON (Marquesha assets) -->
+          <article class="card">
+            <div class="card__media">
+              <picture>
+                <source
+                  type="image/webp"
+                  srcset="/assets/community/marquesha-1_800.webp 800w, /assets/community/marquesha-1_1200.webp 1200w"
+                  sizes="(max-width: 768px) 100vw, 400px">
+                <source
+                  type="image/jpeg"
+                  srcset="/assets/community/marquesha-1-800.jpg 800w, /assets/community/marquesha-1_1200.jpg 1200w, /assets/community/marquesha-1-1600.jpg 1600w"
+                  sizes="(max-width: 768px) 100vw, 400px">
+                <img
+                  src="/assets/community/marquesha-1-800.jpg"
+                  alt="Marquesha representing the upcoming Square Bidness women’s lane"
+                  width="800"
+                  height="1000"
+                  loading="lazy"
+                  decoding="async">
+              </picture>
+              <span class="badge">Women Coming</span>
+            </div>
+            <div class="card__content">
+              <h3>Women’s Lane — Coming Soon</h3>
+              <p class="card__description">
+                Marquesha setting the tone for the women’s side — presence, posture, and Square Bidness written all over it.
+              </p>
+            </div>
+            <div class="card__actions">
+              <a class="btn btn--ghost btn--secondary" href="/community/">Watch the Community Lane</a>
+            </div>
+          </article>
 
         </div>
       </div>
@@ -601,7 +641,7 @@
     </section>
   </main>
 
-  <!-- ✅ Product hydration (text/price only; FIXED JS that was breaking load) -->
+  <!-- ✅ Product hydration (text/price only) -->
   <script>
     fetch("/products.json", { cache: "no-store" })
       .then(r => r.ok ? r.json() : null)
@@ -628,36 +668,50 @@
       .catch(() => {});
   </script>
 
-  <!-- Update banner logic -->
+  <!-- HERO video autoplay (stable) -->
   <script>
-    (function(){
-      var buildMeta = document.querySelector('meta[name="sb:build"]');
-      var BUILD = (buildMeta && buildMeta.content) ? buildMeta.content : 'v0';
-      var bar = document.getElementById('sb-update-banner');
-      if (!bar) return;
+    (function () {
+      const wrap = document.getElementById("homeHeroMedia");
+      const v = document.getElementById("homeHeroVideo");
+      const btn = document.getElementById("homeHeroPlay");
+      if (!v || !wrap) return;
 
-      var btnRefresh = document.getElementById('sb-update-refresh');
-      var btnClose = document.getElementById('sb-update-close');
-      var KEY = 'sb_build_seen';
+      v.muted = true;
+      v.defaultMuted = true;
+      v.playsInline = true;
+      v.setAttribute("muted", "");
+      v.setAttribute("playsinline", "");
+      v.setAttribute("webkit-playsinline", "");
+      v.setAttribute("autoplay", "");
 
-      try {
-        var seen = localStorage.getItem(KEY);
-        if (seen !== BUILD) bar.hidden = false;
-      } catch (e) {}
+      const showBtn = () => { if (btn) btn.style.display = "grid"; };
+      const hideBtn = () => { if (btn) btn.style.display = "none"; };
 
-      if (btnRefresh) {
-        btnRefresh.addEventListener('click', function(){
-          try { localStorage.setItem(KEY, BUILD); } catch(e) {}
-          window.location.reload();
-        });
+      const mark = () => {
+        wrap.classList.add("is-playing");
+        hideBtn();
+      };
+
+      v.addEventListener("playing", mark, { passive:true });
+      v.addEventListener("play", mark, { passive:true });
+
+      async function tryPlay() {
+        try {
+          const p = v.play();
+          if (p && typeof p.then === "function") await p;
+          mark();
+        } catch (_) {
+          showBtn();
+        }
       }
 
-      if (btnClose) {
-        btnClose.addEventListener('click', function(){
-          try { localStorage.setItem(KEY, BUILD); } catch(e) {}
-          bar.hidden = true;
-        });
-      }
+      window.addEventListener("load", tryPlay, { once:true });
+      v.addEventListener("loadedmetadata", tryPlay, { once:true, passive:true });
+      v.addEventListener("canplay", tryPlay, { once:true, passive:true });
+
+      document.addEventListener("click", tryPlay, { once:true });
+      document.addEventListener("touchstart", tryPlay, { once:true, passive:true });
+      if (btn) btn.addEventListener("click", tryPlay);
     })();
   </script>
 
