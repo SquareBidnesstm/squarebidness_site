@@ -18,7 +18,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
 
-  <title>Nae Day — 02.11</title>
+  <title>Nae Day — 24</title>
   <meta name="description" content="Nae Day. 24. In her prime. No noise. Just presence." />
   <link rel="canonical" href="https://www.squarebidness.com/nae-day/" />
 
@@ -26,19 +26,19 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="sb:build" content="v20260211-nae-day-public" />
+  <meta name="sb:build" content="v20260211-nae-day-public-24" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Square Bidness" />
-  <meta property="og:title" content="Nae Day — 02.11" />
+  <meta property="og:title" content="Nae Day — 24" />
   <meta property="og:description" content="24. In her prime. No noise. Just presence." />
   <meta property="og:image" content="https://www.squarebidness.com/nae-day/assets/nae-day_780.jpg" />
   <meta property="og:url" content="https://www.squarebidness.com/nae-day/" />
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Nae Day — 02.11" />
+  <meta name="twitter:title" content="Nae Day — 24" />
   <meta name="twitter:description" content="24. In her prime. No noise. Just presence." />
   <meta name="twitter:image" content="https://www.squarebidness.com/nae-day/assets/nae-day_780.jpg" />
 
@@ -92,7 +92,7 @@
       inset:0;
     }
 
-    /* Poster always shows (even if autoplay blocked) */
+    /* Poster always shows */
     .hero__poster{z-index:-3}
     .hero__poster picture,
     .hero__poster img{
@@ -104,7 +104,7 @@
       object-fit:cover;
       object-position:center;
       transform:scale(1.02);
-      filter:saturate(1.05) contrast(1.05);
+      filter:saturate(1.04) contrast(1.06);
     }
 
     /* Video layer */
@@ -114,27 +114,36 @@
       height:100%;
       object-fit:cover;
       object-position:center;
-      transform:scale(1.08);
+      transform:scale(1.12); /* slightly more motion */
       display:block;
+      filter:contrast(1.05) saturate(1.05); /* make it feel less “still” */
     }
 
-    /* Shade on top of video/poster */
+    /* Shade */
     .shade{
       z-index:-1;
-      background:linear-gradient(to bottom, rgba(0,0,0,.18), rgba(0,0,0,.92));
+      background:
+        radial-gradient(1200px 700px at 50% 35%, rgba(0,0,0,.20), rgba(0,0,0,.85)),
+        linear-gradient(to bottom, rgba(0,0,0,.12), rgba(0,0,0,.92));
     }
 
-    /* IMPORTANT: let the content be clickable; video layers shouldn't eat taps */
-    .hero__poster,
-    .hero__video,
-    .shade{
-      pointer-events:none;
-    }
+    /* Let content be clickable */
+    .hero__poster, .hero__video, .shade{ pointer-events:none; }
 
     .inner{
       text-align:center;
       padding:2.2rem 1.2rem;
     }
+
+    /* Script vibe (optional) */
+    .script{
+      font-family: ui-serif, "Snell Roundhand", "Apple Chancery", "Brush Script MT", cursive;
+      font-size:clamp(2rem,3.6vw,3.6rem);
+      opacity:.92;
+      margin:0 0 .35rem;
+      letter-spacing:.02em;
+    }
+
     .kicker{
       display:inline-block;
       padding:.42rem .9rem;
@@ -147,19 +156,33 @@
       background:rgba(0,0,0,.22);
       backdrop-filter: blur(6px);
     }
-    h1{
-      margin:.9rem 0 0;
-      font-size:clamp(2.3rem,4vw,3.6rem);
-      letter-spacing:.08em;
+
+    /* BIG “24” */
+    .heroBig{
+      margin:.6rem 0 0;
+      font-size:clamp(4.4rem,10vw,9.2rem);
+      letter-spacing:.06em;
       text-transform:uppercase;
+      line-height:1;
+      text-shadow: 0 18px 45px rgba(0,0,0,.55);
     }
+
+    .name{
+      margin:.35rem 0 0;
+      font-size:clamp(1.3rem,2vw,1.65rem);
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      opacity:.92;
+    }
+
     .sub{
-      margin-top:.55rem;
-      opacity:.82;
-      font-size:clamp(1rem,1.4vw,1.15rem);
+      margin-top:.7rem;
+      opacity:.80;
+      font-size:clamp(1rem,1.3vw,1.12rem);
     }
+
     .cta{
-      margin-top:1.15rem;
+      margin-top:1.2rem;
       display:flex;
       gap:.65rem;
       justify-content:center;
@@ -180,7 +203,7 @@
       color:var(--gold);
     }
 
-    /* Play fallback overlay (only shows if autoplay blocked) */
+    /* Play fallback overlay */
     .playFallback{
       position:absolute;
       inset:0;
@@ -247,7 +270,7 @@
 
   <section class="hero" id="hero" aria-label="Nae Day">
 
-    <!-- Poster (always reliable) -->
+    <!-- Poster -->
     <div class="hero__poster" aria-hidden="true">
       <picture>
         <source type="image/webp"
@@ -276,16 +299,20 @@
     <!-- Shade -->
     <div class="shade" aria-hidden="true"></div>
 
-    <!-- Fallback play button (only appears if autoplay blocked) -->
+    <!-- Fallback button -->
     <button id="playFallback" class="playFallback" type="button" aria-label="Play video">
       <span class="playFallback__pill">play</span>
     </button>
 
     <!-- Content -->
     <div class="inner container">
+      <div class="script">Biker Girl</div>
       <span class="kicker">02.11 • Nae Day</span>
-      <h1>Nae</h1>
-      <div class="sub">24. In her prime.</div>
+
+      <div class="heroBig">24</div>
+      <div class="name">Nae</div>
+
+      <div class="sub">In her prime.</div>
       <div class="sub" style="margin-top:.35rem; opacity:.72;">No noise. Just presence.</div>
 
       <div class="cta">
@@ -331,14 +358,12 @@
       const btn = document.getElementById("playFallback");
       if (!v) return;
 
-      // Optional debug: add ?debug=1 to show controls
       const debug = new URLSearchParams(location.search).get("debug") === "1";
       if (debug) {
         v.controls = true;
         v.style.transform = "none";
       }
 
-      // Force autoplay-safe settings
       v.muted = true;
       v.defaultMuted = true;
       v.playsInline = true;
@@ -355,20 +380,18 @@
         }
       };
 
-      // Try at key lifecycles
       document.addEventListener("DOMContentLoaded", tryPlay, { once:true });
       v.addEventListener("loadedmetadata", tryPlay, { passive:true });
       v.addEventListener("canplay", tryPlay, { passive:true });
 
-      // First interaction clears autoplay restrictions
       const onUser = () => tryPlay();
       document.addEventListener("click", onUser, { once:true });
       document.addEventListener("touchstart", onUser, { once:true, passive:true });
 
-      // Fallback button click
       if (btn) btn.addEventListener("click", () => tryPlay());
     })();
   </script>
 
 </body>
 </html>
+
