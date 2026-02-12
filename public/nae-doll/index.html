@@ -344,45 +344,42 @@
   <footer>Square Bidness © 2026</footer>
 
   <script>
-    (function () {
-      const hero = document.getElementById("hero");
-      const v = document.getElementById("heroVideo");
-      const btn = document.getElementById("playFallback");
-      if (!hero || !v) return;
+  (function () {
+    const hero = document.getElementById("hero");
+    const v = document.getElementById("heroVideo");
+    if (!hero || !v) return;
 
-      // Make autoplay as reliable as possible across desktop/mobile
-      v.muted = true;
-      v.defaultMuted = true;
-      v.playsInline = true;
-      v.setAttribute("muted", "");
-      v.setAttribute("playsinline", "");
+    // Make autoplay as reliable as possible
+    v.muted = true;
+    v.defaultMuted = true;
+    v.playsInline = true;
+    v.setAttribute("muted", "");
+    v.setAttribute("playsinline", "");
 
-      const markPlaying = () => hero.classList.add("is-playing");
-      v.addEventListener("playing", markPlaying, { passive: true });
+    const mark = () => hero.classList.add("is-playing");
+    v.addEventListener("playing", mark, { passive:true });
 
-      const tryPlay = async () => {
-        try {
-          const p = v.play();
-          if (p && typeof p.then === "function") await p;
-          if (btn) btn.style.display = "none";
-        } catch (e) {
-          if (btn) btn.style.display = "grid"; // user tap to start
-        }
-      };
+    const tryPlay = async () => {
+      try {
+        const p = v.play();
+        if (p && typeof p.then === "function") await p;
+        mark();
+      } catch (e) {
+        // If blocked, first click will start it
+      }
+    };
 
-      // Try on multiple lifecycle events
-      document.addEventListener("DOMContentLoaded", tryPlay, { once: true });
-      v.addEventListener("loadedmetadata", tryPlay, { passive: true });
-      v.addEventListener("canplay", tryPlay, { passive: true });
+    // Try multiple moments
+    document.addEventListener("DOMContentLoaded", tryPlay, { once:true });
+    v.addEventListener("loadedmetadata", tryPlay, { passive:true });
+    v.addEventListener("canplay", tryPlay, { passive:true });
 
-      // First user gesture always clears restrictions
-      const onUser = () => tryPlay();
-      document.addEventListener("click", onUser, { once: true });
-      document.addEventListener("touchstart", onUser, { once: true, passive: true });
-
-      if (btn) btn.addEventListener("click", () => tryPlay());
-    })();
-  </script>
+    // First user interaction always clears restrictions
+    const onUser = () => tryPlay();
+    document.addEventListener("click", onUser, { once:true });
+    document.addEventListener("touchstart", onUser, { once:true, passive:true });
+  })();
+</script>
 
 </body>
 </html>
