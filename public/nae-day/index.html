@@ -1,6 +1,6 @@
 <!-- /public/nae-day/index.html
   Folder:
-    /public/nae-day/assets/nae-day.mp4
+    /public/nae-day/assets/nae-day.mp4   (or nae-day-v4.mp4)
     /public/nae-day/assets/nae-day_420.jpg
     /public/nae-day/assets/nae-day_640.jpg
     /public/nae-day/assets/nae-day_780.jpg
@@ -26,7 +26,7 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="sb:build" content="v20260212-nae-day-public-24-stillridin-v2" />
+  <meta name="sb:build" content="v20260212-nae-day-public-24-stillridin-v3" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
@@ -56,11 +56,8 @@
 
   <style>
     :root{
-      --bg:#000;
-      --fg:#fff;
-      --gold:#c7a65c;
-      --stroke:rgba(255,255,255,.10);
-      --card:#0b0b0b;
+      --bg:#000; --fg:#fff; --gold:#c7a65c;
+      --stroke:rgba(255,255,255,.10); --card:#0b0b0b;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -72,7 +69,6 @@
     a{color:inherit;text-decoration:none}
     .container{max-width:1100px;margin:0 auto;padding:0 16px;}
 
-    /* HERO */
     header.hero{
       position:relative;isolation:isolate;overflow:hidden;
       min-height:100svh;height:100svh;
@@ -89,7 +85,6 @@
     .shade{z-index:-1}
     .poster,.videoLayer,.shade{pointer-events:none;}
 
-    /* Poster */
     .poster picture,.poster img{width:100%;height:100%;display:block}
     .poster img{
       object-fit:cover;object-position:center;
@@ -105,24 +100,20 @@
     }
     header.hero.is-playing .poster img{ animation:none; }
 
-    /* ✅ Video visible by default (don’t “look frozen” on desktop) */
     .videoLayer video{
       width:100%;height:100%;
       object-fit:cover;object-position:center;
       transform:scale(1.12);
       display:block;
-      opacity:1;
-      will-change: opacity;
+      opacity:1; /* show immediately */
     }
 
-    /* Shade */
     .shade{
       background:
         radial-gradient(1200px 700px at 50% 35%, rgba(0,0,0,.22), rgba(0,0,0,.86)),
         linear-gradient(to bottom, rgba(0,0,0,.08), rgba(0,0,0,.94));
     }
 
-    /* Content */
     .inner{text-align:center;padding:2.2rem 1.2rem;}
     .kicker{
       display:inline-block;padding:.42rem .9rem;
@@ -163,7 +154,6 @@
     .fine{margin:.9rem 0 0;opacity:.7;font-size:.9rem;}
     .fine a{ text-decoration:underline; text-underline-offset:3px; }
 
-    /* Play fallback */
     .playFallback{
       position:absolute;inset:0;z-index:5;
       display:none;place-items:center;
@@ -179,14 +169,12 @@
       letter-spacing:.02em;text-transform:lowercase;
     }
 
-    /* Sections */
     main{display:block}
     .section{padding:2.4rem 0;border-top:1px solid var(--stroke);}
     .center{text-align:center}
     .muted{opacity:.78}
     .title{margin:0;font-size:1.05rem;letter-spacing:.08em;text-transform:uppercase;}
 
-    /* Gallery */
     .grid{
       display:grid;gap:1rem;
       grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
@@ -229,25 +217,25 @@
       </picture>
     </div>
 
-    <!-- ✅ Video (AUTOPLAY ADDED) -->
+    <!-- Video -->
     <div class="layer videoLayer" aria-hidden="true">
-      <<video
-  id="heroVideo"
-  autoplay
-  muted
-  playsinline
-  webkit-playsinline
-  loop
-  preload="metadata"
-  poster="/nae-day/assets/nae-day_780.jpg">
-  <source src="/nae-day/assets/nae-day-web.mp4" type="video/mp4; codecs=avc1.4D401E,mp4a.40.2">
-</video>
+      <video
+        id="heroVideo"
+        autoplay
+        muted
+        playsinline
+        webkit-playsinline
+        loop
+        preload="metadata"
+        poster="/nae-day/assets/nae-day_780.jpg">
+        <source src="/nae-day/assets/nae-day.mp4" type="video/mp4" />
+      </video>
     </div>
 
     <!-- Shade -->
     <div class="layer shade" aria-hidden="true"></div>
 
-    <!-- Fallback button -->
+    <!-- Fallback -->
     <button id="playFallback" class="playFallback" type="button" aria-label="Play video">
       <span class="playFallback__pill">play</span>
     </button>
@@ -278,7 +266,6 @@
     </div>
   </header>
 
-  <!-- ✅ main landmark -->
   <main>
     <section class="section">
       <div class="container center">
@@ -318,7 +305,7 @@
       const btn = document.getElementById("playFallback");
       if (!v) return;
 
-      // Hard-set autoplay-friendly flags (some browsers need JS set)
+      // keep autoplay-friendly flags
       v.muted = true;
       v.defaultMuted = true;
       v.playsInline = true;
@@ -330,44 +317,27 @@
       const showBtn = () => { if (btn) btn.style.display = "grid"; };
       const hideBtn = () => { if (btn) btn.style.display = "none"; };
 
-      const markPlaying = () => {
+      const mark = () => {
         if (hero) hero.classList.add("is-playing");
         hideBtn();
       };
 
-      v.addEventListener("playing", markPlaying, { passive:true });
-      v.addEventListener("play", markPlaying, { passive:true });
-
-      let tries = 0;
-      const MAX_TRIES = 6;
+      v.addEventListener("playing", mark, { passive:true });
+      v.addEventListener("play", mark, { passive:true });
 
       const tryPlay = async () => {
-        tries++;
         try {
           const p = v.play();
           if (p && typeof p.then === "function") await p;
-          // if it actually starts, play/playing handlers will mark it
         } catch (e) {
-          if (tries >= MAX_TRIES) showBtn();
+          showBtn();
         }
       };
 
-      // Run a few safe attempts across lifecycles (desktop-friendly)
       window.addEventListener("load", tryPlay, { once:true });
-      v.addEventListener("loadedmetadata", tryPlay, { passive:true, once:true });
-      v.addEventListener("canplay", tryPlay, { passive:true, once:true });
-
-      // Extra attempts (covers timing / caching weirdness)
-      requestAnimationFrame(() => tryPlay());
-      setTimeout(() => tryPlay(), 250);
-      setTimeout(() => tryPlay(), 900);
-
-      // Gesture unlock
-      const onUser = () => tryPlay();
-      document.addEventListener("click", onUser, { once:true });
-      document.addEventListener("touchstart", onUser, { once:true, passive:true });
-
-      if (btn) btn.addEventListener("click", () => tryPlay());
+      document.addEventListener("click", tryPlay, { once:true });
+      document.addEventListener("touchstart", tryPlay, { once:true, passive:true });
+      if (btn) btn.addEventListener("click", tryPlay);
     })();
   </script>
 
