@@ -216,66 +216,62 @@
       </picture>
     </div>
 
-     <!-- Video -->
-    <div class="layer videoLayer" aria-hidden="true">
-      <video
-        id="heroVideo"
-        autoplay
-        muted
-        playsinline
-        loop
-        preload="auto"
-        poster="/nae-day/assets/nae-day_780.jpg">
-        <source src="/nae-day/assets/nae-day.mp4" type="video/mp4">
-      </video>
-    </div>
+   <!-- Video -->
+<div class="layer videoLayer" aria-hidden="true">
+  <video
+    id="heroVideo"
+    autoplay
+    muted
+    playsinline
+    loop
+    preload="auto"
+    poster="/nae-day/assets/nae-day_780.jpg">
+    <source src="/nae-day/assets/nae-day-v4.mp4" type="video/mp4">
+  </video>
+</div>
 
-    <script>
-      (function () {
-        const hero = document.getElementById("hero");
-        const v = document.getElementById("heroVideo");
-        const btn = document.getElementById("playFallback");
-        if (!v) return;
+<script>
+  (function () {
+    const hero = document.getElementById("hero");
+    const v = document.getElementById("heroVideo");
+    const btn = document.getElementById("playFallback");
+    if (!v) return;
 
-        // Autoplay-friendly flags
-        v.muted = true;
-        v.defaultMuted = true;
-        v.setAttribute("muted", "");
-        v.setAttribute("playsinline", "");
-        v.setAttribute("autoplay", "");
+    v.muted = true;
+    v.defaultMuted = true;
+    v.setAttribute("muted", "");
+    v.setAttribute("playsinline", "");
+    v.setAttribute("autoplay", "");
 
-        const showBtn = () => { if (btn) btn.style.display = "grid"; };
-        const hideBtn = () => { if (btn) btn.style.display = "none"; };
+    const showBtn = () => { if (btn) btn.style.display = "grid"; };
+    const hideBtn = () => { if (btn) btn.style.display = "none"; };
+    const mark = () => { if (hero) hero.classList.add("is-playing"); hideBtn(); };
 
-        const mark = () => {
-          if (hero) hero.classList.add("is-playing");
-          hideBtn();
-        };
+    v.addEventListener("playing", mark, { passive:true });
+    v.addEventListener("play", mark, { passive:true });
 
-        v.addEventListener("playing", mark, { passive: true });
-        v.addEventListener("play", mark, { passive: true });
+    async function tryPlay() {
+      try {
+        v.load(); // helps when the browser thinks it has “no source”
+        const p = v.play();
+        if (p && typeof p.then === "function") await p;
+      } catch (_) {
+        showBtn();
+      }
+    }
 
-        async function tryPlay() {
-          try {
-            const p = v.play();
-            if (p && typeof p.then === "function") await p;
-          } catch (_) {
-            showBtn();
-          }
-        }
+    window.addEventListener("load", tryPlay, { once:true });
+    v.addEventListener("loadedmetadata", tryPlay, { once:true, passive:true });
+    v.addEventListener("canplay", tryPlay, { once:true, passive:true });
 
-        // Kick at multiple safe moments
-        window.addEventListener("load", tryPlay, { once: true });
-        v.addEventListener("loadedmetadata", tryPlay, { once: true, passive: true });
-        v.addEventListener("canplay", tryPlay, { once: true, passive: true });
+    document.addEventListener("click", tryPlay, { once:true });
+    document.addEventListener("touchstart", tryPlay, { once:true, passive:true });
 
-        // One gesture always unlocks if autoplay is blocked
-        document.addEventListener("click", tryPlay, { once: true });
-        document.addEventListener("touchstart", tryPlay, { once: true, passive: true });
+    if (btn) btn.addEventListener("click", tryPlay);
+  })();
+</script>
 
-        if (btn) btn.addEventListener("click", tryPlay);
-      })();
-    </script>
+    
 
     <!-- Shade -->
     <div class="layer shade" aria-hidden="true"></div>
