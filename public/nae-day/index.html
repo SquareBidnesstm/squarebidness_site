@@ -343,58 +343,71 @@
 
 
 
-  <!-- ONE autoplay script (only once) -->
-  <script>
-    (function () {
-      const hero = document.getElementById("hero");
-      const v = document.getElementById("heroVideo");
-      const btn = document.getElementById("playFallback");
-      if (!v) return;
+ <!-- ONE autoplay script (loop-safe) -->
+<script>
+  (function () {
+    const hero = document.getElementById("hero");
+    const v = document.getElementById("heroVideo");
+    const btn = document.getElementById("playFallback");
+    if (!v) return;
 
-      v.muted = true;
-      v.defaultMuted = true;
-      v.playsInline = true;
-      v.setAttribute("muted", "");
-      v.setAttribute("playsinline", "");
-      v.setAttribute("webkit-playsinline", "");
-      v.setAttribute("autoplay", "");
+    // autoplay-friendly flags
+    v.muted = true;
+    v.defaultMuted = true;
+    v.playsInline = true;
+    v.setAttribute("muted", "");
+    v.setAttribute("playsinline", "");
+    v.setAttribute("webkit-playsinline", "");
+    v.setAttribute("autoplay", "");
+    v.setAttribute("loop", ""); // keep looping
 
-      const showBtn = () => { if (btn) btn.style.display = "grid"; };
-      const hideBtn = () => { if (btn) btn.style.display = "none"; };
+    const showBtn = () => { if (btn) btn.style.display = "grid"; };
+    const hideBtn = () => { if (btn) btn.style.display = "none"; };
 
-      const mark = () => {
-        if (hero) hero.classList.add("is-playing");
-        hideBtn();
-      };
+    const mark = () => {
+      if (hero) hero.classList.add("is-playing");
+      hideBtn();
+    };
 
-      v.addEventListener("playing", mark, { passive:true });
-      v.addEventListener("play", mark, { passive:true });
+    v.addEventListener("playing", mark, { passive:true });
+    v.addEventListener("play", mark, { passive:true });
 
-      let tries = 0;
-      const MAX_TRIES = 6;
+    let tries = 0;
+    const MAX_TRIES = 6;
 
-      async function tryPlay() {
-        tries++;
-        try {
-          const p = v.play();
-          if (p && typeof p.then === "function") await p;
-        } catch (_) {
-          if (tries >= MAX_TRIES) showBtn();
-        }
+    async function tryPlay() {
+      tries++;
+      try {
+        // Safari sometimes needs a reload nudge:
+        // v.load();
+        const p = v.play();
+        if (p && typeof p.then === "function") await p;
+      } catch (_) {
+        if (tries >= MAX_TRIES) showBtn();
       }
+    }
 
-      window.addEventListener("load", tryPlay, { once:true });
-      v.addEventListener("loadedmetadata", tryPlay, { once:true, passive:true });
-      v.addEventListener("canplay", tryPlay, { once:true, passive:true });
+    window.addEventListener("load", tryPlay, { once:true });
+    v.addEventListener("loadedmetadata", tryPlay, { once:true, passive:true });
+    v.addEventListener("canplay", tryPlay, { once:true, passive:true });
 
-      requestAnimationFrame(() => tryPlay());
-      setTimeout(() => tryPlay(), 250);
-      setTimeout(() => tryPlay(), 900);
+    requestAnimationFrame(() => tryPlay());
+    setTimeout(() => tryPlay(), 250);
+    setTimeout(() => tryPlay(), 900);
 
-      document.addEventListener("click", tryPlay, { once:true });
-      document.addEventListener("touchstart", tryPlay, { once:true, passive:true });
-      if (btn) btn.addEventListener("click", tryPlay);
-    })();
-  </script>
+    document.addEventListener("click", tryPlay, { once:true });
+    document.addEventListener("touchstart", tryPlay, { once:true, passive:true });
+    if (btn) btn.addEventListener("click", tryPlay);
+
+    // OPTIONAL: scroll once after video is actually playing (loop-safe)
+    let scrolled = false;
+    function scrollOnce() {
+      if (scrolled) return;
+      scrolled = true;
+      window.scrollTo({ top: window.innerHeight * 0.85, behavior: "smooth" });
+    }
+    v.addEventListener("playing", () => setTimeout(scrollOnce, 1400), { once:true, passive:true });
+  })();
+</script>
 </body>
 </html>
