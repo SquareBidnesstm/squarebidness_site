@@ -1,5 +1,5 @@
 <!-- /public/nae-day/index.html
-  ASSETS (must exist):
+  Folder:
     /public/nae-day/assets/nae-day.mp4
     /public/nae-day/assets/nae-day_420.jpg
     /public/nae-day/assets/nae-day_640.jpg
@@ -7,6 +7,9 @@
     /public/nae-day/assets/nae-day_420.webp
     /public/nae-day/assets/nae-day_640.webp
     /public/nae-day/assets/nae-day_780.webp
+    /public/nae-day/assets/nae-day_candidate_1.jpg
+    /public/nae-day/assets/nae-day_candidate_2.jpg
+    /public/nae-day/assets/nae-day_candidate_3.jpg
 -->
 
 <!doctype html>
@@ -16,7 +19,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
 
   <title>Nae Day — 02.11</title>
-  <meta name="description" content="Nae Day. 24. In her prime." />
+  <meta name="description" content="Nae Day. 24. In her prime. No noise. Just presence." />
   <link rel="canonical" href="https://www.squarebidness.com/nae-day/" />
 
   <meta name="theme-color" content="#000000" />
@@ -40,44 +43,30 @@
   <meta name="twitter:image" content="https://www.squarebidness.com/nae-day/assets/nae-day_780.jpg" />
 
   <!-- Preload poster -->
-  <link
-    rel="preload"
-    as="image"
-    href="/nae-day/assets/nae-day_780.jpg"
-    imagesrcset="
-      /nae-day/assets/nae-day_420.jpg 420w,
-      /nae-day/assets/nae-day_640.jpg 640w,
-      /nae-day/assets/nae-day_780.jpg 780w"
-    imagesizes="100vw"
-    fetchpriority="high"
-  />
+  <link rel="preload" as="image" href="/nae-day/assets/nae-day_780.jpg"
+    imagesrcset="/nae-day/assets/nae-day_420.jpg 420w, /nae-day/assets/nae-day_640.jpg 640w, /nae-day/assets/nae-day_780.jpg 780w"
+    imagesizes="100vw" fetchpriority="high" />
 
-  <!-- Site-wide analytics -->
   <script defer src="/scripts/sb-analytics.js"></script>
 
   <style>
     :root{
-      --bg:#000;
-      --fg:#fff;
-      --gold:#c7a65c;
-      --stroke:rgba(255,255,255,.10);
-      --card:#0b0b0b;
+      --bg:#000; --fg:#fff; --gold:#c7a65c;
+      --stroke:rgba(255,255,255,.10); --card:#0b0b0b;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0;background:var(--bg);color:var(--fg);
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,sans-serif;
-      -webkit-font-smoothing:antialiased;
-      text-rendering:optimizeLegibility;
+      -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
     }
     a{color:inherit;text-decoration:none}
     .container{max-width:1100px;margin:0 auto;padding:0 16px;}
 
-    /* HERO */
     .hero{
       position:relative;isolation:isolate;overflow:hidden;
-      min-height:100vh;display:grid;place-items:center;
+      min-height:92vh;display:grid;place-items:center;
       border-bottom:1px solid var(--stroke);
     }
     .hero__poster{position:absolute;inset:0;z-index:-3;}
@@ -87,114 +76,55 @@
     .hero__video video{
       width:100%;height:100%;
       object-fit:cover;object-position:center;
-      transform:scale(1.08);
-      display:block;
+      transform:scale(1.08);display:block;
     }
     .shade{
       position:absolute;inset:0;z-index:-1;
       background:linear-gradient(to bottom, rgba(0,0,0,.18), rgba(0,0,0,.92));
     }
-
-    .inner{
-      text-align:center;
-      padding:2.2rem 1.2rem;
-    }
+    .inner{text-align:center;padding:2.2rem 1.2rem;}
     .kicker{
-      display:inline-block;
-      padding:.42rem .9rem;
+      display:inline-block;padding:.42rem .9rem;
       border:1px solid rgba(199,166,92,.65);
-      border-radius:999px;
-      color:var(--gold);
-      font-size:.78rem;
-      text-transform:uppercase;
-      letter-spacing:.10em;
-      background:rgba(0,0,0,.22);
-      backdrop-filter: blur(6px);
+      border-radius:999px;color:var(--gold);
+      font-size:.78rem;text-transform:uppercase;letter-spacing:.10em;
+      background:rgba(0,0,0,.22);backdrop-filter: blur(6px);
     }
     h1{
       margin:.9rem 0 0;
       font-size:clamp(2.3rem,4vw,3.6rem);
-      letter-spacing:.08em;
-      text-transform:uppercase;
+      letter-spacing:.08em;text-transform:uppercase;
     }
-    .sub{
-      margin-top:.55rem;
-      opacity:.82;
-      font-size:clamp(1rem,1.4vw,1.15rem);
-    }
-    .cta{
-      margin-top:1.15rem;
-      display:flex;gap:.65rem;justify-content:center;flex-wrap:wrap;
-    }
+    .sub{margin-top:.55rem;opacity:.82;font-size:clamp(1rem,1.4vw,1.15rem);}
+    .cta{margin-top:1.15rem;display:flex;gap:.65rem;justify-content:center;flex-wrap:wrap;}
     .btn{
-      display:inline-block;
-      padding:.7rem 1.05rem;
-      border-radius:999px;
+      display:inline-block;padding:.7rem 1.05rem;border-radius:999px;
       border:1px solid rgba(255,255,255,.14);
-      background:rgba(11,11,11,.55);
-      color:var(--fg);
-      font-weight:650;
-      letter-spacing:.01em;
+      background:rgba(11,11,11,.55);color:var(--fg);
+      font-weight:650;letter-spacing:.01em;
     }
-    .btn--gold{
-      border-color:rgba(199,166,92,.78);
-      color:var(--gold);
-    }
+    .btn--gold{border-color:rgba(199,166,92,.78);color:var(--gold);}
 
-    /* SECTIONS */
-    .section{
-      padding:2.4rem 0;
-      border-top:1px solid var(--stroke);
-    }
+    .section{padding:2.4rem 0;border-top:1px solid var(--stroke);}
     .center{text-align:center}
     .muted{opacity:.78}
-    .title{
-      margin:0;
-      font-size:1.05rem;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-    }
+    .title{margin:0;font-size:1.05rem;letter-spacing:.08em;text-transform:uppercase;}
 
-    /* GALLERY */
     .grid{
       display:grid;gap:1rem;
       grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
       margin-top:1.25rem;
     }
     .card{
-      border-radius:16px;overflow:hidden;
-      background:var(--card);
+      border-radius:16px;overflow:hidden;background:var(--card);
       border:1px solid rgba(255,255,255,.08);
       aspect-ratio:4/5;
     }
-    .card picture{display:block;width:100%}
     .card img{
       width:100%;height:100%;display:block;
       object-fit:cover;object-position:center 20%;
       background:#000;
     }
-
-    /* BOOKING */
-    .book{max-width:760px;margin:1.25rem auto 0;text-align:left;}
-    .book label{display:block;font-size:.92rem;opacity:.9;margin:.75rem 0 .25rem;}
-    .book input,.book select,.book textarea{
-      width:100%;
-      padding:.75rem .85rem;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(11,11,11,.55);
-      color:var(--fg);
-      outline:none;
-    }
-    .book input:focus,.book select:focus,.book textarea:focus{
-      border-color:rgba(199,166,92,.65);
-      box-shadow:0 0 0 3px rgba(199,166,92,.12);
-    }
-    .row{display:grid;gap:.8rem;grid-template-columns:1fr;}
-    @media (min-width:720px){ .row{grid-template-columns:1fr 1fr;} }
-    .actions{margin-top:1rem;display:flex;gap:.6rem;flex-wrap:wrap;}
-    .status{margin:.75rem 0 0;font-size:.9rem;opacity:.75;}
-    .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;}
 
     footer{
       padding:2rem 0;text-align:center;
@@ -211,16 +141,10 @@
     <div class="hero__poster" aria-hidden="true">
       <picture>
         <source type="image/webp"
-          srcset="
-            /nae-day/assets/nae-day_420.webp 420w,
-            /nae-day/assets/nae-day_640.webp 640w,
-            /nae-day/assets/nae-day_780.webp 780w"
+          srcset="/nae-day/assets/nae-day_420.webp 420w, /nae-day/assets/nae-day_640.webp 640w, /nae-day/assets/nae-day_780.webp 780w"
           sizes="100vw">
         <source type="image/jpeg"
-          srcset="
-            /nae-day/assets/nae-day_420.jpg 420w,
-            /nae-day/assets/nae-day_640.jpg 640w,
-            /nae-day/assets/nae-day_780.jpg 780w"
+          srcset="/nae-day/assets/nae-day_420.jpg 420w, /nae-day/assets/nae-day_640.jpg 640w, /nae-day/assets/nae-day_780.jpg 780w"
           sizes="100vw">
         <img src="/nae-day/assets/nae-day_780.jpg" alt="" decoding="async" fetchpriority="high">
       </picture>
@@ -248,8 +172,8 @@
       <div class="sub" style="margin-top:.35rem; opacity:.72;">No noise. Just presence.</div>
 
       <div class="cta">
-        <a class="btn btn--gold" href="#book">Book Nae</a>
-        <a class="btn" href="#fit">Fit</a>
+        <a class="btn btn--gold" href="mailto:naedoll@squarebidness.com?subject=Nae%20Day%20—%20Booking">Book</a>
+        <a class="btn" href="/polarexpress/">Polar Express (Sold Out)</a>
       </div>
     </div>
   </section>
@@ -258,21 +182,6 @@
     <div class="container center">
       <p class="title">Quiet celebration</p>
       <p class="muted" style="margin:.6rem 0 0">No announcement. Just arrival.</p>
-    </div>
-  </section>
-
-  <section class="section" id="fit" aria-label="Fit">
-    <div class="container center">
-      <p class="title">Prime energy</p>
-      <p class="muted" style="margin:.6rem 0 0">
-        She’s in <strong>Polar Express</strong> by Square Bidness.<br />
-        <strong>Sold out.</strong>
-      </p>
-
-      <div class="cta" style="margin-top:1rem">
-        <a class="btn" href="/polarexpress/">View Polar Express</a>
-        <a class="btn btn--gold" href="mailto:naedoll@squarebidness.com?subject=Polar%20Express%20—%20Notify%20Me&body=Name%3A%0AEmail%3A%0ASize%20requested%3A%0A">Notify me</a>
-      </div>
     </div>
   </section>
 
@@ -285,94 +194,15 @@
 
       <div class="grid">
         <figure class="card">
-          <picture>
-            <source type="image/webp"
-              srcset="/nae-day/assets/nae-day_candidate_1.webp 1x"
-              >
-            <img src="/nae-day/assets/nae-day_candidate_1.jpg" loading="lazy" decoding="async" alt="Nae Day — frame one">
-          </picture>
+          <img src="/nae-day/assets/nae-day_candidate_1.jpg" loading="lazy" decoding="async" alt="Nae Day — frame one">
         </figure>
-
         <figure class="card">
-          <picture>
-            <source type="image/webp"
-              srcset="/nae-day/assets/nae-day_candidate_2.webp 1x"
-              >
-            <img src="/nae-day/assets/nae-day_candidate_2.jpg" loading="lazy" decoding="async" alt="Nae Day — frame two">
-          </picture>
+          <img src="/nae-day/assets/nae-day_candidate_2.jpg" loading="lazy" decoding="async" alt="Nae Day — frame two">
         </figure>
-
         <figure class="card">
-          <picture>
-            <source type="image/webp"
-              srcset="/nae-day/assets/nae-day_candidate_3.webp 1x"
-              >
-            <img src="/nae-day/assets/nae-day_candidate_3.jpg" loading="lazy" decoding="async" alt="Nae Day — frame three">
-          </picture>
+          <img src="/nae-day/assets/nae-day_candidate_3.jpg" loading="lazy" decoding="async" alt="Nae Day — frame three">
         </figure>
       </div>
-    </div>
-  </section>
-
-  <section class="section" id="book" aria-label="Booking">
-    <div class="container">
-      <div class="center">
-        <p class="title">Bookings</p>
-        <p class="muted" style="margin:.6rem 0 0">Serious inquiries only.</p>
-      </div>
-
-      <form id="naeBooking" class="book" autocomplete="on" novalidate>
-        <label class="hp" aria-hidden="true">
-          Leave this blank
-          <input name="company" tabindex="-1" autocomplete="off" />
-        </label>
-
-        <div class="row">
-          <label>
-            Name
-            <input name="name" required placeholder="Your name" />
-          </label>
-          <label>
-            Phone (optional)
-            <input name="phone" inputmode="tel" placeholder="(###) ###-####" />
-          </label>
-        </div>
-
-        <div class="row">
-          <label>
-            Email
-            <input name="email" type="email" required placeholder="you@email.com" />
-          </label>
-          <label>
-            Date (optional)
-            <input name="date" type="date" />
-          </label>
-        </div>
-
-        <label>
-          Booking type
-          <select name="type" required>
-            <option value="" selected disabled>Select one</option>
-            <option>Feature</option>
-            <option>Photo/Video Shoot</option>
-            <option>Appearance</option>
-            <option>Brand Collaboration</option>
-            <option>Other</option>
-          </select>
-        </label>
-
-        <label>
-          Message
-          <textarea name="message" rows="5" required placeholder="Location + vibe + budget range (optional)"></textarea>
-        </label>
-
-        <div class="actions">
-          <button class="btn btn--gold" type="submit">Send Request</button>
-          <a class="btn" href="mailto:naedoll@squarebidness.com?subject=Nae%20Day%20Booking%20Inquiry">Email Instead</a>
-        </div>
-
-        <p id="bookStatus" class="status" role="status" aria-live="polite"></p>
-      </form>
     </div>
   </section>
 
@@ -394,69 +224,6 @@
       document.addEventListener("DOMContentLoaded", tryPlay, { once:true });
       document.addEventListener("click", tryPlay, { once:true });
       document.addEventListener("touchstart", tryPlay, { once:true, passive:true });
-    })();
-
-    // Booking: tries API later; mailto fallback now
-    (function () {
-      const form = document.getElementById("naeBooking");
-      const status = document.getElementById("bookStatus");
-      if (!form) return;
-
-      const emailTo = "naedoll@squarebidness.com";
-      const endpoint = "/api/nae-day/booking"; // optional future endpoint
-
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        status.textContent = "";
-
-        const fd = new FormData(form);
-        if ((fd.get("company") || "").toString().trim()) return;
-
-        const data = Object.fromEntries(fd.entries());
-        if (!data.name || !data.email || !data.type || !data.message) {
-          status.textContent = "Please fill out name, email, type, and message.";
-          return;
-        }
-
-        try {
-          const res = await fetch(endpoint, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              name: data.name,
-              email: data.email,
-              phone: data.phone || "",
-              date: data.date || "",
-              type: data.type,
-              message: data.message,
-              page: location.pathname,
-              ts: new Date().toISOString()
-            })
-          });
-          if (res.ok) {
-            form.reset();
-            status.textContent = "Sent.";
-            return;
-          }
-        } catch (_) {}
-
-        const subject = encodeURIComponent("Nae Day Booking Inquiry");
-        const body = encodeURIComponent(
-`Name: ${data.name}
-Email: ${data.email}
-Phone: ${data.phone || "-"}
-Requested Date: ${data.date || "-"}
-Type: ${data.type}
-
-Message:
-${data.message}
-
-Page: ${location.href}
-Time: ${new Date().toLocaleString()}`
-        );
-
-        window.location.href = `mailto:${emailTo}?subject=${subject}&body=${body}`;
-      });
     })();
   </script>
 
