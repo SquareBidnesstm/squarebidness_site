@@ -322,75 +322,57 @@
   const hero = document.getElementById("hero");
   const v = document.getElementById("heroVideo");
   const btn = document.getElementById("playFallback");
-  if (!hero || !v) return;
+  if (!hero || !v || !btn) return;
 
-  // Hard set flags
-  v.muted = true; v.defaultMuted = true;
-  v.autoplay = true; v.loop = true;
+  // Force flags
+  v.muted = true;
+  v.defaultMuted = true;
+  v.loop = true;
   v.playsInline = true;
 
   v.setAttribute("muted", "");
-  v.setAttribute("autoplay", "");
   v.setAttribute("playsinline", "");
   v.setAttribute("webkit-playsinline", "");
 
-  const showBtn = () => { if (btn) btn.style.display = "grid"; };
-  const hideBtn = () => { if (btn) btn.style.display = "none"; };
-
-  let started = false;
+  // Show button until we KNOW it's playing
+  btn.style.display = "grid";
 
   const markPlaying = () => {
-    if (started) return;
-    started = true;
     hero.classList.add("is-playing");
-    hideBtn();
+    btn.style.display = "none";
   };
 
   v.addEventListener("playing", markPlaying, { passive:true });
 
-  const tryPlay = async () => {
-    if (started) return true;
+  const hardStart = async () => {
     try {
+      // Kick Safari/desktop sometimes needing a nudge off exact 0
+      if (v.currentTime === 0) v.currentTime = 0.01;
+
       const p = v.play();
       if (p && typeof p.then === "function") await p;
-      return true;
-    } catch (_) {
-      showBtn();
-      return false;
+
+      // If it starts, playing event will hide button
+      // If not, keep button visible
+    } catch (e) {
+      // Keep button visible if blocked
     }
   };
 
-  // Retry window (covers desktop timing where play() runs before ready)
-  const retryFor = (ms = 2500, every = 250) => {
-    const t0 = Date.now();
-    const id = setInterval(async () => {
-      if (started) return clearInterval(id);
-      await tryPlay();
-      if (Date.now() - t0 > ms) clearInterval(id);
-    }, every);
-  };
+  // Attempt autoplay, but don’t rely on it
+  const tryAuto = () => hardStart();
 
-  // Only attempt autoplay when hero is in view (desktop-friendly)
-  const io = new IntersectionObserver((entries) => {
-    const inView = entries.some(e => e.isIntersecting);
-    if (inView) { tryPlay(); retryFor(); }
-  }, { threshold: 0.25 });
-  io.observe(hero);
+  document.addEventListener("DOMContentLoaded", tryAuto, { once:true });
+  window.addEventListener("load", tryAuto, { once:true });
 
-  // Lifecycle tries
-  document.addEventListener("DOMContentLoaded", () => { tryPlay(); retryFor(); }, { once:true });
-  window.addEventListener("load", () => { tryPlay(); retryFor(); }, { once:true });
+  // Guaranteed manual start
+  btn.addEventListener("click", hardStart);
 
-  // User unlock (always works)
-  const onUser = () => { tryPlay(); retryFor(1200, 200); };
-  document.addEventListener("click", onUser, { once:true });
-  document.addEventListener("touchstart", onUser, { once:true, passive:true });
-  document.addEventListener("keydown", onUser, { once:true });
-
-  if (btn) btn.addEventListener("click", onUser);
+  // Also start on first interaction anywhere
+  document.addEventListener("click", hardStart, { once:true });
+  document.addEventListener("touchstart", hardStart, { once:true, passive:true });
 })();
 </script>
-
 
 </body>
 </html>
