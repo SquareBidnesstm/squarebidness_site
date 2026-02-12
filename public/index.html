@@ -14,7 +14,7 @@
   <meta name="color-scheme" content="dark light">
 
   <!-- Build/version stamp -->
-  <meta name="sb:build" content="v20260212-home-hero-video-v1" />
+  <meta name="sb:build" content="v20260212-home-hero-video-naeday" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
@@ -38,7 +38,7 @@
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
   <link rel="preconnect" href="https://www.google-analytics.com" crossorigin>
 
-  <!-- ✅ Preload LCP hero poster (WebP) -->
+  <!-- ✅ Preload poster (LCP-safe) -->
   <link
     rel="preload"
     as="image"
@@ -132,7 +132,7 @@
       box-shadow:0 10px 30px rgba(0,0,0,.65);
       text-align:left;text-decoration:none;display:flex;flex-direction:column;gap:.15rem;
       font-size:.8rem;line-height:1.3;background:#800020;color:#FFD700;
-      z-index:4;
+      z-index:10;
     }
     .sb-banner--overlay .sb-banner__eyebrow{ font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;opacity:.9; }
     .sb-banner--overlay strong{ font-size:.9rem; }
@@ -146,7 +146,7 @@
       .hero__inner{ grid-template-columns:1fr 1fr;align-items:center; }
     }
 
-    /* HERO MEDIA (poster + video) */
+    /* HERO MEDIA (VIDEO) */
     .hero__media{
       position:relative;
       border-radius:12px;
@@ -155,33 +155,55 @@
       background:#0f0f0f;
       aspect-ratio: 3 / 2;
     }
-    .hero__poster, .hero__poster img{ width:100%; height:100%; display:block; }
-    .hero__poster img{ object-fit:cover; object-position:center; }
-    .hero__video{
-      position:absolute; inset:0;
-      width:100%; height:100%;
-      object-fit:cover; object-position:center;
-      display:block;
-      opacity:0;
-      transition:opacity .28s ease;
-      transform: scale(1.03);
-    }
-    .hero__media.is-playing .hero__video{ opacity:1; }
 
-    /* play fallback */
+    .hero__poster{
+      position:absolute;
+      inset:0;
+      z-index:1;
+    }
+    .hero__poster img{
+      width:100%;
+      height:100%;
+      display:block;
+      object-fit:cover;
+      object-position:center;
+      background:#0f0f0f;
+      transform:scale(1.01);
+    }
+
+    .hero__video{
+      position:absolute;
+      inset:0;
+      z-index:2;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      object-position:center;
+      display:block;
+      opacity:1;           /* IMPORTANT: never hide */
+      transform:scale(1.03);
+    }
+
     .heroPlayFallback{
-      position:absolute; inset:0; z-index:5;
-      display:none; place-items:center;
-      background:transparent;border:0;color:#fff;
+      position:absolute;
+      inset:0;
+      z-index:9;
+      display:none;
+      place-items:center;
+      background:transparent;
+      border:0;
+      color:#fff;
       cursor:pointer;
     }
     .heroPlayFallback__pill{
-      padding:.55rem 1rem;border-radius:999px;
+      padding:.55rem 1rem;
+      border-radius:999px;
       border:1px solid rgba(255,255,255,.18);
       background:rgba(0,0,0,.35);
       backdrop-filter:blur(6px);
       font:600 14px system-ui,-apple-system,Segoe UI,Roboto,Inter,sans-serif;
-      letter-spacing:.02em;text-transform:lowercase;
+      letter-spacing:.02em;
+      text-transform:lowercase;
     }
 
     header.hero.hero--dark{ min-height:260px; }
@@ -348,7 +370,8 @@
       playsinline
       preload="auto"
       poster="/nae-day/assets/nae-day_780.jpg">
-      <source src="/nae-day/assets/nae-day-v4.mp4" type="video/mp4">
+      <source src="/nae-day/assets/nae-day.mp4" type="video/mp4">
+      <source src="/nae-day/assets/nae-day.webm" type="video/webm">
     </video>
 
     <div class="nae-takeover__shade" aria-hidden="true"></div>
@@ -385,7 +408,7 @@
 
       <div class="hero__inner">
         <div class="hero__media" id="homeHeroMedia">
-          <!-- Poster -->
+          <!-- poster behind video -->
           <picture class="hero__poster" aria-hidden="true">
             <source type="image/webp"
               srcset="/assets/hero_600.webp 600w, /assets/hero_800.webp 800w, /assets/hero_1200.webp 1200w"
@@ -393,18 +416,10 @@
             <source type="image/jpeg"
               srcset="/assets/hero_800.jpg 800w, /assets/hero_1200.jpg 1200w"
               sizes="(max-width: 768px) 90vw, 52vw" />
-            <img
-              src="/assets/hero_1200.jpg"
-              width="1200"
-              height="800"
-              alt=""
-              loading="eager"
-              decoding="async"
-              fetchpriority="high"
-            />
+            <img src="/assets/hero_1200.jpg" width="1200" height="800" alt="" loading="eager" decoding="async" fetchpriority="high" />
           </picture>
 
-          <!-- Video -->
+          <!-- video -->
           <video
             id="homeHeroVideo"
             class="hero__video"
@@ -416,13 +431,15 @@
             preload="metadata"
             poster="/assets/hero_1200.jpg">
             <source src="/nae-day/assets/nae-day.mp4" type="video/mp4">
+            <source src="/nae-day/assets/nae-day.webm" type="video/webm">
           </video>
 
-          <!-- Fallback -->
+          <!-- fallback play -->
           <button id="homeHeroPlayFallback" class="heroPlayFallback" type="button" aria-label="Play video">
             <span class="heroPlayFallback__pill">play</span>
           </button>
 
+          <!-- VSOP overlay (ships line removed) -->
           <a href="/vsop/" class="sb-banner sb-banner--overlay" rel="noopener">
             <span class="sb-banner__eyebrow">VSOP Collection</span>
             <strong>Preorders Live</strong>
@@ -551,7 +568,7 @@
             </div>
           </article>
 
-          <!-- Women Coming Soon (Marquesha image) -->
+          <!-- Women Coming Soon (Marquesha) -->
           <article class="card">
             <div class="card__media">
               <picture>
@@ -561,7 +578,7 @@
                 <source type="image/jpeg"
                   srcset="/assets/community/marquesha-1-800.jpg 800w, /assets/community/marquesha-1_1200.jpg 1200w"
                   sizes="(max-width: 768px) 100vw, 400px">
-                <img src="/assets/community/marquesha-1_1200.jpg" alt="Marquesha — Women’s lane coming soon" width="1200" height="1600" loading="lazy" decoding="async">
+                <img src="/assets/community/marquesha-1_1200.jpg" alt="Marquesha — women’s lane coming soon" width="1200" height="1500" loading="lazy" decoding="async">
               </picture>
               <span class="badge">Women Coming</span>
             </div>
@@ -633,61 +650,46 @@
       .catch(() => {});
   </script>
 
-  <!-- ✅ Homepage hero video: autoplay-safe + fallback -->
+  <!-- HERO VIDEO: reliable start + fallback -->
   <script>
-    (function () {
-      const wrap = document.getElementById("homeHeroMedia");
-      const v = document.getElementById("homeHeroVideo");
-      const btn = document.getElementById("homeHeroPlayFallback");
-      if (!wrap || !v) return;
+  (function () {
+    const v = document.getElementById("homeHeroVideo");
+    const btn = document.getElementById("homeHeroPlayFallback");
+    if (!v) return;
 
-      // autoplay-friendly flags
-      v.muted = true;
-      v.defaultMuted = true;
-      v.setAttribute("muted", "");
-      v.setAttribute("playsinline", "");
-      v.setAttribute("webkit-playsinline", "");
-      v.setAttribute("autoplay", "");
+    v.muted = true;
+    v.defaultMuted = true;
+    v.setAttribute("muted", "");
+    v.setAttribute("playsinline", "");
+    v.setAttribute("webkit-playsinline", "");
+    v.setAttribute("autoplay", "");
 
-      const showBtn = () => { if (btn) btn.style.display = "grid"; };
-      const hideBtn = () => { if (btn) btn.style.display = "none"; };
+    const showBtn = () => { if (btn) btn.style.display = "grid"; };
+    const hideBtn = () => { if (btn) btn.style.display = "none"; };
 
-      const mark = () => {
-        wrap.classList.add("is-playing");
+    async function tryPlay() {
+      try {
+        v.load(); // Safari “forget source” fix
+        const p = v.play();
+        if (p && typeof p.then === "function") await p;
         hideBtn();
-      };
-
-      v.addEventListener("playing", mark, { passive:true });
-      v.addEventListener("play", mark, { passive:true });
-
-      async function tryPlay() {
-        try {
-          // helps on Safari when it “forgets” source
-          v.load();
-          const p = v.play();
-          if (p && typeof p.then === "function") await p;
-          mark();
-        } catch (_) {
-          showBtn();
-        }
+      } catch (_) {
+        showBtn();
       }
+    }
 
-      // try at a few reliable lifecycle points
-      window.addEventListener("load", tryPlay, { once:true });
-      v.addEventListener("loadedmetadata", tryPlay, { once:true, passive:true });
-      v.addEventListener("canplay", tryPlay, { once:true, passive:true });
+    window.addEventListener("load", tryPlay, { once:true });
+    v.addEventListener("loadedmetadata", tryPlay, { once:true, passive:true });
+    v.addEventListener("canplay", tryPlay, { once:true, passive:true });
 
-      // gesture unlock
-      document.addEventListener("click", tryPlay, { once:true });
-      document.addEventListener("touchstart", tryPlay, { once:true, passive:true });
+    document.addEventListener("click", tryPlay, { once:true });
+    document.addEventListener("touchstart", tryPlay, { once:true, passive:true });
+    if (btn) btn.addEventListener("click", tryPlay);
 
-      if (btn) btn.addEventListener("click", tryPlay);
-
-      // if tab comes back visible, re-try (Safari pauses a lot)
-      document.addEventListener("visibilitychange", function(){
-        if (!document.hidden) tryPlay();
-      });
-    })();
+    document.addEventListener("visibilitychange", function(){
+      if (!document.hidden) tryPlay();
+    });
+  })();
   </script>
 
   <!-- NAE DAY — 72HR TAKEOVER logic -->
