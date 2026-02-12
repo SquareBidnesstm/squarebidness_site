@@ -1,0 +1,284 @@
+<!-- /public/nae-doll/index.html
+     HERO VIDEO: /public/nae-doll/assets/hero.mp4
+     POSTER IMAGES (make sure these exist):
+       /public/nae-doll/assets/nae-doll-2_420.jpg
+       /public/nae-doll/assets/nae-doll-2_640.jpg
+       /public/nae-doll/assets/nae-doll-2_780.jpg
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <title>Nae Doll — Star Time</title>
+  <meta name="description" content="Private showcase. Star time." />
+  <link rel="canonical" href="https://www.squarebidness.com/nae-doll/" />
+
+  <meta name="theme-color" content="#000000" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="robots" content="noindex,nofollow" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Square Bidness" />
+  <meta property="og:title" content="Nae Doll — Star Time" />
+  <meta property="og:description" content="You’re the hottest. Star time." />
+  <meta property="og:image" content="https://www.squarebidness.com/nae-doll/assets/nae-doll-2_780.jpg" />
+  <meta property="og:url" content="https://www.squarebidness.com/nae-doll/" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Nae Doll — Star Time" />
+  <meta name="twitter:description" content="You’re the hottest. Star time." />
+  <meta name="twitter:image" content="https://www.squarebidness.com/nae-doll/assets/nae-doll-2_780.jpg" />
+
+  <!-- Preload poster -->
+  <link
+    rel="preload"
+    as="image"
+    href="/nae-doll/assets/nae-doll-2_780.jpg"
+    imagesrcset="
+      /nae-doll/assets/nae-doll-2_420.jpg 420w,
+      /nae-doll/assets/nae-doll-2_640.jpg 640w,
+      /nae-doll/assets/nae-doll-2_780.jpg 780w"
+    imagesizes="100vw"
+    fetchpriority="high"
+  />
+
+  <style>
+    :root{
+      --bg:#000;
+      --fg:#fff;
+      --stroke:rgba(255,255,255,.10);
+      --gold:#c7a65c;
+      --card:#0b0b0b;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;background:var(--bg);color:var(--fg);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,sans-serif;
+      -webkit-font-smoothing:antialiased;
+      text-rendering:optimizeLegibility;
+    }
+    a{color:inherit}
+    .container{max-width:1100px;margin:0 auto;padding:0 16px;}
+
+    /* HERO */
+    .hero{
+      position:relative;isolation:isolate;overflow:hidden;
+      min-height:62vh;display:grid;place-items:center;
+      padding:3.2rem 0;border-bottom:1px solid var(--stroke);
+    }
+
+    /* Poster as responsive image behind video (reliable) */
+    .hero__poster{
+      position:absolute;inset:0;z-index:-3;
+    }
+    .hero__poster picture, .hero__poster img{
+      width:100%;height:100%;display:block;
+    }
+    .hero__poster img{
+      object-fit:cover;object-position:center;
+      transform:scale(1.02);
+      filter:saturate(1.05) contrast(1.05);
+    }
+
+    .hero__video-wrap{
+      position:absolute;inset:0;z-index:-2;
+      overflow:hidden;
+    }
+    .hero-video{
+      width:100%;height:100%;
+      object-fit:cover;object-position:center;
+      opacity:0;
+      transition:opacity .35s ease;
+    }
+    .hero.is-playing .hero-video{opacity:1}
+
+    .hero__shade{
+      position:absolute;inset:0;z-index:-1;
+      background:linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,.9));
+    }
+
+    .hero__inner{text-align:center}
+    .hero h1{margin:0;font-size:clamp(1.8rem,3vw,2.6rem);}
+    .sub{opacity:.75;margin-top:.4rem}
+    .banner{
+      margin-top:1rem;display:inline-block;
+      padding:.4rem 1rem;
+      border:1px solid rgba(199,166,92,.6);
+      border-radius:999px;color:var(--gold);
+      font-size:.8rem;text-transform:uppercase;
+      background:rgba(0,0,0,.25);
+      backdrop-filter: blur(6px);
+    }
+
+    /* GALLERY */
+    .grid-wrap{padding:1.6rem 0}
+    .grid{
+      display:grid;gap:1rem;
+      grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    }
+    .card{
+      border-radius:16px;overflow:hidden;
+      background:var(--card);
+      border:1px solid rgba(255,255,255,.08);
+    }
+
+    /* ✅ Force consistent sizing + keep subject visible */
+    .card picture{display:block;width:100%}
+    .card img{
+      display:block;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      object-position:center 20%;
+      background:#000;
+    }
+    /* Choose a flattering aspect ratio for portraits */
+    .card{aspect-ratio: 4 / 5;}
+
+    /* MESSAGE */
+    .message{
+      padding:1.6rem 0;
+      text-align:center;
+      border-top:1px solid var(--stroke);
+      border-bottom:1px solid var(--stroke);
+    }
+    .message p{margin:.4rem 0}
+    .message strong{color:var(--gold)}
+
+    footer{
+      padding:1.6rem 0;text-align:center;
+      font-size:.85rem;opacity:.6;
+    }
+  </style>
+</head>
+
+<body>
+  <section class="hero" id="hero" aria-label="Nae Doll private preview">
+
+    <div class="hero__poster" aria-hidden="true">
+      <picture>
+        <source type="image/webp"
+          srcset="
+            /nae-doll/assets/nae-doll-2_420.webp 420w,
+            /nae-doll/assets/nae-doll-2_640.webp 640w,
+            /nae-doll/assets/nae-doll-2_780.webp 780w"
+          sizes="100vw">
+        <source type="image/jpeg"
+          srcset="
+            /nae-doll/assets/nae-doll-2_420.jpg 420w,
+            /nae-doll/assets/nae-doll-2_640.jpg 640w,
+            /nae-doll/assets/nae-doll-2_780.jpg 780w"
+          sizes="100vw">
+        <img
+          src="/nae-doll/assets/nae-doll-2_780.jpg"
+          width="780" height="975"
+          alt=""
+          decoding="async"
+          fetchpriority="high">
+      </picture>
+    </div>
+
+    <div class="hero__video-wrap" aria-hidden="true">
+      <video
+        id="heroVideo"
+        class="hero-video"
+        autoplay muted loop playsinline
+        preload="metadata"
+        poster="/nae-doll/assets/nae-doll-2_780.jpg">
+        <source src="/nae-doll/assets/hero.mp4" type="video/mp4" />
+      </video>
+    </div>
+
+    <div class="hero__shade" aria-hidden="true"></div>
+
+    <div class="hero__inner container">
+      <h1><h1>You’re a natural.</h1>
+      <div class="sub">Star time.</div>
+      <div class="banner">Move intentional</div>
+    </div>
+  </section>
+
+  <main class="grid-wrap" aria-label="Gallery">
+    <div class="container grid">
+      <figure class="card">
+        <picture>
+          <source type="image/webp"
+            srcset="
+              /nae-doll/assets/nae-doll_420.webp 420w,
+              /nae-doll/assets/nae-doll_640.webp 640w,
+              /nae-doll/assets/nae-doll_780.webp 780w"
+            sizes="(min-width: 900px) 520px, 100vw">
+          <source type="image/jpeg"
+            srcset="
+              /nae-doll/assets/nae-doll_420.jpg 420w,
+              /nae-doll/assets/nae-doll_640.jpg 640w,
+              /nae-doll/assets/nae-doll_780.jpg 780w"
+            sizes="(min-width: 900px) 520px, 100vw">
+          <img
+            src="/nae-doll/assets/nae-doll_780.jpg"
+            width="780" height="975"
+            loading="lazy"
+            decoding="async"
+            alt="Nae Doll — look one">
+        </picture>
+      </figure>
+
+      <figure class="card">
+        <picture>
+          <source type="image/webp"
+            srcset="
+              /nae-doll/assets/nae-doll-2_420.webp 420w,
+              /nae-doll/assets/nae-doll-2_640.webp 640w,
+              /nae-doll/assets/nae-doll-2_780.webp 780w"
+            sizes="(min-width: 900px) 520px, 100vw">
+          <source type="image/jpeg"
+            srcset="
+              /nae-doll/assets/nae-doll-2_420.jpg 420w,
+              /nae-doll/assets/nae-doll-2_640.jpg 640w,
+              /nae-doll/assets/nae-doll-2_780.jpg 780w"
+            sizes="(min-width: 900px) 520px, 100vw">
+          <img
+            src="/nae-doll/assets/nae-doll-2_780.jpg"
+            width="780" height="975"
+            loading="lazy"
+            decoding="async"
+            alt="Nae Doll — look two">
+        </picture>
+      </figure>
+    </div>
+  </main>
+
+  <section class="message">
+    <p><strong>You’re the hottest.</strong></p>
+    <p>Protect your value. Move like you know who you are.</p>
+  </section>
+
+  <footer>Private showcase • Square Bidness Tech Lab © 2026</footer>
+
+  <script>
+    (function () {
+      const hero = document.getElementById("hero");
+      const v = document.getElementById("heroVideo");
+      if (!hero || !v) return;
+
+      const mark = () => hero.classList.add("is-playing");
+      v.addEventListener("playing", mark, { passive:true });
+
+      const tryPlay = () => {
+        const p = v.play();
+        if (p && typeof p.catch === "function") p.catch(()=>{});
+      };
+
+      document.addEventListener("DOMContentLoaded", tryPlay, { once:true });
+      document.addEventListener("touchstart", tryPlay, { once:true, passive:true });
+      document.addEventListener("click", tryPlay, { once:true });
+    })();
+  </script>
+</body>
+</html>
