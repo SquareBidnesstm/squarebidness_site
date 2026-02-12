@@ -201,7 +201,6 @@
 </head>
 
 <body>
-
   <header class="hero" id="hero" aria-label="Nae Day">
 
     <!-- Poster -->
@@ -224,13 +223,51 @@
         autoplay
         muted
         playsinline
-        webkit-playsinline
         loop
-        preload="metadata"
+        preload="auto"
         poster="/nae-day/assets/nae-day_780.jpg">
-        <source src="/nae-day/assets/nae-day.mp4" type="video/mp4" />
+        <source src="/nae-day/assets/nae-day.mp4" type="video/mp4">
       </video>
     </div>
+<script>
+  (function () {
+    const hero = document.getElementById("hero");
+    const v = document.getElementById("heroVideo");
+    const btn = document.getElementById("playFallback");
+    if (!v) return;
+
+    v.muted = true;
+    v.defaultMuted = true;
+    v.setAttribute("muted", "");
+    v.setAttribute("playsinline", "");
+    v.setAttribute("autoplay", "");
+
+    const showBtn = () => { if (btn) btn.style.display = "grid"; };
+    const hideBtn = () => { if (btn) btn.style.display = "none"; };
+
+    const mark = () => {
+      if (hero) hero.classList.add("is-playing");
+      hideBtn();
+    };
+
+    v.addEventListener("playing", mark, { passive:true });
+    v.addEventListener("play", mark, { passive:true });
+
+    async function tryPlay() {
+      try {
+        const p = v.play();
+        if (p && typeof p.then === "function") await p;
+      } catch (_) {
+        showBtn();
+      }
+    }
+
+    window.addEventListener("load", tryPlay, { once:true });
+    document.addEventListener("click", tryPlay, { once:true });
+    document.addEventListener("touchstart", tryPlay, { once:true, passive:true });
+    if (btn) btn.addEventListener("click", tryPlay);
+  })();
+</script>
 
     <!-- Shade -->
     <div class="layer shade" aria-hidden="true"></div>
@@ -239,6 +276,7 @@
     <button id="playFallback" class="playFallback" type="button" aria-label="Play video">
       <span class="playFallback__pill">play</span>
     </button>
+
 
     <!-- Content -->
     <div class="inner container">
