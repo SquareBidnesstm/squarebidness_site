@@ -19,27 +19,27 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
 
   <title>Nae Day — 24</title>
-  <meta name="description" content="Nae Day. 24. In her prime. No noise. Just motion." />
+  <meta name="description" content="24. Nae Doll. Still Ridin." />
   <link rel="canonical" href="https://www.squarebidness.com/nae-day/" />
 
   <meta name="theme-color" content="#000000" />
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="sb:build" content="v20260212-nae-day-public-24-motion" />
+  <meta name="sb:build" content="v20260212-nae-day-public-24-stillridin" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Square Bidness" />
   <meta property="og:title" content="Nae Day — 24" />
-  <meta property="og:description" content="24. In her prime. No noise. Just motion." />
+  <meta property="og:description" content="24. Nae Doll. Still Ridin." />
   <meta property="og:image" content="https://www.squarebidness.com/nae-day/assets/nae-day_780.jpg" />
   <meta property="og:url" content="https://www.squarebidness.com/nae-day/" />
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Nae Day — 24" />
-  <meta name="twitter:description" content="24. In her prime. No noise. Just motion." />
+  <meta name="twitter:description" content="24. Nae Doll. Still Ridin." />
   <meta name="twitter:image" content="https://www.squarebidness.com/nae-day/assets/nae-day_780.jpg" />
 
   <!-- Preload poster (LCP) -->
@@ -53,20 +53,6 @@
   />
 
   <script defer src="/scripts/sb-analytics.js"></script>
-
-  <!-- Optional: structured identity (quiet + official) -->
-  <script type="application/ld+json">
-  {
-    "@context":"https://schema.org",
-    "@type":"Person",
-    "name":"Nae Doll",
-    "url":"https://www.squarebidness.com/nae-day/",
-    "sameAs":[
-      "https://www.instagram.com/naeedoll.__",
-      "https://www.facebook.com/share/1AVWB4nzcW/?mibextid=wwXIfr"
-    ]
-  }
-  </script>
 
   <style>
     :root{
@@ -89,30 +75,43 @@
     a{color:inherit;text-decoration:none}
     .container{max-width:1100px;margin:0 auto;padding:0 16px;}
 
-    /* HERO */
-    .hero{
+    /* HERO (no Safari jump) */
+    header.hero{
       position:relative;
       isolation:isolate;
       overflow:hidden;
-      min-height:92vh;
+      min-height:100svh;
+      height:100svh;
       display:grid;
       place-items:center;
       border-bottom:1px solid var(--stroke);
+    }
+    @supports (height: 100dvh){
+      header.hero{ min-height:100dvh; height:100dvh; }
     }
 
     .layer{position:absolute;inset:0}
     .poster{z-index:-3}
     .videoLayer{z-index:-2; overflow:hidden}
     .shade{z-index:-1}
+    .poster,.videoLayer,.shade{pointer-events:none;}
 
-    /* Poster always shows */
-    .poster picture, .poster img{width:100%;height:100%;display:block}
+    /* Poster always shows (and gives quiet motion even if video blocked) */
+    .poster picture,.poster img{width:100%;height:100%;display:block}
     .poster img{
       object-fit:cover;
       object-position:center;
-      transform:scale(1.02);
+      transform-origin:50% 40%;
+      transform:scale(1.03);
       filter:saturate(1.04) contrast(1.06);
+      animation: naeDrift 10s ease-in-out infinite alternate;
+      will-change: transform;
     }
+    @keyframes naeDrift{
+      from{ transform:scale(1.03) translate3d(0,0,0); }
+      to{ transform:scale(1.08) translate3d(-1.5%,-1%,0); }
+    }
+    header.hero.is-playing .poster img{ animation:none; }
 
     /* Video */
     .videoLayer video{
@@ -122,35 +121,24 @@
       object-position:center;
       transform:scale(1.12);
       display:block;
-      filter:contrast(1.05) saturate(1.05);
       opacity:0;
-      transition:opacity .35s ease;
+      transition:opacity .25s ease;
+      will-change: opacity;
     }
-    .hero.is-playing .videoLayer video{ opacity:1; }
+    header.hero.is-playing .videoLayer video{ opacity:1; }
 
     /* Shade */
     .shade{
       background:
         radial-gradient(1200px 700px at 50% 35%, rgba(0,0,0,.22), rgba(0,0,0,.86)),
-        linear-gradient(to bottom, rgba(0,0,0,.10), rgba(0,0,0,.94));
+        linear-gradient(to bottom, rgba(0,0,0,.08), rgba(0,0,0,.94));
     }
 
-    /* Let content be clickable */
-    .poster, .videoLayer, .shade{ pointer-events:none; }
-
+    /* Content */
     .inner{
       text-align:center;
       padding:2.2rem 1.2rem;
     }
-
-    .script{
-      font-family: ui-serif, "Snell Roundhand", "Apple Chancery", "Brush Script MT", cursive;
-      font-size:clamp(2rem,3.6vw,3.6rem);
-      opacity:.92;
-      margin:0 0 .35rem;
-      letter-spacing:.02em;
-    }
-
     .kicker{
       display:inline-block;
       padding:.42rem .9rem;
@@ -163,15 +151,13 @@
       background:rgba(0,0,0,.22);
       backdrop-filter: blur(6px);
     }
-
     .heroBig{
-      margin:.6rem 0 0;
+      margin:.7rem 0 0;
       font-size:clamp(4.6rem,10.5vw,9.4rem);
       letter-spacing:.06em;
       line-height:1;
-      text-shadow: 0 18px 45px rgba(0,0,0,.55);
+      text-shadow:0 18px 45px rgba(0,0,0,.55);
     }
-
     .name{
       margin:.35rem 0 0;
       font-size:clamp(1.3rem,2vw,1.65rem);
@@ -179,11 +165,10 @@
       text-transform:uppercase;
       opacity:.92;
     }
-
     .sub{
-      margin-top:.7rem;
-      opacity:.80;
-      font-size:clamp(1rem,1.3vw,1.12rem);
+      margin-top:.55rem;
+      opacity:.82;
+      font-size:clamp(1.05rem,1.35vw,1.18rem);
     }
 
     .cta{
@@ -193,7 +178,6 @@
       justify-content:center;
       flex-wrap:wrap;
     }
-
     .btn{
       display:inline-block;
       padding:.7rem 1.05rem;
@@ -216,7 +200,7 @@
     }
     .fine a{ text-decoration:underline; text-underline-offset:3px; }
 
-    /* Play fallback overlay */
+    /* Play fallback (only shows if autoplay blocked) */
     .playFallback{
       position:absolute;
       inset:0;
@@ -240,14 +224,14 @@
       text-transform:lowercase;
     }
 
-    /* SECTIONS */
-    main{ display:block; }
+    /* Sections */
+    main{display:block}
     .section{padding:2.4rem 0;border-top:1px solid var(--stroke);}
     .center{text-align:center}
     .muted{opacity:.78}
     .title{margin:0;font-size:1.05rem;letter-spacing:.08em;text-transform:uppercase;}
 
-    /* GALLERY */
+    /* Gallery */
     .grid{
       display:grid;
       gap:1rem;
@@ -301,12 +285,11 @@
     <div class="layer videoLayer" aria-hidden="true">
       <video
         id="heroVideo"
-        autoplay
         muted
         playsinline
         webkit-playsinline
         loop
-        preload="metadata"
+        preload="auto"
         poster="/nae-day/assets/nae-day_780.jpg">
         <source src="/nae-day/assets/nae-day.mp4" type="video/mp4" />
       </video>
@@ -322,14 +305,11 @@
 
     <!-- Content -->
     <div class="inner container">
-      <div class="script">Nae Day</div>
-      <span class="kicker">02.11 • quiet celebration</span>
+      <span class="kicker">02.11 • Nae Day</span>
 
       <div class="heroBig">24</div>
       <div class="name">Nae Doll</div>
-
-      <div class="sub">In her prime.</div>
-      <div class="sub" style="margin-top:.35rem; opacity:.72;">No noise. Just motion.</div>
+      <div class="sub">Still Ridin</div>
 
       <div class="cta">
         <a class="btn btn--gold" href="mailto:naedoll@squarebidness.com?subject=Nae%20Day%20—%20Booking">Book Nae</a>
@@ -339,6 +319,7 @@
       <div class="cta" style="margin-top:.6rem;">
         <a class="btn" href="https://www.instagram.com/naeedoll.__" target="_blank" rel="noopener noreferrer">Instagram</a>
         <a class="btn" href="https://www.facebook.com/share/1AVWB4nzcW/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer">Facebook</a>
+        <a class="btn" href="https://www.tiktok.com/t/ZP89tHkMA/" target="_blank" rel="noopener noreferrer">TikTok</a>
       </div>
 
       <p class="fine">
@@ -387,7 +368,7 @@
       const btn = document.getElementById("playFallback");
       if (!v) return;
 
-      // Force attributes in JS (helps some desktop autoplay edge cases)
+      // Force autoplay-allowed state
       v.muted = true;
       v.defaultMuted = true;
       v.playsInline = true;
@@ -396,43 +377,50 @@
       v.setAttribute("webkit-playsinline", "");
       v.setAttribute("autoplay", "");
 
+      let started = false;
+      let attempted = false;
+
       const showBtn = () => { if (btn) btn.style.display = "grid"; };
       const hideBtn = () => { if (btn) btn.style.display = "none"; };
 
-      const markPlaying = () => { if (hero) hero.classList.add("is-playing"); };
+      const markPlaying = () => {
+        if (hero) hero.classList.add("is-playing");
+        hideBtn();
+        started = true;
+      };
 
-      const tryPlay = async () => {
+      v.addEventListener("playing", markPlaying, { passive:true });
+
+      async function tryPlayOnce() {
+        if (started || attempted) return;
+        attempted = true;
         try {
-          // Nudge load + play (some browsers need load() first)
-          v.load();
           const p = v.play();
           if (p && typeof p.then === "function") await p;
-          hideBtn();
-          markPlaying();
+          // playing event will fire if successful
         } catch (e) {
           showBtn();
         }
+      }
+
+      // Try after page load (most reliable on desktop)
+      window.addEventListener("load", tryPlayOnce, { once:true });
+
+      // Also try after enough data is buffered
+      v.addEventListener("canplay", () => { tryPlayOnce(); }, { passive:true, once:true });
+
+      // One user gesture always unlocks playback
+      const onUser = () => {
+        attempted = false; // allow one more attempt after gesture
+        tryPlayOnce();
       };
-
-      // Try early + after metadata is ready + after canplaythrough
-      const kick = () => requestAnimationFrame(() => setTimeout(tryPlay, 0));
-      document.addEventListener("DOMContentLoaded", kick, { once:true });
-      v.addEventListener("loadedmetadata", kick, { passive:true });
-      v.addEventListener("canplay", kick, { passive:true });
-      v.addEventListener("playing", () => { hideBtn(); markPlaying(); }, { passive:true });
-
-      // First user interaction clears restrictions
-      const onUser = () => tryPlay();
       document.addEventListener("click", onUser, { once:true });
       document.addEventListener("touchstart", onUser, { once:true, passive:true });
-      if (btn) btn.addEventListener("click", () => tryPlay());
 
-      // If it STILL fails, at least make the page feel alive (slight motion on poster)
-      setTimeout(() => {
-        if (!hero || hero.classList.contains("is-playing")) return;
-        const img = hero.querySelector(".poster img");
-        if (img) img.style.transform = "scale(1.05)";
-      }, 1200);
+      if (btn) btn.addEventListener("click", () => {
+        attempted = false;
+        tryPlayOnce();
+      });
     })();
   </script>
 
