@@ -305,52 +305,88 @@
     </div>
   </section>
 
-  <footer>Nae Day by Square Bidness © 2026</footer>
+  <footer>Square Bidness Apparel © 2026</footer>
 
-  <script>
-    (function () {
-      const v = document.getElementById("heroVideo");
-      const btn = document.getElementById("playFallback");
-      if (!v) return;
+ <script>
+  (function () {
+    const v = document.getElementById("heroVideo");
+    const btn = document.getElementById("playFallback");
+    if (!v) return;
 
-      // Force desktop-safe autoplay flags
-      v.muted = true;
-      v.defaultMuted = true;
-      v.autoplay = true;
-      v.loop = true;
-      v.playsInline = true;
-      v.setAttribute("muted", "");
-      v.setAttribute("autoplay", "");
-      v.setAttribute("playsinline", "");
+    // Force autoplay-safe flags (some browsers require JS assignment)
+    v.muted = true;
+    v.defaultMuted = true;
+    v.autoplay = true;
+    v.loop = true;
+    v.playsInline = true;
 
-      const debug = new URLSearchParams(location.search).get("debug") === "1";
-      if (debug) {
-        v.controls = true;
-        v.style.transform = "none";
+    v.setAttribute("muted", "");
+    v.setAttribute("autoplay", "");
+    v.setAttribute("playsinline", "");
+    v.setAttribute("webkit-playsinline", "");
+    v.setAttribute("preload", "auto");
+
+    // Optional debug: ?debug=1 shows controls
+    const debug = new URLSearchParams(location.search).get("debug") === "1";
+    if (debug) {
+      v.controls = true;
+      v.style.transform = "none";
+      console.log("[nae-day] debug mode");
+    }
+
+    let started = false;
+
+    const hideBtn = () => { if (btn) btn.style.display = "none"; };
+    const showBtn = () => { if (btn) btn.style.display = "grid"; };
+
+    const tryPlay = async () => {
+      if (started) return true;
+      try {
+        const p = v.play();
+        if (p && typeof p.then === "function") await p;
+        started = true;
+        hideBtn();
+        return true;
+      } catch (e) {
+        showBtn();
+        if (debug) console.log("[nae-day] autoplay blocked:", e?.name || e);
+        return false;
       }
+    };
 
-      const tryPlay = async () => {
-        try {
-          const p = v.play();
-          if (p && typeof p.then === "function") await p;
-          if (btn) btn.style.display = "none";
-        } catch (_) {
-          if (btn) btn.style.display = "grid";
-        }
-      };
+    // Keep trying briefly (helps on desktop where play() fails before ready)
+    const retryFor = (ms = 2500, every = 350) => {
+      const t0 = Date.now();
+      const id = setInterval(async () => {
+        if (started) return clearInterval(id);
+        await tryPlay();
+        if (Date.now() - t0 > ms) clearInterval(id);
+      }, every);
+    };
 
-      document.addEventListener("DOMContentLoaded", tryPlay, { once:true });
-      window.addEventListener("load", tryPlay, { once:true });
-      v.addEventListener("loadedmetadata", tryPlay, { passive:true });
-      v.addEventListener("canplay", tryPlay, { passive:true });
+    // Try on load lifecycle
+    document.addEventListener("DOMContentLoaded", () => { tryPlay(); retryFor(); }, { once:true });
+    window.addEventListener("load", () => { tryPlay(); retryFor(); }, { once:true });
 
-      const onUser = () => tryPlay();
-      document.addEventListener("click", onUser, { once:true });
-      document.addEventListener("touchstart", onUser, { once:true, passive:true });
+    // Try when the tab becomes visible again
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) { tryPlay(); retryFor(1200, 300); }
+    });
 
-      if (btn) btn.addEventListener("click", () => tryPlay());
-    })();
-  </script>
+    // First user interaction always unlocks autoplay
+    const onUser = () => { tryPlay(); retryFor(1200, 250); };
+    document.addEventListener("click", onUser, { once:true });
+    document.addEventListener("touchstart", onUser, { once:true, passive:true });
+    document.addEventListener("keydown", onUser, { once:true });
+
+    // Button fallback (silent)
+    if (btn) btn.addEventListener("click", onUser);
+
+    // If it starts playing, hide the overlay no matter what
+    v.addEventListener("playing", () => { started = true; hideBtn(); }, { passive:true });
+  })();
+</script>
+
 
 </body>
 </html>
