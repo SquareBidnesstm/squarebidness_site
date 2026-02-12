@@ -14,7 +14,7 @@
   <meta name="color-scheme" content="dark light">
 
   <!-- Build/version stamp -->
-  <meta name="sb:build" content="v20260101-home" />
+  <meta name="sb:build" content="v20260212-home-naeday72" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
@@ -222,6 +222,118 @@
     @media (max-width:600px){
       .sb-update-banner{ align-items:flex-start;flex-direction:column; }
     }
+
+    /* =========================
+       NAE DAY — 72HR TAKEOVER
+       ========================= */
+    .nae-takeover{
+      position:relative;
+      width:100%;
+      height:100vh;
+      min-height:640px;
+      overflow:hidden;
+      background:#000;
+      border-bottom:1px solid #1f1f1f;
+    }
+    .nae-takeover__video{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      object-position:center;
+      display:block;
+    }
+    .nae-takeover__shade{
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(1200px 700px at 50% 35%, rgba(0,0,0,.22), rgba(0,0,0,.86)),
+        linear-gradient(to bottom, rgba(0,0,0,.10), rgba(0,0,0,.92));
+    }
+    .nae-takeover__inner{
+      position:relative;
+      z-index:2;
+      height:100%;
+      display:grid;
+      place-items:center;
+      text-align:center;
+      padding:2.25rem 1.1rem;
+    }
+    .nae-kicker{
+      display:inline-block;
+      padding:.42rem .95rem;
+      border:1px solid rgba(199,166,92,.68);
+      border-radius:999px;
+      color:#c7a65c;
+      font-size:.78rem;
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      background:rgba(0,0,0,.25);
+      backdrop-filter: blur(6px);
+    }
+    .nae-big{
+      margin:.65rem 0 0;
+      font-size:clamp(4.2rem,10vw,9.2rem);
+      letter-spacing:.06em;
+      line-height:1;
+      text-shadow: 0 18px 45px rgba(0,0,0,.55);
+    }
+    .nae-name{
+      margin:.35rem 0 0;
+      font-size:clamp(1.25rem,2vw,1.6rem);
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      opacity:.93;
+    }
+    .nae-sub{
+      margin-top:.85rem;
+      opacity:.82;
+      font-size:clamp(1rem,1.25vw,1.1rem);
+    }
+    .nae-cta{
+      margin-top:1.35rem;
+      display:flex;
+      gap:.7rem;
+      justify-content:center;
+      flex-wrap:wrap;
+    }
+    .nae-btn{
+      display:inline-block;
+      padding:.7rem 1.05rem;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(0,0,0,.40);
+      color:#fff;
+      cursor:pointer;
+      font-weight:650;
+      letter-spacing:.01em;
+    }
+    .nae-btn--gold{
+      border-color:rgba(199,166,92,.85);
+      color:#c7a65c;
+    }
+    .nae-takeover__corner{
+      position:absolute;
+      top:1rem;
+      right:1rem;
+      z-index:3;
+      display:flex;
+      gap:.5rem;
+    }
+    .nae-x{
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(0,0,0,.38);
+      color:#fff;
+      border-radius:999px;
+      padding:.35rem .7rem;
+      cursor:pointer;
+      font-weight:700;
+      line-height:1;
+    }
+    @media (max-width:520px){
+      .nae-takeover{ min-height: 600px; }
+    }
   </style>
 </head>
 
@@ -244,6 +356,40 @@
   </div>
 
   <div id="site-header" aria-busy="true" style="content-visibility:auto;contain-intrinsic-size:80px;"></div>
+
+  <!-- NAE DAY — 72HR TAKEOVER (public) -->
+  <section id="naeTakeover" class="nae-takeover" aria-label="Nae Day takeover" hidden>
+    <video
+      class="nae-takeover__video"
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="auto"
+      poster="/nae-day/assets/nae-day_780.jpg">
+      <source src="/nae-day/assets/nae-day-v4.mp4" type="video/mp4">
+    </video>
+
+    <div class="nae-takeover__shade" aria-hidden="true"></div>
+
+    <div class="nae-takeover__corner">
+      <button class="nae-x" id="naeSkipTop" type="button" aria-label="Skip takeover">Skip</button>
+    </div>
+
+    <div class="nae-takeover__inner">
+      <div>
+        <div class="nae-kicker">02.11 • Nae Day</div>
+        <div class="nae-big">24</div>
+        <div class="nae-name">Nae</div>
+        <div class="nae-sub">No noise. Just presence.</div>
+
+        <div class="nae-cta">
+          <a class="nae-btn nae-btn--gold" href="/nae-day/">Enter</a>
+          <button class="nae-btn" id="naeSkip" type="button">Skip</button>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <header class="hero hero--dark">
     <div class="container">
@@ -513,6 +659,47 @@
           bar.hidden = true;
         });
       }
+    })();
+  </script>
+
+  <!-- NAE DAY — 72HR TAKEOVER logic -->
+  <script>
+    (function(){
+      var END_TIME = new Date("2026-02-15T23:59:00").getTime(); // adjust anytime
+      var now = Date.now();
+
+      var takeover = document.getElementById("naeTakeover");
+      if (!takeover) return;
+
+      if (now > END_TIME) {
+        takeover.hidden = true;
+        return;
+      }
+
+      var KEY = "sb_naeday_skip_session";
+      try {
+        if (sessionStorage.getItem(KEY) === "1") {
+          takeover.hidden = true;
+          return;
+        }
+      } catch(e){}
+
+      takeover.hidden = false;
+
+      function hide(){
+        takeover.hidden = true;
+        try { sessionStorage.setItem(KEY, "1"); } catch(e){}
+      }
+
+      var btn1 = document.getElementById("naeSkip");
+      var btn2 = document.getElementById("naeSkipTop");
+      if (btn1) btn1.addEventListener("click", hide);
+      if (btn2) btn2.addEventListener("click", hide);
+
+      var onScroll = function(){
+        if (window.scrollY > 80) hide();
+      };
+      window.addEventListener("scroll", onScroll, { passive:true });
     })();
   </script>
 
