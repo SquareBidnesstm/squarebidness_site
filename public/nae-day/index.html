@@ -201,6 +201,22 @@
       font-size:.85rem;opacity:.6;
       border-top:1px solid var(--stroke);
     }
+    footer a{
+      display:inline-block;
+      padding:.45rem .9rem;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(255,255,255,.04);
+      text-decoration:none;
+      font-weight:600;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      font-size:.78rem;
+    }
+    footer a:hover{
+      border-color:rgba(199,166,92,.9);
+      color:#c7a65c;
+    }
   </style>
 </head>
 
@@ -230,7 +246,6 @@
         loop
         preload="metadata"
         poster="/nae-day/assets/nae-day_780.jpg">
-        <!-- cache-bust so you’re never stuck on a stale mp4 -->
         <source src="/nae-day/assets/nae-day.mp4?v=20260212" type="video/mp4">
       </video>
     </div>
@@ -300,7 +315,10 @@
     </section>
   </main>
 
-  <footer>Square Bidness © 2026</footer>
+  <footer>
+    <a href="/" aria-label="Return to Square Bidness front page">Nae Doll — Front Page</a>
+    <div style="margin-top:.4rem;opacity:.55;">Square Bidness © 2026</div>
+  </footer>
 
   <!-- ONE autoplay script (only once) -->
   <script>
@@ -310,7 +328,6 @@
       const btn = document.getElementById("playFallback");
       if (!v) return;
 
-      // autoplay-friendly flags
       v.muted = true;
       v.defaultMuted = true;
       v.playsInline = true;
@@ -347,12 +364,10 @@
       v.addEventListener("loadedmetadata", tryPlay, { once:true, passive:true });
       v.addEventListener("canplay", tryPlay, { once:true, passive:true });
 
-      // extra attempts for “sometimes it loads but won’t start”
       requestAnimationFrame(() => tryPlay());
       setTimeout(() => tryPlay(), 250);
       setTimeout(() => tryPlay(), 900);
 
-      // gesture unlock
       document.addEventListener("click", tryPlay, { once:true });
       document.addEventListener("touchstart", tryPlay, { once:true, passive:true });
       if (btn) btn.addEventListener("click", tryPlay);
