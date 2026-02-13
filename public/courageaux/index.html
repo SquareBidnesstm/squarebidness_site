@@ -59,98 +59,95 @@
     type="image/webp"
   />
 
-  <!-- ✅ Structured Data: WebSite (SearchAction) -->
+   <!-- ✅ Structured Data (single source of truth): WebSite + LocalBusiness + WebPage + Breadcrumbs -->
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
-    "@type":"WebSite",
-    "@id":"https://www.squarebidness.com/courageaux/#website",
-    "name":"Courageaux Aesthetics",
-    "url":"https://www.squarebidness.com/courageaux/",
-    "inLanguage":"en-US",
-    "potentialAction":{
-      "@type":"SearchAction",
-      "target":{
-        "@type":"EntryPoint",
-        "urlTemplate":"https://www.squarebidness.com/search/?q={search_term_string}"
-      },
-      "query-input":"required name=search_term_string"
-    }
-  }
-  </script>
-
-  <!-- ✅ Structured Data: LocalBusiness (Google-ready, address structured) -->
-  <script type="application/ld+json">
-  {
-    "@context":"https://schema.org",
-    "@type":"BeautySalon",
-    "@id":"https://www.squarebidness.com/courageaux/#business",
-    "name":"Courageaux Aesthetics",
-    "url":"https://www.squarebidness.com/courageaux/",
-    "image":[
-      "https://www.squarebidness.com/courageaux/assets/courageaux_hero_1200x630.jpg"
-    ],
-    "description":"Routine-first corrective skin care in Hammond, Louisiana. Book online or walk in when available.",
-    "address":{
-      "@type":"PostalAddress",
-      "streetAddress":"42334 Deluxe Plaza 1",
-      "addressLocality":"Hammond",
-      "addressRegion":"LA",
-      "postalCode":"70403",
-      "addressCountry":"US"
-    },
-    "areaServed":[
-      { "@type":"City", "name":"Hammond" },
-      { "@type":"AdministrativeArea", "name":"Northshore" },
-      { "@type":"AdministrativeArea", "name":"Southeast Louisiana" }
-    ],
-    "sameAs":[
-      "https://instagram.com/courageuxaesthetics",
-      "https://courageauxaesthetics.glossgenius.com/"
-    ],
-    "openingHoursSpecification":[
-      { "@type":"OpeningHoursSpecification", "dayOfWeek":"Tuesday", "opens":"10:00", "closes":"20:00" },
-      { "@type":"OpeningHoursSpecification", "dayOfWeek":"Wednesday", "opens":"09:00", "closes":"20:00" },
-      { "@type":"OpeningHoursSpecification", "dayOfWeek":"Thursday", "opens":"09:00", "closes":"20:00" },
-      { "@type":"OpeningHoursSpecification", "dayOfWeek":"Friday", "opens":"09:30", "closes":"20:00" },
-      { "@type":"OpeningHoursSpecification", "dayOfWeek":"Saturday", "opens":"09:30", "closes":"16:30" }
-    }
-  }
-  </script>
-
-  <!-- ✅ Structured Data: WebPage (home) -->
-  <script type="application/ld+json">
-  {
-    "@context":"https://schema.org",
-    "@type":"WebPage",
-    "@id":"https://www.squarebidness.com/courageaux/#webpage",
-    "url":"https://www.squarebidness.com/courageaux/",
-    "name":"Courageaux Aesthetics — Routine-First Skin Care | Hammond, Louisiana",
-    "description":"Routine-first corrective skin care in Hammond, Louisiana. Clean, calm, confident skin with professional care. Book online or walk in when available.",
-    "isPartOf":{"@id":"https://www.squarebidness.com/courageaux/#website"},
-    "about":{"@id":"https://www.squarebidness.com/courageaux/#business"},
-    "primaryImageOfPage":{
-      "@type":"ImageObject",
-      "@id":"https://www.squarebidness.com/courageaux/#primaryimage",
-      "url":"https://www.squarebidness.com/courageaux/assets/courageaux_hero_1200x630.jpg",
-      "width":1200,
-      "height":630
-    },
-    "inLanguage":"en-US"
-  }
-  </script>
-
-  <!-- ✅ Structured Data: Breadcrumbs (home) -->
-  <script type="application/ld+json">
-  {
-    "@context":"https://schema.org",
-    "@type":"BreadcrumbList",
-    "itemListElement":[
+    "@graph":[
       {
-        "@type":"ListItem",
-        "position":1,
+        "@type":"WebSite",
+        "@id":"https://www.squarebidness.com/courageaux/#website",
         "name":"Courageaux Aesthetics",
-        "item":"https://www.squarebidness.com/courageaux/"
+        "url":"https://www.squarebidness.com/courageaux/",
+        "inLanguage":"en-US",
+        "potentialAction":{
+          "@type":"SearchAction",
+          "target":{
+            "@type":"EntryPoint",
+            "urlTemplate":"https://www.squarebidness.com/search/?q={search_term_string}"
+          },
+          "query-input":"required name=search_term_string"
+        }
+      },
+      {
+        "@type":"BreadcrumbList",
+        "@id":"https://www.squarebidness.com/courageaux/#breadcrumbs",
+        "itemListElement":[
+          {
+            "@type":"ListItem",
+            "position":1,
+            "name":"Courageaux Aesthetics",
+            "item":"https://www.squarebidness.com/courageaux/"
+          }
+        ]
+      },
+      {
+        "@type":"BeautySalon",
+        "@id":"https://www.squarebidness.com/courageaux/#business",
+        "name":"Courageaux Aesthetics",
+        "url":"https://www.squarebidness.com/courageaux/",
+        "image":[
+          "https://www.squarebidness.com/courageaux/assets/courageaux_hero_1200x630.jpg"
+        ],
+        "description":"Routine-first corrective skin care in Hammond, Louisiana. Book online or walk in when available.",
+        "address":{
+          "@type":"PostalAddress",
+          "streetAddress":"42334 Deluxe Plaza 1",
+          "addressLocality":"Hammond",
+          "addressRegion":"LA",
+          "postalCode":"70403",
+          "addressCountry":"US"
+        },
+        "areaServed":[
+          { "@type":"City", "name":"Hammond" },
+          { "@type":"AdministrativeArea", "name":"Northshore" },
+          { "@type":"AdministrativeArea", "name":"Southeast Louisiana" }
+        ],
+        "sameAs":[
+          "https://instagram.com/courageuxaesthetics",
+          "https://courageauxaesthetics.glossgenius.com/"
+        ],
+        "openingHoursSpecification":[
+          { "@type":"OpeningHoursSpecification", "dayOfWeek":"Tuesday", "opens":"10:00", "closes":"20:00" },
+          { "@type":"OpeningHoursSpecification", "dayOfWeek":"Wednesday", "opens":"09:00", "closes":"20:00" },
+          { "@type":"OpeningHoursSpecification", "dayOfWeek":"Thursday", "opens":"09:00", "closes":"20:00" },
+          { "@type":"OpeningHoursSpecification", "dayOfWeek":"Friday", "opens":"09:30", "closes":"20:00" },
+          { "@type":"OpeningHoursSpecification", "dayOfWeek":"Saturday", "opens":"09:30", "closes":"16:30" }
+        ],
+        "mainEntityOfPage":{
+          "@id":"https://www.squarebidness.com/courageaux/#webpage"
+        }
+      },
+      {
+        "@type":"WebPage",
+        "@id":"https://www.squarebidness.com/courageaux/#webpage",
+        "url":"https://www.squarebidness.com/courageaux/",
+        "name":"Courageaux Aesthetics — Routine-First Skin Care | Hammond, Louisiana",
+        "description":"Routine-first corrective skin care in Hammond, Louisiana. Clean, calm, confident skin with professional care. Book online or walk in when available.",
+        "isPartOf":{"@id":"https://www.squarebidness.com/courageaux/#website"},
+        "about":{"@id":"https://www.squarebidness.com/courageaux/#business"},
+        "breadcrumb":{"@id":"https://www.squarebidness.com/courageaux/#breadcrumbs"},
+        "primaryImageOfPage":{
+          "@type":"ImageObject",
+          "@id":"https://www.squarebidness.com/courageaux/#primaryimage",
+          "url":"https://www.squarebidness.com/courageaux/assets/courageaux_hero_1200x630.jpg",
+          "width":1200,
+          "height":630
+        },
+        "publisher":{
+          "@id":"https://www.squarebidness.com/courageaux/#business"
+        },
+        "inLanguage":"en-US"
       }
     ]
   }
