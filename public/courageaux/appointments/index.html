@@ -1,12 +1,12 @@
-<!-- public/courageaux/appointments/index.html (patched for shared _partials includes + consistency) -->
+<!-- public/courageaux/appointments/index.html (final — address ON + LocalBusiness schema + shared includes) -->
 <!doctype html>
 <html lang="en">
 <head>
   <!-- Basics -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Courageaux Aesthetics — Appointments & Walk-ins</title>
-  <meta name="description" content="Book online or walk in when available with Courageaux Aesthetics — clean, calm, professional skin care in Hammond, Louisiana." />
+  <title>Courageaux Aesthetics — Appointments & Walk-ins | Hammond, Louisiana</title>
+  <meta name="description" content="Book online anytime or walk in when available at Courageaux Aesthetics in Hammond, Louisiana. View services, review consultation guidance, then book through GlossGenius." />
   <link rel="canonical" href="https://www.squarebidness.com/courageaux/appointments/" />
   <meta name="author" content="Courageaux Aesthetics" />
 
@@ -14,7 +14,7 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="sb:build" content="v20260213-courageaux-appointments-includes-nav-footer" />
+  <meta name="sb:build" content="v20260213-courageaux-appointments-final-address-schema" />
 
   <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
@@ -32,24 +32,54 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/courageaux/assets/icon_180.png">
   <link rel="manifest" href="/courageaux/manifest.webmanifest">
 
-  <!-- Open Graph -->
+  <!-- Social -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Courageaux Aesthetics" />
   <meta property="og:title" content="Courageaux Aesthetics — Appointments & Walk-ins" />
-  <meta property="og:description" content="Book online anytime or walk in when available — clean, calm, professional studio care with Courageaux Aesthetics in Hammond, Louisiana." />
+  <meta property="og:description" content="Book online anytime or walk in when available — clean, calm, professional studio care in Hammond, Louisiana." />
   <meta property="og:url" content="https://www.squarebidness.com/courageaux/appointments/" />
   <meta property="og:image" content="https://www.squarebidness.com/courageaux/assets/courageaux_hero_1200x630.jpg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
 
-  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Courageaux Aesthetics — Appointments & Walk-ins" />
-  <meta name="twitter:description" content="Book online anytime or walk in when available with Courageaux Aesthetics." />
+  <meta name="twitter:description" content="Book online anytime or walk in when available at Courageaux Aesthetics in Hammond, Louisiana." />
   <meta name="twitter:image" content="https://www.squarebidness.com/courageaux/assets/courageaux_hero_1200x630.jpg" />
 
   <!-- Preload hero (LCP) -->
   <link rel="preload" as="image" href="/courageaux/assets/hero_index_1600.webp" fetchpriority="high" type="image/webp" />
+
+  <!-- LocalBusiness / BeautySalon schema (address ON for public-service brand) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BeautySalon",
+    "@id": "https://www.squarebidness.com/courageaux/#business",
+    "name": "Courageaux Aesthetics",
+    "url": "https://www.squarebidness.com/courageaux/",
+    "image": "https://www.squarebidness.com/courageaux/assets/courageaux_hero_1200x630.jpg",
+    "description": "Routine-first corrective skin care in Hammond, Louisiana. Book through GlossGenius for live availability and confirmations.",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "42334 Deluxe Plaza 1",
+      "addressLocality": "Hammond",
+      "addressRegion": "LA",
+      "postalCode": "70403",
+      "addressCountry": "US"
+    },
+    "areaServed": [
+      { "@type": "City", "name": "Hammond, Louisiana" },
+      { "@type": "AdministrativeArea", "name": "Northshore, Louisiana" },
+      { "@type": "AdministrativeArea", "name": "Southeast Louisiana" }
+    ],
+    "hasMap": "https://www.google.com/maps?q=42334+Deluxe+Plaza+1,+Hammond,+LA+70403",
+    "sameAs": [
+      "https://instagram.com/courageuxaesthetics",
+      "https://courageauxaesthetics.glossgenius.com/"
+    ]
+  }
+  </script>
 
   <style>
     :root{
@@ -63,7 +93,7 @@
     img{max-width:100%;height:auto;display:block}
     .container{max-width:1200px;margin:0 auto;padding:0 16px}
 
-    /* ✅ Standard buttons (match stack) */
+    /* Buttons (stack standard) */
     .btn{
       display:inline-flex;align-items:center;justify-content:center;gap:10px;
       padding:12px 16px;border-radius:12px;text-decoration:none;font-weight:900;
@@ -79,7 +109,7 @@
     }
     .btn:focus-visible{outline:3px solid rgba(201,162,39,.55); outline-offset:2px}
 
-    /* ✅ Top nav CSS (needed because partial is markup-only) */
+    /* Nav CSS (partial is markup-only) */
     .cx-topnav{
       position:sticky;top:0;z-index:50;
       border-bottom:1px solid var(--stroke);
@@ -123,14 +153,13 @@
       .cx-hero__inner{grid-template-columns:1.05fr .95fr;gap:22px;padding:24px 16px 26px;align-items:center}
     }
 
-    /* ✅ Standard badge */
+    /* Badge */
     .badge{
       background:#fff;color:#000;display:inline-flex;align-items:center;gap:8px;
       padding:6px 10px;border-radius:999px;font-size:.82rem;font-weight:950;letter-spacing:.02em;
       width:max-content;box-shadow: 0 10px 30px rgba(0,0,0,.18);
     }
     .badge img{height:18px;width:18px;display:block}
-
     .cx-tagline{margin-top:6px;font-size:.85rem;color:var(--muted)}
 
     .cx-hero__copy h1{
@@ -141,10 +170,10 @@
     .cx-hero__copy p{margin:.25rem 0 .4rem;color:#d7dae0;max-width:46rem}
 
     /* Location line */
-    .cx-loc{margin:.35rem 0 0;color:var(--muted);font-size:.9rem}
+    .cx-loc{margin:.35rem 0 0;color:var(--muted);font-size:.92rem}
     .cx-loc a{color:#d7dae0;text-decoration:underline;font-weight:950;text-underline-offset:3px}
 
-    .cx-hero__meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:.55rem}
+    .cx-hero__meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:.65rem}
 
     /* Status strip */
     .cx-status{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
@@ -167,7 +196,7 @@
     .cx-chip--walkin{border-color:rgba(201,162,39,.35);background:rgba(201,162,39,.08)}
     .cx-chip--walkin .cx-ico{border-color:rgba(201,162,39,.55);background:rgba(201,162,39,.14)}
 
-    /* ✅ HERO MEDIA (premium, flush) */
+    /* Hero media */
     .cx-hero__media{
       border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.10);
       box-shadow: var(--shadow);background:#000;aspect-ratio:16/9;
@@ -176,7 +205,8 @@
     .cx-hero__media img{object-fit:contain;object-position:center;filter:contrast(1.03) saturate(1.02)}
     @media (min-width:1200px){ .cx-hero__media{max-height:420px} }
 
-    /* SECTIONS */
+    /* Sections */
+    main{padding:18px 0 6px}
     .kicker{letter-spacing:.12em;text-transform:uppercase;color:var(--gold);font-weight:950;font-size:.85rem}
     .section-title{font-size:1.15rem;font-weight:950;margin:10px 0 4px}
     .section-sub{color:var(--muted);margin:0 0 12px;max-width:70ch;font-size:.95rem}
@@ -188,9 +218,10 @@
     ul.cx-list{padding-left:1.1rem;margin:.1rem 0 0;color:#d7dae0;font-size:.95rem}
     ul.cx-list li{margin-bottom:.25rem}
 
-    .note{font-size:.85rem;color:var(--muted);margin-top:.45rem}
+    .note{font-size:.85rem;color:var(--muted);margin-top:.55rem}
+    .note a{color:var(--gold);text-decoration:underline;font-weight:950;text-underline-offset:3px}
 
-    .step-row{display:grid;gap:8px;margin-top:6px}
+    .step-row{display:grid;gap:8px;margin-top:8px}
     @media (min-width:640px){ .step-row{grid-template-columns:repeat(3,minmax(0,1fr))} }
     .step-pill{
       border-radius:999px;border:1px solid var(--stroke);padding:8px 12px;font-size:.85rem;
@@ -198,7 +229,7 @@
     }
     .step-pill span{font-weight:950;margin-right:4px;color:var(--gold)}
 
-    /* ✅ Footer baseline (partial provides markup; this styles it) */
+    /* Footer baseline (partial provides markup; this styles it) */
     .cx-footer{
       margin-top:26px;border-top:1px solid var(--stroke);background:rgba(0,0,0,.35);
       padding:22px 16px;text-align:center;
@@ -210,14 +241,12 @@
 </head>
 
 <body>
-  <!-- ✅ Shared nav include -->
+  <!-- Shared nav include -->
   <!-- @@include("public/courageaux/_partials/nav.html") -->
 
-  <!-- HERO -->
   <header class="cx-hero">
     <div class="cx-hero__inner">
       <div class="cx-hero__copy">
-        <!-- ✅ Standard badge line (shared style/copy) -->
         <span class="badge">
           <img
             src="/courageaux/assets/logo_courageaux_black_400.png"
@@ -234,8 +263,8 @@
 
         <h1>Appointments — and walk-ins when available.</h1>
         <p>
-          This is the booking hub for Courageaux Aesthetics — book online anytime, or walk in when there’s
-          availability for same-day service.
+          Book online for the fastest confirmation. Walk-ins are welcome when the schedule has an opening.
+          If you’re new, check the Services + Consultation guidance first, then book.
         </p>
 
         <p class="cx-loc">
@@ -243,7 +272,6 @@
           <a href="https://www.google.com/maps?q=42334+Deluxe+Plaza+1,+Hammond,+LA+70403" target="_blank" rel="noopener noreferrer">Directions</a>
         </p>
 
-        <!-- Status strip -->
         <div class="cx-status" aria-label="Booking status">
           <div class="cx-status__label">Status</div>
 
@@ -259,17 +287,13 @@
         </div>
 
         <div class="cx-hero__meta">
-          <a class="btn btn--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">
-            Book now on GlossGenius
-          </a>
-          <a class="btn btn--ghost" href="/courageaux/">⟵ Back to Courageaux</a>
-          <a class="btn btn--ghost" href="/courageaux/services-preview/">View services overview</a>
+          <a class="btn btn--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book now on GlossGenius</a>
+          <a class="btn btn--ghost" href="/courageaux/services-preview/">Services overview</a>
           <a class="btn btn--ghost" href="/courageaux/consultation/">Consultation &amp; policies</a>
-          <a class="btn btn--ghost" href="/courageaux/intake/">Client intake</a>
+          <a class="btn btn--ghost" href="/courageaux/">⟵ Back to Courageaux</a>
         </div>
       </div>
 
-      <!-- HERO: hero_index_* (WebP + JPG fallback) -->
       <div class="cx-hero__media" aria-label="Courageaux appointments hero image">
         <picture>
           <source
@@ -302,28 +326,29 @@
   </header>
 
   <main>
-    <!-- CURRENT BOOKING FLOW -->
     <section class="container" style="padding:18px 16px 18px">
       <div class="card-grid card-grid--two">
         <article class="card">
           <div class="kicker">Book online</div>
           <h2 class="section-title">Fastest way to lock in your time.</h2>
           <p class="section-sub">
-            Appointments, reschedules, deposits, intake forms, and confirmations are handled through the official
+            Live availability, confirmations, deposits, rescheduling, and required intake steps are handled through the official
             <strong>courageauxaesthetics.glossgenius.com</strong> booking system.
           </p>
           <ul class="cx-list">
             <li>Browse the full service menu in real time.</li>
-            <li>See current availability and open time slots.</li>
-            <li>Complete required intake forms and waivers.</li>
-            <li>Securely handle deposits and saved cards.</li>
+            <li>Pick a time slot that’s actually available.</li>
+            <li>Complete intake/waivers if required for your service.</li>
+            <li>Receive confirmation automatically (email/text).</li>
           </ul>
           <p class="note">
-            If you need to change or cancel an appointment, always use the links provided in your GlossGenius
-            confirmation email or text.
+            Need help choosing? Start with
+            <a href="/courageaux/services-preview/">Services</a>
+            and
+            <a href="/courageaux/consultation/">Consultation</a>
+            before booking.
           </p>
-          <a class="btn btn--gold" style="margin-top:10px"
-             href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">
+          <a class="btn btn--gold" style="margin-top:10px" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">
             Go to booking page
           </a>
         </article>
@@ -332,8 +357,8 @@
           <div class="kicker">Walk-ins</div>
           <h2 class="section-title">Welcome when availability allows.</h2>
           <p class="section-sub">
-            Walk-ins are welcomed when the schedule has openings. For the smoothest experience, check availability
-            on GlossGenius first — or stop by and we’ll confirm the next available slot.
+            Walk-ins are welcomed when the schedule has openings. For the smoothest experience, check GlossGenius first —
+            or stop by and we’ll confirm the next available slot.
           </p>
           <ul class="cx-list">
             <li>Same-day openings vary by demand.</li>
@@ -342,23 +367,21 @@
           </ul>
 
           <div class="step-row" aria-label="Walk-in steps">
-            <div class="step-pill"><span>1.</span>Stop by (or check IG).</div>
-            <div class="step-pill"><span>2.</span>Confirm the next opening.</div>
-            <div class="step-pill"><span>3.</span>Intake → service.</div>
+            <div class="step-pill"><span>1.</span>Stop by (or check IG)</div>
+            <div class="step-pill"><span>2.</span>Confirm the next opening</div>
+            <div class="step-pill"><span>3.</span>Intake → service</div>
           </div>
 
-          <p class="note">
-            Location: <strong>42334 Deluxe Plaza 1, Hammond, LA 70403</strong> ·
-            <a href="https://www.google.com/maps?q=42334+Deluxe+Plaza+1,+Hammond,+LA+70403" target="_blank" rel="noopener noreferrer" style="text-decoration:underline;font-weight:950;">
-              Directions
-            </a>
+          <p class="note" style="margin-top:10px">
+            <strong>Studio address:</strong> 42334 Deluxe Plaza 1, Hammond, LA 70403 ·
+            <a href="https://www.google.com/maps?q=42334+Deluxe+Plaza+1,+Hammond,+LA+70403" target="_blank" rel="noopener noreferrer">Directions</a>
           </p>
         </article>
       </div>
     </section>
   </main>
 
-  <!-- ✅ Shared footer include -->
+  <!-- Shared footer include -->
   <!-- @@include("public/courageaux/_partials/footer.html") -->
 </body>
 </html>
