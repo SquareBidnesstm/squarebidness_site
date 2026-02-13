@@ -1,4 +1,4 @@
-<!-- public/courageaux/products/index.html (consistency sweep: same topnav/badge/buttons/footer, no hero media) -->
+<!-- public/courageaux/products/index.html (PASTE READY — includes nav/footer + consistent UI + waitlist placeholder) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -14,7 +14,7 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="sb:build" content="v20260211-courageaux-products-consistency-nohero" />
+  <meta name="sb:build" content="v20260213-courageaux-products-includes-nav-footer" />
 
   <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
@@ -47,21 +47,28 @@
   <meta name="twitter:title" content="Courageaux Products — Launch List" />
   <meta name="twitter:description" content="Small-batch skincare drops — routine-first, calm, and clear. Join the launch list." />
   <meta name="twitter:image" content="https://www.squarebidness.com/courageaux/assets/courageaux_hero_1200x630.jpg" />
-  <meta name="twitter:site" content="@squarebidness" />
 
-  <!-- Structured Data (product-coming-soon safe) -->
+  <!-- Structured Data (coming-soon safe) -->
   <script type="application/ld+json">
   {
-    "@context": "https://schema.org",
-    "@graph": [
+    "@context":"https://schema.org",
+    "@graph":[
       {
-        "@type": "WebPage",
-        "@id": "https://www.squarebidness.com/courageaux/products/#webpage",
-        "url": "https://www.squarebidness.com/courageaux/products/",
-        "name": "Courageaux Products — Launch List",
-        "isPartOf": { "@id": "https://www.squarebidness.com/courageaux/#business" },
-        "about": { "@id": "https://www.squarebidness.com/courageaux/#business" },
-        "description": "Join the Courageaux Products launch list. Small-batch skincare drops — routine-first, calm, and clear."
+        "@type":"WebPage",
+        "@id":"https://www.squarebidness.com/courageaux/products/#webpage",
+        "url":"https://www.squarebidness.com/courageaux/products/",
+        "name":"Courageaux Products — Launch List",
+        "description":"Join the Courageaux Products launch list. Small-batch skincare drops — routine-first, calm, and clear.",
+        "inLanguage":"en-US",
+        "about":{"@id":"https://www.squarebidness.com/courageaux/#business"}
+      },
+      {
+        "@type":"BreadcrumbList",
+        "@id":"https://www.squarebidness.com/courageaux/products/#breadcrumbs",
+        "itemListElement":[
+          {"@type":"ListItem","position":1,"name":"Courageaux Aesthetics","item":"https://www.squarebidness.com/courageaux/"},
+          {"@type":"ListItem","position":2,"name":"Products","item":"https://www.squarebidness.com/courageaux/products/"}
+        ]
       }
     ]
   }
@@ -72,6 +79,8 @@
       --bg:#0b0b0b; --fg:#fff; --muted:#bdbdbd;
       --soft:#121212; --stroke:#1f1f1f; --gold:#c9a227;
       --ok:#20c997;
+      --shadow: 0 18px 40px rgba(0,0,0,.35);
+      --r:16px;
     }
     *{box-sizing:border-box}
     html,body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,Segoe UI,Roboto,Arial;line-height:1.5}
@@ -82,7 +91,9 @@
     .btn{
       display:inline-flex;align-items:center;justify-content:center;gap:8px;
       padding:11px 16px;border-radius:12px;font-weight:950;border:1px solid transparent;white-space:nowrap;
+      transition:transform .12s ease, opacity .12s ease, background .12s ease, border-color .12s ease;
     }
+    .btn:active{transform: translateY(1px)}
     .btn--gold{background:var(--gold);color:#000;border-color:var(--gold)}
     .btn--ghost{background:#0f0f0f;color:#fff;border-color:#2a2a2a}
     @media(hover:hover){.btn:hover{opacity:.93}}
@@ -96,7 +107,7 @@
     }
     .badge img{height:18px;width:18px;display:block}
 
-    /* ✅ Shared topnav (same order everywhere) */
+    /* Nav styles (partial is markup-only) */
     .cx-topnav{
       position:sticky;top:0;z-index:50;
       border-bottom:1px solid var(--stroke);
@@ -147,10 +158,11 @@
     main{padding:18px 0 30px}
     .grid{display:grid;gap:14px}
     @media(min-width:900px){.grid{grid-template-columns:1.05fr .95fr;gap:18px}}
-    .card{background:var(--soft);border:1px solid var(--stroke);border-radius:16px;padding:16px}
+    .card{background:var(--soft);border:1px solid var(--stroke);border-radius:16px;padding:16px;box-shadow:0 12px 30px rgba(0,0,0,.25)}
     .kicker{letter-spacing:.12em;text-transform:uppercase;color:var(--gold);font-weight:950;font-size:.85rem}
     .title{margin:8px 0 6px;font-size:1.1rem;font-weight:950}
     .muted{color:var(--muted)}
+
     .step-row{display:grid;gap:8px;margin-top:10px}
     @media(min-width:640px){.step-row{grid-template-columns:repeat(3,minmax(0,1fr))}}
     .step-pill{border-radius:999px;border:1px solid var(--stroke);padding:8px 12px;font-size:.85rem;color:#e0e0e0;background:#101010}
@@ -182,53 +194,20 @@
       background:rgba(248,113,113,.08);padding:12px 14px;color:#fee2e2;font-weight:800;
     }
 
-    /* ✅ Shared footer */
-    footer{
-      background:#0b0b0b;
-      border-top:1px solid var(--stroke);
-      margin-top:22px;
-      padding:16px 0 26px;
+    /* Footer baseline (partial markup) */
+    .cx-footer{
+      margin-top:26px;border-top:1px solid var(--stroke);background:rgba(0,0,0,.35);
+      padding:22px 16px;text-align:center;
     }
-    .credit-strip{
-      margin:0 auto;
-      padding:10px 14px;
-      border:1px solid var(--stroke);
-      border-radius:12px;
-      background:#0e0e0e;
-      color:#d7dae0;
-      text-align:center;
-      font-size:.88rem;
-      line-height:1.6;
-    }
-    .credit-strip a{
-      color:var(--gold);
-      text-decoration:underline;
-      font-weight:950;
-      text-underline-offset:3px;
-    }
+    .cx-footer__line{ margin:0; color:#a1a1aa; font-size:.92rem; line-height:1.65; }
+    .cx-footer__sub{ margin:.85rem 0 0; color:#6b7280; font-size:.9rem; line-height:1.6; }
+    .cx-footer a{ color:var(--gold); text-decoration:underline; font-weight:950; text-underline-offset:3px; }
   </style>
 </head>
 
 <body>
-  <nav class="cx-topnav" aria-label="Courageaux navigation">
-    <div class="cx-topnav__inner">
-      <a class="cx-brand" href="/courageaux/">
-        <img src="/courageaux/assets/icon_courageaux_512.png" alt="Courageaux Aesthetics" width="22" height="22" loading="eager" decoding="async">
-        Courageaux Aesthetics
-      </a>
-
-      <!-- ✅ SAME ORDER everywhere -->
-      <div class="cx-links">
-        <a class="cx-pill cx-pill--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book</a>
-        <a class="cx-pill" href="/courageaux/services-preview/">Services</a>
-        <a class="cx-pill" href="/courageaux/consultation/">Consultation</a>
-        <a class="cx-pill" href="/courageaux/appointments/">Appointments</a>
-        <a class="cx-pill" href="/courageaux/her-words/">Her Words</a>
-        <a class="cx-pill" href="/courageaux/products/">Products</a>
-        <a class="cx-pill" href="https://instagram.com/courageuxaesthetics" target="_blank" rel="me noopener noreferrer">Instagram</a>
-      </div>
-    </div>
-  </nav>
+  <!-- ✅ Shared nav include -->
+  <!-- @@include("public/courageaux/_partials/nav.html") -->
 
   <header class="hero">
     <div class="container">
@@ -307,23 +286,23 @@
         <form id="waitlistForm" novalidate>
           <div class="row row--2">
             <div>
-              <label for="name">Full name<span class="req">*</span></label>
-              <input id="name" name="name" type="text" autocomplete="name" required>
+              <label for="wl_name">Full name<span class="req">*</span></label>
+              <input id="wl_name" name="name" type="text" autocomplete="name" required>
             </div>
             <div>
-              <label for="email">Email<span class="req">*</span></label>
-              <input id="email" name="email" type="email" autocomplete="email" inputmode="email" required>
+              <label for="wl_email">Email<span class="req">*</span></label>
+              <input id="wl_email" name="email" type="email" autocomplete="email" inputmode="email" required>
             </div>
           </div>
 
           <div class="row row--2">
             <div>
-              <label for="city">City (optional)</label>
-              <input id="city" name="city" type="text" autocomplete="address-level2" placeholder="Hammond, Ponchatoula, etc.">
+              <label for="wl_city">City (optional)</label>
+              <input id="wl_city" name="city" type="text" autocomplete="address-level2" placeholder="Hammond, Ponchatoula, etc.">
             </div>
             <div>
-              <label for="routine">Routine style (optional)</label>
-              <select id="routine" name="routine">
+              <label for="wl_routine">Routine style (optional)</label>
+              <select id="wl_routine" name="routine">
                 <option value="" selected>Choose one</option>
                 <option value="simple">Simple (2–3 steps)</option>
                 <option value="steady">Steady (4–5 steps)</option>
@@ -348,7 +327,7 @@
           <div>
             <div class="checks">
               <label>
-                <input id="consent" name="consent" type="checkbox" required>
+                <input id="wl_consent" name="consent" type="checkbox" required>
                 I agree to receive skincare updates by email.<span class="req">*</span>
               </label>
             </div>
@@ -375,19 +354,10 @@
     </div>
   </main>
 
-  <footer>
-    <div class="container">
-      <div class="credit-strip">
-        © <span id="year"></span> Courageaux Aesthetics · Site support by
-        <a href="https://lab.squarebidness.com/" target="_blank" rel="noopener noreferrer">Square Bidness Tech Lab</a>
-        · <a href="/courageaux/">Back to Courageaux</a>
-      </div>
-    </div>
-  </footer>
+  <!-- ✅ Shared footer include -->
+  <!-- @@include("public/courageaux/_partials/footer.html") -->
 
   <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
-
     (function () {
       const form = document.getElementById('waitlistForm');
       const success = document.getElementById('success');
