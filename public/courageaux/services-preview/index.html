@@ -14,7 +14,7 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="sb:build" content="v20260211-courageaux-services-nohero-start-here-faq-v3-consistency" />
+  <meta name="sb:build" content="v20260212-courageaux-services-preview-standard-ui" />
 
   <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
@@ -50,129 +50,68 @@
 
   <style>
     :root{
-      --bg:#0b0b0b;
-      --fg:#ffffff;
-      --muted:#bdbdbd;
-      --muted2:#a1a1aa;
-      --soft:#121212;
-      --stroke:#1f1f1f;
-      --gold:#c9a227;
-      --ok:#20c997;
+      --bg:#0b0b0b; --fg:#ffffff; --muted:#bdbdbd; --muted2:#a1a1aa;
+      --soft:#121212; --stroke:#1f1f1f; --gold:#c9a227; --ok:#20c997;
       --shadow: 0 18px 40px rgba(0,0,0,.35);
     }
-
     *{box-sizing:border-box}
-    html,body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;line-height:1.55}
+    html,body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.55}
     a{color:inherit;text-decoration:none}
     img{max-width:100%;height:auto;display:block}
     .container{max-width:1200px;margin:0 auto;padding:0 16px}
 
-    /* ✅ Standard buttons (match index) */
+    /* ===== Standard buttons (match appointments/book) ===== */
     .btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      padding:12px 16px;
-      border-radius:12px;
-      text-decoration:none;
-      font-weight:900;
-      border:1px solid transparent;
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:11px 16px;border-radius:12px;font-weight:950;border:1px solid transparent;white-space:nowrap;
+      text-decoration:none;color:inherit;
       transition: transform .12s ease, opacity .12s ease, background .12s ease, border-color .12s ease;
-      user-select:none;
-      white-space:nowrap;
     }
     .btn:active{transform: translateY(1px)}
-    .btn--gold{background:var(--gold);color:#000;border-color:rgba(201,162,39,.95)}
-    .btn--ghost{background:rgba(255,255,255,.03);color:#fff;border-color:rgba(255,255,255,.14)}
-    @media (hover:hover){
-      .btn:hover{opacity:.95}
-      .btn--ghost:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.22)}
-    }
-    .btn:focus-visible{outline:3px solid rgba(201,162,39,.55); outline-offset:2px}
+    .btn--gold{background:var(--gold);color:#000;border-color:var(--gold)}
+    .btn--ghost{background:#0f0f0f;color:#fff;border-color:#2a2a2a}
+    @media(hover:hover){ .btn:hover{opacity:.93} }
+    .btn:focus-visible{outline:3px solid rgba(201,162,39,.45); outline-offset:2px}
 
-    /* ✅ Top nav (consistent) */
+    /* ===== Standard top nav ===== */
     .cx-topnav{
-      position:sticky;
-      top:0;
-      z-index:50;
+      position:sticky;top:0;z-index:50;
       border-bottom:1px solid var(--stroke);
-      background: rgba(0,0,0,.55);
+      background:rgba(0,0,0,.55);
       backdrop-filter: blur(10px);
     }
     .cx-topnav__inner{
-      max-width:1200px;
-      margin:0 auto;
-      padding:12px 16px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
+      max-width:1200px;margin:0 auto;padding:12px 16px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
     }
     .cx-brand{
-      display:inline-flex;
-      align-items:center;
-      gap:10px;
-      text-decoration:none;
-      color:inherit;
-      font-weight:950;
-      letter-spacing:-.01em;
+      display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:inherit;
+      font-weight:950;letter-spacing:-.01em;
     }
     .cx-brand img{
-      width:22px;height:22px;
-      border-radius:7px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.95);
-      padding:2px;
+      width:22px;height:22px;border-radius:7px;border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.95);padding:2px;
     }
-    .cx-links{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      align-items:center;
-    }
+    .cx-links{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
     .cx-pill{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:9px 12px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.04);
-      color:#f5f5f5;
-      text-decoration:none;
-      font-weight:950;
-      font-size:.92rem;
-      white-space:nowrap;
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:9px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.04);color:#f5f5f5;text-decoration:none;font-weight:950;font-size:.92rem;white-space:nowrap;
       transition: background .12s ease, border-color .12s ease, transform .12s ease;
     }
     .cx-pill:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.22)}
     .cx-pill:active{transform: translateY(1px)}
-    .cx-pill--gold{
-      border-color:rgba(201,162,39,.85);
-      background:rgba(201,162,39,.95);
-      color:#000;
-    }
+    .cx-pill--gold{border-color:rgba(201,162,39,.85);background:rgba(201,162,39,.95);color:#000}
 
-    /* Header (no hero image) */
+    /* ===== Header (no hero media) ===== */
     .hero{border-bottom:1px solid var(--stroke);background:#0b0b0b}
     .hero__inner{max-width:1200px;margin:0 auto;padding:18px 16px 16px;display:grid;gap:12px;align-items:center}
 
-    /* ✅ Standard badge (match index copy) */
     .badge{
-      background:#fff;
-      color:#000;
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:6px 10px;
-      border-radius:999px;
-      font-size:.82rem;
-      font-weight:950;
-      letter-spacing:.02em;
-      width:max-content;
-      box-shadow: 0 10px 30px rgba(0,0,0,.18);
+      display:inline-flex;align-items:center;gap:8px;
+      background:#fff;color:#000;border-radius:999px;padding:6px 10px;
+      font-weight:950;font-size:.82rem;letter-spacing:.02em;width:max-content;
+      box-shadow:0 10px 30px rgba(0,0,0,.18);
     }
     .badge img{height:18px;width:18px;display:block}
 
@@ -183,7 +122,7 @@
     }
 
     .hero h1{margin:.4rem 0 .15rem;font-size:clamp(1.55rem,4vw,2.25rem);font-weight:950;letter-spacing:-.01em}
-    .hero p{margin:.15rem 0 0;color:var(--muted);max-width:78ch}
+    .hero p{margin:.15rem 0 0;color:#d7dae0;max-width:78ch}
     .hero__actions{margin-top:10px;display:flex;flex-wrap:wrap;gap:10px}
 
     /* Booking status strip */
@@ -191,14 +130,15 @@
     .cx-chip{
       display:inline-flex;align-items:center;gap:8px;padding:7px 10px;border-radius:999px;
       border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);
-      font-weight:950;font-size:.82rem;color:#f3f3f3;white-space:nowrap;line-height:1;
+      font-weight:900;font-size:.82rem;color:#f3f3f3;white-space:nowrap;line-height:1;
     }
     .cx-dot{width:8px;height:8px;border-radius:50%;background:#9aa3ad;box-shadow:0 0 0 3px rgba(255,255,255,.06) inset}
     .cx-dot--ok{background:var(--ok)}
     .cx-dot--soon{background:var(--gold)}
     .cx-chip strong{color:var(--gold)}
 
-    /* Section titles */
+    /* Sections */
+    main.container{padding:0 16px 0}
     .section-title{font-size:1.2rem;font-weight:950;margin:26px 0 8px}
     .section-sub{color:var(--muted);margin:0 0 14px;max-width:80ch;font-size:.95rem}
 
@@ -216,7 +156,7 @@
       flex-direction:column;
       gap:10px;
       min-height:210px;
-      box-shadow: 0 12px 30px rgba(0,0,0,.25);
+      box-shadow:0 12px 30px rgba(0,0,0,.25);
     }
     .pill{
       display:inline-flex;align-items:center;width:max-content;
@@ -228,7 +168,7 @@
     .price{font-weight:950;color:var(--gold);margin-top:auto;font-size:1rem}
     .card .book{margin-top:8px;width:100%}
 
-    /* Start Here block */
+    /* Start Here */
     .start-here{
       margin-top:16px;
       border:1px solid rgba(201,162,39,.32);
@@ -246,38 +186,32 @@
     .start-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 
     /* FAQ */
-    .faq{margin-top:18px;background:var(--soft);border:1px solid var(--stroke);border-radius:16px;padding:16px;box-shadow: 0 12px 30px rgba(0,0,0,.25);}
+    .faq{margin-top:18px;background:var(--soft);border:1px solid var(--stroke);border-radius:16px;padding:16px;box-shadow:0 12px 30px rgba(0,0,0,.25);}
     .faq h2{margin:0 0 .35rem;font-size:1.05rem;font-weight:950}
     .faq p{margin:0 0 .85rem;color:var(--muted);font-size:.9rem}
     .faq details{border-top:1px solid var(--stroke);padding:10px 0}
     .faq details:first-of-type{border-top:0}
-    .faq summary{cursor:pointer;font-weight:950;color:#f3f4f6}
+    .faq summary{cursor:pointer;font-weight:950;color:#f3f3f4}
     .faq .ans{margin-top:6px;color:#d7dae0;font-size:.95rem;line-height:1.55}
 
-    /* Hours (trust-safe) */
-    .hours{margin-top:18px;background:var(--soft);border:1px solid var(--stroke);border-radius:16px;padding:16px;box-shadow: 0 12px 30px rgba(0,0,0,.25);}
+    /* Hours */
+    .hours{margin-top:18px;background:var(--soft);border:1px solid var(--stroke);border-radius:16px;padding:16px;box-shadow:0 12px 30px rgba(0,0,0,.25);}
     .hours h2{margin:0 0 .4rem;font-size:1.05rem;font-weight:950}
     .hours p{margin:0;color:var(--muted);font-size:.9rem}
 
-    /* ✅ Standard footer (match index) */
-    .cx-footer{
-      margin-top:26px;
+    /* ===== Standard footer (appointments/book) ===== */
+    footer{
+      background:#0b0b0b;
       border-top:1px solid var(--stroke);
-      background:rgba(0,0,0,.35);
-      padding:22px 16px;
-      text-align:center;
+      margin-top:28px;
+      padding:16px 0 24px;
     }
-    .cx-footer p{
-      margin:0;
-      color:var(--muted2);
-      font-size:.92rem;
-      line-height:1.65;
+    .credit-strip{
+      max-width:1200px;margin:0 auto;padding:10px 14px;
+      border:1px solid var(--stroke);border-radius:12px;background:#0e0e0e;
+      color:#d7dae0;text-align:center;font-size:.88rem;line-height:1.6;
     }
-    .cx-footer a{
-      color:var(--gold);
-      text-decoration:underline;
-      font-weight:950;
-    }
+    .credit-strip a{color:var(--gold);text-decoration:underline;font-weight:950;text-underline-offset:3px}
   </style>
 </head>
 
@@ -285,14 +219,7 @@
   <nav class="cx-topnav" aria-label="Courageaux navigation">
     <div class="cx-topnav__inner">
       <a class="cx-brand" href="/courageaux/">
-        <img
-          src="/courageaux/assets/icon_courageaux.svg"
-          alt="Courageaux Aesthetics"
-          width="22"
-          height="22"
-          loading="eager"
-          decoding="async"
-        >
+        <img src="/courageaux/assets/icon_courageaux_512.png" alt="Courageaux Aesthetics" width="22" height="22" loading="eager" decoding="async">
         Courageaux Aesthetics
       </a>
 
@@ -312,17 +239,9 @@
   <header class="hero">
     <div class="hero__inner">
       <div>
-        <!-- ✅ Standard badge copy -->
         <span class="badge">
-          <img
-            src="/courageaux/assets/logo_courageaux_black_400.png"
-            alt="Courageaux Aesthetics logo"
-            width="18"
-            height="18"
-            loading="eager"
-            decoding="async"
-          >
-          Courageaux Aesthetics · Hammond · Northshore · Southeastern, Louisiana
+          <img src="/courageaux/assets/logo_courageaux_black_400.png" alt="Courageaux Aesthetics logo" width="18" height="18" loading="eager" decoding="async">
+          Courageaux Aesthetics · Services
         </span>
 
         <h1>Services overview.</h1>
@@ -523,27 +442,19 @@
       <h2>Hours</h2>
       <p>Hours vary — confirm current availability inside the GlossGenius calendar.</p>
     </section>
-
-    <!-- ✅ Standard footer -->
-    <footer class="cx-footer">
-      <p>
-        © <span id="year"></span> <strong>Courageaux Aesthetics</strong> ·
-        <a href="https://instagram.com/courageuxaesthetics" target="_blank" rel="noopener noreferrer">Instagram</a> ·
-        <a href="https://courageauxaesthetics.glossgenius.com/" target="_blank" rel="noopener noreferrer">Book Online</a>
-      </p>
-
-      <p style="margin:.85rem 0 0;color:#6b7280;font-size:.9rem;line-height:1.6;">
-        Powered by
-        <a href="https://lab.squarebidness.com/" target="_blank" rel="noopener noreferrer">
-          Square Bidness Tech Lab
-        </a>
-      </p>
-    </footer>
   </main>
+
+  <!-- ✅ Standard footer -->
+  <footer>
+    <div class="credit-strip">
+      © <span id="year"></span> Courageaux Aesthetics · Site support by
+      <a href="https://lab.squarebidness.com/" target="_blank" rel="noopener noreferrer">Square Bidness Tech Lab</a>
+      · <a href="/courageaux/">Back to Courageaux</a>
+    </div>
+  </footer>
 
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
   </script>
 </body>
 </html>
-
