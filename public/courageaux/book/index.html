@@ -1,4 +1,5 @@
-<!-- public/courageaux/book/index.html (standardized nav + badge + footer + premium flush embed) -->
+
+<!-- public/courageaux/book/index.html (standard nav + badge/buttons/footer, no hero media) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -13,7 +14,7 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="sb:build" content="v20260211-courageaux-book-nohero-standard" />
+  <meta name="sb:build" content="v20260211-courageaux-book-standard-ui-nohero" />
 
   <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
@@ -49,97 +50,94 @@
       --bg:#0b0b0b; --fg:#fff; --muted:#bdbdbd;
       --soft:#121212; --stroke:#1f1f1f; --gold:#c9a227;
       --ok:#20c997;
-      --shadow: 0 18px 40px rgba(0,0,0,.35);
-      --r:16px;
     }
     *{box-sizing:border-box}
     html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:system-ui,Segoe UI,Roboto,Arial;line-height:1.5}
     a{color:inherit;text-decoration:none}
     .container{max-width:1200px;margin:0 auto;padding:0 16px}
 
-    /* Buttons (standard) */
+    /* ===== Shared UI (nav / badge / buttons / footer) ===== */
     .btn{
       display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      padding:11px 16px;border-radius:12px;font-weight:950;border:1px solid transparent;
-      white-space:nowrap;
+      padding:11px 16px;border-radius:12px;font-weight:950;border:1px solid transparent;white-space:nowrap;
+      text-decoration:none;color:inherit;
     }
     .btn--gold{background:var(--gold);color:#000;border-color:var(--gold)}
     .btn--ghost{background:#0f0f0f;color:#fff;border-color:#2a2a2a}
-    @media (hover:hover){.btn:hover{opacity:.93}}
+    @media (hover:hover){ .btn:hover{opacity:.93} }
     .btn:focus-visible{outline:3px solid rgba(201,162,39,.45); outline-offset:2px}
 
-    /* Top nav (standard) */
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;
+      background:#fff;color:#000;border-radius:999px;padding:6px 10px;
+      font-weight:950;font-size:.82rem;letter-spacing:.02em;width:max-content;
+      box-shadow:0 10px 30px rgba(0,0,0,.18);
+    }
+    .badge img{height:18px;width:18px;display:block}
+
+    /* Standard Top nav */
     .cx-topnav{
+      position:sticky;top:0;z-index:50;
       border-bottom:1px solid var(--stroke);
       background:rgba(0,0,0,.55);
       backdrop-filter:blur(10px);
-      position:sticky;top:0;z-index:50;
     }
     .cx-topnav__inner{
       max-width:1200px;margin:0 auto;padding:12px 16px;
       display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
     }
     .cx-brand{
-      display:inline-flex;align-items:center;gap:10px;
-      text-decoration:none;color:inherit;font-weight:950;letter-spacing:-.01em;
+      display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:inherit;font-weight:950;
+      letter-spacing:-.01em;
     }
     .cx-brand img{
-      width:22px;height:22px;border-radius:7px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.95);
-      padding:2px;
+      width:22px;height:22px;border-radius:7px;border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.95);padding:2px;
     }
     .cx-links{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
     .cx-pill{
       display:inline-flex;align-items:center;justify-content:center;
-      padding:9px 12px;border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.04);
-      color:#f5f5f5;font-weight:950;font-size:.92rem;white-space:nowrap;
+      padding:9px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.04);color:#f5f5f5;text-decoration:none;font-weight:950;font-size:.92rem;white-space:nowrap;
       transition: background .12s ease, border-color .12s ease, transform .12s ease;
     }
     .cx-pill:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.22)}
     .cx-pill:active{transform: translateY(1px)}
-    .cx-pill--gold{
-      border-color:rgba(201,162,39,.85);
-      background:rgba(201,162,39,.95);
-      color:#000;
-    }
+    .cx-pill--gold{border-color:rgba(201,162,39,.85);background:rgba(201,162,39,.95);color:#000}
 
-    /* Header (no hero media) */
-    .hero{border-bottom:1px solid var(--stroke);padding:18px 0 16px;background:#0b0b0b}
-    .badge{
-      display:inline-flex;align-items:center;gap:8px;background:#fff;color:#000;
-      border-radius:999px;padding:6px 10px;font-weight:950;font-size:.82rem;
-      width:max-content;
+    /* Header (no hero image) */
+    .hero{border-bottom:1px solid var(--stroke);padding:18px 0 16px}
+    .mood-strip{
+      height:8px;border-radius:999px;margin:12px 0 0;
+      background:linear-gradient(90deg, rgba(201,162,39,.55), rgba(255,255,255,.10), rgba(201,162,39,.25));
+      border:1px solid rgba(255,255,255,.10);
     }
-    .badge img{height:18px;width:18px;display:block}
     h1{margin:.6rem 0 .2rem;font-size:clamp(1.6rem,3.6vw,2.25rem);letter-spacing:-.01em}
     .sub{margin:0;color:#d7dae0;max-width:70ch}
     .row{margin-top:12px;display:flex;flex-wrap:wrap;gap:10px}
 
-    /* Status strip (standard minimal) */
+    /* Status strip */
     .cx-status{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
     .cx-chip{
       display:inline-flex;align-items:center;gap:8px;
       padding:7px 10px;border-radius:999px;
       border:1px solid rgba(255,255,255,.14);
       background:rgba(255,255,255,.04);
-      font-weight:950;font-size:.82rem;color:#f3f3f3;white-space:nowrap;line-height:1;
+      font-weight:900;font-size:.82rem;color:#f3f3f3;white-space:nowrap;line-height:1;
     }
     .cx-dot{width:8px;height:8px;border-radius:50%;background:#9aa3ad;box-shadow:0 0 0 3px rgba(255,255,255,.06) inset}
     .cx-dot--ok{background:var(--ok)}
     .cx-dot--soon{background:var(--gold)}
     .cx-chip strong{color:var(--gold)}
 
-    /* Premium flush embed */
-    main{padding:16px 0 26px}
+    /* Frame */
+    main{padding:14px 0 0}
     .frame-wrap{
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:var(--r);
+      margin:14px auto 24px;
+      border:1px solid var(--stroke);
+      border-radius:16px;
       overflow:hidden;
       background:#000;
-      box-shadow: var(--shadow);
     }
     iframe{
       width:100%;
@@ -150,32 +148,24 @@
       background:#000;
     }
 
-    /* Footer (standard credit strip style) */
+    /* Standard Footer */
     footer{
       background:#0b0b0b;
       border-top:1px solid var(--stroke);
-      margin-top:10px;
-      padding:16px 0 24px;
+      margin-top:0;
+      padding:16px 0 26px;
     }
     .credit-strip{
-      margin:0 auto;
-      padding:10px 14px;
-      border:1px solid var(--stroke);
-      border-radius:12px;
-      background:#0e0e0e;
-      color:#d7dae0;
-      text-align:center;
-      font-size:.88rem;
+      max-width:1200px;margin:0 auto;padding:10px 14px;
+      border:1px solid var(--stroke);border-radius:12px;background:#0e0e0e;
+      color:#d7dae0;text-align:center;font-size:.88rem;line-height:1.6;
     }
-    .credit-strip a{
-      color:var(--gold);
-      text-decoration:underline;
-      font-weight:950;
-    }
+    .credit-strip a{color:var(--gold);text-decoration:underline;font-weight:950;text-underline-offset:3px}
   </style>
 </head>
 
 <body>
+  <!-- Standard Topnav -->
   <nav class="cx-topnav" aria-label="Courageaux navigation">
     <div class="cx-topnav__inner">
       <a class="cx-brand" href="/courageaux/">
@@ -183,7 +173,6 @@
         Courageaux Aesthetics
       </a>
 
-      <!-- ✅ Standard pill order -->
       <div class="cx-links">
         <a class="cx-pill cx-pill--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book</a>
         <a class="cx-pill" href="/courageaux/services-preview/">Services</a>
@@ -206,7 +195,7 @@
       <h1>Book online.</h1>
       <p class="sub">
         Booking is managed securely through GlossGenius. If the embed doesn’t load on your device,
-        use “Book” in the top menu to open the official booking page.
+        use “Open booking” to book directly on the official page.
       </p>
 
       <div class="cx-status" aria-label="Booking status">
@@ -221,10 +210,12 @@
       </div>
 
       <div class="row">
-        <a class="btn btn--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Open booking in new tab</a>
+        <a class="btn btn--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Open booking</a>
         <a class="btn btn--ghost" href="/courageaux/appointments/">⟵ Back to Appointments</a>
-        <a class="btn btn--ghost" href="/courageaux/consultation/">Consultation &amp; policies</a>
+        <a class="btn btn--ghost" href="/courageaux/intake/">Client Intake</a>
       </div>
+
+      <div class="mood-strip" aria-hidden="true"></div>
     </div>
   </header>
 
@@ -239,17 +230,12 @@
     </div>
   </main>
 
+  <!-- Standard Footer -->
   <footer>
-    <div class="container">
-      <div class="credit-strip">
-        <div>Booking — © <span id="year"></span> Courageaux Aesthetics</div>
-        <div style="margin-top:4px;font-size:.88rem;">
-          Site support by
-          <a href="https://lab.squarebidness.com/" target="_blank" rel="noopener noreferrer">
-            Square Bidness Tech Lab
-          </a>
-        </div>
-      </div>
+    <div class="credit-strip">
+      © <span id="year"></span> Courageaux Aesthetics · Site support by
+      <a href="https://lab.squarebidness.com/" target="_blank" rel="noopener noreferrer">Square Bidness Tech Lab</a>
+      · <a href="/courageaux/">Back to Courageaux</a>
     </div>
   </footer>
 
