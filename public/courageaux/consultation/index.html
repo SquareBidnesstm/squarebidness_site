@@ -1,12 +1,12 @@
-<!-- public/courageaux/consultation/index.html (hero_index_* implemented) -->
+<!-- public/courageaux/consultation/index.html (final — shared includes + address ON + SEO tighten + schema) -->
 <!doctype html>
 <html lang="en">
 <head>
   <!-- Basics -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Courageaux Aesthetics — Consultation & Policies</title>
-  <meta name="description" content="New client consultation and policy overview for Courageaux Aesthetics — clean, calm, professional skin care in Hammond, Louisiana." />
+  <title>Courageaux Aesthetics — Consultation & Policies | Hammond, Louisiana</title>
+  <meta name="description" content="Consultation and policy overview for Courageaux Aesthetics in Hammond, Louisiana. Review expectations, walk-in guidance, and booking details before you book through GlossGenius." />
   <link rel="canonical" href="https://www.squarebidness.com/courageaux/consultation/" />
   <meta name="author" content="Courageaux Aesthetics" />
 
@@ -14,7 +14,7 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="sb:build" content="v20260211-courageaux-consultation-hero-index-webp-premium" />
+  <meta name="sb:build" content="v20260213-courageaux-consultation-includes-address-schema" />
 
   <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
@@ -32,16 +32,16 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/courageaux/assets/icon_180.png">
   <link rel="manifest" href="/courageaux/manifest.webmanifest">
 
-  <!-- Open Graph (share image stays consultation-specific) -->
+  <!-- Open Graph (consultation share image) -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Courageaux Aesthetics" />
+  <meta property="og:locale" content="en_US" />
   <meta property="og:title" content="Courageaux Aesthetics — Consultation & Policies" />
-  <meta property="og:description" content="Start with a clean consultation — expectations, skin goals, and booking details with Courageaux Aesthetics in Hammond, Louisiana." />
+  <meta property="og:description" content="Start with a clean consultation — expectations, skin goals, and booking details in Hammond, Louisiana." />
   <meta property="og:url" content="https://www.squarebidness.com/courageaux/consultation/" />
   <meta property="og:image" content="https://www.squarebidness.com/courageaux/assets/consultation_1200x630.jpg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="og:locale" content="en_US" />
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
@@ -50,391 +50,204 @@
   <meta name="twitter:image" content="https://www.squarebidness.com/courageaux/assets/consultation_1200x630.jpg" />
 
   <!-- Preload hero (LCP) -->
-  <link
-    rel="preload"
-    as="image"
-    href="/courageaux/assets/hero_index_1600.webp"
-    fetchpriority="high"
-    type="image/webp"
-  />
+  <link rel="preload" as="image" href="/courageaux/assets/hero_index_1600.webp" fetchpriority="high" type="image/webp" />
+
+  <!-- WebPage + Breadcrumb schema (references business @id from /appointments) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": "https://www.squarebidness.com/courageaux/consultation/#webpage",
+        "url": "https://www.squarebidness.com/courageaux/consultation/",
+        "name": "Courageaux Aesthetics — Consultation & Policies",
+        "description": "Consultation and policy overview for Courageaux Aesthetics in Hammond, Louisiana.",
+        "isPartOf": { "@id": "https://www.squarebidness.com/courageaux/#website" },
+        "about": { "@id": "https://www.squarebidness.com/courageaux/#business" }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": "https://www.squarebidness.com/courageaux/consultation/#breadcrumbs",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Courageaux Aesthetics", "item": "https://www.squarebidness.com/courageaux/" },
+          { "@type": "ListItem", "position": 2, "name": "Consultation", "item": "https://www.squarebidness.com/courageaux/consultation/" }
+        ]
+      }
+    ]
+  }
+  </script>
 
   <style>
     :root{
-      --bg:#0b0b0b; --fg:#fff; --muted:#bdbdbd;
-      --soft:#121212; --stroke:#1f1f1f; --gold:#c9a227;
-      --ok:#20c997;
+      --bg:#0b0b0b; --fg:#fff; --muted:#bdbdbd; --muted2:#a1a1aa;
+      --soft:#121212; --stroke:#1f1f1f; --gold:#c9a227; --ok:#20c997;
       --shadow: 0 18px 40px rgba(0,0,0,.35);
     }
     *{box-sizing:border-box}
-    html,body{
-      margin:0;
-      background:var(--bg);
-      color:var(--fg);
-      font-family:system-ui,Segoe UI,Roboto,Arial;
-      line-height:1.5;
-    }
+    html,body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,Segoe UI,Roboto,Arial;line-height:1.55}
     a{color:inherit;text-decoration:none}
+    img{max-width:100%;height:auto;display:block}
     .container{max-width:1200px;margin:0 auto;padding:0 16px}
 
+    /* Buttons (stack standard) */
     .btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      padding:11px 16px;
-      border-radius:12px;
-      text-decoration:none;
-      font-weight:900;
-      white-space:nowrap;
-      font-size:.95rem;
-      border:1px solid transparent;
+      display:inline-flex;align-items:center;justify-content:center;gap:10px;
+      padding:12px 16px;border-radius:12px;text-decoration:none;font-weight:900;
+      border:1px solid transparent;white-space:nowrap;user-select:none;
+      transition: transform .12s ease, opacity .12s ease, background .12s ease, border-color .12s ease;
     }
-    .btn--gold{background:var(--gold);color:#000;border-color:var(--gold)}
-    .btn--ghost{background:#0f0f0f;color:#fff;border-color:#2a2a2a}
-    @media (hover:hover){ .btn:hover{opacity:.93} }
-    .btn:focus-visible{outline:3px solid rgba(201,162,39,.45); outline-offset:2px}
+    .btn:active{transform: translateY(1px)}
+    .btn--gold{background:var(--gold);color:#000;border-color:rgba(201,162,39,.95)}
+    .btn--ghost{background:rgba(255,255,255,.03);color:#fff;border-color:rgba(255,255,255,.14)}
+    @media (hover:hover){
+      .btn:hover{opacity:.95}
+      .btn--ghost:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.22)}
+    }
+    .btn:focus-visible{outline:3px solid rgba(201,162,39,.55); outline-offset:2px}
 
-    /* HERO */
-    .cx-hero{
-      background:#0b0b0b;
-      border-bottom:1px solid var(--stroke);
-    }
-    .cx-hero__inner{
-      max-width:1200px;
-      margin:0 auto;
-      padding:18px 16px 22px;
-      display:grid;
-      gap:18px;
-      align-items:start;
-    }
-    @media (min-width:900px){
-      .cx-hero__inner{
-        grid-template-columns:1.05fr .95fr;
-        gap:22px;
-        padding:24px 16px 26px;
-        align-items:center;
-      }
-    }
-
-    .cx-badge{
-      display:inline-flex;
-      gap:8px;
-      align-items:center;
-      background:#fff;
-      color:#000;
-      border-radius:999px;
-      padding:6px 10px;
-      font-weight:950;
-      font-size:.8rem;
-      letter-spacing:.02em;
-      box-shadow: 0 10px 30px rgba(0,0,0,.18);
-    }
-    .cx-badge img{height:18px;width:18px;display:block}
-
-    .cx-tagline{
-      margin-top:6px;
-      font-size:.85rem;
-      color:var(--muted);
-    }
-
-    .cx-hero__copy h1{
-      margin:.45rem 0 .25rem;
-      font-size:clamp(1.45rem,3.5vw,2.1rem);
-      line-height:1.2;
-      letter-spacing:-.01em;
-    }
-    .cx-hero__copy p{
-      margin:.25rem 0 .4rem;
-      color:#d7dae0;
-      max-width:46rem;
-    }
-
-    /* Booking status strip — super minimal */
-    .cx-status{
-      margin-top:10px;
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      align-items:center;
-    }
-    .cx-chip{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:7px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.04);
-      font-weight:950;
-      font-size:.82rem;
-      color:#f3f3f3;
-      white-space:nowrap;
-      line-height:1;
-      letter-spacing:.02em;
-    }
-    .cx-dot{
-      width:8px;height:8px;border-radius:50%;
-      background:#9aa3ad;
-      box-shadow:0 0 0 3px rgba(255,255,255,.06) inset;
-    }
-    .cx-dot--ok{background:var(--ok)}
-    .cx-dot--soon{background:var(--gold)}
-    .cx-dot--walkin{background:rgba(201,162,39,.95)}
-    .cx-chip strong{color:var(--gold)}
-
-    /* Address line */
-    .cx-loc{
-      margin-top:8px;
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      align-items:center;
-      color:var(--muted);
-      font-size:.88rem;
-    }
-    .cx-loc a{
-      color:#d7dae0;
-      text-decoration:underline;
-      font-weight:950;
-      text-underline-offset:3px;
-    }
-    .cx-pin{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      width:20px;height:20px;
-      border-radius:7px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.04);
-      color:#fff;
-      font-size:.9rem;
-      line-height:1;
-    }
-
-    .cx-hero__meta{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:.55rem;
-    }
-
-    /* ✅ HERO MEDIA (premium, no crop, flush) */
-    .cx-hero__media{
-      border-radius:16px;
-      overflow:hidden;
-      border:1px solid rgba(255,255,255,.10);
-      box-shadow: var(--shadow);
-      background:#000;
-      aspect-ratio: 16 / 9;
-    }
-    .cx-hero__media picture,
-    .cx-hero__media img{
-      width:100%;
-      height:100%;
-      display:block;
-    }
-    /* IMPORTANT: banner graphic must NOT crop */
-    .cx-hero__media img{
-      object-fit: contain;
-      object-position: center;
-      filter:contrast(1.03) saturate(1.02);
-    }
-    @media (min-width: 1200px){
-      .cx-hero__media{ max-height: 420px; }
-    }
-
-    /* SECTIONS */
-    .kicker{
-      letter-spacing:.12em;
-      text-transform:uppercase;
-      color:var(--gold);
-      font-weight:950;
-      font-size:.85rem;
-    }
-    .section-title{
-      font-size:1.15rem;
-      font-weight:950;
-      margin:10px 0 4px;
-    }
-    .section-sub{
-      color:var(--muted);
-      margin:0 0 12px;
-      max-width:70ch;
-      font-size:.95rem;
-    }
-
-    .card{
-      background:var(--soft);
-      border:1px solid var(--stroke);
-      border-radius:16px;
-      padding:16px;
-    }
-
-    .card-grid{
-      display:grid;
-      gap:14px;
-    }
-    @media (min-width:860px){
-      .card-grid--two{grid-template-columns:1.15fr 1fr}
-    }
-
-    ul.cx-list{
-      padding-left:1.1rem;
-      margin:.1rem 0 0;
-      color:#d7dae0;
-      font-size:.95rem;
-    }
-    ul.cx-list li{margin-bottom:.25rem}
-
-    .note{
-      font-size:.85rem;
-      color:var(--muted);
-      margin-top:.45rem;
-    }
-
-    /* HOURS MINI */
-    .hours-grid{
-      display:grid;
-      grid-template-columns:1fr auto;
-      row-gap:3px;
-      column-gap:12px;
-      font-size:.9rem;
-      color:#e5e7eb;
-    }
-    .hours-grid span:nth-child(odd){color:#d7dae0}
-    .hours-grid span:nth-child(even){color:#f3f4f6}
-
-    /* FOOTER */
-    footer{
-      background:#0b0b0b;
-      border-top:1px solid var(--stroke);
-      margin-top:28px;
-      padding:16px 0 24px;
-    }
-    .credit-strip{
-      margin:0 auto;
-      padding:10px 14px;
-      border:1px solid var(--stroke);
-      border-radius:12px;
-      background:#0e0e0e;
-      color:#d7dae0;
-      text-align:center;
-      font-size:.88rem;
-    }
-    .credit-strip a{
-      color:var(--gold);
-      text-decoration:underline;
-      font-weight:950;
-    }
-  </style>
-
-  <style>
+    /* Nav CSS (partial is markup-only) */
     .cx-topnav{
-      border-bottom:1px solid var(--stroke,#1f1f1f);
-      background:rgba(0,0,0,.35);
+      position:sticky;top:0;z-index:50;
+      border-bottom:1px solid var(--stroke);
+      background:rgba(0,0,0,.55);
       backdrop-filter: blur(10px);
     }
     .cx-topnav__inner{
-      max-width:1200px;
-      margin:0 auto;
-      padding:14px 16px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
+      max-width:1200px;margin:0 auto;padding:12px 16px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
     }
     .cx-brand{
-      display:inline-flex;
-      align-items:center;
-      gap:10px;
-      text-decoration:none;
-      color:inherit;
-      font-weight:950;
-      letter-spacing:-.01em;
+      display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:inherit;
+      font-weight:950;letter-spacing:-.01em;
     }
     .cx-brand img{
-      height:22px;width:22px;display:block;
-      border-radius:7px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.95);
-      padding:2px;
+      width:22px;height:22px;border-radius:7px;border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.95);padding:2px;
     }
-    .cx-links{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      align-items:center;
-    }
+    .cx-links{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
     .cx-pill{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:9px 12px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.04);
-      color:#f5f5f5;
-      text-decoration:none;
-      font-weight:950;
-      font-size:.9rem;
-      white-space:nowrap;
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:9px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.04);color:#f5f5f5;text-decoration:none;
+      font-weight:950;font-size:.92rem;white-space:nowrap;
       transition: background .12s ease, border-color .12s ease, transform .12s ease;
     }
     .cx-pill:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.22)}
     .cx-pill:active{transform: translateY(1px)}
-    .cx-pill--gold{
-      border-color:rgba(201,162,39,.85);
-      background:rgba(201,162,39,.95);
-      color:#000;
+    .cx-pill--gold{border-color:rgba(201,162,39,.85);background:rgba(201,162,39,.95);color:#000}
+
+    /* Hero */
+    .cx-hero{background:#0b0b0b;border-bottom:1px solid var(--stroke)}
+    .cx-hero__inner{
+      max-width:1200px;margin:0 auto;padding:18px 16px 22px;
+      display:grid;gap:18px;align-items:start;
     }
+    @media (min-width:900px){
+      .cx-hero__inner{grid-template-columns:1.05fr .95fr;gap:22px;padding:24px 16px 26px;align-items:center}
+    }
+
+    .badge{
+      background:#fff;color:#000;display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;font-size:.82rem;font-weight:950;letter-spacing:.02em;
+      width:max-content;box-shadow:0 10px 30px rgba(0,0,0,.18);
+    }
+    .badge img{height:18px;width:18px;display:block}
+    .cx-tagline{margin-top:6px;font-size:.85rem;color:var(--muted)}
+
+    h1{margin:.45rem 0 .25rem;font-size:clamp(1.45rem,3.5vw,2.1rem);line-height:1.2;letter-spacing:-.01em}
+    .lead{margin:.25rem 0 .4rem;color:#d7dae0;max-width:46rem}
+
+    /* Status strip */
+    .cx-status{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+    .cx-chip{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:7px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.04);
+      font-weight:950;font-size:.82rem;color:#f3f3f3;white-space:nowrap;line-height:1;
+    }
+    .cx-dot{width:8px;height:8px;border-radius:50%;background:#9aa3ad;box-shadow:0 0 0 3px rgba(255,255,255,.06) inset}
+    .cx-dot--ok{background:var(--ok)}
+    .cx-dot--walkin{background:rgba(201,162,39,.95)}
+    .cx-dot--soon{background:var(--gold)}
+    .cx-chip strong{color:var(--gold)}
+
+    /* Address line */
+    .cx-loc{
+      margin-top:10px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+      color:var(--muted);font-size:.92rem;
+    }
+    .cx-loc a{color:#d7dae0;text-decoration:underline;font-weight:950;text-underline-offset:3px}
+    .cx-pin{
+      display:inline-flex;align-items:center;justify-content:center;
+      width:20px;height:20px;border-radius:7px;border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.04);color:#fff;font-size:.9rem;line-height:1;
+    }
+
+    .cx-hero__meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:.65rem}
+
+    /* Hero media */
+    .cx-hero__media{
+      border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.10);
+      box-shadow:var(--shadow);background:#000;aspect-ratio:16/9;
+    }
+    .cx-hero__media picture,.cx-hero__media img{width:100%;height:100%;display:block}
+    .cx-hero__media img{object-fit:contain;object-position:center;filter:contrast(1.03) saturate(1.02)}
+    @media (min-width:1200px){ .cx-hero__media{max-height:420px} }
+
+    /* Sections */
+    main{padding:18px 0 8px}
+    .kicker{letter-spacing:.12em;text-transform:uppercase;color:var(--gold);font-weight:950;font-size:.85rem}
+    .section-title{font-size:1.15rem;font-weight:950;margin:10px 0 4px}
+    .section-sub{color:var(--muted);margin:0 0 12px;max-width:70ch;font-size:.95rem}
+    .card{background:var(--soft);border:1px solid var(--stroke);border-radius:16px;padding:16px}
+    .card-grid{display:grid;gap:14px}
+    @media (min-width:860px){ .card-grid--two{grid-template-columns:1.15fr 1fr} }
+
+    ul.cx-list{padding-left:1.1rem;margin:.1rem 0 0;color:#d7dae0;font-size:.95rem}
+    ul.cx-list li{margin-bottom:.25rem}
+
+    .note{font-size:.85rem;color:var(--muted);margin-top:.55rem}
+    .note a{color:var(--gold);text-decoration:underline;font-weight:950;text-underline-offset:3px}
+
+    /* Hours */
+    .hours-grid{
+      display:grid;grid-template-columns:1fr auto;row-gap:3px;column-gap:12px;
+      font-size:.9rem;color:#e5e7eb;
+    }
+    .hours-grid span:nth-child(odd){color:#d7dae0}
+    .hours-grid span:nth-child(even){color:#f3f4f6}
+
+    /* Footer baseline (partial provides markup; this styles it) */
+    .cx-footer{
+      margin-top:26px;border-top:1px solid var(--stroke);background:rgba(0,0,0,.35);
+      padding:22px 16px;text-align:center;
+    }
+    .cx-footer__line{ margin:0; color:var(--muted2); font-size:.92rem; line-height:1.65; }
+    .cx-footer__sub{ margin:.85rem 0 0; color:#6b7280; font-size:.9rem; line-height:1.6; }
+    .cx-footer a{ color:var(--gold); text-decoration:underline; font-weight:950; }
   </style>
 </head>
 
 <body>
-  <nav class="cx-topnav" aria-label="Courageaux navigation">
-    <div class="cx-topnav__inner">
-      <a class="cx-brand" href="/courageaux/">
-        <img
-          src="/courageaux/assets/icon_courageaux.svg"
-          alt="Courageaux Aesthetics"
-          width="22"
-          height="22"
-          loading="eager"
-          decoding="async"
-        >
-        Courageaux Aesthetics
-      </a>
+  <!-- Shared nav include -->
+  <!-- @@include("public/courageaux/_partials/nav.html") -->
 
-      <div class="cx-links">
-        <a class="cx-pill cx-pill--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book</a>
-        <a class="cx-pill" href="/courageaux/services-preview/">Services</a>
-        <a class="cx-pill" href="/courageaux/consultation/">Consultation</a>
-        <a class="cx-pill" href="/courageaux/appointments/">Appointments</a>
-        <a class="cx-pill" href="/courageaux/her-words/">Her Words</a>
-        <a class="cx-pill" href="/courageaux/products/">Products</a>
-        <a class="cx-pill" href="https://instagram.com/courageuxaesthetics" target="_blank" rel="me noopener noreferrer">Instagram</a>
-      </div>
-    </div>
-  </nav>
-
-  <!-- HERO -->
   <header class="cx-hero">
     <div class="cx-hero__inner">
       <div class="cx-hero__copy">
-        <span class="cx-badge">
+        <span class="badge">
           <img src="/courageaux/assets/logo_courageaux_black_400.png" alt="Courageaux Aesthetics logo" width="18" height="18" loading="eager" decoding="async">
           Courageaux Aesthetics · Consultation
         </span>
-        <div class="cx-tagline">Clean • Calm • Professional · Licensed Esthetician</div>
+
+        <div class="cx-tagline">Clean • Calm • Professional</div>
 
         <h1>Consultation &amp; policies.</h1>
-        <p>
-          Use this page to review how Courageaux Aesthetics approaches new client consultations, expectations,
-          and studio policies — so booking and walk-ins stay smooth and stress-free.
+        <p class="lead">
+          Review expectations before your visit — what to book, how walk-ins work, and the policy basics that keep the studio running smooth.
         </p>
 
-        <!-- Booking / Walk-in strip -->
         <div class="cx-status" aria-label="Booking and walk-in status">
           <div class="cx-chip" title="Online booking is handled on GlossGenius">
             <span class="cx-dot cx-dot--ok" aria-hidden="true"></span>
@@ -442,46 +255,30 @@
           </div>
           <div class="cx-chip" title="Walk-ins are welcomed when availability allows">
             <span class="cx-dot cx-dot--walkin" aria-hidden="true"></span>
-            <strong>WALK-INS</strong> · Welcome (when available)
+            <strong>WALK-INS</strong> · When available
           </div>
           <div class="cx-chip" title="Direct booking will be enabled later">
             <span class="cx-dot cx-dot--soon" aria-hidden="true"></span>
-            <strong>SOON</strong> · Direct booking
+            <strong>SOON</strong> · Direct
           </div>
         </div>
 
-        <!-- Location -->
         <div class="cx-loc" aria-label="Studio location">
           <span class="cx-pin" aria-hidden="true">⌁</span>
           <span>42334 Deluxe Plaza 1, Hammond, LA 70403</span>
-          <a
-            href="https://www.google.com/maps?q=42334+Deluxe+Plaza+1,+Hammond,+LA+70403"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Open directions in Google Maps"
-          >Directions</a>
+          <a href="https://www.google.com/maps?q=42334+Deluxe+Plaza+1,+Hammond,+LA+70403" target="_blank" rel="noopener noreferrer">Directions</a>
         </div>
 
         <div class="cx-hero__meta">
-          <a class="btn btn--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">
-            Book on GlossGenius
-          </a>
-          <a class="btn btn--ghost" href="/courageaux/appointments/">
-            Appointments
-          </a>
-          <a class="btn btn--ghost" href="/courageaux/intake/">
-            Client intake
-          </a>
-          <a class="btn btn--ghost" href="/courageaux/">
-            ⟵ Back to Courageaux
-          </a>
+          <a class="btn btn--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book on GlossGenius</a>
+          <a class="btn btn--ghost" href="/courageaux/services-preview/">Services overview</a>
+          <a class="btn btn--ghost" href="/courageaux/appointments/">Appointments</a>
+          <a class="btn btn--ghost" href="/courageaux/">⟵ Back to Courageaux</a>
         </div>
       </div>
 
-      <!-- ✅ HERO: hero_index_* (WebP + JPG fallback) -->
       <div class="cx-hero__media" aria-label="Courageaux hero image">
         <picture>
-          <!-- WebP (preferred) -->
           <source
             type="image/webp"
             srcset="
@@ -491,7 +288,6 @@
             "
             sizes="(max-width: 900px) 100vw, 1200px"
           />
-          <!-- JPG fallback (create these to match) -->
           <img
             src="/courageaux/assets/hero_index_1200.jpg"
             srcset="
@@ -509,63 +305,56 @@
           />
         </picture>
       </div>
-
     </div>
   </header>
 
   <main>
-    <!-- WHO THIS IS FOR / WHAT TO EXPECT -->
     <section class="container" style="padding:18px 16px 4px">
       <div class="card-grid card-grid--two">
         <article class="card">
-          <div class="kicker">Who this is for</div>
-          <h2 class="section-title">New clients start here.</h2>
+          <div class="kicker">New clients</div>
+          <h2 class="section-title">Start clean. No guessing.</h2>
           <p class="section-sub">
-            If you’re booking your first visit, starting corrective skin care, or you just want clarity before you come in —
-            a consultation keeps everything clean, calm, and professional.
+            If you’re new (or returning after a long break), this is how you get the smoothest experience and best results.
           </p>
           <ul class="cx-list">
-            <li>First-time clients (or first time in a while).</li>
-            <li>Clients moving into corrective or advanced treatments.</li>
-            <li>Anyone who wants expectations before booking or walking in.</li>
+            <li>Review the Services overview first.</li>
+            <li>Book the right service level for your goals.</li>
+            <li>Complete intake/waivers if required for your appointment.</li>
+            <li>Follow a routine-first plan for consistent progress.</li>
           </ul>
           <p class="note">
-            Online booking, reminders, intake forms, and waivers are handled securely through <strong>GlossGenius</strong>.
+            Start here: <a href="/courageaux/services-preview/">Services</a> → <a href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book</a>
           </p>
         </article>
 
         <article class="card">
-          <div class="kicker">What happens</div>
+          <div class="kicker">What to expect</div>
           <h2 class="section-title">Clear plan, realistic goals.</h2>
           <ul class="cx-list">
             <li>Review your skin history, sensitivities, and current products.</li>
-            <li>Discuss top concerns: acne, hyperpigmentation, texture, barrier support, etc.</li>
-            <li>Match you to the right service level — not guesswork.</li>
-            <li>Set a routine-first plan for home + in-studio consistency.</li>
+            <li>Discuss concerns like acne, hyperpigmentation, texture, and barrier support.</li>
+            <li>Match you to the right service (routine-first, corrective, or maintenance).</li>
+            <li>Set expectations for home care + in-studio consistency.</li>
           </ul>
           <p class="note">
-            Many new clients start with the <strong>“Hard Reset” first-time facial</strong> or a
-            <strong>consultation</strong> through the services menu.
+            Want to walk in? Check <a href="/courageaux/appointments/">Appointments</a> first — walk-ins are welcome when availability allows.
           </p>
         </article>
       </div>
     </section>
 
-    <!-- BEFORE / POLICIES -->
     <section class="container" style="padding:8px 16px 8px">
       <div class="card-grid card-grid--two">
         <article class="card">
           <div class="kicker">Before you arrive</div>
-          <h2 class="section-title">Best results start before the chair.</h2>
+          <h2 class="section-title">Set yourself up for results.</h2>
           <ul class="cx-list">
             <li>Come with a clean face when possible (no heavy makeup).</li>
-            <li>Bring a list/photos of your current skin products if you can.</li>
+            <li>Bring a list/photos of your current products if you can.</li>
             <li>Include medications, recent peels, or procedures in your intake.</li>
             <li>Arrive a few minutes early to settle in.</li>
           </ul>
-          <p class="note">
-            For walk-ins: availability depends on the day’s schedule. If you want a guaranteed time, book online.
-          </p>
           <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:10px">
             <a class="btn btn--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book a time</a>
             <a class="btn btn--ghost" href="https://www.google.com/maps?q=42334+Deluxe+Plaza+1,+Hammond,+LA+70403" target="_blank" rel="noopener noreferrer">Get directions</a>
@@ -577,7 +366,6 @@
           <h2 class="section-title">Deposits, reschedules &amp; cancellations.</h2>
           <p class="section-sub">
             The most accurate policies are always displayed during booking on the official GlossGenius page.
-            This overview keeps expectations clear.
           </p>
           <ul class="cx-list">
             <li>Bookings and changes are managed through GlossGenius.</li>
@@ -586,23 +374,21 @@
             <li>No-shows and last-minute changes may result in fees per booking policy.</li>
           </ul>
           <p class="note">
-            Always follow your confirmation email/text links for changes and policy details.
+            Use your confirmation email/text links for changes and policy details.
           </p>
-          <a class="btn btn--gold" style="margin-top:10px"
-             href="https://courageauxaesthetics.glossgenius.com/" target="_blank" rel="noopener noreferrer">
-            View official policies on GlossGenius
+          <a class="btn btn--gold" style="margin-top:10px" href="https://courageauxaesthetics.glossgenius.com/" target="_blank" rel="noopener noreferrer">
+            View official policies
           </a>
         </article>
       </div>
     </section>
 
-    <!-- HOURS -->
     <section class="container" style="padding:4px 16px 18px">
       <article class="card">
         <div class="kicker">Studio hours</div>
         <h2 class="section-title">Hours (confirm availability online).</h2>
         <p class="section-sub">
-          Hours can shift with demand, holidays, or special scheduling. Always confirm open times in the GlossGenius booking calendar.
+          Hours can shift with demand, holidays, or special scheduling. Always confirm open times in the booking calendar.
         </p>
 
         <div class="hours-grid" aria-label="Weekly hours">
@@ -622,19 +408,7 @@
     </section>
   </main>
 
-  <!-- FOOTER -->
-  <footer>
-    <div class="container">
-      <div class="credit-strip">
-        © <span id="year"></span> Courageaux Aesthetics · Site support by
-        <a href="https://lab.squarebidness.com/" target="_blank" rel="noopener noreferrer">Square Bidness Tech Lab</a>
-        · <a href="/courageaux/">Back to Courageaux</a>
-      </div>
-    </div>
-  </footer>
-
-  <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
-  </script>
+  <!-- Shared footer include -->
+  <!-- @@include("public/courageaux/_partials/footer.html") -->
 </body>
 </html>
