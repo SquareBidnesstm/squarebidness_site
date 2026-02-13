@@ -1,4 +1,4 @@
-<!-- public/courageaux/appointments/index.html (v3 hero_index_* implemented) -->
+<!-- public/courageaux/appointments/index.html (patched for shared _partials includes + consistency) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -14,7 +14,7 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="sb:build" content="v20260211-courageaux-appointments-walkins-address-hero-index-webp-premium" />
+  <meta name="sb:build" content="v20260213-courageaux-appointments-includes-nav-footer" />
 
   <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
@@ -49,408 +49,188 @@
   <meta name="twitter:image" content="https://www.squarebidness.com/courageaux/assets/courageaux_hero_1200x630.jpg" />
 
   <!-- Preload hero (LCP) -->
-  <link
-    rel="preload"
-    as="image"
-    href="/courageaux/assets/hero_index_1600.webp"
-    fetchpriority="high"
-    type="image/webp"
-  />
+  <link rel="preload" as="image" href="/courageaux/assets/hero_index_1600.webp" fetchpriority="high" type="image/webp" />
 
   <style>
     :root{
-      --bg:#0b0b0b; --fg:#fff; --muted:#bdbdbd;
+      --bg:#0b0b0b; --fg:#fff; --muted:#bdbdbd; --muted2:#a1a1aa;
       --soft:#121212; --stroke:#1f1f1f; --gold:#c9a227;
       --shadow: 0 18px 40px rgba(0,0,0,.35);
     }
     *{box-sizing:border-box}
-    html,body{
-      margin:0;
-      background:var(--bg);
-      color:var(--fg);
-      font-family:system-ui,Segoe UI,Roboto,Arial;
-      line-height:1.5;
-    }
+    html,body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,Segoe UI,Roboto,Arial;line-height:1.55}
     a{color:inherit;text-decoration:none}
-
+    img{max-width:100%;height:auto;display:block}
     .container{max-width:1200px;margin:0 auto;padding:0 16px}
 
+    /* ✅ Standard buttons (match stack) */
     .btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      padding:11px 16px;
-      border-radius:12px;
-      text-decoration:none;
-      font-weight:950;
-      white-space:nowrap;
-      font-size:.95rem;
-      border:1px solid transparent;
+      display:inline-flex;align-items:center;justify-content:center;gap:10px;
+      padding:12px 16px;border-radius:12px;text-decoration:none;font-weight:900;
+      border:1px solid transparent;white-space:nowrap;user-select:none;
+      transition: transform .12s ease, opacity .12s ease, background .12s ease, border-color .12s ease;
     }
-    .btn--gold{background:var(--gold);color:#000;border-color:var(--gold)}
-    .btn--ghost{background:#0f0f0f;color:#fff;border-color:#2a2a2a}
-    @media (hover:hover){ .btn:hover{opacity:.93} }
-    .btn:focus-visible{outline:3px solid rgba(201,162,39,.45); outline-offset:2px}
+    .btn:active{transform: translateY(1px)}
+    .btn--gold{background:var(--gold);color:#000;border-color:rgba(201,162,39,.95)}
+    .btn--ghost{background:rgba(255,255,255,.03);color:#fff;border-color:rgba(255,255,255,.14)}
+    @media (hover:hover){
+      .btn:hover{opacity:.95}
+      .btn--ghost:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.22)}
+    }
+    .btn:focus-visible{outline:3px solid rgba(201,162,39,.55); outline-offset:2px}
 
-    /* HERO */
-    .cx-hero{
-      background:#0b0b0b;
-      border-bottom:1px solid var(--stroke);
-    }
-    .cx-hero__inner{
-      max-width:1200px;
-      margin:0 auto;
-      padding:18px 16px 22px;
-      display:grid;
-      gap:18px;
-      align-items:start;
-    }
-    @media (min-width:900px){
-      .cx-hero__inner{
-        grid-template-columns:1.05fr .95fr;
-        gap:22px;
-        padding:24px 16px 26px;
-        align-items:center;
-      }
-    }
-
-    .cx-badge{
-      display:inline-flex;
-      gap:8px;
-      align-items:center;
-      background:#fff;
-      color:#000;
-      border-radius:999px;
-      padding:6px 10px;
-      font-weight:950;
-      font-size:.8rem;
-      letter-spacing:.02em;
-      box-shadow: 0 10px 30px rgba(0,0,0,.18);
-    }
-    .cx-badge img{height:18px;width:18px;display:block}
-
-    .cx-tagline{
-      margin-top:6px;
-      font-size:.85rem;
-      color:var(--muted);
-    }
-
-    .cx-hero__copy h1{
-      margin:.45rem 0 .25rem;
-      font-size:clamp(1.45rem,3.5vw,2.1rem);
-      line-height:1.2;
-      letter-spacing:-.01em;
-    }
-    .cx-hero__copy p{
-      margin:.25rem 0 .4rem;
-      color:#d7dae0;
-      max-width:46rem;
-    }
-
-    /* Location line */
-    .cx-loc{
-      margin:.35rem 0 0;
-      color:var(--muted);
-      font-size:.9rem;
-    }
-    .cx-loc a{
-      color:#d7dae0;
-      text-decoration:underline;
-      font-weight:950;
-      text-underline-offset:3px;
-    }
-
-    .cx-hero__meta{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:.55rem;
-    }
-
-    /* BOOKING STATUS STRIP */
-    .cx-status{
-      margin-top:10px;
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      align-items:center;
-    }
-    .cx-status__label{
-      font-weight:950;
-      font-size:.82rem;
-      letter-spacing:.12em;
-      text-transform:uppercase;
-      color:var(--muted);
-      margin-right:2px;
-    }
-
-    .cx-chip{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:8px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.04);
-      font-weight:950;
-      font-size:.85rem;
-      color:#f3f3f3;
-      white-space:nowrap;
-      line-height:1;
-    }
-
-    .cx-ico{
-      width:18px;
-      height:18px;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      border-radius:6px;
-      font-size:.9rem;
-      font-weight:950;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.12);
-    }
-
-    .cx-chip--ok{
-      border-color:rgba(25,195,125,.35);
-      background:rgba(25,195,125,.08);
-    }
-    .cx-chip--ok .cx-ico{
-      border-color:rgba(25,195,125,.55);
-      background:rgba(25,195,125,.14);
-    }
-
-    .cx-chip--walkin{
-      border-color:rgba(201,162,39,.35);
-      background:rgba(201,162,39,.08);
-    }
-    .cx-chip--walkin .cx-ico{
-      border-color:rgba(201,162,39,.55);
-      background:rgba(201,162,39,.14);
-    }
-
-    /* ✅ HERO MEDIA (premium, no crop, flush) */
-    .cx-hero__media{
-      border-radius:16px;
-      overflow:hidden;
-      border:1px solid rgba(255,255,255,.10);
-      box-shadow: var(--shadow);
-      background:#000;
-      aspect-ratio: 16 / 9;
-    }
-    .cx-hero__media picture,
-    .cx-hero__media img{
-      width:100%;
-      height:100%;
-      display:block;
-    }
-    .cx-hero__media img{
-      object-fit: contain; /* no cropping */
-      object-position: center;
-      filter:contrast(1.03) saturate(1.02);
-    }
-    @media (min-width: 1200px){
-      .cx-hero__media{ max-height: 420px; }
-    }
-
-    /* SECTIONS */
-    .kicker{
-      letter-spacing:.12em;
-      text-transform:uppercase;
-      color:var(--gold);
-      font-weight:950;
-      font-size:.85rem;
-    }
-    .section-title{
-      font-size:1.15rem;
-      font-weight:950;
-      margin:10px 0 4px;
-    }
-    .section-sub{
-      color:var(--muted);
-      margin:0 0 12px;
-      max-width:70ch;
-      font-size:.95rem;
-    }
-
-    .card{
-      background:var(--soft);
-      border:1px solid var(--stroke);
-      border-radius:16px;
-      padding:16px;
-    }
-
-    .card-grid{
-      display:grid;
-      gap:14px;
-    }
-    @media (min-width:900px){
-      .card-grid--two{grid-template-columns:1.15fr 1fr}
-    }
-
-    ul.cx-list{
-      padding-left:1.1rem;
-      margin:.1rem 0 0;
-      color:#d7dae0;
-      font-size:.95rem;
-    }
-    ul.cx-list li{margin-bottom:.25rem}
-
-    .note{
-      font-size:.85rem;
-      color:var(--muted);
-      margin-top:.45rem;
-    }
-
-    .step-row{
-      display:grid;
-      gap:8px;
-      margin-top:6px;
-    }
-    @media (min-width:640px){
-      .step-row{grid-template-columns:repeat(3,minmax(0,1fr))}
-    }
-    .step-pill{
-      border-radius:999px;
-      border:1px solid var(--stroke);
-      padding:8px 12px;
-      font-size:.85rem;
-      color:#e0e0e0;
-      background:#101010;
-    }
-    .step-pill span{
-      font-weight:950;
-      margin-right:4px;
-      color:var(--gold);
-    }
-
-    /* FOOTER */
-    footer{
-      background:#0b0b0b;
-      border-top:1px solid var(--stroke);
-      margin-top:28px;
-      padding:16px 0 24px;
-    }
-    .credit-strip{
-      margin:0 auto;
-      padding:10px 14px;
-      border:1px solid var(--stroke);
-      border-radius:12px;
-      background:#0e0e0e;
-      color:#d7dae0;
-      text-align:center;
-      font-size:.88rem;
-    }
-    .credit-strip a{
-      color:var(--gold);
-      text-decoration:underline;
-      font-weight:950;
-    }
-  </style>
-
-  <style>
-    /* Top nav (consistent) */
+    /* ✅ Top nav CSS (needed because partial is markup-only) */
     .cx-topnav{
-      border-bottom:1px solid var(--stroke,#1f1f1f);
-      background:rgba(0,0,0,.35);
+      position:sticky;top:0;z-index:50;
+      border-bottom:1px solid var(--stroke);
+      background:rgba(0,0,0,.55);
       backdrop-filter: blur(10px);
     }
     .cx-topnav__inner{
-      max-width:1200px;
-      margin:0 auto;
-      padding:14px 16px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
+      max-width:1200px;margin:0 auto;padding:12px 16px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
     }
     .cx-brand{
-      display:inline-flex;
-      align-items:center;
-      gap:10px;
-      text-decoration:none;
-      color:inherit;
-      font-weight:950;
-      letter-spacing:-.01em;
+      display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:inherit;
+      font-weight:950;letter-spacing:-.01em;
     }
     .cx-brand img{
-      height:22px;width:22px;display:block;
-      border-radius:7px;
+      width:22px;height:22px;border-radius:7px;
       border:1px solid rgba(255,255,255,.14);
       background:rgba(255,255,255,.95);
       padding:2px;
     }
-    .cx-links{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      align-items:center;
-    }
+    .cx-links{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
     .cx-pill{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:9px 12px;
-      border-radius:999px;
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:9px 12px;border-radius:999px;
       border:1px solid rgba(255,255,255,.14);
       background:rgba(255,255,255,.04);
-      color:#f5f5f5;
-      text-decoration:none;
-      font-weight:950;
-      font-size:.9rem;
-      white-space:nowrap;
+      color:#f5f5f5;text-decoration:none;font-weight:950;font-size:.92rem;white-space:nowrap;
       transition: background .12s ease, border-color .12s ease, transform .12s ease;
     }
     .cx-pill:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.22)}
     .cx-pill:active{transform: translateY(1px)}
-    .cx-pill--gold{
-      border-color:rgba(201,162,39,.85);
-      background:rgba(201,162,39,.95);
-      color:#000;
+    .cx-pill--gold{border-color:rgba(201,162,39,.85);background:rgba(201,162,39,.95);color:#000}
+
+    /* HERO */
+    .cx-hero{background:#0b0b0b;border-bottom:1px solid var(--stroke)}
+    .cx-hero__inner{
+      max-width:1200px;margin:0 auto;padding:18px 16px 22px;
+      display:grid;gap:18px;align-items:start;
     }
+    @media (min-width:900px){
+      .cx-hero__inner{grid-template-columns:1.05fr .95fr;gap:22px;padding:24px 16px 26px;align-items:center}
+    }
+
+    /* ✅ Standard badge */
+    .badge{
+      background:#fff;color:#000;display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;font-size:.82rem;font-weight:950;letter-spacing:.02em;
+      width:max-content;box-shadow: 0 10px 30px rgba(0,0,0,.18);
+    }
+    .badge img{height:18px;width:18px;display:block}
+
+    .cx-tagline{margin-top:6px;font-size:.85rem;color:var(--muted)}
+
+    .cx-hero__copy h1{
+      margin:.45rem 0 .25rem;
+      font-size:clamp(1.45rem,3.5vw,2.1rem);
+      line-height:1.2;letter-spacing:-.01em;
+    }
+    .cx-hero__copy p{margin:.25rem 0 .4rem;color:#d7dae0;max-width:46rem}
+
+    /* Location line */
+    .cx-loc{margin:.35rem 0 0;color:var(--muted);font-size:.9rem}
+    .cx-loc a{color:#d7dae0;text-decoration:underline;font-weight:950;text-underline-offset:3px}
+
+    .cx-hero__meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:.55rem}
+
+    /* Status strip */
+    .cx-status{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+    .cx-status__label{
+      font-weight:950;font-size:.82rem;letter-spacing:.12em;text-transform:uppercase;
+      color:var(--muted);margin-right:2px;
+    }
+    .cx-chip{
+      display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);
+      font-weight:950;font-size:.85rem;color:#f3f3f3;white-space:nowrap;line-height:1;
+    }
+    .cx-ico{
+      width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;
+      border-radius:6px;font-size:.9rem;font-weight:950;background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.12);
+    }
+    .cx-chip--ok{border-color:rgba(25,195,125,.35);background:rgba(25,195,125,.08)}
+    .cx-chip--ok .cx-ico{border-color:rgba(25,195,125,.55);background:rgba(25,195,125,.14)}
+    .cx-chip--walkin{border-color:rgba(201,162,39,.35);background:rgba(201,162,39,.08)}
+    .cx-chip--walkin .cx-ico{border-color:rgba(201,162,39,.55);background:rgba(201,162,39,.14)}
+
+    /* ✅ HERO MEDIA (premium, flush) */
+    .cx-hero__media{
+      border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.10);
+      box-shadow: var(--shadow);background:#000;aspect-ratio:16/9;
+    }
+    .cx-hero__media picture,.cx-hero__media img{width:100%;height:100%;display:block}
+    .cx-hero__media img{object-fit:contain;object-position:center;filter:contrast(1.03) saturate(1.02)}
+    @media (min-width:1200px){ .cx-hero__media{max-height:420px} }
+
+    /* SECTIONS */
+    .kicker{letter-spacing:.12em;text-transform:uppercase;color:var(--gold);font-weight:950;font-size:.85rem}
+    .section-title{font-size:1.15rem;font-weight:950;margin:10px 0 4px}
+    .section-sub{color:var(--muted);margin:0 0 12px;max-width:70ch;font-size:.95rem}
+
+    .card{background:var(--soft);border:1px solid var(--stroke);border-radius:16px;padding:16px}
+    .card-grid{display:grid;gap:14px}
+    @media (min-width:900px){ .card-grid--two{grid-template-columns:1.15fr 1fr} }
+
+    ul.cx-list{padding-left:1.1rem;margin:.1rem 0 0;color:#d7dae0;font-size:.95rem}
+    ul.cx-list li{margin-bottom:.25rem}
+
+    .note{font-size:.85rem;color:var(--muted);margin-top:.45rem}
+
+    .step-row{display:grid;gap:8px;margin-top:6px}
+    @media (min-width:640px){ .step-row{grid-template-columns:repeat(3,minmax(0,1fr))} }
+    .step-pill{
+      border-radius:999px;border:1px solid var(--stroke);padding:8px 12px;font-size:.85rem;
+      color:#e0e0e0;background:#101010;
+    }
+    .step-pill span{font-weight:950;margin-right:4px;color:var(--gold)}
+
+    /* ✅ Footer baseline (partial provides markup; this styles it) */
+    .cx-footer{
+      margin-top:26px;border-top:1px solid var(--stroke);background:rgba(0,0,0,.35);
+      padding:22px 16px;text-align:center;
+    }
+    .cx-footer__line{ margin:0; color:var(--muted2); font-size:.92rem; line-height:1.65; }
+    .cx-footer__sub{ margin:.85rem 0 0; color:#6b7280; font-size:.9rem; line-height:1.6; }
+    .cx-footer a{ color:var(--gold); text-decoration:underline; font-weight:950; }
   </style>
 </head>
 
 <body>
-  <nav class="cx-topnav" aria-label="Courageaux navigation">
-    <div class="cx-topnav__inner">
-      <a class="cx-brand" href="/courageaux/">
-        <img
-          src="/courageaux/assets/icon_courageaux.svg"
-          alt="Courageaux Aesthetics"
-          width="22"
-          height="22"
-          loading="eager"
-          decoding="async"
-        >
-        Courageaux Aesthetics
-      </a>
-
-      <div class="cx-links">
-        <a class="cx-pill cx-pill--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book</a>
-        <a class="cx-pill" href="/courageaux/services-preview/">Services</a>
-        <a class="cx-pill" href="/courageaux/consultation/">Consultation</a>
-        <a class="cx-pill" href="/courageaux/appointments/">Appointments</a>
-        <a class="cx-pill" href="/courageaux/her-words/">Her Words</a>
-        <a class="cx-pill" href="/courageaux/products/">Products</a>
-        <a class="cx-pill" href="https://instagram.com/courageuxaesthetics" target="_blank" rel="me noopener noreferrer">Instagram</a>
-      </div>
-    </div>
-  </nav>
+  <!-- ✅ Shared nav include -->
+  <!-- @@include("public/courageaux/_partials/nav.html") -->
 
   <!-- HERO -->
   <header class="cx-hero">
     <div class="cx-hero__inner">
       <div class="cx-hero__copy">
-        <span class="cx-badge">
-          <img src="/courageaux/assets/logo_courageaux_black_400.png" alt="Courageaux Aesthetics logo" width="18" height="18" loading="eager" decoding="async">
-          Courageaux Aesthetics · Appointments
+        <!-- ✅ Standard badge line (shared style/copy) -->
+        <span class="badge">
+          <img
+            src="/courageaux/assets/logo_courageaux_black_400.png"
+            alt="Courageaux Aesthetics logo"
+            width="18"
+            height="18"
+            loading="eager"
+            decoding="async"
+          >
+          Courageaux Aesthetics · Hammond · Northshore · Southeast Louisiana
         </span>
 
-        <div class="cx-tagline">Clean • Calm • Professional · Hammond, Louisiana</div>
+        <div class="cx-tagline">Clean • Calm • Professional</div>
 
         <h1>Appointments — and walk-ins when available.</h1>
         <p>
@@ -489,10 +269,9 @@
         </div>
       </div>
 
-      <!-- ✅ HERO: hero_index_* (WebP + JPG fallback) -->
+      <!-- HERO: hero_index_* (WebP + JPG fallback) -->
       <div class="cx-hero__media" aria-label="Courageaux appointments hero image">
         <picture>
-          <!-- WebP (preferred) -->
           <source
             type="image/webp"
             srcset="
@@ -502,7 +281,6 @@
             "
             sizes="(max-width: 900px) 100vw, 1200px"
           />
-          <!-- JPG fallback -->
           <img
             src="/courageaux/assets/hero_index_1200.jpg"
             srcset="
@@ -580,23 +358,7 @@
     </section>
   </main>
 
-  <!-- FOOTER CREDIT -->
-  <footer>
-    <div class="container">
-      <div class="credit-strip">
-        <div>Appointment Hub — © <span id="year"></span> Courageaux Aesthetics</div>
-        <div style="margin-top:4px;font-size:.88rem;">
-          Site support by
-          <a href="https://lab.squarebidness.com/" target="_blank" rel="noopener noreferrer">
-            Square Bidness Tech Lab
-          </a>
-        </div>
-      </div>
-    </div>
-  </footer>
-
-  <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
-  </script>
+  <!-- ✅ Shared footer include -->
+  <!-- @@include("public/courageaux/_partials/footer.html") -->
 </body>
 </html>
