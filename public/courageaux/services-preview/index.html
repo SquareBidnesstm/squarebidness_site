@@ -1,12 +1,13 @@
-<!-- public/courageaux/services-preview/index.html (v3 consistency polish — no hero media, standardized nav/badge/buttons/footer) -->
+<!-- public/courageaux/services-preview/index.html (v4 — includes + address ON + LocalBusiness schema + SEO tighten) -->
 <!doctype html>
 <html lang="en">
 <head>
   <!-- Basics -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Courageaux Aesthetics — Services Overview</title>
-  <meta name="description" content="A clean visual preview of Courageaux Aesthetics services on the Northshore in Southeast Louisiana — facials, corrective care, waxing, and signature treatments." />
+
+  <title>Courageaux Aesthetics — Services | Hammond, Louisiana</title>
+  <meta name="description" content="Preview services at Courageaux Aesthetics in Hammond, Louisiana — facials, corrective care, waxing, and signature treatments. Book through GlossGenius for live availability." />
   <link rel="canonical" href="https://www.squarebidness.com/courageaux/services-preview/" />
   <meta name="author" content="Courageaux Aesthetics" />
 
@@ -14,7 +15,7 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="sb:build" content="v20260212-courageaux-services-preview-standard-ui" />
+  <meta name="sb:build" content="v20260213-courageaux-services-preview-includes-address-schema" />
 
   <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
@@ -35,8 +36,9 @@
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Courageaux Aesthetics" />
-  <meta property="og:title" content="Courageaux Aesthetics — Services Overview" />
-  <meta property="og:description" content="A clean visual preview of top services — facials, corrective care, waxing, and signature treatments. Book through GlossGenius." />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:title" content="Courageaux Aesthetics — Services" />
+  <meta property="og:description" content="Preview services — facials, corrective care, waxing, and signature treatments. Book through GlossGenius." />
   <meta property="og:url" content="https://www.squarebidness.com/courageaux/services-preview/" />
   <meta property="og:image" content="https://www.squarebidness.com/courageaux/assets/courageaux_hero_1200x630.jpg" />
   <meta property="og:image:width" content="1200" />
@@ -44,9 +46,57 @@
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Courageaux Aesthetics — Services Overview" />
+  <meta name="twitter:title" content="Courageaux Aesthetics — Services" />
   <meta name="twitter:description" content="Preview services, then book through the official GlossGenius calendar." />
   <meta name="twitter:image" content="https://www.squarebidness.com/courageaux/assets/courageaux_hero_1200x630.jpg" />
+
+  <!-- Schema: LocalBusiness + WebPage + Breadcrumbs -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": ["LocalBusiness","HealthAndBeautyBusiness"],
+        "@id": "https://www.squarebidness.com/courageaux/#business",
+        "name": "Courageaux Aesthetics",
+        "url": "https://www.squarebidness.com/courageaux/",
+        "image": "https://www.squarebidness.com/courageaux/assets/courageaux_hero_1200x630.jpg",
+        "logo": "https://www.squarebidness.com/courageaux/assets/logo_courageaux_black_400.png",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "42334 Deluxe Plaza 1",
+          "addressLocality": "Hammond",
+          "addressRegion": "LA",
+          "postalCode": "70403",
+          "addressCountry": "US"
+        },
+        "hasMap": "https://www.google.com/maps?q=42334+Deluxe+Plaza+1,+Hammond,+LA+70403",
+        "sameAs": [
+          "https://instagram.com/courageuxaesthetics",
+          "https://courageauxaesthetics.glossgenius.com/"
+        ],
+        "priceRange": "$$"
+      },
+      {
+        "@type": "WebPage",
+        "@id": "https://www.squarebidness.com/courageaux/services-preview/#webpage",
+        "url": "https://www.squarebidness.com/courageaux/services-preview/",
+        "name": "Courageaux Aesthetics — Services",
+        "description": "Preview services at Courageaux Aesthetics in Hammond, Louisiana — facials, corrective care, waxing, and signature treatments.",
+        "about": { "@id": "https://www.squarebidness.com/courageaux/#business" },
+        "isPartOf": { "@id": "https://www.squarebidness.com/courageaux/#website" }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": "https://www.squarebidness.com/courageaux/services-preview/#breadcrumbs",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Courageaux Aesthetics", "item": "https://www.squarebidness.com/courageaux/" },
+          { "@type": "ListItem", "position": 2, "name": "Services", "item": "https://www.squarebidness.com/courageaux/services-preview/" }
+        ]
+      }
+    ]
+  }
+  </script>
 
   <style>
     :root{
@@ -60,7 +110,7 @@
     img{max-width:100%;height:auto;display:block}
     .container{max-width:1200px;margin:0 auto;padding:0 16px}
 
-    /* ===== Standard buttons (match appointments/book) ===== */
+    /* Standard buttons */
     .btn{
       display:inline-flex;align-items:center;justify-content:center;gap:8px;
       padding:11px 16px;border-radius:12px;font-weight:950;border:1px solid transparent;white-space:nowrap;
@@ -73,7 +123,7 @@
     @media(hover:hover){ .btn:hover{opacity:.93} }
     .btn:focus-visible{outline:3px solid rgba(201,162,39,.45); outline-offset:2px}
 
-    /* ===== Standard top nav ===== */
+    /* Nav CSS (partial is markup-only) */
     .cx-topnav{
       position:sticky;top:0;z-index:50;
       border-bottom:1px solid var(--stroke);
@@ -103,7 +153,7 @@
     .cx-pill:active{transform: translateY(1px)}
     .cx-pill--gold{border-color:rgba(201,162,39,.85);background:rgba(201,162,39,.95);color:#000}
 
-    /* ===== Header (no hero media) ===== */
+    /* Header (no hero media) */
     .hero{border-bottom:1px solid var(--stroke);background:#0b0b0b}
     .hero__inner{max-width:1200px;margin:0 auto;padding:18px 16px 16px;display:grid;gap:12px;align-items:center}
 
@@ -125,7 +175,7 @@
     .hero p{margin:.15rem 0 0;color:#d7dae0;max-width:78ch}
     .hero__actions{margin-top:10px;display:flex;flex-wrap:wrap;gap:10px}
 
-    /* Booking status strip */
+    /* Status strip */
     .cx-status{margin-top:8px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
     .cx-chip{
       display:inline-flex;align-items:center;gap:8px;padding:7px 10px;border-radius:999px;
@@ -136,6 +186,10 @@
     .cx-dot--ok{background:var(--ok)}
     .cx-dot--soon{background:var(--gold)}
     .cx-chip strong{color:var(--gold)}
+
+    /* Address line */
+    .cx-loc{margin-top:8px;color:var(--muted);font-size:.92rem}
+    .cx-loc a{color:#d7dae0;text-decoration:underline;font-weight:950;text-underline-offset:3px}
 
     /* Sections */
     main.container{padding:0 16px 0}
@@ -170,7 +224,7 @@
 
     /* Start Here */
     .start-here{
-      margin-top:16px;
+      margin-top:14px;
       border:1px solid rgba(201,162,39,.32);
       background:rgba(201,162,39,.08);
       border-radius:16px;
@@ -194,47 +248,20 @@
     .faq summary{cursor:pointer;font-weight:950;color:#f3f3f4}
     .faq .ans{margin-top:6px;color:#d7dae0;font-size:.95rem;line-height:1.55}
 
-    /* Hours */
-    .hours{margin-top:18px;background:var(--soft);border:1px solid var(--stroke);border-radius:16px;padding:16px;box-shadow:0 12px 30px rgba(0,0,0,.25);}
-    .hours h2{margin:0 0 .4rem;font-size:1.05rem;font-weight:950}
-    .hours p{margin:0;color:var(--muted);font-size:.9rem}
-
-    /* ===== Standard footer (appointments/book) ===== */
-    footer{
-      background:#0b0b0b;
-      border-top:1px solid var(--stroke);
-      margin-top:28px;
-      padding:16px 0 24px;
+    /* Footer baseline (partial provides markup; this styles it) */
+    .cx-footer{
+      margin-top:26px;border-top:1px solid var(--stroke);background:rgba(0,0,0,.35);
+      padding:22px 16px;text-align:center;
     }
-    .credit-strip{
-      max-width:1200px;margin:0 auto;padding:10px 14px;
-      border:1px solid var(--stroke);border-radius:12px;background:#0e0e0e;
-      color:#d7dae0;text-align:center;font-size:.88rem;line-height:1.6;
-    }
-    .credit-strip a{color:var(--gold);text-decoration:underline;font-weight:950;text-underline-offset:3px}
+    .cx-footer__line{ margin:0; color:var(--muted2); font-size:.92rem; line-height:1.65; }
+    .cx-footer__sub{ margin:.85rem 0 0; color:#6b7280; font-size:.9rem; line-height:1.6; }
+    .cx-footer a{ color:var(--gold); text-decoration:underline; font-weight:950; }
   </style>
 </head>
 
 <body>
-  <nav class="cx-topnav" aria-label="Courageaux navigation">
-    <div class="cx-topnav__inner">
-      <a class="cx-brand" href="/courageaux/">
-        <img src="/courageaux/assets/icon_courageaux_512.png" alt="Courageaux Aesthetics" width="22" height="22" loading="eager" decoding="async">
-        Courageaux Aesthetics
-      </a>
-
-      <!-- ✅ Standard pill order -->
-      <div class="cx-links">
-        <a class="cx-pill cx-pill--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book</a>
-        <a class="cx-pill" href="/courageaux/services-preview/">Services</a>
-        <a class="cx-pill" href="/courageaux/consultation/">Consultation</a>
-        <a class="cx-pill" href="/courageaux/appointments/">Appointments</a>
-        <a class="cx-pill" href="/courageaux/her-words/">Her Words</a>
-        <a class="cx-pill" href="/courageaux/products/">Products</a>
-        <a class="cx-pill" href="https://instagram.com/courageuxaesthetics" target="_blank" rel="me noopener noreferrer">Instagram</a>
-      </div>
-    </div>
-  </nav>
+  <!-- Shared nav include -->
+  <!-- @@include("public/courageaux/_partials/nav.html") -->
 
   <header class="hero">
     <div class="hero__inner">
@@ -246,8 +273,8 @@
 
         <h1>Services overview.</h1>
         <p>
-          A clean visual preview of top treatments offered by Courageaux Aesthetics — facials, corrective care,
-          waxing, and signature experiences. For live availability and exact options, book through GlossGenius.
+          A clean preview of top treatments — facials, corrective care, waxing, and signature experiences.
+          For live availability and exact options, book through GlossGenius.
         </p>
 
         <div class="cx-status" aria-label="Booking status">
@@ -261,6 +288,11 @@
           </div>
         </div>
 
+        <div class="cx-loc">
+          42334 Deluxe Plaza 1, Hammond, LA 70403 ·
+          <a href="https://www.google.com/maps?q=42334+Deluxe+Plaza+1,+Hammond,+LA+70403" target="_blank" rel="noopener noreferrer">Directions</a>
+        </div>
+
         <div class="hero__actions">
           <a class="btn btn--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book on GlossGenius</a>
           <a class="btn btn--ghost" href="/courageaux/">⟵ Back to Courageaux</a>
@@ -271,11 +303,9 @@
 
         <div class="mood-strip" aria-hidden="true"></div>
 
-        <div class="start-here" style="margin-top:14px">
+        <div class="start-here">
           <div>
-            <p>
-              <strong>New here?</strong> Start with the “Hard Reset” first-time facial or a consultation to get a clear recommendation.
-            </p>
+            <p><strong>New here?</strong> Start with the “Hard Reset” first-time facial or review the consultation guidance before booking.</p>
           </div>
           <div class="start-actions">
             <a class="btn btn--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Start here</a>
@@ -287,7 +317,7 @@
   </header>
 
   <main class="container">
-    <!-- SIGNATURE SERVICES -->
+    <!-- SIGNATURE -->
     <h2 class="section-title">Signature services</h2>
     <p class="section-sub">Top recommended treatments for first-time clients and monthly maintenance.</p>
 
@@ -311,13 +341,13 @@
       <div class="card">
         <span class="pill">Maintenance</span>
         <h3>Returning Client Facial — 60 min</h3>
-        <p>Steady glow upkeep, tailored to your ongoing routine and progress.</p>
+        <p>Steady glow upkeep, tailored to your routine and progress.</p>
         <div class="price">$95</div>
         <a class="btn btn--gold book" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book</a>
       </div>
     </div>
 
-    <!-- ADVANCED SERVICES -->
+    <!-- ADVANCED -->
     <h2 class="section-title">Advanced treatments</h2>
     <p class="section-sub">Higher-level services focused on correction, smoothing, brightening, or unique experiences.</p>
 
@@ -333,7 +363,7 @@
       <div class="card">
         <span class="pill">Corrective</span>
         <h3>Microdermabrasion</h3>
-        <p>Exfoliation treatment to smooth texture, brighten dull skin, and fade dark spots over time.</p>
+        <p>Exfoliation treatment to smooth texture, brighten dull skin, and support fading dark spots over time.</p>
         <div class="price">$85</div>
         <a class="btn btn--gold book" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book</a>
       </div>
@@ -341,13 +371,13 @@
       <div class="card">
         <span class="pill">Instant smooth</span>
         <h3>Dermaplaning — 10 min</h3>
-        <p>Removes peach fuzz + dead skin for a flawless, smooth makeup-ready base.</p>
+        <p>Removes peach fuzz + dead skin for a smooth, makeup-ready base.</p>
         <div class="price">$50</div>
         <a class="btn btn--gold book" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book</a>
       </div>
     </div>
 
-    <!-- SPECIAL SERVICES -->
+    <!-- SPECIALTY -->
     <h2 class="section-title">Specialty services</h2>
     <p class="section-sub">Unique offerings tailored for different client needs.</p>
 
@@ -363,7 +393,7 @@
       <div class="card">
         <span class="pill">Bundle</span>
         <h3>Soft Girl Package — 120 min</h3>
-        <p>Facial + dermaplaning + wax package for a full “fresh start” transformation.</p>
+        <p>Facial + dermaplaning + wax package for a full “fresh start” experience.</p>
         <div class="price">$150</div>
         <a class="btn btn--gold book" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book</a>
       </div>
@@ -371,7 +401,7 @@
       <div class="card">
         <span class="pill">Experience</span>
         <h3>Couples Glow — 80 min</h3>
-        <p>Side-by-side double appointment — glow &amp; relax together. Perfect for birthdays &amp; anniversaries.</p>
+        <p>Side-by-side double appointment — relax and glow together. Perfect for special occasions.</p>
         <div class="price">$255</div>
         <a class="btn btn--gold book" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book</a>
       </div>
@@ -415,46 +445,30 @@
       <details>
         <summary>Do I need a consultation first?</summary>
         <div class="ans">
-          If you’re not sure what to book, start with the Consultation page. Many first-time clients choose the “Hard Reset” facial as a safe starting point.
-          <a href="/courageaux/consultation/" style="color:var(--gold);text-decoration:underline;font-weight:950;">Consultation &amp; policies</a>
-        </div>
-      </details>
-
-      <details>
-        <summary>What if I’m not sure what to book?</summary>
-        <div class="ans">
-          Book the “Hard Reset” first-time facial or review the consultation guidance first. The goal is calm, routine-first care — no guesswork.
-          <a href="/courageaux/consultation/" style="color:var(--gold);text-decoration:underline;font-weight:950;">Start here</a>
+          If you’re not sure what to book, start with the Consultation page. Many first-time clients choose the “Hard Reset” facial as a clean starting point.
+          <a href="/courageaux/consultation/" style="color:var(--gold);text-decoration:underline;font-weight:950;text-underline-offset:3px">Consultation &amp; policies</a>
         </div>
       </details>
 
       <details>
         <summary>How do I reschedule or cancel?</summary>
         <div class="ans">
-          Use the reschedule/cancel links in your GlossGenius confirmation email or text. Policies and fees (if any) are listed in the GlossGenius booking flow.
-          <a href="https://courageauxaesthetics.glossgenius.com/" target="_blank" rel="noopener noreferrer" style="color:var(--gold);text-decoration:underline;font-weight:950;">Open GlossGenius</a>
+          Use the links in your GlossGenius confirmation email or text. Official policies are shown during the booking flow.
+          <a href="https://courageauxaesthetics.glossgenius.com/" target="_blank" rel="noopener noreferrer" style="color:var(--gold);text-decoration:underline;font-weight:950;text-underline-offset:3px">Open GlossGenius</a>
+        </div>
+      </details>
+
+      <details>
+        <summary>Do you accept walk-ins?</summary>
+        <div class="ans">
+          Walk-ins are welcome when availability allows. For a guaranteed time, book online.
+          <a href="/courageaux/appointments/" style="color:var(--gold);text-decoration:underline;font-weight:950;text-underline-offset:3px">Appointments</a>
         </div>
       </details>
     </section>
-
-    <!-- HOURS (trust-safe) -->
-    <section class="hours" aria-label="Hours">
-      <h2>Hours</h2>
-      <p>Hours vary — confirm current availability inside the GlossGenius calendar.</p>
-    </section>
   </main>
 
-  <!-- ✅ Standard footer -->
-  <footer>
-    <div class="credit-strip">
-      © <span id="year"></span> Courageaux Aesthetics · Site support by
-      <a href="https://lab.squarebidness.com/" target="_blank" rel="noopener noreferrer">Square Bidness Tech Lab</a>
-      · <a href="/courageaux/">Back to Courageaux</a>
-    </div>
-  </footer>
-
-  <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
-  </script>
+  <!-- Shared footer include -->
+  <!-- @@include("public/courageaux/_partials/footer.html") -->
 </body>
 </html>
