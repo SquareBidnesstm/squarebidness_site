@@ -1,4 +1,4 @@
-<!-- public/courageaux/intake/index.html (consistency sweep: topnav/badge/buttons/footer) -->
+<!-- public/courageaux/intake/index.html (PASTE READY — includes nav/footer + robots tightened + a11y + print polish) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -11,9 +11,10 @@
 
   <meta name="theme-color" content="#0b0b0b" />
   <meta name="color-scheme" content="dark light" />
-  <meta name="robots" content="noindex,nofollow,nosnippet" />
+  <!-- ✅ Private utility page -->
+  <meta name="robots" content="noindex,follow" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="sb:build" content="v20260211-courageaux-intake-consistency" />
+  <meta name="sb:build" content="v20260213-courageaux-intake-consistency-includes-robots-a11y" />
 
   <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
@@ -85,64 +86,36 @@
     }
     .badge img{height:18px;width:18px;display:block}
 
-    /* ✅ Shared topnav (same order across site) */
+    /* Nav baseline styles (partial is markup-only) */
     .cx-topnav{
-      position:sticky;
-      top:0;
-      z-index:50;
+      position:sticky;top:0;z-index:50;
       border-bottom:1px solid var(--stroke);
       background:rgba(0,0,0,.55);
       backdrop-filter: blur(10px);
     }
     .cx-topnav__inner{
-      max-width:1200px;
-      margin:0 auto;
-      padding:12px 16px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
+      max-width:1200px;margin:0 auto;padding:12px 16px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
     }
     .cx-brand{
-      display:inline-flex;
-      align-items:center;
-      gap:10px;
-      text-decoration:none;
-      color:inherit;
-      font-weight:950;
-      letter-spacing:-.01em;
+      display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:inherit;
+      font-weight:950;letter-spacing:-.01em;
     }
     .cx-brand img{
-      width:22px;height:22px;
-      border-radius:7px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.95);
-      padding:2px;
+      width:22px;height:22px;border-radius:7px;border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.95);padding:2px;
     }
     .cx-links{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
     .cx-pill{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:9px 12px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.04);
-      color:#f5f5f5;
-      text-decoration:none;
-      font-weight:950;
-      font-size:.92rem;
-      white-space:nowrap;
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:9px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.04);color:#f5f5f5;text-decoration:none;
+      font-weight:950;font-size:.92rem;white-space:nowrap;
       transition: background .12s ease, border-color .12s ease, transform .12s ease;
     }
     .cx-pill:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.22)}
     .cx-pill:active{transform: translateY(1px)}
-    .cx-pill--gold{
-      border-color:rgba(201,162,39,.85);
-      background:rgba(201,162,39,.95);
-      color:#000;
-    }
+    .cx-pill--gold{border-color:rgba(201,162,39,.85);background:rgba(201,162,39,.95);color:#000}
 
     /* Header */
     header{
@@ -254,33 +227,17 @@
     }
     .bottom-helper a{color:var(--gold);text-decoration:underline;font-weight:950;text-underline-offset:3px}
 
-    /* ✅ Shared footer */
-    footer{
-      border-top:1px solid var(--stroke);
-      margin-top:26px;
-      padding:16px 0 26px;
-      background:#0b0b0b;
+    /* Footer styling baseline (partial markup) */
+    .cx-footer{
+      margin-top:26px;border-top:1px solid var(--stroke);background:rgba(0,0,0,.35);
+      padding:22px 16px;text-align:center;
     }
-    .credit-strip{
-      margin:0 auto;
-      padding:10px 14px;
-      border:1px solid var(--stroke);
-      border-radius:12px;
-      background:#0e0e0e;
-      color:#d7dae0;
-      text-align:center;
-      font-size:.88rem;
-      line-height:1.6;
-    }
-    .credit-strip a{
-      color:var(--gold);
-      text-decoration:underline;
-      font-weight:950;
-      text-underline-offset:3px;
-    }
+    .cx-footer__line{ margin:0; color:#a1a1aa; font-size:.92rem; line-height:1.65; }
+    .cx-footer__sub{ margin:.85rem 0 0; color:#6b7280; font-size:.9rem; line-height:1.6; }
+    .cx-footer a{ color:var(--gold); text-decoration:underline; font-weight:950; text-underline-offset:3px; }
 
     @media print{
-      .cx-topnav, .actions, .hint-row{display:none !important;}
+      .cx-topnav, .actions, .hint-row, .cx-footer{display:none !important;}
       body{background:#fff;color:#000}
       form{border:1px solid #ddd;background:#fff}
       fieldset{border:1px solid #ddd}
@@ -292,25 +249,8 @@
 </head>
 
 <body>
-  <nav class="cx-topnav" aria-label="Courageaux navigation">
-    <div class="cx-topnav__inner">
-      <a class="cx-brand" href="/courageaux/">
-        <img src="/courageaux/assets/icon_courageaux_512.png" alt="Courageaux Aesthetics" width="22" height="22" loading="eager" decoding="async">
-        Courageaux Aesthetics
-      </a>
-
-      <!-- ✅ SAME ORDER everywhere -->
-      <div class="cx-links">
-        <a class="cx-pill cx-pill--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book</a>
-        <a class="cx-pill" href="/courageaux/services-preview/">Services</a>
-        <a class="cx-pill" href="/courageaux/consultation/">Consultation</a>
-        <a class="cx-pill" href="/courageaux/appointments/">Appointments</a>
-        <a class="cx-pill" href="/courageaux/her-words/">Her Words</a>
-        <a class="cx-pill" href="/courageaux/products/">Products</a>
-        <a class="cx-pill" href="https://instagram.com/courageuxaesthetics" target="_blank" rel="me noopener noreferrer">Instagram</a>
-      </div>
-    </div>
-  </nav>
+  <!-- ✅ Shared nav include -->
+  <!-- @@include("public/courageaux/_partials/nav.html") -->
 
   <div class="wrap">
     <header>
@@ -331,7 +271,7 @@
     </header>
 
     <form id="intakeForm" novalidate>
-      <div id="errorMsg" class="error">Please complete all required fields (marked with *).</div>
+      <div id="errorMsg" class="error" role="alert" aria-live="assertive">Please complete all required fields (marked with *).</div>
 
       <!-- Contact -->
       <fieldset>
@@ -371,7 +311,7 @@
         <div class="grid-2">
           <div>
             <label>Primary skin concerns<span class="req">*</span></label>
-            <div class="inline-check">
+            <div class="inline-check" role="group" aria-label="Primary skin concerns">
               <label><input type="checkbox" name="concern" value="acne"> Acne / breakouts</label>
               <label><input type="checkbox" name="concern" value="dark-spots"> Dark spots</label>
               <label><input type="checkbox" name="concern" value="texture"> Texture / roughness</label>
@@ -391,7 +331,7 @@
         <div class="grid-2" style="margin-top:10px">
           <div>
             <label>Have you used any of the following in the last 7 days?</label>
-            <div class="inline-check">
+            <div class="inline-check" role="group" aria-label="Recent actives used">
               <label><input type="checkbox" name="actives" value="retinol"> Retinol / tretinoin</label>
               <label><input type="checkbox" name="actives" value="acids"> AHA/BHA acids</label>
               <label><input type="checkbox" name="actives" value="scrubs"> Scrubs / heavy exfoliants</label>
@@ -400,14 +340,14 @@
           </div>
           <div>
             <label for="allergies">Allergies or sensitivities</label>
-            <textarea id="allergies" name="allergies" placeholder="Ingredients, medications, latex, nuts, fragrances, etc."></textarea>
+            <textarea id="allergies" name="allergies" placeholder="Ingredients, medications, latex, nuts, fragrances, etc." autocomplete="off"></textarea>
           </div>
         </div>
 
         <div class="grid-2" style="margin-top:10px">
           <div>
             <label>Medical conditions (check any that apply)</label>
-            <div class="inline-check">
+            <div class="inline-check" role="group" aria-label="Medical conditions">
               <label><input type="checkbox" name="conditions" value="pregnant"> Pregnant / nursing</label>
               <label><input type="checkbox" name="conditions" value="diabetes"> Diabetes</label>
               <label><input type="checkbox" name="conditions" value="autoimmune"> Autoimmune</label>
@@ -418,7 +358,7 @@
           </div>
           <div>
             <label for="meds">Medications or medical notes</label>
-            <textarea id="meds" name="meds"></textarea>
+            <textarea id="meds" name="meds" autocomplete="off"></textarea>
           </div>
         </div>
       </fieldset>
@@ -478,19 +418,10 @@
     </form>
   </div>
 
-  <footer>
-    <div class="container">
-      <div class="credit-strip">
-        © <span id="year"></span> Courageaux Aesthetics · Site support by
-        <a href="https://lab.squarebidness.com/" target="_blank" rel="noopener noreferrer">Square Bidness Tech Lab</a>
-        · <a href="/courageaux/">Back to Courageaux</a>
-      </div>
-    </div>
-  </footer>
+  <!-- ✅ Shared footer include -->
+  <!-- @@include("public/courageaux/_partials/footer.html") -->
 
   <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
-
     // Require at least one concern checked
     (function () {
       const form = document.getElementById('intakeForm');
