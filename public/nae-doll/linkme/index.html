@@ -32,15 +32,6 @@
   <script defer src="/scripts/ga.js"></script>
   <script defer src="/scripts/sb-analytics.js"></script>
 
-  <!-- Safe fallback so onclick never errors if analytics loads late -->
-  <script>
-    window.sbIntent = window.sbIntent || function(lane){
-      try{
-        window.__sbIntentQueue = window.__sbIntentQueue || [];
-        window.__sbIntentQueue.push([lane, location.pathname]);
-      }catch{}
-    };
-  </script>
 
   <style>
     :root{
@@ -164,18 +155,5 @@
       </footer>
     </div>
   </div>
-
-  <!-- optional: flush queued intents once analytics defines sbIntent for real -->
-  <script>
-    window.addEventListener("load", function(){
-      try{
-        if (!window.__sbIntentQueue || typeof window.sbTrack !== "function") return;
-        const q = window.__sbIntentQueue.splice(0);
-        q.forEach(([lane, path]) => {
-          window.sbTrack("sb_intent", { intent_lane: lane, page_path: path });
-        });
-      }catch{}
-    }, { once:true });
-  </script>
 </body>
 </html>
