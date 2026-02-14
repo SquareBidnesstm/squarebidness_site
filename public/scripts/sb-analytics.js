@@ -115,16 +115,17 @@
       item_brand: "Square Bidness",
     };
     // remove undefined fields
-    Object.keys(item).forEach(k => item[k] === undefined || item[k] === "" ? delete item[k] : null);
+    Object.keys(item).forEach((k) => (item[k] === undefined || item[k] === "" ? delete item[k] : null));
     return item;
   }
 
   // ---- Detect product page view_item via <meta name="sb:product">
-  // Add this meta to product pages (examples below)
+  // Add this meta to product pages
   async function trackViewItemIfProductPage() {
     const meta = document.querySelector('meta[name="sb:product"]');
     if (!meta) return;
     const id = meta.content;
+
     const data = await loadProducts();
     const p = data?.[id];
     if (!p) return;
@@ -138,57 +139,65 @@
     });
   }
 
-  // ---- Track add_to_cart buttons (works for:
-  // 1) Any element with data-add-to-cart="PRODUCT_ID"
-  // 2) Any element with data-product-id="PRODUCT_ID" and data-action="add"
+  // ---- Track add_to_cart buttons
+  // 1) data-add-to-cart="PRODUCT_ID"
+  // 2) data-product-id="PRODUCT_ID" + data-action="add"
   function bindAddToCart() {
-    document.addEventListener("click", async (e) => {
-      const btn =
-        e.target.closest('[data-add-to-cart]') ||
-        e.target.closest('[data-action="add"][data-product-id]');
+    document.addEventListener(
+      "click",
+      async (e) => {
+        const btn =
+          e.target.closest("[data-add-to-cart]") ||
+          e.target.closest('[data-action="add"][data-product-id]');
 
-      if (!btn) return;
+        if (!btn) return;
 
-      const id = btn.getAttribute("data-add-to-cart") || btn.getAttribute("data-product-id");
-      if (!id) return;
+        const id = btn.getAttribute("data-add-to-cart") || btn.getAttribute("data-product-id");
+        if (!id) return;
 
-      const data = await loadProducts();
-      const p = data?.[id];
-      if (!p) return;
+        const data = await loadProducts();
+        const p = data?.[id];
+        if (!p) return;
 
-      const qty = Number(btn.getAttribute("data-qty") || 1) || 1;
+        const qty = Number(btn.getAttribute("data-qty") || 1) || 1;
 
-      window.sbTrack("add_to_cart", {
-        currency: getCurrency(),
-        value: money((p.price || 0) * qty),
-        items: [ { ...productToItem(id, p), quantity: qty } ],
-      });
-    }, { passive: true });
+        window.sbTrack("add_to_cart", {
+          currency: getCurrency(),
+          value: money((p.price || 0) * qty),
+          items: [{ ...productToItem(id, p), quantity: qty }],
+        });
+      },
+      { passive: true }
+    );
   }
 
   // ---- Track begin_checkout for Stripe links
   // Put data-stripe-checkout="PRODUCT_ID" on Stripe checkout links/buttons
   function bindStripeCheckoutClicks() {
-    document.addEventListener("click", async (e) => {
-      const a = e.target.closest('[data-stripe-checkout]');
-      if (!a) return;
+    document.addEventListener(
+      "click",
+      async (e) => {
+        const a = e.target.closest("[data-stripe-checkout]");
+        if (!a) return;
 
-      const id = a.getAttribute("data-stripe-checkout");
-      const data = await loadProducts();
-      const p = data?.[id];
+        const id = a.getAttribute("data-stripe-checkout");
+        const data = await loadProducts();
+        const p = data?.[id];
 
-      // If we don’t know product, still track begin_checkout
-      if (!p) {
-        window.sbTrack("begin_checkout", { currency: getCurrency() });
-        return;
-      }
+        // If we don’t know product, still track begin_checkout
+        if (!p) {
+          window.sbTrack("begin_checkout", { currency: getCurrency() });
+          return;
+        }
 
-      window.sbTrack("begin_checkout", {
-        currency: getCurrency(),
-        value: money(p.price),
-        items: [ productToItem(id, p) ],
-      });
-    }, { passive: true });
+        window.sbTrack("begin_checkout", {
+          currency: getCurrency(),
+          value: money(p.price),
+          items: [productToItem(id, p)],
+        });
+      },
+      { passive: true }
+    );
   }
 
   // ---- Track purchase on /success/
@@ -215,7 +224,7 @@
       transaction_id: `sb_${Date.now()}_${Math.random().toString(16).slice(2)}`,
       currency: getCurrency(),
       value: money(p.price),
-      items: [ productToItem(pid, p) ],
+      items: [productToItem(pid, p)],
     });
   }
 
@@ -232,7 +241,11 @@
   });
 
   // Also fire on full load (helps on some Safari timing cases)
-  window.addEventListener("load", () => {
-    forcePageView();
-  }, { once: true });
+  window.addEventListener(
+    "load",
+    () => {
+      forcePageView();
+    },
+    { once: true }
+  );
 })();
