@@ -13,7 +13,7 @@
   <meta name="format-detection" content="telephone=no" />
 
   <!-- Build stamp -->
-  <meta name="sb:build" content="v20260116-puffs-index-restore" />
+  <meta name="sb:build" content="v20260213-puffs-index-sms-consent-cta" />
 
   <!-- PWA -->
   <link rel="manifest" href="/puffs/manifest.webmanifest" />
@@ -157,6 +157,21 @@
       flex-direction:column;
       gap:10px;
     }
+
+    /* SMS consent block (CTA proof for carriers) */
+    .smsConsent{
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+      padding:10px 12px;
+      border:1px solid #262626;
+      border-radius:12px;
+      background:#0f0f0f;
+      margin-top:2px;
+    }
+    .smsConsent input{ width:auto; margin-top:3px; }
+    .smsConsent span{ font-size:.86rem; line-height:1.35; color:#d8d8d8; }
+    .smsConsent a{ color:#fff; text-decoration:underline; }
   </style>
 
   <script type="application/ld+json">
@@ -271,7 +286,22 @@
             </select>
           </label>
           <label>Your name <input id="custName" placeholder="Name"></label>
+
           <label>Phone <input id="custPhone" placeholder="(xxx) xxx-xxxx"></label>
+
+          <!-- SMS Consent (CTA proof) -->
+          <label class="smsConsent" for="smsConsent" aria-label="SMS Consent">
+            <input type="checkbox" id="smsConsent" />
+            <span>
+              I agree to receive transactional SMS messages from Puff’s Smokehouse related to my order, including payment confirmations,
+              order status updates, and pickup notifications. Message frequency varies. Message and data rates may apply.
+              Reply STOP to opt out. Reply HELP for assistance.
+              <br />
+              <a href="/puffs/privacy/">Privacy Policy</a> ·
+              <a href="/puffs/terms/">SMS Terms &amp; Conditions</a>
+            </span>
+          </label>
+
           <label>Notes (no onions, extra sauce, etc.) <textarea id="custNotes" rows="3"></textarea></label>
         </div>
 
@@ -318,9 +348,9 @@
       <span style="opacity:.5"> · </span>
       <a id="ownerLogin" href="/puffs/?owner=1&v=2" style="color:#fff;text-decoration:underline">Owner Login</a>
       <span style="opacity:.5"> · </span>
-<a href="/puffs/privacy/" style="color:#fff;text-decoration:underline">Privacy</a>
-<span style="opacity:.5"> · </span>
-<a href="/puffs/terms/" style="color:#fff;text-decoration:underline">SMS Terms</a>
+      <a href="/puffs/privacy/" style="color:#fff;text-decoration:underline">Privacy</a>
+      <span style="opacity:.5"> · </span>
+      <a href="/puffs/terms/" style="color:#fff;text-decoration:underline">SMS Terms</a>
     </div>
 
     <p style="margin:.85rem 0 0;color:#6b7280;font-size:.85rem;line-height:1.5;">
@@ -611,7 +641,19 @@
 
     document.getElementById("btnText").onclick = () => {
       if (getClosed()) { applyClosedState(true); return; }
+
       if (cart.size === 0) { alert("Add something to the cart first."); return; }
+
+      const phoneField = document.getElementById("custPhone");
+      const consent = document.getElementById("smsConsent");
+
+      // Require explicit SMS consent if a phone number is provided
+      const phoneVal = String(phoneField?.value || "").trim();
+      if (phoneVal.length && (!consent || !consent.checked)) {
+        alert("Please agree to SMS terms before submitting your phone number.");
+        return;
+      }
+
       const summary = encodeURIComponent(buildSummary());
       window.location.href = `sms:${PHONE}?&body=${summary}`;
     };
@@ -619,7 +661,6 @@
     function buildSummary() {
       const when = document.getElementById("pickup").value;
       const name = document.getElementById("custName").value || "—";
-      const phone = document.getElementById("custPhone").value || "—";
       const notes = document.getElementById("custNotes").value || "—";
 
       let lines = [
