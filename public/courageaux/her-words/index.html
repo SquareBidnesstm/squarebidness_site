@@ -1,4 +1,4 @@
-<!-- public/courageaux/her-words/index.html (flush + premium portrait media) -->
+<!-- public/courageaux/her-words/index.html (BRIDGE → canonical to /stories/courageaux/ + “Read the feature” CTA) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -8,14 +8,17 @@
 
   <title>Courageaux Aesthetics — Her Words & Bio</title>
   <meta name="description" content="The story of Courageaux Aesthetics in Amari Wilford’s own words — inspired by Joshua 1:9 and built for clean, calm, confident skin across the Northshore and Southeastern Louisiana." />
-  <link rel="canonical" href="https://www.squarebidness.com/courageaux/her-words/" />
+
+  <!-- ✅ Bridge canonical: Stories is source of truth -->
+  <link rel="canonical" href="https://www.squarebidness.com/stories/courageaux/" />
+
   <meta name="author" content="Courageaux Aesthetics" />
 
   <meta name="theme-color" content="#0b0b0b" />
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="sb:build" content="v20260211-courageaux-her-words-flush-premium" />
+  <meta name="sb:build" content="v20260213-courageaux-her-words-bridge-to-stories" />
 
   <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
@@ -39,7 +42,10 @@
   <meta property="og:locale" content="en_US" />
   <meta property="og:title" content="Courageaux Aesthetics — Her Words & Bio" />
   <meta property="og:description" content="The heart behind Courageaux Aesthetics, in Amari Wilford’s own words — plus a short bio for new clients." />
-  <meta property="og:url" content="https://www.squarebidness.com/courageaux/her-words/" />
+
+  <!-- ✅ Bridge OG url to Stories -->
+  <meta property="og:url" content="https://www.squarebidness.com/stories/courageaux/" />
+
   <meta property="og:image" content="https://www.squarebidness.com/courageaux/assets/amari_hero_1200x630.jpg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -51,6 +57,9 @@
   <meta name="twitter:image" content="https://www.squarebidness.com/courageaux/assets/amari_hero_1200x630.jpg" />
   <meta name="twitter:site" content="@squarebidness" />
 
+  <!-- ✅ Optional: tell crawlers the preferred URL explicitly -->
+  <meta property="og:see_also" content="https://www.squarebidness.com/stories/courageaux/" />
+
   <style>
     :root{
       --bg:#0b0b0b;
@@ -59,7 +68,7 @@
       --muted2:#a1a1aa;
       --soft:#121212;
       --stroke:#1f1f1f;
-      --gold:#c9a227; /* Stories gold */
+      --gold:#c9a227;
       --shadow: 0 18px 40px rgba(0,0,0,.35);
       --r:16px;
     }
@@ -82,7 +91,6 @@
     img{max-width:100%;height:auto;display:block}
     .container{max-width:980px;margin:0 auto;padding:0 16px}
 
-    /* ✅ Standard buttons (match polished set) */
     .btn{
       display:inline-flex;
       align-items:center;
@@ -118,7 +126,6 @@
     }
     .btn:focus-visible{outline:3px solid rgba(201,162,39,.55); outline-offset:2px}
 
-    /* ✅ Standard top nav (same pill order) */
     .cx-topnav{
       position:sticky;
       top:0;
@@ -177,7 +184,6 @@
       color:#000;
     }
 
-    /* Hero shell */
     .page-hero{
       padding:22px 0 16px;
       border-bottom:1px solid rgba(255,255,255,.10);
@@ -186,7 +192,6 @@
         linear-gradient(180deg, rgba(0,0,0,.75), rgba(0,0,0,.25));
     }
 
-    /* ✅ Standard badge */
     .badge{
       display:inline-flex;
       align-items:center;
@@ -216,24 +221,22 @@
     }
     .nav-row{margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 
-    /* ✅ Portrait/content-first split */
     .hw-split{display:grid;gap:18px;align-items:start;margin-top:18px}
     @media(min-width:900px){
       .hw-split{grid-template-columns:1.15fr .85fr;gap:28px}
     }
     .hw-text{max-width:68ch}
 
-    /* ✅ PREMIUM, FLUSH IMAGE CARD */
     .hw-media{
       position:relative;
       border-radius:18px;
-      overflow:hidden;                  /* flush edges */
+      overflow:hidden;
       border:1px solid rgba(201,162,39,.85);
       background:#000;
       box-shadow:0 20px 46px rgba(0,0,0,.60);
       isolation:isolate;
+      aspect-ratio: 4 / 5;
     }
-    /* gold trim + inner stroke like “premium frame” */
     .hw-media::before{
       content:"";
       position:absolute;
@@ -244,7 +247,6 @@
         inset 0 0 0 1px rgba(255,255,255,.10),
         inset 0 0 0 2px rgba(201,162,39,.18);
     }
-    /* subtle vignette to feel cinematic */
     .hw-media::after{
       content:"";
       position:absolute;
@@ -256,28 +258,8 @@
       mix-blend-mode: multiply;
       opacity:.9;
     }
-
-    .hw-media picture,
-    .hw-media img{
-      width:100%;
-      height:100%;
-      display:block;
-    }
-    /* ✅ flush + premium rendering */
-    .hw-media img{
-      object-fit:cover;
-      object-position:center;
-      transform: translateZ(0);
-      backface-visibility:hidden;
-      filter: contrast(1.03) saturate(1.02);
-    }
-
-    /* Set a stable portrait ratio so it always feels intentional */
-    .hw-media{aspect-ratio: 4 / 5;}
-    @media(min-width:900px){
-      .hw-media{aspect-ratio: 4 / 5;}
-    }
-
+    .hw-media picture,.hw-media img{width:100%;height:100%;display:block}
+    .hw-media img{object-fit:cover;object-position:center;filter: contrast(1.03) saturate(1.02)}
     .hw-caption{
       margin-top:10px;
       color:var(--muted2);
@@ -287,7 +269,6 @@
     .hw-caption strong{color:#e5e7eb}
     .hw-caption em{color:rgba(201,162,39,.95);font-style:normal;font-weight:950}
 
-    /* Cards */
     .page{padding:22px 0 28px}
     .card{
       background:rgba(18,18,18,.92);
@@ -317,7 +298,18 @@
     .meta{margin-top:10px;color:var(--muted);font-size:.92rem}
     .bio p{margin:.65rem 0;color:#d7dae0}
 
-    /* ✅ Standard footer */
+    /* ✅ Bridge callout (keeps page useful, pushes Stories) */
+    .bridge{
+      border:1px solid rgba(201,162,39,.35);
+      background:rgba(201,162,39,.06);
+      border-radius:16px;
+      padding:14px;
+      margin-top:14px;
+    }
+    .bridge h2{margin:0 0 6px;font-size:1.05rem;letter-spacing:-.01em}
+    .bridge p{margin:0;color:#d7dae0}
+    .bridge .row{margin-top:12px;display:flex;flex-wrap:wrap;gap:10px}
+
     .cx-footer{
       margin-top:22px;
       border-top:1px solid rgba(255,255,255,.10);
@@ -377,6 +369,10 @@
       <div class="nav-row">
         <a class="btn btn--ghost" href="/courageaux/">&larr; Back to Courageaux</a>
         <a class="btn btn--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book now</a>
+
+        <!-- ✅ Bridge CTA -->
+        <a class="btn btn--ghost" href="/stories/courageaux/">Read the feature</a>
+
         <a class="btn btn--ghost" href="/courageaux/consultation/">Consultation</a>
         <a class="btn btn--ghost" href="/courageaux/appointments/">Appointments</a>
         <a class="btn btn--ghost" href="/courageaux/services-preview/">Services</a>
@@ -386,6 +382,19 @@
 
   <main class="page">
     <div class="container">
+
+      <!-- ✅ Bridge callout near top -->
+      <section class="bridge" aria-label="Stories feature">
+        <h2>Preferred reading version</h2>
+        <p>
+          This page is a bridge. The canonical “feature” lives on Square Bidness Stories.
+          For the official story layout, read the feature below.
+        </p>
+        <div class="row">
+          <a class="btn btn--gold" href="/stories/courageaux/">Read the feature on Stories</a>
+          <a class="btn btn--ghost" href="/stories/">Browse all Stories</a>
+        </div>
+      </section>
 
       <section class="hw-split" aria-label="Her Words introduction">
         <div class="hw-text">
@@ -470,7 +479,7 @@
         <div class="nav-row" style="margin-top:12px">
           <a class="btn btn--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book on GlossGenius</a>
           <a class="btn btn--ghost" href="/courageaux/intake/">Client Intake</a>
-          <a class="btn btn--ghost" href="mailto:courageauxaesthetics@gmail.com">Email the studio</a>
+          <a class="btn btn--ghost" href="/stories/courageaux/">Read the feature</a>
         </div>
       </section>
 
@@ -481,6 +490,7 @@
         <p>
           © <span id="year"></span> <strong>Courageaux Aesthetics</strong> ·
           <a href="/courageaux/">Home</a> ·
+          <a href="/stories/courageaux/">Stories feature</a> ·
           <a href="https://instagram.com/courageuxaesthetics" target="_blank" rel="me noopener noreferrer">Instagram</a> ·
           <a href="https://courageauxaesthetics.glossgenius.com/" target="_blank" rel="noopener noreferrer">Book Online</a>
         </p>
