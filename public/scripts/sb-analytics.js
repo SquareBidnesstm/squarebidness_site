@@ -228,6 +228,16 @@
     });
   }
 
+  // ---- Intent lane tracking (Conversation Hub)
+window.sbIntent = function (lane) {
+  try {
+    window.sbTrack("sb_intent", {
+      intent_lane: lane,
+      page_path: location.pathname
+    });
+  } catch {}
+};
+
   // ---- Boot
   document.addEventListener("DOMContentLoaded", () => {
     // Force a page_view early (queues if gtag isn’t ready yet)
