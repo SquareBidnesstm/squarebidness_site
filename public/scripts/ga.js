@@ -5,11 +5,15 @@
     return;
   }
 
+  // ✅ Define gtag immediately (so sb-analytics can fire right away)
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = window.gtag || function(){ window.dataLayer.push(arguments); };
+
   function loadGA(){
     if (window.__ga_loaded) return;
     window.__ga_loaded = true;
 
-    // preconnect (only when we actually intend to load)
+    // preconnect (only when we actually load GA)
     try{
       const a=document.createElement("link");
       a.rel="preconnect"; a.href="https://www.googletagmanager.com"; a.crossOrigin="anonymous";
@@ -18,40 +22,35 @@
       document.head.append(a,b);
     } catch {}
 
-    // gtag bootstrap (queue-safe even before network script loads)
-    window.dataLayer = window.dataLayer || [];
-    window.gtag = window.gtag || function(){ window.dataLayer.push(arguments); };
-
+    // gtag init
     window.gtag("js", new Date());
 
-    // IMPORTANT:
-    // - send_page_view:false because sb-analytics.js will send page_view reliably
-    // - transport_type:"beacon" keeps it lightweight
+    // IMPORTANT: sb-analytics will send page_view (so we prevent auto page_view)
     window.gtag("config", id, {
       transport_type: "beacon",
       anonymize_ip: true,
       send_page_view: false
     });
 
+    // load GA library
     const s=document.createElement("script");
     s.async=true;
     s.src=`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(id)}`;
     document.head.appendChild(s);
   }
 
-  // Load early enough to catch “quiet” landings, but still not blocking render
+  // Load fast enough to catch landings
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", loadGA, { once:true });
   } else {
     loadGA();
   }
 
-  // Backup: if page is opened in background, idle callbacks can delay forever
+  // Backups
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) loadGA();
   }, { passive:true });
 
-  // Backup: user interaction should always load GA
   ["click","touchstart","keydown","scroll"].forEach(evt => {
     document.addEventListener(evt, loadGA, { once:true, passive:true });
   });
