@@ -12,7 +12,7 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="sb:build" content="v20260212-nae-doll-linkme-v1" />
+  <meta name="sb:build" content="v20260212-nae-doll-linkme-v2" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
@@ -31,6 +31,16 @@
   <!-- GA4 (site-wide) -->
   <script defer src="/scripts/ga.js"></script>
   <script defer src="/scripts/sb-analytics.js"></script>
+
+  <!-- Safe fallback so onclick never errors if analytics loads late -->
+  <script>
+    window.sbIntent = window.sbIntent || function(lane){
+      try{
+        window.__sbIntentQueue = window.__sbIntentQueue || [];
+        window.__sbIntentQueue.push([lane, location.pathname]);
+      }catch{}
+    };
+  </script>
 
   <style>
     :root{
@@ -98,34 +108,51 @@
         <p class="sub">Ponchatoula, Louisiana. Still ridin.</p>
 
         <div class="list" aria-label="Links">
-          <a class="pill" href="/nae-doll/" aria-label="Nae Doll — Public Record">
+          <a class="pill" href="/nae-doll/" aria-label="Nae Doll — Public Record" onclick="sbIntent('public_record')">
             <span>Public Record</span>
             <span aria-hidden="true">→</span>
           </a>
 
-          <a class="pill" href="/nae-day/" aria-label="Nae Day — Ridin lane">
-            <span>Ridin</span>
+          <a class="pill" href="/nae-day/" aria-label="Nae Day — Ridin lane" onclick="sbIntent('culture_ridin')">
+            <span>Ridin Lane</span>
             <span aria-hidden="true">→</span>
           </a>
 
-          <a class="pill" href="mailto:naedoll@squarebidness.com?subject=Nae%20Doll%20—%20Booking%20%2F%20Collaborations" aria-label="Email booking and collaborations">
-            <span>Booking / Events</span>
+          <a class="pill"
+             href="mailto:naedoll@squarebidness.com?subject=Nae%20Doll%20—%20Booking%20%2F%20Collaborations"
+             aria-label="Work with Nae (email)"
+             onclick="sbIntent('work')">
+            <span>Work with Nae</span>
             <span aria-hidden="true">→</span>
           </a>
 
-          <a class="pill" href="https://www.instagram.com/naeedoll.__" target="_blank" rel="noopener noreferrer">
+          <a class="pill"
+             href="https://www.instagram.com/naeedoll.__"
+             target="_blank" rel="noopener noreferrer"
+             onclick="sbIntent('social_instagram')">
             <span>Instagram</span>
-            <small>external</small>
+            <small>daily</small>
           </a>
 
-          <a class="pill" href="https://www.facebook.com/share/1AVWB4nzcW/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer">
-            <span>Facebook</span>
-            <small>external</small>
-          </a>
-
-          <a class="pill" href="https://www.tiktok.com/t/ZP89tHkMA/" target="_blank" rel="noopener noreferrer">
+          <a class="pill"
+             href="https://www.tiktok.com/t/ZP89tHkMA/"
+             target="_blank" rel="noopener noreferrer"
+             onclick="sbIntent('social_tiktok')">
             <span>TikTok</span>
-            <small>external</small>
+            <small>motion</small>
+          </a>
+
+          <a class="pill"
+             href="https://www.facebook.com/share/1AVWB4nzcW/?mibextid=wwXIfr"
+             target="_blank" rel="noopener noreferrer"
+             onclick="sbIntent('social_facebook')">
+            <span>Facebook</span>
+            <small>updates</small>
+          </a>
+
+          <a class="pill" href="/" onclick="sbIntent('culture_squarebidness')">
+            <span>Square Bidness</span>
+            <span aria-hidden="true">→</span>
           </a>
         </div>
 
@@ -133,9 +160,22 @@
       </div>
 
       <footer>
-        Square Bidness © 2026 • <a href="/">Front Page</a>
+        Square Bidness © 2026 • <a href="/" onclick="sbIntent('front_page')">Front Page</a>
       </footer>
     </div>
   </div>
+
+  <!-- optional: flush queued intents once analytics defines sbIntent for real -->
+  <script>
+    window.addEventListener("load", function(){
+      try{
+        if (!window.__sbIntentQueue || typeof window.sbTrack !== "function") return;
+        const q = window.__sbIntentQueue.splice(0);
+        q.forEach(([lane, path]) => {
+          window.sbTrack("sb_intent", { intent_lane: lane, page_path: path });
+        });
+      }catch{}
+    }, { once:true });
+  </script>
 </body>
 </html>
