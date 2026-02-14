@@ -10,21 +10,19 @@
   };
 
   const getCurrency = () => "USD";
-
   const safeText = (s) => (typeof s === "string" ? s.trim() : "");
   const qs = (k) => new URLSearchParams(location.search).get(k);
 
-  // ---- Global event wrapper
+  // ---- Global event wrapper (buffers until GA is ready)
   window.sbTrack = (eventName, params = {}) => {
     try {
       if (!hasGtag()) {
-        // keep a small buffer so events aren't lost if ga.js loads a hair late
         window.__sbEventQueue = window.__sbEventQueue || [];
         window.__sbEventQueue.push([eventName, params]);
         return;
       }
       window.gtag("event", eventName, params);
-    } catch (e) {
+    } catch {
       // silent
     }
   };
@@ -35,7 +33,9 @@
     const q = window.__sbEventQueue || [];
     while (q.length) {
       const [name, p] = q.shift();
-      try { window.gtag("event", name, p); } catch {}
+      try {
+        window.gtag("event", name, p);
+      } catch {}
     }
   };
 
@@ -114,7 +114,7 @@
       currency: getCurrency(),
       item_brand: "Square Bidness",
     };
-    // remove undefined fields
+    // remove undefined/empty fields
     Object.keys(item).forEach((k) => (item[k] === undefined || item[k] === "" ? delete item[k] : null));
     return item;
   }
@@ -229,14 +229,28 @@
   }
 
   // ---- Intent lane tracking (Conversation Hub)
-window.sbIntent = function (lane) {
-  try {
-    window.sbTrack("sb_intent", {
-      intent_lane: lane,
-      page_path: location.pathname
-    });
-  } catch {}
-};
+  // Use in HTML like: onclick="sbIntent('social_instagram', this)"
+  window.sbIntent = function (lane, el) {
+    try {
+      const href = el && el.getAttribute ? (el.getAttribute("href") || "") : "";
+
+      // If sbTrack isn't ready yet, buffer it safely
+      if (typeof window.sbTrack !== "function") {
+        window.__sbEventQueue = window.__sbEventQueue || [];
+        window.__sbEventQueue.push([
+          "sb_intent",
+          { intent_lane: lane, page_path: location.pathname, link_url: href },
+        ]);
+        return;
+      }
+
+      window.sbTrack("sb_intent", {
+        intent_lane: lane,
+        page_path: location.pathname,
+        link_url: href,
+      });
+    } catch {}
+  };
 
   // ---- Boot
   document.addEventListener("DOMContentLoaded", () => {
