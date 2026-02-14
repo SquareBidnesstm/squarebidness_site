@@ -47,6 +47,49 @@
     if (hasGtag() || tries > 30) clearInterval(t);
   }, 200);
 
+  // ---- FORCE PAGEVIEW (GA4)
+  // Fires a page_view event for reliable page reporting even if some pages are "quiet"
+  function forcePageView() {
+    try {
+      const params = {
+        page_location: location.href,
+        page_path: location.pathname + location.search,
+        page_title: document.title || "",
+      };
+
+      // Dedup per page load (prevents double if called more than once)
+      const key = `sb_pv_${params.page_path}`;
+      try {
+        if (sessionStorage.getItem(key) === "1") return;
+        sessionStorage.setItem(key, "1");
+      } catch {}
+
+      window.sbTrack("page_view", params);
+    } catch {}
+  }
+
+  // Optional: track SPA-like navigation (safe even for static sites)
+  function hookHistoryForPageviews() {
+    try {
+      const origPush = history.pushState;
+      const origReplace = history.replaceState;
+
+      history.pushState = function () {
+        const r = origPush.apply(this, arguments);
+        forcePageView();
+        return r;
+      };
+      history.replaceState = function () {
+        const r = origReplace.apply(this, arguments);
+        forcePageView();
+        return r;
+      };
+
+      window.addEventListener("popstate", forcePageView, { passive: true });
+      window.addEventListener("hashchange", forcePageView, { passive: true });
+    } catch {}
+  }
+
   // ---- Products.json cache
   let PRODUCTS = null;
   async function loadProducts() {
@@ -178,9 +221,18 @@
 
   // ---- Boot
   document.addEventListener("DOMContentLoaded", () => {
+    // Force a page_view early (queues if gtag isn’t ready yet)
+    forcePageView();
+    hookHistoryForPageviews();
+
     trackViewItemIfProductPage();
     bindAddToCart();
     bindStripeCheckoutClicks();
     trackPurchaseIfSuccessPage();
   });
+
+  // Also fire on full load (helps on some Safari timing cases)
+  window.addEventListener("load", () => {
+    forcePageView();
+  }, { once: true });
 })();
