@@ -1,19 +1,19 @@
-<!-- public/courageaux/book/index.html (v2 — iframe-safe fallback + auto-detect + always-works booking CTA) -->
+<!-- public/courageaux/book/index.html (v3 — bridge-only, premium, always-works CTA; no iframe) -->
 <!doctype html>
-<html lang="en" data-sb-brand="courageaux" data-sb-tier="book" data-sb-variant="v2">
+<html lang="en" data-sb-brand="courageaux" data-sb-tier="book" data-sb-variant="v3-bridge">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
 
   <title>Courageaux Aesthetics — Book Online</title>
-  <meta name="description" content="Book online with Courageaux Aesthetics. If the embedded calendar doesn’t load, open the official booking page on GlossGenius." />
+  <meta name="description" content="Book online with Courageaux Aesthetics via the official GlossGenius booking page. Clear steps, quick access, and a smooth booking flow on any device." />
   <link rel="canonical" href="https://www.squarebidness.com/courageaux/book/" />
 
   <meta name="theme-color" content="#0b0b0b" />
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="sb:build" content="v20260213-courageaux-book-v2-embed-fallback" />
+  <meta name="sb:build" content="v20260215-courageaux-book-v3-bridge-only" />
 
   <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
@@ -35,7 +35,7 @@
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Courageaux Aesthetics" />
   <meta property="og:title" content="Courageaux Aesthetics — Book Online" />
-  <meta property="og:description" content="Book online with Courageaux Aesthetics. Official booking is managed securely through GlossGenius." />
+  <meta property="og:description" content="Book online via the official GlossGenius booking page. Clean flow, works on every device." />
   <meta property="og:url" content="https://www.squarebidness.com/courageaux/book/" />
   <meta property="og:image" content="https://www.squarebidness.com/courageaux/assets/courageaux_og_1200x630.jpg" />
   <meta property="og:locale" content="en_US" />
@@ -43,7 +43,7 @@
 
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Courageaux Aesthetics — Book Online" />
-  <meta name="twitter:description" content="Book online with Courageaux Aesthetics via GlossGenius." />
+  <meta name="twitter:description" content="Book online via GlossGenius." />
   <meta name="twitter:image" content="https://www.squarebidness.com/courageaux/assets/courageaux_og_1200x630.jpg" />
 
   <!-- ✅ Booking Page Schema -->
@@ -56,7 +56,7 @@
         "@id":"https://www.squarebidness.com/courageaux/book/#webpage",
         "url":"https://www.squarebidness.com/courageaux/book/",
         "name":"Courageaux Aesthetics — Book Online",
-        "description":"Book online with Courageaux Aesthetics in Hammond, Louisiana. Official booking is handled through GlossGenius.",
+        "description":"Book online with Courageaux Aesthetics. Official booking is handled through GlossGenius.",
         "inLanguage":"en-US",
         "about":{"@id":"https://www.squarebidness.com/courageaux/#business"},
         "primaryImageOfPage":{
@@ -74,24 +74,25 @@
     :root{
       --bg:#0b0b0b; --fg:#fff; --muted:#bdbdbd;
       --soft:#121212; --stroke:#1f1f1f; --gold:#c9a227;
-      --ok:#20c997;
+      --ok:#20c997; --shadow: 0 18px 42px rgba(0,0,0,.45);
     }
     *{box-sizing:border-box}
     html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:system-ui,Segoe UI,Roboto,Arial;line-height:1.5}
     a{color:inherit;text-decoration:none}
+    a:hover{text-decoration:underline}
     .container{max-width:1200px;margin:0 auto;padding:0 16px}
 
     /* Buttons */
     .btn{
-      display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      padding:11px 16px;border-radius:12px;font-weight:950;border:1px solid transparent;white-space:nowrap;
+      display:inline-flex;align-items:center;justify-content:center;gap:10px;
+      padding:12px 16px;border-radius:12px;font-weight:950;border:1px solid transparent;white-space:nowrap;
       text-decoration:none;color:inherit;
       transition:transform .12s ease, opacity .12s ease, background .12s ease, border-color .12s ease;
     }
     .btn:active{transform: translateY(1px)}
-    .btn--gold{background:var(--gold);color:#000;border-color:var(--gold)}
+    .btn--gold{background:var(--gold);color:#000;border-color:rgba(201,162,39,.95);box-shadow:0 12px 30px rgba(201,162,39,.20)}
     .btn--ghost{background:#0f0f0f;color:#fff;border-color:#2a2a2a}
-    @media (hover:hover){ .btn:hover{opacity:.93} }
+    @media (hover:hover){ .btn:hover{opacity:.94} }
     .btn:focus-visible{outline:3px solid rgba(201,162,39,.45); outline-offset:2px}
 
     /* Badge */
@@ -133,91 +134,77 @@
     .cx-pill:active{transform: translateY(1px)}
     .cx-pill--gold{border-color:rgba(201,162,39,.85);background:rgba(201,162,39,.95);color:#000}
 
-    /* Header */
-    .hero{border-bottom:1px solid var(--stroke);padding:18px 0 16px}
+    /* Hero */
+    .hero{
+      border-bottom:1px solid var(--stroke);
+      padding:20px 0 18px;
+      background:
+        radial-gradient(900px 420px at 18% -10%, rgba(201,162,39,.12), rgba(0,0,0,0) 60%),
+        radial-gradient(900px 420px at 90% 0%, rgba(255,255,255,.06), rgba(0,0,0,0) 55%),
+        linear-gradient(180deg, #080808, #0b0b0b 45%, #080808 100%);
+    }
+    h1{margin:.7rem 0 .2rem;font-size:clamp(1.65rem,3.6vw,2.35rem);letter-spacing:-.01em}
+    .sub{margin:0;color:#d7dae0;max-width:76ch}
     .mood-strip{
-      height:8px;border-radius:999px;margin:12px 0 0;
+      height:8px;border-radius:999px;margin:14px 0 0;
       background:linear-gradient(90deg, rgba(201,162,39,.55), rgba(255,255,255,.10), rgba(201,162,39,.25));
       border:1px solid rgba(255,255,255,.10);
     }
-    h1{margin:.6rem 0 .2rem;font-size:clamp(1.6rem,3.6vw,2.25rem);letter-spacing:-.01em}
-    .sub{margin:0;color:#d7dae0;max-width:72ch}
-    .row{margin-top:12px;display:flex;flex-wrap:wrap;gap:10px}
+    .row{margin-top:14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 
-    /* Status strip */
-    .cx-status{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-    .cx-chip{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:7px 10px;border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.04);
-      font-weight:900;font-size:.82rem;color:#f3f3f3;white-space:nowrap;line-height:1;
-    }
-    .cx-dot{width:8px;height:8px;border-radius:50%;background:#9aa3ad;box-shadow:0 0 0 3px rgba(255,255,255,.06) inset}
-    .cx-dot--ok{background:var(--ok)}
-    .cx-dot--warn{background:var(--gold)}
-    .cx-chip strong{color:var(--gold)}
-
-    /* Embed shell */
-    main{padding:14px 0 0}
-    .panel{
-      margin:14px auto 18px;
+    /* Main */
+    main{padding:18px 0 30px}
+    .grid{display:grid;gap:14px}
+    @media(min-width:940px){.grid{grid-template-columns:1.05fr .95fr;gap:18px}}
+    .card{
+      background:var(--soft);
       border:1px solid var(--stroke);
       border-radius:16px;
-      overflow:hidden;
-      background:#000;
-    }
-
-    /* Loading overlay (shown until iframe confirms "loaded") */
-    .panel__loading{
-      display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;
-      padding:26px 16px;
-      border-bottom:1px solid var(--stroke);
-      background:linear-gradient(180deg, #0b0b0b, #000);
-      text-align:center;
-    }
-    .spinner{
-      width:26px;height:26px;border-radius:999px;
-      border:3px solid rgba(255,255,255,.18);
-      border-top-color: rgba(201,162,39,.95);
-      animation:spin .8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg) } }
-    .panel__loading p{margin:0;color:#d7dae0;max-width:70ch}
-    .panel__loading small{color:var(--muted);max-width:70ch}
-
-    iframe{
-      width:100%;
-      height:86vh;
-      min-height:680px;
-      border:0;
-      display:block;
-      background:#000;
-    }
-
-    /* Fallback callout */
-    .fallback{
-      display:none;
-      border-top:1px solid var(--stroke);
-      background:#0b0b0b;
       padding:16px;
+      box-shadow:var(--shadow);
     }
-    .fallback .card{
-      border:1px solid rgba(201,162,39,.35);
-      background:rgba(201,162,39,.06);
+    .kicker{letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:950;font-size:.82rem}
+    .title{margin:8px 0 8px;font-size:1.08rem;font-weight:950}
+    .muted{color:var(--muted)}
+    .steps{display:grid;gap:10px;margin-top:10px}
+    .step{
+      border:1px solid rgba(255,255,255,.10);
       border-radius:14px;
-      padding:14px;
+      background:rgba(0,0,0,.25);
+      padding:12px;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
     }
-    .fallback h2{margin:0 0 6px;font-size:1.05rem;letter-spacing:-.01em}
-    .fallback p{margin:0;color:#d7dae0}
-    .fallback .actions{margin-top:12px;display:flex;flex-wrap:wrap;gap:10px}
-    .fallback a{color:inherit}
+    .num{
+      width:28px;height:28px;border-radius:999px;
+      display:inline-flex;align-items:center;justify-content:center;
+      background:rgba(201,162,39,.14);
+      border:1px solid rgba(201,162,39,.35);
+      color:rgba(201,162,39,.95);
+      font-weight:950;
+      flex:0 0 auto;
+    }
+    .step strong{display:block}
+    .faq{margin-top:12px}
+    details{
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:14px;
+      background:rgba(0,0,0,.18);
+      padding:12px;
+      margin-top:10px;
+    }
+    summary{cursor:pointer;font-weight:950}
+    details p{margin:8px 0 0;color:#d7dae0}
+    .ctaBox{
+      border:1px solid rgba(201,162,39,.25);
+      background:linear-gradient(180deg, rgba(201,162,39,.10), rgba(0,0,0,0));
+    }
 
     /* Footer */
     footer{
       background:#0b0b0b;
       border-top:1px solid var(--stroke);
-      margin-top:0;
       padding:16px 0 26px;
     }
     .credit-strip{
@@ -226,26 +213,47 @@
       color:#d7dae0;text-align:center;font-size:.88rem;line-height:1.6;
     }
     .credit-strip a{color:var(--gold);text-decoration:underline;font-weight:950;text-underline-offset:3px}
+
+    @media print{
+      .cx-topnav, .row, footer{display:none !important}
+      body{background:#fff;color:#000}
+      .card{box-shadow:none;border:1px solid #ddd;background:#fff}
+      .step{border:1px solid #ddd;background:#fff}
+      .muted{color:#333}
+    }
   </style>
 </head>
 
 <body>
-  <!-- Standard Topnav -->
   <nav class="cx-topnav" aria-label="Courageaux navigation">
     <div class="cx-topnav__inner">
-      <a class="cx-brand" href="/courageaux/">
+      <a class="cx-brand" href="/courageaux/" data-sb-action="nav_home" data-sb-component="topnav" data-sb-label="Courageaux Home">
         <img src="/courageaux/assets/icon_courageaux_512.png" alt="Courageaux Aesthetics" width="22" height="22" loading="eager" decoding="async">
         Courageaux Aesthetics
       </a>
 
       <div class="cx-links">
-        <a class="cx-pill cx-pill--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book</a>
-        <a class="cx-pill" href="/courageaux/services-preview/">Services</a>
-        <a class="cx-pill" href="/courageaux/consultation/">Consultation</a>
-        <a class="cx-pill" href="/courageaux/appointments/">Appointments</a>
-        <a class="cx-pill" href="/courageaux/her-words/">Her Words</a>
-        <a class="cx-pill" href="/courageaux/products/">Products</a>
-        <a class="cx-pill" href="https://instagram.com/courageuxaesthetics" target="_blank" rel="me noopener noreferrer">Instagram</a>
+        <a class="cx-pill cx-pill--gold"
+           href="https://courageauxaesthetics.glossgenius.com/services"
+           target="_blank" rel="noopener noreferrer"
+           data-sb-action="book"
+           data-sb-component="topnav"
+           data-sb-label="Book (GlossGenius)">
+          Book
+        </a>
+        <a class="cx-pill" href="/courageaux/services-preview/" data-sb-action="nav_services" data-sb-component="topnav" data-sb-label="Services">Services</a>
+        <a class="cx-pill" href="/courageaux/consultation/" data-sb-action="nav_consultation" data-sb-component="topnav" data-sb-label="Consultation">Consultation</a>
+        <a class="cx-pill" href="/courageaux/appointments/" data-sb-action="nav_appointments" data-sb-component="topnav" data-sb-label="Appointments">Appointments</a>
+        <a class="cx-pill" href="/courageaux/her-words/" data-sb-action="nav_her_words" data-sb-component="topnav" data-sb-label="Her Words">Her Words</a>
+        <a class="cx-pill" href="/courageaux/products/" data-sb-action="nav_products" data-sb-component="topnav" data-sb-label="Products">Products</a>
+        <a class="cx-pill"
+           href="https://instagram.com/courageuxaesthetics"
+           target="_blank" rel="me noopener noreferrer"
+           data-sb-action="instagram"
+           data-sb-component="topnav"
+           data-sb-label="Instagram">
+          Instagram
+        </a>
       </div>
     </div>
   </nav>
@@ -257,34 +265,44 @@
         Courageaux Aesthetics · Book
       </span>
 
-      <h1>Book online.</h1>
+      <h1>Book online — official link.</h1>
       <p class="sub">
-        Booking is managed securely through GlossGenius. If the calendar doesn’t load here,
-        use “Open booking” to book directly on the official page.
+        Booking is handled securely through GlossGenius. This page is the fast bridge that works on every device.
       </p>
-
-      <div class="cx-status" aria-label="Booking status">
-        <div class="cx-chip" title="Live booking is handled on GlossGenius">
-          <span class="cx-dot cx-dot--ok" aria-hidden="true"></span>
-          <strong>LIVE</strong> · GlossGenius
-        </div>
-        <div class="cx-chip" title="Some devices block third-party booking embeds">
-          <span class="cx-dot cx-dot--warn" aria-hidden="true"></span>
-          <strong>NOTE</strong> · Embed may be blocked
-        </div>
-      </div>
 
       <div class="row">
         <a class="btn btn--gold"
-   href="https://courageauxaesthetics.glossgenius.com/services"
-   target="_blank" rel="noopener noreferrer"
-   data-sb-action="book"
-   data-sb-component="hero"
-   data-sb-label="GlossGenius Services">
-  Open booking
-</a>
-        <a class="btn btn--ghost" href="/courageaux/appointments/">⟵ Back to Appointments</a>
-        <a class="btn btn--ghost" href="/courageaux/intake/">Client Intake</a>
+           href="https://courageauxaesthetics.glossgenius.com/services"
+           target="_blank" rel="noopener noreferrer"
+           data-sb-action="book"
+           data-sb-component="hero"
+           data-sb-label="Open booking (primary)">
+          Open booking
+        </a>
+
+        <a class="btn btn--ghost"
+           href="/courageaux/appointments/"
+           data-sb-action="back_appointments"
+           data-sb-component="hero"
+           data-sb-label="Back to Appointments">
+          ⟵ Back to Appointments
+        </a>
+
+        <a class="btn btn--ghost"
+           href="/courageaux/intake/"
+           data-sb-action="intake"
+           data-sb-component="hero"
+           data-sb-label="Client Intake">
+          Client Intake
+        </a>
+
+        <a class="btn btn--ghost"
+           href="#how"
+           data-sb-action="how_it_works"
+           data-sb-component="hero"
+           data-sb-label="How it works">
+          How it works
+        </a>
       </div>
 
       <div class="mood-strip" aria-hidden="true"></div>
@@ -292,42 +310,98 @@
   </header>
 
   <main class="container">
-    <div class="panel" aria-label="GlossGenius booking embed">
-      <!-- Loading / status -->
-      <div class="panel__loading" id="embedLoading">
-        <div class="spinner" aria-hidden="true"></div>
-        <p><strong>Loading booking…</strong></p>
-        <small>
-          If this stays stuck, your browser is blocking embedded booking (common on iPhone/Safari or with privacy settings).
-          Use <strong>Open booking</strong> above.
-        </small>
-      </div>
+    <div class="grid">
+      <section class="card ctaBox" aria-labelledby="primary-cta">
+        <div class="kicker">Quick booking</div>
+        <h2 id="primary-cta" class="title">Tap once. Pick your service. Confirm.</h2>
+        <p class="muted" style="margin:0">
+          If you’re ready now, use the official link. This is the exact same booking page used for all appointments.
+        </p>
 
-      <!-- The embed (may be blocked by GG headers; that’s why we fallback) -->
-      <iframe
-        id="ggFrame"
-        title="Courageaux Aesthetics booking (GlossGenius)"
-        src="https://courageauxaesthetics.glossgenius.com/services"
-        loading="lazy"
-        referrerpolicy="no-referrer-when-downgrade"
-        sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"
-      ></iframe>
+        <div class="row" style="margin-top:14px">
+          <a class="btn btn--gold"
+             href="https://courageauxaesthetics.glossgenius.com/services"
+             target="_blank" rel="noopener noreferrer"
+             data-sb-action="book"
+             data-sb-component="card"
+             data-sb-label="Open booking (card)">
+            Open booking on GlossGenius
+          </a>
+          <a class="btn btn--ghost"
+             href="mailto:courageauxaesthetics@gmail.com"
+             data-sb-action="email"
+             data-sb-component="card"
+             data-sb-label="Email the studio">
+            Email the studio
+          </a>
+        </div>
 
-      <!-- Fallback message (shown if blocked or times out) -->
-      <div class="fallback" id="embedFallback" role="status" aria-live="polite">
-        <div class="card">
-          <h2>Booking embed blocked on this device.</h2>
-          <p>
-            No problem — booking is still live. Tap below to open the official GlossGenius booking page.
-          </p>
-          <div class="actions">
-            <a class="btn btn--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">
-              Open booking on GlossGenius
-            </a>
-            <a class="btn btn--ghost" href="/courageaux/">Back to Courageaux</a>
+        <p class="muted" style="margin:12px 0 0;font-size:.9rem">
+          Tip: If you’re on iPhone/Safari, booking opens smoother in a new tab — that’s why this bridge page exists.
+        </p>
+      </section>
+
+      <section class="card" id="how" aria-labelledby="how-title">
+        <div class="kicker">How it works</div>
+        <h2 id="how-title" class="title">Clean flow: book → confirm → intake → service</h2>
+        <p class="muted" style="margin:0">
+          Courageaux is appointment-first. Booking is private, controlled, and designed for consistent results.
+        </p>
+
+        <div class="steps" aria-label="Booking steps">
+          <div class="step">
+            <span class="num">1</span>
+            <div>
+              <strong>Choose your service</strong>
+              <span class="muted">Select the treatment that matches your goals.</span>
+            </div>
+          </div>
+          <div class="step">
+            <span class="num">2</span>
+            <div>
+              <strong>Pick a time + confirm</strong>
+              <span class="muted">You’ll receive confirmation through GlossGenius.</span>
+            </div>
+          </div>
+          <div class="step">
+            <span class="num">3</span>
+            <div>
+              <strong>Complete the intake (recommended)</strong>
+              <span class="muted">Helps Amari plan your visit with precision.</span>
+              <div style="margin-top:10px">
+                <a class="btn btn--ghost"
+                   href="/courageaux/intake/"
+                   data-sb-action="intake"
+                   data-sb-component="steps"
+                   data-sb-label="Go to Intake">
+                  Go to Client Intake
+                </a>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+
+        <div class="faq" aria-label="FAQ">
+          <details>
+            <summary>Why not embed booking on this page?</summary>
+            <p>
+              Many phones and privacy settings block third-party booking embeds. This bridge page is faster and more reliable — it always works.
+            </p>
+          </details>
+          <details>
+            <summary>Is this the official booking page?</summary>
+            <p>
+              Yes. “Open booking” takes you directly to the official Courageaux GlossGenius services page.
+            </p>
+          </details>
+          <details>
+            <summary>Do I need the intake form?</summary>
+            <p>
+              It’s strongly recommended for new clients. It helps your visit stay calm, safe, and personalized.
+            </p>
+          </details>
+        </div>
+      </section>
     </div>
   </main>
 
@@ -335,53 +409,12 @@
     <div class="credit-strip">
       © <span id="year"></span> Courageaux Aesthetics · Site support by
       <a href="https://lab.squarebidness.com/" target="_blank" rel="noopener noreferrer">Square Bidness Tech Lab</a>
-      · <a href="/courageaux/">Back to Courageaux</a>
+      · <a href="/courageaux/" data-sb-action="home" data-sb-component="footer" data-sb-label="Back to Courageaux">Back to Courageaux</a>
     </div>
   </footer>
 
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
-
-    (function(){
-      const frame = document.getElementById('ggFrame');
-      const loading = document.getElementById('embedLoading');
-      const fallback = document.getElementById('embedFallback');
-
-      function show(el){ if(el) el.style.display = 'block'; }
-      function hide(el){ if(el) el.style.display = 'none'; }
-
-      // Default: show loading. If iframe truly loads, hide loading + fallback.
-      let loaded = false;
-
-      frame.addEventListener('load', function(){
-        loaded = true;
-        hide(loading);
-        hide(fallback);
-      });
-
-      // If it doesn't load within X ms, assume blocked and show fallback.
-      // (When GG blocks iframes, some browsers never fire load OR they show an error page.)
-      setTimeout(function(){
-        if (!loaded) {
-          hide(loading);
-          show(fallback);
-        }
-      }, 2800);
-
-      // If iframe throws a hard error (rare), show fallback.
-      frame.addEventListener('error', function(){
-        hide(loading);
-        show(fallback);
-      });
-
-      // If user comes back to tab and still not loaded, reveal fallback.
-      document.addEventListener('visibilitychange', function(){
-        if (!loaded && document.visibilityState === 'visible') {
-          // don't be aggressive, but ensure user sees the path
-          show(fallback);
-        }
-      });
-    })();
   </script>
 </body>
 </html>
