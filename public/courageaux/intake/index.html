@@ -266,11 +266,11 @@
 
       <div class="hint-row">
         <span>Fields marked with <span style="color:var(--gold);font-weight:950">*</span> are required.</span>
-        <span><a href="#" onclick="window.print();return false;">Print / Save PDF</a></span>
+        <a href="#" data-sb-action="cx_print" data-sb-component="header" data-sb-label="Print / Save PDF" onclick="window.print();return false;">Print / Save PDF</a>
       </div>
     </header>
 
-    <form id="intakeForm" novalidate>
+   <form id="intakeForm" novalidate data-sb-form="cx_intake" data-sb-form-version="v1">
       <div id="errorMsg" class="error" role="alert" aria-live="assertive">Please complete all required fields (marked with *).</div>
 
       <!-- Contact -->
@@ -413,49 +413,157 @@
 
       <p class="bottom-helper">
         Your info is used only for your care and appointment preparation (not sold). If you prefer not to submit online, you can
-        <a href="#" onclick="window.print();return false;">print this form</a> and bring a copy.
+        <a href="#" data-sb-action="cx_print" data-sb-component="footer_helper" data-sb-label="Print this form" onclick="window.print();return false;">print this form</a>
       </p>
     </form>
   </div>
 
-  <!-- ✅ Shared footer include -->
   <!-- @@include("public/courageaux/_partials/footer.html") -->
+<script>
+  (function () {
+    const brand = document.documentElement.getAttribute("data-sb-brand") || "courageaux";
+    const tier  = document.documentElement.getAttribute("data-sb-tier")  || "intake";
+    const variant = document.documentElement.getAttribute("data-sb-variant") || "v1";
 
-  <script>
-    // Require at least one concern checked
-    (function () {
-      const form = document.getElementById('intakeForm');
-      const errorMsg = document.getElementById('errorMsg');
-      const concernBoxes = Array.from(document.querySelectorAll('input[name="concern"]'));
+    const form = document.getElementById('intakeForm');
+    const errorMsg = document.getElementById('errorMsg');
+    const concernBoxes = Array.from(document.querySelectorAll('input[name="concern"]'));
 
-      function hasConcernChecked() { return concernBoxes.some(cb => cb.checked); }
+    // ---- Safe track wrapper (queues if needed via sbTrack)
+    const track = (name, params = {}) => {
+      try {
+        if (typeof window.sbTrack !== "function") return;
+        window.sbTrack(name, {
+          sb_brand: brand,
+          sb_tier: tier,
+          sb_variant: variant,
+          page_path: location.pathname,
+          page_title: document.title || "",
+          ...params
+        });
+      } catch {}
+    };
 
-      form.addEventListener('submit', function (e) {
-        const validFields = form.checkValidity();
-        const validConcerns = hasConcernChecked();
+    // ---- View
+    track("cx_intake_view");
 
-        if (!validFields || !validConcerns) {
-          e.preventDefault();
-          errorMsg.style.display = 'block';
+    // ---- Start (first interaction)
+    let started = false;
+    function markStart(source) {
+      if (started) return;
+      started = true;
+      track("cx_intake_start", { source: source || "first_input" });
+    }
 
-          const firstInvalid = form.querySelector(':invalid');
-          if (firstInvalid) {
-            firstInvalid.focus({ preventScroll: true });
-            firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          } else if (!validConcerns && concernBoxes[0]) {
-            concernBoxes[0].focus({ preventScroll: true });
-            concernBoxes[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }
-          return;
-        }
+    // ---- Step detection (which fieldset they entered)
+    // We infer step by closest fieldset legend text (no markup changes needed)
+    const stepsSeen = new Set();
+    function stepFromEl(el) {
+      const fs = el && el.closest ? el.closest("fieldset") : null;
+      if (!fs) return null;
+      const legend = fs.querySelector("legend");
+      const t = (legend ? legend.textContent : "").toLowerCase();
+      if (t.includes("contact")) return "contact";
+      if (t.includes("skin")) return "history";
+      if (t.includes("goal")) return "goals";
+      if (t.includes("consent")) return "consent";
+      return "unknown";
+    }
+    function markStep(stepId, source) {
+      if (!stepId || stepsSeen.has(stepId)) return;
+      stepsSeen.add(stepId);
+      track("cx_intake_step", { step_id: stepId, source: source || "interaction" });
+    }
 
-        errorMsg.style.display = 'none';
+    // ---- Observe interaction
+    form.addEventListener("focusin", (e) => {
+      const el = e.target;
+      if (!el) return;
+      if (el.matches("input, textarea, select")) markStart("focusin");
+      const step = stepFromEl(el);
+      if (step) markStep(step, "focusin");
+    }, true);
 
-        // Placeholder mode: no backend yet
-        e.preventDefault();
-        alert('Thank you! Your intake form is ready to save or print.');
+    form.addEventListener("change", (e) => {
+      const el = e.target;
+      if (!el) return;
+      if (el.matches("input, textarea, select")) markStart("change");
+      const step = stepFromEl(el);
+      if (step) markStep(step, "change");
+    }, true);
+
+    // ---- Reset tracking
+    form.addEventListener("reset", () => {
+      track("cx_intake_reset");
+      started = false;         // allow a new start after reset
+      stepsSeen.clear();
+      track("cx_intake_view", { source: "after_reset" });
+    });
+
+    // ---- Require at least one concern checked
+    function hasConcernChecked() { return concernBoxes.some(cb => cb.checked); }
+
+    // ---- Submit tracking + validation tracking
+    form.addEventListener('submit', function (e) {
+      track("cx_intake_submit_attempt", {
+        concerns_selected: concernBoxes.filter(cb => cb.checked).length
       });
-    })();
-  </script>
+
+      const validFields = form.checkValidity();
+      const validConcerns = hasConcernChecked();
+
+      if (!validFields || !validConcerns) {
+        e.preventDefault();
+        errorMsg.style.display = 'block';
+
+        const firstInvalid = form.querySelector(':invalid');
+        const invalidName = firstInvalid ? (firstInvalid.getAttribute("name") || firstInvalid.id || "unknown") : "missing_concern";
+
+        track("cx_intake_error", {
+          reason: !validFields ? "invalid_required_fields" : "missing_concern",
+          first_invalid: invalidName,
+          concerns_selected: concernBoxes.filter(cb => cb.checked).length
+        });
+
+        if (firstInvalid) {
+          firstInvalid.focus({ preventScroll: true });
+          firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else if (!validConcerns && concernBoxes[0]) {
+          concernBoxes[0].focus({ preventScroll: true });
+          concernBoxes[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return;
+      }
+
+      errorMsg.style.display = 'none';
+      markStep("consent", "submit");
+
+      // Success (even in placeholder mode)
+      track("cx_intake_submit_success", {
+        concerns_selected: concernBoxes.filter(cb => cb.checked).length
+      });
+
+      // Placeholder mode: no backend yet
+      e.preventDefault();
+      alert('Thank you! Your intake form is ready to save or print.');
+    });
+
+    // ---- Track print (covers cmd+p too)
+    window.addEventListener("beforeprint", () => track("cx_print", { source: "beforeprint" }));
+
+    // ---- Track CTA clicks if you use data-sb-action anywhere
+    document.addEventListener("click", (e) => {
+      const el = e.target && e.target.closest ? e.target.closest("[data-sb-action]") : null;
+      if (!el) return;
+      track("cx_click", {
+        action: el.getAttribute("data-sb-action") || "",
+        component: el.getAttribute("data-sb-component") || "",
+        label: el.getAttribute("data-sb-label") || "",
+        link_url: el.getAttribute("href") || ""
+      });
+    }, { passive: true });
+  })();
+</script>
+
 </body>
 </html>
