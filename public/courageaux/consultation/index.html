@@ -1,6 +1,6 @@
-<!-- public/courageaux/consultation/index.html (FINAL — shared _partials includes + no inline nav/footer) -->
+<!-- public/courageaux/consultation/index.html (FINAL + Conversion Lab tracking layer + intent attribution) -->
 <!doctype html>
-<html lang="en">
+<html lang="en" data-sb-brand="courageaux" data-sb-tier="consultation" data-sb-variant="v1">
 <head>
   <!-- Basics -->
   <meta charset="utf-8" />
@@ -15,7 +15,7 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="sb:build" content="v20260213-courageaux-consultation-includes-nav-footer-localbusiness" />
+  <meta name="sb:build" content="v20260215-courageaux-consultation-conversionlab" />
 
   <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
@@ -52,7 +52,7 @@
   <!-- Preload hero (LCP) -->
   <link rel="preload" as="image" href="/courageaux/assets/hero_index_1600.webp" fetchpriority="high" type="image/webp" />
 
-   <!-- ✅ SEO Schema: LocalBusiness + WebSite + WebPage + Breadcrumbs -->
+  <!-- ✅ SEO Schema: LocalBusiness + WebSite + WebPage + Breadcrumbs -->
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
@@ -112,7 +112,6 @@
     ]
   }
   </script>
-
 
   <style>
     :root{
@@ -285,14 +284,45 @@
 
         <p class="cx-loc">
           42334 Deluxe Plaza 1, Hammond, LA 70403 ·
-          <a href="https://www.google.com/maps?q=42334+Deluxe+Plaza+1,+Hammond,+LA+70403" target="_blank" rel="noopener noreferrer">Directions</a>
+          <a href="https://www.google.com/maps?q=42334+Deluxe+Plaza+1,+Hammond,+LA+70403"
+             target="_blank" rel="noopener noreferrer"
+             data-sb-action="directions"
+             data-sb-component="location_line"
+             data-sb-label="Directions">
+            Directions
+          </a>
         </p>
 
         <div class="cx-hero__meta">
-          <a class="btn btn--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book on GlossGenius</a>
-          <a class="btn btn--ghost" href="/courageaux/appointments/">Appointments</a>
-          <a class="btn btn--ghost" href="/courageaux/intake/">Client intake</a>
-          <a class="btn btn--ghost" href="/courageaux/">⟵ Back to Courageaux</a>
+          <a class="btn btn--gold"
+             href="https://courageauxaesthetics.glossgenius.com/services"
+             target="_blank" rel="noopener noreferrer"
+             data-sb-action="book"
+             data-sb-component="hero"
+             data-sb-label="Book on GlossGenius">
+            Book on GlossGenius
+          </a>
+          <a class="btn btn--ghost"
+             href="/courageaux/appointments/"
+             data-sb-action="appointments"
+             data-sb-component="hero"
+             data-sb-label="Appointments">
+            Appointments
+          </a>
+          <a class="btn btn--ghost"
+             href="/courageaux/intake/"
+             data-sb-action="intake"
+             data-sb-component="hero"
+             data-sb-label="Client intake">
+            Client intake
+          </a>
+          <a class="btn btn--ghost"
+             href="/courageaux/"
+             data-sb-action="home"
+             data-sb-component="hero"
+             data-sb-label="Back to Courageaux">
+            ⟵ Back to Courageaux
+          </a>
         </div>
       </div>
 
@@ -374,8 +404,22 @@
             For walk-ins: availability depends on the day’s schedule. If you want a guaranteed time, book online.
           </p>
           <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:10px">
-            <a class="btn btn--gold" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book a time</a>
-            <a class="btn btn--ghost" href="https://www.google.com/maps?q=42334+Deluxe+Plaza+1,+Hammond,+LA+70403" target="_blank" rel="noopener noreferrer">Get directions</a>
+            <a class="btn btn--gold"
+               href="https://courageauxaesthetics.glossgenius.com/services"
+               target="_blank" rel="noopener noreferrer"
+               data-sb-action="book"
+               data-sb-component="before_arrive"
+               data-sb-label="Book a time">
+              Book a time
+            </a>
+            <a class="btn btn--ghost"
+               href="https://www.google.com/maps?q=42334+Deluxe+Plaza+1,+Hammond,+LA+70403"
+               target="_blank" rel="noopener noreferrer"
+               data-sb-action="directions"
+               data-sb-component="before_arrive"
+               data-sb-label="Get directions">
+              Get directions
+            </a>
           </div>
         </article>
 
@@ -395,7 +439,13 @@
           <p class="note">
             Always follow your confirmation email/text links for changes and policy details.
           </p>
-          <a class="btn btn--gold" style="margin-top:10px" href="https://courageauxaesthetics.glossgenius.com/" target="_blank" rel="noopener noreferrer">
+          <a class="btn btn--gold"
+             style="margin-top:10px"
+             href="https://courageauxaesthetics.glossgenius.com/"
+             target="_blank" rel="noopener noreferrer"
+             data-sb-action="policies"
+             data-sb-component="policies_card"
+             data-sb-label="View official policies on GlossGenius">
             View official policies on GlossGenius
           </a>
         </article>
@@ -429,5 +479,97 @@
 
   <!-- ✅ Shared footer include -->
   <!-- @@include("public/courageaux/_partials/footer.html") -->
+
+  <script>
+  (() => {
+    const brand = document.documentElement.getAttribute("data-sb-brand") || "courageaux";
+    const tier  = document.documentElement.getAttribute("data-sb-tier")  || "consultation";
+    const variant = document.documentElement.getAttribute("data-sb-variant") || "v1";
+
+    const track = (name, params = {}) => {
+      try {
+        if (typeof window.sbTrack !== "function") return;
+        window.sbTrack(name, {
+          sb_brand: brand,
+          sb_tier: tier,
+          sb_variant: variant,
+          page_path: location.pathname,
+          page_title: document.title || "",
+          ...params
+        });
+      } catch {}
+    };
+
+    // View
+    track("cx_consultation_view");
+
+    // Click capture for any element with data-sb-action
+    document.addEventListener("click", (e) => {
+      const el = e.target && e.target.closest ? e.target.closest("[data-sb-action]") : null;
+      if (!el) return;
+
+      const href = el.getAttribute("href") || "";
+      const action = el.getAttribute("data-sb-action") || "";
+      const component = el.getAttribute("data-sb-component") || "";
+      const label = el.getAttribute("data-sb-label") || (el.textContent || "").trim().slice(0, 80);
+
+      // High-signal intent events (clean + reportable)
+      if (action === "book") track("cx_intent_book", { component, label, link_url: href });
+      else if (action === "directions") track("cx_intent_directions", { component, label, link_url: href });
+      else if (action === "intake") track("cx_intent_intake", { component, label, link_url: href });
+      else if (action === "appointments") track("cx_intent_appointments", { component, label, link_url: href });
+      else if (action === "policies") track("cx_intent_policies", { component, label, link_url: href });
+      else if (action === "home") track("cx_intent_home", { component, label, link_url: href });
+
+      // Universal click event (debug / funnels)
+      track("cx_click", { action, component, label, link_url: href });
+    }, { passive: true });
+
+    // Section view signals (no markup refactor)
+    const observe = (el, eventName, extra = {}) => {
+      if (!el || !("IntersectionObserver" in window)) return;
+      let fired = false;
+      const io = new IntersectionObserver((entries) => {
+        const v = entries && entries[0] ? entries[0].isIntersecting : false;
+        if (v && !fired) {
+          fired = true;
+          track(eventName, extra);
+          io.disconnect();
+        }
+      }, { threshold: 0.35 });
+      io.observe(el);
+    };
+
+    const cards = Array.from(document.querySelectorAll(".card"));
+    const whoCard = cards.find(c => (c.textContent || "").toLowerCase().includes("who this is for"));
+    const whatCard = cards.find(c => (c.textContent || "").toLowerCase().includes("what happens"));
+    const beforeCard = cards.find(c => (c.textContent || "").toLowerCase().includes("before you arrive"));
+    const policiesCard = cards.find(c => (c.textContent || "").toLowerCase().includes("policies"));
+    const hoursCard = cards.find(c => (c.textContent || "").toLowerCase().includes("studio hours"));
+
+    if (whoCard)      observe(whoCard,      "cx_consultation_section_view", { section: "who_this_is_for" });
+    if (whatCard)     observe(whatCard,     "cx_consultation_section_view", { section: "what_happens" });
+    if (beforeCard)   observe(beforeCard,   "cx_consultation_section_view", { section: "before_you_arrive" });
+    if (policiesCard) observe(policiesCard, "cx_consultation_section_view", { section: "policies" });
+    if (hoursCard)    observe(hoursCard,    "cx_consultation_section_view", { section: "hours" });
+
+    // Scroll depth
+    const marks = [25, 50, 75, 90];
+    const seen = new Set();
+    const onScroll = () => {
+      const h = document.documentElement;
+      const max = Math.max(1, h.scrollHeight - h.clientHeight);
+      const pct = Math.round((h.scrollTop / max) * 100);
+      for (const m of marks) {
+        if (pct >= m && !seen.has(m)) {
+          seen.add(m);
+          track("cx_scroll_depth", { percent: m });
+        }
+      }
+      if (seen.size === marks.length) window.removeEventListener("scroll", onScroll, { passive: true });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+  })();
+  </script>
 </body>
 </html>
