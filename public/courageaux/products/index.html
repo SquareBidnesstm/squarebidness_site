@@ -1,6 +1,6 @@
-<!-- public/courageaux/products/index.html (PASTE READY — includes nav/footer + consistent UI + waitlist placeholder) -->
+<!-- public/courageaux/products/index.html (FINAL + Conversion Lab tracking layer + intent attribution) -->
 <!doctype html>
-<html lang="en">
+<html lang="en" data-sb-brand="courageaux" data-sb-tier="products_waitlist" data-sb-variant="v1">
 <head>
   <!-- Basics -->
   <meta charset="utf-8" />
@@ -14,7 +14,7 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="sb:build" content="v20260213-courageaux-products-includes-nav-footer" />
+  <meta name="sb:build" content="v20260215-courageaux-products-conversionlab" />
 
   <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
@@ -209,7 +209,7 @@
   <!-- ✅ Shared nav include -->
   <!-- @@include("public/courageaux/_partials/nav.html") -->
 
-  <header class="hero">
+  <header class="hero" data-sb-section="hero">
     <div class="container">
       <span class="badge">
         <img src="/courageaux/assets/logo_courageaux_black_400.png" alt="Courageaux logo" width="18" height="18" loading="eager" decoding="async">
@@ -233,9 +233,28 @@
       </div>
 
       <div class="actions">
-        <a class="btn btn--gold" href="#waitlist">Join the launch list</a>
-        <a class="btn btn--ghost" href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer">Book a consult</a>
-        <a class="btn btn--ghost" href="/courageaux/">Back to Courageaux</a>
+        <a class="btn btn--gold"
+           href="#waitlist"
+           data-sb-action="waitlist_jump"
+           data-sb-component="hero"
+           data-sb-label="Join the launch list (jump)">
+          Join the launch list
+        </a>
+        <a class="btn btn--ghost"
+           href="https://courageauxaesthetics.glossgenius.com/services"
+           target="_blank" rel="noopener noreferrer"
+           data-sb-action="book"
+           data-sb-component="hero"
+           data-sb-label="Book a consult (GlossGenius)">
+          Book a consult
+        </a>
+        <a class="btn btn--ghost"
+           href="/courageaux/"
+           data-sb-action="home"
+           data-sb-component="hero"
+           data-sb-label="Back to Courageaux">
+          Back to Courageaux
+        </a>
       </div>
 
       <div class="mood-strip" aria-hidden="true"></div>
@@ -244,7 +263,7 @@
 
   <main class="container">
     <div class="grid">
-      <section class="card" aria-labelledby="skincare-preview">
+      <section class="card" aria-labelledby="skincare-preview" data-sb-section="coming_soon">
         <div class="kicker">Coming soon</div>
         <h2 id="skincare-preview" class="title">Courageaux Skincare (in development)</h2>
 
@@ -268,7 +287,7 @@
         </div>
       </section>
 
-      <section class="card" id="waitlist" aria-labelledby="waitlist-title">
+      <section class="card" id="waitlist" aria-labelledby="waitlist-title" data-sb-section="waitlist">
         <div class="kicker">Stay informed</div>
         <h2 id="waitlist-title" class="title">Get notified when the first skincare release is ready.</h2>
         <p class="muted" style="margin:.3rem 0 0">
@@ -287,22 +306,22 @@
           <div class="row row--2">
             <div>
               <label for="wl_name">Full name<span class="req">*</span></label>
-              <input id="wl_name" name="name" type="text" autocomplete="name" required>
+              <input id="wl_name" name="name" type="text" autocomplete="name" required data-sb-field="name">
             </div>
             <div>
               <label for="wl_email">Email<span class="req">*</span></label>
-              <input id="wl_email" name="email" type="email" autocomplete="email" inputmode="email" required>
+              <input id="wl_email" name="email" type="email" autocomplete="email" inputmode="email" required data-sb-field="email">
             </div>
           </div>
 
           <div class="row row--2">
             <div>
               <label for="wl_city">City (optional)</label>
-              <input id="wl_city" name="city" type="text" autocomplete="address-level2" placeholder="Hammond, Ponchatoula, etc.">
+              <input id="wl_city" name="city" type="text" autocomplete="address-level2" placeholder="Hammond, Ponchatoula, etc." data-sb-field="city">
             </div>
             <div>
               <label for="wl_routine">Routine style (optional)</label>
-              <select id="wl_routine" name="routine">
+              <select id="wl_routine" name="routine" data-sb-field="routine">
                 <option value="" selected>Choose one</option>
                 <option value="simple">Simple (2–3 steps)</option>
                 <option value="steady">Steady (4–5 steps)</option>
@@ -314,12 +333,12 @@
           <div>
             <label>What are you looking for? (optional)</label>
             <div class="checks" role="group" aria-label="Skin goals">
-              <label><input type="checkbox" name="concern" value="acne"> Acne / breakouts</label>
-              <label><input type="checkbox" name="concern" value="dark-marks"> Dark marks</label>
-              <label><input type="checkbox" name="concern" value="texture"> Texture</label>
-              <label><input type="checkbox" name="concern" value="dryness"> Dryness</label>
-              <label><input type="checkbox" name="concern" value="sensitive"> Sensitive skin</label>
-              <label><input type="checkbox" name="concern" value="glow"> Glow / maintenance</label>
+              <label><input type="checkbox" name="concern" value="acne" data-sb-field="concern"> Acne / breakouts</label>
+              <label><input type="checkbox" name="concern" value="dark-marks" data-sb-field="concern"> Dark marks</label>
+              <label><input type="checkbox" name="concern" value="texture" data-sb-field="concern"> Texture</label>
+              <label><input type="checkbox" name="concern" value="dryness" data-sb-field="concern"> Dryness</label>
+              <label><input type="checkbox" name="concern" value="sensitive" data-sb-field="concern"> Sensitive skin</label>
+              <label><input type="checkbox" name="concern" value="glow" data-sb-field="concern"> Glow / maintenance</label>
             </div>
             <p class="note">This helps shape what gets introduced first.</p>
           </div>
@@ -327,7 +346,7 @@
           <div>
             <div class="checks">
               <label>
-                <input id="wl_consent" name="consent" type="checkbox" required>
+                <input id="wl_consent" name="consent" type="checkbox" required data-sb-field="consent">
                 I agree to receive skincare updates by email.<span class="req">*</span>
               </label>
             </div>
@@ -337,15 +356,30 @@
           </div>
 
           <div class="submit-row">
-            <button class="btn btn--ghost" type="reset">Clear</button>
-            <button class="btn btn--gold" type="submit">Join the list</button>
+            <button class="btn btn--ghost" type="reset"
+              data-sb-action="form_reset"
+              data-sb-component="waitlist_form"
+              data-sb-label="Clear">
+              Clear
+            </button>
+            <button class="btn btn--gold" type="submit"
+              data-sb-action="waitlist_submit"
+              data-sb-component="waitlist_form"
+              data-sb-label="Join the list">
+              Join the list
+            </button>
           </div>
         </form>
 
         <div style="margin-top:12px;border-top:1px solid var(--stroke);padding-top:12px">
           <p class="note" style="margin:0">
             Prefer guidance now? Book a consultation to get a routine recommendation.
-            <a href="https://courageauxaesthetics.glossgenius.com/services" target="_blank" rel="noopener noreferrer" style="color:var(--gold);text-decoration:underline;font-weight:950;text-underline-offset:3px;">
+            <a href="https://courageauxaesthetics.glossgenius.com/services"
+               target="_blank" rel="noopener noreferrer"
+               style="color:var(--gold);text-decoration:underline;font-weight:950;text-underline-offset:3px;"
+               data-sb-action="book"
+               data-sb-component="waitlist_card"
+               data-sb-label="Book on GlossGenius (footer note)">
               Book on GlossGenius
             </a>
           </p>
@@ -359,6 +393,10 @@
 
   <script>
     (function () {
+      const brand = document.documentElement.getAttribute("data-sb-brand") || "courageaux";
+      const tier  = document.documentElement.getAttribute("data-sb-tier")  || "products_waitlist";
+      const variant = document.documentElement.getAttribute("data-sb-variant") || "v1";
+
       const form = document.getElementById('waitlistForm');
       const success = document.getElementById('success');
       const error = document.getElementById('error');
@@ -366,21 +404,126 @@
       function hide(el){ if(el) el.style.display = 'none'; }
       function show(el){ if(el) el.style.display = 'block'; }
 
+      const track = (name, params = {}) => {
+        try {
+          if (typeof window.sbTrack !== "function") return;
+          window.sbTrack(name, {
+            sb_brand: brand,
+            sb_tier: tier,
+            sb_variant: variant,
+            page_path: location.pathname,
+            page_title: document.title || "",
+            ...params
+          });
+        } catch {}
+      };
+
+      const safeLen = (v, n) => String(v || "").trim().slice(0, n);
+      const getConcerns = () => {
+        const checks = form.querySelectorAll('input[name="concern"]:checked');
+        const arr = [];
+        checks.forEach((c) => arr.push(safeLen(c.value, 40)));
+        return arr.slice(0, 12);
+      };
+
+      // Page view
+      track("cx_products_view");
+
+      // Section view signals
+      const observeSel = (selector, eventName, extra = {}) => {
+        const el = document.querySelector(selector);
+        if (!el || !("IntersectionObserver" in window)) return;
+        let fired = false;
+        const io = new IntersectionObserver((entries) => {
+          const v = entries && entries[0] ? entries[0].isIntersecting : false;
+          if (v && !fired) {
+            fired = true;
+            track(eventName, extra);
+            io.disconnect();
+          }
+        }, { threshold: 0.35 });
+        io.observe(el);
+      };
+      observeSel('[data-sb-section="hero"]', "cx_products_section_view", { section: "hero" });
+      observeSel('[data-sb-section="coming_soon"]', "cx_products_section_view", { section: "coming_soon" });
+      observeSel('[data-sb-section="waitlist"]', "cx_products_section_view", { section: "waitlist" });
+
+      // Scroll depth
+      const marks = [25, 50, 75, 90];
+      const seen = new Set();
+      const onScroll = () => {
+        const h = document.documentElement;
+        const max = Math.max(1, h.scrollHeight - h.clientHeight);
+        const pct = Math.round((h.scrollTop / max) * 100);
+        for (const m of marks) {
+          if (pct >= m && !seen.has(m)) {
+            seen.add(m);
+            track("cx_scroll_depth", { percent: m });
+          }
+        }
+        if (seen.size === marks.length) window.removeEventListener("scroll", onScroll, { passive: true });
+      };
+      window.addEventListener("scroll", onScroll, { passive: true });
+
+      // Click capture for any element with data-sb-action
+      document.addEventListener("click", (e) => {
+        const el = e.target && e.target.closest ? e.target.closest("[data-sb-action]") : null;
+        if (!el) return;
+
+        const href = el.getAttribute("href") || "";
+        const action = el.getAttribute("data-sb-action") || "";
+        const component = el.getAttribute("data-sb-component") || "";
+        const label = el.getAttribute("data-sb-label") || (el.textContent || "").trim().slice(0, 80);
+
+        // Intent events (clean)
+        if (action === "book") track("cx_intent_book", { component, label, link_url: href });
+        else if (action === "home") track("cx_intent_home", { component, label, link_url: href });
+        else if (action === "waitlist_jump") track("cx_intent_waitlist", { component, label, link_url: href });
+
+        // Universal click
+        track("cx_click", { action, component, label, link_url: href });
+      }, { passive: true });
+
+      // Form events
       form.addEventListener('reset', function () {
         hide(success);
         hide(error);
+        track("cx_waitlist_reset", { component: "waitlist_form" });
       });
 
+      // Track first input (soft signal)
+      let started = false;
+      form.addEventListener("input", function (e) {
+        if (started) return;
+        started = true;
+        track("cx_waitlist_start", { component: "waitlist_form" });
+      }, { passive: true });
+
       form.addEventListener('submit', function (e) {
+        // capture intent + minimal attribution (no PII)
+        const routine = safeLen((document.getElementById("wl_routine") || {}).value, 30);
+        const city = safeLen((document.getElementById("wl_city") || {}).value, 60);
+        const concerns = getConcerns();
+
         const valid = form.checkValidity();
         if (!valid) {
           e.preventDefault();
           hide(success);
           show(error);
+
+          track("cx_waitlist_error", {
+            component: "waitlist_form",
+            routine,
+            city_present: city ? true : false,
+            concerns_count: concerns.length
+          });
+
           const firstInvalid = form.querySelector(':invalid');
           if (firstInvalid) {
-            firstInvalid.focus({ preventScroll: true });
-            firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            try {
+              firstInvalid.focus({ preventScroll: true });
+              firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } catch {}
           }
           return;
         }
@@ -389,7 +532,21 @@
         e.preventDefault();
         hide(error);
         show(success);
-        success.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        try { success.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch {}
+
+        track("cx_intent_waitlist_submit", {
+          component: "waitlist_form",
+          routine,
+          city_present: city ? true : false,
+          concerns
+        });
+
+        track("cx_waitlist_success", {
+          component: "waitlist_form",
+          routine,
+          city_present: city ? true : false,
+          concerns_count: concerns.length
+        });
       });
     })();
   </script>
