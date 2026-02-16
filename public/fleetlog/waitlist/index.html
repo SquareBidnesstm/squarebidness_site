@@ -1,0 +1,134 @@
+<!-- /public/fleetlog/waitlist/index.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SB FleetLog™ — Waitlist</title>
+  <meta name="description" content="Join the SB FleetLog™ waitlist for owner-operators and small fleets." />
+  <meta name="robots" content="index,follow" />
+  <meta name="theme-color" content="#0b0b0b" />
+  <meta name="color-scheme" content="dark light" />
+  <link rel="canonical" href="https://www.squarebidness.com/fleetlog/waitlist/" />
+  <meta name="sb:build" content="v20260216-fleetlog-waitlist" />
+
+  <script defer src="/scripts/sb-analytics.js"></script>
+
+  <style>
+    :root{--bg:#0b0b0b;--card:#121212;--text:#f2f2f2;--muted:#b8b8b8;--line:#242424}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto;background:var(--bg);color:var(--text)}
+    a{color:#fff;text-decoration:none}
+    .wrap{max-width:860px;margin:0 auto;padding:24px}
+    .top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin:10px 0 18px}
+    .brand{font-weight:900}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+    .col-12{grid-column:span 12}.col-6{grid-column:span 6}.col-4{grid-column:span 4}
+    @media (max-width:820px){.col-6,.col-4{grid-column:span 12}}
+    label{display:block;color:var(--muted);font-size:13px;margin:0 0 6px}
+    input,select,textarea{width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);background:#0f0f0f;color:var(--text);outline:none}
+    textarea{min-height:96px;resize:vertical}
+    button{padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#fff;color:#000;font-weight:900;cursor:pointer}
+    button:disabled{opacity:.6;cursor:not-allowed}
+    .k{color:var(--muted);font-size:13px}
+    .ok{color:#9effa7;font-size:13px}
+    .err{color:#ff9e9e;font-size:13px}
+    .hp{display:none !important}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <div class="brand">SB FleetLog™</div>
+        <div class="k">Waitlist • Owner-Operators + Small Fleets</div>
+      </div>
+      <div class="k"><a href="/fleetlog/">← Back</a></div>
+    </div>
+
+    <div class="card">
+      <form id="wForm">
+        <!-- honeypot -->
+        <input class="hp" type="text" name="company_website" tabindex="-1" autocomplete="off" />
+
+        <div class="grid">
+          <div class="col-6">
+            <label>Name *</label>
+            <input name="name" required placeholder="First Last" />
+          </div>
+          <div class="col-6">
+            <label>Email *</label>
+            <input name="email" type="email" required placeholder="you@email.com" />
+          </div>
+
+          <div class="col-4">
+            <label>Phone (optional)</label>
+            <input name="phone" placeholder="Optional" />
+          </div>
+          <div class="col-4">
+            <label>Type *</label>
+            <select name="type" required>
+              <option value="owner_operator">Owner-Operator</option>
+              <option value="small_fleet">Small Fleet (2–10)</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="col-4">
+            <label># of Trucks</label>
+            <input name="trucks" type="number" step="1" min="1" placeholder="1" />
+          </div>
+
+          <div class="col-12">
+            <label>Notes</label>
+            <textarea name="notes" placeholder="What do you want FleetLog to do for you?"></textarea>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:14px;flex-wrap:wrap">
+          <div class="k">We’ll notify you when subscriptions open.</div>
+          <button id="btn" type="submit">Join Waitlist</button>
+        </div>
+
+        <div id="msg" class="k" style="margin-top:10px;"></div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("wForm");
+    const btn = document.getElementById("btn");
+    const msg = document.getElementById("msg");
+
+    function setMsg(t, cls){ msg.className = cls || "k"; msg.textContent = t || ""; }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      btn.disabled = true;
+      setMsg("Submitting…","k");
+
+      const payload = Object.fromEntries(new FormData(form).entries());
+
+      try{
+        const r = await fetch("/api/fleetlog/waitlist",{
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body: JSON.stringify(payload)
+        });
+        const j = await r.json();
+        if(!j.ok) throw new Error(j.error || "Submit failed");
+
+        window.sbTrack?.("sb_form_submit", { brand:"sb-fleetlog", page:location.pathname, component:"waitlist", action:"join_waitlist", label:payload.type });
+
+        setMsg("You’re in. We’ll reach out as soon as subscriptions open.","ok");
+        form.reset();
+      }catch(err){
+        window.sbTrack?.("sb_form_error", { brand:"sb-fleetlog", page:location.pathname, component:"waitlist", action:"join_waitlist", label:String(err.message||"error") });
+        setMsg(err.message,"err");
+      }finally{
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
