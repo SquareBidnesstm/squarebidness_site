@@ -95,33 +95,67 @@ function esc(s) {
 }
 
 function welcomeEmailHtml({ email, tier, subscriptionId }) {
+  const planLabel =
+    String(tier || "").toLowerCase() === "fleet"
+      ? "Small Fleet (2–10)"
+      : "Single Truck";
+
   return `
-  <div style="font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto;line-height:1.5;color:#111;">
-    <h2 style="margin:0 0 12px;">SB FleetLog™ — You're live.</h2>
-    <p style="margin:0 0 12px;">
-      Your subscription is active. Start logging immediately and generate printable receipt links for your records.
-    </p>
+  <div style="font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto;line-height:1.55;color:#111;background:#fff;">
+    <div style="max-width:640px;margin:0 auto;padding:22px 18px;">
+      <div style="font-weight:900;letter-spacing:.2px;font-size:14px;color:#111;opacity:.9;">
+        SB FleetLog™
+      </div>
 
-    <div style="margin:18px 0;">
-      <a href="https://www.squarebidness.com/lab/fleetlog/"
-         style="display:inline-block;background:#111;color:#fff;text-decoration:none;padding:12px 16px;border-radius:12px;font-weight:800;">
-        Start Logging Now
-      </a>
-      <a href="https://www.squarebidness.com/fleetlog/"
-         style="display:inline-block;margin-left:10px;color:#111;text-decoration:underline;">
-        Back to FleetLog
-      </a>
+      <h2 style="margin:10px 0 10px;font-size:22px;line-height:1.2;">
+        You're live. Subscription active.
+      </h2>
+
+      <p style="margin:0 0 14px;color:#222;">
+        You can start logging immediately and generate printable receipt links for your records.
+      </p>
+
+      <div style="margin:18px 0 16px;">
+        <a href="https://www.squarebidness.com/lab/fleetlog/new/"
+           style="display:inline-block;background:#111;color:#fff;text-decoration:none;padding:12px 16px;border-radius:12px;font-weight:900;">
+          Create Your First Log
+        </a>
+
+        <a href="https://www.squarebidness.com/lab/fleetlog/"
+           style="display:inline-block;margin-left:10px;color:#111;text-decoration:underline;font-weight:800;">
+          Open FleetLog App
+        </a>
+      </div>
+
+      <div style="margin:0 0 18px;">
+        <a href="https://www.squarebidness.com/lab/fleetlog/"
+           style="display:inline-block;background:#fff;color:#111;text-decoration:none;padding:10px 14px;border-radius:12px;font-weight:900;border:1px solid #ddd;">
+          Manage Billing (inside app)
+        </a>
+
+        <a href="https://www.squarebidness.com/fleetlog/"
+           style="display:inline-block;margin-left:10px;color:#111;text-decoration:underline;">
+          Back to Marketing
+        </a>
+      </div>
+
+      <div style="border-top:1px solid #e8e8e8;margin:18px 0;padding-top:14px;">
+        <p style="margin:0 0 6px;"><strong>Plan:</strong> ${esc(planLabel)}</p>
+        <p style="margin:0 0 6px;"><strong>Email:</strong> ${esc(email)}</p>
+        <p style="margin:0 0 6px;"><strong>Subscription ID:</strong> ${esc(subscriptionId)}</p>
+      </div>
+
+      <p style="margin:14px 0 0;color:#555;font-size:13px;">
+        Need help? Reply to this email and we’ll take care of you.
+      </p>
+
+      <p style="margin:10px 0 0;color:#777;font-size:12px;">
+        SB FleetLog™ — Built for Owner-Operators. Not Corporate Fleets.
+      </p>
     </div>
-
-    <p style="margin:0 0 8px;"><strong>Plan:</strong> ${esc(tier)}</p>
-    <p style="margin:0 0 8px;"><strong>Email:</strong> ${esc(email)}</p>
-    <p style="margin:0 0 18px;"><strong>Subscription ID:</strong> ${esc(subscriptionId)}</p>
-
-    <p style="margin:0;color:#555;font-size:13px;">
-      If you need help, reply to this email.
-    </p>
   </div>`;
 }
+
 
 export default async function handler(req, res) {
   const sig = req.headers["stripe-signature"];
