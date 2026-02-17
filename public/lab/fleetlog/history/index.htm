@@ -1,4 +1,4 @@
-<!-- /lab/fleetlog/history/index.html -->
+<!-- /public/lab/fleetlog/history/index.html -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -21,15 +21,12 @@
     .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
     table{width:100%;border-collapse:collapse;margin-top:10px}
     th,td{padding:12px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:13px}
-    th{color:var(--muted);font-weight:800}
-    .empty{padding:14px;border:1px dashed var(--line);border-radius:14px;color:var(--muted);margin-top:12px}
-    .btn{
-      padding:12px 14px;border-radius:12px;border:1px solid var(--line);
-      font-weight:900;cursor:pointer;background:#fff;color:#000;display:inline-block
-    }
+    th{color:var(--muted);font-weight:900}
+    .btn{padding:12px 14px;border-radius:12px;border:1px solid var(--line);font-weight:900;cursor:pointer;background:#fff;color:#000;display:inline-block}
     .btn-ghost{background:transparent;color:#fff}
     .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-    code{background:#0f0f0f;border:1px solid var(--line);border-radius:10px;padding:2px 6px}
+    input{padding:12px;border-radius:12px;border:1px solid var(--line);background:#0f0f0f;color:var(--text);min-width:260px}
+    .empty{padding:14px;border:1px dashed var(--line);border-radius:14px;color:var(--muted);margin-top:12px}
   </style>
 </head>
 <body>
@@ -37,32 +34,24 @@
     <div class="top">
       <div>
         <h1>Log History</h1>
-        <div class="muted">Placeholder list tonight. Tomorrow we load real records from your backend.</div>
+        <div class="muted">Loads saved logs for a driver email.</div>
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        <a class="pill" href="/lab/fleetlog/" onclick="window.sbTrack?.('sb_click',{brand:'sb-fleetlog',page:location.pathname,component:'top',action:'back_app_home'});">App Home</a>
-        <a class="pill" href="/lab/fleetlog/new/" onclick="window.sbTrack?.('sb_click',{brand:'sb-fleetlog',page:location.pathname,component:'top',action:'new_log'});">New Log</a>
-        <a class="pill" href="/fleetlog/" onclick="window.sbTrack?.('sb_click',{brand:'sb-fleetlog',page:location.pathname,component:'top',action:'back_marketing'});">Marketing</a>
+        <a class="pill" href="/lab/fleetlog/">App Home</a>
+        <a class="pill" href="/lab/fleetlog/new/">New Log</a>
       </div>
     </div>
 
     <div class="card">
-      <div class="muted">
-        Tomorrow we’ll populate this table from Redis/DB and add “Open” + “Receipt” links.
-      </div>
-
       <div class="actions">
-        <a class="btn" href="/lab/fleetlog/new/"
-           onclick="window.sbTrack?.('sb_click',{brand:'sb-fleetlog',page:location.pathname,component:'history',action:'create_new'});">
-          Create New Log
-        </a>
-        <button class="btn btn-ghost" id="btnSeed">Seed Demo Rows</button>
-        <button class="btn btn-ghost" id="btnClear">Clear</button>
+        <input id="email" type="email" placeholder="driver email" />
+        <button class="btn" id="load">Load</button>
+        <button class="btn btn-ghost" id="billing">Manage Billing</button>
       </div>
 
-      <div id="empty" class="empty">
-        No logs yet. Create your first daily log at <code>/lab/fleetlog/new/</code>.
-      </div>
+      <div id="msg" class="muted" style="margin-top:10px;"></div>
+
+      <div id="empty" class="empty" style="display:none;">No logs found.</div>
 
       <table id="tbl" style="display:none;">
         <thead>
@@ -71,7 +60,7 @@
             <th>Route</th>
             <th>Start → End</th>
             <th>Miles</th>
-            <th>Status</th>
+            <th>Receipt</th>
           </tr>
         </thead>
         <tbody id="rows"></tbody>
@@ -80,50 +69,61 @@
   </div>
 
   <script>
-    const rowsEl = document.getElementById("rows");
-    const tbl = document.getElementById("tbl");
-    const empty = document.getElementById("empty");
+    const $ = (id)=>document.getElementById(id);
 
-    function render(rows){
-      rowsEl.innerHTML = "";
-      if(!rows.length){
-        tbl.style.display = "none";
-        empty.style.display = "block";
-        return;
-      }
-      empty.style.display = "none";
-      tbl.style.display = "table";
-      rows.forEach(r=>{
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${r.date}</td>
-          <td>${r.route || "—"}</td>
-          <td>${r.start || "—"} → ${r.end || "—"}</td>
-          <td>${r.miles || "—"}</td>
-          <td>${r.status || "DRAFT"}</td>
-        `;
-        rowsEl.appendChild(tr);
-      });
+    function row(L){
+      const receipt = `/lab/fleetlog/receipt/?id=${encodeURIComponent(L.id)}`;
+      return `
+        <tr>
+          <td>${L.date || "—"}</td>
+          <td>${L.route || "—"}</td>
+          <td>${(L.start||"—")} → ${(L.end||"—")}</td>
+          <td>${L.miles || "—"}</td>
+          <td><a href="${receipt}" target="_blank" rel="noopener">Open</a></td>
+        </tr>
+      `;
     }
 
-    let demo = [];
+    async function load(){
+      const email = ($("email").value||"").trim().toLowerCase();
+      if(!email || !email.includes("@")) { $("msg").textContent="Enter a valid email."; return; }
 
-    document.getElementById("btnSeed").addEventListener("click", ()=>{
-      demo = [
-        { date:"2026-02-16", route:"I-12", start:"Hammond, LA", end:"Baton Rouge, LA", miles:"55", status:"DRAFT" },
-        { date:"2026-02-15", route:"I-10", start:"New Orleans, LA", end:"Lafayette, LA", miles:"135", status:"DRAFT" }
-      ];
-      render(demo);
-      window.sbTrack?.("sb_click",{brand:"sb-fleetlog",page:location.pathname,component:"history",action:"seed_demo"});
-    });
+      $("msg").textContent="Loading…";
+      $("empty").style.display="none";
+      $("tbl").style.display="none";
+      $("rows").innerHTML="";
 
-    document.getElementById("btnClear").addEventListener("click", ()=>{
-      demo = [];
-      render(demo);
-      window.sbTrack?.("sb_click",{brand:"sb-fleetlog",page:location.pathname,component:"history",action:"clear"});
-    });
+      const r = await fetch(`/api/fleetlog/logs/list?email=${encodeURIComponent(email)}&limit=25`);
+      const j = await r.json();
+      if(!j.ok){ $("msg").textContent = `Error: ${j.error || "failed"}`; return; }
 
-    render(demo);
+      const logs = j.logs || [];
+      if(!logs.length){
+        $("msg").textContent="";
+        $("empty").style.display="block";
+        return;
+      }
+
+      $("msg").textContent="";
+      $("tbl").style.display="table";
+      $("rows").innerHTML = logs.map(row).join("");
+      window.sbTrack?.("sb_page_ready",{brand:"sb-fleetlog",page:location.pathname,component:"history",action:"loaded"});
+    }
+
+    async function billing(){
+      const email = ($("email").value||"").trim().toLowerCase();
+      if(!email || !email.includes("@")) { $("msg").textContent="Enter a valid email first."; return; }
+
+      $("msg").textContent="Opening billing…";
+      const r = await fetch(`/api/fleetlog/stripe/portal?email=${encodeURIComponent(email)}`);
+      const j = await r.json();
+      if(!j.ok){ $("msg").textContent = `Billing error: ${j.error || "failed"}`; return; }
+      window.open(j.url, "_blank", "noopener,noreferrer");
+      $("msg").textContent="";
+    }
+
+    $("load").addEventListener("click", load);
+    $("billing").addEventListener("click", billing);
   </script>
 </body>
 </html>
