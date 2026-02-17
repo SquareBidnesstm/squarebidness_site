@@ -1,4 +1,4 @@
-<!-- /lab/fleetlog/new/index.html -->
+<!-- /public/lab/fleetlog/new/index.html -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -12,33 +12,28 @@
     :root{--bg:#0b0b0b;--card:#121212;--line:#242424;--text:#f2f2f2;--muted:#b8b8b8;--ok:#22c55e;--bad:#ef4444}
     *{box-sizing:border-box}
     body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto;background:var(--bg);color:var(--text);padding:20px}
-    .wrap{max-width:860px;margin:0 auto}
-    .top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+    .wrap{max-width:920px;margin:0 auto}
     a{color:#fff;text-decoration:none}
+    .top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+    .pill{display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:var(--muted)}
     .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
     h1{margin:0 0 6px;font-size:22px}
     .muted{color:var(--muted);font-size:13px}
     .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
-    @media (max-width:780px){.grid{grid-template-columns:1fr}}
+    @media (max-width:820px){.grid{grid-template-columns:1fr}}
     label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px}
     input,select,textarea{
       width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);
       background:#0f0f0f;color:var(--text);outline:none
     }
-    textarea{min-height:90px;resize:vertical}
-    .row{margin-top:12px}
+    textarea{min-height:100px;resize:vertical}
     .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
-    .btn{
-      padding:12px 14px;border-radius:12px;border:1px solid var(--line);
-      font-weight:900;cursor:pointer;background:#fff;color:#000
-    }
+    .btn{padding:12px 14px;border-radius:12px;border:1px solid var(--line);font-weight:900;cursor:pointer;background:#fff;color:#000}
     .btn-ghost{background:transparent;color:#fff}
-    .pill{display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:var(--muted)}
-    .notice{margin-top:12px;font-size:13px;color:var(--muted)}
-    .out{margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
-    pre{white-space:pre-wrap;word-break:break-word;background:#0f0f0f;border:1px solid var(--line);border-radius:12px;padding:12px;margin:0;color:#eaeaea;font-size:12px}
     .status{margin-top:12px;font-size:13px}
     .ok{color:var(--ok)} .bad{color:var(--bad)}
+    .out{margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
+    pre{white-space:pre-wrap;word-break:break-word;background:#0f0f0f;border:1px solid var(--line);border-radius:12px;padding:12px;margin:0;color:#eaeaea;font-size:12px}
   </style>
 </head>
 <body>
@@ -46,10 +41,9 @@
     <div class="top">
       <div>
         <h1>New Daily Log</h1>
-        <div class="muted">This saves to FleetLog storage and generates a receipt link.</div>
+        <div class="muted">Saves to FleetLog storage + generates a printable receipt link.</div>
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        <span class="pill" id="todayPill">Date: —</span>
         <a class="pill" href="/lab/fleetlog/">App Home</a>
         <a class="pill" href="/lab/fleetlog/history/">History</a>
       </div>
@@ -61,7 +55,6 @@
           <label for="email">Driver Email (required)</label>
           <input id="email" type="email" placeholder="you@example.com" autocomplete="email" />
         </div>
-
         <div>
           <label for="logDate">Log Date</label>
           <input id="logDate" type="date" />
@@ -71,7 +64,6 @@
           <label for="truckId">Truck / Unit # (optional)</label>
           <input id="truckId" placeholder="ex: 12 / 904 / Pete389" />
         </div>
-
         <div>
           <label for="route">Route / Corridor</label>
           <select id="route">
@@ -85,7 +77,6 @@
           <label for="startCity">Start City / State</label>
           <input id="startCity" placeholder="ex: Hammond, LA" />
         </div>
-
         <div>
           <label for="endCity">End City / State</label>
           <input id="endCity" placeholder="ex: Dallas, TX" />
@@ -97,7 +88,7 @@
         </div>
       </div>
 
-      <div class="row">
+      <div style="margin-top:12px;">
         <label for="notes">Notes</label>
         <textarea id="notes" placeholder="Fuel, stops, delays, receipts, compliance notes…"></textarea>
       </div>
@@ -111,103 +102,102 @@
       <div class="status" id="status"></div>
 
       <div class="out" id="out" style="display:none;">
-        <div class="muted" style="margin-bottom:8px;">Draft / Saved Payload</div>
+        <div class="muted" style="margin-bottom:8px;">Payload</div>
         <pre id="jsonOut"></pre>
       </div>
 
-      <div class="notice">
-        After save, we’ll show your receipt link (print anytime).
+      <div class="muted" style="margin-top:12px;">
+        After save, a receipt opens automatically in a new tab.
       </div>
     </div>
   </div>
 
   <script>
-    const $ = (id) => document.getElementById(id);
+    const $ = (id)=>document.getElementById(id);
 
     function isoDate(d=new Date()){
-      const z = (n)=> String(n).padStart(2,'0');
+      const z=(n)=>String(n).padStart(2,'0');
       return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`;
     }
 
     const today = isoDate();
     $("logDate").value = today;
-    $("todayPill").textContent = `Date: ${today}`;
 
-    function payload() {
+    function payload(){
       return {
-        email: $("email").value.trim(),
+        email: ($("email").value||"").trim(),
         date: $("logDate").value || today,
-        truckId: $("truckId").value.trim(),
+        truckId: ($("truckId").value||"").trim(),
         route: $("route").value,
-        start: $("startCity").value.trim(),
-        end: $("endCity").value.trim(),
-        miles: $("miles").value.trim(),
-        notes: $("notes").value.trim()
+        start: ($("startCity").value||"").trim(),
+        end: ($("endCity").value||"").trim(),
+        miles: ($("miles").value||"").trim(),
+        notes: ($("notes").value||"").trim()
       };
     }
 
-    function showJson(obj) {
-      $("out").style.display = "block";
+    function showJson(obj){
+      $("out").style.display="block";
       $("jsonOut").textContent = JSON.stringify(obj, null, 2);
     }
 
-    function setStatus(msg, good=true) {
-      $("status").className = "status " + (good ? "ok" : "bad");
-      $("status").textContent = msg;
+    function setStatus(msg, ok=true){
+      $("status").className = "status " + (ok ? "ok" : "bad");
+      $("status").textContent = msg || "";
     }
 
-    async function save() {
+    async function save(){
       const p = payload();
-      if (!p.email || !p.email.includes("@")) {
-        setStatus("Driver email is required.", false);
-        return;
-      }
+      const email = (p.email||"").toLowerCase();
+      if(!email || !email.includes("@")) return setStatus("Driver email is required.", false);
 
       setStatus("Saving…");
-      showJson({ ...p, saving: true });
+      showJson({ ...p, saving:true });
 
-      try {
+      try{
         const r = await fetch("/api/fleetlog/logs/create", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
           body: JSON.stringify(p)
         });
         const j = await r.json();
+        if(!j.ok) throw new Error(j.error || "Save failed");
 
-        if (!j.ok) throw new Error(j.error || "Save failed");
+        setStatus("Saved. Opening receipt…");
+        showJson({ ...p, saved:true, id:j.id, receipt_url:j.receipt_url });
 
-        setStatus(`Saved. Receipt: ${location.origin}${j.receipt_url}`);
-        showJson({ ...p, saved: true, id: j.id, receipt_url: j.receipt_url });
+        window.sbTrack?.("sb_form_submit",{brand:"sb-fleetlog",page:location.pathname,component:"new_log",action:"save_log"});
 
-        window.sbTrack?.("sb_form_submit", { brand:"sb-fleetlog", page:location.pathname, component:"new_log", action:"save_log" });
-
-        // quick open receipt in new tab
+        // open receipt
         window.open(j.receipt_url, "_blank", "noopener,noreferrer");
-      } catch (e) {
-        setStatus(`Error: ${e.message}`, false);
+
+        // go to history with email prefilled
+        setTimeout(()=>{ window.location.href = `/lab/fleetlog/history/?email=${encodeURIComponent(email)}`; }, 350);
+      }catch(e){
+        setStatus("Error: " + e.message, false);
       }
     }
 
-    function draft() {
+    function draft(){
       const p = payload();
-      showJson({ ...p, draft: true, createdAt: new Date().toISOString() });
-      window.sbTrack?.("sb_click", { brand:"sb-fleetlog", page:location.pathname, component:"new_log", action:"draft_generated" });
+      showJson({ ...p, draft:true, createdAt:new Date().toISOString() });
       setStatus("Draft generated (not saved).");
+      window.sbTrack?.("sb_click",{brand:"sb-fleetlog",page:location.pathname,component:"new_log",action:"draft_generated"});
     }
 
-    function clearForm() {
-      $("email").value = "";
-      $("logDate").value = today;
-      $("truckId").value = "";
-      $("route").value = "";
-      $("startCity").value = "";
-      $("endCity").value = "";
-      $("miles").value = "";
-      $("notes").value = "";
-      $("out").style.display = "none";
-      $("jsonOut").textContent = "";
-      $("status").textContent = "";
-      window.sbTrack?.("sb_click", { brand:"sb-fleetlog", page:location.pathname, component:"new_log", action:"clear" });
+    function clearForm(){
+      $("email").value="";
+      $("logDate").value=today;
+      $("truckId").value="";
+      $("route").value="";
+      $("startCity").value="";
+      $("endCity").value="";
+      $("miles").value="";
+      $("notes").value="";
+      $("status").textContent="";
+      $("out").style.display="none";
+      $("jsonOut").textContent="";
+      window.sbTrack?.("sb_click",{brand:"sb-fleetlog",page:location.pathname,component:"new_log",action:"clear"});
     }
 
     $("btnSave").addEventListener("click", save);
