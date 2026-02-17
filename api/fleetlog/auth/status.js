@@ -7,7 +7,8 @@ function base() {
     .replace(/\/+$/, "");
 }
 function token() {
-  return (process.env.UPSTASH_REDIS_REST_TOKEN || "").replace(/(^"|"$)/g, "");
+  return (process.env.UPSTASH_REDIS_REST_TOKEN || "")
+    .replace(/(^"|"$)/g, "");
 }
 
 async function upstashGet(key) {
@@ -31,21 +32,26 @@ export default async function handler(req, res) {
 
   try {
     const email = String(req.query.email || "").trim().toLowerCase();
-    if (!email || !email.includes("@")) return res.status(400).json({ ok: false, error: "Missing/invalid email" });
+    if (!email || !email.includes("@")) {
+      return res.status(400).json({ ok: false, error: "Missing/invalid email" });
+    }
 
     const raw = await upstashGet(`fleetlog:email:${email}`);
     if (!raw) return res.status(200).json({ ok: true, active: false });
 
     const rec = JSON.parse(raw);
-    const active = String(rec.status || "").toUpperCase() === "ACTIVE";
+    const status = String(rec.status || "").toUpperCase();
+    const active = status === "ACTIVE";
 
     return res.status(200).json({
       ok: true,
       active,
+      status,
       tier: rec.tier || null,
       subscriptionId: rec.subscriptionId || null,
       customerId: rec.customerId || null,
       email: rec.email || email,
+      createdAt: rec.createdAt || null,
     });
   } catch (e) {
     return res.status(500).json({ ok: false, error: e?.message || "Server error" });
