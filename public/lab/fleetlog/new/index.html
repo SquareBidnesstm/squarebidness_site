@@ -37,6 +37,8 @@
     .notice{margin-top:12px;font-size:13px;color:var(--muted)}
     .out{margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
     pre{white-space:pre-wrap;word-break:break-word;background:#0f0f0f;border:1px solid var(--line);border-radius:12px;padding:12px;margin:0;color:#eaeaea;font-size:12px}
+    .status{margin-top:12px;font-size:13px}
+    .ok{color:var(--ok)} .bad{color:var(--bad)}
   </style>
 </head>
 <body>
@@ -44,17 +46,22 @@
     <div class="top">
       <div>
         <h1>New Daily Log</h1>
-        <div class="muted">Draft locally tonight. We’ll wire save + receipts tomorrow.</div>
+        <div class="muted">This saves to FleetLog storage and generates a receipt link.</div>
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
         <span class="pill" id="todayPill">Date: —</span>
-        <a class="pill" href="/lab/fleetlog/" onclick="window.sbTrack?.('sb_click',{brand:'sb-fleetlog',page:location.pathname,component:'top',action:'back_app_home'});">App Home</a>
-        <a class="pill" href="/fleetlog/" onclick="window.sbTrack?.('sb_click',{brand:'sb-fleetlog',page:location.pathname,component:'top',action:'back_marketing'});">Marketing</a>
+        <a class="pill" href="/lab/fleetlog/">App Home</a>
+        <a class="pill" href="/lab/fleetlog/history/">History</a>
       </div>
     </div>
 
     <div class="card">
       <div class="grid">
+        <div>
+          <label for="email">Driver Email (required)</label>
+          <input id="email" type="email" placeholder="you@example.com" autocomplete="email" />
+        </div>
+
         <div>
           <label for="logDate">Log Date</label>
           <input id="logDate" type="date" />
@@ -69,11 +76,7 @@
           <label for="route">Route / Corridor</label>
           <select id="route">
             <option value="">Select…</option>
-            <option>I-12</option>
-            <option>I-55</option>
-            <option>I-10</option>
-            <option>I-49</option>
-            <option>I-20</option>
+            <option>I-12</option><option>I-55</option><option>I-10</option><option>I-49</option><option>I-20</option>
             <option>Other</option>
           </select>
         </div>
@@ -100,21 +103,20 @@
       </div>
 
       <div class="actions">
-        <button class="btn" id="btnDraft">Generate Draft</button>
+        <button class="btn" id="btnSave">Save Log</button>
+        <button class="btn btn-ghost" id="btnDraft">Generate Draft</button>
         <button class="btn btn-ghost" id="btnClear">Clear</button>
-        <a class="btn btn-ghost" href="/lab/fleetlog/history/" style="text-align:center;display:inline-block;"
-           onclick="window.sbTrack?.('sb_click',{brand:'sb-fleetlog',page:location.pathname,component:'actions',action:'go_history'});">
-          View History
-        </a>
+      </div>
+
+      <div class="status" id="status"></div>
+
+      <div class="out" id="out" style="display:none;">
+        <div class="muted" style="margin-bottom:8px;">Draft / Saved Payload</div>
+        <pre id="jsonOut"></pre>
       </div>
 
       <div class="notice">
-        Tomorrow we wire: Save → Receipt link → Printable PDF + Admin view.
-      </div>
-
-      <div class="out" id="out" style="display:none;">
-        <div class="muted" style="margin-bottom:8px;">Draft JSON (preview)</div>
-        <pre id="jsonOut"></pre>
+        After save, we’ll show your receipt link (print anytime).
       </div>
     </div>
   </div>
@@ -127,32 +129,74 @@
       return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`;
     }
 
-    // init
     const today = isoDate();
     $("logDate").value = today;
     $("todayPill").textContent = `Date: ${today}`;
 
-    function draft() {
-      const payload = {
-        brand: "sb-fleetlog",
-        type: "daily_log",
+    function payload() {
+      return {
+        email: $("email").value.trim(),
         date: $("logDate").value || today,
         truckId: $("truckId").value.trim(),
         route: $("route").value,
         start: $("startCity").value.trim(),
         end: $("endCity").value.trim(),
         miles: $("miles").value.trim(),
-        notes: $("notes").value.trim(),
-        createdAt: new Date().toISOString()
+        notes: $("notes").value.trim()
       };
+    }
 
+    function showJson(obj) {
       $("out").style.display = "block";
-      $("jsonOut").textContent = JSON.stringify(payload, null, 2);
+      $("jsonOut").textContent = JSON.stringify(obj, null, 2);
+    }
 
-      window.sbTrack?.("sb_form_submit", { brand:"sb-fleetlog", page:location.pathname, component:"new_log", action:"draft_generated" });
+    function setStatus(msg, good=true) {
+      $("status").className = "status " + (good ? "ok" : "bad");
+      $("status").textContent = msg;
+    }
+
+    async function save() {
+      const p = payload();
+      if (!p.email || !p.email.includes("@")) {
+        setStatus("Driver email is required.", false);
+        return;
+      }
+
+      setStatus("Saving…");
+      showJson({ ...p, saving: true });
+
+      try {
+        const r = await fetch("/api/fleetlog/logs/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(p)
+        });
+        const j = await r.json();
+
+        if (!j.ok) throw new Error(j.error || "Save failed");
+
+        setStatus(`Saved. Receipt: ${location.origin}${j.receipt_url}`);
+        showJson({ ...p, saved: true, id: j.id, receipt_url: j.receipt_url });
+
+        window.sbTrack?.("sb_form_submit", { brand:"sb-fleetlog", page:location.pathname, component:"new_log", action:"save_log" });
+
+        // quick open receipt in new tab
+        window.open(j.receipt_url, "_blank", "noopener,noreferrer");
+      } catch (e) {
+        setStatus(`Error: ${e.message}`, false);
+      }
+    }
+
+    function draft() {
+      const p = payload();
+      showJson({ ...p, draft: true, createdAt: new Date().toISOString() });
+      window.sbTrack?.("sb_click", { brand:"sb-fleetlog", page:location.pathname, component:"new_log", action:"draft_generated" });
+      setStatus("Draft generated (not saved).");
     }
 
     function clearForm() {
+      $("email").value = "";
       $("logDate").value = today;
       $("truckId").value = "";
       $("route").value = "";
@@ -162,9 +206,11 @@
       $("notes").value = "";
       $("out").style.display = "none";
       $("jsonOut").textContent = "";
+      $("status").textContent = "";
       window.sbTrack?.("sb_click", { brand:"sb-fleetlog", page:location.pathname, component:"new_log", action:"clear" });
     }
 
+    $("btnSave").addEventListener("click", save);
     $("btnDraft").addEventListener("click", draft);
     $("btnClear").addEventListener("click", clearForm);
   </script>
