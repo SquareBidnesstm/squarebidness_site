@@ -8,13 +8,14 @@
   <meta name="theme-color" content="#0b0b0b" />
   <script defer src="/scripts/sb-analytics.js"></script>
   <style>
-    :root{--bg:#0b0b0b;--card:#121212;--line:#242424;--text:#f2f2f2;--muted:#b8b8b8}
+    :root{--bg:#0b0b0b;--card:#121212;--line:#242424;--text:#f2f2f2;--muted:#b8b8b8;--bad:#ef4444;--ok:#22c55e}
     *{box-sizing:border-box}
     body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto;background:var(--bg);color:var(--text);min-height:100vh;padding:20px;display:flex;align-items:center;justify-content:center}
     a{color:#fff;text-decoration:none}
-    .app{width:100%;max-width:560px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px}
+    .app{width:100%;max-width:640px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px}
     h1{margin:0 0 8px;font-size:28px}
     .muted{color:var(--muted);font-size:14px;margin:0 0 18px}
+    .pill{display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:var(--muted)}
     .row{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 0}
     input{
       flex:1;min-width:240px;padding:12px;border-radius:12px;border:1px solid var(--line);
@@ -26,8 +27,15 @@
     }
     .btn-primary{background:#fff;color:#000}
     .btn-ghost{background:transparent;color:#fff}
-    .pill{display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:var(--muted)}
+    .btn-danger{background:transparent;color:#fff;border-color:#3a1f1f}
     .status{margin-top:10px;font-size:13px;color:var(--muted)}
+    .status.bad{color:var(--bad)}
+    .status.ok{color:var(--ok)}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media (max-width:700px){.grid2{grid-template-columns:1fr}}
+    .gate{margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
+    .tag{display:inline-block;margin-top:6px;font-size:12px;color:var(--muted)}
+    .hidden{display:none!important}
   </style>
 </head>
 <body>
@@ -38,47 +46,128 @@
     </div>
 
     <h1>FleetLog</h1>
-    <p class="muted">Enter your email to load your history and manage billing. Create a new daily log anytime.</p>
+    <p class="muted">Enter your email. If your subscription is active, the app unlocks instantly.</p>
 
     <div class="row">
-      <input id="email" type="email" placeholder="driver email (required for history/billing)" autocomplete="email" />
-    </div>
-
-    <div style="margin-top:14px;">
-      <a class="btn btn-primary" href="/lab/fleetlog/new/"
-         onclick="window.sbTrack?.('sb_click',{brand:'sb-fleetlog',page:location.pathname,component:'app_home',action:'new_log'});">
-        Create New Daily Log
-      </a>
-    </div>
-
-    <div style="margin-top:10px;">
-      <button class="btn btn-ghost" id="historyBtn">View Log History</button>
-    </div>
-
-    <div style="margin-top:10px;">
-      <button class="btn btn-ghost" id="billingBtn">Manage Billing</button>
+      <input id="email" type="email" placeholder="driver email" autocomplete="email" />
+      <button class="pill" id="checkBtn" style="cursor:pointer;">Check</button>
     </div>
 
     <div class="status" id="status"></div>
 
+    <!-- UNLOCKED ACTIONS -->
+    <div id="unlocked" class="hidden" style="margin-top:14px;">
+      <div class="grid2">
+        <a class="btn btn-primary" href="/lab/fleetlog/new/"
+           onclick="window.sbTrack?.('sb_click',{brand:'sb-fleetlog',page:location.pathname,component:'app_home',action:'new_log'});">
+          Create New Daily Log
+        </a>
+
+        <a class="btn btn-ghost" id="historyLink" href="/lab/fleetlog/history/">
+          View Log History
+        </a>
+      </div>
+
+      <div style="margin-top:10px;">
+        <button class="btn btn-ghost" id="billingBtn">Manage Billing</button>
+      </div>
+
+      <div class="tag" id="planTag"></div>
+    </div>
+
+    <!-- GATE (NOT ACTIVE) -->
+    <div id="gate" class="gate hidden">
+      <div class="muted" style="margin-bottom:10px;">
+        No active subscription found for this email. Subscribe to activate FleetLog.
+      </div>
+
+      <div class="grid2">
+        <a class="btn btn-primary" id="buySingle" href="/api/fleetlog/stripe/checkout?tier=single">
+          Subscribe — Single Truck ($19/mo)
+        </a>
+
+        <a class="btn btn-ghost" id="buyFleet" href="/api/fleetlog/stripe/checkout?tier=fleet">
+          Subscribe — Small Fleet ($99/mo)
+        </a>
+      </div>
+
+      <div class="muted" style="margin-top:10px;font-size:13px;">
+        After checkout, your email is provisioned automatically and you’ll get a welcome email.
+      </div>
+    </div>
+
+    <div style="margin-top:12px;">
+      <button class="btn btn-danger" id="clearBtn">Clear Email</button>
+    </div>
+
     <script>
       const $ = (id)=>document.getElementById(id);
-      const statusEl = $("status");
+      const KEY = "fleetlog_email";
 
-      function getEmail(){
-        return ($("email").value || "").trim().toLowerCase();
+      function getEmail(){ return ($("email").value || "").trim().toLowerCase(); }
+      function setStatus(msg, kind){
+        $("status").textContent = msg || "";
+        $("status").className = "status" + (kind ? (" " + kind) : "");
       }
-      function setStatus(msg){ statusEl.textContent = msg || ""; }
+      function show(id, on){ $(id).classList.toggle("hidden", !on); }
 
-      $("historyBtn").addEventListener("click", ()=>{
+      function setEmailInUi(email){
+        $("email").value = email || "";
+      }
+
+      async function checkStatus(){
         const email = getEmail();
-        if(!email || !email.includes("@")) return setStatus("Enter a valid email to load history.");
-        window.location.href = `/lab/fleetlog/history/?email=${encodeURIComponent(email)}`;
-      });
+        if(!email || !email.includes("@")){
+          setStatus("Enter a valid email.", "bad");
+          show("unlocked", false);
+          show("gate", false);
+          return;
+        }
+
+        setStatus("Checking subscription…");
+        show("unlocked", false);
+        show("gate", false);
+
+        try{
+          const r = await fetch(`/api/fleetlog/auth/status?email=${encodeURIComponent(email)}`);
+          const j = await r.json();
+          if(!j.ok) throw new Error(j.error || "Status failed");
+
+          localStorage.setItem(KEY, email);
+
+          // Wire buttons/links with email context
+          $("historyLink").href = `/lab/fleetlog/history/?email=${encodeURIComponent(email)}`;
+          $("billingBtn").dataset.email = email;
+
+          $("buySingle").href = `/api/fleetlog/stripe/checkout?tier=single`;
+          $("buyFleet").href  = `/api/fleetlog/stripe/checkout?tier=fleet`;
+
+          if(j.active){
+            show("unlocked", true);
+            show("gate", false);
+            const plan = j.tier ? String(j.tier).toUpperCase() : "ACTIVE";
+            $("planTag").textContent = `Status: ACTIVE • Plan: ${plan}`;
+            setStatus("Active subscription found. App unlocked.", "ok");
+            window.sbTrack?.("sb_page_ready",{brand:"sb-fleetlog",page:location.pathname,component:"app_home",action:"unlocked"});
+          }else{
+            show("unlocked", false);
+            show("gate", true);
+            setStatus("No active subscription found for this email.", "bad");
+            window.sbTrack?.("sb_page_ready",{brand:"sb-fleetlog",page:location.pathname,component:"app_home",action:"locked"});
+          }
+        }catch(e){
+          setStatus("Error: " + e.message, "bad");
+          show("unlocked", false);
+          show("gate", true);
+        }
+      }
+
+      $("checkBtn").addEventListener("click", checkStatus);
+      $("email").addEventListener("keydown", (e)=>{ if(e.key === "Enter") checkStatus(); });
 
       $("billingBtn").addEventListener("click", async ()=>{
         const email = getEmail();
-        if(!email || !email.includes("@")) return setStatus("Enter a valid email to open billing portal.");
+        if(!email || !email.includes("@")) return setStatus("Enter a valid email first.", "bad");
 
         setStatus("Opening billing portal…");
         try{
@@ -89,9 +178,24 @@
           setStatus("");
           window.sbTrack?.("sb_click",{brand:"sb-fleetlog",page:location.pathname,component:"app_home",action:"billing_portal"});
         }catch(e){
-          setStatus("Billing error: " + e.message);
+          setStatus("Billing error: " + e.message, "bad");
         }
       });
+
+      $("clearBtn").addEventListener("click", ()=>{
+        localStorage.removeItem(KEY);
+        setEmailInUi("");
+        setStatus("");
+        show("unlocked", false);
+        show("gate", false);
+      });
+
+      // Prefill email from localStorage
+      const saved = (localStorage.getItem(KEY) || "").trim().toLowerCase();
+      if(saved){
+        setEmailInUi(saved);
+        checkStatus();
+      }
     </script>
   </div>
 </body>
