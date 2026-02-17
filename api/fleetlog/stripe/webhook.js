@@ -12,7 +12,7 @@ function nowIso() {
 }
 
 async function upstashFetch(path, bodyObj) {
-  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const url = (process.env.UPSTASH_REDIS_REST_URL || "").replace(/(^"|"$)/g, "").replace(/\/+$/,"");
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
   if (!url || !token) throw new Error("Missing Upstash env vars");
 
