@@ -1,0 +1,79 @@
+<!-- /public/lab/fleetlog/receipt/index.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Receipt — SB FleetLog™</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#0b0b0b" />
+  <script defer src="/scripts/sb-analytics.js"></script>
+  <style>
+    :root{--bg:#0b0b0b;--card:#121212;--line:#242424;--text:#f2f2f2;--muted:#b8b8b8}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto;background:var(--bg);color:var(--text);padding:20px}
+    .wrap{max-width:860px;margin:0 auto}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+    h1{margin:0 0 6px;font-size:20px}
+    .muted{color:var(--muted);font-size:13px}
+    .row{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:12px}
+    .k{color:var(--muted);font-size:12px}
+    .v{font-weight:800}
+    .btn{display:inline-block;margin-top:14px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#fff;color:#000;font-weight:900;text-decoration:none;cursor:pointer}
+    .btn-ghost{background:transparent;color:#fff}
+    @media print{ .noprint{display:none} body{background:#fff;color:#000} .card{border:0} }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="noprint" style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+        <a class="btn btn-ghost" href="/lab/fleetlog/history/">Back to History</a>
+        <button class="btn" onclick="window.print()">Print</button>
+      </div>
+
+      <h1 style="margin-top:14px;">SB FleetLog™ Receipt</h1>
+      <div class="muted">Printable record for your daily log.</div>
+
+      <div id="content" style="margin-top:14px;"></div>
+
+      <div class="noprint" style="margin-top:14px;">
+        <a class="btn btn-ghost" href="/lab/fleetlog/new/">Create New Log</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const qp = new URLSearchParams(location.search);
+    const id = qp.get("id") || "";
+    const el = document.getElementById("content");
+
+    function item(k, v){
+      return `<div class="row"><div class="k">${k}</div><div class="v">${v || "—"}</div></div>`;
+    }
+
+    async function load(){
+      if(!id){ el.innerHTML = `<div class="muted">Missing receipt id.</div>`; return; }
+      const r = await fetch(`/api/fleetlog/logs/get?id=${encodeURIComponent(id)}`);
+      const j = await r.json();
+      if(!j.ok){ el.innerHTML = `<div class="muted">Not found.</div>`; return; }
+
+      const L = j.log;
+      el.innerHTML = [
+        item("Log ID", L.id),
+        item("Date", L.date),
+        item("Truck / Unit", L.truckId),
+        item("Route", L.route),
+        item("Start", L.start),
+        item("End", L.end),
+        item("Miles", L.miles),
+        item("Notes", L.notes),
+        item("Created", L.createdAt)
+      ].join("");
+      window.sbTrack?.("sb_page_ready",{brand:"sb-fleetlog",page:location.pathname,component:"receipt",action:"loaded"});
+    }
+
+    load();
+  </script>
+</body>
+</html>
