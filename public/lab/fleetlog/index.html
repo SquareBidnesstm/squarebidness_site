@@ -1,123 +1,104 @@
-<!-- /lab/fleetlog/index.html -->
+<!-- /public/lab/fleetlog/index.html -->
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-
-  <title>FleetLog App — SB FleetLog™</title>
+  <title>SB FleetLog™ — App</title>
   <meta name="robots" content="noindex,nofollow" />
   <meta name="theme-color" content="#0b0b0b" />
-
   <script defer src="/scripts/sb-analytics.js"></script>
-
   <style>
-    :root{
-      --bg:#0b0b0b;
-      --card:#121212;
-      --line:#242424;
-      --text:#f2f2f2;
-      --muted:#b8b8b8;
-      --accent:#ffffff;
+    :root{--bg:#0b0b0b;--card:#121212;--line:#242424;--text:#f2f2f2;--muted:#b8b8b8}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto;background:var(--bg);color:var(--text);min-height:100vh;padding:20px;display:flex;align-items:center;justify-content:center}
+    a{color:#fff;text-decoration:none}
+    .app{width:100%;max-width:560px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px}
+    h1{margin:0 0 8px;font-size:28px}
+    .muted{color:var(--muted);font-size:14px;margin:0 0 18px}
+    .row{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 0}
+    input{
+      flex:1;min-width:240px;padding:12px;border-radius:12px;border:1px solid var(--line);
+      background:#0f0f0f;color:var(--text);outline:none
     }
-
-    *{box-sizing:border-box;}
-    body{
-      margin:0;
-      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto;
-      background:var(--bg);
-      color:var(--text);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      min-height:100vh;
-      padding:20px;
-    }
-
-    .app{
-      width:100%;
-      max-width:520px;
-      background:var(--card);
-      border:1px solid var(--line);
-      border-radius:18px;
-      padding:28px;
-    }
-
-    h1{
-      margin:0 0 8px;
-      font-size:28px;
-    }
-
-    .muted{
-      color:var(--muted);
-      font-size:14px;
-      margin-bottom:22px;
-    }
-
     .btn{
-      width:100%;
-      padding:14px;
-      border-radius:14px;
-      border:1px solid var(--line);
-      font-weight:800;
-      cursor:pointer;
-      margin-bottom:12px;
-      text-align:center;
-      display:block;
-      text-decoration:none;
+      width:100%;padding:14px;border-radius:14px;border:1px solid var(--line);
+      font-weight:900;cursor:pointer;text-align:center;display:block
     }
-
-    .btn-primary{
-      background:#ffffff;
-      color:#000;
-    }
-
-    .btn-ghost{
-      background:transparent;
-      color:#fff;
-    }
-
-    .footer{
-      text-align:center;
-      font-size:12px;
-      color:var(--muted);
-      margin-top:18px;
-    }
+    .btn-primary{background:#fff;color:#000}
+    .btn-ghost{background:transparent;color:#fff}
+    .pill{display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:var(--muted)}
+    .status{margin-top:10px;font-size:13px;color:var(--muted)}
   </style>
 </head>
-
 <body>
-
   <div class="app">
-
-    <h1>SB FleetLog™</h1>
-    <div class="muted">
-      Digital Logbook — Built for Owner-Operators
+    <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px;">
+      <div class="pill">SB FleetLog™ App</div>
+      <a class="pill" href="/fleetlog/" onclick="window.sbTrack?.('sb_click',{brand:'sb-fleetlog',page:location.pathname,component:'app_home',action:'back_marketing'});">Marketing</a>
     </div>
 
-    <a class="btn btn-primary"
-       href="/lab/fleetlog/new/"
-       onclick="window.sbTrack?.('sb_click',{brand:'sb-fleetlog',page:location.pathname,component:'app',action:'new_log'});">
-      Create New Daily Log
-    </a>
+    <h1>FleetLog</h1>
+    <p class="muted">Enter your email to load your history and manage billing. Create a new daily log anytime.</p>
 
-    <a class="btn btn-ghost"
-       href="/lab/fleetlog/history/"
-       onclick="window.sbTrack?.('sb_click',{brand:'sb-fleetlog',page:location.pathname,component:'app',action:'view_history'});">
-      View Log History
-    </a>
-
-    <a class="btn btn-ghost"
-       href="/fleetlog/"
-       onclick="window.sbTrack?.('sb_click',{brand:'sb-fleetlog',page:location.pathname,component:'app',action:'back_marketing'});">
-      Back to FleetLog Site
-    </a>
-
-    <div class="footer">
-      Mobile-friendly • Printable receipts • No corporate bloat
+    <div class="row">
+      <input id="email" type="email" placeholder="driver email (required for history/billing)" autocomplete="email" />
     </div>
 
+    <div style="margin-top:14px;">
+      <a class="btn btn-primary" id="newBtn" href="/lab/fleetlog/new/"
+         onclick="window.sbTrack?.('sb_click',{brand:'sb-fleetlog',page:location.pathname,component:'app_home',action:'new_log'});">
+        Create New Daily Log
+      </a>
+    </div>
+
+    <div style="margin-top:10px;">
+      <button class="btn btn-ghost" id="historyBtn">
+        View Log History
+      </button>
+    </div>
+
+    <div style="margin-top:10px;">
+      <button class="btn btn-ghost" id="billingBtn">
+        Manage Billing
+      </button>
+    </div>
+
+    <div class="status" id="status"></div>
+
+    <script>
+      const $ = (id)=>document.getElementById(id);
+      const statusEl = $("status");
+
+      function getEmail(){
+        return ($("email").value || "").trim().toLowerCase();
+      }
+
+      function setStatus(msg){ statusEl.textContent = msg || ""; }
+
+      $("historyBtn").addEventListener("click", ()=>{
+        const email = getEmail();
+        if(!email || !email.includes("@")) return setStatus("Enter a valid email to load history.");
+        window.location.href = `/lab/fleetlog/history/?email=${encodeURIComponent(email)}`;
+      });
+
+      $("billingBtn").addEventListener("click", async ()=>{
+        const email = getEmail();
+        if(!email || !email.includes("@")) return setStatus("Enter a valid email to open billing portal.");
+
+        setStatus("Opening billing portal…");
+        try{
+          const r = await fetch(`/api/fleetlog/stripe/portal?email=${encodeURIComponent(email)}`);
+          const j = await r.json();
+          if(!j.ok) throw new Error(j.error || "Billing failed");
+          window.open(j.url, "_blank", "noopener,noreferrer");
+          setStatus("");
+          window.sbTrack?.("sb_click",{brand:"sb-fleetlog",page:location.pathname,component:"app_home",action:"billing_portal"});
+        }catch(e){
+          setStatus("Billing error: " + e.message);
+        }
+      });
+    </script>
   </div>
-
 </body>
 </html>
