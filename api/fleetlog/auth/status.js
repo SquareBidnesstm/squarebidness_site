@@ -1,4 +1,4 @@
-// /api/fleetlog/auth/status.js
+// api/fleetlog/auth/status.js
 export const config = { runtime: "nodejs" };
 
 function base() {
@@ -28,7 +28,9 @@ async function upstashGet(key) {
 
 export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(204).end();
-  if (req.method !== "GET") return res.status(405).json({ ok: false, error: "Method not allowed" });
+  if (req.method !== "GET") {
+    return res.status(405).json({ ok: false, error: "Method not allowed" });
+  }
 
   try {
     const email = String(req.query.email || "").trim().toLowerCase();
@@ -57,4 +59,3 @@ export default async function handler(req, res) {
     return res.status(500).json({ ok: false, error: e?.message || "Server error" });
   }
 }
-
