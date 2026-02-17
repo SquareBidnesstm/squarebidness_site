@@ -1,6 +1,4 @@
 // /api/fleetlog/logs/create.js
-// SB FleetLog — Create Log (Upstash REST)
-
 export const config = { runtime: "nodejs" };
 
 const clean = (s, n = 4000) =>
@@ -11,23 +9,23 @@ const clean = (s, n = 4000) =>
     .slice(0, n);
 
 function upstashBaseUrl() {
-  // harden against quotes/trailing slashes
   return (process.env.UPSTASH_REDIS_REST_URL || "")
     .replace(/(^"|"$)/g, "")
     .replace(/\/+$/, "");
 }
 
+function upstashToken() {
+  return (process.env.UPSTASH_REDIS_REST_TOKEN || "").replace(/(^"|"$)/g, "");
+}
+
 async function upstashPost(path, bodyArr) {
   const base = upstashBaseUrl();
-  const token = (process.env.UPSTASH_REDIS_REST_TOKEN || "").replace(/(^"|"$)/g, "");
+  const token = upstashToken();
   if (!base || !token) throw new Error("Missing UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN");
 
   const r = await fetch(`${base}${path}`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify(bodyArr),
   });
 
@@ -37,12 +35,8 @@ async function upstashPost(path, bodyArr) {
 }
 
 function makeId() {
-  // Node 18+ has crypto.randomUUID
-  try {
-    return crypto.randomUUID();
-  } catch {
-    return `fl_${Date.now()}_${Math.random().toString(16).slice(2)}`;
-  }
+  try { return crypto.randomUUID(); }
+  catch { return `fl_${Date.now()}_${Math.random().toString(16).slice(2)}`; }
 }
 
 export default async function handler(req, res) {
@@ -52,9 +46,7 @@ export default async function handler(req, res) {
   try {
     const body = req.body || {};
     const email = clean(body.email, 160).toLowerCase();
-    if (!email || !email.includes("@")) {
-      return res.status(400).json({ ok: false, error: "Missing or invalid email" });
-    }
+    if (!email || !email.includes("@")) return res.status(400).json({ ok: false, error: "Missing or invalid email" });
 
     const log = {
       id: makeId(),
@@ -71,17 +63,8 @@ export default async function handler(req, res) {
       status: "SAVED",
     };
 
-    // store log
-    await upstashPost(`/set/${encodeURIComponent(`fleetlog:log:${log.id}`)}`, [
-      JSON.stringify(log),
-    ]);
-
-    // index for user history (latest first)
-    await upstashPost(`/lpush/${encodeURIComponent(`fleetlog:user:${email}:logs`)}`, [
-      log.id,
-    ]);
-
-    // optional: keep only latest 200 ids
+    await upstashPost(`/set/${encodeURIComponent(`fleetlog:log:${log.id}`)}`, [JSON.stringify(log)]);
+    await upstashPost(`/lpush/${encodeURIComponent(`fleetlog:user:${email}:logs`)}`, [log.id]);
     await upstashPost(`/ltrim/${encodeURIComponent(`fleetlog:user:${email}:logs`)}`, [0, 199]);
 
     return res.status(200).json({
