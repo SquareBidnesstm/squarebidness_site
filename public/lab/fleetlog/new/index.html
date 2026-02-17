@@ -1,0 +1,172 @@
+<!-- /lab/fleetlog/new/index.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>New Log — SB FleetLog™</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#0b0b0b" />
+  <script defer src="/scripts/sb-analytics.js"></script>
+  <style>
+    :root{--bg:#0b0b0b;--card:#121212;--line:#242424;--text:#f2f2f2;--muted:#b8b8b8;--ok:#22c55e;--bad:#ef4444}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto;background:var(--bg);color:var(--text);padding:20px}
+    .wrap{max-width:860px;margin:0 auto}
+    .top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+    a{color:#fff;text-decoration:none}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+    h1{margin:0 0 6px;font-size:22px}
+    .muted{color:var(--muted);font-size:13px}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+    @media (max-width:780px){.grid{grid-template-columns:1fr}}
+    label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px}
+    input,select,textarea{
+      width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);
+      background:#0f0f0f;color:var(--text);outline:none
+    }
+    textarea{min-height:90px;resize:vertical}
+    .row{margin-top:12px}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .btn{
+      padding:12px 14px;border-radius:12px;border:1px solid var(--line);
+      font-weight:900;cursor:pointer;background:#fff;color:#000
+    }
+    .btn-ghost{background:transparent;color:#fff}
+    .pill{display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:var(--muted)}
+    .notice{margin-top:12px;font-size:13px;color:var(--muted)}
+    .out{margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
+    pre{white-space:pre-wrap;word-break:break-word;background:#0f0f0f;border:1px solid var(--line);border-radius:12px;padding:12px;margin:0;color:#eaeaea;font-size:12px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>New Daily Log</h1>
+        <div class="muted">Draft locally tonight. We’ll wire save + receipts tomorrow.</div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <span class="pill" id="todayPill">Date: —</span>
+        <a class="pill" href="/lab/fleetlog/" onclick="window.sbTrack?.('sb_click',{brand:'sb-fleetlog',page:location.pathname,component:'top',action:'back_app_home'});">App Home</a>
+        <a class="pill" href="/fleetlog/" onclick="window.sbTrack?.('sb_click',{brand:'sb-fleetlog',page:location.pathname,component:'top',action:'back_marketing'});">Marketing</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="grid">
+        <div>
+          <label for="logDate">Log Date</label>
+          <input id="logDate" type="date" />
+        </div>
+
+        <div>
+          <label for="truckId">Truck / Unit # (optional)</label>
+          <input id="truckId" placeholder="ex: 12 / 904 / Pete389" />
+        </div>
+
+        <div>
+          <label for="route">Route / Corridor</label>
+          <select id="route">
+            <option value="">Select…</option>
+            <option>I-12</option>
+            <option>I-55</option>
+            <option>I-10</option>
+            <option>I-49</option>
+            <option>I-20</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="startCity">Start City / State</label>
+          <input id="startCity" placeholder="ex: Hammond, LA" />
+        </div>
+
+        <div>
+          <label for="endCity">End City / State</label>
+          <input id="endCity" placeholder="ex: Dallas, TX" />
+        </div>
+
+        <div>
+          <label for="miles">Miles (optional)</label>
+          <input id="miles" inputmode="numeric" placeholder="ex: 486" />
+        </div>
+      </div>
+
+      <div class="row">
+        <label for="notes">Notes</label>
+        <textarea id="notes" placeholder="Fuel, stops, delays, receipts, compliance notes…"></textarea>
+      </div>
+
+      <div class="actions">
+        <button class="btn" id="btnDraft">Generate Draft</button>
+        <button class="btn btn-ghost" id="btnClear">Clear</button>
+        <a class="btn btn-ghost" href="/lab/fleetlog/history/" style="text-align:center;display:inline-block;"
+           onclick="window.sbTrack?.('sb_click',{brand:'sb-fleetlog',page:location.pathname,component:'actions',action:'go_history'});">
+          View History
+        </a>
+      </div>
+
+      <div class="notice">
+        Tomorrow we wire: Save → Receipt link → Printable PDF + Admin view.
+      </div>
+
+      <div class="out" id="out" style="display:none;">
+        <div class="muted" style="margin-bottom:8px;">Draft JSON (preview)</div>
+        <pre id="jsonOut"></pre>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    function isoDate(d=new Date()){
+      const z = (n)=> String(n).padStart(2,'0');
+      return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`;
+    }
+
+    // init
+    const today = isoDate();
+    $("logDate").value = today;
+    $("todayPill").textContent = `Date: ${today}`;
+
+    function draft() {
+      const payload = {
+        brand: "sb-fleetlog",
+        type: "daily_log",
+        date: $("logDate").value || today,
+        truckId: $("truckId").value.trim(),
+        route: $("route").value,
+        start: $("startCity").value.trim(),
+        end: $("endCity").value.trim(),
+        miles: $("miles").value.trim(),
+        notes: $("notes").value.trim(),
+        createdAt: new Date().toISOString()
+      };
+
+      $("out").style.display = "block";
+      $("jsonOut").textContent = JSON.stringify(payload, null, 2);
+
+      window.sbTrack?.("sb_form_submit", { brand:"sb-fleetlog", page:location.pathname, component:"new_log", action:"draft_generated" });
+    }
+
+    function clearForm() {
+      $("logDate").value = today;
+      $("truckId").value = "";
+      $("route").value = "";
+      $("startCity").value = "";
+      $("endCity").value = "";
+      $("miles").value = "";
+      $("notes").value = "";
+      $("out").style.display = "none";
+      $("jsonOut").textContent = "";
+      window.sbTrack?.("sb_click", { brand:"sb-fleetlog", page:location.pathname, component:"new_log", action:"clear" });
+    }
+
+    $("btnDraft").addEventListener("click", draft);
+    $("btnClear").addEventListener("click", clearForm);
+  </script>
+</body>
+</html>
