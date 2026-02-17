@@ -9,23 +9,28 @@
   <meta name="theme-color" content="#0b0b0b" />
   <script defer src="/scripts/sb-analytics.js"></script>
   <style>
-    :root{--bg:#0b0b0b;--card:#121212;--line:#242424;--text:#f2f2f2;--muted:#b8b8b8}
+    :root{--bg:#0b0b0b;--card:#121212;--line:#242424;--text:#f2f2f2;--muted:#b8b8b8;--bad:#ef4444}
     *{box-sizing:border-box}
     body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto;background:var(--bg);color:var(--text);padding:20px}
-    .wrap{max-width:980px;margin:0 auto}
+    .wrap{max-width:1020px;margin:0 auto}
+    a{color:#fff;text-decoration:none}
     .top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
     h1{margin:0 0 6px;font-size:22px}
     .muted{color:var(--muted);font-size:13px}
-    a{color:#fff;text-decoration:none}
     .pill{display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:var(--muted)}
     .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
-    table{width:100%;border-collapse:collapse;margin-top:10px}
-    th,td{padding:12px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:13px}
-    th{color:var(--muted);font-weight:900}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    input{
+      padding:12px;border-radius:12px;border:1px solid var(--line);
+      background:#0f0f0f;color:var(--text);min-width:280px;outline:none
+    }
     .btn{padding:12px 14px;border-radius:12px;border:1px solid var(--line);font-weight:900;cursor:pointer;background:#fff;color:#000;display:inline-block}
     .btn-ghost{background:transparent;color:#fff}
-    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-    input{padding:12px;border-radius:12px;border:1px solid var(--line);background:#0f0f0f;color:var(--text);min-width:260px}
+    .msg{margin-top:10px;font-size:13px;color:var(--muted)}
+    .err{color:var(--bad)}
+    table{width:100%;border-collapse:collapse;margin-top:12px}
+    th,td{padding:12px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:13px;vertical-align:top}
+    th{color:var(--muted);font-weight:900}
     .empty{padding:14px;border:1px dashed var(--line);border-radius:14px;color:var(--muted);margin-top:12px}
   </style>
 </head>
@@ -34,7 +39,7 @@
     <div class="top">
       <div>
         <h1>Log History</h1>
-        <div class="muted">Loads saved logs for a driver email.</div>
+        <div class="muted">Loads saved logs by driver email.</div>
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
         <a class="pill" href="/lab/fleetlog/">App Home</a>
@@ -44,14 +49,14 @@
 
     <div class="card">
       <div class="actions">
-        <input id="email" type="email" placeholder="driver email" />
-        <button class="btn" id="load">Load</button>
-        <button class="btn btn-ghost" id="billing">Manage Billing</button>
+        <input id="email" type="email" placeholder="driver email" autocomplete="email" />
+        <button class="btn" id="loadBtn">Load</button>
+        <button class="btn btn-ghost" id="billingBtn">Manage Billing</button>
       </div>
 
-      <div id="msg" class="muted" style="margin-top:10px;"></div>
+      <div class="msg" id="msg"></div>
 
-      <div id="empty" class="empty" style="display:none;">No logs found.</div>
+      <div class="empty" id="empty" style="display:none;">No logs found.</div>
 
       <table id="tbl" style="display:none;">
         <thead>
@@ -71,6 +76,15 @@
   <script>
     const $ = (id)=>document.getElementById(id);
 
+    function qp(name){
+      return new URLSearchParams(location.search).get(name) || "";
+    }
+
+    function setMsg(text, isErr=false){
+      $("msg").className = "msg" + (isErr ? " err" : "");
+      $("msg").textContent = text || "";
+    }
+
     function row(L){
       const receipt = `/lab/fleetlog/receipt/?id=${encodeURIComponent(L.id)}`;
       return `
@@ -86,44 +100,57 @@
 
     async function load(){
       const email = ($("email").value||"").trim().toLowerCase();
-      if(!email || !email.includes("@")) { $("msg").textContent="Enter a valid email."; return; }
+      if(!email || !email.includes("@")) return setMsg("Enter a valid email.", true);
 
-      $("msg").textContent="Loading…";
+      setMsg("Loading…");
       $("empty").style.display="none";
       $("tbl").style.display="none";
       $("rows").innerHTML="";
 
-      const r = await fetch(`/api/fleetlog/logs/list?email=${encodeURIComponent(email)}&limit=25`);
-      const j = await r.json();
-      if(!j.ok){ $("msg").textContent = `Error: ${j.error || "failed"}`; return; }
+      try{
+        const r = await fetch(`/api/fleetlog/logs/list?email=${encodeURIComponent(email)}&limit=25`);
+        const j = await r.json();
+        if(!j.ok) throw new Error(j.error || "Failed");
 
-      const logs = j.logs || [];
-      if(!logs.length){
-        $("msg").textContent="";
-        $("empty").style.display="block";
-        return;
+        const logs = j.logs || [];
+        if(!logs.length){
+          setMsg("");
+          $("empty").style.display="block";
+          return;
+        }
+
+        setMsg("");
+        $("tbl").style.display="table";
+        $("rows").innerHTML = logs.map(row).join("");
+        window.sbTrack?.("sb_page_ready",{brand:"sb-fleetlog",page:location.pathname,component:"history",action:"loaded"});
+      }catch(e){
+        setMsg("Error: " + e.message, true);
       }
-
-      $("msg").textContent="";
-      $("tbl").style.display="table";
-      $("rows").innerHTML = logs.map(row).join("");
-      window.sbTrack?.("sb_page_ready",{brand:"sb-fleetlog",page:location.pathname,component:"history",action:"loaded"});
     }
 
     async function billing(){
       const email = ($("email").value||"").trim().toLowerCase();
-      if(!email || !email.includes("@")) { $("msg").textContent="Enter a valid email first."; return; }
+      if(!email || !email.includes("@")) return setMsg("Enter a valid email first.", true);
 
-      $("msg").textContent="Opening billing…";
-      const r = await fetch(`/api/fleetlog/stripe/portal?email=${encodeURIComponent(email)}`);
-      const j = await r.json();
-      if(!j.ok){ $("msg").textContent = `Billing error: ${j.error || "failed"}`; return; }
-      window.open(j.url, "_blank", "noopener,noreferrer");
-      $("msg").textContent="";
+      setMsg("Opening billing…");
+      try{
+        const r = await fetch(`/api/fleetlog/stripe/portal?email=${encodeURIComponent(email)}`);
+        const j = await r.json();
+        if(!j.ok) throw new Error(j.error || "Billing failed");
+        window.open(j.url, "_blank", "noopener,noreferrer");
+        setMsg("");
+        window.sbTrack?.("sb_click",{brand:"sb-fleetlog",page:location.pathname,component:"history",action:"billing_portal"});
+      }catch(e){
+        setMsg("Billing error: " + e.message, true);
+      }
     }
 
-    $("load").addEventListener("click", load);
-    $("billing").addEventListener("click", billing);
+    $("loadBtn").addEventListener("click", load);
+    $("billingBtn").addEventListener("click", billing);
+
+    // prefill from ?email=
+    const pre = qp("email");
+    if(pre){ $("email").value = pre; load(); }
   </script>
 </body>
 </html>
