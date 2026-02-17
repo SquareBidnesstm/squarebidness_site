@@ -75,7 +75,7 @@
       <div class="tag" id="planTag"></div>
     </div>
 
-    <!-- GATE (NOT ACTIVE) -->
+    <!-- LOCKED -->
     <div id="gate" class="gate hidden">
       <div class="muted" style="margin-bottom:10px;">
         No active subscription found for this email. Subscribe to activate FleetLog.
@@ -111,10 +111,6 @@
       }
       function show(id, on){ $(id).classList.toggle("hidden", !on); }
 
-      function setEmailInUi(email){
-        $("email").value = email || "";
-      }
-
       async function checkStatus(){
         const email = getEmail();
         if(!email || !email.includes("@")){
@@ -135,12 +131,8 @@
 
           localStorage.setItem(KEY, email);
 
-          // Wire buttons/links with email context
           $("historyLink").href = `/lab/fleetlog/history/?email=${encodeURIComponent(email)}`;
           $("billingBtn").dataset.email = email;
-
-          $("buySingle").href = `/api/fleetlog/stripe/checkout?tier=single`;
-          $("buyFleet").href  = `/api/fleetlog/stripe/checkout?tier=fleet`;
 
           if(j.active){
             show("unlocked", true);
@@ -184,16 +176,15 @@
 
       $("clearBtn").addEventListener("click", ()=>{
         localStorage.removeItem(KEY);
-        setEmailInUi("");
+        $("email").value = "";
         setStatus("");
         show("unlocked", false);
         show("gate", false);
       });
 
-      // Prefill email from localStorage
       const saved = (localStorage.getItem(KEY) || "").trim().toLowerCase();
       if(saved){
-        setEmailInUi(saved);
+        $("email").value = saved;
         checkStatus();
       }
     </script>
