@@ -31,6 +31,8 @@
     th,td{padding:12px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:13px;vertical-align:top}
     th{color:var(--muted);font-weight:900}
     .empty{padding:14px;border:1px dashed var(--line);border-radius:14px;color:var(--muted);margin-top:12px}
+    .hidden{display:none!important}
+    .gatebox{margin-top:12px;border:1px dashed var(--line);border-radius:14px;padding:14px}
   </style>
 </head>
 <body>
@@ -38,11 +40,11 @@
     <div class="top">
       <div>
         <h1>Log History</h1>
-        <div class="muted">Loads saved logs by driver email.</div>
+        <div class="muted">Gated by active subscription. Loads logs by driver email.</div>
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
         <a class="pill" href="/lab/fleetlog/">App Home</a>
-        <a class="pill" href="/lab/fleetlog/new/">New Log</a>
+        <a class="pill" id="newLink" href="/lab/fleetlog/new/">New Log</a>
       </div>
     </div>
 
@@ -55,9 +57,20 @@
 
       <div class="msg" id="msg"></div>
 
-      <div class="empty" id="empty" style="display:none;">No logs found.</div>
+      <div class="gatebox hidden" id="gate">
+        <div class="muted" style="margin-bottom:10px;">
+          No active subscription found for this email. Subscribe to activate FleetLog.
+        </div>
+        <div class="actions">
+          <a class="btn" href="/api/fleetlog/stripe/checkout?tier=single">Subscribe — Single ($19/mo)</a>
+          <a class="btn btn-ghost" href="/api/fleetlog/stripe/checkout?tier=fleet">Subscribe — Fleet ($99/mo)</a>
+          <a class="btn btn-ghost" href="/fleetlog/">Back to Marketing</a>
+        </div>
+      </div>
 
-      <table id="tbl" style="display:none;">
+      <div class="empty hidden" id="empty">No logs found.</div>
+
+      <table id="tbl" class="hidden">
         <thead>
           <tr>
             <th>Date</th>
@@ -74,15 +87,16 @@
 
   <script>
     const $ = (id)=>document.getElementById(id);
+    const KEY = "fleetlog_email";
 
-    function qp(name){
-      return new URLSearchParams(location.search).get(name) || "";
-    }
-
+    function qp(name){ return new URLSearchParams(location.search).get(name) || ""; }
     function setMsg(text, isErr=false){
       $("msg").className = "msg" + (isErr ? " err" : "");
       $("msg").textContent = text || "";
     }
+    function show(id, on){ $(id).classList.toggle("hidden", !on); }
+
+    function getEmail(){ return ($("email").value||"").trim().toLowerCase(); }
 
     function row(L){
       const receipt = `/lab/fleetlog/receipt/?id=${encodeURIComponent(L.id)}`;
@@ -97,15 +111,44 @@
       `;
     }
 
+    async function ensureActive(email){
+      if(!email || !email.includes("@")){
+        setMsg("Enter a valid email.", true);
+        show("gate", false);
+        return false;
+      }
+      setMsg("Checking subscription…");
+      try{
+        const r = await fetch(`/api/fleetlog/auth/status?email=${encodeURIComponent(email)}`);
+        const j = await r.json();
+        if(!j.ok) throw new Error(j.error || "Status failed");
+        localStorage.setItem(KEY, email);
+        $("newLink").href = `/lab/fleetlog/new/?email=${encodeURIComponent(email)}`;
+
+        if(!j.active){
+          setMsg("Subscription inactive for this email.", true);
+          show("gate", true);
+          return false;
+        }
+        show("gate", false);
+        return true;
+      }catch(e){
+        setMsg("Status error: " + e.message, true);
+        show("gate", true);
+        return false;
+      }
+    }
+
     async function load(){
-      const email = ($("email").value||"").trim().toLowerCase();
-      if(!email || !email.includes("@")) return setMsg("Enter a valid email.", true);
+      const email = getEmail();
+      show("empty", false);
+      show("tbl", false);
+      $("rows").innerHTML = "";
+
+      const ok = await ensureActive(email);
+      if(!ok) return;
 
       setMsg("Loading…");
-      $("empty").style.display="none";
-      $("tbl").style.display="none";
-      $("rows").innerHTML="";
-
       try{
         const r = await fetch(`/api/fleetlog/logs/list?email=${encodeURIComponent(email)}&limit=25`);
         const j = await r.json();
@@ -114,12 +157,12 @@
         const logs = j.logs || [];
         if(!logs.length){
           setMsg("");
-          $("empty").style.display="block";
+          show("empty", true);
           return;
         }
 
         setMsg("");
-        $("tbl").style.display="table";
+        show("tbl", true);
         $("rows").innerHTML = logs.map(row).join("");
         window.sbTrack?.("sb_page_ready",{brand:"sb-fleetlog",page:location.pathname,component:"history",action:"loaded"});
       }catch(e){
@@ -128,8 +171,9 @@
     }
 
     async function billing(){
-      const email = ($("email").value||"").trim().toLowerCase();
-      if(!email || !email.includes("@")) return setMsg("Enter a valid email first.", true);
+      const email = getEmail();
+      const ok = await ensureActive(email);
+      if(!ok) return;
 
       setMsg("Opening billing…");
       try{
@@ -146,9 +190,15 @@
 
     $("loadBtn").addEventListener("click", load);
     $("billingBtn").addEventListener("click", billing);
+    $("email").addEventListener("keydown", (e)=>{ if(e.key === "Enter") load(); });
 
-    const pre = qp("email");
-    if(pre){ $("email").value = pre; load(); }
+    // Prefill from ?email= or localStorage
+    const pre = (qp("email") || localStorage.getItem(KEY) || "").trim().toLowerCase();
+    if(pre){
+      $("email").value = pre;
+      $("newLink").href = `/lab/fleetlog/new/?email=${encodeURIComponent(pre)}`;
+      load();
+    }
   </script>
 </body>
 </html>
