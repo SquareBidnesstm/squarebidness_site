@@ -26,30 +26,56 @@ async function upstashGetRaw(key) {
   return j?.result ?? null;
 }
 
-// Handles Upstash returning:
-// 1) a JSON string: "{...}"
-// 2) an array wrapping the JSON string: ["{...}"]
+function tryJsonParse(x) {
+  if (typeof x !== "string") return null;
+  try { return JSON.parse(x); } catch { return null; }
+}
+
+// Normalizes all known stored shapes into a record object:
+// - "{...}"
+// - ["{...}"]
+// - "[\"{...}\"]"  (stringified JSON array, your current case)
 function parseStoredRecord(result) {
   if (result == null) return null;
 
-  // If Upstash returns an array, take first element
+  // Case A: already an object
+  if (typeof result === "object" && !Array.isArray(result)) return result;
+
+  // Case B: array
   if (Array.isArray(result)) {
     const first = result[0];
-    if (typeof first === "string") {
-      try { return JSON.parse(first); } catch { return null; }
-    }
-    // if it’s already an object
+
     if (typeof first === "object" && first) return first;
+
+    if (typeof first === "string") {
+      const obj = tryJsonParse(first);
+      if (obj && typeof obj === "object") return obj;
+    }
     return null;
   }
 
-  // If it's a string that looks like JSON
+  // Case C: string
   if (typeof result === "string") {
-    try { return JSON.parse(result); } catch { return null; }
-  }
+    // First parse attempt
+    const parsed = tryJsonParse(result);
 
-  // If it's already an object
-  if (typeof result === "object") return result;
+    // If parsed is an object, done
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) return parsed;
+
+    // If parsed is an array, try parse first element as JSON
+    if (Array.isArray(parsed)) {
+      const first = parsed[0];
+      if (typeof first === "object" && first) return first;
+      if (typeof first === "string") {
+        const obj = tryJsonParse(first);
+        if (obj && typeof obj === "object") return obj;
+      }
+      return null;
+    }
+
+    // If string isn't JSON, nothing we can do
+    return null;
+  }
 
   return null;
 }
@@ -60,7 +86,9 @@ export default async function handler(req, res) {
 
   try {
     const email = clean(req.query.email).toLowerCase();
-    if (!email || !email.includes("@")) return res.status(400).json({ ok: false, error: "Missing/invalid email" });
+    if (!email || !email.includes("@")) {
+      return res.status(400).json({ ok: false, error: "Missing/invalid email" });
+    }
 
     const raw = await upstashGetRaw(`fleetlog:email:${email}`);
     if (!raw) return res.status(200).json({ ok: true, active: false });
