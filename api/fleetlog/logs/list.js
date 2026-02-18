@@ -1,23 +1,38 @@
 // api/fleetlog/logs/list.js
 export const config = { runtime: "nodejs" };
 
-function upstashBaseUrl() {
+function base() {
   return (process.env.UPSTASH_REDIS_REST_URL || "")
     .replace(/(^"|"$)/g, "")
     .replace(/\/+$/, "");
 }
-function upstashToken() {
+function token() {
   return (process.env.UPSTASH_REDIS_REST_TOKEN || "").replace(/(^"|"$)/g, "");
 }
 
-async function upstashPost(path, body) {
-  const base = upstashBaseUrl();
-  const token = upstashToken();
-  if (!base || !token) throw new Error("Missing Upstash env vars");
+async function upstashGetRaw(key) {
+  const b = base();
+  const t = token();
+  if (!b || !t) throw new Error("Missing Upstash env vars");
 
-  const r = await fetch(`${base}${path}`, {
+  const r = await fetch(`${b}/get/${encodeURIComponent(key)}`, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${t}` },
+  });
+
+  const j = await r.json().catch(() => null);
+  if (!r.ok) throw new Error(`Upstash error: ${r.status} ${JSON.stringify(j)}`);
+  return j?.result ?? null;
+}
+
+async function upstashPost(path, body) {
+  const b = base();
+  const t = token();
+  if (!b || !t) throw new Error("Missing Upstash env vars");
+
+  const r = await fetch(`${b}${path}`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    headers: { Authorization: `Bearer ${t}`, "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
 
@@ -26,22 +41,15 @@ async function upstashPost(path, body) {
   return j;
 }
 
-async function upstashGet(key) {
-  const j = await upstashPost(`/get/${encodeURIComponent(key)}`, []);
-  return j?.result ?? null;
-}
-
 function normEmail(email) {
   return String(email || "").trim().toLowerCase();
 }
 
 async function requireActive(email) {
   const e = normEmail(email);
-  if (!e || !e.includes("@")) {
-    return { ok: false, status: 400, error: "Missing/invalid email" };
-  }
+  if (!e || !e.includes("@")) return { ok: false, status: 400, error: "Missing/invalid email" };
 
-  const raw = await upstashGet(`fleetlog:email:${e}`);
+  const raw = await upstashGetRaw(`fleetlog:email:${e}`);
   if (!raw) return { ok: false, status: 403, error: "SUBSCRIPTION_REQUIRED" };
 
   let rec;
@@ -64,14 +72,12 @@ export default async function handler(req, res) {
     const gate = await requireActive(email);
     if (!gate.ok) return res.status(gate.status).json({ ok: false, error: gate.error });
 
-    // IDs list
     const listKey = `fleetlog:user:${email}:logs`;
     const idsResp = await upstashPost(`/lrange/${encodeURIComponent(listKey)}`, [0, limit - 1]);
     const ids = Array.isArray(idsResp?.result) ? idsResp.result : [];
 
     if (!ids.length) return res.status(200).json({ ok: true, logs: [] });
 
-    // Pipeline GET each log key
     const commands = ids.map((id) => ["GET", `fleetlog:log:${id}`]);
     const pipe = await upstashPost(`/pipeline`, commands);
 
