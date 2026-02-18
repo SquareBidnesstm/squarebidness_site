@@ -1,4 +1,4 @@
-<!-- /public/lab/fleetlog/index.html (PASTE READY — Billing Portal wired via redirect, no JSON fetch) -->
+<!-- /public/lab/fleetlog/index.html (PASTE READY — adds Subscription Badge + status-based messaging + billing redirect) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -22,6 +22,22 @@
       flex:1;min-width:240px;padding:12px;border-radius:12px;border:1px solid var(--line);
       background:#0f0f0f;color:var(--text);outline:none
     }
+
+    /* Subscription badge */
+    .badge{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 10px; border-radius:999px; border:1px solid var(--line);
+      font-size:12px; font-weight:900;
+    }
+    .dot{ width:8px; height:8px; border-radius:999px; background:var(--muted); display:inline-block; }
+    .badge.ok{ color:#bbf7d0; border-color:#12311f; }
+    .badge.ok .dot{ background:var(--ok); }
+    .badge.bad{ color:#fecaca; border-color:#3a1f1f; }
+    .badge.bad .dot{ background:var(--bad); }
+    .badge.warn{ color:#fde68a; border-color:#3a2b10; }
+    .badge.warn .dot{ background:#f59e0b; }
+    .submeta{ color:var(--muted); font-size:12px; margin-top:8px; word-break:break-word; }
+
     .btn{
       width:100%;padding:14px;border-radius:14px;border:1px solid var(--line);
       font-weight:900;cursor:pointer;text-align:center;display:block
@@ -56,6 +72,15 @@
 
     <div class="status" id="status"></div>
 
+    <!-- Subscription Badge -->
+    <div id="badgeWrap" class="hidden" style="margin-top:10px;">
+      <div id="subBadge" class="badge">
+        <span class="dot"></span>
+        <span id="badgeText">—</span>
+      </div>
+      <div id="subMeta" class="submeta"></div>
+    </div>
+
     <!-- UNLOCKED ACTIONS -->
     <div id="unlocked" class="hidden" style="margin-top:14px;">
       <div class="grid2">
@@ -70,7 +95,7 @@
       </div>
 
       <div style="margin-top:10px;">
-        <!-- NOTE: we redirect to /api/fleetlog/stripe/portal (302) instead of fetch+JSON -->
+        <!-- Redirects to Stripe Billing Portal (302) -->
         <a class="btn btn-ghost" id="billingLink" href="#" role="button">
           Manage Billing
         </a>
@@ -119,12 +144,14 @@
         const email = getEmail();
         if(!email || !email.includes("@")){
           setStatus("Enter a valid email.", "bad");
+          show("badgeWrap", false);
           show("unlocked", false);
           show("gate", false);
           return;
         }
 
         setStatus("Checking subscription…");
+        show("badgeWrap", false);
         show("unlocked", false);
         show("gate", false);
 
@@ -138,21 +165,61 @@
           $("historyLink").href = `/lab/fleetlog/history/?email=${encodeURIComponent(email)}`;
           $("billingLink").href = `/api/fleetlog/stripe/portal?email=${encodeURIComponent(email)}`;
 
-          if(j.active){
+          // Badge always shows when we get a valid response
+          show("badgeWrap", true);
+
+          const tier = j.tier ? String(j.tier).toUpperCase() : "—";
+          const status = j.status ? String(j.status).toUpperCase() : (j.active ? "ACTIVE" : "INACTIVE");
+
+          const subId = j.subscriptionId ? String(j.subscriptionId) : "";
+          const custId = j.customerId ? String(j.customerId) : "";
+
+          $("subMeta").textContent =
+            (subId ? `Sub: ${subId}   ` : "") + (custId ? `Customer: ${custId}` : "");
+
+          const badge = $("subBadge");
+          badge.className = "badge"; // reset
+
+          function setBadge(kind, text){
+            badge.classList.add(kind);
+            $("badgeText").textContent = text;
+          }
+
+          // ACTIVE unlock
+          if (j.active) {
             show("unlocked", true);
             show("gate", false);
-            const plan = j.tier ? String(j.tier).toUpperCase() : "ACTIVE";
-            $("planTag").textContent = `Status: ACTIVE • Plan: ${plan}`;
+
+            setBadge("ok", `ACTIVE • ${tier}`);
+            $("planTag").textContent = `Status: ACTIVE • Plan: ${tier}`;
             setStatus("Active subscription found. App unlocked.", "ok");
+
             window.sbTrack?.("sb_page_ready",{brand:"sb-fleetlog",page:location.pathname,component:"app_home",action:"unlocked"});
-          }else{
+
+          } else {
             show("unlocked", false);
             show("gate", true);
-            setStatus("No active subscription found for this email.", "bad");
+
+            const billingStates = ["CANCELED","PAST_DUE","UNPAID","INCOMPLETE","INCOMPLETE_EXPIRED","TRIALING"];
+            if (billingStates.includes(status)) {
+              setBadge(status === "CANCELED" ? "bad" : "warn", `${status} • ${tier}`);
+              setStatus(
+                status === "CANCELED"
+                  ? "Subscription is canceled. Reactivate or subscribe again."
+                  : "Billing issue detected. Open billing portal to fix payment.",
+                "bad"
+              );
+            } else {
+              setBadge("bad", `NO SUBSCRIPTION • ${tier}`);
+              setStatus("No active subscription found for this email.", "bad");
+            }
+
             window.sbTrack?.("sb_page_ready",{brand:"sb-fleetlog",page:location.pathname,component:"app_home",action:"locked"});
           }
-        }catch(e){
+
+        } catch(e){
           setStatus("Error: " + e.message, "bad");
+          show("badgeWrap", false);
           show("unlocked", false);
           show("gate", true);
         }
@@ -168,13 +235,13 @@
           return setStatus("Enter a valid email first.", "bad");
         }
         window.sbTrack?.("sb_click",{brand:"sb-fleetlog",page:location.pathname,component:"app_home",action:"billing_portal"});
-        // allow normal navigation to the 302 portal endpoint
       });
 
       $("clearBtn").addEventListener("click", ()=>{
         localStorage.removeItem(KEY);
         $("email").value = "";
         setStatus("");
+        show("badgeWrap", false);
         show("unlocked", false);
         show("gate", false);
       });
