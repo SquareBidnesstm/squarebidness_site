@@ -16,9 +16,9 @@ export default async function handler(req, res) {
     if (req.method === "OPTIONS") return res.status(204).end();
     if (req.method !== "GET") return res.status(405).json({ ok: false, error: "Method not allowed" });
 
+    // 🔒 ADMIN GATE
     const admin = clean(process.env.FLEETLOG_ADMIN_TOKEN);
     const provided = clean(req.headers["x-admin-token"] || req.query.admin);
-
     if (!admin) return res.status(500).json({ ok: false, error: "Missing FLEETLOG_ADMIN_TOKEN" });
     if (provided !== admin) return res.status(401).json({ ok: false, error: "UNAUTHORIZED" });
 
@@ -28,30 +28,30 @@ export default async function handler(req, res) {
     const b = base();
     const t = tok();
     if (!b || !t) {
-      return res.status(500).json({
-        ok: false,
-        error: "Missing Upstash env vars",
-        hasUrl: !!b,
-        hasToken: !!t,
-      });
+      return res.status(500).json({ ok: false, error: "Missing Upstash env vars", hasUrl: !!b, hasToken: !!t });
     }
 
     const url = `${b}/get/${encodeURIComponent(key)}`;
+    const r = await fetch(url, { method: "GET", headers: { Authorization: `Bearer ${t}` } });
 
-    const r = await fetch(url, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${t}` },
-    });
+    const rawText = await r.text();
 
-    const text = await r.text(); // parse safely
     let j = null;
-    try { j = JSON.parse(text); } catch { j = { raw: text }; }
+    try { j = JSON.parse(rawText); } catch { j = null; }
 
     if (!r.ok) {
-      return res.status(500).json({ ok: false, error: `Upstash error ${r.status}`, detail: j });
+      return res.status(500).json({ ok: false, error: `Upstash error ${r.status}`, rawText, parsed: j });
     }
 
-    return res.status(200).json({ ok: true, key, result: j?.result ?? null });
+    // Upstash shape: { result: <value> }
+    return res.status(200).json({
+      ok: true,
+      key,
+      rawText,
+      parsed: j,
+      result: j?.result ?? null,
+      resultType: Array.isArray(j?.result) ? "array" : typeof (j?.result),
+    });
   } catch (e) {
     console.error("FleetLog debug/get crash:", e);
     return res.status(500).json({ ok: false, error: e?.message || "Server error" });
