@@ -1,0 +1,260 @@
+<!-- /public/lab/fleetlog/admin/index.html (PASTE READY — Ops view: Audit + Webhooks) -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SB FleetLog™ — Admin Ops</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#0b0b0b" />
+  <script defer src="/scripts/sb-analytics.js"></script>
+  <style>
+    :root{--bg:#0b0b0b;--card:#121212;--line:#242424;--text:#f2f2f2;--muted:#b8b8b8;--ok:#22c55e;--bad:#ef4444;--warn:#f59e0b}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto;background:var(--bg);color:var(--text)}
+    a{color:#fff;text-decoration:none}
+    .wrap{max-width:1200px;margin:0 auto;padding:20px}
+    .top{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+    .pill{display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:1.2fr .8fr;gap:14px}
+    @media (max-width:980px){.grid{grid-template-columns:1fr}}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
+    h1{margin:0;font-size:20px}
+    h2{margin:0 0 10px;font-size:16px}
+    .muted{color:var(--muted);font-size:13px}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
+    input,select{
+      padding:10px 12px;border-radius:12px;border:1px solid var(--line);
+      background:#0f0f0f;color:var(--text);outline:none
+    }
+    input{min-width:240px;flex:1}
+    .btn{padding:10px 12px;border-radius:12px;border:1px solid var(--line);font-weight:900;cursor:pointer;background:#fff;color:#000}
+    .btn-ghost{background:transparent;color:#fff}
+    .btn-danger{background:transparent;color:#fff;border-color:#3a1f1f}
+    .status{margin-top:10px;font-size:13px;color:var(--muted)}
+    .status.ok{color:var(--ok)} .status.bad{color:var(--bad)} .status.warn{color:var(--warn)}
+    table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}
+    th,td{border-bottom:1px solid var(--line);padding:10px 8px;text-align:left;vertical-align:top}
+    th{color:var(--muted);font-weight:800;font-size:12px}
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px}
+    .k{color:var(--muted);font-size:12px}
+    .tag{display:inline-block;padding:4px 8px;border-radius:999px;border:1px solid var(--line);font-size:11px;color:var(--muted)}
+    .tag.ok{border-color:#12311f;color:#bbf7d0}
+    .tag.bad{border-color:#3a1f1f;color:#fecaca}
+    .tag.warn{border-color:#3a2b10;color:#fde68a}
+    .split{display:flex;gap:10px;flex-wrap:wrap}
+    pre{white-space:pre-wrap;word-break:break-word;background:#0f0f0f;border:1px solid var(--line);border-radius:12px;padding:12px;margin:10px 0 0;color:#eaeaea;font-size:12px}
+    .hidden{display:none!important}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <div class="pill">SB FleetLog™ — Admin Ops</div>
+        <h1 style="margin-top:8px;">Ops View</h1>
+        <div class="muted">Audit events + Stripe webhook events (admin token required)</div>
+      </div>
+      <div class="split">
+        <a class="pill" href="/lab/fleetlog/" onclick="window.sbTrack?.('sb_click',{brand:'sb-fleetlog',page:location.pathname,component:'admin',action:'back_app'});">App</a>
+        <a class="pill" href="/fleetlog/" onclick="window.sbTrack?.('sb_click',{brand:'sb-fleetlog',page:location.pathname,component:'admin',action:'back_marketing'});">Marketing</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Admin Access</h2>
+      <div class="row">
+        <input id="adminToken" placeholder="Paste FLEETLOG_ADMIN_TOKEN" autocomplete="off" />
+        <button class="btn" id="saveToken">Save Token</button>
+        <button class="btn btn-ghost" id="clearToken">Clear</button>
+        <button class="btn btn-ghost" id="refreshAll">Refresh</button>
+      </div>
+      <div class="row">
+        <input id="search" placeholder="Filter (email, type, id…)" />
+        <select id="limit">
+          <option value="50">50</option>
+          <option value="100">100</option>
+          <option value="200">200</option>
+        </select>
+        <button class="btn btn-ghost" id="copyJson">Copy JSON</button>
+      </div>
+      <div class="status" id="status"></div>
+    </div>
+
+    <div class="grid" style="margin-top:14px;">
+      <div class="card">
+        <h2>Audit Log</h2>
+        <div class="k">Source: <code>/api/fleetlog/ops/audit/list</code></div>
+        <div id="auditWrap"></div>
+      </div>
+
+      <div class="card">
+        <h2>Webhook Events</h2>
+        <div class="k">Source: <code>/api/fleetlog/ops/webhooks/list</code></div>
+        <div id="webhookWrap"></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px;">
+      <h2>Raw JSON (filtered)</h2>
+      <div class="muted">This is what “Copy JSON” copies.</div>
+      <pre id="rawOut">{}</pre>
+    </div>
+  </div>
+
+  <script>
+    const $ = (id)=>document.getElementById(id);
+    const TOKEN_KEY = "fleetlog_admin_token";
+
+    let state = { audit: [], webhooks: [], filtered: { audit: [], webhooks: [] } };
+
+    function setStatus(msg, kind){
+      $("status").textContent = msg || "";
+      $("status").className = "status" + (kind ? (" " + kind) : "");
+    }
+
+    function getToken(){
+      return (sessionStorage.getItem(TOKEN_KEY) || "").trim();
+    }
+
+    function saveToken(){
+      const t = ($("adminToken").value || "").trim();
+      if(!t) return setStatus("Missing admin token.", "bad");
+      sessionStorage.setItem(TOKEN_KEY, t);
+      $("adminToken").value = "";
+      setStatus("Token saved in session (tab-only).", "ok");
+      window.sbTrack?.("sb_click",{brand:"sb-fleetlog",page:location.pathname,component:"admin",action:"token_saved"});
+    }
+
+    function clearToken(){
+      sessionStorage.removeItem(TOKEN_KEY);
+      setStatus("Token cleared.", "warn");
+      window.sbTrack?.("sb_click",{brand:"sb-fleetlog",page:location.pathname,component:"admin",action:"token_cleared"});
+    }
+
+    async function fetchJson(url){
+      const token = getToken();
+      if(!token) throw new Error("Missing admin token. Paste it and Save.");
+      const r = await fetch(url, { headers: { "x-admin-token": token } });
+      const j = await r.json().catch(()=>null);
+      if(!r.ok || !j || !j.ok) throw new Error(j?.error || ("Request failed: " + r.status));
+      return j;
+    }
+
+    function tagForType(type){
+      const t = String(type||"").toLowerCase();
+      if(t.includes("error") || t.includes("fail")) return "bad";
+      if(t.includes("limit") || t.includes("past_due") || t.includes("warn")) return "warn";
+      return "";
+    }
+
+    function esc(s){
+      return String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    function renderTable(targetId, rows, kind){
+      if(!rows.length){
+        $(targetId).innerHTML = `<div class="muted" style="margin-top:10px;">No events yet.</div>`;
+        return;
+      }
+
+      const head = kind === "audit"
+        ? `<tr><th>Time</th><th>Type</th><th>Email</th><th>Meta</th></tr>`
+        : `<tr><th>Time</th><th>Type</th><th>ID</th><th>Mode</th></tr>`;
+
+      const body = rows.map((x)=>{
+        const ts = esc(x.ts || "");
+        const type = esc(x.type || "");
+        const cls = tagForType(type);
+        const tag = `<span class="tag ${cls}">${type || "—"}</span>`;
+
+        if(kind === "audit"){
+          const email = esc(x.email || "");
+          const meta = esc(JSON.stringify(Object.assign({}, x, { ts: undefined, type: undefined, email: undefined })));
+          return `<tr>
+            <td><code>${ts}</code></td>
+            <td>${tag}</td>
+            <td><code>${email}</code></td>
+            <td class="k">${meta}</td>
+          </tr>`;
+        }else{
+          const id = esc(x.id || "");
+          const mode = x.livemode ? `<span class="tag ok">LIVE</span>` : `<span class="tag warn">TEST</span>`;
+          return `<tr>
+            <td><code>${ts}</code></td>
+            <td>${tag}</td>
+            <td><code>${id}</code></td>
+            <td>${mode}</td>
+          </tr>`;
+        }
+      }).join("");
+
+      $(targetId).innerHTML = `<table>${head}${body}</table>`;
+    }
+
+    function applyFilter(){
+      const q = String($("search").value || "").trim().toLowerCase();
+      const hasQ = !!q;
+
+      const audit = hasQ
+        ? state.audit.filter(x => JSON.stringify(x).toLowerCase().includes(q))
+        : state.audit.slice();
+
+      const webhooks = hasQ
+        ? state.webhooks.filter(x => JSON.stringify(x).toLowerCase().includes(q))
+        : state.webhooks.slice();
+
+      state.filtered = { audit, webhooks };
+      renderTable("auditWrap", audit, "audit");
+      renderTable("webhookWrap", webhooks, "webhook");
+      $("rawOut").textContent = JSON.stringify(state.filtered, null, 2);
+    }
+
+    async function refresh(){
+      try{
+        setStatus("Loading…");
+        const lim = parseInt($("limit").value || "50", 10);
+
+        const [a, w] = await Promise.all([
+          fetchJson(`/api/fleetlog/ops/audit/list?limit=${lim}`),
+          fetchJson(`/api/fleetlog/ops/webhooks/list?limit=${lim}`)
+        ]);
+
+        state.audit = Array.isArray(a.events) ? a.events : [];
+        state.webhooks = Array.isArray(w.events) ? w.events : [];
+
+        applyFilter();
+        setStatus(`Loaded: Audit ${state.audit.length} • Webhooks ${state.webhooks.length}`, "ok");
+        window.sbTrack?.("sb_page_ready",{brand:"sb-fleetlog",page:location.pathname,component:"admin",action:"loaded"});
+      }catch(e){
+        setStatus("Error: " + (e?.message || e), "bad");
+      }
+    }
+
+    async function copyJson(){
+      try{
+        await navigator.clipboard.writeText($("rawOut").textContent || "{}");
+        setStatus("Copied filtered JSON to clipboard.", "ok");
+        window.sbTrack?.("sb_click",{brand:"sb-fleetlog",page:location.pathname,component:"admin",action:"copy_json"});
+      }catch(e){
+        setStatus("Copy failed. (Browser blocked clipboard)", "warn");
+      }
+    }
+
+    $("saveToken").addEventListener("click", saveToken);
+    $("clearToken").addEventListener("click", clearToken);
+    $("refreshAll").addEventListener("click", refresh);
+    $("copyJson").addEventListener("click", copyJson);
+    $("search").addEventListener("input", applyFilter);
+    $("limit").addEventListener("change", refresh);
+
+    // boot
+    const existing = getToken();
+    if(!existing){
+      setStatus("Paste admin token and click Save Token.", "warn");
+    }else{
+      refresh();
+    }
+  </script>
+</body>
+</html>
