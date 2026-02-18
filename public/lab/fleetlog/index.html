@@ -1,3 +1,4 @@
+<!-- /public/lab/fleetlog/index.html (PASTE READY — Billing Portal wired via redirect, no JSON fetch) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -69,7 +70,10 @@
       </div>
 
       <div style="margin-top:10px;">
-        <button class="btn btn-ghost" id="billingBtn">Manage Billing</button>
+        <!-- NOTE: we redirect to /api/fleetlog/stripe/portal (302) instead of fetch+JSON -->
+        <a class="btn btn-ghost" id="billingLink" href="#" role="button">
+          Manage Billing
+        </a>
       </div>
 
       <div class="tag" id="planTag"></div>
@@ -132,7 +136,7 @@
           localStorage.setItem(KEY, email);
 
           $("historyLink").href = `/lab/fleetlog/history/?email=${encodeURIComponent(email)}`;
-          $("billingBtn").dataset.email = email;
+          $("billingLink").href = `/api/fleetlog/stripe/portal?email=${encodeURIComponent(email)}`;
 
           if(j.active){
             show("unlocked", true);
@@ -157,21 +161,14 @@
       $("checkBtn").addEventListener("click", checkStatus);
       $("email").addEventListener("keydown", (e)=>{ if(e.key === "Enter") checkStatus(); });
 
-      $("billingBtn").addEventListener("click", async ()=>{
+      $("billingLink").addEventListener("click", (e)=>{
         const email = getEmail();
-        if(!email || !email.includes("@")) return setStatus("Enter a valid email first.", "bad");
-
-        setStatus("Opening billing portal…");
-        try{
-          const r = await fetch(`/api/fleetlog/stripe/portal?email=${encodeURIComponent(email)}`);
-          const j = await r.json();
-          if(!j.ok) throw new Error(j.error || "Billing failed");
-          window.open(j.url, "_blank", "noopener,noreferrer");
-          setStatus("");
-          window.sbTrack?.("sb_click",{brand:"sb-fleetlog",page:location.pathname,component:"app_home",action:"billing_portal"});
-        }catch(e){
-          setStatus("Billing error: " + e.message, "bad");
+        if(!email || !email.includes("@")){
+          e.preventDefault();
+          return setStatus("Enter a valid email first.", "bad");
         }
+        window.sbTrack?.("sb_click",{brand:"sb-fleetlog",page:location.pathname,component:"app_home",action:"billing_portal"});
+        // allow normal navigation to the 302 portal endpoint
       });
 
       $("clearBtn").addEventListener("click", ()=>{
