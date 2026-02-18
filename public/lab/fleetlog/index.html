@@ -1,4 +1,4 @@
-<!-- /public/lab/fleetlog/index.html (PASTE READY — adds Subscription Badge + status-based messaging + billing redirect) -->
+<!-- /public/lab/fleetlog/index.html -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -8,58 +8,137 @@
   <meta name="robots" content="noindex,nofollow" />
   <meta name="theme-color" content="#0b0b0b" />
   <script defer src="/scripts/sb-analytics.js"></script>
+
   <style>
-    :root{--bg:#0b0b0b;--card:#121212;--line:#242424;--text:#f2f2f2;--muted:#b8b8b8;--bad:#ef4444;--ok:#22c55e}
+    :root{
+      --bg:#0b0b0b;
+      --card:#121212;
+      --line:#242424;
+      --text:#f2f2f2;
+      --muted:#b8b8b8;
+      --bad:#ef4444;
+      --ok:#22c55e;
+    }
+
     *{box-sizing:border-box}
-    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto;background:var(--bg);color:var(--text);min-height:100vh;padding:20px;display:flex;align-items:center;justify-content:center}
+
+    body{
+      margin:0;
+      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      padding:20px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
     a{color:#fff;text-decoration:none}
-    .app{width:100%;max-width:640px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px}
+
+    .app{
+      width:100%;
+      max-width:640px;
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:26px;
+    }
+
     h1{margin:0 0 8px;font-size:28px}
     .muted{color:var(--muted);font-size:14px;margin:0 0 18px}
-    .pill{display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:var(--muted)}
-    .row{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 0}
-    input{
-      flex:1;min-width:240px;padding:12px;border-radius:12px;border:1px solid var(--line);
-      background:#0f0f0f;color:var(--text);outline:none
+
+    .pill{
+      display:inline-block;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      font-size:12px;
+      color:var(--muted);
     }
 
-    /* Subscription badge */
-    .badge{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:8px 10px; border-radius:999px; border:1px solid var(--line);
-      font-size:12px; font-weight:900;
+    .row{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 0}
+
+    input{
+      flex:1;
+      min-width:240px;
+      padding:12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:#0f0f0f;
+      color:var(--text);
+      outline:none;
     }
-    .dot{ width:8px; height:8px; border-radius:999px; background:var(--muted); display:inline-block; }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      font-size:12px;
+      font-weight:900;
+    }
+
+    .dot{
+      width:8px;
+      height:8px;
+      border-radius:999px;
+      background:var(--muted);
+      display:inline-block;
+    }
+
     .badge.ok{ color:#bbf7d0; border-color:#12311f; }
     .badge.ok .dot{ background:var(--ok); }
+
     .badge.bad{ color:#fecaca; border-color:#3a1f1f; }
     .badge.bad .dot{ background:var(--bad); }
+
     .badge.warn{ color:#fde68a; border-color:#3a2b10; }
     .badge.warn .dot{ background:#f59e0b; }
-    .submeta{ color:var(--muted); font-size:12px; margin-top:8px; word-break:break-word; }
+
+    .submeta{
+      color:var(--muted);
+      font-size:12px;
+      margin-top:8px;
+      word-break:break-word;
+    }
 
     .btn{
-      width:100%;padding:14px;border-radius:14px;border:1px solid var(--line);
-      font-weight:900;cursor:pointer;text-align:center;display:block
+      width:100%;
+      padding:14px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      font-weight:900;
+      cursor:pointer;
+      text-align:center;
+      display:block;
     }
+
     .btn-primary{background:#fff;color:#000}
     .btn-ghost{background:transparent;color:#fff}
     .btn-danger{background:transparent;color:#fff;border-color:#3a1f1f}
+
     .status{margin-top:10px;font-size:13px;color:var(--muted)}
     .status.bad{color:var(--bad)}
     .status.ok{color:var(--ok)}
+
     .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     @media (max-width:700px){.grid2{grid-template-columns:1fr}}
+
     .gate{margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
     .tag{display:inline-block;margin-top:6px;font-size:12px;color:var(--muted)}
     .hidden{display:none!important}
   </style>
 </head>
+
 <body>
   <div class="app">
-    <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px;">
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
       <div class="pill">SB FleetLog™ App</div>
-      <a class="pill" href="/fleetlog/" onclick="window.sbTrack?.('sb_click',{brand:'sb-fleetlog',page:location.pathname,component:'app_home',action:'back_marketing'});">Marketing</a>
+      <a class="pill" href="/fleetlog/">Marketing</a>
     </div>
 
     <h1>FleetLog</h1>
@@ -67,12 +146,11 @@
 
     <div class="row">
       <input id="email" type="email" placeholder="driver email" autocomplete="email" />
-      <button class="pill" id="checkBtn" style="cursor:pointer;">Check</button>
+      <button class="pill" id="checkBtn">Check</button>
     </div>
 
     <div class="status" id="status"></div>
 
-    <!-- Subscription Badge -->
     <div id="badgeWrap" class="hidden" style="margin-top:10px;">
       <div id="subBadge" class="badge">
         <span class="dot"></span>
@@ -81,51 +159,28 @@
       <div id="subMeta" class="submeta"></div>
     </div>
 
-    <!-- UNLOCKED ACTIONS -->
     <div id="unlocked" class="hidden" style="margin-top:14px;">
       <div class="grid2">
-        <a class="btn btn-primary" href="/lab/fleetlog/new/"
-           onclick="window.sbTrack?.('sb_click',{brand:'sb-fleetlog',page:location.pathname,component:'app_home',action:'new_log'});">
-          Create New Daily Log
-        </a>
-
-        <a class="btn btn-ghost" id="historyLink" href="/lab/fleetlog/history/">
-          View Log History
-        </a>
+        <a class="btn btn-primary" href="/lab/fleetlog/new/">Create New Daily Log</a>
+        <a class="btn btn-ghost" id="historyLink" href="#">View Log History</a>
       </div>
 
-      <div style="margin-top:10px;">
-        <!-- Redirects to Stripe Billing Portal (302) -->
-        <a class="btn btn-ghost" id="billingLink" href="#" role="button">
-          Manage Billing
-        </a>
-        <a class="btn btn-ghost" id="upgradeLink" href="#" role="button" style="margin-top:10px;">
-  Upgrade to Fleet
-</a>
+      <div class="grid2" style="margin-top:10px;">
+        <a class="btn btn-ghost" id="billingLink" href="#">Manage Billing</a>
+        <a class="btn btn-ghost" id="upgradeLink" href="#">Upgrade to Fleet</a>
       </div>
-      
 
       <div class="tag" id="planTag"></div>
     </div>
 
-    <!-- LOCKED -->
     <div id="gate" class="gate hidden">
       <div class="muted" style="margin-bottom:10px;">
-        No active subscription found for this email. Subscribe to activate FleetLog.
+        No active subscription found for this email.
       </div>
 
       <div class="grid2">
-        <a class="btn btn-primary" id="buySingle" href="/api/fleetlog/stripe/checkout?tier=single">
-          Subscribe — Single Truck ($19/mo)
-        </a>
-
-        <a class="btn btn-ghost" id="buyFleet" href="/api/fleetlog/stripe/checkout?tier=fleet">
-          Subscribe — Small Fleet ($99/mo)
-        </a>
-      </div>
-
-      <div class="muted" style="margin-top:10px;font-size:13px;">
-        After checkout, your email is provisioned automatically and you’ll get a welcome email.
+        <a class="btn btn-primary" href="/api/fleetlog/stripe/checkout?tier=single">Subscribe — Single ($19/mo)</a>
+        <a class="btn btn-ghost" href="/api/fleetlog/stripe/checkout?tier=fleet">Subscribe — Fleet ($99/mo)</a>
       </div>
     </div>
 
@@ -133,297 +188,99 @@
       <button class="btn btn-danger" id="clearBtn">Clear Email</button>
     </div>
 
-    <!-- /public/lab/fleetlog/index.html (PASTE READY — Subscription Badge + Billing Portal + Upgrade to Fleet) -->
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>SB FleetLog™ — App</title>
-  <meta name="robots" content="noindex,nofollow" />
-  <meta name="theme-color" content="#0b0b0b" />
-  <script defer src="/scripts/sb-analytics.js"></script>
-  <style>
-    :root{--bg:#0b0b0b;--card:#121212;--line:#242424;--text:#f2f2f2;--muted:#b8b8b8;--bad:#ef4444;--ok:#22c55e}
-    *{box-sizing:border-box}
-    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto;background:var(--bg);color:var(--text);min-height:100vh;padding:20px;display:flex;align-items:center;justify-content:center}
-    a{color:#fff;text-decoration:none}
-    .app{width:100%;max-width:640px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px}
-    h1{margin:0 0 8px;font-size:28px}
-    .muted{color:var(--muted);font-size:14px;margin:0 0 18px}
-    .pill{display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:var(--muted)}
-    .row{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 0}
-    input{
-      flex:1;min-width:240px;padding:12px;border-radius:12px;border:1px solid var(--line);
-      background:#0f0f0f;color:var(--text);outline:none
-    }
-
-    /* Subscription badge */
-    .badge{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:8px 10px; border-radius:999px; border:1px solid var(--line);
-      font-size:12px; font-weight:900;
-    }
-    .dot{ width:8px; height:8px; border-radius:999px; background:var(--muted); display:inline-block; }
-    .badge.ok{ color:#bbf7d0; border-color:#12311f; }
-    .badge.ok .dot{ background:var(--ok); }
-    .badge.bad{ color:#fecaca; border-color:#3a1f1f; }
-    .badge.bad .dot{ background:var(--bad); }
-    .badge.warn{ color:#fde68a; border-color:#3a2b10; }
-    .badge.warn .dot{ background:#f59e0b; }
-    .submeta{ color:var(--muted); font-size:12px; margin-top:8px; word-break:break-word; }
-
-    .btn{
-      width:100%;padding:14px;border-radius:14px;border:1px solid var(--line);
-      font-weight:900;cursor:pointer;text-align:center;display:block
-    }
-    .btn-primary{background:#fff;color:#000}
-    .btn-ghost{background:transparent;color:#fff}
-    .btn-danger{background:transparent;color:#fff;border-color:#3a1f1f}
-    .status{margin-top:10px;font-size:13px;color:var(--muted)}
-    .status.bad{color:var(--bad)}
-    .status.ok{color:var(--ok)}
-    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    @media (max-width:700px){.grid2{grid-template-columns:1fr}}
-    .gate{margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
-    .tag{display:inline-block;margin-top:6px;font-size:12px;color:var(--muted)}
-    .hidden{display:none!important}
-  </style>
-</head>
-<body>
-  <div class="app">
-    <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px;">
-      <div class="pill">SB FleetLog™ App</div>
-      <a class="pill" href="/fleetlog/" onclick="window.sbTrack?.('sb_click',{brand:'sb-fleetlog',page:location.pathname,component:'app_home',action:'back_marketing'});">Marketing</a>
-    </div>
-
-    <h1>FleetLog</h1>
-    <p class="muted">Enter your email. If your subscription is active, the app unlocks instantly.</p>
-
-    <div class="row">
-      <input id="email" type="email" placeholder="driver email" autocomplete="email" />
-      <button class="pill" id="checkBtn" style="cursor:pointer;">Check</button>
-    </div>
-
-    <div class="status" id="status"></div>
-
-    <!-- Subscription Badge -->
-    <div id="badgeWrap" class="hidden" style="margin-top:10px;">
-      <div id="subBadge" class="badge">
-        <span class="dot"></span>
-        <span id="badgeText">—</span>
-      </div>
-      <div id="subMeta" class="submeta"></div>
-    </div>
-
-    <!-- UNLOCKED ACTIONS -->
-    <div id="unlocked" class="hidden" style="margin-top:14px;">
-      <div class="grid2">
-        <a class="btn btn-primary" href="/lab/fleetlog/new/"
-           onclick="window.sbTrack?.('sb_click',{brand:'sb-fleetlog',page:location.pathname,component:'app_home',action:'new_log'});">
-          Create New Daily Log
-        </a>
-
-        <a class="btn btn-ghost" id="historyLink" href="/lab/fleetlog/history/">
-          View Log History
-        </a>
-      </div>
-
-      <div class="grid2" style="margin-top:10px;">
-        <!-- Redirects to Stripe Billing Portal (302) -->
-        <a class="btn btn-ghost" id="billingLink" href="#" role="button">
-          Manage Billing
-        </a>
-
-        <!-- Upgrade (recommended via Billing Portal) -->
-        <a class="btn btn-ghost" id="upgradeLink" href="#" role="button">
-          Upgrade to Fleet
-        </a>
-      </div>
-
-      <div class="tag" id="planTag"></div>
-    </div>
-
-    <!-- LOCKED -->
-    <div id="gate" class="gate hidden">
-      <div class="muted" style="margin-bottom:10px;">
-        No active subscription found for this email. Subscribe to activate FleetLog.
-      </div>
-
-      <div class="grid2">
-        <a class="btn btn-primary" id="buySingle" href="/api/fleetlog/stripe/checkout?tier=single">
-          Subscribe — Single Truck ($19/mo)
-        </a>
-
-        <a class="btn btn-ghost" id="buyFleet" href="/api/fleetlog/stripe/checkout?tier=fleet">
-          Subscribe — Small Fleet ($99/mo)
-        </a>
-      </div>
-
-      <div class="muted" style="margin-top:10px;font-size:13px;">
-        After checkout, your email is provisioned automatically and you’ll get a welcome email.
-      </div>
-    </div>
-
-    <div style="margin-top:12px;">
-  <button class="btn btn-danger" id="clearBtn">Clear Email</button>
-
-  <!-- Admin shortcut (hidden unless ?admin=1) -->
-  <div id="adminRow" class="hidden" style="margin-top:12px;">
-    <a class="pill" href="/lab/fleetlog/admin/"
-       onclick="window.sbTrack?.('sb_click',{brand:'sb-fleetlog',page:location.pathname,component:'app_home',action:'open_admin'});">
-      Admin Ops
-    </a>
-    <span class="pill" style="opacity:.8">ops only</span>
   </div>
-</div>
 
-    <script>
-      const $ = (id)=>document.getElementById(id);
-      const KEY = "fleetlog_email";
+<script>
+const $ = (id)=>document.getElementById(id);
+const KEY = "fleetlog_email";
 
-      function getEmail(){ return ($("email").value || "").trim().toLowerCase(); }
-      function setStatus(msg, kind){
-        $("status").textContent = msg || "";
-        $("status").className = "status" + (kind ? (" " + kind) : "");
-      }
-      function show(id, on){ $(id).classList.toggle("hidden", !on); }
+function getEmail(){ return ($("email").value||"").trim().toLowerCase(); }
+function setStatus(msg,kind){
+  $("status").textContent = msg||"";
+  $("status").className = "status" + (kind?(" "+kind):"");
+}
+function show(id,on){ $(id).classList.toggle("hidden",!on); }
 
-      async function checkStatus(){
-        const email = getEmail();
-        if(!email || !email.includes("@")){
-          setStatus("Enter a valid email.", "bad");
-          show("badgeWrap", false);
-          show("unlocked", false);
-          show("gate", false);
-          return;
+async function checkStatus(){
+  const email = getEmail();
+  if(!email.includes("@")){
+    setStatus("Enter valid email.","bad");
+    return;
+  }
+
+  try{
+    const r = await fetch(`/api/fleetlog/auth/status?email=${encodeURIComponent(email)}`);
+    const j = await r.json();
+    if(!j.ok) throw new Error(j.error);
+
+    localStorage.setItem(KEY,email);
+
+    $("historyLink").href = `/lab/fleetlog/history/?email=${encodeURIComponent(email)}`;
+    $("billingLink").href = `/api/fleetlog/stripe/portal?email=${encodeURIComponent(email)}`;
+    $("upgradeLink").href = `/api/fleetlog/stripe/portal?email=${encodeURIComponent(email)}`;
+
+    show("badgeWrap",true);
+
+    const tier = (j.tier||"").toUpperCase();
+    const tierRaw = (j.tier||"").toLowerCase();
+
+    const badge = $("subBadge");
+    badge.className="badge";
+
+    if(j.active){
+      badge.classList.add("ok");
+      $("badgeText").textContent=`ACTIVE • ${tier}`;
+
+      show("unlocked",true);
+      show("gate",false);
+
+      // usage count
+      let usage="";
+      try{
+        const ur=await fetch(`/api/fleetlog/logs/list?email=${encodeURIComponent(email)}&limit=1000`);
+        const lj=await ur.json();
+        if(lj.ok){
+          const used=(lj.logs||[]).length;
+          const max=(tierRaw==="fleet")?300:30;
+          usage=` • Logs Used: ${used}/${max}`;
         }
+      }catch{}
 
-        setStatus("Checking subscription…");
-        show("badgeWrap", false);
-        show("unlocked", false);
-        show("gate", false);
+      $("planTag").textContent=`ACTIVE • ${tier}${usage}`;
+      $("upgradeLink").style.display=(tierRaw==="fleet")?"none":"block";
+      setStatus("Subscription active.","ok");
 
-        try{
-          const r = await fetch(`/api/fleetlog/auth/status?email=${encodeURIComponent(email)}`);
-          const j = await r.json();
-          if(!j.ok) throw new Error(j.error || "Status failed");
+    }else{
+      badge.classList.add("bad");
+      $("badgeText").textContent="NO SUBSCRIPTION";
+      show("unlocked",false);
+      show("gate",true);
+      $("planTag").textContent="";
+      setStatus("No active subscription.","bad");
+    }
 
-          localStorage.setItem(KEY, email);
-
-          $("historyLink").href = `/lab/fleetlog/history/?email=${encodeURIComponent(email)}`;
-
-          const portalHref = `/api/fleetlog/stripe/portal?email=${encodeURIComponent(email)}`;
-          $("billingLink").href = portalHref;
-          $("upgradeLink").href = portalHref;
-
-          // Badge always shows when we get a valid response
-          show("badgeWrap", true);
-
-          const tier = j.tier ? String(j.tier).toUpperCase() : "—";
-          const status = j.status ? String(j.status).toUpperCase() : (j.active ? "ACTIVE" : "INACTIVE");
-
-          const subId = j.subscriptionId ? String(j.subscriptionId) : "";
-          const custId = j.customerId ? String(j.customerId) : "";
-
-          $("subMeta").textContent =
-            (subId ? `Sub: ${subId}   ` : "") + (custId ? `Customer: ${custId}` : "");
-
-          const badge = $("subBadge");
-          badge.className = "badge"; // reset
-
-          function setBadge(kind, text){
-            badge.classList.add(kind);
-            $("badgeText").textContent = text;
-          }
-
-          if (j.active) {
-            show("unlocked", true);
-            show("gate", false);
-
-            setBadge("ok", `ACTIVE • ${tier}`);
-            $("planTag").textContent = `Status: ACTIVE • Plan: ${tier}`;
-            setStatus("Active subscription found. App unlocked.", "ok");
-
-            // Only show Upgrade button for Single plan
-            $("upgradeLink").style.display = (String(j.tier || "").toLowerCase() === "fleet") ? "none" : "block";
-
-            window.sbTrack?.("sb_page_ready",{brand:"sb-fleetlog",page:location.pathname,component:"app_home",action:"unlocked"});
-          } else {
-            show("unlocked", false);
-            show("gate", true);
-
-            const billingStates = ["CANCELED","PAST_DUE","UNPAID","INCOMPLETE","INCOMPLETE_EXPIRED","TRIALING"];
-            if (billingStates.includes(status)) {
-              setBadge(status === "CANCELED" ? "bad" : "warn", `${status} • ${tier}`);
-              setStatus(
-                status === "CANCELED"
-                  ? "Subscription is canceled. Reactivate or subscribe again."
-                  : "Billing issue detected. Open billing portal to fix payment.",
-                "bad"
-              );
-            } else {
-              setBadge("bad", `NO SUBSCRIPTION • ${tier}`);
-              setStatus("No active subscription found for this email.", "bad");
-            }
-
-            window.sbTrack?.("sb_page_ready",{brand:"sb-fleetlog",page:location.pathname,component:"app_home",action:"locked"});
-          }
-
-        } catch(e){
-          setStatus("Error: " + e.message, "bad");
-          show("badgeWrap", false);
-          show("unlocked", false);
-          show("gate", true);
-        }
-      }
-
-      $("checkBtn").addEventListener("click", checkStatus);
-      $("email").addEventListener("keydown", (e)=>{ if(e.key === "Enter") checkStatus(); });
-
-      $("billingLink").addEventListener("click", (e)=>{
-        const email = getEmail();
-        if(!email || !email.includes("@")){
-          e.preventDefault();
-          return setStatus("Enter a valid email first.", "bad");
-        }
-        window.sbTrack?.("sb_click",{brand:"sb-fleetlog",page:location.pathname,component:"app_home",action:"billing_portal"});
-      });
-
-      $("upgradeLink").addEventListener("click", (e)=>{
-        const email = getEmail();
-        if(!email || !email.includes("@")){
-          e.preventDefault();
-          return setStatus("Enter a valid email first.", "bad");
-        }
-        window.sbTrack?.("sb_click",{brand:"sb-fleetlog",page:location.pathname,component:"app_home",action:"upgrade_to_fleet"});
-      });
-
-      $("clearBtn").addEventListener("click", ()=>{
-        localStorage.removeItem(KEY);
-        $("email").value = "";
-        setStatus("");
-        show("badgeWrap", false);
-        show("unlocked", false);
-        show("gate", false);
-      });
-const saved = (localStorage.getItem(KEY) || "").trim().toLowerCase();
-if(saved){
-  $("email").value = saved;
-  checkStatus();
+  }catch(e){
+    setStatus(e.message,"bad");
+  }
 }
 
-// Show Admin link only when ?admin=1 is present
-try{
-  const qs = new URLSearchParams(location.search);
-  const isAdmin = qs.get("admin") === "1";
-  if(isAdmin) document.getElementById("adminRow")?.classList.remove("hidden");
-}catch{}
-    </script>
-  </div>
-</body>
-</html>
+$("checkBtn").addEventListener("click",checkStatus);
+$("email").addEventListener("keydown",(e)=>{ if(e.key==="Enter")checkStatus(); });
 
-  </div>
+$("clearBtn").addEventListener("click",()=>{
+  localStorage.removeItem(KEY);
+  $("email").value="";
+  show("badgeWrap",false);
+  show("unlocked",false);
+  show("gate",false);
+  setStatus("");
+});
+
+const saved=(localStorage.getItem(KEY)||"").trim().toLowerCase();
+if(saved){
+  $("email").value=saved;
+  checkStatus();
+}
+</script>
 </body>
 </html>
