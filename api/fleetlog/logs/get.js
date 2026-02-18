@@ -7,28 +7,21 @@ function base() {
     .replace(/\/+$/, "");
 }
 function token() {
-  return (process.env.UPSTASH_REDIS_REST_TOKEN || "")
-    .replace(/(^"|"$)/g, "");
+  return (process.env.UPSTASH_REDIS_REST_TOKEN || "").replace(/(^"|"$)/g, "");
 }
 
-async function upstashPost(path, body) {
+async function upstashGetRaw(key) {
   const b = base();
   const t = token();
   if (!b || !t) throw new Error("Missing Upstash env vars");
 
-  const r = await fetch(`${b}${path}`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${t}`, "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+  const r = await fetch(`${b}/get/${encodeURIComponent(key)}`, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${t}` },
   });
 
   const j = await r.json().catch(() => null);
   if (!r.ok) throw new Error(`Upstash error: ${r.status} ${JSON.stringify(j)}`);
-  return j;
-}
-
-async function upstashGet(key) {
-  const j = await upstashPost(`/get/${encodeURIComponent(key)}`, []);
   return j?.result ?? null;
 }
 
@@ -38,11 +31,9 @@ function normEmail(email) {
 
 async function requireActive(email) {
   const e = normEmail(email);
-  if (!e || !e.includes("@")) {
-    return { ok: false, status: 400, error: "Missing/invalid email" };
-  }
+  if (!e || !e.includes("@")) return { ok: false, status: 400, error: "Missing/invalid email" };
 
-  const raw = await upstashGet(`fleetlog:email:${e}`);
+  const raw = await upstashGetRaw(`fleetlog:email:${e}`);
   if (!raw) return { ok: false, status: 403, error: "SUBSCRIPTION_REQUIRED" };
 
   let rec;
@@ -66,7 +57,7 @@ export default async function handler(req, res) {
     const gate = await requireActive(email);
     if (!gate.ok) return res.status(gate.status).json({ ok: false, error: gate.error });
 
-    const raw = await upstashGet(`fleetlog:log:${id}`);
+    const raw = await upstashGetRaw(`fleetlog:log:${id}`);
     if (!raw) return res.status(404).json({ ok: false, error: "Not found" });
 
     const log = JSON.parse(raw);
