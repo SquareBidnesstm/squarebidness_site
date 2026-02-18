@@ -11,6 +11,21 @@ function token() {
     .replace(/(^"|"$)/g, "");
 }
 
+async function upstashGetRaw(key) {
+  const b = base();
+  const t = token();
+  if (!b || !t) throw new Error("Missing Upstash env vars");
+
+  const r = await fetch(`${b}/get/${encodeURIComponent(key)}`, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${t}` },
+  });
+
+  const j = await r.json().catch(() => null);
+  if (!r.ok) throw new Error(`Upstash error: ${r.status} ${JSON.stringify(j)}`);
+  return j?.result ?? null;
+}
+
 async function upstashPost(path, body) {
   const b = base();
   const t = token();
@@ -27,15 +42,9 @@ async function upstashPost(path, body) {
   return j;
 }
 
-async function upstashGet(key) {
-  const j = await upstashPost(`/get/${encodeURIComponent(key)}`, []);
-  return j?.result ?? null;
-}
-
 async function upstashSet(key, value) {
   return upstashPost(`/set/${encodeURIComponent(key)}`, [String(value)]);
 }
-
 async function upstashLpush(key, value) {
   return upstashPost(`/lpush/${encodeURIComponent(key)}`, [String(value)]);
 }
@@ -43,12 +52,9 @@ async function upstashLpush(key, value) {
 function nowIso() {
   return new Date().toISOString();
 }
-
 function newId() {
-  // simple unique id (safe for log keys)
   return `log_${Date.now()}_${Math.random().toString(16).slice(2)}`;
 }
-
 function normEmail(email) {
   return String(email || "").trim().toLowerCase();
 }
@@ -59,10 +65,8 @@ async function requireActive(email) {
     return { ok: false, status: 400, error: "Missing/invalid email" };
   }
 
-  const raw = await upstashGet(`fleetlog:email:${e}`);
-  if (!raw) {
-    return { ok: false, status: 403, error: "SUBSCRIPTION_REQUIRED" };
-  }
+  const raw = await upstashGetRaw(`fleetlog:email:${e}`);
+  if (!raw) return { ok: false, status: 403, error: "SUBSCRIPTION_REQUIRED" };
 
   let rec;
   try { rec = JSON.parse(raw); } catch { rec = null; }
@@ -107,21 +111,15 @@ export default async function handler(req, res) {
       notes: String(body.notes || "").trim(),
       createdAt: nowIso(),
 
-      // subscription context (for audits)
       tier: gate.tier,
       subscriptionId: gate.subscriptionId,
       customerId: gate.customerId,
     };
 
-    // Store log
     await upstashSet(`fleetlog:log:${id}`, JSON.stringify(record));
-
-    // Add to user's list (most recent first)
     await upstashLpush(`fleetlog:user:${email}:logs`, id);
 
-    // Receipt link
     const receipt_url = `https://www.squarebidness.com/lab/fleetlog/receipt/?id=${encodeURIComponent(id)}`;
-
     return res.status(200).json({ ok: true, id, receipt_url, record });
   } catch (e) {
     return res.status(500).json({ ok: false, error: e?.message || "Server error" });
