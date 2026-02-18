@@ -17,6 +17,23 @@ async function upstash(method, path, body){
   if(!r.ok) throw new Error(`Upstash error: ${r.status} ${JSON.stringify(j)}`);
   return j;
 }
+
+async function rateLimit(email){
+  const key = `fleetlog:ratelimit:${email}`;
+  const now = Date.now();
+  const windowMs = 10000; // 10 seconds
+  const max = 5;
+
+  const r = await upstash("POST", `/incr/${encodeURIComponent(key)}`, []);
+  const count = r?.result || 0;
+
+  if(count === 1){
+    await upstash("POST", `/pexpire/${encodeURIComponent(key)}`, [windowMs]);
+  }
+
+  return count > max;
+}
+
 async function uget(key){ return (await upstash("GET", `/get/${encodeURIComponent(key)}`))?.result ?? null; }
 async function uset(key, valStr){ return upstash("POST", `/set/${encodeURIComponent(key)}`, [String(valStr)]); }
 async function lpush(key, val){ return upstash("POST", `/lpush/${encodeURIComponent(key)}`, [String(val)]); }
@@ -71,6 +88,11 @@ export default async function handler(req,res){
     if(status !== "ACTIVE") return res.status(403).json({ ok:false, error:"SUBSCRIPTION_REQUIRED" });
 
     const tier = String(sub.tier || "single").toLowerCase() === "fleet" ? "fleet" : "single";
+
+    if(await rateLimit(email)){
+    return res.status(429).json({ ok:false, error:"RATE_LIMIT_EXCEEDED" });
+    }
+
 
     // limits
     const maxSingle = parseInt(process.env.FLEETLOG_MAX_LOGS_SINGLE || "30", 10);
