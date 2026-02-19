@@ -269,6 +269,26 @@ export default async function handler(req, res) {
         await audit({ type: "webhook_skip_missing", reason: "missing_email_or_sub", email, tier, subscriptionId });
         return res.status(200).json({ received: true, skipped: true });
       }
+      // ALSO log raw webhook events (ops view)
+try{
+  const obj = event?.data?.object || {};
+  await (async ()=>{
+    const key = "fleetlog:ops:webhooks";
+    const payload = {
+      ts: nowIso(),
+      type: event.type,
+      id: event.id || null,
+      livemode: !!event.livemode,
+      subscriptionId: obj.subscription || (obj.id?.startsWith("sub_") ? obj.id : null) || null,
+      customerId: obj.customer || null
+    };
+    await lpush(key, JSON.stringify(payload));
+    await expire(key, 60 * 60 * 24 * 30);
+  })();
+}catch(e){
+  console.warn("FleetLog webhook ops log failed:", e?.message || e);
+}
+
 
       // Idempotency: welcome email only once per subscription
       const emailSentKey = `fleetlog:email_sent:${subscriptionId}`;
