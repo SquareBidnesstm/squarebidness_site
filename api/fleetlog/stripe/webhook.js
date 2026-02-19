@@ -1,3 +1,4 @@
+// /api/fleetlog/stripe/webhook.js
 import Stripe from "stripe";
 
 export const config = {
@@ -5,7 +6,7 @@ export const config = {
   runtime: "nodejs",
 };
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
 
 function nowIso() {
   return new Date().toISOString();
@@ -22,30 +23,23 @@ function upstashToken() {
   return clean(process.env.UPSTASH_REDIS_REST_TOKEN);
 }
 
-async function upstashGetRaw(key) {
-  const base = upstashBase();
-  const token = upstashToken();
-  if (!base || !token) throw new Error("Missing Upstash env vars");
-
-  const r = await fetch(`${base}/get/${encodeURIComponent(key)}`, {
-    method: "GET",
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
-  const j = await r.json().catch(() => null);
-  if (!r.ok) throw new Error(`Upstash error: ${r.status} ${JSON.stringify(j)}`);
-  return j?.result ?? null;
-}
-
-async function upstashPost(path, body) {
+/**
+ * Upstash REST calls:
+ * - Always POST
+ * - Body is an array of args (even for GET: [])
+ */
+async function upstashPost(path, argsArray) {
   const base = upstashBase();
   const token = upstashToken();
   if (!base || !token) throw new Error("Missing Upstash env vars");
 
   const r = await fetch(`${base}${path}`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(Array.isArray(argsArray) ? argsArray : []),
   });
 
   const j = await r.json().catch(() => null);
@@ -53,18 +47,74 @@ async function upstashPost(path, body) {
   return j;
 }
 
-async function upstashSetJson(key, valueObj) {
-  return upstashPost(`/set/${encodeURIComponent(key)}`, [JSON.stringify(valueObj)]);
+async function uget(key) {
+  const j = await upstashPost(`/get/${encodeURIComponent(key)}`, []);
+  return j?.result ?? null;
+}
+async function uset(key, valueStr) {
+  return upstashPost(`/set/${encodeURIComponent(key)}`, [String(valueStr)]);
+}
+async function usetJson(key, obj) {
+  return upstashPost(`/set/${encodeURIComponent(key)}`, [JSON.stringify(obj)]);
+}
+async function lpush(key, valueStr) {
+  return upstashPost(`/lpush/${encodeURIComponent(key)}`, [String(valueStr)]);
+}
+async function expire(key, seconds) {
+  return upstashPost(`/expire/${encodeURIComponent(key)}`, [Number(seconds)]);
 }
 
-async function upstashSet(key, value) {
-  return upstashPost(`/set/${encodeURIComponent(key)}`, [String(value)]);
+function tryParseRecord(raw) {
+  if (raw == null) return null;
+
+  // Upstash may return a string, object, or array-wrapped string
+  if (typeof raw === "object" && !Array.isArray(raw)) return raw;
+
+  if (Array.isArray(raw)) {
+    const first = raw[0];
+    if (typeof first === "object" && first) return first;
+    if (typeof first === "string") {
+      try {
+        return JSON.parse(first);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  }
+
+  if (typeof raw === "string") {
+    // Sometimes it's JSON; sometimes it's ["{...}"]
+    try {
+      const p = JSON.parse(raw);
+      if (p && typeof p === "object" && !Array.isArray(p)) return p;
+      if (Array.isArray(p) && typeof p[0] === "string") {
+        try {
+          return JSON.parse(p[0]);
+        } catch {
+          return null;
+        }
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
+  return null;
+}
+
+async function audit(evt) {
+  const key = "fleetlog:ops:audit";
+  const payload = { ...evt, ts: nowIso() };
+  await lpush(key, JSON.stringify(payload));
+  await expire(key, 60 * 60 * 24 * 30); // 30 days
 }
 
 async function sendResendEmail({ to, subject, html }) {
-  const apiKey = clean(process.env.RESEND_API_KEY);
-  const from = clean(process.env.RESEND_FROM);
-  const replyTo = clean(process.env.RESEND_REPLY_TO);
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.RESEND_FROM;
+  const replyTo = process.env.RESEND_REPLY_TO;
 
   if (!apiKey) throw new Error("Missing RESEND_API_KEY");
   if (!from) throw new Error("Missing RESEND_FROM");
@@ -74,224 +124,179 @@ async function sendResendEmail({ to, subject, html }) {
 
   const r = await fetch("https://api.resend.com/emails", {
     method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(payload),
   });
 
-  const text = await r.text();
-  let j = null;
-  try { j = JSON.parse(text); } catch { j = { raw: text }; }
+  const j = await r.json().catch(() => null);
   if (!r.ok) throw new Error(`Resend error: ${r.status} ${JSON.stringify(j)}`);
   return j;
 }
 
 function esc(s) {
-  return String(s ?? "").replace(/[&<>"']/g, (c) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;",
-  }[c]));
+  return String(s ?? "").replace(/[&<>"']/g, (c) =>
+    ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;",
+    }[c])
+  );
 }
 
 function welcomeEmailHtml({ email, tier, subscriptionId }) {
-  const planLabel = String(tier || "").toLowerCase() === "fleet" ? "Small Fleet (2–10)" : "Single Truck";
   return `
-  <div style="font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto;line-height:1.55;color:#111;background:#fff;">
-    <div style="max-width:640px;margin:0 auto;padding:22px 18px;">
-      <div style="font-weight:900;font-size:14px;opacity:.9;">SB FleetLog™</div>
-      <h2 style="margin:10px 0 10px;font-size:22px;line-height:1.2;">You're live. Subscription active.</h2>
-      <p style="margin:0 0 14px;color:#222;">Start logging immediately and generate printable receipt links for your records.</p>
+  <div style="font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto;line-height:1.5;color:#111;">
+    <h2 style="margin:0 0 12px;">SB FleetLog™ — You're live.</h2>
+    <p style="margin:0 0 12px;">
+      Your subscription is active. Start logging immediately and generate printable receipt links for your records.
+    </p>
 
-      <div style="margin:18px 0 16px;">
-        <a href="https://www.squarebidness.com/lab/fleetlog/new/"
-           style="display:inline-block;background:#111;color:#fff;text-decoration:none;padding:12px 16px;border-radius:12px;font-weight:900;">
-          Create Your First Log
-        </a>
-        <a href="https://www.squarebidness.com/lab/fleetlog/"
-           style="display:inline-block;margin-left:10px;color:#111;text-decoration:underline;font-weight:800;">
-          Open FleetLog App
-        </a>
-      </div>
-
-      <div style="border-top:1px solid #e8e8e8;margin:18px 0;padding-top:14px;">
-        <p style="margin:0 0 6px;"><strong>Plan:</strong> ${esc(planLabel)}</p>
-        <p style="margin:0 0 6px;"><strong>Email:</strong> ${esc(email)}</p>
-        <p style="margin:0 0 6px;"><strong>Subscription ID:</strong> ${esc(subscriptionId || "")}</p>
-      </div>
-
-      <p style="margin:14px 0 0;color:#555;font-size:13px;">Need help? Reply to this email.</p>
+    <div style="margin:18px 0;">
+      <a href="https://www.squarebidness.com/lab/fleetlog/"
+         style="display:inline-block;background:#111;color:#fff;text-decoration:none;padding:12px 16px;border-radius:12px;font-weight:800;">
+        Start Logging Now
+      </a>
+      <a href="https://www.squarebidness.com/fleetlog/"
+         style="display:inline-block;margin-left:10px;color:#111;text-decoration:underline;">
+        Back to FleetLog
+      </a>
     </div>
+
+    <p style="margin:0 0 8px;"><strong>Plan:</strong> ${esc(tier)}</p>
+    <p style="margin:0 0 8px;"><strong>Email:</strong> ${esc(email)}</p>
+    <p style="margin:0 0 18px;"><strong>Subscription ID:</strong> ${esc(subscriptionId)}</p>
+
+    <p style="margin:0;color:#555;font-size:13px;">
+      If you need help, reply to this email.
+    </p>
   </div>`;
 }
 
-async function provisionActive({ email, tier, subscriptionId, customerId, source }) {
-  const e = String(email || "").trim().toLowerCase();
-  if (!e || !e.includes("@")) throw new Error("Missing email for provisioning");
-
-  const record = {
-    subscriptionId: subscriptionId || null,
-    customerId: customerId || null,
-    email: e,
-    tier: tier || "single",
-    createdAt: nowIso(),
-    source: source || "stripe_event",
-    status: "ACTIVE",
-  };
-
-  // Write both indexes
-  if (subscriptionId) await upstashSetJson(`fleetlog:sub:${subscriptionId}`, record);
-  await upstashSetJson(`fleetlog:email:${e}`, record);
-
-  // Idempotent email send: prefer subscription id, otherwise customer id
-  const dedupeId = subscriptionId || customerId || e;
-  const emailSentKey = `fleetlog:email_sent:${dedupeId}`;
-  const alreadySent = await upstashGetRaw(emailSentKey);
-  if (!alreadySent) {
-    const subject =
-      String(record.tier).toLowerCase() === "fleet"
-        ? "SB FleetLog™ — Fleet subscription active"
-        : "SB FleetLog™ — Subscription active";
-
-    await sendResendEmail({
-      to: e,
-      subject,
-      html: welcomeEmailHtml({ email: e, tier: record.tier, subscriptionId }),
-    });
-
-    await upstashSet(emailSentKey, nowIso());
-    console.log("FleetLog welcome email sent:", { email: e, subscriptionId, customerId });
-  }
-
-  return record;
+async function readRawBody(req) {
+  const buf = await new Promise((resolve) => {
+    const chunks = [];
+    req.on("data", (c) => chunks.push(c));
+    req.on("end", () => resolve(Buffer.concat(chunks)));
+  });
+  return buf;
 }
 
 export default async function handler(req, res) {
   const sig = req.headers["stripe-signature"];
-
-  const buf = await new Promise((resolve) => {
-    const chunks = [];
-    req.on("data", (chunk) => chunks.push(chunk));
-    req.on("end", () => resolve(Buffer.concat(chunks)));
-  });
+  const buf = await readRawBody(req);
 
   let event;
   try {
-    event = stripe.webhooks.constructEvent(buf, sig, process.env.STRIPE_WEBHOOK_SECRET);
+    event = stripe.webhooks.constructEvent(
+      buf,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET
+    );
   } catch (err) {
-    console.error("Webhook signature verification failed:", err.message);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
+    console.error("Webhook signature verification failed:", err?.message || err);
+    return res.status(400).send(`Webhook Error: ${err?.message || "invalid signature"}`);
   }
 
   try {
-    // 1) Provision on checkout completion (re-retrieve + expand to avoid subscription:null)
+    // Provision on checkout completion
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
 
-      // Re-fetch with expands (this is the key fix)
-      const full = await stripe.checkout.sessions.retrieve(session.id, {
-        expand: ["subscription", "customer", "customer_details"],
-      });
+      const email = String(session.customer_details?.email || "").trim();
+      const subscriptionId = String(session.subscription || "").trim();
+      const customerId = String(session.customer || "").trim(); // ✅ requested
+      const tierFromMeta =
+        String(session.metadata?.tier || "") ||
+        String(session.subscription_data?.metadata?.tier || "");
+      const tier = (tierFromMeta || "single").toLowerCase() === "fleet" ? "fleet" : "single";
 
-      const customerId = String(full.customer?.id || full.customer || "");
-      const subscriptionId =
-        typeof full.subscription === "string"
-          ? full.subscription
-          : String(full.subscription?.id || "");
-
-      let email =
-        String(full.customer_details?.email || full.customer_email || "").trim().toLowerCase();
-
-      // If still missing, try customer object
-      if (!email && customerId) {
-        const cust = await stripe.customers.retrieve(customerId);
-        email = String(cust?.email || "").trim().toLowerCase();
+      if (!email || !subscriptionId) {
+        console.warn("FleetLog webhook: missing email/subscriptionId");
+        await audit({ type: "webhook_skip_missing", reason: "missing_email_or_sub", tier });
+        return res.status(200).json({ received: true, skipped: true });
       }
 
-      const tier =
-        String(full.metadata?.tier || full.subscription?.metadata?.tier || "").trim().toLowerCase() ||
-        "single";
-
-      // If still no subscription id, DON'T provision yet — subscription events will handle it
-      if (!subscriptionId) {
-        console.log("FleetLog: checkout completed but subscriptionId missing (will wait for subscription events)", {
-          sessionId: full.id,
-          mode: full.mode,
-          customerId,
-          email,
-        });
-        return res.status(200).json({ received: true, ok: true, pending: true });
+      // Idempotency: only send once per subscription
+      const emailSentKey = `fleetlog:email_sent:${subscriptionId}`;
+      const alreadySent = await uget(emailSentKey);
+      if (alreadySent) {
+        return res.status(200).json({ received: true, ok: true, deduped: true });
       }
 
-      await provisionActive({
+      // Store subscriber record
+      const record = {
+        subscriptionId,
+        customerId, // ✅ requested
+        email,
+        tier,
+        createdAt: nowIso(),
+        source: "checkout.session.completed",
+        status: "ACTIVE",
+      };
+
+      await usetJson(`fleetlog:sub:${subscriptionId}`, record);
+      await usetJson(`fleetlog:email:${email.toLowerCase()}`, record);
+
+      // Send welcome email (once)
+      const subject =
+        tier === "fleet"
+          ? "SB FleetLog™ — Fleet subscription active"
+          : "SB FleetLog™ — Subscription active";
+
+      const html = welcomeEmailHtml({ email, tier, subscriptionId });
+      await sendResendEmail({ to: email, subject, html });
+
+      await uset(emailSentKey, nowIso());
+
+      await audit({
+        type: "sub_provisioned",
         email,
         tier,
         subscriptionId,
         customerId,
-        source: "checkout.session.completed",
       });
+
+      console.log("New subscription:", { email, subscriptionId, customerId, tier });
     }
 
-    // 2) Provision on subscription create/update (covers subscription:null cases)
-    if (event.type === "customer.subscription.created" || event.type === "customer.subscription.updated") {
-      const sub = event.data.object;
-
-      const subscriptionId = String(sub.id || "");
-      const customerId = String(sub.customer || "");
-      const status = String(sub.status || "").toLowerCase();
-
-      // only treat active/trialing as allowed
-      const isActive = status === "active" || status === "trialing";
-      if (!isActive) {
-        return res.status(200).json({ received: true, ok: true, skipped: true });
-      }
-
-      // email must be pulled from customer
-      let email = "";
-      if (customerId) {
-        const cust = await stripe.customers.retrieve(customerId);
-        email = String(cust?.email || "").trim().toLowerCase();
-      }
-
-      const tier = String(sub.metadata?.tier || "").trim().toLowerCase() || "single";
-
-      if (email) {
-        await provisionActive({
-          email,
-          tier,
-          subscriptionId,
-          customerId,
-          source: event.type,
-        });
-      } else {
-        console.log("FleetLog: subscription active but missing email on customer", { subscriptionId, customerId });
-      }
-    }
-
-    // 3) Cancel handling
+    // Keep subscription status updated
     if (event.type === "customer.subscription.deleted") {
       const sub = event.data.object;
-      const subscriptionId = String(sub.id || "");
-      const subKey = `fleetlog:sub:${subscriptionId}`;
+      const subscriptionId = String(sub.id || "").trim();
+      if (subscriptionId) {
+        const subKey = `fleetlog:sub:${subscriptionId}`;
+        const existingRaw = await uget(subKey);
+        const existing = tryParseRecord(existingRaw);
 
-      const existing = await upstashGetRaw(subKey);
-      if (existing) {
-        const parsed = JSON.parse(existing);
-        parsed.status = "CANCELED";
-        parsed.canceledAt = nowIso();
-        await upstashSetJson(subKey, parsed);
+        if (existing) {
+          existing.status = "CANCELED";
+          existing.canceledAt = nowIso();
+          await usetJson(subKey, existing);
 
-        const email = String(parsed.email || "").toLowerCase();
-        if (email) await upstashSetJson(`fleetlog:email:${email}`, parsed);
+          const email = String(existing.email || "").toLowerCase();
+          if (email) await usetJson(`fleetlog:email:${email}`, existing);
+        }
+
+        await audit({ type: "sub_canceled", subscriptionId });
+        console.log("FleetLog subscription canceled:", subscriptionId);
       }
-
-      console.log("FleetLog subscription canceled:", subscriptionId);
     }
 
     return res.status(200).json({ received: true });
   } catch (e) {
     console.error("FleetLog webhook handler error:", e?.message || e);
-    return res.status(200).json({ received: true, ok: false, error: e?.message || "error" });
+    await audit({ type: "webhook_error", error: e?.message || String(e) });
+
+    // 200 avoids Stripe retry storms for internal non-critical failures
+    return res.status(200).json({
+      received: true,
+      ok: false,
+      error: e?.message || "error",
+    });
   }
 }
