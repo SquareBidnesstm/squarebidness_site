@@ -1,4 +1,4 @@
-<!-- /public/lab/fleetlog/index.html -->
+<!-- /public/lab/fleetlog/index.html (PASTE READY — App Home + Badge + Usage + WL toggle + Upgrade/Billing + Admin shortcut) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -11,134 +11,70 @@
 
   <style>
     :root{
-      --bg:#0b0b0b;
-      --card:#121212;
-      --line:#242424;
-      --text:#f2f2f2;
-      --muted:#b8b8b8;
-      --bad:#ef4444;
-      --ok:#22c55e;
+      --bg:#0b0b0b; --card:#121212; --line:#242424; --text:#f2f2f2; --muted:#b8b8b8;
+      --bad:#ef4444; --ok:#22c55e; --warn:#f59e0b;
     }
-
     *{box-sizing:border-box}
-
     body{
-      margin:0;
-      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto;
-      background:var(--bg);
-      color:var(--text);
-      min-height:100vh;
-      padding:20px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
+      margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto;
+      background:var(--bg);color:var(--text);min-height:100vh;padding:20px;
+      display:flex;align-items:center;justify-content:center;
     }
-
     a{color:#fff;text-decoration:none}
-
     .app{
-      width:100%;
-      max-width:640px;
-      background:var(--card);
-      border:1px solid var(--line);
-      border-radius:18px;
-      padding:26px;
+      width:100%;max-width:640px;background:var(--card);
+      border:1px solid var(--line);border-radius:18px;padding:26px;
     }
-
     h1{margin:0 0 8px;font-size:28px}
     .muted{color:var(--muted);font-size:14px;margin:0 0 18px}
-
     .pill{
-      display:inline-block;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid var(--line);
-      font-size:12px;
-      color:var(--muted);
+      display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid var(--line);
+      font-size:12px;color:var(--muted);background:transparent;cursor:pointer;
     }
-
     .row{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 0}
-
     input{
-      flex:1;
-      min-width:240px;
-      padding:12px;
-      border-radius:12px;
-      border:1px solid var(--line);
-      background:#0f0f0f;
-      color:var(--text);
-      outline:none;
+      flex:1;min-width:240px;padding:12px;border-radius:12px;border:1px solid var(--line);
+      background:#0f0f0f;color:var(--text);outline:none;
     }
 
+    /* Badge */
     .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:8px 10px;
-      border-radius:999px;
-      border:1px solid var(--line);
-      font-size:12px;
-      font-weight:900;
+      display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;
+      border:1px solid var(--line);font-size:12px;font-weight:900;
     }
-
-    .dot{
-      width:8px;
-      height:8px;
-      border-radius:999px;
-      background:var(--muted);
-      display:inline-block;
-    }
-
-    .badge.ok{ color:#bbf7d0; border-color:#12311f; }
-    .badge.ok .dot{ background:var(--ok); }
-
-    .badge.bad{ color:#fecaca; border-color:#3a1f1f; }
-    .badge.bad .dot{ background:var(--bad); }
-
-    .badge.warn{ color:#fde68a; border-color:#3a2b10; }
-    .badge.warn .dot{ background:#f59e0b; }
-
-    .submeta{
-      color:var(--muted);
-      font-size:12px;
-      margin-top:8px;
-      word-break:break-word;
-    }
+    .dot{width:8px;height:8px;border-radius:999px;background:var(--muted);display:inline-block}
+    .badge.ok{color:#bbf7d0;border-color:#12311f} .badge.ok .dot{background:var(--ok)}
+    .badge.bad{color:#fecaca;border-color:#3a1f1f} .badge.bad .dot{background:var(--bad)}
+    .badge.warn{color:#fde68a;border-color:#3a2b10} .badge.warn .dot{background:var(--warn)}
+    .submeta{color:var(--muted);font-size:12px;margin-top:8px;word-break:break-word}
 
     .btn{
-      width:100%;
-      padding:14px;
-      border-radius:14px;
-      border:1px solid var(--line);
-      font-weight:900;
-      cursor:pointer;
-      text-align:center;
-      display:block;
+      width:100%;padding:14px;border-radius:14px;border:1px solid var(--line);
+      font-weight:900;cursor:pointer;text-align:center;display:block;
     }
-
     .btn-primary{background:#fff;color:#000}
     .btn-ghost{background:transparent;color:#fff}
     .btn-danger{background:transparent;color:#fff;border-color:#3a1f1f}
 
     .status{margin-top:10px;font-size:13px;color:var(--muted)}
-    .status.bad{color:var(--bad)}
-    .status.ok{color:var(--ok)}
-
+    .status.bad{color:var(--bad)} .status.ok{color:var(--ok)} .status.warn{color:var(--warn)}
     .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     @media (max-width:700px){.grid2{grid-template-columns:1fr}}
-
     .gate{margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
     .tag{display:inline-block;margin-top:6px;font-size:12px;color:var(--muted)}
     .hidden{display:none!important}
+
+    /* White-label mode: hide SB header row */
+    body.wl .sb-header{display:none!important}
   </style>
 </head>
 
 <body>
   <div class="app">
 
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <div class="pill">SB FleetLog™ App</div>
-      <a class="pill" href="/fleetlog/">Marketing</a>
+    <div class="sb-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px;">
+      <div class="pill" style="cursor:default;">SB FleetLog™ App</div>
+      <a class="pill" href="/fleetlog/" onclick="window.sbTrack?.('sb_click',{brand:'sb-fleetlog',page:location.pathname,component:'app_home',action:'back_marketing'});">Marketing</a>
     </div>
 
     <h1>FleetLog</h1>
@@ -158,21 +94,39 @@
       </div>
       <div id="subMeta" class="submeta"></div>
     </div>
-   
-    <div style="margin-top:10px;">
-  <button class="pill" id="wlBtn">White-label: OFF</button>
-</div>
 
+    <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+      <button class="pill" id="wlBtn" type="button">White-label: OFF</button>
+
+      <!-- Admin shortcut (hidden unless ?admin=1) -->
+      <div id="adminRow" class="hidden" style="display:flex;gap:10px;align-items:center;">
+        <a class="pill" href="/lab/fleetlog/admin/"
+           onclick="window.sbTrack?.('sb_click',{brand:'sb-fleetlog',page:location.pathname,component:'app_home',action:'open_admin'});">
+          Admin Ops
+        </a>
+        <span class="pill" style="opacity:.8;cursor:default;">ops only</span>
+      </div>
+    </div>
 
     <div id="unlocked" class="hidden" style="margin-top:14px;">
       <div class="grid2">
-        <a class="btn btn-primary" href="/lab/fleetlog/new/">Create New Daily Log</a>
-        <a class="btn btn-ghost" id="historyLink" href="#">View Log History</a>
+        <a class="btn btn-primary" href="/lab/fleetlog/new/"
+           onclick="window.sbTrack?.('sb_click',{brand:'sb-fleetlog',page:location.pathname,component:'app_home',action:'new_log'});">
+          Create New Daily Log
+        </a>
+        <a class="btn btn-ghost" id="historyLink" href="#"
+           onclick="window.sbTrack?.('sb_click',{brand:'sb-fleetlog',page:location.pathname,component:'app_home',action:'history'});">
+          View Log History
+        </a>
       </div>
 
       <div class="grid2" style="margin-top:10px;">
-        <a class="btn btn-ghost" id="billingLink" href="#">Manage Billing</a>
-        <a class="btn btn-ghost" id="upgradeLink" href="#">Upgrade to Fleet</a>
+        <a class="btn btn-ghost" id="billingLink" href="#" role="button">
+          Manage Billing
+        </a>
+        <a class="btn btn-ghost" id="upgradeLink" href="#" role="button">
+          Upgrade to Fleet
+        </a>
       </div>
 
       <div class="tag" id="planTag"></div>
@@ -195,113 +149,193 @@
 
   </div>
 
-<script>
-const $ = (id)=>document.getElementById(id);
-const KEY = "fleetlog_email";
+  <script>
+    const $ = (id)=>document.getElementById(id);
+    const KEY = "fleetlog_email";
+    const WL_KEY = "fleetlog_whitelabel";
 
-function getEmail(){ return ($("email").value||"").trim().toLowerCase(); }
-function setStatus(msg,kind){
-  $("status").textContent = msg||"";
-  $("status").className = "status" + (kind?(" "+kind):"");
-}
-function show(id,on){ $(id).classList.toggle("hidden",!on); }
+    function getEmail(){ return ($("email").value||"").trim().toLowerCase(); }
+    function setStatus(msg,kind){
+      $("status").textContent = msg||"";
+      $("status").className = "status" + (kind?(" "+kind):"");
+    }
+    function show(id,on){ const el=$(id); if(el) el.classList.toggle("hidden",!on); }
 
-async function checkStatus(){
-  const email = getEmail();
-  if(!email.includes("@")){
-    setStatus("Enter valid email.","bad");
-    return;
-  }
-  const WL_KEY="fleetlog_whitelabel";
-function isWL(){ return localStorage.getItem(WL_KEY)==="1"; }
-function applyWL(){
-  const on = isWL();
-  document.getElementById("wlBtn").textContent = `White-label: ${on ? "ON" : "OFF"}`;
-  // Example: hide SB header pills when on
-  document.querySelectorAll(".pill").forEach(el=>{
-    if(el.textContent.includes("SB FleetLog")) el.style.display = on ? "none" : "";
-  });
-}
-document.getElementById("wlBtn").addEventListener("click", ()=>{
-  localStorage.setItem(WL_KEY, isWL() ? "0" : "1");
-  applyWL();
-});
-applyWL();
+    // --- White-label toggle ---
+    function isWL(){ return localStorage.getItem(WL_KEY)==="1"; }
+    function applyWL(){
+      const on = isWL();
+      $("wlBtn").textContent = `White-label: ${on ? "ON" : "OFF"}`;
+      document.body.classList.toggle("wl", on);
+      window.sbTrack?.("sb_click",{brand:"sb-fleetlog",page:location.pathname,component:"app_home",action:on?"wl_on":"wl_off"});
+    }
+    $("wlBtn").addEventListener("click", ()=>{
+      localStorage.setItem(WL_KEY, isWL() ? "0" : "1");
+      applyWL();
+    });
+    applyWL();
 
-
-  try{
-    const r = await fetch(`/api/fleetlog/auth/status?email=${encodeURIComponent(email)}`);
-    const j = await r.json();
-    if(!j.ok) throw new Error(j.error);
-
-    localStorage.setItem(KEY,email);
-
-    $("historyLink").href = `/lab/fleetlog/history/?email=${encodeURIComponent(email)}`;
-    $("billingLink").href = `/api/fleetlog/stripe/portal?email=${encodeURIComponent(email)}`;
-    $("upgradeLink").href = `/api/fleetlog/stripe/portal?email=${encodeURIComponent(email)}`;
-
-    show("badgeWrap",true);
-
-    const tier = (j.tier||"").toUpperCase();
-    const tierRaw = (j.tier||"").toLowerCase();
-
-    const badge = $("subBadge");
-    badge.className="badge";
-
-    if(j.active){
-      badge.classList.add("ok");
-      $("badgeText").textContent=`ACTIVE • ${tier}`;
-
-      show("unlocked",true);
-      show("gate",false);
-
-      // usage count
-      let usage="";
+    // --- Usage helper ---
+    async function fetchUsage(email, tierRaw){
       try{
-        const ur=await fetch(`/api/fleetlog/logs/list?email=${encodeURIComponent(email)}&limit=1000`);
-        const lj=await ur.json();
-        if(lj.ok){
-          const used=(lj.logs||[]).length;
-          const max=(tierRaw==="fleet")?300:30;
-          usage=` • Logs Used: ${used}/${max}`;
-        }
-      }catch{}
+        const ur = await fetch(`/api/fleetlog/logs/list?email=${encodeURIComponent(email)}&limit=1000`);
+        const lj = await ur.json();
+        if(!lj.ok) return { used:null, max:null, pct:null, warn80:false };
 
-      $("planTag").textContent=`ACTIVE • ${tier}${usage}`;
-      $("upgradeLink").style.display=(tierRaw==="fleet")?"none":"block";
-      setStatus("Subscription active.","ok");
+        const used = (lj.logs || []).length;
+        const max  = (String(tierRaw||"").toLowerCase()==="fleet") ? 300 : 30;
+        const pct  = max ? Math.round((used / max) * 100) : null;
 
-    }else{
-      badge.classList.add("bad");
-      $("badgeText").textContent="NO SUBSCRIPTION";
-      show("unlocked",false);
-      show("gate",true);
-      $("planTag").textContent="";
-      setStatus("No active subscription.","bad");
+        return { used, max, pct, warn80: (pct !== null && pct >= 80 && pct < 100) };
+      }catch{
+        return { used:null, max:null, pct:null, warn80:false };
+      }
     }
 
-  }catch(e){
-    setStatus(e.message,"bad");
-  }
-}
+    async function checkStatus(){
+      const email = getEmail();
+      if(!email || !email.includes("@")){
+        setStatus("Enter valid email.","bad");
+        show("badgeWrap", false);
+        show("unlocked", false);
+        show("gate", false);
+        return;
+      }
 
-$("checkBtn").addEventListener("click",checkStatus);
-$("email").addEventListener("keydown",(e)=>{ if(e.key==="Enter")checkStatus(); });
+      setStatus("Checking subscription…");
+      show("badgeWrap", false);
+      show("unlocked", false);
+      show("gate", false);
 
-$("clearBtn").addEventListener("click",()=>{
-  localStorage.removeItem(KEY);
-  $("email").value="";
-  show("badgeWrap",false);
-  show("unlocked",false);
-  show("gate",false);
-  setStatus("");
-});
+      try{
+        const r = await fetch(`/api/fleetlog/auth/status?email=${encodeURIComponent(email)}`);
+        const j = await r.json();
+        if(!j.ok) throw new Error(j.error || "Status failed");
 
-const saved=(localStorage.getItem(KEY)||"").trim().toLowerCase();
-if(saved){
-  $("email").value=saved;
-  checkStatus();
-}
-</script>
+        localStorage.setItem(KEY,email);
+
+        $("historyLink").href = `/lab/fleetlog/history/?email=${encodeURIComponent(email)}`;
+
+        const portal = `/api/fleetlog/stripe/portal?email=${encodeURIComponent(email)}`;
+        $("billingLink").href = portal;
+        $("upgradeLink").href = portal;
+
+        show("badgeWrap", true);
+
+        const tierRaw = String(j.tier||"").toLowerCase();
+        const tier    = tierRaw ? tierRaw.toUpperCase() : "—";
+        const status  = j.status ? String(j.status).toUpperCase() : (j.active ? "ACTIVE" : "INACTIVE");
+
+        // meta
+        const subId  = j.subscriptionId ? String(j.subscriptionId) : "";
+        const custId = j.customerId ? String(j.customerId) : "";
+        $("subMeta").textContent = (subId ? `Sub: ${subId}   ` : "") + (custId ? `Customer: ${custId}` : "");
+
+        const badge = $("subBadge");
+        badge.className = "badge";
+
+        if(j.active){
+          badge.classList.add("ok");
+          $("badgeText").textContent = `ACTIVE • ${tier}`;
+
+          show("unlocked", true);
+          show("gate", false);
+
+          // usage
+          const usage = await fetchUsage(email, tierRaw);
+          const usageText = (usage.used != null && usage.max != null)
+            ? ` • Logs Used: ${usage.used}/${usage.max} (${usage.pct}%)`
+            : "";
+
+          $("planTag").textContent = `ACTIVE • ${tier}${usageText}`;
+
+          // show upgrade only if NOT fleet
+          $("upgradeLink").style.display = (tierRaw === "fleet") ? "none" : "block";
+
+          if(usage.warn80){
+            setStatus(`Heads up: you're at ${usage.pct}% usage. Consider upgrading before you hit the limit.`, "warn");
+            window.sbTrack?.("sb_page_ready",{brand:"sb-fleetlog",page:location.pathname,component:"app_home",action:"usage_80_warning"});
+          }else{
+            setStatus("Subscription active.","ok");
+          }
+
+          window.sbTrack?.("sb_page_ready",{brand:"sb-fleetlog",page:location.pathname,component:"app_home",action:"unlocked"});
+
+        }else{
+          // status-based messaging
+          const billingStates = ["CANCELED","PAST_DUE","UNPAID","INCOMPLETE","INCOMPLETE_EXPIRED","TRIALING"];
+          show("unlocked", false);
+          show("gate", true);
+          $("planTag").textContent = "";
+
+          if(billingStates.includes(status)){
+            badge.classList.add(status==="CANCELED" ? "bad" : "warn");
+            $("badgeText").textContent = `${status} • ${tier}`;
+            setStatus(
+              status==="CANCELED"
+                ? "Subscription is canceled. Reactivate or subscribe again."
+                : "Billing issue detected. Open billing portal to fix payment.",
+              "bad"
+            );
+          }else{
+            badge.classList.add("bad");
+            $("badgeText").textContent = "NO SUBSCRIPTION";
+            setStatus("No active subscription.","bad");
+          }
+
+          window.sbTrack?.("sb_page_ready",{brand:"sb-fleetlog",page:location.pathname,component:"app_home",action:"locked"});
+        }
+
+      }catch(e){
+        setStatus("Error: " + (e?.message || e), "bad");
+        show("badgeWrap", false);
+        show("unlocked", false);
+        show("gate", true);
+      }
+    }
+
+    $("checkBtn").addEventListener("click",checkStatus);
+    $("email").addEventListener("keydown",(e)=>{ if(e.key==="Enter")checkStatus(); });
+
+    $("billingLink").addEventListener("click",(e)=>{
+      const email = getEmail();
+      if(!email || !email.includes("@")){
+        e.preventDefault();
+        return setStatus("Enter a valid email first.","bad");
+      }
+      window.sbTrack?.("sb_click",{brand:"sb-fleetlog",page:location.pathname,component:"app_home",action:"billing_portal"});
+    });
+
+    $("upgradeLink").addEventListener("click",(e)=>{
+      const email = getEmail();
+      if(!email || !email.includes("@")){
+        e.preventDefault();
+        return setStatus("Enter a valid email first.","bad");
+      }
+      window.sbTrack?.("sb_click",{brand:"sb-fleetlog",page:location.pathname,component:"app_home",action:"upgrade_to_fleet"});
+    });
+
+    $("clearBtn").addEventListener("click",()=>{
+      localStorage.removeItem(KEY);
+      $("email").value="";
+      show("badgeWrap",false);
+      show("unlocked",false);
+      show("gate",false);
+      setStatus("");
+    });
+
+    // Show Admin link only when ?admin=1 is present
+    try{
+      const qs = new URLSearchParams(location.search);
+      if(qs.get("admin")==="1") $("adminRow")?.classList.remove("hidden");
+    }catch{}
+
+    // boot
+    const saved=(localStorage.getItem(KEY)||"").trim().toLowerCase();
+    if(saved){
+      $("email").value=saved;
+      checkStatus();
+    }
+  </script>
 </body>
 </html>
