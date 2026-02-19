@@ -201,6 +201,25 @@ export default async function handler(req, res) {
     console.error("Webhook signature verification failed:", err?.message || err);
     return res.status(400).send(`Webhook Error: ${err?.message || "invalid signature"}`);
   }
+  // after: event = stripe.webhooks.constructEvent(...)
+
+try {
+  await audit({
+    type: "stripe_event",
+    event: event.type,
+    subscriptionId:
+      (event?.data?.object?.subscription) ||
+      (event?.data?.object?.id) ||
+      null,
+    customerId:
+      (event?.data?.object?.customer) ||
+      null,
+  });
+} catch (e) {
+  // don't break webhook if audit logging fails
+  console.warn("FleetLog audit log failed:", e?.message || e);
+}
+
 
   try {
     // Provision on checkout completion
