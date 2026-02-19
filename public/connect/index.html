@@ -18,7 +18,7 @@
   <meta name="format-detection" content="telephone=no" />
 
   <!-- Build stamp -->
-  <meta name="sb:build" content="v20260111-connect" />
+  <meta name="sb:build" content="v20260219-connect" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
@@ -139,6 +139,9 @@
     .work-card .work-title{font-weight:800;margin:0 0 .2rem;}
     .work-card .work-sub{margin:0 0 .6rem;opacity:.85;font-size:.9rem;}
     .work-actions{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.35rem;}
+
+    /* Quick email templates */
+    .template-row{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.75rem;}
   </style>
 </head>
 
@@ -165,7 +168,7 @@
         <ul class="connect-list" style="margin-top:.75rem;">
           <li>
             <span class="label">Email</span>
-            <a href="mailto:marcusbuckner@squarebidness.com">marcusbuckner@squarebidness.com</a>
+            <a href="mailto:marcusbuckner@squarebidness.com" data-sb="connect-email-link">marcusbuckner@squarebidness.com</a>
             <div class="muted-small">Partnerships • wholesale • media • community.</div>
           </li>
 
@@ -177,12 +180,41 @@
         </ul>
 
         <div class="connect-cta-row">
-          <a class="btn btn--gold" href="mailto:marcusbuckner@squarebidness.com?subject=Square%20Bidness%20%7C%20Connect">Email Marcus</a>
-          <a class="btn btn--outline-light" href="/linkme/">Link Me</a>
+          <a class="btn btn--gold"
+             href="mailto:marcusbuckner@squarebidness.com?subject=Square%20Bidness%20%7C%20Connect&body=Name%3A%0ACompany%2FOrg%3A%0AWhat%20you%E2%80%99re%20reaching%20out%20about%3A%0ATimeline%3A%0A"
+             data-sb="connect-email-cta">Email Marcus</a>
+
+          <a class="btn btn--outline-light"
+             href="/connect/marcus-buckner.vcf"
+             download
+             data-sb="connect-save-contact">Save Contact</a>
+
+          <a class="btn btn--outline-light"
+             href="/connect/sb-tech-lab.vcf"
+             download
+             data-sb="connect-save-techlab">Save Tech Lab</a>
+        </div>
+
+        <p class="muted-small" style="margin-top:.5rem;">
+          Save my contact in one tap (iPhone/Android).
+        </p>
+
+        <div class="template-row" aria-label="Quick email templates">
+          <a class="btn btn--ghost"
+             href="mailto:marcusbuckner@squarebidness.com?subject=Square%20Bidness%20%7C%20Wholesale&body=Name%3A%0AStore%2FBrand%3A%0ALocation%3A%0AWhat%20lines%20you%E2%80%99re%20interested%20in%3A%0AQuantity%2FRun%20size%3A%0A"
+             data-sb="connect-template-wholesale">Wholesale</a>
+
+          <a class="btn btn--ghost"
+             href="mailto:marcusbuckner@squarebidness.com?subject=Square%20Bidness%20%7C%20Media&body=Outlet%3A%0AContact%20Name%3A%0AStory%20angle%3A%0ADeadline%3A%0A"
+             data-sb="connect-template-media">Media</a>
+
+          <a class="btn btn--ghost"
+             href="mailto:marcusbuckner@squarebidness.com?subject=Square%20Bidness%20%7C%20Partner%20Builds&body=Business%20name%3A%0AWhat%20you%20need%20built%3A%0AWebsite%2FPayments%2FBooking%2FIntake%3A%0ATimeline%3A%0A"
+             data-sb="connect-template-partnerbuilds">Partner Builds</a>
         </div>
 
         <p class="connect-note">
-          Use <strong>Wholesale</strong>, <strong>Media</strong>, or <strong>Community</strong> in the subject so it routes clean.
+          Use <strong>Wholesale</strong>, <strong>Media</strong>, or <strong>Partner Builds</strong> in the subject so it routes clean.
         </p>
       </section>
 
@@ -244,16 +276,35 @@
   <!-- Footer injected by /scripts/partials.js -->
   <div id="site-footer" aria-busy="true" style="content-visibility:auto;contain-intrinsic-size:140px;"></div>
 
-  <!-- Optional: click tracking for Partner Builds -->
+  <!-- SB Analytics (standard click/outbound events) -->
   <script>
     document.addEventListener("click", (e) => {
-      const a = e.target.closest && e.target.closest("a[data-sb]");
+      const a = e.target?.closest?.("a");
       if (!a) return;
-      const label = a.getAttribute("data-sb") || a.getAttribute("href") || "(unknown)";
+
+      const label = a.getAttribute("data-sb");
+      if (!label) return;
+
+      try {
+        if (typeof window.sbTrack === "function") {
+          window.sbTrack("sb_click", {
+            brand: "squarebidness",
+            page: "/connect/",
+            component: "connect",
+            action: "click",
+            label,
+            href: a.getAttribute("href") || ""
+          });
+          return;
+        }
+      } catch (_) {}
+
       try {
         if (typeof window.gtag === "function") {
-          window.gtag("event","connect_click",{
-            event_category:"connect",
+          window.gtag("event", "sb_click", {
+            brand: "squarebidness",
+            page_path: "/connect/",
+            event_category: "connect",
             event_label: label
           });
         }
