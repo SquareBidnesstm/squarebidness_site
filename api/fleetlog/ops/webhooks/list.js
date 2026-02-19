@@ -5,17 +5,14 @@ function clean(s){ return String(s || "").replace(/(^"|"$)/g,"").trim(); }
 function base(){ return clean(process.env.UPSTASH_REDIS_REST_URL).replace(/\/+$/,""); }
 function tok(){ return clean(process.env.UPSTASH_REDIS_REST_TOKEN); }
 
-async function upstashPost(path, args){
+async function upstashPost(path){
   const b = base(), t = tok();
   if(!b || !t) throw new Error("Missing Upstash env vars");
 
-  // Upstash REST expects JSON array args for ALL commands
-  const arr = Array.isArray(args) ? args : [];
-
   const r = await fetch(`${b}${path}`, {
     method: "POST",
-    headers: { Authorization:`Bearer ${t}`, "Content-Type":"application/json" },
-    body: JSON.stringify(arr),
+    headers: { Authorization:`Bearer ${t}` },
+    // IMPORTANT: no JSON body for LRANGE when args are in the URL
   });
 
   const j = await r.json().catch(()=>null);
@@ -33,13 +30,15 @@ export default async function handler(req,res){
   if(provided !== admin) return res.status(401).json({ ok:false, error:"UNAUTHORIZED" });
 
   try{
-    const limit = Math.min(Math.max(parseInt(req.query.limit || "50", 10), 1), 200);
-
-    // where webhook events are stored
+    const limit = Math.min(Math.max(parseInt(req.query.limit || "50",10), 1), 200);
     const key = "fleetlog:ops:webhooks";
 
-    const resp = await upstashPost(`/lrange/${encodeURIComponent(key)}`, [0, limit - 1]);
+    const start = 0;
+    const stop = limit - 1;
+
+    const resp = await upstashPost(`/lrange/${encodeURIComponent(key)}/${start}/${stop}`);
     const rows = Array.isArray(resp?.result) ? resp.result : [];
+
     const events = rows
       .map((s)=>{ try { return JSON.parse(s); } catch { return null; } })
       .filter(Boolean);
