@@ -34,13 +34,13 @@ export default async function handler(req,res){
 
   try{
     const limit = Math.min(Math.max(parseInt(req.query.limit || "50",10), 1), 200);
+
     const key = "fleetlog:ops:webhooks";
-
     const start = 0;
-    const stop = limit - 1;
+    const stop  = limit - 1;
 
-    // ✅ Upstash expects args in BODY: [start, stop]
-    const resp = await upstashPost(`/lrange/${encodeURIComponent(key)}`, [start, stop]);
+    // ✅ Upstash expects key + args in BODY
+    const resp = await upstashPost(`/lrange`, [key, start, stop]);
 
     const rows = Array.isArray(resp?.result) ? resp.result : [];
     const events = rows
@@ -49,6 +49,6 @@ export default async function handler(req,res){
 
     return res.status(200).json({ ok:true, events });
   }catch(e){
-    return res.status(500).json({ ok:false, error:e?.message || "Server error" });
+    return res.status(500).json({ ok:false, error: e?.message || "Server error" });
   }
 }
