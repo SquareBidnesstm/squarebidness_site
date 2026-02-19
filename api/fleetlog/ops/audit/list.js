@@ -38,15 +38,12 @@ export default async function handler(req,res){
     const start = 0;
     const stop = limit - 1;
 
-    // ✅ PIPELINE command arrays remove all arg ambiguity
     const resp = await upstashPipeline([
       ["LRANGE", key, String(start), String(stop)]
     ]);
 
     const rows = Array.isArray(resp?.[0]?.result) ? resp[0].result : [];
-    const events = rows
-      .map((s)=>{ try { return JSON.parse(s); } catch { return null; } })
-      .filter(Boolean);
+    const events = rows.map((s)=>{ try { return JSON.parse(s); } catch { return null; } }).filter(Boolean);
 
     return res.status(200).json({ ok:true, events });
   }catch(e){
