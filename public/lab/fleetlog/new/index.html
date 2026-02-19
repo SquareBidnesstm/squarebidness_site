@@ -51,8 +51,26 @@
         <a class="pill" id="historyLink" href="/lab/fleetlog/history/">History</a>
       </div>
     </div>
+   
 
     <div class="card">
+      <!-- Usage -->
+<div id="usageWrap" class="gatebox" style="margin-top:0;margin-bottom:12px;">
+  <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;">
+    <div class="muted" style="font-weight:900;">Usage</div>
+    <div class="muted" id="usageText">—</div>
+  </div>
+
+  <div style="margin-top:10px;">
+    <div style="height:10px;border-radius:999px;border:1px solid var(--line);background:#0f0f0f;overflow:hidden;">
+      <div id="usageBar" style="height:100%;width:0%;background:#fff;"></div>
+    </div>
+    <div class="muted" style="margin-top:8px;font-size:12px;">
+      <span id="remainingText">—</span>
+    </div>
+  </div>
+</div>
+
       <div class="grid">
         <div>
           <label for="email">Driver Email (required)</label>
@@ -165,11 +183,65 @@
     return ($("email").value||"").trim().toLowerCase();
   }
 
+  // -----------------------------
+  // Usage helpers (bar + remaining)
+  // expects these ids on page:
+  // usageWrap, usageText, usageBar, remainingText
+  // -----------------------------
+  function maxForTier(tierRaw){
+    const t = String(tierRaw || "").toLowerCase();
+    return (t === "fleet") ? 300 : 30;
+  }
+
+  function setUsageUI({ used, max, tierRaw }){
+    const pct = Math.min(100, Math.round((used / max) * 100));
+    const remaining = Math.max(0, max - used);
+
+    $("usageWrap")?.classList.remove("hidden");
+
+    if ($("usageText")) $("usageText").textContent = `${used}/${max} (${pct}%)`;
+    if ($("remainingText")) $("remainingText").textContent = `Logs remaining: ${remaining}`;
+
+    const bar = $("usageBar");
+    if (bar) {
+      bar.style.width = `${pct}%`;
+
+      // simple threshold colors
+      if (pct >= 100) bar.style.background = "#ef4444";
+      else if (pct >= 80) bar.style.background = "#f59e0b";
+      else bar.style.background = "#fff";
+    }
+
+    // 80% warning (non-blocking)
+    if (pct >= 80 && pct < 100){
+      setStatus(`Heads up: you're at ${pct}% usage. Consider upgrading before you hit the limit.`, "warn");
+      window.sbTrack?.("sb_page_ready",{
+        brand:"sb-fleetlog",
+        page:location.pathname,
+        component:"new_log",
+        action:"usage_80_warning"
+      });
+    }
+  }
+
+  async function refreshUsage(email, tierRaw){
+    try{
+      const r = await fetch(`/api/fleetlog/logs/list?email=${encodeURIComponent(email)}&limit=1000`);
+      const j = await r.json();
+      if(!j.ok) return;
+
+      const used = (j.logs || []).length;
+      const max = maxForTier(tierRaw);
+      setUsageUI({ used, max, tierRaw });
+    }catch{}
+  }
+
   async function ensureActive(email){
     if(!email || !email.includes("@")){
       setStatus("Driver email is required.", "bad");
       showInactive(false);
       showLimit(false);
+      $("usageWrap")?.classList.add("hidden");
       return { ok:false };
     }
 
@@ -190,17 +262,23 @@
         setStatus("Subscription inactive for this email.", "bad");
         showInactive(true);
         showLimit(false);
+        $("usageWrap")?.classList.add("hidden");
         return { ok:false, reason:"inactive", status:j.status || "" };
       }
 
       showInactive(false);
       showLimit(false);
+
+      // ✅ CALL AFTER SUBSCRIPTION GATE PASSES
+      await refreshUsage(email, j.tier || "single");
+
       return { ok:true, tier:(j.tier||"single"), status:(j.status||"ACTIVE") };
 
     }catch(e){
       setStatus("Status error: " + e.message, "bad");
       showInactive(true);
       showLimit(false);
+      $("usageWrap")?.classList.add("hidden");
       return { ok:false, reason:"status_error", error:e.message };
     }
   }
@@ -250,6 +328,9 @@
 
           setStatus("Log limit reached. Upgrade required.", "warn");
 
+          // show bar at 100%
+          setUsageUI({ used: j.currentCount || j.max || 0, max: j.max || maxForTier(gate.tier), tierRaw: gate.tier });
+
           window.sbTrack?.("sb_form_error",{
             brand:"sb-fleetlog",
             page:location.pathname,
@@ -287,6 +368,9 @@
         id:j.id,
         receipt_url:receiptUrl
       });
+
+      // ✅ refresh usage after save (counts will move)
+      await refreshUsage(email, gate.tier || "single");
 
       window.sbTrack?.("sb_form_submit",{
         brand:"sb-fleetlog",
@@ -339,6 +423,7 @@
     $("jsonOut").textContent="";
     showInactive(false);
     showLimit(false);
+    $("usageWrap")?.classList.add("hidden");
 
     window.sbTrack?.("sb_click",{
       brand:"sb-fleetlog",
