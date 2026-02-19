@@ -5,7 +5,7 @@ function clean(s){ return String(s || "").replace(/(^"|"$)/g,"").trim(); }
 function base(){ return clean(process.env.UPSTASH_REDIS_REST_URL).replace(/\/+$/,""); }
 function tok(){ return clean(process.env.UPSTASH_REDIS_REST_TOKEN); }
 
-async function upstashPost(path, argsArray){
+async function upstashPost(path, body){
   const b = base(), t = tok();
   if(!b || !t) throw new Error("Missing Upstash env vars");
 
@@ -13,9 +13,9 @@ async function upstashPost(path, argsArray){
     method: "POST",
     headers: {
       Authorization: `Bearer ${t}`,
-      "Content-Type": "application/json",
+      "Content-Type": "application/json"
     },
-    body: JSON.stringify(Array.isArray(argsArray) ? argsArray : []),
+    body: JSON.stringify(body)
   });
 
   const j = await r.json().catch(()=>null);
@@ -39,11 +39,13 @@ export default async function handler(req,res){
     const start = 0;
     const stop = limit - 1;
 
-    // ✅ Upstash expects args in BODY: [start, stop]
+    // ✅ Upstash REST: POST /lrange/<key> with args [start, stop]
     const resp = await upstashPost(`/lrange/${encodeURIComponent(key)}`, [start, stop]);
-
     const rows = Array.isArray(resp?.result) ? resp.result : [];
-    const events = rows.map((s)=>{ try { return JSON.parse(s); } catch { return null; } }).filter(Boolean);
+
+    const events = rows
+      .map((s)=>{ try { return JSON.parse(s); } catch { return null; } })
+      .filter(Boolean);
 
     return res.status(200).json({ ok:true, events });
   }catch(e){
