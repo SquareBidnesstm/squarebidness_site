@@ -3,15 +3,13 @@
   "trailingSlash": true,
   "headers": [
     {
-      "source": "/connect/(.*)\\.vcf",
+      "source": "/connect/(.*)\\.(vcf|vcard)",
       "headers": [
-        { "key": "Content-Type", "value": "text/vcard; charset=utf-8" },
-        { "key": "Content-Disposition", "value": "inline" },
+        { "key": "Content-Type", "value": "text/x-vcard; charset=utf-8" },
         { "key": "X-Content-Type-Options", "value": "nosniff" },
         { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
       ]
     },
-
     {
       "source": "/assets/:path*",
       "headers": [
@@ -26,7 +24,6 @@
         { "key": "Cache-Control", "value": "public, max-age=3600" }
       ]
     },
-
     {
       "source": "/internal/:path*",
       "headers": [
@@ -34,7 +31,6 @@
         { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
       ]
     },
-
     {
       "source": "/robots.txt",
       "headers": [
@@ -128,6 +124,9 @@
   ],
   "redirects": [
     { "source": "/connect.html", "destination": "/connect/", "permanent": true },
-    { "source": "/sitemap", "destination": "/sitemap.xml", "permanent": true }
+    { "source": "/sitemap", "destination": "/sitemap.xml", "permanent": true },
+
+    { "source": "/connect/marcus-buckner.vcf", "destination": "/connect/marcus-buckner.vcard", "permanent": false },
+    { "source": "/connect/sb-tech-lab.vcf", "destination": "/connect/sb-tech-lab.vcard", "permanent": false }
   ]
 }
