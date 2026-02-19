@@ -5,14 +5,19 @@ function clean(s){ return String(s || "").replace(/(^"|"$)/g,"").trim(); }
 function base(){ return clean(process.env.UPSTASH_REDIS_REST_URL).replace(/\/+$/,""); }
 function tok(){ return clean(process.env.UPSTASH_REDIS_REST_TOKEN); }
 
-async function upstashPost(path, body){
+async function upstashPost(path, args){
   const b = base(), t = tok();
   if(!b || !t) throw new Error("Missing Upstash env vars");
+
+  // Upstash REST expects JSON array args for ALL commands
+  const arr = Array.isArray(args) ? args : [];
+
   const r = await fetch(`${b}${path}`, {
-    method:"POST",
-    headers:{ Authorization:`Bearer ${t}`, "Content-Type":"application/json" },
-    body: JSON.stringify(Array.isArray(body) ? body : [])
+    method: "POST",
+    headers: { Authorization:`Bearer ${t}`, "Content-Type":"application/json" },
+    body: JSON.stringify(arr),
   });
+
   const j = await r.json().catch(()=>null);
   if(!r.ok) throw new Error(`Upstash error: ${r.status} ${JSON.stringify(j)}`);
   return j;
@@ -28,18 +33,19 @@ export default async function handler(req,res){
   if(provided !== admin) return res.status(401).json({ ok:false, error:"UNAUTHORIZED" });
 
   try{
-    const limit = Math.min(Math.max(parseInt(req.query.limit || "50",10), 1), 200);
+    const limit = Math.min(Math.max(parseInt(req.query.limit || "50", 10), 1), 200);
+
+    // where webhook events are stored
     const key = "fleetlog:ops:webhooks";
 
-    const resp = await upstashPost(`/lrange/${encodeURIComponent(key)}`, [0, limit-1]);
+    const resp = await upstashPost(`/lrange/${encodeURIComponent(key)}`, [0, limit - 1]);
     const rows = Array.isArray(resp?.result) ? resp.result : [];
-
     const events = rows
       .map((s)=>{ try { return JSON.parse(s); } catch { return null; } })
       .filter(Boolean);
 
     return res.status(200).json({ ok:true, events });
   }catch(e){
-    return res.status(500).json({ ok:false, error:e?.message || "Server error" });
+    return res.status(500).json({ ok:false, error: e?.message || "Server error" });
   }
 }
