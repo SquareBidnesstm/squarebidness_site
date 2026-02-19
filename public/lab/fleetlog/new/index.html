@@ -1,4 +1,4 @@
-<!-- /public/lab/fleetlog/new/index.html (PASTE READY — wired to /api/fleetlog/logs/create?email=... with tier limits + upgrade UX) -->
+<!-- /public/lab/fleetlog/new/index.html (PASTE READY — wired to /api/fleetlog/logs/create?email=... with tier limits + upgrade UX + usage bar + 80% warning) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -51,25 +51,25 @@
         <a class="pill" id="historyLink" href="/lab/fleetlog/history/">History</a>
       </div>
     </div>
-   
 
     <div class="card">
-      <!-- Usage -->
-<div id="usageWrap" class="gatebox" style="margin-top:0;margin-bottom:12px;">
-  <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;">
-    <div class="muted" style="font-weight:900;">Usage</div>
-    <div class="muted" id="usageText">—</div>
-  </div>
 
-  <div style="margin-top:10px;">
-    <div style="height:10px;border-radius:999px;border:1px solid var(--line);background:#0f0f0f;overflow:hidden;">
-      <div id="usageBar" style="height:100%;width:0%;background:#fff;"></div>
-    </div>
-    <div class="muted" style="margin-top:8px;font-size:12px;">
-      <span id="remainingText">—</span>
-    </div>
-  </div>
-</div>
+      <!-- Usage -->
+      <div id="usageWrap" class="gatebox hidden" style="margin-top:0;margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;">
+          <div class="muted" style="font-weight:900;">Usage</div>
+          <div class="muted" id="usageText">—</div>
+        </div>
+
+        <div style="margin-top:10px;">
+          <div style="height:10px;border-radius:999px;border:1px solid var(--line);background:#0f0f0f;overflow:hidden;">
+            <div id="usageBar" style="height:100%;width:0%;background:#fff;"></div>
+          </div>
+          <div class="muted" style="margin-top:8px;font-size:12px;">
+            <span id="remainingText">—</span>
+          </div>
+        </div>
+      </div>
 
       <div class="grid">
         <div>
@@ -134,7 +134,7 @@
         </div>
       </div>
 
-      <!-- LIMIT REACHED (SINGLE) -->
+      <!-- LIMIT REACHED -->
       <div class="gatebox hidden" id="gateLimit">
         <div class="muted" style="margin-bottom:10px;">
           You’ve reached your log limit for the current plan.
@@ -155,323 +155,292 @@
   </div>
 
   <script>
-  const $ = (id)=>document.getElementById(id);
-  const KEY = "fleetlog_email";
+    const $ = (id)=>document.getElementById(id);
+    const KEY = "fleetlog_email";
 
-  function isoDate(d=new Date()){
-    const z=(n)=>String(n).padStart(2,'0');
-    return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`;
-  }
-
-  const today = isoDate();
-  $("logDate").value = today;
-
-  function showInactive(on){ $("gateInactive")?.classList.toggle("hidden", !on); }
-  function showLimit(on){ $("gateLimit")?.classList.toggle("hidden", !on); }
-
-  function showJson(obj){
-    $("out").style.display="block";
-    $("jsonOut").textContent = JSON.stringify(obj, null, 2);
-  }
-
-  function setStatus(msg, kind){
-    $("status").className = "status " + (kind || "");
-    $("status").textContent = msg || "";
-  }
-
-  function getEmail(){
-    return ($("email").value||"").trim().toLowerCase();
-  }
-
-  // -----------------------------
-  // Usage helpers (bar + remaining)
-  // expects these ids on page:
-  // usageWrap, usageText, usageBar, remainingText
-  // -----------------------------
-  function maxForTier(tierRaw){
-    const t = String(tierRaw || "").toLowerCase();
-    return (t === "fleet") ? 300 : 30;
-  }
-
-  function setUsageUI({ used, max, tierRaw }){
-    const pct = Math.min(100, Math.round((used / max) * 100));
-    const remaining = Math.max(0, max - used);
-
-    $("usageWrap")?.classList.remove("hidden");
-
-    if ($("usageText")) $("usageText").textContent = `${used}/${max} (${pct}%)`;
-    if ($("remainingText")) $("remainingText").textContent = `Logs remaining: ${remaining}`;
-
-    const bar = $("usageBar");
-    if (bar) {
-      bar.style.width = `${pct}%`;
-
-      // simple threshold colors
-      if (pct >= 100) bar.style.background = "#ef4444";
-      else if (pct >= 80) bar.style.background = "#f59e0b";
-      else bar.style.background = "#fff";
+    function isoDate(d=new Date()){
+      const z=(n)=>String(n).padStart(2,'0');
+      return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`;
     }
 
-    // 80% warning (non-blocking)
-    if (pct >= 80 && pct < 100){
-      setStatus(`Heads up: you're at ${pct}% usage. Consider upgrading before you hit the limit.`, "warn");
-      window.sbTrack?.("sb_page_ready",{
-        brand:"sb-fleetlog",
-        page:location.pathname,
-        component:"new_log",
-        action:"usage_80_warning"
-      });
-    }
-  }
+    const today = isoDate();
+    $("logDate").value = today;
 
-  async function refreshUsage(email, tierRaw){
-    try{
-      const r = await fetch(`/api/fleetlog/logs/list?email=${encodeURIComponent(email)}&limit=1000`);
-      const j = await r.json();
-      if(!j.ok) return;
+    function showInactive(on){ $("gateInactive")?.classList.toggle("hidden", !on); }
+    function showLimit(on){ $("gateLimit")?.classList.toggle("hidden", !on); }
 
-      const used = (j.logs || []).length;
-      const max = maxForTier(tierRaw);
-      setUsageUI({ used, max, tierRaw });
-    }catch{}
-  }
-
-  async function ensureActive(email){
-    if(!email || !email.includes("@")){
-      setStatus("Driver email is required.", "bad");
-      showInactive(false);
-      showLimit(false);
-      $("usageWrap")?.classList.add("hidden");
-      return { ok:false };
+    function showJson(obj){
+      $("out").style.display="block";
+      $("jsonOut").textContent = JSON.stringify(obj, null, 2);
     }
 
-    try{
-      const r = await fetch(`/api/fleetlog/auth/status?email=${encodeURIComponent(email)}`);
-      const j = await r.json();
-      if(!j.ok) throw new Error(j.error || "Status failed");
+    function setStatus(msg, kind){
+      $("status").className = "status " + (kind || "");
+      $("status").textContent = msg || "";
+    }
 
-      localStorage.setItem(KEY, email);
+    function getEmail(){
+      return ($("email").value||"").trim().toLowerCase();
+    }
 
-      $("historyLink").href = `/lab/fleetlog/history/?email=${encodeURIComponent(email)}`;
+    // -----------------------------
+    // Usage helpers
+    // -----------------------------
+    function maxForTier(tierRaw){
+      const t = String(tierRaw || "").toLowerCase();
+      return (t === "fleet") ? 300 : 30;
+    }
 
-      const portalHref = `/api/fleetlog/stripe/portal?email=${encodeURIComponent(email)}`;
-      $("billingLink").href = portalHref;
-      $("upgradeLink").href = portalHref;
+    function setUsageUI({ used, max, tierRaw }){
+      const pct = Math.min(100, Math.round((used / max) * 100));
+      const remaining = Math.max(0, max - used);
 
-      if(!j.active){
-        setStatus("Subscription inactive for this email.", "bad");
+      $("usageWrap")?.classList.remove("hidden");
+
+      if ($("usageText")) $("usageText").textContent = `${used}/${max} (${pct}%)`;
+      if ($("remainingText")) $("remainingText").textContent = `Logs remaining: ${remaining}`;
+
+      const bar = $("usageBar");
+      if (bar) {
+        bar.style.width = `${pct}%`;
+        if (pct >= 100) bar.style.background = "#ef4444";
+        else if (pct >= 80) bar.style.background = "#f59e0b";
+        else bar.style.background = "#fff";
+      }
+
+      // 80% warning (non-blocking)
+      if (pct >= 80 && pct < 100){
+        setStatus(`Heads up: you're at ${pct}% usage. Consider upgrading before you hit the limit.`, "warn");
+        window.sbTrack?.("sb_page_ready",{
+          brand:"sb-fleetlog",
+          page:location.pathname,
+          component:"new_log",
+          action:"usage_80_warning"
+        });
+      }
+    }
+
+    async function refreshUsage(email, tierRaw){
+      try{
+        const r = await fetch(`/api/fleetlog/logs/list?email=${encodeURIComponent(email)}&limit=1000`);
+        const j = await r.json();
+        if(!j.ok) return;
+
+        const used = (j.logs || []).length;
+        const max = maxForTier(tierRaw);
+        setUsageUI({ used, max, tierRaw });
+      }catch{}
+    }
+
+    async function ensureActive(email){
+      if(!email || !email.includes("@")){
+        setStatus("Driver email is required.", "bad");
+        showInactive(false);
+        showLimit(false);
+        $("usageWrap")?.classList.add("hidden");
+        return { ok:false };
+      }
+
+      try{
+        const r = await fetch(`/api/fleetlog/auth/status?email=${encodeURIComponent(email)}`);
+        const j = await r.json();
+        if(!j.ok) throw new Error(j.error || "Status failed");
+
+        localStorage.setItem(KEY, email);
+
+        $("historyLink").href = `/lab/fleetlog/history/?email=${encodeURIComponent(email)}`;
+
+        const portalHref = `/api/fleetlog/stripe/portal?email=${encodeURIComponent(email)}`;
+        $("billingLink").href = portalHref;
+        $("upgradeLink").href = portalHref;
+
+        if(!j.active){
+          setStatus("Subscription inactive for this email.", "bad");
+          showInactive(true);
+          showLimit(false);
+          $("usageWrap")?.classList.add("hidden");
+          return { ok:false, reason:"inactive", status:j.status || "" };
+        }
+
+        showInactive(false);
+        showLimit(false);
+
+        // after subscription gate passes
+        await refreshUsage(email, j.tier || "single");
+
+        return { ok:true, tier:(j.tier||"single"), status:(j.status||"ACTIVE") };
+
+      }catch(e){
+        setStatus("Status error: " + e.message, "bad");
         showInactive(true);
         showLimit(false);
         $("usageWrap")?.classList.add("hidden");
-        return { ok:false, reason:"inactive", status:j.status || "" };
+        return { ok:false, reason:"status_error", error:e.message };
       }
+    }
 
+    function payload(){
+      return {
+        email: ($("email").value||"").trim(),
+        date: $("logDate").value || today,
+        truckId: ($("truckId").value||"").trim(),
+        route: $("route").value,
+        start: ($("startCity").value||"").trim(),
+        end: ($("endCity").value||"").trim(),
+        miles: ($("miles").value||"").trim(),
+        notes: ($("notes").value||"").trim()
+      };
+    }
+
+    async function save(){
+      const p = payload();
+      const email = (p.email||"").trim().toLowerCase();
+
+      setStatus("Checking subscription…");
+      const gate = await ensureActive(email);
+      if(!gate.ok) return;
+
+      setStatus("Saving…");
+      showJson({ ...p, saving:true });
+
+      try{
+        const r = await fetch(`/api/fleetlog/logs/create?email=${encodeURIComponent(email)}`, {
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body: JSON.stringify(p)
+        });
+
+        const j = await r.json().catch(()=>({ ok:false, error:"Invalid JSON response" }));
+
+        if(!j.ok){
+          if(j.error === "LOG_LIMIT_REACHED"){
+            showInactive(false);
+            showLimit(true);
+
+            const meta = `Current plan: ${(j.tier||"single").toUpperCase()} • Logs: ${j.currentCount}/${j.max}`;
+            $("limitMeta").textContent = meta + " • Upgrade to Fleet for higher capacity.";
+
+            setStatus("Log limit reached. Upgrade required.", "warn");
+
+            setUsageUI({
+              used: j.currentCount || j.max || 0,
+              max: j.max || maxForTier(gate.tier),
+              tierRaw: gate.tier
+            });
+
+            window.sbTrack?.("sb_form_error",{
+              brand:"sb-fleetlog",
+              page:location.pathname,
+              component:"new_log",
+              action:"limit_reached"
+            });
+
+            return;
+          }
+
+          if(j.error === "SUBSCRIPTION_REQUIRED"){
+            showInactive(true);
+            showLimit(false);
+            setStatus("Subscription required to save logs.", "bad");
+            return;
+          }
+
+          if(j.error === "RATE_LIMIT_EXCEEDED"){
+            setStatus("Too many attempts. Please wait a moment.", "warn");
+            return;
+          }
+
+          throw new Error(j.error || "Save failed");
+        }
+
+        const receiptUrl =
+          j.receipt_url ||
+          `/lab/fleetlog/receipt/?id=${encodeURIComponent(j.id)}&email=${encodeURIComponent(email)}`;
+
+        setStatus("Saved. Opening receipt…", "ok");
+
+        showJson({
+          ...p,
+          saved:true,
+          id:j.id,
+          receipt_url:receiptUrl
+        });
+
+        // refresh usage after save
+        await refreshUsage(email, gate.tier || "single");
+
+        window.sbTrack?.("sb_form_submit",{
+          brand:"sb-fleetlog",
+          page:location.pathname,
+          component:"new_log",
+          action:"save_log"
+        });
+
+        window.open(receiptUrl, "_blank", "noopener,noreferrer");
+
+        setTimeout(()=>{
+          window.location.href = `/lab/fleetlog/history/?email=${encodeURIComponent(email)}`;
+        }, 350);
+
+      }catch(e){
+        setStatus("Error: " + e.message, "bad");
+      }
+    }
+
+    function draft(){
+      const p = payload();
+      showJson({ ...p, draft:true, createdAt:new Date().toISOString() });
+      setStatus("Draft generated (not saved).", "ok");
+      window.sbTrack?.("sb_click",{brand:"sb-fleetlog",page:location.pathname,component:"new_log",action:"draft_generated"});
+    }
+
+    function clearForm(){
+      $("email").value="";
+      $("logDate").value=today;
+      $("truckId").value="";
+      $("route").value="";
+      $("startCity").value="";
+      $("endCity").value="";
+      $("miles").value="";
+      $("notes").value="";
+      $("status").textContent="";
+      $("out").style.display="none";
+      $("jsonOut").textContent="";
       showInactive(false);
       showLimit(false);
-
-      // ✅ CALL AFTER SUBSCRIPTION GATE PASSES
-      await refreshUsage(email, j.tier || "single");
-
-      return { ok:true, tier:(j.tier||"single"), status:(j.status||"ACTIVE") };
-
-    }catch(e){
-      setStatus("Status error: " + e.message, "bad");
-      showInactive(true);
-      showLimit(false);
       $("usageWrap")?.classList.add("hidden");
-      return { ok:false, reason:"status_error", error:e.message };
+
+      window.sbTrack?.("sb_click",{brand:"sb-fleetlog",page:location.pathname,component:"new_log",action:"clear"});
     }
-  }
 
-  function payload(){
-    return {
-      email: ($("email").value||"").trim(),
-      date: $("logDate").value || today,
-      truckId: ($("truckId").value||"").trim(),
-      route: $("route").value,
-      start: ($("startCity").value||"").trim(),
-      end: ($("endCity").value||"").trim(),
-      miles: ($("miles").value||"").trim(),
-      notes: ($("notes").value||"").trim()
-    };
-  }
+    $("btnSave").addEventListener("click", save);
+    $("btnDraft").addEventListener("click", draft);
+    $("btnClear").addEventListener("click", clearForm);
 
-  async function save(){
-    const p = payload();
-    const email = (p.email||"").trim().toLowerCase();
-
-    setStatus("Checking subscription…");
-    const gate = await ensureActive(email);
-    if(!gate.ok) return;
-
-    setStatus("Saving…");
-    showJson({ ...p, saving:true });
-
-    try{
-      const r = await fetch(`/api/fleetlog/logs/create?email=${encodeURIComponent(email)}`, {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify(p)
-      });
-
-      const j = await r.json().catch(()=>({ ok:false, error:"Invalid JSON response" }));
-
-      if(!j.ok){
-
-        // HARD LIMIT BLOCK
-        if(j.error === "LOG_LIMIT_REACHED"){
-          showInactive(false);
-          showLimit(true);
-
-          const meta = `Current plan: ${(j.tier||"single").toUpperCase()} • Logs: ${j.currentCount}/${j.max}`;
-          $("limitMeta").textContent = meta + " • Upgrade to Fleet for higher capacity.";
-
-          setStatus("Log limit reached. Upgrade required.", "warn");
-
-          // show bar at 100%
-          setUsageUI({ used: j.currentCount || j.max || 0, max: j.max || maxForTier(gate.tier), tierRaw: gate.tier });
-
-          window.sbTrack?.("sb_form_error",{
-            brand:"sb-fleetlog",
-            page:location.pathname,
-            component:"new_log",
-            action:"limit_reached"
-          });
-
-          return;
-        }
-
-        if(j.error === "SUBSCRIPTION_REQUIRED"){
-          showInactive(true);
-          showLimit(false);
-          setStatus("Subscription required to save logs.", "bad");
-          return;
-        }
-
-        if(j.error === "RATE_LIMIT_EXCEEDED"){
-          setStatus("Too many attempts. Please wait a moment.", "warn");
-          return;
-        }
-
-        throw new Error(j.error || "Save failed");
+    $("billingLink")?.addEventListener("click",(e)=>{
+      const email = getEmail();
+      if(!email || !email.includes("@")){
+        e.preventDefault();
+        return setStatus("Enter a valid email first.", "bad");
       }
+      window.sbTrack?.("sb_click",{brand:"sb-fleetlog",page:location.pathname,component:"new_log",action:"billing_portal"});
+    });
 
-      const receiptUrl =
-        j.receipt_url ||
-        `/lab/fleetlog/receipt/?id=${encodeURIComponent(j.id)}&email=${encodeURIComponent(email)}`;
+    $("upgradeLink")?.addEventListener("click",(e)=>{
+      const email = getEmail();
+      if(!email || !email.includes("@")){
+        e.preventDefault();
+        return setStatus("Enter a valid email first.", "bad");
+      }
+      window.sbTrack?.("sb_click",{brand:"sb-fleetlog",page:location.pathname,component:"new_log",action:"upgrade_to_fleet"});
+    });
 
-      setStatus("Saved. Opening receipt…", "ok");
-
-      showJson({
-        ...p,
-        saved:true,
-        id:j.id,
-        receipt_url:receiptUrl
-      });
-
-      // ✅ refresh usage after save (counts will move)
-      await refreshUsage(email, gate.tier || "single");
-
-      window.sbTrack?.("sb_form_submit",{
-        brand:"sb-fleetlog",
-        page:location.pathname,
-        component:"new_log",
-        action:"save_log"
-      });
-
-      window.open(receiptUrl, "_blank", "noopener,noreferrer");
-
-      setTimeout(()=>{
-        window.location.href =
-          `/lab/fleetlog/history/?email=${encodeURIComponent(email)}`;
-      }, 350);
-
-    }catch(e){
-      setStatus("Error: " + e.message, "bad");
+    const saved = (localStorage.getItem(KEY)||"").trim().toLowerCase();
+    if(saved){
+      $("email").value = saved;
+      $("historyLink").href = `/lab/fleetlog/history/?email=${encodeURIComponent(saved)}`;
+      ensureActive(saved);
     }
-  }
-
-  function draft(){
-    const p = payload();
-    showJson({
-      ...p,
-      draft:true,
-      createdAt:new Date().toISOString()
-    });
-
-    setStatus("Draft generated (not saved).", "ok");
-
-    window.sbTrack?.("sb_click",{
-      brand:"sb-fleetlog",
-      page:location.pathname,
-      component:"new_log",
-      action:"draft_generated"
-    });
-  }
-
-  function clearForm(){
-    $("email").value="";
-    $("logDate").value=today;
-    $("truckId").value="";
-    $("route").value="";
-    $("startCity").value="";
-    $("endCity").value="";
-    $("miles").value="";
-    $("notes").value="";
-    $("status").textContent="";
-    $("out").style.display="none";
-    $("jsonOut").textContent="";
-    showInactive(false);
-    showLimit(false);
-    $("usageWrap")?.classList.add("hidden");
-
-    window.sbTrack?.("sb_click",{
-      brand:"sb-fleetlog",
-      page:location.pathname,
-      component:"new_log",
-      action:"clear"
-    });
-  }
-
-  $("btnSave").addEventListener("click", save);
-  $("btnDraft").addEventListener("click", draft);
-  $("btnClear").addEventListener("click", clearForm);
-
-  $("billingLink")?.addEventListener("click",(e)=>{
-    const email = getEmail();
-    if(!email || !email.includes("@")){
-      e.preventDefault();
-      return setStatus("Enter a valid email first.", "bad");
-    }
-    window.sbTrack?.("sb_click",{
-      brand:"sb-fleetlog",
-      page:location.pathname,
-      component:"new_log",
-      action:"billing_portal"
-    });
-  });
-
-  $("upgradeLink")?.addEventListener("click",(e)=>{
-    const email = getEmail();
-    if(!email || !email.includes("@")){
-      e.preventDefault();
-      return setStatus("Enter a valid email first.", "bad");
-    }
-    window.sbTrack?.("sb_click",{
-      brand:"sb-fleetlog",
-      page:location.pathname,
-      component:"new_log",
-      action:"upgrade_to_fleet"
-    });
-  });
-
-  const saved = (localStorage.getItem(KEY)||"").trim().toLowerCase();
-  if(saved){
-    $("email").value = saved;
-    $("historyLink").href =
-      `/lab/fleetlog/history/?email=${encodeURIComponent(saved)}`;
-    ensureActive(saved);
-  }
-</script>
+  </script>
 </body>
 </html>
