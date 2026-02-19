@@ -1,4 +1,4 @@
-<!-- /public/lab/fleetlog/admin/index.html (PASTE READY — Ops view: Audit + Webhooks) -->
+<!-- /public/lab/fleetlog/admin/index.html (PASTE READY — Ops view: Audit + Webhooks + Impersonation) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -60,19 +60,20 @@
         <a class="pill" href="/fleetlog/" onclick="window.sbTrack?.('sb_click',{brand:'sb-fleetlog',page:location.pathname,component:'admin',action:'back_marketing'});">Marketing</a>
       </div>
     </div>
-    
+
+    <!-- Impersonation -->
     <div class="card" style="margin-bottom:12px;">
-  <div class="muted" style="font-weight:900;margin-bottom:8px;">Impersonate Driver (ops)</div>
-  <div style="display:flex;gap:10px;flex-wrap:wrap;">
-    <input id="impEmail" type="email" placeholder="driver email" style="flex:1;min-width:240px;" />
-    <a class="pill" id="impGoApp" href="#">Open App</a>
-    <a class="pill" id="impGoNew" href="#">New Log</a>
-    <a class="pill" id="impGoHist" href="#">History</a>
-  </div>
-  <div class="muted" style="margin-top:8px;font-size:12px;">Sets localStorage fleetlog_email on click.</div>
-</div>
+      <div class="muted" style="font-weight:900;margin-bottom:8px;">Impersonate Driver (ops)</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <input id="impEmail" type="email" placeholder="driver email" style="flex:1;min-width:240px;" />
+        <a class="pill" id="impGoApp" href="#">Open App</a>
+        <a class="pill" id="impGoNew" href="#">New Log</a>
+        <a class="pill" id="impGoHist" href="#">History</a>
+      </div>
+      <div class="muted" style="margin-top:8px;font-size:12px;">Sets localStorage <code>fleetlog_email</code> before routing. Adds <code>?admin=1</code>.</div>
+    </div>
 
-
+    <!-- Admin access -->
     <div class="card">
       <h2>Admin Access</h2>
       <div class="row">
@@ -182,7 +183,9 @@
 
         if(kind === "audit"){
           const email = esc(x.email || "");
-          const meta = esc(JSON.stringify(Object.assign({}, x, { ts: undefined, type: undefined, email: undefined })));
+          const metaObj = Object.assign({}, x);
+          delete metaObj.ts; delete metaObj.type; delete metaObj.email;
+          const meta = esc(JSON.stringify(metaObj));
           return `<tr>
             <td><code>${ts}</code></td>
             <td>${tag}</td>
@@ -208,13 +211,8 @@
       const q = String($("search").value || "").trim().toLowerCase();
       const hasQ = !!q;
 
-      const audit = hasQ
-        ? state.audit.filter(x => JSON.stringify(x).toLowerCase().includes(q))
-        : state.audit.slice();
-
-      const webhooks = hasQ
-        ? state.webhooks.filter(x => JSON.stringify(x).toLowerCase().includes(q))
-        : state.webhooks.slice();
+      const audit = hasQ ? state.audit.filter(x => JSON.stringify(x).toLowerCase().includes(q)) : state.audit.slice();
+      const webhooks = hasQ ? state.webhooks.filter(x => JSON.stringify(x).toLowerCase().includes(q)) : state.webhooks.slice();
 
       state.filtered = { audit, webhooks };
       renderTable("auditWrap", audit, "audit");
@@ -252,23 +250,27 @@
         setStatus("Copy failed. (Browser blocked clipboard)", "warn");
       }
     }
+
+    // Impersonation (ops)
     (function(){
-  const KEY="fleetlog_email";
-  const $=(id)=>document.getElementById(id);
-  function email(){ return ( $("impEmail").value || "" ).trim().toLowerCase(); }
+      const KEY = "fleetlog_email";
+      function getImpEmail(){ return ( $("impEmail").value || "" ).trim().toLowerCase(); }
 
-  function go(path){
-    const e = email();
-    if(!e || !e.includes("@")) return alert("Enter a valid email");
-    localStorage.setItem(KEY, e);
-    location.href = `${path}?email=${encodeURIComponent(e)}&admin=1`;
-  }
+      function go(path){
+        const e = getImpEmail();
+        if(!e || !e.includes("@")) return alert("Enter a valid email");
+        localStorage.setItem(KEY, e);
 
-  $("impGoApp").addEventListener("click",(ev)=>{ ev.preventDefault(); go("/lab/fleetlog/"); });
-  $("impGoNew").addEventListener("click",(ev)=>{ ev.preventDefault(); go("/lab/fleetlog/new/"); });
-  $("impGoHist").addEventListener("click",(ev)=>{ ev.preventDefault(); go("/lab/fleetlog/history/"); });
-})();
+        const u = new URL(path, location.origin);
+        u.searchParams.set("email", e);
+        u.searchParams.set("admin", "1");
+        location.href = u.pathname + "?" + u.searchParams.toString();
+      }
 
+      $("impGoApp").addEventListener("click",(ev)=>{ ev.preventDefault(); go("/lab/fleetlog/"); });
+      $("impGoNew").addEventListener("click",(ev)=>{ ev.preventDefault(); go("/lab/fleetlog/new/"); });
+      $("impGoHist").addEventListener("click",(ev)=>{ ev.preventDefault(); go("/lab/fleetlog/history/"); });
+    })();
 
     $("saveToken").addEventListener("click", saveToken);
     $("clearToken").addEventListener("click", clearToken);
