@@ -34,16 +34,18 @@ export default async function handler(req,res){
 
   try{
     const limit = Math.min(Math.max(parseInt(req.query.limit || "50",10), 1), 200);
+
     const key = "fleetlog:ops:audit";
-
     const start = 0;
-    const stop = limit - 1;
+    const stop  = limit - 1;
 
-    // ✅ Upstash expects args in BODY: [start, stop]
-    const resp = await upstashPost(`/lrange/${encodeURIComponent(key)}`, [start, stop]);
+    // ✅ Upstash expects: POST /lrange  body: [key, start, stop]
+    const resp = await upstashPost(`/lrange`, [key, start, stop]);
 
     const rows = Array.isArray(resp?.result) ? resp.result : [];
-    const events = rows.map((s)=>{ try { return JSON.parse(s); } catch { return null; } }).filter(Boolean);
+    const events = rows
+      .map((s)=>{ try { return JSON.parse(s); } catch { return null; } })
+      .filter(Boolean);
 
     return res.status(200).json({ ok:true, events });
   }catch(e){
