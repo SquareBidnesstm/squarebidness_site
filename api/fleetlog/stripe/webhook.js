@@ -6,8 +6,6 @@ export const config = {
   runtime: "nodejs",
 };
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
-
 function nowIso() {
   return new Date().toISOString();
 }
@@ -67,33 +65,23 @@ async function expire(key, seconds) {
 function tryParseRecord(raw) {
   if (raw == null) return null;
 
-  // Upstash may return a string, object, or array-wrapped string
   if (typeof raw === "object" && !Array.isArray(raw)) return raw;
 
   if (Array.isArray(raw)) {
     const first = raw[0];
     if (typeof first === "object" && first) return first;
     if (typeof first === "string") {
-      try {
-        return JSON.parse(first);
-      } catch {
-        return null;
-      }
+      try { return JSON.parse(first); } catch { return null; }
     }
     return null;
   }
 
   if (typeof raw === "string") {
-    // Sometimes it's JSON; sometimes it's ["{...}"]
     try {
       const p = JSON.parse(raw);
       if (p && typeof p === "object" && !Array.isArray(p)) return p;
       if (Array.isArray(p) && typeof p[0] === "string") {
-        try {
-          return JSON.parse(p[0]);
-        } catch {
-          return null;
-        }
+        try { return JSON.parse(p[0]); } catch { return null; }
       }
       return null;
     } catch {
@@ -106,6 +94,14 @@ function tryParseRecord(raw) {
 
 async function audit(evt) {
   const key = "fleetlog:ops:audit";
+  const payload = { ...evt, ts: nowIso() };
+  await lpush(key, JSON.stringify(payload));
+  await expire(key, 60 * 60 * 24 * 30); // 30 days
+}
+
+async function webhookLog(evt) {
+  // powers /api/fleetlog/ops/webhooks/list
+  const key = "fleetlog:ops:webhooks";
   const payload = { ...evt, ts: nowIso() };
   await lpush(key, JSON.stringify(payload));
   await expire(key, 60 * 60 * 24 * 30); // 30 days
@@ -138,13 +134,7 @@ async function sendResendEmail({ to, subject, html }) {
 
 function esc(s) {
   return String(s ?? "").replace(/[&<>"']/g, (c) =>
-    ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#39;",
-    }[c])
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
   );
 }
 
@@ -186,82 +176,122 @@ async function readRawBody(req) {
   return buf;
 }
 
+function normalizeTier(val) {
+  return String(val || "").toLowerCase() === "fleet" ? "fleet" : "single";
+}
+
+function normalizeStatus(stripeStatus) {
+  const s = String(stripeStatus || "").toLowerCase();
+  // Stripe statuses: active, trialing, past_due, unpaid, canceled, incomplete, incomplete_expired, paused
+  if (s === "active" || s === "trialing") return "ACTIVE";
+  if (s === "past_due") return "PAST_DUE";
+  if (s === "unpaid") return "UNPAID";
+  if (s === "canceled") return "CANCELED";
+  if (s === "incomplete") return "INCOMPLETE";
+  if (s === "incomplete_expired") return "INCOMPLETE_EXPIRED";
+  if (s === "paused") return "PAUSED";
+  return s ? s.toUpperCase() : "";
+}
+
 export default async function handler(req, res) {
+  if (req.method === "OPTIONS") return res.status(204).end();
+  if (req.method !== "POST") return res.status(405).json({ ok: false, error: "Method not allowed" });
+
+  const stripeKey = process.env.STRIPE_SECRET_KEY;
+  const whsec = process.env.STRIPE_WEBHOOK_SECRET;
+
+  if (!stripeKey) return res.status(500).json({ ok: false, error: "Missing STRIPE_SECRET_KEY" });
+  if (!whsec) return res.status(500).json({ ok: false, error: "Missing STRIPE_WEBHOOK_SECRET" });
+
+  const stripe = new Stripe(stripeKey);
   const sig = req.headers["stripe-signature"];
+
+  if (!sig) return res.status(400).send("Webhook Error: missing stripe-signature");
+
   const buf = await readRawBody(req);
 
   let event;
   try {
-    event = stripe.webhooks.constructEvent(
-      buf,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET
-    );
+    event = stripe.webhooks.constructEvent(buf, sig, whsec);
   } catch (err) {
     console.error("Webhook signature verification failed:", err?.message || err);
     return res.status(400).send(`Webhook Error: ${err?.message || "invalid signature"}`);
   }
-  // after: event = stripe.webhooks.constructEvent(...)
 
-try {
-  await audit({
-    type: "stripe_event",
-    event: event.type,
-    subscriptionId:
-      (event?.data?.object?.subscription) ||
-      (event?.data?.object?.id) ||
-      null,
-    customerId:
-      (event?.data?.object?.customer) ||
-      null,
-  });
-} catch (e) {
-  // don't break webhook if audit logging fails
-  console.warn("FleetLog audit log failed:", e?.message || e);
-}
-
+  // --- Always log event (non-fatal) ---
+  const obj = event?.data?.object || {};
+  const eventId = event?.id || "";
+  const livemode = !!event?.livemode;
+  const subIdFromObj =
+    obj?.subscription || obj?.id || null;
 
   try {
-    // Provision on checkout completion
+    await audit({
+      type: "stripe_event",
+      event: event.type,
+      eventId,
+      livemode,
+      subscriptionId: subIdFromObj,
+      customerId: obj?.customer || null,
+    });
+  } catch (e) {
+    console.warn("FleetLog audit log failed:", e?.message || e);
+  }
+
+  try {
+    await webhookLog({
+      type: event.type,
+      id: eventId,
+      livemode,
+      subscriptionId: subIdFromObj,
+      customerId: obj?.customer || null,
+    });
+  } catch (e) {
+    console.warn("FleetLog webhook log failed:", e?.message || e);
+  }
+
+  try {
+    // 1) Provision on checkout completion
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
 
-      const email = String(session.customer_details?.email || "").trim();
+      const email = String(session.customer_details?.email || "").trim().toLowerCase();
       const subscriptionId = String(session.subscription || "").trim();
-      const customerId = String(session.customer || "").trim(); // ✅ requested
+      const customerId = String(session.customer || "").trim();
+
       const tierFromMeta =
         String(session.metadata?.tier || "") ||
         String(session.subscription_data?.metadata?.tier || "");
-      const tier = (tierFromMeta || "single").toLowerCase() === "fleet" ? "fleet" : "single";
+
+      const tier = normalizeTier(tierFromMeta || "single");
 
       if (!email || !subscriptionId) {
-        console.warn("FleetLog webhook: missing email/subscriptionId");
-        await audit({ type: "webhook_skip_missing", reason: "missing_email_or_sub", tier });
+        await audit({ type: "webhook_skip_missing", reason: "missing_email_or_sub", email, tier, subscriptionId });
         return res.status(200).json({ received: true, skipped: true });
       }
 
-      // Idempotency: only send once per subscription
+      // Idempotency: welcome email only once per subscription
       const emailSentKey = `fleetlog:email_sent:${subscriptionId}`;
       const alreadySent = await uget(emailSentKey);
       if (alreadySent) {
         return res.status(200).json({ received: true, ok: true, deduped: true });
       }
 
-      // Store subscriber record
       const record = {
         subscriptionId,
-        customerId, // ✅ requested
+        customerId,
         email,
         tier,
         createdAt: nowIso(),
         source: "checkout.session.completed",
         status: "ACTIVE",
+        livemode,
+        eventId,
       };
 
       await usetJson(`fleetlog:sub:${subscriptionId}`, record);
-      await usetJson(`fleetlog:email:${email.toLowerCase()}`, record);
+      await usetJson(`fleetlog:email:${email}`, record);
 
-      // Send welcome email (once)
       const subject =
         tier === "fleet"
           ? "SB FleetLog™ — Fleet subscription active"
@@ -272,21 +302,55 @@ try {
 
       await uset(emailSentKey, nowIso());
 
-      await audit({
-        type: "sub_provisioned",
-        email,
-        tier,
-        subscriptionId,
-        customerId,
-      });
-
-      console.log("New subscription:", { email, subscriptionId, customerId, tier });
+      await audit({ type: "sub_provisioned", email, tier, subscriptionId, customerId, livemode });
+      return res.status(200).json({ received: true, ok: true });
     }
 
-    // Keep subscription status updated
+    // 2) Keep status updated (Stripe is the source of truth)
+    if (event.type === "customer.subscription.updated") {
+      const sub = event.data.object;
+
+      const subscriptionId = String(sub.id || "").trim();
+      const customerId = String(sub.customer || "").trim();
+
+      const stripeStatus = normalizeStatus(sub.status);
+      const recordKey = `fleetlog:sub:${subscriptionId}`;
+
+      const existingRaw = await uget(recordKey);
+      const existing = tryParseRecord(existingRaw) || {};
+
+      // Tier may be stored on our record; keep it if present.
+      // If you later store tier in Stripe subscription metadata, we can read it here too.
+      const tier = normalizeTier(existing.tier || "single");
+
+      const updated = {
+        ...existing,
+        subscriptionId,
+        customerId: existing.customerId || customerId || null,
+        tier,
+        status: stripeStatus || existing.status || "",
+        updatedAt: nowIso(),
+        source: "customer.subscription.updated",
+        livemode,
+        eventId,
+      };
+
+      await usetJson(recordKey, updated);
+
+      const email = String(updated.email || "").trim().toLowerCase();
+      if (email && email.includes("@")) {
+        await usetJson(`fleetlog:email:${email}`, updated);
+      }
+
+      await audit({ type: "sub_status_updated", subscriptionId, status: updated.status, tier, livemode });
+      return res.status(200).json({ received: true, ok: true });
+    }
+
+    // 3) Canceled
     if (event.type === "customer.subscription.deleted") {
       const sub = event.data.object;
       const subscriptionId = String(sub.id || "").trim();
+
       if (subscriptionId) {
         const subKey = `fleetlog:sub:${subscriptionId}`;
         const existingRaw = await uget(subKey);
@@ -295,27 +359,32 @@ try {
         if (existing) {
           existing.status = "CANCELED";
           existing.canceledAt = nowIso();
+          existing.source = "customer.subscription.deleted";
+          existing.livemode = livemode;
+          existing.eventId = eventId;
+
           await usetJson(subKey, existing);
 
           const email = String(existing.email || "").toLowerCase();
           if (email) await usetJson(`fleetlog:email:${email}`, existing);
         }
 
-        await audit({ type: "sub_canceled", subscriptionId });
-        console.log("FleetLog subscription canceled:", subscriptionId);
+        await audit({ type: "sub_canceled", subscriptionId, livemode });
       }
+
+      return res.status(200).json({ received: true, ok: true });
     }
 
-    return res.status(200).json({ received: true });
+    // Other events: acknowledge
+    return res.status(200).json({ received: true, ok: true });
   } catch (e) {
     console.error("FleetLog webhook handler error:", e?.message || e);
-    await audit({ type: "webhook_error", error: e?.message || String(e) });
 
-    // 200 avoids Stripe retry storms for internal non-critical failures
-    return res.status(200).json({
-      received: true,
-      ok: false,
-      error: e?.message || "error",
-    });
+    try {
+      await audit({ type: "webhook_error", error: e?.message || String(e), event: event?.type || "", eventId });
+    } catch {}
+
+    // Return 200 to avoid Stripe retry storms for internal issues
+    return res.status(200).json({ received: true, ok: false, error: e?.message || "error" });
   }
 }
