@@ -1,0 +1,146 @@
+<!-- /public/social/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Social — Square Bidness</title>
+
+  <link rel="canonical" href="https://www.squarebidness.com/social/" />
+  <meta name="description" content="Follow Square Bidness — official social channels and content." />
+  <meta name="robots" content="index,follow" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="sb:build" content="v20260219-social" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Square Bidness" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:title" content="Social — Square Bidness" />
+  <meta property="og:description" content="Official social channels for Square Bidness." />
+  <meta property="og:url" content="https://www.squarebidness.com/social/" />
+  <meta property="og:image" content="https://www.squarebidness.com/assets/og-default-1200x630.jpg" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Social — Square Bidness" />
+  <meta name="twitter:description" content="Official social channels for Square Bidness." />
+  <meta name="twitter:image" content="https://www.squarebidness.com/assets/og-default-1200x630.jpg" />
+
+  <link rel="preload" href="/styles/style.css" as="style" />
+  <link rel="stylesheet" href="/styles/style.css" />
+
+  <script defer src="/scripts/ga.js"></script>
+  <script defer src="/scripts/sb-analytics.js"></script>
+  <script defer src="/scripts/partials.js"></script>
+
+  <style>
+    #site-header{min-height:72px;}
+    #site-footer{min-height:120px;}
+
+    .page-hero{
+      background:radial-gradient(circle at top left,#020617,#020617 40%,#020617 100%);
+      border-bottom:1px solid #0b1220;
+      padding:2.25rem 0 1.75rem;
+    }
+    .page-hero .page-subtitle{max-width:680px;opacity:.9;}
+
+    .panel{
+      background:#020617;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      padding:1.25rem 1.4rem 1.4rem;
+      box-shadow:0 18px 45px rgba(15,23,42,.55);
+    }
+
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.45rem;cursor:pointer;text-decoration:none;border-radius:999px;}
+    .btn--social{
+      width:100%;
+      background:#020617;
+      border:1px solid #1f2937;
+      color:#e5e7eb;
+      padding:.85rem 1rem;
+      font-weight:900;
+      font-size:1rem;
+    }
+    .btn--social:hover{background:#0b1220;border-color:#374151;}
+
+    .stack{display:grid;gap:.65rem;margin-top:.9rem;}
+    .muted-small{font-size:.85rem;opacity:.8;}
+    .row{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1rem;}
+    .btn--outline-light{border:1px solid #4b5563;background:transparent;color:#e5e7eb;padding:.6rem .95rem;font-weight:800;font-size:.9rem;}
+    .btn--outline-light:hover{border-color:#9ca3af;}
+  </style>
+</head>
+
+<body class="theme-dark" id="top">
+  <div id="site-header" aria-busy="true" style="content-visibility:auto;contain-intrinsic-size:80px;"></div>
+
+  <header class="page-hero">
+    <div class="container">
+      <h1 class="page-title">Social</h1>
+      <p class="page-subtitle">Official channels. Real-time updates. Behind the scenes. Drops when they’re ready.</p>
+    </div>
+  </header>
+
+  <main class="section" role="main">
+    <div class="container">
+      <section class="panel" aria-label="Square Bidness Social Links">
+        <p class="muted-small">Tap a platform. You’ll open in the app if it’s installed.</p>
+
+        <div class="stack">
+          <!-- TODO: Replace href values with your real URLs -->
+          <a class="btn btn--social" href="https://instagram.com/" target="_blank" rel="noopener" data-sb="social-instagram">Instagram</a>
+          <a class="btn btn--social" href="https://facebook.com/" target="_blank" rel="noopener" data-sb="social-facebook">Facebook</a>
+          <a class="btn btn--social" href="https://tiktok.com/" target="_blank" rel="noopener" data-sb="social-tiktok">TikTok</a>
+          <a class="btn btn--social" href="https://youtube.com/" target="_blank" rel="noopener" data-sb="social-youtube">YouTube</a>
+          <a class="btn btn--social" href="https://x.com/" target="_blank" rel="noopener" data-sb="social-x">X</a>
+          <a class="btn btn--social" href="https://www.linkedin.com/" target="_blank" rel="noopener" data-sb="social-linkedin">LinkedIn</a>
+        </div>
+
+        <div class="row">
+          <a class="btn btn--outline-light" href="/connect/" data-sb="social-back-connect">Back to Connect</a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div id="site-footer" aria-busy="true" style="content-visibility:auto;contain-intrinsic-size:140px;"></div>
+
+  <script>
+    // Standardized tracking (sbTrack preferred, gtag fallback)
+    document.addEventListener("click", (e) => {
+      const a = e.target?.closest?.("a[data-sb]");
+      if (!a) return;
+      const label = a.getAttribute("data-sb") || a.getAttribute("href") || "(unknown)";
+
+      try {
+        if (typeof window.sbTrack === "function") {
+          window.sbTrack("sb_click", {
+            brand: "squarebidness",
+            page: "/social/",
+            component: "social",
+            action: "click",
+            label,
+            href: a.getAttribute("href") || ""
+          });
+          return;
+        }
+      } catch (_) {}
+
+      try {
+        if (typeof window.gtag === "function") {
+          window.gtag("event", "sb_click", {
+            brand: "squarebidness",
+            page_path: "/social/",
+            event_category: "social",
+            event_label: label
+          });
+        }
+      } catch (_) {}
+    });
+  </script>
+</body>
+</html>
+
