@@ -137,182 +137,256 @@
   </div>
 
   <script>
-    const $ = (id)=>document.getElementById(id);
-    const KEY = "fleetlog_email";
+  const $ = (id)=>document.getElementById(id);
+  const KEY = "fleetlog_email";
 
-    function isoDate(d=new Date()){
-      const z=(n)=>String(n).padStart(2,'0');
-      return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`;
-    }
-    const today = isoDate();
-    $("logDate").value = today;
+  function isoDate(d=new Date()){
+    const z=(n)=>String(n).padStart(2,'0');
+    return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`;
+  }
 
-    function showInactive(on){ $("gateInactive").classList.toggle("hidden", !on); }
-    function showLimit(on){ $("gateLimit").classList.toggle("hidden", !on); }
-    function showJson(obj){
-      $("out").style.display="block";
-      $("jsonOut").textContent = JSON.stringify(obj, null, 2);
-    }
-    function setStatus(msg, kind){
-      $("status").className = "status " + (kind || "");
-      $("status").textContent = msg || "";
-    }
-    function getEmail(){ return ($("email").value||"").trim().toLowerCase(); }
+  const today = isoDate();
+  $("logDate").value = today;
 
-    async function ensureActive(email){
-      if(!email || !email.includes("@")){
-        setStatus("Driver email is required.", "bad");
-        showInactive(false); showLimit(false);
-        return { ok:false };
+  function showInactive(on){ $("gateInactive")?.classList.toggle("hidden", !on); }
+  function showLimit(on){ $("gateLimit")?.classList.toggle("hidden", !on); }
+
+  function showJson(obj){
+    $("out").style.display="block";
+    $("jsonOut").textContent = JSON.stringify(obj, null, 2);
+  }
+
+  function setStatus(msg, kind){
+    $("status").className = "status " + (kind || "");
+    $("status").textContent = msg || "";
+  }
+
+  function getEmail(){
+    return ($("email").value||"").trim().toLowerCase();
+  }
+
+  async function ensureActive(email){
+    if(!email || !email.includes("@")){
+      setStatus("Driver email is required.", "bad");
+      showInactive(false);
+      showLimit(false);
+      return { ok:false };
+    }
+
+    try{
+      const r = await fetch(`/api/fleetlog/auth/status?email=${encodeURIComponent(email)}`);
+      const j = await r.json();
+      if(!j.ok) throw new Error(j.error || "Status failed");
+
+      localStorage.setItem(KEY, email);
+
+      $("historyLink").href = `/lab/fleetlog/history/?email=${encodeURIComponent(email)}`;
+
+      const portalHref = `/api/fleetlog/stripe/portal?email=${encodeURIComponent(email)}`;
+      $("billingLink").href = portalHref;
+      $("upgradeLink").href = portalHref;
+
+      if(!j.active){
+        setStatus("Subscription inactive for this email.", "bad");
+        showInactive(true);
+        showLimit(false);
+        return { ok:false, reason:"inactive", status:j.status || "" };
       }
-      try{
-        const r = await fetch(`/api/fleetlog/auth/status?email=${encodeURIComponent(email)}`);
-        const j = await r.json();
-        if(!j.ok) throw new Error(j.error || "Status failed");
-        localStorage.setItem(KEY, email);
 
-        $("historyLink").href = `/lab/fleetlog/history/?email=${encodeURIComponent(email)}`;
+      showInactive(false);
+      showLimit(false);
+      return { ok:true, tier:(j.tier||"single"), status:(j.status||"ACTIVE") };
 
-        const portalHref = `/api/fleetlog/stripe/portal?email=${encodeURIComponent(email)}`;
-        $("billingLink").href = portalHref;
-        $("upgradeLink").href = portalHref;
+    }catch(e){
+      setStatus("Status error: " + e.message, "bad");
+      showInactive(true);
+      showLimit(false);
+      return { ok:false, reason:"status_error", error:e.message };
+    }
+  }
 
-        if(!j.active){
-          setStatus("Subscription inactive for this email.", "bad");
-          showInactive(true); showLimit(false);
-          return { ok:false, reason:"inactive", status:j.status || "" };
+  function payload(){
+    return {
+      email: ($("email").value||"").trim(),
+      date: $("logDate").value || today,
+      truckId: ($("truckId").value||"").trim(),
+      route: $("route").value,
+      start: ($("startCity").value||"").trim(),
+      end: ($("endCity").value||"").trim(),
+      miles: ($("miles").value||"").trim(),
+      notes: ($("notes").value||"").trim()
+    };
+  }
+
+  async function save(){
+    const p = payload();
+    const email = (p.email||"").trim().toLowerCase();
+
+    setStatus("Checking subscription…");
+    const gate = await ensureActive(email);
+    if(!gate.ok) return;
+
+    setStatus("Saving…");
+    showJson({ ...p, saving:true });
+
+    try{
+      const r = await fetch(`/api/fleetlog/logs/create?email=${encodeURIComponent(email)}`, {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify(p)
+      });
+
+      const j = await r.json().catch(()=>({ ok:false, error:"Invalid JSON response" }));
+
+      if(!j.ok){
+
+        // HARD LIMIT BLOCK
+        if(j.error === "LOG_LIMIT_REACHED"){
+          showInactive(false);
+          showLimit(true);
+
+          const meta = `Current plan: ${(j.tier||"single").toUpperCase()} • Logs: ${j.currentCount}/${j.max}`;
+          $("limitMeta").textContent = meta + " • Upgrade to Fleet for higher capacity.";
+
+          setStatus("Log limit reached. Upgrade required.", "warn");
+
+          window.sbTrack?.("sb_form_error",{
+            brand:"sb-fleetlog",
+            page:location.pathname,
+            component:"new_log",
+            action:"limit_reached"
+          });
+
+          return;
         }
 
-        showInactive(false); showLimit(false);
-        return { ok:true, tier:(j.tier||"single"), status:(j.status||"ACTIVE") };
-      }catch(e){
-        setStatus("Status error: " + e.message, "bad");
-        showInactive(true); showLimit(false);
-        return { ok:false, reason:"status_error", error:e.message };
-      }
-    }
-
-    function payload(){
-      return {
-        email: ($("email").value||"").trim(),
-        date: $("logDate").value || today,
-        truckId: ($("truckId").value||"").trim(),
-        route: $("route").value,
-        start: ($("startCity").value||"").trim(),
-        end: ($("endCity").value||"").trim(),
-        miles: ($("miles").value||"").trim(),
-        notes: ($("notes").value||"").trim()
-      };
-    }
-
-    async function save(){
-      const p = payload();
-      const email = (p.email||"").trim().toLowerCase();
-
-      setStatus("Checking subscription…");
-      const gate = await ensureActive(email);
-      if(!gate.ok) return;
-
-      setStatus("Saving…");
-      showJson({ ...p, saving:true });
-
-      try{
-        // IMPORTANT: pass email in query so API can enforce subscription + tier limits
-        const r = await fetch(`/api/fleetlog/logs/create?email=${encodeURIComponent(email)}`, {
-          method:"POST",
-          headers:{ "Content-Type":"application/json" },
-          body: JSON.stringify(p)
-        });
-
-        const j = await r.json().catch(()=>({ ok:false, error:"Invalid JSON response" }));
-        if(!j.ok){
-          // Tier limit reached
-          if(j.error === "LOG_LIMIT_REACHED"){
-            showInactive(false);
-            showLimit(true);
-            const meta = `Current plan: ${(j.tier||"single").toUpperCase()} • Logs: ${j.currentCount}/${j.max}`;
-            $("limitMeta").textContent = meta + " • Upgrade to Fleet for higher capacity.";
-            setStatus("Log limit reached. Upgrade recommended.", "warn");
-            window.sbTrack?.("sb_form_error",{brand:"sb-fleetlog",page:location.pathname,component:"new_log",action:"limit_reached"});
-            return;
-          }
-
-          if(j.error === "SUBSCRIPTION_REQUIRED"){
-            showInactive(true);
-            showLimit(false);
-            setStatus("Subscription required to save logs.", "bad");
-            return;
-          }
-
-          throw new Error(j.error || "Save failed");
+        if(j.error === "SUBSCRIPTION_REQUIRED"){
+          showInactive(true);
+          showLimit(false);
+          setStatus("Subscription required to save logs.", "bad");
+          return;
         }
 
-        // Receipt URL: if API doesn't return one yet, generate a safe fallback
-        const receiptUrl = j.receipt_url || `/lab/fleetlog/receipt/?id=${encodeURIComponent(j.id)}&email=${encodeURIComponent(email)}`;
+        if(j.error === "RATE_LIMIT_EXCEEDED"){
+          setStatus("Too many attempts. Please wait a moment.", "warn");
+          return;
+        }
 
-        setStatus("Saved. Opening receipt…", "ok");
-        showJson({ ...p, saved:true, id:j.id, receipt_url:receiptUrl });
-
-        window.sbTrack?.("sb_form_submit",{brand:"sb-fleetlog",page:location.pathname,component:"new_log",action:"save_log"});
-
-        window.open(receiptUrl, "_blank", "noopener,noreferrer");
-        setTimeout(()=>{ window.location.href = `/lab/fleetlog/history/?email=${encodeURIComponent(email)}`; }, 350);
-
-      }catch(e){
-        setStatus("Error: " + e.message, "bad");
+        throw new Error(j.error || "Save failed");
       }
+
+      const receiptUrl =
+        j.receipt_url ||
+        `/lab/fleetlog/receipt/?id=${encodeURIComponent(j.id)}&email=${encodeURIComponent(email)}`;
+
+      setStatus("Saved. Opening receipt…", "ok");
+
+      showJson({
+        ...p,
+        saved:true,
+        id:j.id,
+        receipt_url:receiptUrl
+      });
+
+      window.sbTrack?.("sb_form_submit",{
+        brand:"sb-fleetlog",
+        page:location.pathname,
+        component:"new_log",
+        action:"save_log"
+      });
+
+      window.open(receiptUrl, "_blank", "noopener,noreferrer");
+
+      setTimeout(()=>{
+        window.location.href =
+          `/lab/fleetlog/history/?email=${encodeURIComponent(email)}`;
+      }, 350);
+
+    }catch(e){
+      setStatus("Error: " + e.message, "bad");
     }
+  }
 
-    function draft(){
-      const p = payload();
-      showJson({ ...p, draft:true, createdAt:new Date().toISOString() });
-      setStatus("Draft generated (not saved).", "ok");
-      window.sbTrack?.("sb_click",{brand:"sb-fleetlog",page:location.pathname,component:"new_log",action:"draft_generated"});
-    }
-
-    function clearForm(){
-      $("email").value="";
-      $("logDate").value=today;
-      $("truckId").value="";
-      $("route").value="";
-      $("startCity").value="";
-      $("endCity").value="";
-      $("miles").value="";
-      $("notes").value="";
-      $("status").textContent="";
-      $("out").style.display="none";
-      $("jsonOut").textContent="";
-      showInactive(false); showLimit(false);
-      window.sbTrack?.("sb_click",{brand:"sb-fleetlog",page:location.pathname,component:"new_log",action:"clear"});
-    }
-
-    $("btnSave").addEventListener("click", save);
-    $("btnDraft").addEventListener("click", draft);
-    $("btnClear").addEventListener("click", clearForm);
-
-    $("billingLink").addEventListener("click", (e)=>{
-      const email = getEmail();
-      if(!email || !email.includes("@")){
-        e.preventDefault();
-        return setStatus("Enter a valid email first.", "bad");
-      }
-      window.sbTrack?.("sb_click",{brand:"sb-fleetlog",page:location.pathname,component:"new_log",action:"billing_portal"});
-    });
-    $("upgradeLink").addEventListener("click", (e)=>{
-      const email = getEmail();
-      if(!email || !email.includes("@")){
-        e.preventDefault();
-        return setStatus("Enter a valid email first.", "bad");
-      }
-      window.sbTrack?.("sb_click",{brand:"sb-fleetlog",page:location.pathname,component:"new_log",action:"upgrade_to_fleet"});
+  function draft(){
+    const p = payload();
+    showJson({
+      ...p,
+      draft:true,
+      createdAt:new Date().toISOString()
     });
 
-    const saved = (localStorage.getItem(KEY) || "").trim().toLowerCase();
-    if(saved){
-      $("email").value = saved;
-      $("historyLink").href = `/lab/fleetlog/history/?email=${encodeURIComponent(saved)}`;
-      ensureActive(saved);
+    setStatus("Draft generated (not saved).", "ok");
+
+    window.sbTrack?.("sb_click",{
+      brand:"sb-fleetlog",
+      page:location.pathname,
+      component:"new_log",
+      action:"draft_generated"
+    });
+  }
+
+  function clearForm(){
+    $("email").value="";
+    $("logDate").value=today;
+    $("truckId").value="";
+    $("route").value="";
+    $("startCity").value="";
+    $("endCity").value="";
+    $("miles").value="";
+    $("notes").value="";
+    $("status").textContent="";
+    $("out").style.display="none";
+    $("jsonOut").textContent="";
+    showInactive(false);
+    showLimit(false);
+
+    window.sbTrack?.("sb_click",{
+      brand:"sb-fleetlog",
+      page:location.pathname,
+      component:"new_log",
+      action:"clear"
+    });
+  }
+
+  $("btnSave").addEventListener("click", save);
+  $("btnDraft").addEventListener("click", draft);
+  $("btnClear").addEventListener("click", clearForm);
+
+  $("billingLink")?.addEventListener("click",(e)=>{
+    const email = getEmail();
+    if(!email || !email.includes("@")){
+      e.preventDefault();
+      return setStatus("Enter a valid email first.", "bad");
     }
-  </script>
+    window.sbTrack?.("sb_click",{
+      brand:"sb-fleetlog",
+      page:location.pathname,
+      component:"new_log",
+      action:"billing_portal"
+    });
+  });
+
+  $("upgradeLink")?.addEventListener("click",(e)=>{
+    const email = getEmail();
+    if(!email || !email.includes("@")){
+      e.preventDefault();
+      return setStatus("Enter a valid email first.", "bad");
+    }
+    window.sbTrack?.("sb_click",{
+      brand:"sb-fleetlog",
+      page:location.pathname,
+      component:"new_log",
+      action:"upgrade_to_fleet"
+    });
+  });
+
+  const saved = (localStorage.getItem(KEY)||"").trim().toLowerCase();
+  if(saved){
+    $("email").value = saved;
+    $("historyLink").href =
+      `/lab/fleetlog/history/?email=${encodeURIComponent(saved)}`;
+    ensureActive(saved);
+  }
+</script>
 </body>
 </html>
