@@ -158,6 +158,11 @@
       </div>
       <div id="subMeta" class="submeta"></div>
     </div>
+   
+    <div style="margin-top:10px;">
+  <button class="pill" id="wlBtn">White-label: OFF</button>
+</div>
+
 
     <div id="unlocked" class="hidden" style="margin-top:14px;">
       <div class="grid2">
@@ -207,6 +212,22 @@ async function checkStatus(){
     setStatus("Enter valid email.","bad");
     return;
   }
+  const WL_KEY="fleetlog_whitelabel";
+function isWL(){ return localStorage.getItem(WL_KEY)==="1"; }
+function applyWL(){
+  const on = isWL();
+  document.getElementById("wlBtn").textContent = `White-label: ${on ? "ON" : "OFF"}`;
+  // Example: hide SB header pills when on
+  document.querySelectorAll(".pill").forEach(el=>{
+    if(el.textContent.includes("SB FleetLog")) el.style.display = on ? "none" : "";
+  });
+}
+document.getElementById("wlBtn").addEventListener("click", ()=>{
+  localStorage.setItem(WL_KEY, isWL() ? "0" : "1");
+  applyWL();
+});
+applyWL();
+
 
   try{
     const r = await fetch(`/api/fleetlog/auth/status?email=${encodeURIComponent(email)}`);
