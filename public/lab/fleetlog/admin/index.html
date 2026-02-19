@@ -60,6 +60,18 @@
         <a class="pill" href="/fleetlog/" onclick="window.sbTrack?.('sb_click',{brand:'sb-fleetlog',page:location.pathname,component:'admin',action:'back_marketing'});">Marketing</a>
       </div>
     </div>
+    
+    <div class="card" style="margin-bottom:12px;">
+  <div class="muted" style="font-weight:900;margin-bottom:8px;">Impersonate Driver (ops)</div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;">
+    <input id="impEmail" type="email" placeholder="driver email" style="flex:1;min-width:240px;" />
+    <a class="pill" id="impGoApp" href="#">Open App</a>
+    <a class="pill" id="impGoNew" href="#">New Log</a>
+    <a class="pill" id="impGoHist" href="#">History</a>
+  </div>
+  <div class="muted" style="margin-top:8px;font-size:12px;">Sets localStorage fleetlog_email on click.</div>
+</div>
+
 
     <div class="card">
       <h2>Admin Access</h2>
@@ -240,6 +252,23 @@
         setStatus("Copy failed. (Browser blocked clipboard)", "warn");
       }
     }
+    (function(){
+  const KEY="fleetlog_email";
+  const $=(id)=>document.getElementById(id);
+  function email(){ return ( $("impEmail").value || "" ).trim().toLowerCase(); }
+
+  function go(path){
+    const e = email();
+    if(!e || !e.includes("@")) return alert("Enter a valid email");
+    localStorage.setItem(KEY, e);
+    location.href = `${path}?email=${encodeURIComponent(e)}&admin=1`;
+  }
+
+  $("impGoApp").addEventListener("click",(ev)=>{ ev.preventDefault(); go("/lab/fleetlog/"); });
+  $("impGoNew").addEventListener("click",(ev)=>{ ev.preventDefault(); go("/lab/fleetlog/new/"); });
+  $("impGoHist").addEventListener("click",(ev)=>{ ev.preventDefault(); go("/lab/fleetlog/history/"); });
+})();
+
 
     $("saveToken").addEventListener("click", saveToken);
     $("clearToken").addEventListener("click", clearToken);
