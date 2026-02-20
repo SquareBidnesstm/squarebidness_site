@@ -1,4 +1,4 @@
-<!-- /public/start2finish/index.html -->
+<!-- /public/start2finish/index.html (PASTE READY — Source tracking fixed + QR source capture to Sheet) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,8 +13,6 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
-  
-
 
   <!-- Build stamp -->
   <meta name="sb:build" content="v20260111-start2finish" />
@@ -228,21 +226,20 @@
 
     <!-- INQUIRY FORM -->
     <section id="inquiry" class="grid" style="margin-top:26px;grid-template-columns:1fr .9fr;" aria-label="Inquiry">
-    <form class="form" method="post" action="https://script.google.com/macros/s/AKfycbwcoofcVjFMRAAeOZ3DjDqJp4SEkuoFYnVS6j3foCGEpqpZRUcNqfHqPx5n7faXUKhk/exec" novalidate>
+      <form class="form" method="post" action="https://script.google.com/macros/s/AKfycbwcoofcVjFMRAAeOZ3DjDqJp4SEkuoFYnVS6j3foCGEpqpZRUcNqfHqPx5n7faXUKhk/exec" novalidate>
 
         <h2>Start an Inquiry</h2>
         <p class="note">Choose your inquiry type and we’ll route it clean.</p>
 
-        <!-- FormSubmit settings -->
+        <!-- SYSTEM / ROUTING -->
         <input type="hidden" name="form_name" value="start2finish" />
         <input id="subject" type="hidden" name="_subject" value="Start2Finish — Estimate Request" />
         <input type="hidden" name="_captcha" value="false" />
         <input type="hidden" name="_template" value="table" />
         <input id="nextUrl" type="hidden" name="_next" value="https://www.squarebidness.com/start2finish/thank-you/?type=estimate" />
-        <input type="hidden" name="_source" value="start2finish-main" />
-        <input type="hidden" name="_source" value="start2finish_sell" />
 
-
+        <!-- ✅ SOURCE (ONE FIELD ONLY) — JS will set this from ?_source= -->
+        <input id="source" type="hidden" name="_source" value="start2finish_main" />
 
         <div class="row">
           <div>
@@ -395,6 +392,32 @@
       const form = document.querySelector("form.form");
       if (!form) return;
 
+      // ✅ SOURCE TRACKING (QR → Sheet)
+      const sourceEl = document.getElementById("source");
+      function getSource(){
+        try{
+          const url = new URL(window.location.href);
+          const s =
+            url.searchParams.get("_source") ||
+            url.searchParams.get("utm_source") ||
+            url.searchParams.get("source");
+
+          const stored = sessionStorage.getItem("s2f_source");
+          const finalSource =
+            (s && s.trim()) ? s.trim() :
+            (stored && stored.trim()) ? stored.trim() :
+            "start2finish_main";
+
+          sessionStorage.setItem("s2f_source", finalSource);
+          return finalSource;
+        } catch(e){
+          return "start2finish_main";
+        }
+      }
+
+      const src = getSource();
+      if (sourceEl) sourceEl.value = src;
+
       const inquiry = document.getElementById("inquiryType");
       const subject = document.getElementById("subject");
       const service = document.getElementById("service");
@@ -412,7 +435,7 @@
           else subject.value = "Start2Finish — Estimate Request";
         }
 
-        // ✅ Route thank-you type so you can customize later if you want
+        // ✅ Route thank-you type
         if (nextUrl) {
           nextUrl.value = `https://www.squarebidness.com/start2finish/thank-you/?type=${encodeURIComponent(v)}`;
         }
@@ -430,7 +453,6 @@
               service.value = "";
             }
           } else {
-            // keep context in email even if disabled
             service.value =
               (v === "sell") ? "Sell Your House" :
               (v === "rental") ? "Rental / Availability" :
@@ -445,9 +467,10 @@
       applyRouting();
       inquiry?.addEventListener("change", applyRouting);
 
-      // ✅ Validate required fields (respect disabled)
+      // ✅ Validate required fields + re-assert source at submit time
       form.addEventListener("submit", (e) => {
         applyRouting();
+        if (sourceEl) sourceEl.value = getSource();
 
         const required = form.querySelectorAll("[required]");
         for (const el of required) {
