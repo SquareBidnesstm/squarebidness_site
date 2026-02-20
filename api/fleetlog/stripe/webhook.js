@@ -12,11 +12,26 @@ function clean(s){ return String(s || "").replace(/(^"|"$)/g, "").trim(); }
 function upstashBase(){ return clean(process.env.UPSTASH_REDIS_REST_URL).replace(/\/+$/, ""); }
 function upstashToken(){ return clean(process.env.UPSTASH_REDIS_REST_TOKEN); }
 
-/**
- * Upstash REST calls:
- * - POST
- * - Body is an array of args
- */
+// -----------------------------
+// Upstash REST helpers
+// - GET for /get/<key>  (NO body)
+// - POST w/ JSON array for commands like set/lpush/lrange/expire
+// -----------------------------
+async function upstashGet(path){
+  const base = upstashBase();
+  const token = upstashToken();
+  if(!base || !token) throw new Error("Missing Upstash env vars");
+
+  const r = await fetch(`${base}${path}`, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  const j = await r.json().catch(()=>null);
+  if(!r.ok) throw new Error(`Upstash error: ${r.status} ${JSON.stringify(j)}`);
+  return j;
+}
+
 async function upstashPost(path, argsArray){
   const base = upstashBase();
   const token = upstashToken();
@@ -37,7 +52,7 @@ async function upstashPost(path, argsArray){
 }
 
 async function uget(key){
-  const j = await upstashPost(`/get/${encodeURIComponent(key)}`, []);
+  const j = await upstashGet(`/get/${encodeURIComponent(key)}`);
   return j?.result ?? null;
 }
 async function uset(key, valueStr){
@@ -58,8 +73,10 @@ function tryParseRecord(raw){
 
   if(typeof raw === "object" && !Array.isArray(raw)) return raw;
 
+  // handle weird nesting like [["{...}"]]
   if(Array.isArray(raw)){
     const first = raw[0];
+    if(Array.isArray(first)) return tryParseRecord(first[0]);
     if(typeof first === "object" && first) return first;
     if(typeof first === "string"){ try { return JSON.parse(first); } catch { return null; } }
     return null;
@@ -69,11 +86,9 @@ function tryParseRecord(raw){
     try{
       const p = JSON.parse(raw);
       if(p && typeof p === "object" && !Array.isArray(p)) return p;
-      if(Array.isArray(p) && typeof p[0] === "string"){ try { return JSON.parse(p[0]); } catch { return null; } }
+      if(Array.isArray(p)) return tryParseRecord(p[0]);
       return null;
-    }catch{
-      return null;
-    }
+    }catch{ return null; }
   }
 
   return null;
@@ -178,20 +193,7 @@ function normalizeStatus(stripeStatus){
 
 export default async function handler(req, res){
   if(req.method === "OPTIONS") return res.status(204).end();
-
-  // ✅ browser/curl-friendly ping (does NOT bypass Stripe signature; POST still required)
-  if(req.method === "GET"){
-    return res.status(200).json({
-      ok: true,
-      endpoint: "fleetlog_stripe_webhook",
-      note: "Stripe sends POST requests to this endpoint.",
-      ts: nowIso(),
-    });
-  }
-
-  if(req.method !== "POST"){
-    return res.status(405).json({ ok:false, error:"Method not allowed" });
-  }
+  if(req.method !== "POST") return res.status(405).json({ ok:false, error:"Method not allowed" });
 
   const stripeKey = process.env.STRIPE_SECRET_KEY;
   const whsec = process.env.STRIPE_WEBHOOK_SECRET;
@@ -216,39 +218,14 @@ export default async function handler(req, res){
   const obj = event?.data?.object || {};
   const eventId = event?.id || "";
   const livemode = !!event?.livemode;
-  const subscriptionIdHint =
-    obj?.subscription ||
-    (String(obj?.id||"").startsWith("sub_") ? obj.id : null) ||
-    null;
+  const subscriptionIdHint = obj?.subscription || (String(obj?.id||"").startsWith("sub_") ? obj.id : null) || null;
 
   // Always log (non-fatal)
-  try{
-    await audit({
-      type: "stripe_event",
-      event: event.type,
-      eventId,
-      livemode,
-      subscriptionId: subscriptionIdHint,
-      customerId: obj?.customer || null,
-    });
-  }catch(e){
-    console.warn("FleetLog audit log failed:", e?.message || e);
-  }
+  try{ await audit({ type:"stripe_event", event:event.type, eventId, livemode, subscriptionId:subscriptionIdHint, customerId: obj?.customer || null }); }catch(e){}
+  try{ await webhookLog({ type:event.type, id:eventId, livemode, subscriptionId:subscriptionIdHint, customerId: obj?.customer || null }); }catch(e){}
 
   try{
-    await webhookLog({
-      type: event.type,
-      id: eventId,
-      livemode,
-      subscriptionId: subscriptionIdHint,
-      customerId: obj?.customer || null,
-    });
-  }catch(e){
-    console.warn("FleetLog webhook log failed:", e?.message || e);
-  }
-
-  try{
-    // 1) Provision on checkout completion
+    // Provision on checkout completion
     if(event.type === "checkout.session.completed"){
       const session = event.data.object;
 
@@ -289,22 +266,23 @@ export default async function handler(req, res){
       await usetJson(`fleetlog:sub:${subscriptionId}`, record);
       await usetJson(`fleetlog:email:${email}`, record);
 
-      const subject =
-        tier === "fleet"
-          ? "SB FleetLog™ — Fleet subscription active"
-          : "SB FleetLog™ — Subscription active";
+      const subject = tier === "fleet"
+        ? "SB FleetLog™ — Fleet subscription active"
+        : "SB FleetLog™ — Subscription active";
 
-      const html = welcomeEmailHtml({ email, tier, subscriptionId });
-      await sendResendEmail({ to: email, subject, html });
+      await sendResendEmail({
+        to: email,
+        subject,
+        html: welcomeEmailHtml({ email, tier, subscriptionId })
+      });
 
       await uset(emailSentKey, nowIso());
-
       await audit({ type:"sub_provisioned", email, tier, subscriptionId, customerId, livemode, eventId });
 
       return res.status(200).json({ received:true, ok:true });
     }
 
-    // 2) Keep status updated
+    // Keep status updated
     if(event.type === "customer.subscription.updated"){
       const sub = event.data.object;
 
@@ -315,7 +293,6 @@ export default async function handler(req, res){
       const recordKey = `fleetlog:sub:${subscriptionId}`;
       const existingRaw = await uget(recordKey);
       const existing = tryParseRecord(existingRaw) || {};
-
       const tier = normalizeTier(existing.tier || "single");
 
       const updated = {
@@ -338,14 +315,14 @@ export default async function handler(req, res){
       }
 
       await audit({ type:"sub_status_updated", subscriptionId, status: updated.status, tier, livemode, eventId });
-
       return res.status(200).json({ received:true, ok:true });
     }
 
-    // 3) Canceled
+    // Canceled
     if(event.type === "customer.subscription.deleted"){
       const sub = event.data.object;
       const subscriptionId = String(sub.id || "").trim();
+
       if(subscriptionId){
         const subKey = `fleetlog:sub:${subscriptionId}`;
         const existingRaw = await uget(subKey);
@@ -360,7 +337,6 @@ export default async function handler(req, res){
             livemode,
             eventId,
           };
-
           await usetJson(subKey, canceled);
 
           const email = String(canceled.email || "").trim().toLowerCase();
@@ -376,11 +352,7 @@ export default async function handler(req, res){
     return res.status(200).json({ received:true, ok:true });
   }catch(e){
     console.error("FleetLog webhook handler error:", e?.message || e);
-
-    try{
-      await audit({ type:"webhook_error", error: e?.message || String(e), event: event?.type || "", eventId, livemode });
-    }catch{}
-
-    return res.status(200).json({ received:true, ok:false, error: e?.message || "error" });
+    try{ await audit({ type:"webhook_error", error:e?.message || String(e), event:event?.type || "", eventId, livemode }); }catch{}
+    return res.status(200).json({ received:true, ok:false, error:e?.message || "error" });
   }
 }
