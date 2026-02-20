@@ -65,14 +65,21 @@ async function lpush(key, valueStr){
   return upstashPost(`/lpush/${encodeURIComponent(key)}`, [String(valueStr)]);
 }
 async function expire(key, seconds){
-  return upstashPost(`/expire/${encodeURIComponent(key)}`, [Number(seconds)]);
+  // Upstash EXPIRE needs an integer number of seconds
+  const n = Number(seconds);
+  const s = Number.isFinite(n) ? Math.floor(n) : 0;
+
+  // If something weird comes through, don't break the webhook
+  if(s <= 0) return { ok:false, skipped:true };
+
+  try{
+    return await upstashPost(`/expire/${encodeURIComponent(key)}`, [s]);
+  }catch(e){
+    // TTL is non-critical; never fail webhook on TTL
+    console.warn("Upstash expire failed:", e?.message || e);
+    return { ok:false, error: e?.message || String(e) };
+  }
 }
-
-function tryParseRecord(raw){
-  if(raw == null) return null;
-
-  if(typeof raw === "object" && !Array.isArray(raw)) return raw;
-
   // handle weird nesting like [["{...}"]]
   if(Array.isArray(raw)){
     const first = raw[0];
@@ -97,15 +104,18 @@ function tryParseRecord(raw){
 async function audit(evt){
   const key = "fleetlog:ops:audit";
   const payload = { ...evt, ts: nowIso() };
+
+  // lpush is important; expire is best-effort
   await lpush(key, JSON.stringify(payload));
-  await expire(key, 60 * 60 * 24 * 30);
+  await expire(key, 60 * 60 * 24 * 30); // 30 days
 }
 
 async function webhookLog(evt){
   const key = "fleetlog:ops:webhooks";
   const payload = { ...evt, ts: nowIso() };
+
   await lpush(key, JSON.stringify(payload));
-  await expire(key, 60 * 60 * 24 * 30);
+  await expire(key, 60 * 60 * 24 * 30); // 30 days
 }
 
 async function sendResendEmail({ to, subject, html }){
