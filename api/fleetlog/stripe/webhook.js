@@ -87,7 +87,6 @@ async function audit(evt){
 }
 
 async function webhookLog(evt){
-  // powers /api/fleetlog/ops/webhooks/list
   const key = "fleetlog:ops:webhooks";
   const payload = { ...evt, ts: nowIso() };
   await lpush(key, JSON.stringify(payload));
@@ -179,7 +178,20 @@ function normalizeStatus(stripeStatus){
 
 export default async function handler(req, res){
   if(req.method === "OPTIONS") return res.status(204).end();
-  if(req.method !== "POST") return res.status(405).json({ ok:false, error:"Method not allowed" });
+
+  // ✅ browser/curl-friendly ping (does NOT bypass Stripe signature; POST still required)
+  if(req.method === "GET"){
+    return res.status(200).json({
+      ok: true,
+      endpoint: "fleetlog_stripe_webhook",
+      note: "Stripe sends POST requests to this endpoint.",
+      ts: nowIso(),
+    });
+  }
+
+  if(req.method !== "POST"){
+    return res.status(405).json({ ok:false, error:"Method not allowed" });
+  }
 
   const stripeKey = process.env.STRIPE_SECRET_KEY;
   const whsec = process.env.STRIPE_WEBHOOK_SECRET;
@@ -204,7 +216,10 @@ export default async function handler(req, res){
   const obj = event?.data?.object || {};
   const eventId = event?.id || "";
   const livemode = !!event?.livemode;
-  const subscriptionIdHint = obj?.subscription || (String(obj?.id||"").startsWith("sub_") ? obj.id : null) || null;
+  const subscriptionIdHint =
+    obj?.subscription ||
+    (String(obj?.id||"").startsWith("sub_") ? obj.id : null) ||
+    null;
 
   // Always log (non-fatal)
   try{
@@ -366,7 +381,6 @@ export default async function handler(req, res){
       await audit({ type:"webhook_error", error: e?.message || String(e), event: event?.type || "", eventId, livemode });
     }catch{}
 
-    // 200 avoids Stripe retry storms
     return res.status(200).json({ received:true, ok:false, error: e?.message || "error" });
   }
 }
