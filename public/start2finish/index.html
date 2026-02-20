@@ -1,4 +1,4 @@
-<!-- /public/start2finish/index.html (PASTE READY — Source tracking fixed + QR source capture to Sheet) -->
+<!-- /public/start2finish/index.html (PASTE READY — Source Tag + Source Page URL logging) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,9 +15,9 @@
   <meta name="format-detection" content="telephone=no" />
 
   <!-- Build stamp -->
-  <meta name="sb:build" content="v20260111-start2finish" />
+  <meta name="sb:build" content="v20260219-start2finish" />
 
-  <!-- Open Graph (clean: one image) -->
+  <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Start2Finish" />
   <meta property="og:title" content="Start2Finish — Contractor Work & Property Inquiries" />
@@ -159,7 +159,7 @@
   </header>
 
   <main class="wrap">
-    <!-- HERO (text-first, no on-page images) -->
+    <!-- HERO -->
     <section class="hero">
       <h1>Contractor Work + Property Inquiries</h1>
       <p>
@@ -238,8 +238,9 @@
         <input type="hidden" name="_template" value="table" />
         <input id="nextUrl" type="hidden" name="_next" value="https://www.squarebidness.com/start2finish/thank-you/?type=estimate" />
 
-        <!-- ✅ SOURCE (ONE FIELD ONLY) — JS will set this from ?_source= -->
+        <!-- ✅ Source Tag + Source Page URL -->
         <input id="source" type="hidden" name="_source" value="start2finish_main" />
+        <input id="sourcePage" type="hidden" name="source_page" value="" />
 
         <div class="row">
           <div>
@@ -392,8 +393,9 @@
       const form = document.querySelector("form.form");
       if (!form) return;
 
-      // ✅ SOURCE TRACKING (QR → Sheet)
       const sourceEl = document.getElementById("source");
+      const sourcePageEl = document.getElementById("sourcePage");
+
       function getSource(){
         try{
           const url = new URL(window.location.href);
@@ -415,8 +417,21 @@
         }
       }
 
-      const src = getSource();
-      if (sourceEl) sourceEl.value = src;
+      function setSourcePage(){
+        try{
+          const u = new URL(window.location.href);
+          const full = u.toString(); // keep full URL incl ?_source=
+          if (sourcePageEl) sourcePageEl.value = full;
+          sessionStorage.setItem("s2f_source_page", full);
+        } catch(e){
+          const stored = sessionStorage.getItem("s2f_source_page") || "";
+          if (sourcePageEl) sourcePageEl.value = stored;
+        }
+      }
+
+      // ✅ initialize hidden fields
+      if (sourceEl) sourceEl.value = getSource();
+      setSourcePage();
 
       const inquiry = document.getElementById("inquiryType");
       const subject = document.getElementById("subject");
@@ -427,7 +442,6 @@
       function applyRouting() {
         const v = inquiry?.value || "estimate";
 
-        // ✅ Route email subject clean
         if (subject) {
           if (v === "sell") subject.value = "Start2Finish — Sell Your House Inquiry";
           else if (v === "rental") subject.value = "Start2Finish — Rental / Availability Inquiry";
@@ -435,12 +449,10 @@
           else subject.value = "Start2Finish — Estimate Request";
         }
 
-        // ✅ Route thank-you type
         if (nextUrl) {
           nextUrl.value = `https://www.squarebidness.com/start2finish/thank-you/?type=${encodeURIComponent(v)}`;
         }
 
-        // ✅ Only require "Service Needed" for estimate
         if (service) {
           const needsService = (v === "estimate");
           service.required = needsService;
@@ -467,10 +479,12 @@
       applyRouting();
       inquiry?.addEventListener("change", applyRouting);
 
-      // ✅ Validate required fields + re-assert source at submit time
       form.addEventListener("submit", (e) => {
         applyRouting();
+
+        // re-assert just before submit
         if (sourceEl) sourceEl.value = getSource();
+        setSourcePage();
 
         const required = form.querySelectorAll("[required]");
         for (const el of required) {
