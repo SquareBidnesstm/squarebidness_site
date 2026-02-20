@@ -2,105 +2,90 @@
 import Stripe from "stripe";
 export const config = { runtime: "nodejs" };
 
-function clean(s) {
-  return String(s || "").replace(/(^"|"$)/g, "").trim();
-}
-function base() {
-  return clean(process.env.UPSTASH_REDIS_REST_URL).replace(/\/+$/, "");
-}
-function tok() {
-  return clean(process.env.UPSTASH_REDIS_REST_TOKEN);
-}
+function clean(s){ return String(s || "").replace(/(^"|"$)/g,"").trim(); }
+function nowIso(){ return new Date().toISOString(); }
 
-async function upstashGetRaw(key) {
-  const b = base();
-  const t = tok();
-  if (!b || !t) throw new Error("Missing Upstash env vars");
+function upstashBase(){ return clean(process.env.UPSTASH_REDIS_REST_URL).replace(/\/+$/,""); }
+function upstashToken(){ return clean(process.env.UPSTASH_REDIS_REST_TOKEN); }
 
-  const r = await fetch(`${b}/get/${encodeURIComponent(key)}`, {
-    method: "GET",
-    headers: { Authorization: `Bearer ${t}` },
+async function upstashPost(path, argsArray){
+  const base = upstashBase();
+  const token = upstashToken();
+  if(!base || !token) throw new Error("Missing Upstash env vars");
+  const r = await fetch(`${base}${path}`, {
+    method:"POST",
+    headers:{ Authorization:`Bearer ${token}`, "Content-Type":"application/json" },
+    body: JSON.stringify(Array.isArray(argsArray) ? argsArray : [])
   });
-
-  const j = await r.json().catch(() => null);
-  if (!r.ok) throw new Error(`Upstash error: ${r.status} ${JSON.stringify(j)}`);
-  return j?.result ?? null;
+  const j = await r.json().catch(()=>null);
+  if(!r.ok) throw new Error(`Upstash error: ${r.status} ${JSON.stringify(j)}`);
+  return j;
 }
 
-// Handles "{...}" OR "[\"{...}\"]" OR ["{...}"]
-function normalizeRecord(result) {
-  if (result == null) return null;
+async function uget(key){ return (await upstashPost(`/get/${encodeURIComponent(key)}`, []))?.result ?? null; }
+async function usetJson(key,obj){ return upstashPost(`/set/${encodeURIComponent(key)}`, [JSON.stringify(obj)]); }
 
-  if (Array.isArray(result)) {
-    const first = result[0];
-    if (typeof first === "object" && first) return first;
-    if (typeof first === "string") {
-      try { return JSON.parse(first); } catch { return null; }
-    }
-    return null;
-  }
-
-  if (typeof result === "string") {
-    // might be JSON object
-    try {
-      const p = JSON.parse(result);
-      if (p && typeof p === "object" && !Array.isArray(p)) return p;
-
-      // might be stringified array
-      if (Array.isArray(p)) {
-        const first = p[0];
-        if (typeof first === "object" && first) return first;
-        if (typeof first === "string") {
-          try { return JSON.parse(first); } catch { return null; }
-        }
-      }
-      return null;
-    } catch {
-      return null;
-    }
-  }
-
-  if (typeof result === "object") return result;
+function tryParse(raw){
+  if(raw == null) return null;
+  if(typeof raw === "object" && !Array.isArray(raw)) return raw;
+  if(Array.isArray(raw) && typeof raw[0] === "string"){ try { return JSON.parse(raw[0]); } catch { return null; } }
+  if(typeof raw === "string"){ try { return JSON.parse(raw); } catch { return null; } }
   return null;
 }
 
-export default async function handler(req, res) {
-  if (req.method === "OPTIONS") return res.status(204).end();
-  if (req.method !== "GET") return res.status(405).json({ ok: false, error: "Method not allowed" });
+export default async function handler(req,res){
+  if(req.method === "OPTIONS") return res.status(204).end();
+  if(req.method !== "GET") return res.status(405).json({ ok:false, error:"Method not allowed" });
 
-  try {
-    const key = process.env.STRIPE_SECRET_KEY;
-    if (!key) return res.status(500).json({ ok: false, error: "Missing STRIPE_SECRET_KEY" });
+  try{
+    const stripeKey = process.env.STRIPE_SECRET_KEY;
+    if(!stripeKey) return res.status(500).json({ ok:false, error:"Missing STRIPE_SECRET_KEY" });
 
     const email = clean(req.query.email).toLowerCase();
-    if (!email || !email.includes("@")) {
-      return res.status(400).json({ ok: false, error: "Missing/invalid email" });
+    if(!email || !email.includes("@")) return res.status(400).json({ ok:false, error:"Missing/invalid email" });
+
+    const stripe = new Stripe(stripeKey);
+
+    // read our record
+    const recKey = `fleetlog:email:${email}`;
+    const raw = await uget(recKey);
+    let rec = tryParse(raw) || {};
+
+    let customerId = clean(rec.customerId);
+
+    // 1) If we have a customerId, verify it exists in THIS mode
+    if(customerId){
+      try{
+        await stripe.customers.retrieve(customerId);
+      }catch(e){
+        // Wrong mode or deleted; clear and self-heal
+        customerId = "";
+      }
     }
 
-    // 🔒 Gate: must be ACTIVE
-    const raw = await upstashGetRaw(`fleetlog:email:${email}`);
-    const rec = normalizeRecord(raw);
-    if (!rec) return res.status(403).json({ ok: false, error: "SUBSCRIPTION_REQUIRED" });
+    // 2) Self-heal: find customer by email in current Stripe mode
+    if(!customerId){
+      const list = await stripe.customers.list({ email, limit: 1 });
+      customerId = list?.data?.[0]?.id || "";
+      if(!customerId){
+        return res.status(403).json({
+          ok:false,
+          error:"NO_CUSTOMER_IN_THIS_MODE",
+          hint:"Run checkout in the current mode (live/test) for this email."
+        });
+      }
 
-    const status = String(rec.status || "").toUpperCase();
-    if (status !== "ACTIVE") return res.status(403).json({ ok: false, error: "SUBSCRIPTION_REQUIRED" });
+      // Update record in Upstash so next time is clean
+      rec = { ...rec, email, customerId, healedAt: nowIso() };
+      await usetJson(recKey, rec);
+    }
 
-    const customerId = String(rec.customerId || "");
-    if (!customerId) return res.status(500).json({ ok: false, error: "Missing customerId on subscriber record" });
+    // 3) Create portal session
+    const return_url = "https://www.squarebidness.com/lab/fleetlog/";
+    const portal = await stripe.billingPortal.sessions.create({ customer: customerId, return_url });
 
-    const stripe = new Stripe(key);
-
-    const returnUrl =
-      clean(process.env.FLEETLOG_PORTAL_RETURN_URL) ||
-      "https://www.squarebidness.com/lab/fleetlog/";
-
-    const session = await stripe.billingPortal.sessions.create({
-      customer: customerId,
-      return_url: returnUrl,
-    });
-
-    return res.writeHead(302, { Location: session.url }).end();
-  } catch (e) {
-    return res.status(500).json({ ok: false, error: e?.message || "Stripe portal error" });
+    return res.status(200).json({ ok:true, url: portal.url });
+  }catch(e){
+    return res.status(500).json({ ok:false, error: e?.message || "Server error" });
   }
 }
