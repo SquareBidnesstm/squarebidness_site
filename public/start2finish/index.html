@@ -1,4 +1,4 @@
-<!-- /public/start2finish/index.html (PASTE READY — Source Tag + Source Page URL logging) -->
+<!-- /public/start2finish/index.html (PASTE READY — Unified Leads + clean _source + correct Apps Script endpoint) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,7 +15,7 @@
   <meta name="format-detection" content="telephone=no" />
 
   <!-- Build stamp -->
-  <meta name="sb:build" content="v20260219-start2finish" />
+  <meta name="sb:build" content="v20260221-start2finish-unified-leads" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
@@ -226,19 +226,27 @@
 
     <!-- INQUIRY FORM -->
     <section id="inquiry" class="grid" style="margin-top:26px;grid-template-columns:1fr .9fr;" aria-label="Inquiry">
-      <form class="form" method="post" action="https://script.google.com/macros/s/AKfycbwcoofcVjFMRAAeOZ3DjDqJp4SEkuoFYnVS6j3foCGEpqpZRUcNqfHqPx5n7faXUKhk/exec" novalidate>
+      <form class="form" method="post" action="https://script.google.com/macros/s/AKfycbxtNBPIjg8rVnAf5JYQKkhjQC-YhYFqI4ilXamWP-C_J4mSEmdYqIN5uLXwrPR_zVVo/exec" novalidate>
 
         <h2>Start an Inquiry</h2>
         <p class="note">Choose your inquiry type and we’ll route it clean.</p>
 
         <!-- SYSTEM / ROUTING -->
         <input type="hidden" name="form_name" value="start2finish" />
+
+        <!-- Unified-leads routing fields (these align with your Code.gs) -->
+        <input type="hidden" name="lane" value="start2finish" />
+        <input type="hidden" name="partner" value="start2finish" />
+        <input type="hidden" name="property" value="" />
+
+        <!-- Legacy fields (safe to keep) -->
         <input id="subject" type="hidden" name="_subject" value="Start2Finish — Estimate Request" />
         <input type="hidden" name="_captcha" value="false" />
         <input type="hidden" name="_template" value="table" />
         <input id="nextUrl" type="hidden" name="_next" value="https://www.squarebidness.com/start2finish/thank-you/?type=estimate" />
 
-        <!-- ✅ Source Tag + Source Page URL -->
+        <!-- ✅ Source Tag + Source Page URL logging -->
+        <!-- IMPORTANT: we do NOT persist _source across pages anymore -->
         <input id="source" type="hidden" name="_source" value="start2finish_main" />
         <input id="sourcePage" type="hidden" name="source_page" value="" />
 
@@ -390,28 +398,21 @@
     document.getElementById("year").textContent = new Date().getFullYear();
 
     (function () {
-      const form = document.querySelector("form.form");
+      const form = document.querySelector("#inquiry form.form");
       if (!form) return;
 
       const sourceEl = document.getElementById("source");
       const sourcePageEl = document.getElementById("sourcePage");
 
-      function getSource(){
+      // URL-only _source (NO carryover) to prevent lilmaine_qr "bleeding" into other pages
+      function getSourceFromUrlOnly(){
         try{
           const url = new URL(window.location.href);
           const s =
             url.searchParams.get("_source") ||
             url.searchParams.get("utm_source") ||
             url.searchParams.get("source");
-
-          const stored = sessionStorage.getItem("s2f_source");
-          const finalSource =
-            (s && s.trim()) ? s.trim() :
-            (stored && stored.trim()) ? stored.trim() :
-            "start2finish_main";
-
-          sessionStorage.setItem("s2f_source", finalSource);
-          return finalSource;
+          return (s && s.trim()) ? s.trim() : "start2finish_main";
         } catch(e){
           return "start2finish_main";
         }
@@ -419,18 +420,16 @@
 
       function setSourcePage(){
         try{
-          const u = new URL(window.location.href);
-          const full = u.toString(); // keep full URL incl ?_source=
+          // keep full URL incl ?_source=
+          const full = new URL(window.location.href).toString();
           if (sourcePageEl) sourcePageEl.value = full;
-          sessionStorage.setItem("s2f_source_page", full);
         } catch(e){
-          const stored = sessionStorage.getItem("s2f_source_page") || "";
-          if (sourcePageEl) sourcePageEl.value = stored;
+          if (sourcePageEl) sourcePageEl.value = window.location.pathname;
         }
       }
 
       // ✅ initialize hidden fields
-      if (sourceEl) sourceEl.value = getSource();
+      if (sourceEl) sourceEl.value = getSourceFromUrlOnly();
       setSourcePage();
 
       const inquiry = document.getElementById("inquiryType");
@@ -453,6 +452,7 @@
           nextUrl.value = `https://www.squarebidness.com/start2finish/thank-you/?type=${encodeURIComponent(v)}`;
         }
 
+        // Service required ONLY for estimate
         if (service) {
           const needsService = (v === "estimate");
           service.required = needsService;
@@ -461,10 +461,12 @@
             service.disabled = false;
             service.style.opacity = "1";
             if (serviceHint) serviceHint.textContent = "Required for estimate requests.";
+            // don’t auto-fill service on estimate
             if (service.value === "Sell Your House" || service.value === "Rental / Availability" || service.value === "Buy a House") {
               service.value = "";
             }
           } else {
+            // For non-estimate, we record a readable label into Service
             service.value =
               (v === "sell") ? "Sell Your House" :
               (v === "rental") ? "Rental / Availability" :
@@ -483,7 +485,7 @@
         applyRouting();
 
         // re-assert just before submit
-        if (sourceEl) sourceEl.value = getSource();
+        if (sourceEl) sourceEl.value = getSourceFromUrlOnly();
         setSourcePage();
 
         const required = form.querySelectorAll("[required]");
