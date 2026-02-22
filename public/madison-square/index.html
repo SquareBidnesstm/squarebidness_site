@@ -1,4 +1,4 @@
-<!-- FILE: /public/madison-square/index.html (PASTE READY — Professional Commercial Listing Mode) -->
+<!-- FILE: /public/madison-square/index.html (PASTE READY — Professional Commercial Listing Mode | URL-only _source | NEW Script URL) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -22,7 +22,6 @@
   <meta property="og:title" content="Madison Square — Commercial Plaza (Availability + Leasing)" />
   <meta property="og:description" content="Commercial retail plaza in Alexandria, Louisiana. Request availability, leasing terms, and unit information." />
   <meta property="og:url" content="https://www.squarebidness.com/madison-square/" />
-  <!-- TODO: set this to your final 1200x630 when ready -->
   <meta property="og:image" content="https://www.squarebidness.com/madison-square/assets/mdw-commercial-meta-1200x630.jpg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -34,11 +33,9 @@
   <meta name="twitter:description" content="Availability + Leasing — Alexandria, Louisiana. Request unit information." />
   <meta name="twitter:image" content="https://www.squarebidness.com/madison-square/assets/mdw-commercial-meta-1200x630.jpg" />
 
-  <!-- Site-wide analytics (required) -->
+  <!-- Site-wide analytics -->
   <script defer src="/scripts/sb-analytics.js"></script>
-  <!-- GA4 (site-wide) -->
   <script defer src="/scripts/ga.js"></script>
-  
 
   <style>
     :root{
@@ -110,8 +107,6 @@
     .dot{width:8px;height:8px;border-radius:999px;background:var(--accent)}
     .hero h2{margin:10px 0 8px;font-size:40px;letter-spacing:.2px}
     .hero .sub{margin:0;color:var(--muted);max-width:80ch;line-height:1.55}
-    .rule{height:1px;background:var(--line);margin:16px 0 14px;}
-
     .cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
     .btn{
       display:inline-flex;align-items:center;justify-content:center;gap:8px;
@@ -364,7 +359,7 @@
       <form id="inquiry"
             class="card"
             method="post"
-            action="https://script.google.com/macros/s/AKfycbwcoofcVjFMRAAeOZ3DjDqJp4SEkuoFYnVS6j3foCGEpqpZRUcNqfHqPx5n7faXUKhk/exec"
+            action="https://script.google.com/macros/s/AKfycbxtNBPIjg8rVnAf5JYQKkhjQC-YhYFqI4ilXamWP-C_J4mSEmdYqIN5uLXwrPR_zVVo/exec"
             novalidate
             aria-label="Madison Square inquiry form">
 
@@ -377,10 +372,10 @@
           <!-- SYSTEM / ROUTING -->
           <input type="hidden" name="form_name" value="madison_square_listing" />
           <input id="subject" type="hidden" name="_subject" value="Madison Square — Availability Request" />
-          <input id="nextUrl" type="hidden" name="_next" value="https://www.squarebidness.com/start2finish/thank-you/?type=madison_square" />
+          <input id="nextUrl" type="hidden" name="_next" value="https://www.squarebidness.com/madison-square/thank-you/" />
 
-          <!-- SOURCE (ONE FIELD ONLY) -->
-          <input id="source" type="hidden" name="_source" value="madison_square" />
+          <!-- ✅ URL-only _source + source_page -->
+          <input id="source" type="hidden" name="_source" value="mdw_site_madison_square" />
           <input id="sourcePage" type="hidden" name="source_page" value="" />
 
           <!-- LANE / PARTNER / PROPERTY -->
@@ -500,6 +495,9 @@
 
             <a href="mailto:mdwinvestmentsllc@gmail.com?subject=Madison%20Square%20—%20Availability%20Request"
                data-sb-event="sb_click" data-brand="mdw" data-component="madison_square_aside" data-action="email" data-label="email_aside">Email</a>
+
+            <a href="/mdw/?_source=mdw_site_madison_square"
+               data-sb-event="sb_click" data-brand="mdw" data-component="madison_square_aside" data-action="visit_mdw" data-label="mdw_hub">MDW Hub</a>
           </div>
 
           <p class="note" style="margin-top:12px">
@@ -531,70 +529,50 @@
 
   <script>
     (function(){
-      const form = document.querySelector("form");
+      var form = document.querySelector("form");
       if(!form) return;
 
-      const sourceEl = document.getElementById("source");
-      const sourcePageEl = document.getElementById("sourcePage");
+      var sourceEl = document.getElementById("source");
+      var sourcePageEl = document.getElementById("sourcePage");
 
-      function getSource(){
+      function getSourceUrlOnly(){
         try{
-          const u = new URL(location.href);
-          const s =
+          var u = new URL(window.location.href);
+          var s =
             u.searchParams.get("_source") ||
             u.searchParams.get("utm_source") ||
             u.searchParams.get("source");
-
-          const stored = sessionStorage.getItem("s2f_source");
-          const finalSource =
-            (s && s.trim()) ? s.trim() :
-            (stored && stored.trim()) ? stored.trim() :
-            "madison_square";
-
-          sessionStorage.setItem("s2f_source", finalSource);
-          return finalSource;
+          return (s && s.trim()) ? s.trim() : "mdw_site_madison_square";
         }catch(e){
-          return "madison_square";
+          return "mdw_site_madison_square";
         }
       }
 
       function setSourcePage(){
         try{
-          const u = new URL(location.href);
-          const full = u.toString();
+          var u = new URL(window.location.href);
+          var full = u.toString();
           if(sourcePageEl) sourcePageEl.value = full;
-          sessionStorage.setItem("s2f_source_page", full);
         }catch(e){
-          const stored = sessionStorage.getItem("s2f_source_page") || "";
-          if(sourcePageEl) sourcePageEl.value = stored;
+          if(sourcePageEl) sourcePageEl.value = window.location.pathname;
         }
       }
 
-      // Ensure _source exists for share/QR tracking
-      (function ensureSourceParam(){
-        try{
-          const u = new URL(location.href);
-          if(!u.searchParams.get("_source")){
-            u.searchParams.set("_source", getSource());
-            history.replaceState(null,"",u.toString());
-          }
-        }catch(e){}
-      })();
-
-      // On load
-      if(sourceEl) sourceEl.value = getSource();
+      // init
       setSourcePage();
+      if(sourceEl) sourceEl.value = getSourceUrlOnly();
 
-      form.addEventListener("submit", (e) => {
-        if(sourceEl) sourceEl.value = getSource();
+      form.addEventListener("submit", function(e){
         setSourcePage();
+        if(sourceEl) sourceEl.value = getSourceUrlOnly();
 
-        const required = form.querySelectorAll("[required]");
-        for (const el of required) {
+        var required = form.querySelectorAll("[required]");
+        for (var i=0; i<required.length; i++){
+          var el = required[i];
           if (el.disabled) continue;
-          if (!String(el.value || "").trim()) {
+          if (!String(el.value || "").trim()){
             alert("Please complete required fields.");
-            el.focus?.();
+            el.focus && el.focus();
             e.preventDefault();
             return;
           }
@@ -604,4 +582,3 @@
   </script>
 </body>
 </html>
-
