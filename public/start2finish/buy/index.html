@@ -1,4 +1,4 @@
-<!-- /public/start2finish/buy/index.html -->
+<!-- /public/start2finish/buy/index.html (PASTE READY — Unified Google Sheet Logger + URL-only _source) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,7 +15,7 @@
   <meta name="format-detection" content="telephone=no" />
 
   <!-- Build stamp -->
-  <meta name="sb:build" content="v20260111-start2finish-buy" />
+  <meta name="sb:build" content="v20260221-start2finish-buy-unified" />
 
   <!-- Open Graph (BUY meta) -->
   <meta property="og:type" content="website" />
@@ -176,19 +176,26 @@
 
     <!-- BUY INQUIRY -->
     <section id="inquiry" class="grid" style="margin-top:22px;grid-template-columns:1fr .9fr;" aria-label="Buyer inquiry">
-      <form class="form" method="post" action="https://formsubmit.co/start2finish@squarebidness.com" novalidate>
+      <form class="form"
+            method="post"
+            action="https://script.google.com/macros/s/AKfycbxtNBPIjg8rVnAf5JYQKkhjQC-YhYFqI4ilXamWP-C_J4mSEmdYqIN5uLXwrPR_zVVo/exec"
+            novalidate>
         <h2>Buyer Inquiry</h2>
-        <p class="note">Pre-set to <strong>Buy</strong> and routed to the right subject line.</p>
+        <p class="note">Pre-set to <strong>Buy</strong> and routed clean into your ops sheet.</p>
 
-        <!-- FormSubmit settings -->
+        <!-- SYSTEM / ROUTING -->
+        <input type="hidden" name="form_name" value="start2finish" />
+        <input type="hidden" name="lane" value="start2finish" />
         <input id="subject" type="hidden" name="_subject" value="Start2Finish — Home Buyer Inquiry" />
         <input type="hidden" name="_captcha" value="false" />
         <input type="hidden" name="_template" value="table" />
         <input type="hidden" name="_next" value="https://www.squarebidness.com/start2finish/thank-you/?type=buy" />
 
-        <!-- Source tag (for your Google Sheet logger / CRM) -->
-        <input type="hidden" name="_source" value="start2finish_buy" />
+        <!-- ✅ URL-only source + source_page -->
+        <input id="source" type="hidden" name="_source" value="s2f_buy" />
+        <input id="sourcePage" type="hidden" name="source_page" value="" />
 
+        <!-- Keep inquiry type locked to buy by default -->
         <div class="row">
           <div>
             <label for="inquiryType">Inquiry Type</label>
@@ -279,7 +286,7 @@
           </div>
         </div>
 
-        <!-- Service is NOT required for buy lane, but we keep a context value -->
+        <!-- Service context (fits your sheet columns) -->
         <input id="service" name="service" type="hidden" value="Home Buyer Inquiry" />
         <p class="note" id="serviceHint" style="margin-top:8px;">Service selection isn’t required for Buyer inquiries.</p>
 
@@ -296,7 +303,7 @@
         </div>
 
         <p class="note" style="margin-top:8px">
-          Submitting this sends your request to Start2Finish. We respond quickly.
+          Submitting logs to Start2Finish Ops (Leads tab). We respond quickly.
         </p>
       </form>
 
@@ -348,11 +355,34 @@
       const inquiry = document.getElementById("inquiryType");
       const subject = document.getElementById("subject");
       const serviceHidden = document.getElementById("service");
+      const sourceEl = document.getElementById("source");
+      const sourcePageEl = document.getElementById("sourcePage");
+
+      function getSourceUrlOnly(){
+        try{
+          const u = new URL(window.location.href);
+          const s =
+            u.searchParams.get("_source") ||
+            u.searchParams.get("utm_source") ||
+            u.searchParams.get("source");
+          return (s && s.trim()) ? s.trim() : "s2f_buy";
+        }catch(e){
+          return "s2f_buy";
+        }
+      }
+
+      function setSourcePage(){
+        try{
+          const u = new URL(window.location.href);
+          if (sourcePageEl) sourcePageEl.value = u.toString();
+        }catch(e){
+          if (sourcePageEl) sourcePageEl.value = window.location.pathname;
+        }
+      }
 
       function applyRouting() {
         const v = inquiry?.value || "buy";
 
-        // Route email subject clean
         if (subject) {
           if (v === "sell") subject.value = "Start2Finish — Sell Your House Inquiry";
           else if (v === "rental") subject.value = "Start2Finish — Rental / Availability Inquiry";
@@ -360,7 +390,6 @@
           else subject.value = "Start2Finish — Home Buyer Inquiry";
         }
 
-        // Keep a context service value for non-estimate lanes
         if (serviceHidden) {
           if (v === "estimate") serviceHidden.value = "";
           else if (v === "sell") serviceHidden.value = "Sell Your House";
@@ -369,12 +398,19 @@
         }
       }
 
+      // init
+      if (sourceEl) sourceEl.value = getSourceUrlOnly();
+      setSourcePage();
       applyRouting();
+
       inquiry?.addEventListener("change", applyRouting);
 
-      // Validate required fields
       form.addEventListener("submit", (e) => {
+        // re-assert on submit
+        if (sourceEl) sourceEl.value = getSourceUrlOnly();
+        setSourcePage();
         applyRouting();
+
         const required = form.querySelectorAll("[required]");
         for (const el of required) {
           if (!String(el.value || "").trim()) {
