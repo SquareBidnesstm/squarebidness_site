@@ -1,4 +1,4 @@
-<!-- FILE: /public/mdw/index.html  (PASTE READY — MDW Operator Hub | Commercial Real Estate) -->
+<!-- FILE: /public/mdw/index.html  (PASTE READY — MDW Operator Hub | Commercial Real Estate | Unified Leads) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -22,19 +22,21 @@
   <meta property="og:title" content="MDW Investments LLC — Commercial Real Estate | Hub" />
   <meta property="og:description" content="Buy • Sell • Lease • Investment Properties • Off-market opportunities • Deal flow." />
   <meta property="og:url" content="https://www.squarebidness.com/mdw/" />
-  <meta property="og:image" content="https://www.squarebidness.com/mdw/assets/mdw_meta_commercial_1200x630.jpg" /> 
+  <meta property="og:image" content="https://www.squarebidness.com/mdw/assets/mdw_meta_commercial_1200x630.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="MDW Investments LLC — Commercial Real Estate" />
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="MDW Investments LLC — Commercial Real Estate | Hub" />
   <meta name="twitter:description" content="Buy • Sell • Lease • Investment Properties • Off-market opportunities • Deal flow." />
-  <meta name="twitter:image" content="https://www.squarebidness.com/mdw/assets//mdw_meta_commercial_1200x630.jpg" /> 
+  <meta name="twitter:image" content="https://www.squarebidness.com/mdw/assets/mdw_meta_commercial_1200x630.jpg" />
 
-  <!-- Site-wide analytics (required) -->
+  <!-- Site-wide analytics -->
   <script defer src="/scripts/sb-analytics.js"></script>
-  <!-- GA4 (site-wide) -->
   <script defer src="/scripts/ga.js"></script>
-  
+
   <style>
     :root{
       --bg:#0b0b0b;
@@ -226,12 +228,15 @@
         </div>
 
         <div class="bd">
-          <form method="post" action="https://script.google.com/macros/s/AKfycbwcoofcVjFMRAAeOZ3DjDqJp4SEkuoFYnVS6j3foCGEpqpZRUcNqfHqPx5n7faXUKhk/exec" novalidate>
+          <!-- ✅ IMPORTANT: point to your NEW deployed Apps Script URL (unified leads) -->
+          <form method="post" action="https://script.google.com/macros/s/AKfycbxtNBPIjg8rVnAf5JYQKkhjQC-YhYFqI4ilXamWP-C_J4mSEmdYqIN5uLXwrPR_zVVo/exec" novalidate>
             <!-- Routing / system -->
             <input type="hidden" name="form_name" value="mdw" />
             <input type="hidden" name="lane" value="commercial" />
             <input type="hidden" name="partner" value="mdw_investments" />
             <input type="hidden" name="property" value="" />
+
+            <!-- URL-only source (NO carryover) -->
             <input type="hidden" id="source" name="_source" value="mdw_site" />
             <input type="hidden" id="sourcePage" name="source_page" value="" />
 
@@ -371,50 +376,42 @@
 
   <script>
     (function(){
-      // Set source_page (full URL) + _source from query/session
       var sourceEl = document.getElementById("source");
       var sourcePageEl = document.getElementById("sourcePage");
 
-      function setSourcePage(){
-        try{
-          var u = new URL(window.location.href);
-          var full = u.toString();
-          if (sourcePageEl) sourcePageEl.value = full;
-          sessionStorage.setItem("mdw_source_page", full);
-        }catch(e){
-          var stored = sessionStorage.getItem("mdw_source_page") || "";
-          if (sourcePageEl) sourcePageEl.value = stored;
-        }
-      }
-
-      function getSource(){
+      // URL-only _source (NO carryover) to prevent cross-page bleeding
+      function getSourceFromUrlOnly(){
         try{
           var url = new URL(window.location.href);
           var s =
             url.searchParams.get("_source") ||
             url.searchParams.get("utm_source") ||
             url.searchParams.get("source");
-          var stored = sessionStorage.getItem("mdw_source");
-          var finalSource =
-            (s && s.trim()) ? s.trim() :
-            (stored && stored.trim()) ? stored.trim() :
-            "mdw_site";
-          sessionStorage.setItem("mdw_source", finalSource);
-          return finalSource;
+          return (s && s.trim()) ? s.trim() : "mdw_site";
         }catch(e){
           return "mdw_site";
         }
       }
 
+      function setSourcePage(){
+        try{
+          var u = new URL(window.location.href);
+          var full = u.toString();
+          if (sourcePageEl) sourcePageEl.value = full;
+        }catch(e){
+          if (sourcePageEl) sourcePageEl.value = window.location.pathname;
+        }
+      }
+
+      // init
       setSourcePage();
-      var src = getSource();
-      if (sourceEl) sourceEl.value = src;
+      if (sourceEl) sourceEl.value = getSourceFromUrlOnly();
 
       // Basic required validation
       var form = document.querySelector("form");
       form && form.addEventListener("submit", function(ev){
         setSourcePage();
-        if (sourceEl) sourceEl.value = getSource();
+        if (sourceEl) sourceEl.value = getSourceFromUrlOnly();
 
         var required = form.querySelectorAll("[required]");
         for (var i=0; i<required.length; i++){
