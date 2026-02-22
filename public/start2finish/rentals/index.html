@@ -1,4 +1,4 @@
-<!-- /public/start2finish/rentals/index.html -->
+<!-- /public/start2finish/rentals/index.html (PASTE READY — Unified Google Sheet Logger + URL-only _source) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,7 +13,7 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="format-detection" content="telephone=no" />
 
-  <meta name="sb:build" content="v20260111-start2finish-rentals" />
+  <meta name="sb:build" content="v20260221-start2finish-rentals-unified" />
 
   <!-- Open Graph (RENTALS image) -->
   <meta property="og:type" content="website" />
@@ -94,24 +94,33 @@
     </section>
 
     <section id="inquiry" class="grid" style="margin-top:18px;grid-template-columns:1fr .9fr;">
-      <form class="form" method="post" action="https://formsubmit.co/start2finish@squarebidness.com" novalidate>
+      <form class="form"
+            method="post"
+            action="https://script.google.com/macros/s/AKfycbxtNBPIjg8rVnAf5JYQKkhjQC-YhYFqI4ilXamWP-C_J4mSEmdYqIN5uLXwrPR_zVVo/exec"
+            novalidate>
         <h2>Rental Inquiry</h2>
-        <p class="note">This routes directly to the rentals lane.</p>
+        <p class="note">This logs to your Leads tab and routes clean.</p>
 
+        <!-- SYSTEM / ROUTING -->
+        <input type="hidden" name="form_name" value="start2finish" />
+        <input type="hidden" name="lane" value="start2finish" />
         <input id="subject" type="hidden" name="_subject" value="Start2Finish — Rental / Availability Inquiry" />
         <input type="hidden" name="_captcha" value="false" />
         <input type="hidden" name="_template" value="table" />
         <input type="hidden" name="_next" value="https://www.squarebidness.com/start2finish/thank-you/?type=rental" />
-        <input type="hidden" name="_source" value="start2finish_sell" />
 
+        <!-- ✅ URL-only source + source_page -->
+        <input id="source" type="hidden" name="_source" value="s2f_rentals" />
+        <input id="sourcePage" type="hidden" name="source_page" value="" />
 
         <div class="row">
           <div>
             <label for="inquiryType">Inquiry Type</label>
             <select id="inquiryType" name="inquiry_type" required>
+              <option value="rental" selected>I’m looking for a rental / available property</option>
               <option value="estimate">I need work / estimate</option>
               <option value="sell">I want to sell my house</option>
-              <option value="rental">I’m looking for a rental / available property</option>
+              <option value="buy">I’m looking to buy a house</option>
             </select>
           </div>
           <div>
@@ -131,10 +140,37 @@
           </div>
         </div>
 
+        <!-- Optional email (your sheet supports it) -->
         <div class="row">
           <div>
-            <label for="budget">Monthly Budget (optional)</label>
-            <input id="budget" name="monthly_budget" type="text" placeholder="e.g., $900–$1,200" />
+            <label for="email">Email (optional)</label>
+            <input id="email" name="email" type="email" placeholder="you@example.com" autocomplete="email" />
+          </div>
+          <div>
+            <label for="timeline">Timeline (optional)</label>
+            <select id="timeline" name="timeline">
+              <option value="">Choose one…</option>
+              <option>ASAP</option>
+              <option>1–2 weeks</option>
+              <option>3–4 weeks</option>
+              <option>1–3 months</option>
+              <option>Just gathering info</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Sheet column compatibility -->
+        <input id="service" name="service" type="hidden" value="Rental / Availability" />
+        <!-- Budget should land in "Budget" column -->
+        <input type="hidden" name="budget" id="budgetShim" value="" />
+        <!-- Use beds/baths column directly -->
+        <input type="hidden" name="property_type" value="" />
+
+        <div class="row">
+          <div>
+            <label for="monthlyBudget">Monthly Budget (optional)</label>
+            <input id="monthlyBudget" name="monthly_budget" type="text" placeholder="e.g., $900–$1,200" />
+            <p class="note" style="margin-top:6px;">We’ll log this into the main <strong>Budget</strong> column too.</p>
           </div>
           <div>
             <label for="beds_baths">Beds/Baths (optional)</label>
@@ -178,8 +214,38 @@
     document.getElementById("year").textContent = new Date().getFullYear();
 
     (function () {
+      const form = document.querySelector("form.form");
+      if (!form) return;
+
       const inquiry = document.getElementById("inquiryType");
       const subject = document.getElementById("subject");
+      const sourceEl = document.getElementById("source");
+      const sourcePageEl = document.getElementById("sourcePage");
+
+      const monthlyBudget = document.getElementById("monthlyBudget");
+      const budgetShim = document.getElementById("budgetShim");
+
+      function getSourceUrlOnly(){
+        try{
+          const u = new URL(window.location.href);
+          const s =
+            u.searchParams.get("_source") ||
+            u.searchParams.get("utm_source") ||
+            u.searchParams.get("source");
+          return (s && s.trim()) ? s.trim() : "s2f_rentals";
+        }catch(e){
+          return "s2f_rentals";
+        }
+      }
+
+      function setSourcePage(){
+        try{
+          const u = new URL(window.location.href);
+          if (sourcePageEl) sourcePageEl.value = u.toString();
+        }catch(e){
+          if (sourcePageEl) sourcePageEl.value = window.location.pathname;
+        }
+      }
 
       // Pre-select RENTAL
       if (inquiry) inquiry.value = "rental";
@@ -187,13 +253,43 @@
       function applyRouting() {
         const v = inquiry?.value || "rental";
         if (!subject) return;
+
         if (v === "sell") subject.value = "Start2Finish — Sell Your House Inquiry";
         else if (v === "rental") subject.value = "Start2Finish — Rental / Availability Inquiry";
+        else if (v === "buy") subject.value = "Start2Finish — Home Buyer Inquiry";
         else subject.value = "Start2Finish — Estimate Request";
       }
 
+      function syncBudget(){
+        // Put monthly_budget into the main "budget" column too (your Sheet expects "budget")
+        if (budgetShim) budgetShim.value = (monthlyBudget && String(monthlyBudget.value || "").trim()) ? String(monthlyBudget.value).trim() : "";
+      }
+
+      // init
+      if (sourceEl) sourceEl.value = getSourceUrlOnly();
+      setSourcePage();
       applyRouting();
+      syncBudget();
+
       inquiry?.addEventListener("change", applyRouting);
+      monthlyBudget?.addEventListener("input", syncBudget);
+
+      form.addEventListener("submit", (e) => {
+        if (sourceEl) sourceEl.value = getSourceUrlOnly();
+        setSourcePage();
+        applyRouting();
+        syncBudget();
+
+        const required = form.querySelectorAll("[required]");
+        for (const el of required) {
+          if (!String(el.value || "").trim()) {
+            alert("Please complete required fields.");
+            el.focus?.();
+            e.preventDefault();
+            return;
+          }
+        }
+      });
     })();
   </script>
 </body>
