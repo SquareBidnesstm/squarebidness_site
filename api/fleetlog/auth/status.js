@@ -11,12 +11,12 @@ function tok(){
   return clean(process.env.UPSTASH_REDIS_REST_TOKEN);
 }
 
-// Always POST to Upstash, args are JSON array
-async function upstashPost(path, argsArray){
+// Always POST to Upstash command endpoints, args are JSON array
+async function upstashCmd(command, argsArray){
   const b = base(), t = tok();
   if(!b || !t) throw new Error("Missing Upstash env vars");
 
-  const r = await fetch(`${b}${path}`, {
+  const r = await fetch(`${b}/${command}`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${t}`,
@@ -34,7 +34,7 @@ async function upstashPost(path, argsArray){
 }
 
 async function uget(key){
-  const j = await upstashPost(`/get/${encodeURIComponent(key)}`, []);
+  const j = await upstashCmd("get", [String(key)]);
   return j?.result ?? null;
 }
 
