@@ -1,4 +1,4 @@
-<!-- /public/puffs/index.html -->
+<!-- /public/puffs/index.html (PASTE READY — single SMS consent block + JS gate) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -13,7 +13,7 @@
   <meta name="format-detection" content="telephone=no" />
 
   <!-- Build stamp -->
-  <meta name="sb:build" content="v20260213-puffs-index-sms-consent-cta" />
+  <meta name="sb:build" content="v20260223-puffs-index-sms-consent-cta-clean" />
 
   <!-- PWA -->
   <link rel="manifest" href="/puffs/manifest.webmanifest" />
@@ -40,7 +40,6 @@
   <meta name="twitter:title" content="Puff’s Smokehouse — Order Pickup" />
   <meta name="twitter:description" content="Order online, pickup on arrival. Louisiana." />
   <meta name="twitter:image" content="https://www.squarebidness.com/puffs/assets/puffs_hero_1200x630.jpg" />
-
 
   <style>
     :root{
@@ -169,9 +168,10 @@
       border-radius:12px;
       background:#0f0f0f;
       margin-top:2px;
+      cursor:pointer;
     }
-    .smsConsent input{ width:auto; margin-top:3px; }
-    .smsConsent span{ font-size:.86rem; line-height:1.35; color:#d8d8d8; }
+    .smsConsent input{ width:auto; margin-top:3px; transform:scale(1.15); }
+    .smsConsent span{ font-size:.9rem; line-height:1.35; color:#d6d6d6; }
     .smsConsent a{ color:#fff; text-decoration:underline; }
   </style>
 
@@ -202,6 +202,7 @@
     ]
   }
   </script>
+
   <!-- GA4 (site-wide) -->
   <script defer src="/scripts/ga.js"></script>
   <script defer src="/scripts/sb-analytics.js"></script>
@@ -286,25 +287,35 @@
               <option>Top of the hour</option>
             </select>
           </label>
+
           <label>Your name <input id="custName" placeholder="Name"></label>
 
-          <label>Phone <input id="custPhone" placeholder="(xxx) xxx-xxxx"></label>
+          <label>Phone
+            <input id="custPhone" placeholder="(xxx) xxx-xxxx" inputmode="tel" autocomplete="tel" />
+          </label>
 
           <!-- SMS Consent (CTA proof) -->
           <label class="smsConsent" for="smsConsent" aria-label="SMS Consent">
             <input type="checkbox" id="smsConsent" name="smsConsent" value="yes" />
-
             <span>
-              I agree to receive transactional SMS messages from Puff’s Smokehouse related to my order, including payment confirmations,
-              order status updates, and pickup notifications. Message frequency varies. Message and data rates may apply.
-              Reply STOP to opt out. Reply HELP for assistance.
+              I agree to receive <strong>transactional SMS messages</strong> from Puff’s Smokehouse related to my order,
+              including payment confirmations, order status updates, and pickup notifications.
+              Message frequency varies. Message and data rates may apply.
+              Reply <strong>STOP</strong> to opt out. Reply <strong>HELP</strong> for assistance.
               <br />
-              <a href="/puffs/privacy/">Privacy Policy</a> ·
+              <span class="tiny" style="display:block;margin-top:6px;opacity:.9">
+                Phone number is optional. If you do not opt in, we will not text you.
+              </span>
+              <span style="opacity:.6"> · </span>
+              <a href="/puffs/privacy/">Privacy Policy</a>
+              <span style="opacity:.6"> · </span>
               <a href="/puffs/terms/">SMS Terms &amp; Conditions</a>
             </span>
           </label>
 
-          <label>Notes (no onions, extra sauce, etc.) <textarea id="custNotes" rows="3"></textarea></label>
+          <label>Notes (no onions, extra sauce, etc.)
+            <textarea id="custNotes" rows="3"></textarea>
+          </label>
         </div>
 
         <div class="order-actions">
