@@ -19,23 +19,18 @@
 <script defer src="/scripts/partials.js"></script>
 
 <style>
-#site-header{
-  position:absolute;
-  width:100%;
-  z-index:20;
-  background:transparent !important;
-  border:none !important;
-}
+#site-header{min-height:72px;}
+#site-footer{min-height:120px;}
 
-.hero-wrapper{
+.hero-video-wrapper{
   position:relative;
+  width:100%;
   height:100vh;
   overflow:hidden;
   background:#000;
 }
 
-/* Slow cinematic zoom */
-.hero-wrapper video{
+.hero-video-wrapper video{
   position:absolute;
   top:50%;
   left:50%;
@@ -43,58 +38,39 @@
   min-height:100%;
   width:auto;
   height:auto;
-  transform:translate(-50%, -50%) scale(1);
+  transform:translate(-50%, -50%);
   object-fit:cover;
-  animation:slowZoom 18s ease-in-out infinite alternate;
-}
-
-@keyframes slowZoom{
-  from { transform:translate(-50%, -50%) scale(1); }
-  to { transform:translate(-50%, -50%) scale(1.08); }
-}
-
-/* Film grain overlay */
-.hero-wrapper::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background-image:url("data:image/svg+xml,\
-  <svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'>\
-  <filter id='noise'><feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/></filter>\
-  <rect width='100%' height='100%' filter='url(%23noise)' opacity='0.05'/></svg>");
-  pointer-events:none;
-  mix-blend-mode:overlay;
 }
 
 .hero-overlay{
   position:absolute;
   inset:0;
-  background:linear-gradient(to bottom, rgba(0,0,0,.2), rgba(0,0,0,.65));
+  background:linear-gradient(to bottom, rgba(0,0,0,.25), rgba(0,0,0,.65));
   display:flex;
   align-items:center;
   justify-content:center;
   text-align:center;
-  padding:2rem;
+  padding:1.5rem;
 }
 
 .hero-content{
   color:#fff;
-  max-width:900px;
+  max-width:800px;
   opacity:0;
   transform:translateY(30px);
-  animation:fadeUp 2s ease forwards;
+  animation:fadeUp 1.8s ease forwards;
 }
 
 .hero-content h1{
-  font-size:clamp(2.2rem,5vw,4.5rem);
+  font-size:clamp(2rem,5vw,4rem);
   font-weight:400;
   letter-spacing:.08em;
   margin-bottom:1rem;
 }
 
 .hero-content p{
-  font-size:.9rem;
-  letter-spacing:.25em;
+  font-size:1rem;
+  letter-spacing:.18em;
   text-transform:uppercase;
   opacity:.85;
 }
@@ -106,9 +82,9 @@
   }
 }
 
-/* Scroll reveal section */
+/* Scroll section */
 .section-next{
-  padding:7rem 1.5rem;
+  padding:6rem 1.5rem;
   text-align:center;
   background:#020617;
   opacity:0;
@@ -121,16 +97,28 @@
   transform:translateY(0);
 }
 
+.section-next h2{
+  font-weight:400;
+  letter-spacing:.1em;
+  margin-bottom:1rem;
+}
+
+.section-next p{
+  max-width:600px;
+  margin:0 auto;
+  opacity:.8;
+}
+
 .btn-outline{
   display:inline-block;
   margin-top:2rem;
-  padding:.8rem 1.6rem;
+  padding:.8rem 1.4rem;
   border:1px solid #fff;
   border-radius:999px;
   text-decoration:none;
   color:#fff;
-  font-size:.85rem;
-  letter-spacing:.2em;
+  font-size:.9rem;
+  letter-spacing:.15em;
   text-transform:uppercase;
   transition:all .3s ease;
 }
@@ -146,17 +134,10 @@
 
 <div id="site-header"></div>
 
-<section class="hero-wrapper">
-
-  <!-- Video -->
+<section class="hero-video-wrapper">
   <video autoplay muted loop playsinline preload="auto">
     <source src="/assets/video/ladies-teaser.mp4" type="video/mp4" />
   </video>
-
-  <!-- Optional Licensed Piano Audio -->
-  <audio id="bgMusic" loop>
-    <source src="/assets/audio/ladies-piano.mp3" type="audio/mpeg">
-  </audio>
 
   <div class="hero-overlay">
     <div class="hero-content">
@@ -164,22 +145,21 @@
       <p>Launching Soon</p>
     </div>
   </div>
-
 </section>
 
 <section class="section-next" id="nextSection">
-  <h2 style="font-weight:400; letter-spacing:.1em;">Designed With Intention</h2>
-  <p style="max-width:600px; margin:0 auto; opacity:.8;">
-    Elevated essentials. Controlled drops.
-    Built on presence, precision, and power.
+  <h2>Designed With Intention</h2>
+  <p>
+    Elevated essentials. Controlled drops.  
+    Built on principles, presence, and power.
   </p>
+
   <a href="/connect/" class="btn-outline">Stay Connected</a>
 </section>
 
 <div id="site-footer"></div>
 
 <script>
-/* Scroll reveal */
 const observer = new IntersectionObserver(entries=>{
   entries.forEach(entry=>{
     if(entry.isIntersecting){
@@ -187,16 +167,8 @@ const observer = new IntersectionObserver(entries=>{
     }
   });
 },{threshold:.2});
-observer.observe(document.getElementById('nextSection'));
 
-/* Soft piano activation after interaction (required for autoplay policy) */
-document.addEventListener("click", function(){
-  const audio = document.getElementById("bgMusic");
-  if(audio.paused){
-    audio.volume = 0.3;
-    audio.play().catch(()=>{});
-  }
-},{ once:true });
+observer.observe(document.getElementById('nextSection'));
 </script>
 
 </body>
