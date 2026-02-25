@@ -2,124 +2,174 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Ladies — Square Bidness</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Ladies — Square Bidness</title>
 
-  <link rel="canonical" href="https://www.squarebidness.com/ladies/" />
-  <meta name="description" content="Square Bidness Ladies — coming soon." />
-  <meta name="robots" content="index,follow" />
-  <meta name="theme-color" content="#000000" />
-  <meta name="color-scheme" content="dark light" />
+<link rel="canonical" href="https://www.squarebidness.com/ladies/" />
+<meta name="description" content="Square Bidness Ladies — Launching Soon." />
+<meta name="theme-color" content="#000000" />
+<meta name="color-scheme" content="dark light" />
 
-  <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="Square Bidness" />
-  <meta property="og:locale" content="en_US" />
-  <meta property="og:title" content="Ladies — Square Bidness" />
-  <meta property="og:description" content="Square Bidness Ladies — coming soon." />
-  <meta property="og:url" content="https://www.squarebidness.com/ladies/" />
-  <meta property="og:image" content="https://www.squarebidness.com/assets/og-default-1200x630.jpg" />
+<link rel="preload" href="/styles/style.css" as="style" />
+<link rel="stylesheet" href="/styles/style.css" />
 
-  <link rel="preload" href="/styles/style.css" as="style" />
-  <link rel="stylesheet" href="/styles/style.css" />
+<script defer src="/scripts/ga.js"></script>
+<script defer src="/scripts/sb-analytics.js"></script>
+<script defer src="/scripts/partials.js"></script>
 
-  <script defer src="/scripts/ga.js"></script>
-  <script defer src="/scripts/sb-analytics.js"></script>
-  <script defer src="/scripts/partials.js"></script>
+<style>
+#site-header{min-height:72px;}
+#site-footer{min-height:120px;}
 
-  <style>
-    #site-header{min-height:72px;}
-    #site-footer{min-height:120px;}
+.hero-video-wrapper{
+  position:relative;
+  width:100%;
+  height:100vh;
+  overflow:hidden;
+  background:#000;
+}
 
-    .wrap{padding:2.2rem 0 2.4rem;}
-    .panel{
-      background:#020617;
-      border-radius:18px;
-      border:1px solid #0f172a;
-      padding:1.1rem 1.1rem 1.2rem;
-      box-shadow:0 18px 45px rgba(15,23,42,.55);
-    }
+.hero-video-wrapper video{
+  position:absolute;
+  top:50%;
+  left:50%;
+  min-width:100%;
+  min-height:100%;
+  width:auto;
+  height:auto;
+  transform:translate(-50%, -50%);
+  object-fit:cover;
+}
 
-    .pill{
-      display:inline-flex;align-items:center;gap:.45rem;
-      padding:.22rem .6rem;border-radius:999px;
-      border:1px solid #1f2937;
-      font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
-      color:#e5e7eb;background:#020617;
-      margin-bottom:.7rem;
-    }
-    .dot{width:.45rem;height:.45rem;border-radius:999px;background:#ec4899;}
+.hero-overlay{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(to bottom, rgba(0,0,0,.25), rgba(0,0,0,.65));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:1.5rem;
+}
 
-    .video-box{
-      border-radius:16px;
-      overflow:hidden;
-      border:1px solid #111827;
-      background:#000;
-    }
-    video{
-      width:100%;
-      height:auto;
-      display:block;
-    }
+.hero-content{
+  color:#fff;
+  max-width:800px;
+  opacity:0;
+  transform:translateY(30px);
+  animation:fadeUp 1.8s ease forwards;
+}
 
-    .muted{opacity:.85;max-width:62ch;margin:.75rem 0 0;}
-    .row{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1rem;}
-    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.35rem;cursor:pointer;text-decoration:none;border-radius:999px;}
-    .btn--outline{
-      border:1px solid #4b5563;background:transparent;color:#e5e7eb;
-      padding:.65rem 1rem;font-weight:900;font-size:.95rem;
-    }
-    .btn--outline:hover{border-color:#9ca3af;}
-  </style>
+.hero-content h1{
+  font-size:clamp(2rem,5vw,4rem);
+  font-weight:400;
+  letter-spacing:.08em;
+  margin-bottom:1rem;
+}
+
+.hero-content p{
+  font-size:1rem;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  opacity:.85;
+}
+
+@keyframes fadeUp{
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+/* Scroll section */
+.section-next{
+  padding:6rem 1.5rem;
+  text-align:center;
+  background:#020617;
+  opacity:0;
+  transform:translateY(40px);
+  transition:all .8s ease;
+}
+
+.section-next.visible{
+  opacity:1;
+  transform:translateY(0);
+}
+
+.section-next h2{
+  font-weight:400;
+  letter-spacing:.1em;
+  margin-bottom:1rem;
+}
+
+.section-next p{
+  max-width:600px;
+  margin:0 auto;
+  opacity:.8;
+}
+
+.btn-outline{
+  display:inline-block;
+  margin-top:2rem;
+  padding:.8rem 1.4rem;
+  border:1px solid #fff;
+  border-radius:999px;
+  text-decoration:none;
+  color:#fff;
+  font-size:.9rem;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  transition:all .3s ease;
+}
+
+.btn-outline:hover{
+  background:#fff;
+  color:#000;
+}
+</style>
 </head>
 
-<body class="theme-dark" id="top">
-  <div id="site-header" aria-busy="true" style="content-visibility:auto;contain-intrinsic-size:80px;"></div>
+<body class="theme-dark">
 
-  <main class="section" role="main">
-    <div class="container wrap">
-      <section class="panel" aria-label="Ladies teaser">
-        <p class="pill"><span class="dot"></span>Ladies — Coming Soon</p>
-        <h1 class="page-title">Square Bidness Ladies</h1>
+<div id="site-header"></div>
 
-        <div class="video-box" style="margin-top:1rem;">
-  <video controls playsinline preload="metadata" poster="/assets/og-default-1200x630.jpg">
+<section class="hero-video-wrapper">
+  <video autoplay muted loop playsinline preload="auto">
     <source src="/assets/video/ladies-teaser.mp4" type="video/mp4" />
-    Sorry — your browser doesn’t support this video.
   </video>
-</div>
 
-        <p class="muted">
-          New looks building now. Tap Connect for partnerships, or hit Socials to stay tapped in.
-        </p>
-
-        <div class="row">
-          <a class="btn btn--outline" href="/connect/" data-sb="ladies-back-connect">Connect</a>
-          <a class="btn btn--outline" href="/social/" data-sb="ladies-socials">Socials</a>
-        </div>
-      </section>
+  <div class="hero-overlay">
+    <div class="hero-content">
+      <h1>Square Bidness Ladies</h1>
+      <p>Launching Soon</p>
     </div>
-  </main>
+  </div>
+</section>
 
-  <div id="site-footer" aria-busy="true" style="content-visibility:auto;contain-intrinsic-size:140px;"></div>
+<section class="section-next" id="nextSection">
+  <h2>Designed With Intention</h2>
+  <p>
+    Elevated essentials. Controlled drops.  
+    Built on principles, presence, and power.
+  </p>
 
-  <script>
-    document.addEventListener("click", (e) => {
-      const a = e.target?.closest?.("a[data-sb]");
-      if (!a) return;
-      const label = a.getAttribute("data-sb") || a.getAttribute("href") || "(unknown)";
-      try {
-        if (typeof window.sbTrack === "function") {
-          window.sbTrack("sb_click", { brand:"squarebidness", page:"/ladies/", component:"ladies", action:"click", label, href:a.getAttribute("href")||"" });
-          return;
-        }
-      } catch (_) {}
-      try {
-        if (typeof window.gtag === "function") {
-          window.gtag("event","sb_click",{ brand:"squarebidness", page_path:"/ladies/", event_category:"ladies", event_label:label });
-        }
-      } catch (_) {}
-    });
-  </script>
+  <a href="/connect/" class="btn-outline">Stay Connected</a>
+</section>
+
+<div id="site-footer"></div>
+
+<script>
+const observer = new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      entry.target.classList.add('visible');
+    }
+  });
+},{threshold:.2});
+
+observer.observe(document.getElementById('nextSection'));
+</script>
+
 </body>
 </html>
