@@ -1,175 +1,226 @@
-<!-- /public/ladies/index.html -->
+<!-- /public/ladies/index.html (MOBILE-SAFE LUXURY) -->
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Ladies — Square Bidness</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1, viewport-fit=cover" />
+  <title>Ladies — Square Bidness</title>
 
-<link rel="canonical" href="https://www.squarebidness.com/ladies/" />
-<meta name="description" content="Square Bidness Ladies — Launching Soon." />
-<meta name="theme-color" content="#000000" />
-<meta name="color-scheme" content="dark light" />
+  <link rel="canonical" href="https://www.squarebidness.com/ladies/" />
+  <meta name="description" content="Square Bidness Ladies — Launching Soon." />
+  <meta name="robots" content="index,follow" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="color-scheme" content="dark light" />
 
-<link rel="preload" href="/styles/style.css" as="style" />
-<link rel="stylesheet" href="/styles/style.css" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Square Bidness" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:title" content="Ladies — Square Bidness" />
+  <meta property="og:description" content="Square Bidness Ladies — Launching Soon." />
+  <meta property="og:url" content="https://www.squarebidness.com/ladies/" />
+  <meta property="og:image" content="https://www.squarebidness.com/assets/og-default-1200x630.jpg" />
 
-<script defer src="/scripts/ga.js"></script>
-<script defer src="/scripts/sb-analytics.js"></script>
-<script defer src="/scripts/partials.js"></script>
+  <link rel="preload" href="/styles/style.css" as="style" />
+  <link rel="stylesheet" href="/styles/style.css" />
 
-<style>
-#site-header{min-height:72px;}
-#site-footer{min-height:120px;}
+  <script defer src="/scripts/ga.js"></script>
+  <script defer src="/scripts/sb-analytics.js"></script>
+  <script defer src="/scripts/partials.js"></script>
 
-.hero-video-wrapper{
-  position:relative;
-  width:100%;
-  height:100vh;
-  overflow:hidden;
-  background:#000;
-}
+  <style>
+    /* CLS guards for injected partials */
+    #site-header{min-height:72px;}
+    #site-footer{min-height:120px;}
 
-.hero-video-wrapper video{
-  position:absolute;
-  top:50%;
-  left:50%;
-  min-width:100%;
-  min-height:100%;
-  width:auto;
-  height:auto;
-  transform:translate(-50%, -50%);
-  object-fit:cover;
-}
+    /* Transparent header only on this page */
+    #site-header{
+      position: absolute;
+      left: 0; right: 0; top: 0;
+      z-index: 30;
+      background: transparent !important;
+      border: 0 !important;
+    }
 
-.hero-overlay{
-  position:absolute;
-  inset:0;
-  background:linear-gradient(to bottom, rgba(0,0,0,.25), rgba(0,0,0,.65));
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  padding:1.5rem;
-}
+    /* iOS-safe hero height */
+    .hero {
+      position: relative;
+      min-height: 100svh; /* modern mobile viewport */
+      min-height: 100vh;  /* fallback */
+      background: #000;
+      overflow: hidden;
+    }
 
-.hero-content{
-  color:#fff;
-  max-width:800px;
-  opacity:0;
-  transform:translateY(30px);
-  animation:fadeUp 1.8s ease forwards;
-}
+    /* We animate a wrapper instead of the video itself for iOS stability */
+    .hero-media {
+      position: absolute;
+      inset: 0;
+      transform: scale(1);
+      animation: sbSlowZoom 18s ease-in-out infinite alternate;
+      will-change: transform;
+    }
+    @keyframes sbSlowZoom {
+      from { transform: scale(1); }
+      to   { transform: scale(1.06); }
+    }
 
-.hero-content h1{
-  font-size:clamp(2rem,5vw,4rem);
-  font-weight:400;
-  letter-spacing:.08em;
-  margin-bottom:1rem;
-}
+    .hero video{
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display:block;
+    }
 
-.hero-content p{
-  font-size:1rem;
-  letter-spacing:.18em;
-  text-transform:uppercase;
-  opacity:.85;
-}
+    /* Soft gradient + contrast overlay */
+    .hero::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: linear-gradient(to bottom, rgba(0,0,0,.12), rgba(0,0,0,.62));
+      z-index: 10;
+      pointer-events:none;
+    }
 
-@keyframes fadeUp{
-  to{
-    opacity:1;
-    transform:translateY(0);
-  }
-}
+    /* Lightweight film grain (no SVG turbulence) */
+    .hero::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      z-index: 11;
+      pointer-events:none;
+      opacity:.10;
+      background-image:
+        radial-gradient(rgba(255,255,255,.06) 1px, transparent 1px);
+      background-size: 3px 3px;
+      mix-blend-mode: overlay;
+    }
 
-/* Scroll section */
-.section-next{
-  padding:6rem 1.5rem;
-  text-align:center;
-  background:#020617;
-  opacity:0;
-  transform:translateY(40px);
-  transition:all .8s ease;
-}
+    .hero-content{
+      position: relative;
+      z-index: 20;
+      height: 100%;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: calc(84px + env(safe-area-inset-top)) 1.25rem 2rem;
+    }
 
-.section-next.visible{
-  opacity:1;
-  transform:translateY(0);
-}
+    .hero-text{
+      max-width: 900px;
+      opacity: 0;
+      transform: translateY(18px);
+      animation: sbFadeUp 1.8s ease forwards;
+    }
+    @keyframes sbFadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
 
-.section-next h2{
-  font-weight:400;
-  letter-spacing:.1em;
-  margin-bottom:1rem;
-}
+    .hero-title{
+      font-size: clamp(2.1rem, 6vw, 4.2rem);
+      font-weight: 500;
+      letter-spacing: .08em;
+      margin: 0 0 .8rem;
+    }
 
-.section-next p{
-  max-width:600px;
-  margin:0 auto;
-  opacity:.8;
-}
+    .hero-sub{
+      margin: 0;
+      font-size: .9rem;
+      letter-spacing: .28em;
+      text-transform: uppercase;
+      opacity: .86;
+    }
 
-.btn-outline{
-  display:inline-block;
-  margin-top:2rem;
-  padding:.8rem 1.4rem;
-  border:1px solid #fff;
-  border-radius:999px;
-  text-decoration:none;
-  color:#fff;
-  font-size:.9rem;
-  letter-spacing:.15em;
-  text-transform:uppercase;
-  transition:all .3s ease;
-}
+    /* Next section */
+    .next{
+      padding: 6rem 1.25rem 6.5rem;
+      background: #020617;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity .8s ease, transform .8s ease;
+    }
+    .next.visible{ opacity:1; transform: translateY(0); }
 
-.btn-outline:hover{
-  background:#fff;
-  color:#000;
-}
-</style>
+    .next h2{
+      font-weight: 500;
+      letter-spacing: .10em;
+      margin: 0 0 .9rem;
+    }
+    .next p{
+      max-width: 620px;
+      margin: 0 auto;
+      opacity: .82;
+    }
+
+    .btn-outline{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      margin-top: 1.9rem;
+      padding: .8rem 1.4rem;
+      border: 1px solid rgba(255,255,255,.9);
+      border-radius: 999px;
+      text-decoration:none;
+      color:#fff;
+      font-size:.85rem;
+      letter-spacing:.20em;
+      text-transform: uppercase;
+      transition: background .25s ease, color .25s ease, border-color .25s ease;
+    }
+    .btn-outline:hover{
+      background:#fff;
+      color:#000;
+      border-color:#fff;
+    }
+  </style>
 </head>
 
 <body class="theme-dark">
+  <div id="site-header" aria-busy="true" style="content-visibility:auto;contain-intrinsic-size:80px;"></div>
 
-<div id="site-header"></div>
-
-<section class="hero-video-wrapper">
-  <video autoplay muted loop playsinline preload="auto">
-    <source src="/assets/video/ladies-teaser.mp4" type="video/mp4" />
-  </video>
-
-  <div class="hero-overlay">
-    <div class="hero-content">
-      <h1>Square Bidness Ladies</h1>
-      <p>Launching Soon</p>
+  <section class="hero" aria-label="Ladies hero video">
+    <div class="hero-media" aria-hidden="true">
+      <video autoplay muted loop playsinline preload="metadata" poster="/assets/og-default-1200x630.jpg">
+        <source src="/assets/video/ladies-teaser.mp4" type="video/mp4" />
+      </video>
     </div>
-  </div>
-</section>
 
-<section class="section-next" id="nextSection">
-  <h2>Designed With Intention</h2>
-  <p>
-    Elevated essentials. Controlled drops.  
-    Built on principles, presence, and power.
-  </p>
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1 class="hero-title">Square Bidness Ladies</h1>
+        <p class="hero-sub">Launching Soon</p>
+      </div>
+    </div>
+  </section>
 
-  <a href="/connect/" class="btn-outline">Stay Connected</a>
-</section>
+  <section class="next" id="nextSection">
+    <h2>Designed With Intention</h2>
+    <p>Elevated essentials. Controlled drops. Built on presence, precision, and power.</p>
+    <a class="btn-outline" href="/connect/" data-sb="ladies-connect">Stay Connected</a>
+  </section>
 
-<div id="site-footer"></div>
+  <div id="site-footer" aria-busy="true" style="content-visibility:auto;contain-intrinsic-size:140px;"></div>
 
-<script>
-const observer = new IntersectionObserver(entries=>{
-  entries.forEach(entry=>{
-    if(entry.isIntersecting){
-      entry.target.classList.add('visible');
-    }
-  });
-},{threshold:.2});
+  <script>
+    // Scroll reveal
+    const el = document.getElementById("nextSection");
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) entry.target.classList.add("visible");
+      });
+    }, { threshold: 0.2 });
+    io.observe(el);
 
-observer.observe(document.getElementById('nextSection'));
-</script>
-
+    // Simple click tracking hook (optional)
+    document.addEventListener("click", (e) => {
+      const a = e.target?.closest?.("a[data-sb]");
+      if (!a) return;
+      const label = a.getAttribute("data-sb") || a.getAttribute("href") || "(unknown)";
+      try {
+        if (typeof window.sbTrack === "function") {
+          window.sbTrack("sb_click", { brand:"squarebidness", page:"/ladies/", component:"ladies", action:"click", label, href:a.getAttribute("href")||"" });
+        }
+      } catch (_) {}
+    });
+  </script>
 </body>
 </html>
