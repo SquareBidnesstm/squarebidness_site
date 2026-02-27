@@ -4,6 +4,7 @@
   <!-- Page basics -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <title>Square Bidness – Home</title>
   <meta name="description" content="Veteran-owned Louisiana lifestyle brand. Apparel built on principles, morals, and business done right. Shop the VSOP Collection and more." />
   <link rel="canonical" href="https://www.squarebidness.com/" />
@@ -12,9 +13,10 @@
   <meta name="robots" content="index,follow">
   <meta name="theme-color" content="#000000">
   <meta name="color-scheme" content="dark light">
+  <meta name="format-detection" content="telephone=no" />
 
   <!-- Build/version stamp -->
-  <meta name="sb:build" content="v20260212-home-hero-video-naeday-final-stillridin-no-vsop-overlay" />
+  <meta name="sb:build" content="v20260227-home-canonical-schema-tightening" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
@@ -57,42 +59,65 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/icon-180.png">
   <link rel="manifest" href="/manifest.webmanifest">
 
-  <!-- Sitemap -->
-  <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap-index.xml">
-
-  <!-- Org JSON-LD (no street address) -->
+  <!-- Structured Data (WebSite + WebPage + Organization) — ✅ NO STREET ADDRESS -->
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
-    "@type":"Organization",
-    "@id":"https://www.squarebidness.com/#org",
-    "name":"Square Bidness Apparel",
-    "alternateName":"Square Bidness",
-    "url":"https://www.squarebidness.com/",
-    "logo":"https://www.squarebidness.com/assets/cleantextlogo.png",
-    "areaServed":[
-      "Hammond, Louisiana",
-      "Northshore Louisiana",
-      "Southeastern Louisiana"
-    ],
-    "address":{
-      "@type":"PostalAddress",
-      "addressRegion":"LA",
-      "addressCountry":"US"
-    },
-    "sameAs":[
-      "https://instagram.com/squarebidnesstm",
-      "https://www.tiktok.com/@squarebidnesstm",
-      "https://www.facebook.com/squarebidnessapparel",
-      "https://bsky.app/profile/squarebidnesstm.bsky.social",
-      "https://www.linkedin.com/company/square-bidness-apparel"
-    ],
-    "contactPoint":[
+    "@graph":[
       {
-        "@type":"ContactPoint",
-        "contactType":"customer support",
-        "email":"info@squarebidness.com",
-        "areaServed":"US"
+        "@type":"Organization",
+        "@id":"https://www.squarebidness.com/#org",
+        "name":"Square Bidness Apparel",
+        "alternateName":"Square Bidness",
+        "url":"https://www.squarebidness.com/",
+        "logo":{
+          "@type":"ImageObject",
+          "url":"https://www.squarebidness.com/assets/cleantextlogo.png"
+        },
+        "address":{
+          "@type":"PostalAddress",
+          "addressRegion":"Louisiana",
+          "addressCountry":"US"
+        },
+        "sameAs":[
+          "https://instagram.com/squarebidnesstm",
+          "https://www.tiktok.com/@squarebidnesstm",
+          "https://www.facebook.com/squarebidnessapparel",
+          "https://bsky.app/profile/squarebidnesstm.bsky.social",
+          "https://www.linkedin.com/company/square-bidness-apparel"
+        ],
+        "contactPoint":[
+          {
+            "@type":"ContactPoint",
+            "contactType":"customer support",
+            "email":"info@squarebidness.com",
+            "areaServed":"US"
+          }
+        ]
+      },
+      {
+        "@type":"WebSite",
+        "@id":"https://www.squarebidness.com/#website",
+        "url":"https://www.squarebidness.com/",
+        "name":"Square Bidness",
+        "publisher":{"@id":"https://www.squarebidness.com/#org"},
+        "potentialAction":{
+          "@type":"SearchAction",
+          "target":"https://www.squarebidness.com/search/?q={search_term_string}",
+          "query-input":"required name=search_term_string"
+        }
+      },
+      {
+        "@type":"WebPage",
+        "@id":"https://www.squarebidness.com/#webpage",
+        "url":"https://www.squarebidness.com/",
+        "name":"Square Bidness – Home",
+        "isPartOf":{"@id":"https://www.squarebidness.com/#website"},
+        "about":{"@id":"https://www.squarebidness.com/#org"},
+        "primaryImageOfPage":{
+          "@type":"ImageObject",
+          "url":"https://www.squarebidness.com/assets/sb-social-card_1200.jpg"
+        }
       }
     ]
   }
@@ -201,36 +226,6 @@
     @media (max-width:480px){
       .nae-hero-stillridin{ right:.75rem; bottom:.75rem; }
     }
-    /* Nae feature link under tagline (inside .hero__copy) */
-.nae-caption{
-  display:inline-flex;
-  align-items:center;
-  gap:.35rem;
-  margin:.55rem 0 .15rem;
-  padding:.38rem .85rem;
-  border-radius:999px;
-  border:1px solid rgba(199,166,92,.55);
-  background:rgba(0,0,0,.28);
-  color:#c7a65c;
-  font-weight:800;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-  font-size:.74rem;
-  text-decoration:none;
-  width:fit-content;
-}
-
-.nae-caption:hover{
-  border-color:rgba(199,166,92,.92);
-  background:rgba(0,0,0,.38);
-  color:#c7a65c;
-}
-
-.nae-caption:focus-visible{
-  outline:2px solid rgba(199,166,92,.95);
-  outline-offset:3px;
-}
-
 
     header.hero.hero--dark{ min-height:260px; }
     @media (min-width: 900px){
