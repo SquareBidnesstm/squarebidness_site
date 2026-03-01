@@ -151,53 +151,88 @@
     .taxpass-pill__arrow{ font-size:.9rem;margin-left:.15rem; }
     .taxpass-pill:hover{ border-color:#4b5563;background:radial-gradient(circle at top left,#111827,#030712); }
 
-    .hero__inner{ display:grid;gap:1rem; }
-    @media(min-width:768px){
-      .hero__inner{ grid-template-columns:1fr 1fr;align-items:center; }
-    }
+  /* HERO LAYOUT */
+.hero__inner{
+  display:grid;
+  gap:1rem;
+}
+@media(min-width:768px){
+  .hero__inner{
+    grid-template-columns:1fr 1fr;
+    align-items:stretch; /* key change */
+  }
+}
 
-    /* HERO MEDIA (VIDEO) */
-    .hero__media{
-      position:relative;
-      border-radius:12px;
-      border:1px solid #1f1f1f;
-      overflow:hidden;
-      background:#0f0f0f;
-      aspect-ratio: 3 / 2;
-    }
-    .hero__poster{
-      position:absolute; inset:0; z-index:1;
-    }
-    .hero__poster img{
-      width:100%; height:100%; display:block;
-      object-fit:cover; object-position:center;
-      background:#0f0f0f;
-      transform:scale(1.01);
-    }
-    .hero__video{
-      position:absolute; inset:0; z-index:2;
-      width:100%; height:100%;
-      object-fit:cover; object-position:center;
-      display:block;
-      opacity:1;
-      transform:scale(1.03);
-    }
-    .heroPlayFallback{
-      position:absolute; inset:0; z-index:9;
-      display:none; place-items:center;
-      background:transparent; border:0; color:#fff;
-      cursor:pointer;
-    }
-    .heroPlayFallback__pill{
-      padding:.55rem 1rem;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.18);
-      background:rgba(0,0,0,.35);
-      backdrop-filter:blur(6px);
-      font:600 14px system-ui,-apple-system,Segoe UI,Roboto,Inter,sans-serif;
-      letter-spacing:.02em;
-      text-transform:lowercase;
-    }
+/* HERO MEDIA (VIDEO) */
+.hero__media{
+  position:relative;
+  border-radius:12px;
+  border:1px solid #1f1f1f;
+  overflow:hidden;
+  background:#0f0f0f;
+
+  /* Mobile: controlled ratio */
+  aspect-ratio: 3 / 2;
+  height:auto;
+}
+
+/* Desktop: fill vertical space */
+@media(min-width:900px){
+  .hero__media{
+    aspect-ratio:auto;               /* remove fixed ratio */
+    height:clamp(520px, 72vh, 760px); /* near full-height feel */
+  }
+}
+
+.hero__poster{
+  position:absolute;
+  inset:0;
+  z-index:1;
+}
+.hero__poster img{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:cover;
+  object-position:center;
+  background:#0f0f0f;
+  transform:scale(1.01);
+}
+
+.hero__video{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+  display:block;
+  transform:scale(1.03);
+}
+
+.heroPlayFallback{
+  position:absolute;
+  inset:0;
+  z-index:9;
+  display:none;
+  place-items:center;
+  background:transparent;
+  border:0;
+  color:#fff;
+  cursor:pointer;
+}
+
+.heroPlayFallback__pill{
+  padding:.55rem 1rem;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.18);
+  background:rgba(0,0,0,.35);
+  backdrop-filter:blur(6px);
+  font:600 14px system-ui,-apple-system,Segoe UI,Roboto,Inter,sans-serif;
+  letter-spacing:.02em;
+  text-transform:lowercase;
+}
 
     /* HERO PILL (bottom-right) */
     .nae-hero-stillridin{
