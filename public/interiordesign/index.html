@@ -107,18 +107,22 @@
     border-radius:999px;
     transition:.25s ease;
     border:1px solid rgba(0,0,0,.10);
+    cursor:pointer;
   }
   .btn:hover{background:var(--gold2)}
 
-  /* ABOUT (no image) */
+  /* ABOUT */
   section{padding:52px 0}
   .about-grid{
     display:grid;
     grid-template-columns:1.2fr .8fr;
     gap:18px;
-    align-items:stretch;
+    align-items:start;
   }
-  @media (max-width:920px){ .about-grid{grid-template-columns:1fr} h1{font-size:38px} }
+  @media (max-width:920px){
+    .about-grid{grid-template-columns:1fr}
+    h1{font-size:38px}
+  }
 
   .card{
     background:var(--card);
@@ -141,7 +145,7 @@
     letter-spacing:.2px;
   }
 
-  /* CTA */
+  /* FORM CARD */
   .cta{
     background:#111;
     color:#fff;
@@ -152,6 +156,41 @@
   }
   .cta h3{margin:0 0 8px;font-size:22px}
   .cta p{margin:0 0 14px;color:rgba(255,255,255,.82);line-height:1.6}
+
+  .form{margin-top:14px}
+  .form label{display:block;margin:10px 0}
+  .form span{
+    display:block;
+    font-size:12px;
+    letter-spacing:.8px;
+    text-transform:uppercase;
+    color:rgba(255,255,255,.78);
+    margin:0 0 6px;
+  }
+  .form input,.form select,.form textarea{
+    width:100%;
+    padding:12px 12px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.14);
+    background:rgba(255,255,255,.06);
+    color:#fff;
+    outline:none;
+  }
+  .form input::placeholder,.form textarea::placeholder{color:rgba(255,255,255,.55)}
+  .form input:focus,.form select:focus,.form textarea:focus{
+    border-color:rgba(183,156,110,.55);
+    box-shadow:0 0 0 4px rgba(183,156,110,.15);
+  }
+  .form select{appearance:none}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media (max-width:920px){.row{grid-template-columns:1fr}}
+  .submit{margin-top:12px;border:none}
+  .fineprint{
+    margin-top:10px;
+    font-size:12px;
+    color:rgba(255,255,255,.62);
+    line-height:1.4;
+  }
 
   footer{
     padding:30px 0 36px;
@@ -175,9 +214,10 @@
   </div>
 </section>
 
-<!-- ABOUT (no 2nd image) -->
+<!-- ABOUT + FORM -->
 <section id="about">
   <div class="wrap about-grid">
+
     <div class="card">
       <h2>About Monica</h2>
       <p>
@@ -198,11 +238,60 @@
       </div>
     </div>
 
-    <div class="cta">
-      <h3>Work With Monica</h3>
-      <p>Ready to transform your home into a refined statement space? Book a consultation and let Monica handle the execution.</p>
-      <a class="btn" href="mailto:hello@interiordesignbymonica.com">Book a Consultation</a>
+    <div class="cta" id="consult">
+      <h3>Book a Consultation</h3>
+      <p>Send the details below. Monica will follow up to confirm next steps.</p>
+
+      <form class="form" action="mailto:hello@interiordesignbymonica.com" method="post" enctype="text/plain">
+        <div class="row">
+          <label>
+            <span>Full Name</span>
+            <input name="name" type="text" autocomplete="name" required />
+          </label>
+
+          <label>
+            <span>Phone</span>
+            <input name="phone" type="tel" autocomplete="tel" required />
+          </label>
+        </div>
+
+        <label>
+          <span>Email</span>
+          <input name="email" type="email" autocomplete="email" required />
+        </label>
+
+        <div class="row">
+          <label>
+            <span>City / State</span>
+            <input name="location" type="text" placeholder="City, State" required />
+          </label>
+
+          <label>
+            <span>Project Type</span>
+            <select name="project_type" required>
+              <option value="" selected disabled>Select one</option>
+              <option>Room Refresh</option>
+              <option>Full Home</option>
+              <option>Renovation / Remodel</option>
+              <option>Staging</option>
+              <option>Other</option>
+            </select>
+          </label>
+        </div>
+
+        <label>
+          <span>Tell Monica what you want done</span>
+          <textarea name="details" rows="5" placeholder="Budget range, timeline, rooms, goals, etc." required></textarea>
+        </label>
+
+        <button class="btn submit" type="submit">Send Request</button>
+
+        <div class="fineprint">
+          By submitting, you agree Monica may contact you by phone/email to follow up.
+        </div>
+      </form>
     </div>
+
   </div>
 </section>
 
