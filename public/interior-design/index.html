@@ -1,3 +1,4 @@
+<!-- /public/interior-design/index.html  (PASTE READY — includes 640/820/1200 hero srcset) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -145,46 +146,17 @@
     border:1px solid var(--line);
     border-radius:var(--radius);
     padding:16px;
-    background:rgba(255,255,255,.85);
+    background:rgba(255,255,255,.88);
   }
   .service b{display:block; letter-spacing:.2px; margin-bottom:6px}
   .service span{display:block; color:var(--muted); line-height:1.55; font-size:14px}
   @media (max-width:900px){ .services{grid-template-columns:1fr} }
 
-  /* Portfolio 3-grid */
-  .section-head{
-    display:flex; align-items:end; justify-content:space-between; gap:12px;
-    margin-bottom:14px;
-  }
-  .section-head h2{margin:0;font-size:22px;letter-spacing:.3px}
-  .section-head small{color:rgba(0,0,0,.55)}
-  .portfolio{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:14px;
-  }
-  .shot{
-    border-radius:var(--radius);
-    overflow:hidden;
-    border:1px solid var(--line);
-    box-shadow:0 12px 28px rgba(0,0,0,.06);
-    background:#fff;
-  }
-  .shot img{
-    width:100%;
-    height:260px;
-    object-fit:cover;
-    display:block;
-    transition:transform .35s ease;
-  }
-  .shot:hover img{transform:scale(1.03)}
-  @media (max-width:900px){ .portfolio{grid-template-columns:1fr} .shot img{height:240px} }
-
   /* Bottom CTA */
   .cta{
     background:#111;
     color:#fff;
-    border-radius:calc(var(--radius) + 6px);
+    border-radius:24px;
     padding:26px;
     box-shadow:var(--shadow);
     border:1px solid rgba(0,0,0,.12);
@@ -208,14 +180,34 @@
 
 <section class="hero">
   <div class="hero-media" aria-hidden="true">
-    <!-- Mobile-friendly: add smaller files later (ex: living_1_820.webp/jpg). For now it will still work. -->
+    <!-- Uses smaller images on smaller screens automatically -->
     <picture>
-      <!-- If you create a smaller mobile hero later, add it like this:
-      <source media="(max-width: 720px)" srcset="/interior-design/assets/living_1_820.webp" type="image/webp">
-      <source media="(max-width: 720px)" srcset="/interior-design/assets/living_1_820.jpg" type="image/jpeg">
-      -->
-      <source srcset="/interior-design/assets/living_1_1200.webp" type="image/webp">
-      <img src="/interior-design/assets/living_1_1200.jpg" alt="" loading="eager" />
+      <!-- WEBP first -->
+      <source
+        type="image/webp"
+        srcset="
+          /interior-design/assets/living_1_640.webp 640w,
+          /interior-design/assets/living_1_820.webp 820w,
+          /interior-design/assets/living_1_1200.webp 1200w
+        "
+        sizes="100vw"
+      />
+      <!-- JPG fallback -->
+      <source
+        type="image/jpeg"
+        srcset="
+          /interior-design/assets/living_1_640.jpg 640w,
+          /interior-design/assets/living_1_820.jpg 820w,
+          /interior-design/assets/living_1_1200.jpg 1200w
+        "
+        sizes="100vw"
+      />
+      <img
+        src="/interior-design/assets/living_1_1200.jpg"
+        alt=""
+        loading="eager"
+        decoding="async"
+      />
     </picture>
   </div>
 
@@ -227,7 +219,7 @@
     <div class="actions">
       <a class="btn" href="/interior-design/book/">Book Now</a>
       <a class="btn ghost" href="#about">About Monica</a>
-      <a class="btn ghost" href="#portfolio">Portfolio</a>
+      <a class="btn ghost" href="#services">Services</a>
     </div>
   </div>
 </section>
@@ -253,10 +245,9 @@
         <span class="chip">Intentional Styling</span>
       </div>
 
-      <!-- Services (3 bullets/cards) -->
-      <div class="section-head" style="margin-top:18px">
-        <h2 id="services">Services</h2>
-        <small>3 core offerings</small>
+      <div style="display:flex;align-items:end;justify-content:space-between;gap:12px;margin:18px 0 10px">
+        <h2 id="services" style="margin:0;font-size:22px;letter-spacing:.3px">Services</h2>
+        <small style="color:rgba(0,0,0,.55)">3 core offerings</small>
       </div>
 
       <div class="services">
@@ -266,26 +257,29 @@
         </div>
         <div class="service">
           <b>Full Home Design</b>
-          <span>End-to-end design direction: cohesive rooms, curated selections, and a finished luxury feel.</span>
+          <span>End-to-end direction: cohesive rooms, curated selections, and a finished luxury feel.</span>
         </div>
         <div class="service">
           <b>Staging + Styling</b>
-          <span>Photo-ready spaces for listings, events, or personal reset — intentional and polished.</span>
+          <span>Photo-ready spaces for listings or resets — intentional, polished, and elevated.</span>
         </div>
       </div>
+
+      <p style="margin:14px 0 0;color:rgba(0,0,0,.62);line-height:1.6;font-size:14px">
+        Available by appointment • Residential • Staging + Styling • Renovation direction
+      </p>
     </div>
   </div>
 </section>
 
-<!-- Bottom CTA -->
 <section>
   <div class="wrap">
     <div class="cta">
       <h3>Ready to elevate your space?</h3>
-      <p>Tell Monica what you want done and get the next steps confirmed.</p>
+      <p>Share your project details and Monica will confirm next steps.</p>
       <div class="ctaRow">
         <a class="btn" href="/interior-design/book/">Book a Consultation</a>
-        <a class="btn ghost" href="#portfolio">View Portfolio</a>
+        <a class="btn ghost" href="#services">View Services</a>
       </div>
     </div>
   </div>
