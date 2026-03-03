@@ -1,5 +1,6 @@
+<!-- /public/founder/index.html (PASTE READY — cleaned, Pixel via /scripts/meta-pixel.js + bridge) -->
 <!doctype html>
-<html lang="en">
+<html lang="en" data-sb-brand="squarebidness" data-sb-tier="founder" data-sb-variant="v20260201-founder-apparel-leadin-techlab-handoff">
 <head>
   <!-- Basics -->
   <meta charset="utf-8" />
@@ -17,10 +18,13 @@
   <!-- Build stamp -->
   <meta name="sb:build" content="v20260201-founder-apparel-leadin-techlab-handoff" />
 
+  <!-- Meta App Association -->
+  <meta property="fb:app_id" content="802680062853443" />
+
   <!-- Perf -->
-  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
-  <link rel="preconnect" href="https://www.google-analytics.com" crossorigin>
-  <link rel="preconnect" href="https://static.cloudflareinsights.com" crossorigin>
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
+  <link rel="preconnect" href="https://www.google-analytics.com" crossorigin />
+  <link rel="preconnect" href="https://connect.facebook.net" crossorigin />
 
   <!-- Global CSS -->
   <link rel="stylesheet" href="/styles/style.css" />
@@ -54,7 +58,6 @@
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:image:alt" content="Marcus Buckner — Founder & Operator of Square Bidness" />
-  <meta property="fb:app_id" content="802680062853443" />
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
@@ -118,12 +121,19 @@
         "@id": "https://www.squarebidness.com/founder/#webpage",
         "url": "https://www.squarebidness.com/founder/",
         "name": "Marcus Buckner — Founder & Operator | Square Bidness",
-        "isPartOf": { "@id": "https://www.squarebidness.com/#org" },
+        "isPartOf": { "@id": "https://www.squarebidness.com/#website" },
         "about": { "@id": "https://www.squarebidness.com/founder/#marcus-buckner" },
         "primaryImageOfPage": {
           "@type": "ImageObject",
           "url": "https://www.squarebidness.com/connect/assets/connect_founder_1200x630.jpg"
         }
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://www.squarebidness.com/#website",
+        "url": "https://www.squarebidness.com/",
+        "name": "Square Bidness",
+        "publisher": { "@id": "https://www.squarebidness.com/#org" }
       },
       {
         "@type": "Person",
@@ -169,36 +179,26 @@
     ]
   }
   </script>
-  <!-- Meta Pixel (Square Bidness) -->
-<script>
-!function(f,b,e,v,n,t,s)
-{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-n.queue=[];t=b.createElement(e);t.async=!0;
-t.src=v;s=b.getElementsByTagName(e)[0];
-s.parentNode.insertBefore(t,s)}(window, document,'script',
-'https://connect.facebook.net/en_US/fbevents.js');
 
-fbq('init', '914123084877133');
-fbq('track', 'PageView');
-</script>
-<noscript>
-  <img height="1" width="1" style="display:none"
-       src="https://www.facebook.com/tr?id=914123084877133&ev=PageView&noscript=1"/>
-</noscript>
-<!-- End Meta Pixel -->
-
-  <!-- Site scripts (match your main pages) -->
+  <!-- Site scripts (standard) -->
   <script defer src="/scripts/ga.js"></script>
   <script defer src="/scripts/sb-analytics.js"></script>
+
+  <!-- Meta Pixel (centralized) + SB→Meta bridge -->
+  <script defer src="/scripts/meta-pixel.js"></script>
+  <script defer src="/scripts/sb-meta-bridge.js"></script>
+
   <script defer src="/scripts/sb-cart.js"></script>
   <script defer src="/scripts/global.js"></script>
-  <script defer src="/partials/loader.js"></script>
+  <script defer src="/scripts/partials.js"></script>
   <script defer src="/scripts/sw-register.js"></script>
 
   <!-- Page styles -->
   <style>
+    /* CLS guard for injected header/footer */
+    #site-header{min-height:72px;}
+    #site-footer{min-height:120px;}
+
     .founder-hero{
       background:#020617;
       border-bottom:1px solid #1f1f1f;
@@ -271,7 +271,7 @@ fbq('track', 'PageView');
 
 <body class="theme-dark">
   <!-- NAV injection target -->
-  <div id="site-header"></div>
+  <div id="site-header" aria-busy="true" style="content-visibility:auto;contain-intrinsic-size:80px;"></div>
 
   <!-- HERO -->
   <section class="founder-hero">
@@ -282,7 +282,6 @@ fbq('track', 'PageView');
           <p class="founder-eyebrow">Founder • Operator</p>
           <h1>Marcus Buckner</h1>
 
-          <!-- ✅ Apparel lead-in + clean Tech Lab handoff (3rd person) -->
           <p class="founder-tagline">
             Founder and operator of <strong>Square Bidness</strong> — known first for <strong>apparel drops</strong> built on quality,
             discipline, and Louisiana-rooted identity. With the core systems now in place, new apparel releases are positioned
@@ -302,7 +301,6 @@ fbq('track', 'PageView');
             Standard: <strong>Principles. Morals. Business Done Right.</strong>
           </p>
 
-          <!-- ✅ Keep coexistence: apparel first, clean handoff to Tech Lab -->
           <div class="f-pillrow" aria-label="Key links">
             <a class="f-pill" href="/vsop/">Square Bidness Apparel <span aria-hidden="true">→</span></a>
             <a class="f-pill" href="/techlabs/">SB Tech Lab <span aria-hidden="true">→</span></a>
@@ -320,7 +318,7 @@ fbq('track', 'PageView');
           </div>
         </div>
 
-        <!-- ✅ KEEP IMAGES EXACTLY AS-IS -->
+        <!-- KEEP IMAGES EXACTLY AS-IS -->
         <div class="founder-hero__media">
           <figure class="founder-figure">
             <picture>
@@ -353,7 +351,6 @@ fbq('track', 'PageView');
 
     <!-- PUBLIC VERSION -->
     <section id="public-version">
-      <!-- Apparel lead, then Tech Lab weight (≈65/35) -->
       <section class="f-card" aria-labelledby="apparel-now-title">
         <h2 id="apparel-now-title" style="margin:0 0 8px;">Apparel, with systems behind it</h2>
         <p class="f-mini" style="margin:0;">
@@ -492,7 +489,7 @@ fbq('track', 'PageView');
   </main>
 
   <!-- FOOTER injection target -->
-  <div id="site-footer"></div>
+  <div id="site-footer" aria-busy="true" style="content-visibility:auto;contain-intrinsic-size:140px;"></div>
 
   <!-- Toggle script (tiny, no dependencies) -->
   <script>
@@ -512,6 +509,5 @@ fbq('track', 'PageView');
       });
     })();
   </script>
-
 </body>
 </html>
