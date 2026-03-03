@@ -1,4 +1,4 @@
-<!-- /public/connect/index.html (PASTE READY — lab.squarebidness.com linked + VCF buttons mobile-safe) -->
+<!-- /public/connect/index.html (PASTE READY — cleaned: external meta-pixel.js + sb-meta-bridge + no duplicate noscript, sb_action ready) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,7 +18,7 @@
   <meta name="format-detection" content="telephone=no" />
 
   <!-- Build stamp -->
-  <meta name="sb:build" content="v20260227-connect-lab-subdomain-vcf-mobile" />
+  <meta name="sb:build" content="v20260303-connect-clean-meta-pixel-bridge" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
@@ -31,6 +31,8 @@
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:image:alt" content="Connect with Square Bidness" />
+
+  <!-- Meta App Association -->
   <meta property="fb:app_id" content="802680062853443" />
 
   <!-- Twitter -->
@@ -41,8 +43,8 @@
   <meta name="twitter:image:alt" content="Connect with Square Bidness" />
 
   <!-- Perf -->
-  <link rel="preconnect" href="https://www.googletagmanager.com" />
-  <link rel="preconnect" href="https://www.google-analytics.com" />
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
+  <link rel="preconnect" href="https://www.google-analytics.com" crossorigin />
 
   <!-- Styles -->
   <link rel="preload" href="/styles/style.css" as="style" />
@@ -55,30 +57,13 @@
   <link rel="apple-touch-icon" href="/icon_180.png" />
   <link rel="manifest" href="/manifest.webmanifest" />
 
-
-  <!-- Meta Pixel (Square Bidness) -->
-<script>
-!function(f,b,e,v,n,t,s)
-{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-n.queue=[];t=b.createElement(e);t.async=!0;
-t.src=v;s=b.getElementsByTagName(e)[0];
-s.parentNode.insertBefore(t,s)}(window, document,'script',
-'https://connect.facebook.net/en_US/fbevents.js');
-
-fbq('init', '914123084877133');
-fbq('track', 'PageView');
-</script>
-<noscript>
-  <img height="1" width="1" style="display:none"
-       src="https://www.facebook.com/tr?id=914123084877133&ev=PageView&noscript=1"/>
-</noscript>
-<!-- End Meta Pixel -->
-
   <!-- Analytics -->
   <script defer src="/scripts/ga.js"></script>
   <script defer src="/scripts/sb-analytics.js"></script>
+
+  <!-- Meta Pixel + Bridge (SB events -> Meta events) -->
+  <script defer src="/scripts/meta-pixel.js"></script>
+  <script defer src="/scripts/sb-meta-bridge.js"></script>
 
   <!-- Nav/Footer loader -->
   <script defer src="/scripts/partials.js"></script>
@@ -168,6 +153,12 @@ fbq('track', 'PageView');
 </head>
 
 <body class="theme-dark" id="top">
+  <!-- Meta Pixel noscript (keep in body ONCE) -->
+  <noscript>
+    <img height="1" width="1" style="display:none"
+         src="https://www.facebook.com/tr?id=914123084877133&ev=PageView&noscript=1" />
+  </noscript>
+
   <!-- Header injected by /scripts/partials.js -->
   <div id="site-header" aria-busy="true" style="content-visibility:auto;contain-intrinsic-size:80px;"></div>
 
@@ -190,7 +181,12 @@ fbq('track', 'PageView');
         <ul class="connect-list" style="margin-top:.75rem;">
           <li>
             <span class="label">Email</span>
-            <a href="mailto:marcusbuckner@squarebidness.com" data-sb="connect-email-link">marcusbuckner@squarebidness.com</a>
+            <a
+              href="mailto:marcusbuckner@squarebidness.com"
+              data-sb-action="cx_connect_email"
+              data-sb-component="connect"
+              data-sb-label="marcusbuckner@squarebidness.com"
+            >marcusbuckner@squarebidness.com</a>
             <div class="muted-small">Partnerships • wholesale • media • community.</div>
           </li>
 
@@ -204,26 +200,36 @@ fbq('track', 'PageView');
         <div class="connect-cta-row">
           <a class="btn btn--gold"
              href="mailto:marcusbuckner@squarebidness.com?subject=Square%20Bidness%20%7C%20Connect&body=Name%3A%0ACompany%2FOrg%3A%0AWhat%20you%E2%80%99re%20reaching%20out%20about%3A%0ATimeline%3A%0A"
-             data-sb="connect-email-cta">Email Marcus</a>
+             data-sb-action="cx_connect_email_cta"
+             data-sb-component="connect"
+             data-sb-label="Email Marcus">Email Marcus</a>
 
           <!-- ✅ VCF links (mobile-friendly add-to-contacts) -->
           <a class="btn btn--outline-light"
              href="/connect/marcus-buckner.vcf"
-             data-sb="connect-save-contact">Save Contact</a>
+             data-sb-action="cx_connect_save_contact"
+             data-sb-component="connect"
+             data-sb-label="Save Contact">Save Contact</a>
 
           <a class="btn btn--outline-light"
              href="/connect/sb-tech-lab.vcf"
-             data-sb="connect-save-techlab">Save Tech Lab</a>
+             data-sb-action="cx_connect_save_techlab"
+             data-sb-component="connect"
+             data-sb-label="Save Tech Lab">Save Tech Lab</a>
 
           <a class="btn btn--outline-light"
              href="https://lab.squarebidness.com/"
              target="_blank"
              rel="noopener"
-             data-sb="connect-open-lab">Open Tech Lab</a>
+             data-sb-action="cx_connect_open_lab"
+             data-sb-component="connect"
+             data-sb-label="Open Tech Lab">Open Tech Lab</a>
 
           <a class="btn btn--outline-light"
              href="/social/"
-             data-sb="connect-social">Socials</a>
+             data-sb-action="cx_connect_social"
+             data-sb-component="connect"
+             data-sb-label="Socials">Socials</a>
         </div>
 
         <p class="muted-small" style="margin-top:.5rem;">
@@ -233,15 +239,21 @@ fbq('track', 'PageView');
         <div class="template-row" aria-label="Quick email templates">
           <a class="btn btn--ghost"
              href="mailto:marcusbuckner@squarebidness.com?subject=Square%20Bidness%20%7C%20Wholesale&body=Name%3A%0AStore%2FBrand%3A%0ALocation%3A%0AWhat%20lines%20you%E2%80%99re%20interested%20in%3A%0AQuantity%2FRun%20size%3A%0A"
-             data-sb="connect-template-wholesale">Wholesale</a>
+             data-sb-action="cx_connect_template_wholesale"
+             data-sb-component="connect"
+             data-sb-label="Wholesale">Wholesale</a>
 
           <a class="btn btn--ghost"
              href="mailto:marcusbuckner@squarebidness.com?subject=Square%20Bidness%20%7C%20Media&body=Outlet%3A%0AContact%20Name%3A%0AStory%20angle%3A%0ADeadline%3A%0A"
-             data-sb="connect-template-media">Media</a>
+             data-sb-action="cx_connect_template_media"
+             data-sb-component="connect"
+             data-sb-label="Media">Media</a>
 
           <a class="btn btn--ghost"
              href="mailto:marcusbuckner@squarebidness.com?subject=Square%20Bidness%20%7C%20Partner%20Builds&body=Business%20name%3A%0AWhat%20you%20need%20built%3A%0AWebsite%2FPayments%2FBooking%2FIntake%3A%0ATimeline%3A%0A"
-             data-sb="connect-template-partnerbuilds">Partner Builds</a>
+             data-sb-action="cx_connect_template_partnerbuilds"
+             data-sb-component="connect"
+             data-sb-label="Partner Builds">Partner Builds</a>
         </div>
 
         <p class="connect-note">
@@ -287,12 +299,12 @@ fbq('track', 'PageView');
           <p class="work-sub">Recent client work and partner pages built through SB Tech Lab.</p>
 
           <div class="work-actions">
-            <a class="btn btn--ghost" href="/work/" data-sb="connect-work">View all</a>
-            <a class="btn btn--ghost" href="/start2finish/" data-sb="connect-start2finish">Start2Finish</a>
-            <a class="btn btn--ghost" href="/puffs/" data-sb="connect-puffs">Puff’s</a>
-            <a class="btn btn--ghost" href="/courageaux/" data-sb="connect-courageaux">Courageaux</a>
-            <a class="btn btn--ghost" href="/phomatic/" data-sb="connect-phomatic">Pho-Matic</a>
-            <a class="btn btn--ghost" href="/richardson/" data-sb="connect-richardson">Richardson</a>
+            <a class="btn btn--ghost" href="/work/" data-sb-action="cx_connect_work" data-sb-component="connect" data-sb-label="View all">View all</a>
+            <a class="btn btn--ghost" href="/start2finish/" data-sb-action="cx_connect_start2finish" data-sb-component="connect" data-sb-label="Start2Finish">Start2Finish</a>
+            <a class="btn btn--ghost" href="/puffs/" data-sb-action="cx_connect_puffs" data-sb-component="connect" data-sb-label="Puff’s">Puff’s</a>
+            <a class="btn btn--ghost" href="/courageaux/" data-sb-action="cx_connect_courageaux" data-sb-component="connect" data-sb-label="Courageaux">Courageaux</a>
+            <a class="btn btn--ghost" href="/phomatic/" data-sb-action="cx_connect_phomatic" data-sb-component="connect" data-sb-label="Pho-Matic">Pho-Matic</a>
+            <a class="btn btn--ghost" href="/richardson/" data-sb-action="cx_connect_richardson" data-sb-component="connect" data-sb-label="Richardson">Richardson</a>
           </div>
 
           <p class="connect-note" style="margin-top:.6rem;">
@@ -304,45 +316,5 @@ fbq('track', 'PageView');
   </main>
 
   <div id="site-footer" aria-busy="true" style="content-visibility:auto;contain-intrinsic-size:140px;"></div>
-
-  <script>
-    document.addEventListener("click", (e) => {
-      const a = e.target?.closest?.("a");
-      if (!a) return;
-
-      const label = a.getAttribute("data-sb");
-      if (!label) return;
-
-      try {
-        if (typeof window.sbTrack === "function") {
-          window.sbTrack("sb_click", {
-            brand: "squarebidness",
-            page: "/connect/",
-            component: "connect",
-            action: "click",
-            label,
-            href: a.getAttribute("href") || ""
-          });
-          return;
-        }
-      } catch (_) {}
-
-      try {
-        if (typeof window.gtag === "function") {
-          window.gtag("event", "sb_click", {
-            brand: "squarebidness",
-            page_path: "/connect/",
-            event_category: "connect",
-            event_label: label
-          });
-        }
-      } catch (_) {}
-    });
-  </script>
-  <!-- Meta Pixel (Square Bidness) — NOSCRIPT (place in body) -->
-<noscript>
-  <img height="1" width="1" style="display:none"
-       src="https://www.facebook.com/tr?id=914123084877133&ev=PageView&noscript=1"/>
-</noscript>
 </body>
 </html>
