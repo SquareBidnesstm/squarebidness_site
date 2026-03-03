@@ -1,6 +1,6 @@
-<!-- /public/puffs/index.html (PASTE READY — single SMS consent block + JS gate) -->
+<!-- /public/puffs/index.html (PASTE READY — FB/OG FULL REFRESH + cache-bust + pixel centralized) -->
 <!doctype html>
-<html lang="en">
+<html lang="en" data-sb-brand="puffs" data-sb-tier="public" data-sb-variant="puffs-index-v20260303">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -13,7 +13,7 @@
   <meta name="format-detection" content="telephone=no" />
 
   <!-- Build stamp -->
-  <meta name="sb:build" content="v20260223-puffs-index-sms-consent-cta-clean" />
+  <meta name="sb:build" content="v20260303-puffs-index-og-refresh" />
 
   <!-- PWA -->
   <link rel="manifest" href="/puffs/manifest.webmanifest" />
@@ -25,21 +25,29 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   <meta name="apple-mobile-web-app-title" content="Puff’s Smokehouse" />
 
-  <!-- Open Graph -->
+  <!-- =========================
+       OPEN GRAPH / FACEBOOK
+       (FULL + cache-bust for FB refresh)
+  ========================== -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Puff’s Smokehouse" />
+  <meta property="og:locale" content="en_US" />
   <meta property="og:title" content="Puff’s Smokehouse — Order Pickup" />
   <meta property="og:description" content="Order online, pickup on arrival. Plates include two sides and bread (except pig feet). Louisiana." />
   <meta property="og:url" content="https://www.squarebidness.com/puffs/" />
-  <meta property="og:image" content="https://www.squarebidness.com/puffs/assets/puffs_hero_1200x630.jpg" />
+
+  <!-- ✅ Cache-bust so Facebook re-scrapes -->
+  <meta property="og:image" content="https://www.squarebidness.com/puffs/assets/puffs_hero_1200x630.jpg?v=20260303" />
+  <meta property="og:image:secure_url" content="https://www.squarebidness.com/puffs/assets/puffs_hero_1200x630.jpg?v=20260303" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Puff’s Smokehouse — BBQ · Smokehouse · Catering (Louisiana)" />
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Puff’s Smokehouse — Order Pickup" />
   <meta name="twitter:description" content="Order online, pickup on arrival. Louisiana." />
-  <meta name="twitter:image" content="https://www.squarebidness.com/puffs/assets/puffs_hero_1200x630.jpg" />
+  <meta name="twitter:image" content="https://www.squarebidness.com/puffs/assets/puffs_hero_1200x630.jpg?v=20260303" />
 
   <style>
     :root{
@@ -184,17 +192,14 @@
     "telephone": "+19859811777",
     "servesCuisine": ["Barbecue", "Southern"],
     "priceRange": "$",
-    "image": ["https://www.squarebidness.com/puffs/assets/puffs_hero_1200x630.jpg"],
+    "image": ["https://www.squarebidness.com/puffs/assets/puffs_hero_1200x630.jpg?v=20260303"],
     "address": {
       "@type": "PostalAddress",
       "addressLocality": "Ponchatoula",
       "addressRegion": "LA",
       "addressCountry": "US"
     },
-    "founder": {
-      "@type": "Person",
-      "name": "Denerian Collins"
-    },
+    "founder": { "@type": "Person", "name": "Denerian Collins" },
     "hasMenu": "https://www.squarebidness.com/puffs/",
     "makesOffer": [
       {"@type":"Offer","name":"BBQ Plates (Pickup)","availability":"https://schema.org/InStock","url":"https://www.squarebidness.com/puffs/"},
@@ -203,9 +208,13 @@
   }
   </script>
 
-  <!-- GA4 (site-wide) -->
+  <!-- ✅ Analytics -->
   <script defer src="/scripts/ga.js"></script>
   <script defer src="/scripts/sb-analytics.js"></script>
+
+  <!-- ✅ Meta Pixel centralized + SB→Meta bridge -->
+  <script defer src="/scripts/meta-pixel.js"></script>
+  <script defer src="/scripts/sb-meta-bridge.js"></script>
 </head>
 
 <body>
@@ -239,15 +248,18 @@
           <a
             href="https://www.google.com/maps/search/?api=1&query=Puff%E2%80%99s%20Smokehouse%20Ponchatoula%20LA"
             target="_blank"
-            rel="noopener"
+            rel="noopener noreferrer"
             style="color:#fff;text-decoration:underline"
+            data-sb-component="hero" data-sb-action="outbound" data-sb-label="directions" data-sb-href="maps"
           >Get directions</a>
           <span class="pill">Preview</span>
         </p>
 
         <div class="hero-actions">
-          <a class="btn primary" href="/puffs/pay/" aria-label="Pay online">Pay Online</a>
-          <a class="btn" href="/puffs/catering/" aria-label="Catering deposits">Catering Deposits</a>
+          <a class="btn primary" href="/puffs/pay/" aria-label="Pay online"
+             data-sb-component="hero" data-sb-action="open" data-sb-label="pay_online" data-sb-href="/puffs/pay/">Pay Online</a>
+          <a class="btn" href="/puffs/catering/" aria-label="Catering deposits"
+             data-sb-component="hero" data-sb-action="open" data-sb-label="catering" data-sb-href="/puffs/catering/">Catering Deposits</a>
         </div>
       </div>
     </div>
@@ -307,9 +319,9 @@
                 Phone number is optional. If you do not opt in, we will not text you.
               </span>
               <span style="opacity:.6"> · </span>
-              <a href="/puffs/privacy/">Privacy Policy</a>
+              <a href="/puffs/privacy/" data-sb-component="consent" data-sb-action="open" data-sb-label="privacy" data-sb-href="/puffs/privacy/">Privacy Policy</a>
               <span style="opacity:.6"> · </span>
-              <a href="/puffs/terms/">SMS Terms &amp; Conditions</a>
+              <a href="/puffs/terms/" data-sb-component="consent" data-sb-action="open" data-sb-label="sms_terms" data-sb-href="/puffs/terms/">SMS Terms &amp; Conditions</a>
             </span>
           </label>
 
@@ -325,7 +337,8 @@
             <button class="btn" id="btnClear" type="button">Clear</button>
           </div>
 
-          <a class="btn" href="/puffs/pay/" aria-label="Pay online after Puff's confirms your order">Pay Online (after confirmation)</a>
+          <a class="btn" href="/puffs/pay/" aria-label="Pay online after Puff's confirms your order"
+             data-sb-component="order" data-sb-action="open" data-sb-label="pay_after_confirm" data-sb-href="/puffs/pay/">Pay Online (after confirmation)</a>
 
           <p class="tiny" style="margin:0">
             You’ll pay at pickup (or by invoice link). Prices and availability subject to change. “Smoked Pig Feet Plate” available <strong>Sunday only</strong>.
@@ -374,6 +387,7 @@
         rel="noopener noreferrer"
         style="color:#ff9f1a;text-decoration:underline;font-weight:700;"
         aria-label="Powered by Square Bidness Tech Lab"
+        data-sb-component="footer" data-sb-action="outbound" data-sb-label="techlab" data-sb-href="https://lab.squarebidness.com/linkme/"
       >Square Bidness Tech Lab</a>
     </p>
   </footer>
@@ -756,5 +770,48 @@
       });
     }
   </script>
+
+  <!-- Unified SB click/outbound tracking -->
+  <script>
+    (function(){
+      function sbPayloadFromAnchor(a){
+        var href = a.getAttribute("href") || "";
+        var label = a.getAttribute("data-sb-label") || (a.textContent || "").trim() || href || "(link)";
+        var action = a.getAttribute("data-sb-action") || "click";
+        var component = a.getAttribute("data-sb-component") || "link";
+
+        var isExternal = /^https?:\/\//i.test(href);
+        if (isExternal && (action === "open" || action === "click")) action = "outbound";
+
+        return {
+          sb_brand: document.documentElement.getAttribute("data-sb-brand") || "puffs",
+          sb_tier: document.documentElement.getAttribute("data-sb-tier") || "public",
+          sb_variant: document.documentElement.getAttribute("data-sb-variant") || "puffs-index-v20260303",
+          page_path: "/puffs/",
+          component: component,
+          action: action,
+          label: label,
+          link_url: href
+        };
+      }
+
+      document.addEventListener("click", function(e){
+        var a = e.target && e.target.closest && e.target.closest("a");
+        if(!a) return;
+
+        try{
+          if (typeof window.sbTrack === "function"){
+            window.sbTrack("sb_click", sbPayloadFromAnchor(a));
+          }
+        }catch(_){}
+      }, { passive:true });
+    })();
+  </script>
+
+  <!-- Meta Pixel — NOSCRIPT fallback -->
+  <noscript>
+    <img height="1" width="1" style="display:none"
+         src="https://www.facebook.com/tr?id=914123084877133&ev=PageView&noscript=1"/>
+  </noscript>
 </body>
 </html>
