@@ -23,7 +23,6 @@
 
   function mapCtx(params) {
     params = params || {};
-    // Meta likes flatter params; keep it clean + helpful
     return clean({
       brand: params.sb_brand || "squarebidness",
       tier: params.sb_tier,
@@ -35,7 +34,8 @@
       label: params.label,
       link_url: params.link_url,
       form_name: params.form_name,
-      form_step: params.form_step
+      form_step: params.form_step,
+      event_source_url: location.href
     });
   }
 
@@ -46,7 +46,7 @@
       .map((it) => ({
         id: it.item_id || it.id || it.sku,
         quantity: it.quantity || 1,
-        item_price: (typeof it.price === "number" ? it.price : undefined)
+        item_price: typeof it.price === "number" ? it.price : undefined
       }))
       .filter((c) => c.id);
     return contents.length ? contents : undefined;
@@ -56,26 +56,11 @@
     whenFbqReady(() => {
       try {
         // Standard events
-        if (eventName === "Lead") {
-          window.fbq("track", "Lead", params);
-          return;
-        }
-        if (eventName === "ViewContent") {
-          window.fbq("track", "ViewContent", params);
-          return;
-        }
-        if (eventName === "AddToCart") {
-          window.fbq("track", "AddToCart", params);
-          return;
-        }
-        if (eventName === "InitiateCheckout") {
-          window.fbq("track", "InitiateCheckout", params);
-          return;
-        }
-        if (eventName === "Purchase") {
-          window.fbq("track", "Purchase", params);
-          return;
-        }
+        if (eventName === "Lead") return window.fbq("track", "Lead", params);
+        if (eventName === "ViewContent") return window.fbq("track", "ViewContent", params);
+        if (eventName === "AddToCart") return window.fbq("track", "AddToCart", params);
+        if (eventName === "InitiateCheckout") return window.fbq("track", "InitiateCheckout", params);
+        if (eventName === "Purchase") return window.fbq("track", "Purchase", params);
 
         // Custom events
         window.fbq("trackCustom", eventName, params);
@@ -104,16 +89,16 @@
         const p = params || {};
         const ctx = mapCtx(p);
 
-        // 1) Forms → Lead (only when valid if you want)
+        // 1) Forms → Lead (only when valid)
         if (eventName === "sb_form_submit") {
-          const valid = (p.valid === undefined) ? true : !!p.valid;
+          const valid = p.valid === undefined ? true : !!p.valid;
           if (valid) trackMeta("Lead", ctx);
           return;
         }
 
-        // 2) Outbound
+        // 2) Outbound click (custom)
         if (eventName === "sb_outbound_click") {
-          trackMeta("OutboundClick", ctx);
+          trackMeta("SBOutboundClick", ctx);
           return;
         }
 
@@ -123,8 +108,8 @@
           trackMeta("ViewContent", clean({
             ...ctx,
             currency: p.currency || "USD",
-            value: (typeof p.value === "number" ? p.value : undefined),
-            contents: contents,
+            value: typeof p.value === "number" ? p.value : undefined,
+            contents,
             content_type: contents ? "product" : undefined
           }));
           return;
@@ -135,8 +120,8 @@
           trackMeta("AddToCart", clean({
             ...ctx,
             currency: p.currency || "USD",
-            value: (typeof p.value === "number" ? p.value : undefined),
-            contents: contents,
+            value: typeof p.value === "number" ? p.value : undefined,
+            contents,
             content_type: contents ? "product" : undefined
           }));
           return;
@@ -147,8 +132,8 @@
           trackMeta("InitiateCheckout", clean({
             ...ctx,
             currency: p.currency || "USD",
-            value: (typeof p.value === "number" ? p.value : undefined),
-            contents: contents,
+            value: typeof p.value === "number" ? p.value : undefined,
+            contents,
             content_type: contents ? "product" : undefined
           }));
           return;
@@ -159,16 +144,15 @@
           trackMeta("Purchase", clean({
             ...ctx,
             currency: p.currency || "USD",
-            value: (typeof p.value === "number" ? p.value : undefined),
-            contents: contents,
+            value: typeof p.value === "number" ? p.value : undefined,
+            contents,
             content_type: contents ? "product" : undefined
           }));
           return;
         }
 
-        // 4) Optional: action clicks (keep, but don’t spam everything)
+        // 4) Action clicks → only mirror cx_ actions (conversion actions)
         if (eventName === "sb_action" && p.action) {
-          // only mirror cx_ actions by default (your conversion actions)
           if (String(p.action).startsWith("cx_")) {
             trackMeta("SBAction", ctx);
           }
