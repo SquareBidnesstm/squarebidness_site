@@ -1,6 +1,6 @@
-<!-- FILE: /public/mdw/index.html  (PASTE READY — MDW Operator Hub | Commercial Real Estate | Unified Leads) -->
+<!-- FILE: /public/mdw/index.html  (PASTE READY — MDW Operator Hub | Commercial Real Estate | Unified Leads | Conversion Lab + Meta Bridge) -->
 <!doctype html>
-<html lang="en">
+<html lang="en" data-sb-brand="mdw" data-sb-tier="hub" data-sb-variant="v1">
 <head>
   <!-- Basics -->
   <meta charset="utf-8" />
@@ -12,20 +12,17 @@
   <meta name="format-detection" content="telephone=no" />
   <meta name="theme-color" content="#0b0b0b" />
   <meta name="color-scheme" content="dark light" />
+  <meta name="sb:build" content="v20260303-mdw-hub-unified-leads" />
 
   <!-- Canonical -->
   <link rel="canonical" href="https://www.squarebidness.com/mdw/" />
 
   <!-- MDW Icons -->
-<link rel="icon" type="image/png" sizes="16x16" href="/mdw/assets/icons/favicon-16.png" />
-<link rel="icon" type="image/png" sizes="32x32" href="/mdw/assets/icons/favicon-32.png" />
-<link rel="icon" type="image/png" sizes="48x48" href="/mdw/assets/icons/favicon-48.png" />
-
-<link rel="apple-touch-icon" sizes="180x180" href="/mdw/assets/icons/apple-touch-icon.png" />
-
-<link rel="manifest" href="/mdw/assets/icons/site.webmanifest" />
-
-
+  <link rel="icon" type="image/png" sizes="16x16" href="/mdw/assets/icons/favicon-16.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/mdw/assets/icons/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="48x48" href="/mdw/assets/icons/favicon-48.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/mdw/assets/icons/apple-touch-icon.png" />
+  <link rel="manifest" href="/mdw/assets/icons/site.webmanifest" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
@@ -45,30 +42,18 @@
   <meta name="twitter:description" content="Buy • Sell • Lease • Investment Properties • Off-market opportunities • Deal flow." />
   <meta name="twitter:image" content="https://www.squarebidness.com/mdw/assets/mdw_meta_commercial_1200x630.jpg" />
 
+  <!-- Perf -->
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+  <link rel="preconnect" href="https://www.google-analytics.com" crossorigin>
+  <link rel="preconnect" href="https://connect.facebook.net" crossorigin>
 
-  <!-- Meta Pixel (Square Bidness) -->
-<script>
-!function(f,b,e,v,n,t,s)
-{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-n.queue=[];t=b.createElement(e);t.async=!0;
-t.src=v;s=b.getElementsByTagName(e)[0];
-s.parentNode.insertBefore(t,s)}(window, document,'script',
-'https://connect.facebook.net/en_US/fbevents.js');
-
-fbq('init', '914123084877133');
-fbq('track', 'PageView');
-</script>
-<noscript>
-  <img height="1" width="1" style="display:none"
-       src="https://www.facebook.com/tr?id=914123084877133&ev=PageView&noscript=1"/>
-</noscript>
-<!-- End Meta Pixel -->
-
-  <!-- Site-wide analytics -->
-  <script defer src="/scripts/sb-analytics.js"></script>
+  <!-- Analytics (site-wide) -->
   <script defer src="/scripts/ga.js"></script>
+  <script defer src="/scripts/sb-analytics.js"></script>
+
+  <!-- Meta Pixel (centralized) + SB→Meta bridge -->
+  <script defer src="/scripts/meta-pixel.js"></script>
+  <script defer src="/scripts/sb-meta-bridge.js"></script>
 
   <style>
     :root{
@@ -96,22 +81,23 @@ fbq('track', 'PageView');
     a{color:inherit;text-decoration:none}
     a:hover{opacity:.94}
     .wrap{max-width:1040px;margin:0 auto}
+
     .top{
       display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;
       margin-bottom:14px;
     }
-    .brand{
-      display:flex;align-items:center;gap:12px;
-    }
+    .brand{display:flex;align-items:center;gap:12px;}
     .mark{
       width:52px;height:52px;border-radius:16px;
       border:1px solid var(--line);
       background:linear-gradient(135deg, rgba(255,255,255,.18), rgba(255,255,255,.05));
-      display:flex;align-items:center;justify-content:center;
-      font-weight:900;letter-spacing:.8px;
+      overflow:hidden;
+      flex:0 0 auto;
     }
+    .mark img{width:100%;height:100%;object-fit:cover;display:block}
     .title h1{margin:0;font-size:22px;letter-spacing:.2px}
     .title p{margin:4px 0 0;color:var(--muted);font-size:13px;max-width:70ch}
+
     .chips{display:flex;gap:8px;flex-wrap:wrap}
     .chip{
       border:1px solid var(--line);
@@ -133,10 +119,7 @@ fbq('track', 'PageView');
       box-shadow:var(--shadow);
       overflow:hidden;
     }
-    .card .hd{
-      padding:16px 16px 12px;
-      border-bottom:1px solid var(--line);
-    }
+    .card .hd{padding:16px 16px 12px;border-bottom:1px solid var(--line);}
     .card .hd h2{margin:0;font-size:16px}
     .card .bd{padding:14px 16px 16px}
 
@@ -158,17 +141,15 @@ fbq('track', 'PageView');
 
     .btn{
       display:flex;align-items:center;justify-content:center;
-      padding:12px 12px;
-      border-radius:14px;
+      padding:12px 12px;border-radius:14px;
       background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.02));
       border:1px solid var(--line);
-      font-weight:800;
-      letter-spacing:.2px;
-      min-height:46px;
-      user-select:none;
+      font-weight:800;letter-spacing:.2px;
+      min-height:46px;user-select:none;
       -webkit-tap-highlight-color: transparent;
       transition:transform .05s ease, border-color .15s ease;
       text-align:center;
+      cursor:pointer;
     }
     .btn:hover{border-color:rgba(255,255,255,.22)}
     .btn:active{transform:translateY(1px)}
@@ -197,18 +178,18 @@ fbq('track', 'PageView');
     @media (max-width:620px){.row{grid-template-columns:1fr}}
 
     .note{color:var(--muted);font-size:12.5px;line-height:1.5;margin:10px 0 0}
-    .foot{
-      margin-top:14px;
-      display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;
-      color:var(--muted);font-size:12px;
+
+    footer.site-footer{
+      margin-top:18px;
       border-top:1px solid var(--line);
-      padding-top:12px;
+      padding-top:14px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.55;
+      text-align:center;
     }
-    .mini{
-      display:inline-flex;gap:8px;align-items:center;
-      border:1px solid var(--line);
-      padding:6px 10px;border-radius:999px;background:rgba(0,0,0,.25);
-    }
+    footer.site-footer a{color:var(--text);text-decoration:underline}
+    .powered a{color:var(--accent);text-decoration:underline;font-weight:800}
   </style>
 
   <!-- JSON-LD (city/state only) -->
@@ -235,17 +216,16 @@ fbq('track', 'PageView');
     <header class="top">
       <div class="brand">
         <div class="mark" aria-label="MDW Investments LLC">
-  <img
-    src="/mdw/assets/icons/android-chrome-192x192.png?v=20260222"
-    alt="MDW Investments LLC"
-    width="44"
-    height="44"
-    loading="eager"
-    decoding="async"
-    style="width:100%;height:100%;object-fit:cover;display:block;border-radius:14px;"
-    onerror="this.onerror=null;this.src='/mdw/assets/icons/apple-touch-icon.png?v=20260222';"
-  />
-</div>
+          <img
+            src="/mdw/assets/icons/android-chrome-192x192.png?v=20260303"
+            alt="MDW Investments LLC"
+            width="52"
+            height="52"
+            loading="eager"
+            decoding="async"
+            onerror="this.onerror=null;this.src='/mdw/assets/icons/apple-touch-icon.png?v=20260303';"
+          />
+        </div>
         <div class="title">
           <h1>MDW Investments LLC</h1>
           <p>Commercial Real Estate — buy, sell, lease, investment properties. Off-market opportunities &amp; deal flow.</p>
@@ -263,7 +243,7 @@ fbq('track', 'PageView');
 
     <section class="grid">
       <!-- LEFT: FORM -->
-      <div class="card" aria-label="Commercial Inquiry">
+      <section class="card" aria-label="Commercial Inquiry">
         <div class="hd">
           <h2>Submit a Commercial Inquiry</h2>
           <p class="note" style="margin:6px 0 0">
@@ -272,8 +252,16 @@ fbq('track', 'PageView');
         </div>
 
         <div class="bd">
-          <!-- ✅ IMPORTANT: point to your NEW deployed Apps Script URL (unified leads) -->
-          <form method="post" action="https://script.google.com/macros/s/AKfycbxtNBPIjg8rVnAf5JYQKkhjQC-YhYFqI4ilXamWP-C_J4mSEmdYqIN5uLXwrPR_zVVo/exec" novalidate>
+          <!-- ✅ IMPORTANT: points to your deployed Apps Script URL (unified leads) -->
+          <form
+            id="mdwForm"
+            method="post"
+            action="https://script.google.com/macros/s/AKfycbxtNBPIjg8rVnAf5JYQKkhjQC-YhYFqI4ilXamWP-C_J4mSEmdYqIN5uLXwrPR_zVVo/exec"
+            novalidate
+            data-sb-action="mdw_form_submit"
+            data-sb-component="form"
+            data-sb-label="Commercial Inquiry"
+          >
             <!-- Routing / system -->
             <input type="hidden" name="form_name" value="mdw" />
             <input type="hidden" name="lane" value="commercial" />
@@ -357,22 +345,33 @@ fbq('track', 'PageView');
             <textarea id="details" name="details" placeholder="Tell us what you need: location, size, use-case, tenant plans, ROI targets, or what you’re selling."></textarea>
 
             <div class="cta" style="margin-top:12px">
-              <button class="btn primary full" type="submit">Submit Commercial Inquiry</button>
+              <button class="btn primary full" type="submit"
+                data-sb-action="mdw_submit_click"
+                data-sb-component="form"
+                data-sb-label="Submit Commercial Inquiry"
+              >Submit Commercial Inquiry</button>
 
-              <a class="btn" href="mailto:mdwinvestmentsllc@gmail.com?subject=MDW%20Investments%20LLC%20—%20Commercial%20Inquiry"
-                 data-sb-event="sb_click" data-brand="mdw" data-component="mdw_hub" data-action="email" data-label="email_mdw">
-                Email MDW
-              </a>
+              <a class="btn"
+                 href="mailto:mdwinvestmentsllc@gmail.com?subject=MDW%20Investments%20LLC%20—%20Commercial%20Inquiry"
+                 target="_blank" rel="noopener noreferrer"
+                 data-sb-action="mdw_email_click"
+                 data-sb-component="cta"
+                 data-sb-label="Email MDW"
+              >Email MDW</a>
 
-              <a class="btn" href="tel:+13185428050"
-                 data-sb-event="sb_click" data-brand="mdw" data-component="mdw_hub" data-action="call" data-label="call_mdw">
-                Call: (318) 542-8050
-              </a>
+              <a class="btn"
+                 href="tel:+13185428050"
+                 data-sb-action="mdw_call_click"
+                 data-sb-component="cta"
+                 data-sb-label="Call MDW"
+              >Call: (318) 542-8050</a>
 
-              <a class="btn full" href="/madison-square/?_source=mdw_site_madison_square"
-                 data-sb-event="sb_click" data-brand="mdw" data-component="mdw_hub" data-action="view_asset" data-label="madison_square">
-                View: Madison Square (Asset Page)
-              </a>
+              <a class="btn full"
+                 href="/madison-square/?_source=mdw_site_madison_square"
+                 data-sb-action="mdw_asset_open"
+                 data-sb-component="cta"
+                 data-sb-label="Madison Square"
+              >View: Madison Square (Asset Page)</a>
             </div>
 
             <p class="note">
@@ -380,9 +379,9 @@ fbq('track', 'PageView');
             </p>
           </form>
         </div>
-      </div>
+      </section>
 
-      <!-- RIGHT: WHAT THIS HUB DOES -->
+      <!-- RIGHT: HOW IT WORKS -->
       <aside class="card" aria-label="How it works">
         <div class="hd">
           <h2>How This Hub Works</h2>
@@ -391,7 +390,7 @@ fbq('track', 'PageView');
           <ul class="list">
             <li><strong>Commercial leads</strong> route to MDW Investments LLC.</li>
             <li><strong>Rehab / make-ready / tenant-turn</strong> routes to Start2Finish when needed.</li>
-            <li><strong>Source tracking</strong> is captured automatically (QR, ads, links).</li>
+            <li><strong>Source tracking</strong> is captured from URL parameters (QR, ads, links).</li>
             <li><strong>Everything logs</strong> to a single Ops sheet for follow-up.</li>
           </ul>
 
@@ -401,29 +400,50 @@ fbq('track', 'PageView');
             Use this hub for: buy / sell / lease / investments / off-market / development deal flow.
           </p>
 
-          <div class="foot">
-            <span class="mini">v20260222-mdw-hub</span>
-            <span class="mini">Default: mdw_site</span>
+          <div style="margin-top:12px; display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-start;">
+            <span class="chip" id="buildStamp">v20260303-mdw-hub</span>
+            <span class="chip" id="sourceStamp">_source: mdw_site</span>
           </div>
 
-          <p class="note" style="margin-top:10px">
+          <p class="note powered" style="margin-top:12px">
             Powered by
-            <a href="https://lab.squarebidness.com/linkme/" target="_blank" rel="noopener noreferrer"
-               style="text-decoration:underline;font-weight:800">
-              Square Bidness Tech Lab
-            </a>
+            <a href="https://lab.squarebidness.com/linkme/" target="_blank" rel="noopener noreferrer">Square Bidness Tech Lab</a>
           </p>
         </div>
       </aside>
     </section>
+
+    <!-- Unified footer nav + contact -->
+    <footer class="site-footer" aria-label="Footer">
+      <div style="margin-bottom:10px;">
+        <strong>Explore:</strong>
+        <a href="/start2finish/">Start2Finish</a> •
+        <a href="/start2finish/commercial/">Commercial Services</a> •
+        <a href="/start2finish/partnership/">Partnership Info</a> •
+        <a href="/mdw/">MDW Investments</a> •
+        <a href="/madison-square/">Madison Square</a>
+      </div>
+
+      <div style="margin-bottom:8px;">
+        MDW Investments LLC • Commercial Real Estate • Louisiana<br />
+        Call/Text <a href="tel:+13185428050">(318) 542-8050</a> •
+        <a href="mailto:mdwinvestmentsllc@gmail.com">mdwinvestmentsllc@gmail.com</a>
+      </div>
+
+      <div class="powered">
+        Powered by <a href="https://lab.squarebidness.com/linkme/" target="_blank" rel="noopener noreferrer">Square Bidness Tech Lab</a>
+      </div>
+    </footer>
   </main>
 
   <script>
     (function(){
       var sourceEl = document.getElementById("source");
       var sourcePageEl = document.getElementById("sourcePage");
+      var sourceStamp = document.getElementById("sourceStamp");
+      var form = document.getElementById("mdwForm");
 
-      // URL-only _source (NO carryover) to prevent cross-page bleeding
+      // URL-only _source (NO carryover)
       function getSourceFromUrlOnly(){
         try{
           var url = new URL(window.location.href);
@@ -439,86 +459,70 @@ fbq('track', 'PageView');
 
       function setSourcePage(){
         try{
-          var u = new URL(window.location.href);
-          var full = u.toString();
-          if (sourcePageEl) sourcePageEl.value = full;
+          if (sourcePageEl) sourcePageEl.value = window.location.href;
         }catch(e){
           if (sourcePageEl) sourcePageEl.value = window.location.pathname;
         }
       }
 
+      function setSource(){
+        var s = getSourceFromUrlOnly();
+        if (sourceEl) sourceEl.value = s;
+        if (sourceStamp) sourceStamp.textContent = "_source: " + s;
+        return s;
+      }
+
       // init
       setSourcePage();
-      if (sourceEl) sourceEl.value = getSourceFromUrlOnly();
+      setSource();
 
-      // Basic required validation
-      var form = document.querySelector("form");
-      form && form.addEventListener("submit", function(ev){
-        setSourcePage();
-        if (sourceEl) sourceEl.value = getSourceFromUrlOnly();
+      // Submit validation + tracking
+      if (form){
+        form.addEventListener("submit", function(ev){
+          setSourcePage();
+          var src = setSource();
 
-        var required = form.querySelectorAll("[required]");
-        for (var i=0; i<required.length; i++){
-          var el = required[i];
-          if (!String(el.value || "").trim()){
-            alert("Please complete required fields.");
-            el.focus && el.focus();
-            ev.preventDefault();
-            return;
+          // basic required validation
+          var required = form.querySelectorAll("[required]");
+          for (var i=0; i<required.length; i++){
+            var el = required[i];
+            if (!String(el.value || "").trim()){
+              alert("Please complete required fields.");
+              el.focus && el.focus();
+              ev.preventDefault();
+              return;
+            }
           }
-        }
-      });
+
+          // conversion event (GA + Meta via sb-meta-bridge)
+          try{
+            if (typeof window.sbTrack === "function"){
+              window.sbTrack("sb_form_submit", {
+                sb_brand: "mdw",
+                sb_tier: "hub",
+                sb_variant: document.documentElement.getAttribute("data-sb-variant") || "v1",
+                page_path: "/mdw/",
+                page_title: document.title || "",
+                form_name: "mdw",
+                form_step: "submit",
+                valid: true,
+                action: "mdw_form_submit",
+                component: "form",
+                label: "Commercial Inquiry",
+                link_url: "",
+                source: src
+              });
+            }
+          }catch(_){}
+        });
+      }
     })();
   </script>
-  <!-- === FOOTER: Unified Brand Navigation + Contact Info === -->
-<footer class="foot" style="margin-top:28px; border-top:1px solid var(--line); padding-top:16px;">
 
- 
-
-  <!-- Text Navigation Links -->
-  <div style="text-align:center; font-size:14px; color:var(--muted); margin-bottom:12px; line-height:1.5;">
-    <strong>Explore:</strong>
-    <a href="/start2finish/" style="color:var(--text); text-decoration:underline; margin:0 4px;">Start2Finish</a>•
-    <a href="/start2finish/commercial/" style="color:var(--text); text-decoration:underline; margin:0 4px;">Commercial Services</a>•
-    <a href="/start2finish/partnership/" style="color:var(--text); text-decoration:underline; margin:0 4px;">Partnership Info</a>•
-    <a href="/mdw/" style="color:var(--text); text-decoration:underline; margin:0 4px;">MDW Investments</a>•
-    <a href="/madison-square/" style="color:var(--text); text-decoration:underline; margin:0 4px;">Madison Square</a>
-  </div>
-
-  <!-- Contact Info -->
-  <div style="text-align:center; font-size:12px; color:var(--muted); margin-bottom:6px;">
-    MDW Investments LLC • Commercial Real Estate  
-    <br />
-    Call/Text <a href="tel:+13185428050" style="color:var(--text); text-decoration:underline;">(318) 542-8050</a>  
-    • <a href="mailto:mdwinvestmentsllc@gmail.com" style="color:var(--text); text-decoration:underline;">mdwinvestmentsllc@gmail.com</a>
-  </div>
-
-  <!-- Powered By -->
-  <div style="text-align:center; font-size:11px; color:var(--muted); margin-top:6px;">
-    Powered by 
-    <a href="https://lab.squarebidness.com/linkme/" target="_blank" rel="noopener noreferrer"
-       style="color:var(--accent); text-decoration:underline; font-weight:700;">
-      Square Bidness Tech Lab
-    </a>
-  </div>
-
-</footer>
-
-<style>
-  .footer-icons img {
-    border: 2px solid var(--line);
-    border-radius: 12px;
-    transition: transform .18s ease, border-color .18s ease;
-  }
-  .footer-icons img:hover {
-    transform: scale(1.15);
-    border-color: var(--accent);
-  }
-</style>
-  <!-- Meta Pixel (Square Bidness) — NOSCRIPT (place in body) -->
-<noscript>
-  <img height="1" width="1" style="display:none"
-       src="https://www.facebook.com/tr?id=914123084877133&ev=PageView&noscript=1"/>
-</noscript>
+  <!-- Meta Pixel — NOSCRIPT fallback -->
+  <noscript>
+    <img height="1" width="1" style="display:none"
+         src="https://www.facebook.com/tr?id=914123084877133&ev=PageView&noscript=1"/>
+  </noscript>
 </body>
 </html>
