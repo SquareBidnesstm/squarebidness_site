@@ -1,6 +1,7 @@
-const CACHE_NAME = "philson-pwa-v1";
+const CACHE_NAME = "philson-pwa-v2";
 const URLS_TO_CACHE = [
   "/philson-le-fleuriste/",
+  "/philson-le-fleuriste/index.html",
   "/philson-le-fleuriste/funeral-floral-tributes/",
   "/philson-le-fleuriste/tributes/",
   "/philson-le-fleuriste/assets/favicon_ico/android-chrome-192x192.png",
@@ -20,7 +21,9 @@ self.addEventListener("activate", (event) => {
     caches.keys().then((keys) =>
       Promise.all(
         keys.map((key) => {
-          if (key !== CACHE_NAME) return caches.delete(key);
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
         })
       )
     )
@@ -30,6 +33,11 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+
+  const url = new URL(event.request.url);
+
+  // Only handle same-origin requests
+  if (url.origin !== self.location.origin) return;
 
   event.respondWith(
     caches.match(event.request).then((cached) => {
@@ -48,7 +56,11 @@ self.addEventListener("fetch", (event) => {
 
           return response;
         })
-        .catch(() => caches.match("/philson-le-fleuriste/"));
+        .catch(() => {
+          if (event.request.mode === "navigate") {
+            return caches.match("/philson-le-fleuriste/");
+          }
+        });
     })
   );
 });
