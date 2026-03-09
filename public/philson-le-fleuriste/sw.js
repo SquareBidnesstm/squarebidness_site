@@ -1,3 +1,4 @@
+// FILE: /public/philson-le-fleuriste/sw.js
 const CACHE_NAME = "philson-pwa-v2";
 const URLS_TO_CACHE = [
   "/philson-le-fleuriste/",
