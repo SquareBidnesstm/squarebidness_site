@@ -1,10 +1,10 @@
 <!-- FILE: /public/philson-le-fleuriste/index.html
-  (PASTE READY — Philson Le Fleuriste | Luxury Florals | Louisiana + Travel | FULLY TIED-IN + FB APP ID)
+  (PASTE READY — Philson Le Fleuriste | Luxury Florals | Louisiana + Travel | PWA CONFIRMED + ROOT MANIFEST)
   NOTE: Social card:
   /philson-le-fleuriste/assets/philson-meta-live-split-1200x630.jpg
 -->
 <!doctype html>
-<html lang="en" data-sb-brand="philson" data-sb-tier="public" data-sb-variant="philson-index-v20260304">
+<html lang="en" data-sb-brand="philson" data-sb-tier="public" data-sb-variant="philson-index-v20260309-pwa">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -18,9 +18,12 @@
   <!-- Theme -->
   <meta name="theme-color" content="#0b0b0b" />
   <meta name="color-scheme" content="dark light" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Philson" />
 
   <!-- Build stamp -->
-  <meta name="sb:build" content="v20260304-philson-le-fleuriste-launch" />
+  <meta name="sb:build" content="v20260309-philson-le-fleuriste-pwa-confirmed" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
@@ -49,7 +52,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/philson-le-fleuriste/assets/favicon_ico/favicon-32x32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/philson-le-fleuriste/assets/favicon_ico/favicon-16x16.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/philson-le-fleuriste/assets/favicon_ico/apple-touch-icon.png" />
-  <link rel="manifest" href="/philson-le-fleuriste/assets/favicon_ico/site.webmanifest" />
+  <link rel="manifest" href="/philson-le-fleuriste/manifest.webmanifest" />
   <link rel="icon" type="image/png" sizes="192x192" href="/philson-le-fleuriste/assets/favicon_ico/android-chrome-192x192.png" />
   <link rel="icon" type="image/png" sizes="512x512" href="/philson-le-fleuriste/assets/favicon_ico/android-chrome-512x512.png" />
 
@@ -105,7 +108,6 @@
       gap:12px;
     }
 
-    /* BRAND (updated: logo block is Philson mark) */
     .brand{
       display:flex; align-items:center; gap:12px;
       min-width:0;
@@ -384,7 +386,6 @@
   <header>
     <div class="wrap">
       <div class="top">
-        <!-- UPDATED HEADER BRANDING (Square Bidness removed, logo block = Philson mark) -->
         <div class="brand" data-sb-component="topnav">
           <div class="logo" aria-hidden="true">
             <img src="/philson-le-fleuriste/assets/favicon_ico/apple-touch-icon.png" alt="" />
@@ -481,6 +482,8 @@
           <a class="btn ghost" href="/philson-le-fleuriste/custom-funeral-tributes/" data-sb-event="sb_click" data-sb-component="quicklinks" data-sb-action="nav" data-sb-label="seo-custom-funeral-tributes">SEO Page: Custom Funeral Tributes</a>
           <a class="btn ghost" href="/philson-le-fleuriste/funeral-flowers-baton-rouge/" data-sb-event="sb_click" data-sb-component="quicklinks" data-sb-action="nav" data-sb-label="seo-baton-rouge">SEO Page: Baton Rouge</a>
           <a class="btn ghost" href="/philson-le-fleuriste/funeral-flowers-houston/" data-sb-event="sb_click" data-sb-component="quicklinks" data-sb-action="nav" data-sb-label="seo-houston">SEO Page: Houston</a>
+          <a class="btn ghost" href="/philson-le-fleuriste/funeral-flowers-dallas/" data-sb-event="sb_click" data-sb-component="quicklinks" data-sb-action="nav" data-sb-label="seo-dallas">SEO Page: Dallas</a>
+          <a class="btn ghost" href="/philson-le-fleuriste/funeral-flowers-atlanta/" data-sb-event="sb_click" data-sb-component="quicklinks" data-sb-action="nav" data-sb-label="seo-atlanta">SEO Page: Atlanta</a>
         </div>
       </section>
 
@@ -559,7 +562,7 @@
           </div>
           <div class="mini">
             <h3>Travel / Destination</h3>
-            <p>Memphis, Las Vegas, and beyond — available for bookings nationwide and abroad.</p>
+            <p>Memphis, Las Vegas, Atlanta, Dallas, and beyond — available for bookings nationwide and abroad.</p>
           </div>
         </div>
       </section>
@@ -608,6 +611,18 @@
 
   <script>
     document.getElementById('y').textContent = new Date().getFullYear();
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('/philson-le-fleuriste/sw.js')
+          .then(function (registration) {
+            console.log('Philson service worker registered:', registration.scope);
+          })
+          .catch(function (error) {
+            console.log('Philson service worker registration failed:', error);
+          });
+      });
+    }
   </script>
 </body>
 </html>
