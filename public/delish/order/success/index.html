@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Delish Order Confirmed</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#111111" />
+  <style>
+    :root{
+      --bg:#0e0e10;
+      --text:#f6f2ea;
+      --muted:#c8c0b2;
+      --accent:#d7ae72;
+      --accent2:#f2d8ae;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      padding:20px;
+      font-family:Inter,system-ui,sans-serif;
+      background:linear-gradient(180deg,#101012 0%,#0b0b0c 100%);
+      color:var(--text);
+    }
+    .card{
+      width:min(100%,720px);
+      background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:28px;
+      padding:32px;
+      text-align:center;
+      box-shadow:0 18px 54px rgba(0,0,0,.30);
+    }
+    .badge{
+      display:inline-flex;
+      min-height:38px;
+      align-items:center;
+      justify-content:center;
+      padding:0 14px;
+      border-radius:999px;
+      background:rgba(215,174,114,.14);
+      border:1px solid rgba(215,174,114,.22);
+      color:var(--accent2);
+      font-weight:800;
+      margin-bottom:18px;
+    }
+    h1{
+      margin:0;
+      font-size:clamp(2rem,4vw,3.25rem);
+      line-height:1;
+      letter-spacing:-.04em;
+    }
+    p{
+      margin:14px auto 0;
+      max-width:580px;
+      color:var(--muted);
+      font-size:1.02rem;
+    }
+    .record{
+      margin-top:18px;
+      padding:14px 16px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.03);
+      color:var(--text);
+      font-weight:700;
+    }
+    .actions{
+      margin-top:24px;
+      display:flex;
+      justify-content:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:48px;
+      padding:0 18px;
+      border-radius:999px;
+      text-decoration:none;
+      font-weight:800;
+    }
+    .btn--gold{
+      background:linear-gradient(180deg,var(--accent2),var(--accent));
+      color:#1c1510;
+    }
+    .btn--dark{
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.10);
+      color:var(--text);
+    }
+  </style>
+  <script defer src="/scripts/sb-analytics.js"></script>
+</head>
+<body>
+  <main class="card">
+    <div class="badge">Payment received</div>
+    <h1>Your Delish order is confirmed.</h1>
+    <p>
+      Your pickup order has been paid successfully. Delish will prepare your order for the selected pickup window.
+    </p>
+    <div class="record" id="recordBox">Order reference: loading...</div>
+    <div class="actions">
+      <a class="btn btn--gold" href="/delish/">Back to Delish</a>
+      <a class="btn btn--dark" href="/delish/order/">Place Another Order</a>
+    </div>
+  </main>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const recordId = params.get("record_id") || "Delish order";
+    document.getElementById("recordBox").textContent = "Order reference: " + recordId;
+  </script>
+</body>
+</html>
