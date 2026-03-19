@@ -1,6 +1,6 @@
 <!-- FILE: /public/delish/index.html -->
 <!doctype html>
-<html lang="en" data-sb-brand="delish" data-sb-tier="public" data-sb-variant="delish-index-v20260318">
+<html lang="en" data-sb-brand="delish" data-sb-tier="public" data-sb-variant="delish-index-v20260319-menu-rebuild">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -16,7 +16,7 @@
   <meta name="format-detection" content="telephone=no" />
   <meta name="theme-color" content="#0f0f0f" />
   <meta name="color-scheme" content="dark light" />
-  <meta name="sb:build" content="v20260318-delish-final-new-location" />
+  <meta name="sb:build" content="v20260319-delish-digital-menu-cta" />
 
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Delish — Authentic Soul Food" />
@@ -201,15 +201,167 @@
       box-shadow:0 0 0 4px rgba(215,174,114,.12);
     }
 
-    .menu-board{padding:0;overflow:hidden}
-    .menu-board__img{aspect-ratio:16/10;object-fit:cover;width:100%;background:#111;border-bottom:1px solid rgba(255,255,255,.08)}
-    .menu-board__body{padding:22px}
-    .menu-columns{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
-    .menu-day{border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:18px;background:rgba(255,255,255,.03)}
-    .menu-day h3{margin:0 0 10px;color:var(--accent-2);font-size:1.02rem}
-    .menu-day ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
-    .menu-day li{color:var(--muted)}
-    .menu-day strong{color:var(--text)}
+    /* DIGITAL MENU REBUILD */
+    .delish-menu-card{
+      background:
+        radial-gradient(circle at top right, rgba(215,174,114,.08), transparent 32%),
+        linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+      padding:22px;
+    }
+    .delish-menu-grid{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0, 1fr));
+      gap:16px;
+    }
+    .delish-menu-day{
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:20px;
+      padding:18px;
+      background:rgba(255,255,255,.03);
+    }
+    .delish-menu-day--featured{
+      border-color:rgba(215,174,114,.22);
+      background:linear-gradient(180deg, rgba(215,174,114,.10), rgba(255,255,255,.03));
+    }
+    .delish-menu-day h3,
+    .delish-menu-panel h3{
+      margin:0 0 10px;
+      font-size:1.08rem;
+      letter-spacing:-.02em;
+      color:var(--accent-2);
+    }
+    .delish-menu-price{
+      display:inline-flex;
+      align-items:center;
+      min-height:32px;
+      padding:0 10px;
+      border-radius:999px;
+      background:rgba(215,174,114,.14);
+      border:1px solid rgba(215,174,114,.18);
+      color:var(--accent-2);
+      font-weight:800;
+      font-size:.88rem;
+      margin-bottom:10px;
+    }
+    .delish-menu-day ul,
+    .delish-menu-simple{
+      list-style:none;
+      margin:0;
+      padding:0;
+      display:grid;
+      gap:10px;
+    }
+    .delish-menu-day li{
+      color:var(--muted);
+      padding-top:10px;
+      border-top:1px dashed rgba(255,255,255,.08);
+    }
+    .delish-menu-day li:first-child{
+      padding-top:0;
+      border-top:0;
+    }
+    .delish-menu-day strong{
+      color:var(--text);
+    }
+    .delish-menu-row,
+    .delish-menu-simple li{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .delish-menu-row span,
+    .delish-menu-simple span{
+      color:var(--muted);
+    }
+    .delish-menu-row strong:last-child,
+    .delish-menu-simple strong{
+      color:var(--text);
+      white-space:nowrap;
+    }
+    .delish-menu-sub{
+      margin-top:4px;
+      color:var(--accent-2);
+      font-size:.9rem;
+      font-weight:700;
+    }
+    .delish-menu-lower{
+      display:grid;
+      grid-template-columns:1fr 1.2fr 1fr;
+      gap:16px;
+      margin-top:16px;
+    }
+    .delish-menu-panel{
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:20px;
+      padding:18px;
+      background:rgba(255,255,255,.03);
+    }
+    .delish-menu-panel--sides h3{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .delish-side-list{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+    .delish-side-list span{
+      display:inline-flex;
+      align-items:center;
+      min-height:38px;
+      padding:0 12px;
+      border-radius:999px;
+      background:rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.08);
+      color:var(--text);
+      font-weight:700;
+      font-size:.92rem;
+    }
+    .delish-menu-note{
+      margin:14px 0 0;
+      color:var(--soft);
+      font-size:.94rem;
+      line-height:1.55;
+    }
+    .delish-menu-footnote{
+      margin-top:16px;
+      padding-top:16px;
+      border-top:1px solid rgba(255,255,255,.08);
+      color:var(--soft);
+      font-size:.94rem;
+      line-height:1.55;
+    }
+    .delish-menu-cta{
+      margin-top:16px;
+      padding:22px;
+      border-radius:22px;
+      border:1px solid rgba(215,174,114,.18);
+      background:
+        radial-gradient(circle at top right, rgba(215,174,114,.12), transparent 35%),
+        linear-gradient(180deg, rgba(215,174,114,.08), rgba(255,255,255,.03));
+      box-shadow:var(--shadow);
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:18px;
+      align-items:center;
+    }
+    .delish-menu-cta h3{
+      margin:0;
+      font-size:clamp(1.35rem,2vw,1.8rem);
+      line-height:1.05;
+      letter-spacing:-.03em;
+    }
+    .delish-menu-cta p{
+      margin:10px 0 0;
+      color:var(--muted);
+      max-width:700px;
+    }
 
     .location{display:grid;grid-template-columns:1.06fr .94fr;gap:18px;align-items:stretch}
     .location__photo{
@@ -258,8 +410,8 @@
 
     @media (max-width:1080px){
       .hero__grid,.location,.grid-3,.steps{grid-template-columns:1fr}
-      .grid-2,.menu-columns{grid-template-columns:1fr}
-      .cta{grid-template-columns:1fr}
+      .grid-2,.delish-menu-grid,.delish-menu-lower{grid-template-columns:1fr}
+      .cta,.delish-menu-cta{grid-template-columns:1fr}
       .hero__panel{min-height:560px}
     }
     @media (max-width:820px){
@@ -278,8 +430,8 @@
       .hero h1{max-width:11ch}
       .hero p{font-size:.98rem}
       .section{padding:22px 0}
-      .cta{padding:24px}
-      .info,.step,.location__card,.quote,.menu-board__body,.card--stats{padding:18px}
+      .cta,.delish-menu-cta{padding:20px}
+      .info,.step,.location__card,.quote,.card--stats,.delish-menu-card,.delish-menu-day,.delish-menu-panel{padding:18px}
     }
   </style>
 
@@ -289,7 +441,7 @@
   <header class="topbar" id="top">
     <div class="wrap topbar__inner">
       <a class="brand" href="/delish/" aria-label="Delish home">
-        <img class="brand__mark" src="/delish/assets/delish-logo-mark_512.png" alt="Delish logo mark" loading="eager" decoding="async" />
+        <img class="brand__mark" src="/delish/assets/delish-logo-mark-512.png" alt="Delish logo mark" loading="eager" decoding="async" />
         <div class="brand__text">
           <p class="brand__name">Delish</p>
           <p class="brand__sub">Authentic Soul Food & Catering</p>
@@ -318,7 +470,7 @@
           <div class="hero__overlay" aria-hidden="true"></div>
 
           <div class="hero__brandline">
-            <img class="hero__brandmark" src="/delish/assets/delish-logo-mark_512.png" alt="Delish logo mark" loading="eager" decoding="async" />
+            <img class="hero__brandmark" src="/delish/assets/delish-logo-mark-512.png" alt="Delish logo mark" loading="eager" decoding="async" />
             <div class="hero__brandcopy">
               <p class="hero__brandname">Delish</p>
               <p class="hero__brandtag">Alexandria, Louisiana • Community Loved</p>
@@ -398,7 +550,7 @@
               <li><strong>Wednesday</strong><span>Open</span></li>
               <li><strong>Thursday</strong><span>Open</span></li>
               <li><strong>Friday</strong><span>Open</span></li>
-              <li><strong>Sunday</strong><span>1st & 3rd Sundays featured menu</span></li>
+              <li><strong>Sunday</strong><span>1st &amp; 3rd Sundays featured menu</span></li>
             </ul>
           </div>
 
@@ -427,65 +579,169 @@
             <p class="section__eyebrow">Weekly menu</p>
             <h2 class="section__title">The plates people already line up for.</h2>
             <p class="section__copy">
-              Delish is known for soul food favorites, comfort classics, and a weekly rhythm
-              customers already understand. This section can be updated as the live menu changes.
+              Delish is known for soul food favorites, comfort classics, and a weekly rhythm customers already understand.
+              Final live ordering will only show currently available prepaid pickup items.
             </p>
           </div>
         </div>
 
-        <div class="info menu-board">
-          <img class="menu-board__img" src="/delish/assets/delish-weekly-menu.jpg" alt="Delish weekly menu board" loading="lazy" decoding="async" />
-          <div class="menu-board__body">
-            <div class="menu-columns">
-              <div class="menu-day">
-                <h3>Monday</h3>
-                <ul>
-                  <li><strong>Red Beans or Okra</strong> with Fried Chicken, Cornbread</li>
-                  <li><strong>Hamburger Steak</strong> with rice or mashed potatoes, vegetables, roll</li>
-                </ul>
-              </div>
-              <div class="menu-day">
-                <h3>Tuesday</h3>
-                <ul>
-                  <li><strong>Beef Tips</strong> or <strong>Meatloaf</strong></li>
-                  <li>Rice or mashed potatoes with 2 sides</li>
-                </ul>
-              </div>
-              <div class="menu-day">
-                <h3>Wednesday</h3>
-                <ul>
-                  <li><strong>Pork Neckbones</strong></li>
-                  <li><strong>Baked Chicken</strong></li>
-                  <li><strong>Country Fried Steak</strong></li>
-                </ul>
-              </div>
-              <div class="menu-day">
-                <h3>Thursday</h3>
-                <ul>
-                  <li><strong>Turkey Wings</strong></li>
-                  <li>Cornbread dressing or rice with 2 sides</li>
-                </ul>
-              </div>
-              <div class="menu-day">
-                <h3>Friday</h3>
-                <ul>
-                  <li><strong>Crawfish Étouffée</strong></li>
-                  <li><strong>Shrimp Pasta</strong></li>
-                  <li><strong>Fried Catfish</strong> or <strong>Baked Catfish</strong></li>
-                </ul>
-              </div>
-              <div class="menu-day">
-                <h3>1st & 3rd Sundays</h3>
-                <ul>
-                  <li><strong>Pork Steak and Gravy</strong></li>
-                  <li><strong>Oxtails</strong></li>
-                  <li><strong>Baked Chicken</strong></li>
-                </ul>
-              </div>
+        <div class="delish-menu-card">
+          <div class="delish-menu-grid">
+            <article class="delish-menu-day">
+              <h3>Monday</h3>
+              <div class="delish-menu-price">$13.99</div>
+              <ul>
+                <li><strong>Red Beans or Okra</strong> with fried chicken, cornbread</li>
+                <li><strong>Hamburger Steak</strong> with rice or mashed potatoes, green beans, corn, roll</li>
+              </ul>
+            </article>
+
+            <article class="delish-menu-day">
+              <h3>Tuesday</h3>
+              <div class="delish-menu-price">$13.99</div>
+              <ul>
+                <li><strong>Beef Tips</strong> or <strong>Meatloaf</strong></li>
+                <li>Rice or mashed potatoes with 2 sides</li>
+              </ul>
+            </article>
+
+            <article class="delish-menu-day">
+              <h3>Wednesday</h3>
+              <div class="delish-menu-price">$10.00</div>
+              <ul>
+                <li><strong>Pork Neckbones</strong></li>
+                <li><strong>Baked Chicken</strong></li>
+                <li><strong>Country Fried Steak</strong></li>
+                <li>Rice or mashed potatoes with 2 sides</li>
+              </ul>
+            </article>
+
+            <article class="delish-menu-day">
+              <h3>Thursday</h3>
+              <div class="delish-menu-price">$16.99</div>
+              <ul>
+                <li><strong>Turkey Wings</strong></li>
+                <li>Cornbread dressing or rice with 2 sides</li>
+              </ul>
+            </article>
+
+            <article class="delish-menu-day delish-menu-day--featured">
+              <h3>Friday</h3>
+              <ul>
+                <li>
+                  <div class="delish-menu-row">
+                    <span><strong>Crawfish Étouffée</strong> with 2 sides</span>
+                    <strong>$16.99</strong>
+                  </div>
+                  <div class="delish-menu-sub">Add fish $21.99</div>
+                </li>
+                <li>
+                  <div class="delish-menu-row">
+                    <span><strong>Shrimp Pasta</strong> with 2 sides</span>
+                    <strong>$16.99</strong>
+                  </div>
+                  <div class="delish-menu-sub">Add fish $21.99</div>
+                </li>
+                <li>
+                  <div class="delish-menu-row">
+                    <span><strong>Fried Catfish (3 strips)</strong> with 2 sides</span>
+                    <strong>$15.99</strong>
+                  </div>
+                </li>
+                <li>
+                  <div class="delish-menu-row">
+                    <span><strong>Baked Catfish (2)</strong> with 2 sides</span>
+                    <strong>$16.99</strong>
+                  </div>
+                </li>
+              </ul>
+            </article>
+
+            <article class="delish-menu-day">
+              <h3>1st &amp; 3rd Sundays</h3>
+              <ul>
+                <li>
+                  <div class="delish-menu-row">
+                    <span><strong>Pork Steak and Gravy</strong> with rice or mashed, 2 sides</span>
+                    <strong>$15.99</strong>
+                  </div>
+                </li>
+                <li>
+                  <div class="delish-menu-row">
+                    <span><strong>Oxtails</strong> with rice or mashed, 2 sides</span>
+                    <strong>$24.99</strong>
+                  </div>
+                </li>
+                <li>
+                  <div class="delish-menu-row">
+                    <span><strong>Baked Chicken</strong> with rice or mashed, 2 sides</span>
+                    <strong>$13.99</strong>
+                  </div>
+                </li>
+              </ul>
+            </article>
+          </div>
+
+          <div class="delish-menu-lower">
+            <div class="delish-menu-panel">
+              <h3>Drinks</h3>
+              <ul class="delish-menu-simple">
+                <li><span>Tropical Punch Kool-Aid</span><strong>$3.99</strong></li>
+                <li><span>Lemonade</span><strong>$3.99</strong></li>
+                <li><span>Can Soda</span><strong>$1.50</strong></li>
+                <li><span>Bottle Water</span><strong>$1.50</strong></li>
+              </ul>
             </div>
 
-            <div style="margin-top:18px;color:var(--soft);font-size:.96rem;">
-              Menu items and availability may change. Final live ordering will show only currently available paid pickup items.
+            <div class="delish-menu-panel">
+              <h3>Lagniappe</h3>
+              <ul class="delish-menu-simple">
+                <li><span>Grilled Chicken Salad</span><strong>$12.99</strong></li>
+                <li><span>Grilled Shrimp Salad</span><strong>$12.99</strong></li>
+                <li><span>Both Meat</span><strong>$16.99</strong></li>
+                <li><span>Chicken Tender Basket with Fries</span><strong>$9.99</strong></li>
+                <li><span>Fried Porkchop Sandwich with Fries</span><strong>$9.99</strong></li>
+                <li><span>Cheeseburger Basket</span><strong>$9.99</strong></li>
+              </ul>
+              <p class="delish-menu-note">
+                Salads come with chopped romaine, tomatoes, cucumber, eggs, shredded cheese,
+                and your choice of ranch, Italian, or balsamic vinaigrette.
+              </p>
+            </div>
+
+            <div class="delish-menu-panel delish-menu-panel--sides">
+              <h3>Extra Sides <span>$2.50</span></h3>
+              <div class="delish-side-list">
+                <span>Mac and Cheese</span>
+                <span>Yams</span>
+                <span>Corn</span>
+                <span>Cabbage</span>
+                <span>Green Salad</span>
+                <span>Black Eyed Peas</span>
+                <span>Green Beans</span>
+              </div>
+              <p class="delish-menu-note">
+                <strong>Friday &amp; Sunday only:</strong> Potato Salad, Rice Dressing
+              </p>
+            </div>
+          </div>
+
+          <div class="delish-menu-footnote">
+            Menu items and availability may change. Some items served at this establishment may contain imported crawfish or shrimp.
+            Ask for more information.
+          </div>
+
+          <div class="delish-menu-cta">
+            <div>
+              <h3>See a plate you want? Call ahead and lock in pickup.</h3>
+              <p>
+                Delish is moving toward a cleaner paid-pickup flow. For now, call to confirm availability
+                and use catering for larger requests so daily demand stays organized.
+              </p>
+            </div>
+            <div class="cta-row">
+              <a class="btn btn--gold" href="tel:+13187879407">Call for Pickup</a>
+              <a class="btn btn--dark" href="/delish/catering/">Start Catering Request</a>
             </div>
           </div>
         </div>
