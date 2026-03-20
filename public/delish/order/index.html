@@ -1,24 +1,36 @@
 <!-- FILE: /public/delish/order/index.html -->
 <!doctype html>
-<html lang="en" data-sb-brand="delish" data-sb-tier="order" data-sb-variant="delish-order-v1">
+<html lang="en" data-sb-brand="delish" data-sb-tier="order" data-sb-variant="delish-order-v2-prepaid-online-lane">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
 
   <title>Order — Delish | Alexandria, Louisiana</title>
-  <meta name="description" content="Order Delish online. Paid pickup only. Select items, clean ordering, no confusion." />
+  <meta name="description" content="Delish is putting a prepaid online pickup system in place for cleaner ordering, controlled availability, and no call-in orders." />
 
   <link rel="canonical" href="https://www.squarebidness.com/delish/order/" />
   <meta name="robots" content="index,follow" />
   <meta name="theme-color" content="#0f0f0f" />
+  <meta property="fb:app_id" content="802680062853443" />
 
   <!-- OG -->
-  <meta property="og:title" content="Order Delish — Paid Pickup Only" />
-  <meta property="og:description" content="Clean ordering. No confusion. Secure your plate ahead of time." />
+  <meta property="og:title" content="Order Delish — Prepaid Online Pickup" />
+  <meta property="og:description" content="Delish is putting a prepaid online pickup system in place. No call-in orders." />
   <meta property="og:image" content="https://www.squarebidness.com/delish/assets/delish-meta-1200x630.jpg" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://www.squarebidness.com/delish/order/" />
 
-  <!-- Favicon -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Order Delish — Prepaid Online Pickup" />
+  <meta name="twitter:description" content="Prepaid online pickup system being put in place. No call-in orders." />
+  <meta name="twitter:image" content="https://www.squarebidness.com/delish/assets/delish-meta-1200x630.jpg" />
+
+  <link rel="manifest" href="/delish/manifest.json" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/delish/assets/delish-favicon-16.png" />
   <link rel="icon" type="image/png" sizes="32x32" href="/delish/assets/delish-favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/delish/assets/delish-logo-mark-180.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/delish/assets/delish-logo-mark-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="/delish/assets/delish-logo-mark-512.png" />
 
   <!-- Analytics -->
   <script defer src="/scripts/ga.js"></script>
@@ -27,36 +39,71 @@
   <script defer src="/scripts/sb-meta-bridge.js"></script>
 
   <style>
+    :root{
+      --bg:#0f0f10;
+      --card:#171718;
+      --line:#2c2c2f;
+      --text:#f5f2ea;
+      --muted:#cfc7ba;
+      --soft:#a79c8d;
+      --accent:#d7ae72;
+      --accent-2:#f2d7ad;
+      --shadow:0 16px 50px rgba(0,0,0,.28);
+      --max:1100px;
+    }
+    *{box-sizing:border-box}
     body{
       margin:0;
-      font-family:Inter,system-ui;
-      background:#0f0f10;
-      color:#f5f2ea;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(215,174,114,.14), transparent 28%),
+        linear-gradient(180deg,#111112 0%,#0c0c0d 100%);
+      color:var(--text);
+      line-height:1.55;
     }
-    .wrap{width:min(1100px,92%);margin:0 auto}
+    a{color:inherit;text-decoration:none}
+    .wrap{width:min(var(--max),92%);margin:0 auto}
     .section{padding:40px 0}
 
-    .hero{
-      text-align:center;
-      padding:60px 0 40px;
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:50;
+      backdrop-filter:blur(14px);
+      background:rgba(12,12,13,.76);
+      border-bottom:1px solid rgba(255,255,255,.06);
     }
-    h1{
-      font-size:clamp(2.2rem,5vw,3.4rem);
+    .topbar__inner{
+      min-height:72px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .brand__mark{
+      width:44px;
+      height:44px;
+      border-radius:14px;
+      object-fit:cover;
+      background:#fff;
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:var(--shadow);
+    }
+    .brand__name{
       margin:0;
-      letter-spacing:-.03em;
+      font-size:1.04rem;
+      font-weight:800;
     }
-    p{
-      color:#cfc7ba;
-      max-width:600px;
-      margin:14px auto 0;
-    }
-
-    .card{
-      border:1px solid #2c2c2f;
-      border-radius:20px;
-      padding:24px;
-      background:#171718;
-      margin-top:30px;
+    .brand__sub{
+      margin:2px 0 0;
+      color:var(--soft);
+      font-size:.88rem;
     }
 
     .btn{
@@ -67,12 +114,72 @@
       border-radius:999px;
       font-weight:800;
       text-decoration:none;
-      margin-top:16px;
+      border:1px solid transparent;
+      transition:transform .14s ease, background .18s ease, border-color .18s ease;
+      white-space:nowrap;
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btn--gold{
+      background:linear-gradient(180deg,var(--accent-2),var(--accent));
+      color:#181410;
+      box-shadow:0 12px 30px rgba(215,174,114,.24);
+    }
+    .btn--dark{
+      background:rgba(255,255,255,.04);
+      border-color:rgba(255,255,255,.10);
+      color:var(--text);
     }
 
-    .btn--gold{
-      background:#d7ae72;
-      color:#181410;
+    .hero{
+      text-align:center;
+      padding:68px 0 30px;
+    }
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:36px;
+      padding:0 14px;
+      border-radius:999px;
+      background:rgba(215,174,114,.12);
+      border:1px solid rgba(215,174,114,.18);
+      color:var(--accent-2);
+      font-size:.82rem;
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      margin-bottom:16px;
+    }
+    h1{
+      font-size:clamp(2.2rem,5vw,3.5rem);
+      margin:0;
+      letter-spacing:-.03em;
+      line-height:1.02;
+    }
+    .hero p{
+      color:var(--muted);
+      max-width:700px;
+      margin:14px auto 0;
+      font-size:1.02rem;
+    }
+
+    .card{
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:24px;
+      background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
+      margin-top:24px;
+      box-shadow:var(--shadow);
+    }
+    .card h2{
+      margin:0 0 10px;
+      font-size:1.28rem;
+      letter-spacing:-.02em;
+    }
+    .card p{
+      color:var(--muted);
+      margin:0;
+      max-width:720px;
     }
 
     .notice{
@@ -81,49 +188,120 @@
       padding:16px;
       border-radius:14px;
       margin-top:20px;
+      color:#f4ead8;
+    }
+
+    .list{
+      margin:14px 0 0;
+      padding-left:18px;
+      color:var(--muted);
+    }
+    .list li + li{margin-top:8px}
+
+    .footer{
+      padding:10px 0 44px;
+      color:var(--soft);
+    }
+    .footer__inner{
+      border-top:1px solid rgba(255,255,255,.08);
+      padding-top:18px;
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+    }
+
+    @media (max-width:640px){
+      .topbar__inner{
+        padding:14px 0;
+      }
+      .hero{
+        padding:48px 0 18px;
+      }
+      .card{
+        padding:18px;
+      }
     }
   </style>
 </head>
-
 <body>
+  <noscript>
+    <img
+      height="1"
+      width="1"
+      style="display:none"
+      src="https://www.facebook.com/tr?id=914123084877133&ev=PageView&noscript=1"
+      alt=""
+    />
+  </noscript>
 
-<section class="hero">
-  <div class="wrap">
-    <h1>Order Delish</h1>
-    <p>Paid pickup only. Select items. Clean ordering. No confusion.</p>
-  </div>
-</section>
+  <header class="topbar">
+    <div class="wrap topbar__inner">
+      <a class="brand" href="/delish/" aria-label="Delish home">
+        <img class="brand__mark" src="/delish/assets/delish-logo-mark-512.png" alt="Delish logo" loading="eager" decoding="async" />
+        <div>
+          <p class="brand__name">Delish</p>
+          <p class="brand__sub">Prepaid online pickup lane</p>
+        </div>
+      </a>
 
-<section class="section">
-  <div class="wrap">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <a href="/delish/" class="btn btn--dark">Back Home</a>
+        <a href="/delish/catering/" class="btn btn--gold">Catering</a>
+      </div>
+    </div>
+  </header>
 
-    <div class="card">
-      <h2>Ordering is being rolled out</h2>
+  <section class="hero">
+    <div class="wrap">
+      <div class="eyebrow">Online ordering lane</div>
+      <h1>Prepaid online pickup is being put in place.</h1>
       <p>
-        Delish is transitioning to a cleaner order system with prepaid pickup,
-        limited daily availability, and better flow during peak hours.
+        Delish is moving to a cleaner ordering system built around prepaid online pickup.
+        No call-in orders. Daily availability and live item access will be managed through the online order lane as the system is put in place.
       </p>
+    </div>
+  </section>
 
-      <div class="notice">
-        <strong>Right now:</strong><br>
-        Call ahead to confirm availability or use catering for larger orders.
+  <section class="section">
+    <div class="wrap">
+      <div class="card">
+        <h2>No call-in orders</h2>
+        <p>
+          Delish is not taking call-in orders. The order system is being built to support prepaid online pickup only,
+          with cleaner order handling, controlled availability, and less confusion during busy periods.
+        </p>
+
+        <div class="notice">
+          <strong>Current status:</strong><br />
+          The prepaid online ordering system is being put in place now. Featured items, pickup timing, and checkout flow will be handled through the online order lane as it goes live.
+        </div>
       </div>
 
-      <a href="tel:+13187879407" class="btn btn--gold">Call to Order</a>
+      <div class="card">
+        <h2>What this system is being built to do</h2>
+        <ul class="list">
+          <li>Accept prepaid online pickup orders only</li>
+          <li>Remove confusion from phone-based ordering</li>
+          <li>Control what items are available each day</li>
+          <li>Support cleaner pickup timing and confirmation</li>
+        </ul>
+      </div>
     </div>
+  </section>
 
-    <div class="card">
-      <h2>What’s coming next</h2>
-      <ul>
-        <li>Live daily menu items</li>
-        <li>Prepaid checkout</li>
-        <li>Pickup time selection</li>
-        <li>Order confirmation system</li>
-      </ul>
+  <footer class="footer">
+    <div class="wrap footer__inner">
+      <div>© <span id="year"></span> Delish. Square Bidness ecosystem.</div>
+      <div>
+        <a href="/delish/">Home</a> ·
+        <a href="/delish/catering/">Catering</a>
+      </div>
     </div>
+  </footer>
 
-  </div>
-</section>
-
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
