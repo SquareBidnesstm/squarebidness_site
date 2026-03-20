@@ -12,6 +12,9 @@
   <meta name="robots" content="index,follow" />
   <meta name="theme-color" content="#050505" />
 
+  <!-- FACEBOOK -->
+  <meta property="fb:app_id" content="802680062853443" />
+
   <!-- OPEN GRAPH (Facebook, LinkedIn, iMessage) -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Elite Home Maintenance | Residential Repair & Bathroom Restoration" />
@@ -48,7 +51,10 @@
   <script defer src="/scripts/sb-analytics.js"></script>
   <script defer src="/scripts/ga.js"></script>
 
-  
+  <!-- Meta Pixel (centralized) + SB→Meta bridge -->
+  <script defer src="/scripts/meta-pixel.js"></script>
+  <script defer src="/scripts/sb-meta-bridge.js"></script>
+
   <style>
     :root{
       --bg:#050505;
@@ -116,13 +122,6 @@
       flex:0 0 auto;
     }
     .brand-copy{min-width:0}
-    .brand-kicker{
-      font-size:11px;
-      letter-spacing:.18em;
-      text-transform:uppercase;
-      color:var(--soft);
-      margin-bottom:2px;
-    }
     .brand-title{
       font-size:16px;
       font-weight:800;
@@ -171,20 +170,11 @@
     .hero{
       padding:64px 0 34px;
     }
-    .hero-grid{
-      display:grid;
-      grid-template-columns:1.15fr .85fr;
-      gap:28px;
-      align-items:stretch;
-    }
-    .hero-copy,
-    .hero-card{
+    .hero-copy{
       background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
       border:1px solid var(--line);
       border-radius:var(--radius);
       box-shadow:var(--shadow);
-    }
-    .hero-copy{
       padding:34px;
       position:relative;
       overflow:hidden;
@@ -243,48 +233,6 @@
       color:var(--muted);
       font-size:13px;
       line-height:1.45;
-    }
-
-    .hero-card{
-      padding:20px;
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
-      gap:18px;
-    }
-    .logo-frame{
-      background:#000;
-      border-radius:22px;
-      overflow:hidden;
-      border:1px solid rgba(255,255,255,.08);
-      min-height:100%;
-    }
-    .logo-frame img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      aspect-ratio:1/1;
-    }
-    .trust-strip{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:12px;
-    }
-    .trust-box{
-      background:rgba(255,255,255,.03);
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:18px;
-      padding:14px 16px;
-    }
-    .trust-box strong{
-      display:block;
-      margin-bottom:5px;
-      font-size:14px;
-    }
-    .trust-box span{
-      display:block;
-      color:var(--muted);
-      font-size:14px;
     }
 
     section{
@@ -425,7 +373,6 @@
     }
 
     @media (max-width: 1024px){
-      .hero-grid,
       .feature-band{
         grid-template-columns:1fr;
       }
@@ -449,7 +396,6 @@
         padding-top:34px;
       }
       .hero-copy,
-      .hero-card,
       .card,
       .cta-panel{
         padding:22px;
@@ -491,6 +437,13 @@
   </script>
 </head>
 <body>
+  <!-- Meta Pixel (Square Bidness) — NOSCRIPT fallback -->
+  <noscript>
+    <img height="1" width="1" style="display:none"
+         src="https://www.facebook.com/tr?id=914123084877133&ev=PageView&noscript=1"
+         alt="" />
+  </noscript>
+
   <header class="topbar">
     <div class="wrap topbar-inner">
       <a class="brand" href="/elite-home-maintenance/">
@@ -511,7 +464,7 @@
 
   <main>
     <section class="hero">
-      <div class="wrap hero-grid">
+      <div class="wrap">
         <div class="hero-copy">
           <div class="eyebrow">Independent Operator • Property Repair Lane</div>
           <h1>Reliable home repair and bathroom restoration, done right.</h1>
@@ -537,23 +490,6 @@
             <div class="hero-point">
               <strong>Louisiana service lane</strong>
               <span>Local operator presence installed inside the Square Bidness ecosystem.</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="hero-card">
-          <div class="logo-frame">
-            <img src="/elite-home-maintenance/assets/elite-logo.jpg" alt="Elite Home Maintenance brand logo" />
-          </div>
-
-          <div class="trust-strip">
-            <div class="trust-box">
-              <strong>Current work in motion</strong>
-              <span>Rotten subfloor replacement in a half bathroom and toilet install at HQ2.</span>
-            </div>
-            <div class="trust-box">
-              <strong>Operator-backed trust</strong>
-              <span>Placed into the Square Bidness ecosystem with reputation, structure, and visibility.</span>
             </div>
           </div>
         </div>
