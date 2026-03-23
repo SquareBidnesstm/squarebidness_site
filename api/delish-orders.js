@@ -1,67 +1,47 @@
-// FILE: /app/api/delish-orders/route.ts
-import { NextResponse } from "next/server";
+// FILE: /api/delish-orders.js
 import { Redis } from "@upstash/redis";
 
-export const runtime = "nodejs";
-
 const redis = new Redis({
-  url: process.env.DELISH_UPSTASH_REDIS_REST_URL!,
-  token: process.env.DELISH_UPSTASH_REDIS_REST_TOKEN!,
+  url: process.env.DELISH_UPSTASH_REDIS_REST_URL,
+  token: process.env.DELISH_UPSTASH_REDIS_REST_TOKEN,
 });
 
-type DelishOrder = {
-  id: string;
-  orderNumber: string;
-  createdAt: string;
-  customerName: string;
-  customerPhone: string;
-  customerEmail?: string;
-  pickupDate: string;
-  pickupWindow: string;
-  notes?: string;
-  items: Array<{
-    name: string;
-    qty: number;
-    price: number;
-  }>;
-  subtotal: number;
-  tax: number;
-  total: number;
-  paymentStatus: "paid";
-  source: string;
-};
+export default async function handler(req, res) {
+  if (req.method !== "GET") {
+    res.setHeader("Allow", "GET");
+    return res.status(405).json({ ok: false, error: "Method not allowed." });
+  }
 
-export async function GET() {
   try {
     if (
       !process.env.DELISH_UPSTASH_REDIS_REST_URL ||
       !process.env.DELISH_UPSTASH_REDIS_REST_TOKEN
     ) {
-      return NextResponse.json(
-        { ok: false, error: "Missing Delish Redis environment variables." },
-        { status: 500 }
-      );
+      return res.status(500).json({
+        ok: false,
+        error: "Missing Delish Redis environment variables.",
+      });
     }
 
-    const ids = await redis.lrange<string>("delish:orders:list", 0, 49);
+    const ids = await redis.lrange("delish:orders:list", 0, 49);
 
-    if (!ids?.length) {
-      return NextResponse.json({ ok: true, orders: [] });
+    if (!ids || !ids.length) {
+      return res.status(200).json({ ok: true, orders: [] });
     }
 
     const orderKeys = ids.map((id) => `delish:order:${id}`);
-    const orders = await redis.mget<DelishOrder[]>(...orderKeys);
+    const orders = await redis.mget(...orderKeys);
     const cleanOrders = (orders || []).filter(Boolean);
 
-    return NextResponse.json({
+    return res.status(200).json({
       ok: true,
       orders: cleanOrders,
     });
   } catch (error) {
     console.error("GET /api/delish-orders error:", error);
-    return NextResponse.json(
-      { ok: false, error: "Failed to load orders." },
-      { status: 500 }
-    );
+    return res.status(500).json({
+      ok: false,
+      error: "Failed to load orders.",
+    });
   }
 }
