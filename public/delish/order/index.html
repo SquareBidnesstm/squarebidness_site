@@ -1,6 +1,6 @@
 <!-- FILE: /public/delish/order/index.html -->
 <!doctype html>
-<html lang="en" data-sb-brand="delish" data-sb-tier="order" data-sb-variant="delish-order-v2-prepaid-online-lane">
+<html lang="en" data-sb-brand="delish" data-sb-tier="order" data-sb-variant="delish-order-v3-checkout-wired">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -13,7 +13,6 @@
   <meta name="theme-color" content="#0f0f0f" />
   <meta property="fb:app_id" content="802680062853443" />
 
-  <!-- OG -->
   <meta property="og:title" content="Order Delish — Prepaid Online Pickup" />
   <meta property="og:description" content="Delish is putting a prepaid online pickup system in place. No call-in orders." />
   <meta property="og:image" content="https://www.squarebidness.com/delish/assets/delish-meta-1200x630.jpg" />
@@ -32,7 +31,6 @@
   <link rel="icon" type="image/png" sizes="192x192" href="/delish/assets/delish-logo-mark-192.png" />
   <link rel="icon" type="image/png" sizes="512x512" href="/delish/assets/delish-logo-mark-512.png" />
 
-  <!-- Analytics -->
   <script defer src="/scripts/ga.js"></script>
   <script defer src="/scripts/sb-analytics.js"></script>
   <script defer src="/scripts/meta-pixel.js"></script>
@@ -48,8 +46,10 @@
       --soft:#a79c8d;
       --accent:#d7ae72;
       --accent-2:#f2d7ad;
+      --danger:#ffd9d2;
+      --danger-text:#7f1d1d;
       --shadow:0 16px 50px rgba(0,0,0,.28);
-      --max:1100px;
+      --max:1120px;
     }
     *{box-sizing:border-box}
     body{
@@ -62,6 +62,7 @@
       line-height:1.55;
     }
     a{color:inherit;text-decoration:none}
+    button,input,select,textarea{font:inherit}
     .wrap{width:min(var(--max),92%);margin:0 auto}
     .section{padding:40px 0}
 
@@ -115,10 +116,12 @@
       font-weight:800;
       text-decoration:none;
       border:1px solid transparent;
-      transition:transform .14s ease, background .18s ease, border-color .18s ease;
+      transition:transform .14s ease, background .18s ease, border-color .18s ease, opacity .18s ease;
       white-space:nowrap;
+      cursor:pointer;
     }
     .btn:hover{transform:translateY(-1px)}
+    .btn[disabled]{opacity:.6;cursor:not-allowed;transform:none}
     .btn--gold{
       background:linear-gradient(180deg,var(--accent-2),var(--accent));
       color:#181410;
@@ -158,9 +161,16 @@
     }
     .hero p{
       color:var(--muted);
-      max-width:700px;
+      max-width:760px;
       margin:14px auto 0;
       font-size:1.02rem;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1.02fr .98fr;
+      gap:20px;
+      align-items:start;
     }
 
     .card{
@@ -198,6 +208,134 @@
     }
     .list li + li{margin-top:8px}
 
+    .form-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:14px;
+      margin-top:18px;
+    }
+    .field{
+      display:grid;
+      gap:8px;
+    }
+    .field--full{
+      grid-column:1 / -1;
+    }
+    label{
+      font-size:.92rem;
+      font-weight:800;
+      color:var(--text);
+    }
+    .req{color:var(--accent-2);margin-left:4px}
+    input,select,textarea{
+      width:100%;
+      min-height:52px;
+      padding:14px 15px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.03);
+      color:var(--text);
+      outline:none;
+      transition:border-color .18s ease, background .18s ease, box-shadow .18s ease;
+    }
+    textarea{
+      min-height:110px;
+      resize:vertical;
+    }
+    input::placeholder,textarea::placeholder{color:#968d81}
+    input:focus,select:focus,textarea:focus{
+      border-color:rgba(215,174,114,.55);
+      background:rgba(255,255,255,.045);
+      box-shadow:0 0 0 4px rgba(215,174,114,.10);
+    }
+
+    .items{
+      display:grid;
+      gap:12px;
+      margin-top:14px;
+    }
+    .item{
+      display:grid;
+      grid-template-columns:auto 1fr auto;
+      gap:12px;
+      align-items:start;
+      padding:16px;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:18px;
+      background:rgba(255,255,255,.03);
+    }
+    .item input[type="checkbox"]{
+      width:18px;
+      height:18px;
+      margin-top:4px;
+      accent-color:#d7ae72;
+    }
+    .item h3{
+      margin:0 0 4px;
+      font-size:1rem;
+      letter-spacing:-.02em;
+    }
+    .item p{
+      margin:0;
+      color:var(--muted);
+      font-size:.94rem;
+    }
+    .item__meta{
+      display:grid;
+      gap:8px;
+      justify-items:end;
+    }
+    .price{
+      color:var(--accent-2);
+      font-weight:900;
+      font-size:1.02rem;
+    }
+    .qty{
+      width:82px;
+      min-height:42px;
+      text-align:center;
+      padding:10px 12px;
+      border-radius:12px;
+    }
+
+    .summary{
+      display:grid;
+      gap:12px;
+      margin-top:18px;
+    }
+    .summary-row{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      color:var(--muted);
+    }
+    .summary-row strong{color:var(--text)}
+    .summary-row--total{
+      padding-top:14px;
+      border-top:1px solid rgba(255,255,255,.08);
+      font-size:1.08rem;
+      font-weight:900;
+    }
+
+    .actions{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:18px;
+    }
+
+    .status{
+      display:none;
+      margin-top:16px;
+      padding:14px 16px;
+      border-radius:16px;
+      background:var(--danger);
+      color:var(--danger-text);
+      border:1px solid rgba(127,29,29,.12);
+      font-weight:700;
+    }
+    .status.is-visible{display:block}
+
     .footer{
       padding:10px 0 44px;
       color:var(--soft);
@@ -211,6 +349,11 @@
       flex-wrap:wrap;
     }
 
+    @media (max-width:900px){
+      .grid{
+        grid-template-columns:1fr;
+      }
+    }
     @media (max-width:640px){
       .topbar__inner{
         padding:14px 0;
@@ -220,6 +363,16 @@
       }
       .card{
         padding:18px;
+      }
+      .form-grid{
+        grid-template-columns:1fr;
+      }
+      .item{
+        grid-template-columns:auto 1fr;
+      }
+      .item__meta{
+        grid-column:2;
+        justify-items:start;
       }
     }
   </style>
@@ -258,34 +411,179 @@
       <h1>Prepaid online pickup is being put in place.</h1>
       <p>
         Delish is moving to a cleaner ordering system built around prepaid online pickup.
-        No call-in orders. Daily availability and live item access will be managed through the online order lane as the system is put in place.
+        No call-in orders. Featured items and pickup timing will run through this online order lane as the system goes live.
       </p>
     </div>
   </section>
 
   <section class="section">
-    <div class="wrap">
-      <div class="card">
-        <h2>No call-in orders</h2>
-        <p>
-          Delish is not taking call-in orders. The order system is being built to support prepaid online pickup only,
-          with cleaner order handling, controlled availability, and less confusion during busy periods.
-        </p>
+    <div class="wrap grid">
+      <div>
+        <div class="card">
+          <h2>Start a pickup order</h2>
+          <p>
+            This order lane is built for prepaid online pickup only. Select featured items, choose a pickup window,
+            and continue to secure checkout.
+          </p>
 
-        <div class="notice">
-          <strong>Current status:</strong><br />
-          The prepaid online ordering system is being put in place now. Featured items, pickup timing, and checkout flow will be handled through the online order lane as it goes live.
+          <form id="delishOrderForm" novalidate>
+            <div class="form-grid">
+              <div class="field">
+                <label for="customerName">Full name<span class="req">*</span></label>
+                <input id="customerName" name="customerName" type="text" placeholder="Your full name" required />
+              </div>
+
+              <div class="field">
+                <label for="customerPhone">Phone number<span class="req">*</span></label>
+                <input id="customerPhone" name="customerPhone" type="tel" placeholder="(318) 555-1234" required />
+              </div>
+
+              <div class="field">
+                <label for="customerEmail">Email address</label>
+                <input id="customerEmail" name="customerEmail" type="email" placeholder="you@example.com" />
+              </div>
+
+              <div class="field">
+                <label for="pickupDate">Pickup date<span class="req">*</span></label>
+                <input id="pickupDate" name="pickupDate" type="date" required />
+              </div>
+
+              <div class="field">
+                <label for="pickupWindow">Pickup window<span class="req">*</span></label>
+                <select id="pickupWindow" name="pickupWindow" required>
+                  <option value="">Select pickup window</option>
+                  <option value="11:00 AM - 11:30 AM">11:00 AM - 11:30 AM</option>
+                  <option value="11:30 AM - 12:00 PM">11:30 AM - 12:00 PM</option>
+                  <option value="12:00 PM - 12:30 PM">12:00 PM - 12:30 PM</option>
+                  <option value="12:30 PM - 1:00 PM">12:30 PM - 1:00 PM</option>
+                  <option value="1:00 PM - 1:30 PM">1:00 PM - 1:30 PM</option>
+                  <option value="1:30 PM - 2:00 PM">1:30 PM - 2:00 PM</option>
+                </select>
+              </div>
+
+              <div class="field field--full">
+                <label for="notes">Pickup notes</label>
+                <textarea id="notes" name="notes" placeholder="Optional note for Delish"></textarea>
+              </div>
+            </div>
+
+            <div class="items">
+              <article class="item" data-name="Turkey Wings Plate" data-price="16.99">
+                <input class="item-select" type="checkbox" />
+                <div>
+                  <h3>Turkey Wings Plate</h3>
+                  <p>Cornbread dressing or rice with 2 sides.</p>
+                </div>
+                <div class="item__meta">
+                  <div class="price">$16.99</div>
+                  <input class="qty" type="number" min="1" value="1" />
+                </div>
+              </article>
+
+              <article class="item" data-name="Hamburger Steak Plate" data-price="13.99">
+                <input class="item-select" type="checkbox" />
+                <div>
+                  <h3>Hamburger Steak Plate</h3>
+                  <p>Rice or mashed potatoes, vegetables, and roll.</p>
+                </div>
+                <div class="item__meta">
+                  <div class="price">$13.99</div>
+                  <input class="qty" type="number" min="1" value="1" />
+                </div>
+              </article>
+
+              <article class="item" data-name="Crawfish Étouffée Plate" data-price="16.99">
+                <input class="item-select" type="checkbox" />
+                <div>
+                  <h3>Crawfish Étouffée Plate</h3>
+                  <p>Friday feature with 2 sides.</p>
+                </div>
+                <div class="item__meta">
+                  <div class="price">$16.99</div>
+                  <input class="qty" type="number" min="1" value="1" />
+                </div>
+              </article>
+
+              <article class="item" data-name="Shrimp Pasta Plate" data-price="16.99">
+                <input class="item-select" type="checkbox" />
+                <div>
+                  <h3>Shrimp Pasta Plate</h3>
+                  <p>Featured plate built for pickup demand.</p>
+                </div>
+                <div class="item__meta">
+                  <div class="price">$16.99</div>
+                  <input class="qty" type="number" min="1" value="1" />
+                </div>
+              </article>
+
+              <article class="item" data-name="Fried Catfish Plate (3 strips)" data-price="15.99">
+                <input class="item-select" type="checkbox" />
+                <div>
+                  <h3>Fried Catfish Plate (3 strips)</h3>
+                  <p>Served with 2 sides.</p>
+                </div>
+                <div class="item__meta">
+                  <div class="price">$15.99</div>
+                  <input class="qty" type="number" min="1" value="1" />
+                </div>
+              </article>
+
+              <article class="item" data-name="Drink Add-On" data-price="3.99">
+                <input class="item-select" type="checkbox" />
+                <div>
+                  <h3>Drink Add-On</h3>
+                  <p>Tropical Punch Kool-Aid or Lemonade.</p>
+                </div>
+                <div class="item__meta">
+                  <div class="price">$3.99</div>
+                  <input class="qty" type="number" min="1" value="1" />
+                </div>
+              </article>
+            </div>
+
+            <div id="status" class="status" aria-live="polite"></div>
+
+            <div class="actions">
+              <button id="checkoutBtn" class="btn btn--gold" type="submit">Continue to Secure Checkout</button>
+              <a href="/delish/catering/" class="btn btn--dark">Need Catering?</a>
+            </div>
+          </form>
         </div>
       </div>
 
-      <div class="card">
-        <h2>What this system is being built to do</h2>
-        <ul class="list">
-          <li>Accept prepaid online pickup orders only</li>
-          <li>Remove confusion from phone-based ordering</li>
-          <li>Control what items are available each day</li>
-          <li>Support cleaner pickup timing and confirmation</li>
-        </ul>
+      <div>
+        <div class="card">
+          <h2>Current status</h2>
+          <p>
+            This prepaid online pickup system is being put in place now. Featured items, pickup timing,
+            and secure checkout will run through this online order lane as it goes live.
+          </p>
+
+          <div class="notice">
+            <strong>No call-in orders.</strong><br />
+            This lane is built to support cleaner online ordering, controlled availability, and clearer pickup handling.
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>What this system is being built to do</h2>
+          <ul class="list">
+            <li>Accept prepaid online pickup orders only</li>
+            <li>Remove confusion from phone-based ordering</li>
+            <li>Control what items are available each day</li>
+            <li>Support cleaner pickup timing and confirmation</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h2>Pickup location</h2>
+          <p>
+            Delish<br />
+            3710 South MacArthur Drive<br />
+            Alexandria, LA 71303<br />
+            Common Point Shopping Center
+          </p>
+        </div>
       </div>
     </div>
   </section>
@@ -301,7 +599,97 @@
   </footer>
 
   <script>
-    document.getElementById('year').textContent = new Date().getFullYear();
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    const TAX_RATE = 0.09;
+    const form = document.getElementById("delishOrderForm");
+    const statusEl = document.getElementById("status");
+    const checkoutBtn = document.getElementById("checkoutBtn");
+    const itemCards = Array.from(document.querySelectorAll(".item"));
+
+    function showStatus(message) {
+      statusEl.textContent = message;
+      statusEl.classList.add("is-visible");
+    }
+
+    function clearStatus() {
+      statusEl.textContent = "";
+      statusEl.classList.remove("is-visible");
+    }
+
+    function getSelectedItems() {
+      return itemCards
+        .map((item) => {
+          const checked = item.querySelector(".item-select").checked;
+          const qty = Math.max(1, parseInt(item.querySelector(".qty").value || "1", 10));
+          const name = item.dataset.name;
+          const price = Number(item.dataset.price || 0);
+
+          if (!checked) return null;
+
+          return { name, qty, price };
+        })
+        .filter(Boolean);
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearStatus();
+
+      if (!form.reportValidity()) {
+        showStatus("Please complete the required fields before continuing.");
+        return;
+      }
+
+      const items = getSelectedItems();
+
+      if (!items.length) {
+        showStatus("Please select at least one item before continuing.");
+        return;
+      }
+
+      const subtotal = items.reduce((sum, item) => sum + (item.qty * item.price), 0);
+      const tax = Number((subtotal * TAX_RATE).toFixed(2));
+      const total = Number((subtotal + tax).toFixed(2));
+
+      const payload = {
+        customerName: document.getElementById("customerName").value.trim(),
+        customerPhone: document.getElementById("customerPhone").value.trim(),
+        customerEmail: document.getElementById("customerEmail").value.trim(),
+        pickupDate: document.getElementById("pickupDate").value,
+        pickupWindow: document.getElementById("pickupWindow").value,
+        notes: document.getElementById("notes").value.trim(),
+        items,
+        subtotal: Number(subtotal.toFixed(2)),
+        tax,
+        total,
+        source: "delish-order-page"
+      };
+
+      const originalText = checkoutBtn.textContent;
+      checkoutBtn.disabled = true;
+      checkoutBtn.textContent = "Starting secure checkout...";
+
+      try {
+        const res = await fetch("/api/delish-create-checkout/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.ok || !data.checkout_url) {
+          throw new Error(data.error || "Unable to start checkout.");
+        }
+
+        window.location.href = data.checkout_url;
+      } catch (error) {
+        showStatus(error.message || "Unable to start checkout right now.");
+        checkoutBtn.disabled = false;
+        checkoutBtn.textContent = originalText;
+      }
+    });
   </script>
 </body>
 </html>
