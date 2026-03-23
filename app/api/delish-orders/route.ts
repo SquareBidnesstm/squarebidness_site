@@ -4,7 +4,10 @@ import { Redis } from "@upstash/redis";
 
 export const runtime = "nodejs";
 
-const redis = Redis.fromEnv();
+const redis = new Redis({
+  url: process.env.DELISH_UPSTASH_REDIS_REST_URL!,
+  token: process.env.DELISH_UPSTASH_REDIS_REST_TOKEN!,
+});
 
 type DelishOrder = {
   id: string;
@@ -30,6 +33,16 @@ type DelishOrder = {
 
 export async function GET() {
   try {
+    if (
+      !process.env.DELISH_UPSTASH_REDIS_REST_URL ||
+      !process.env.DELISH_UPSTASH_REDIS_REST_TOKEN
+    ) {
+      return NextResponse.json(
+        { ok: false, error: "Missing Delish Redis environment variables." },
+        { status: 500 }
+      );
+    }
+
     const ids = await redis.lrange<string>("delish:orders:list", 0, 49);
 
     if (!ids?.length) {
@@ -38,7 +51,6 @@ export async function GET() {
 
     const orderKeys = ids.map((id) => `delish:order:${id}`);
     const orders = await redis.mget<DelishOrder[]>(...orderKeys);
-
     const cleanOrders = (orders || []).filter(Boolean);
 
     return NextResponse.json({
