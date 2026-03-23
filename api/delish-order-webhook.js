@@ -1,3 +1,4 @@
+// FILE: /api/delish-order-webhook.js
 import { Redis } from "@upstash/redis";
 import crypto from "node:crypto";
 import nodemailer from "nodemailer";
@@ -46,7 +47,7 @@ function isValidOrder(body) {
 
 function formatItems(items) {
   return items
-    .map(i => `${i.qty} x ${i.name} ($${i.price})`)
+    .map((i) => `${i.qty} x ${i.name} ($${i.price})`)
     .join("\n");
 }
 
@@ -99,16 +100,24 @@ ${body.notes || "None"}
       `,
     });
 
-    // 📲 SMS
-    await twilioClient.messages.create({
-      body: `New Delish order ${orderNumber} - Pickup ${body.pickupWindow}`,
-      from: process.env.TWILIO_FROM_NUMBER,
-      to: process.env.TWILIO_TO_NUMBER,
-    });
+    // 📲 SMS (non-blocking)
+    try {
+      await twilioClient.messages.create({
+        body: `New Delish order ${orderNumber} - Pickup ${body.pickupWindow}`,
+        from: process.env.TWILIO_FROM_NUMBER,
+        to: process.env.TWILIO_TO_NUMBER,
+      });
+    } catch (smsError) {
+      console.error("TWILIO SMS ERROR:", smsError);
+    }
 
     return res.status(200).json({ ok: true, orderNumber });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ ok: false });
+    console.error("DELISH WEBHOOK ERROR:", err);
+    return res.status(500).json({
+      ok: false,
+      error: err?.message || "Unknown error",
+      more: err?.code || null,
+    });
   }
 }
