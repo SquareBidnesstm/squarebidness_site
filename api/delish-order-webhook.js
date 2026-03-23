@@ -1,11 +1,25 @@
-// FILE: /api/delish-order-webhook.js
 import { Redis } from "@upstash/redis";
 import crypto from "node:crypto";
+import nodemailer from "nodemailer";
+import twilio from "twilio";
 
 const redis = new Redis({
   url: process.env.DELISH_UPSTASH_REDIS_REST_URL,
   token: process.env.DELISH_UPSTASH_REDIS_REST_TOKEN,
 });
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.DELISH_SMTP_USER,
+    pass: process.env.DELISH_SMTP_PASS,
+  },
+});
+
+const twilioClient = twilio(
+  process.env.TWILIO_ACCOUNT_SID,
+  process.env.TWILIO_AUTH_TOKEN
+);
 
 function makeOrderNumber() {
   const now = new Date();
@@ -30,68 +44,71 @@ function isValidOrder(body) {
   );
 }
 
+function formatItems(items) {
+  return items
+    .map(i => `${i.qty} x ${i.name} ($${i.price})`)
+    .join("\n");
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
-    return res.status(405).json({ ok: false, error: "Method not allowed." });
+    return res.status(405).json({ ok: false });
   }
 
   try {
-    if (
-      !process.env.DELISH_UPSTASH_REDIS_REST_URL ||
-      !process.env.DELISH_UPSTASH_REDIS_REST_TOKEN
-    ) {
-      return res.status(500).json({
-        ok: false,
-        error: "Missing Delish Redis environment variables.",
-      });
-    }
-
     const body = req.body;
 
     if (!isValidOrder(body)) {
-      return res.status(400).json({
-        ok: false,
-        error: "Invalid paid order payload.",
-      });
+      return res.status(400).json({ ok: false, error: "Invalid payload" });
     }
 
     const id = crypto.randomUUID();
     const orderNumber = makeOrderNumber();
 
-    const orderRecord = {
+    const order = {
       id,
       orderNumber,
       createdAt: new Date().toISOString(),
-      customerName: body.customerName,
-      customerPhone: body.customerPhone,
-      customerEmail: body.customerEmail || "",
-      pickupDate: body.pickupDate,
-      pickupWindow: body.pickupWindow,
-      notes: body.notes || "",
-      items: body.items,
-      subtotal: body.subtotal ?? 0,
-      tax: body.tax ?? 0,
-      total: body.total,
-      paymentStatus: "paid",
-      source: body.source || "delish-online-order",
-      stripeSessionId: body.stripeSessionId || "",
+      ...body,
     };
 
-    await redis.set(`delish:order:${id}`, orderRecord);
+    await redis.set(`delish:order:${id}`, order);
     await redis.lpush("delish:orders:list", id);
-    await redis.ltrim("delish:orders:list", 0, 99);
 
-    return res.status(200).json({
-      ok: true,
-      id,
-      orderNumber,
+    // 📧 EMAIL
+    await transporter.sendMail({
+      from: `"Delish Orders" <${process.env.DELISH_SMTP_USER}>`,
+      to: process.env.DELISH_NOTIFY_EMAIL,
+      subject: `New Order ${orderNumber}`,
+      text: `
+New Paid Order
+
+Order #: ${orderNumber}
+Customer: ${body.customerName}
+Phone: ${body.customerPhone}
+Pickup: ${body.pickupDate} ${body.pickupWindow}
+
+Items:
+${formatItems(body.items)}
+
+Total: $${body.total}
+
+Notes:
+${body.notes || "None"}
+      `,
     });
-  } catch (error) {
-    console.error("POST /api/delish-order-webhook error:", error);
-    return res.status(500).json({
-      ok: false,
-      error: "Failed to store paid order.",
+
+    // 📲 SMS
+    await twilioClient.messages.create({
+      body: `New Delish order ${orderNumber} - Pickup ${body.pickupWindow}`,
+      from: process.env.TWILIO_FROM_NUMBER,
+      to: process.env.TWILIO_TO_NUMBER,
     });
+
+    return res.status(200).json({ ok: true, orderNumber });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ ok: false });
   }
 }
