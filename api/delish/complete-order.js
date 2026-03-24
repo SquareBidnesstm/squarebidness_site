@@ -1,4 +1,4 @@
-// FILE: /api/delish-complete-order.js
+// FILE: /api/delish/complete-order.js
 import { Redis } from "@upstash/redis";
 
 const redis = new Redis({
@@ -46,7 +46,7 @@ export default async function handler(req, res) {
       status: "completed",
     });
   } catch (error) {
-    console.error("POST /api/delish-complete-order error:", error);
+    console.error("POST /api/delish/complete-order error:", error);
     return res.status(500).json({
       ok: false,
       error: "Failed to complete order.",
