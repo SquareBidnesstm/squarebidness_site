@@ -1,0 +1,452 @@
+<!-- FILE: /public/puffs/orders/index.html -->
+<!doctype html>
+<html lang="en" data-sb-brand="puffs" data-sb-tier="ops" data-sb-variant="puffs-orders-screen-v1">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Puff’s Orders Screen</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#101012" />
+
+  <style>
+    :root{
+      --bg:#101012;
+      --panel:#18181b;
+      --panel-2:#202024;
+      --line:#313138;
+      --text:#f5f2ea;
+      --muted:#c8c0b3;
+      --soft:#9e9587;
+      --accent:#d7ae72;
+      --accent-2:#f2d8ae;
+      --good:#153822;
+      --good-line:#255534;
+      --warn:#4a3312;
+      --warn-line:#7d541a;
+      --shadow:0 18px 54px rgba(0,0,0,.30);
+      --max:1500px;
+    }
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;
+      background:linear-gradient(180deg,#0f0f10 0%,#0b0b0c 100%);
+      color:var(--text);
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    }
+    body{padding:18px}
+    .wrap{width:min(100%,var(--max));margin:0 auto}
+
+    .top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:18px;
+      margin-bottom:18px;
+      flex-wrap:wrap;
+    }
+    .brand{
+      display:flex;
+      gap:14px;
+      align-items:center;
+    }
+    .brand-logo{
+      width:74px;
+      height:74px;
+      border-radius:20px;
+      border:1px solid var(--line);
+      background:#111;
+      overflow:hidden;
+      flex:0 0 auto;
+      box-shadow:var(--shadow);
+    }
+    .brand-logo img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+    .brand-copy h1{
+      margin:0;
+      font-size:clamp(2rem,4vw,3rem);
+      line-height:1;
+      letter-spacing:-.04em;
+    }
+    .brand-copy p{
+      margin:10px 0 0;
+      color:var(--muted);
+      font-size:1rem;
+    }
+
+    .meta{
+      display:grid;
+      gap:10px;
+      min-width:260px;
+    }
+    .meta-box{
+      padding:14px 16px;
+      border-radius:18px;
+      background:var(--panel);
+      border:1px solid var(--line);
+      box-shadow:var(--shadow);
+    }
+    .meta-label{
+      color:var(--soft);
+      font-size:.85rem;
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+    .meta-value{
+      margin-top:6px;
+      font-size:1.2rem;
+      font-weight:900;
+      color:var(--accent-2);
+    }
+
+    .toolbar{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:18px;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      min-height:42px;
+      padding:0 14px;
+      border-radius:999px;
+      background:var(--panel);
+      border:1px solid var(--line);
+      color:var(--muted);
+      font-weight:700;
+    }
+    .pill strong{
+      color:var(--text);
+      margin-left:6px;
+    }
+
+    .orders{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(380px,1fr));
+      gap:16px;
+    }
+
+    .order-card{
+      background:linear-gradient(180deg,var(--panel-2),var(--panel));
+      border:1px solid var(--line);
+      border-radius:24px;
+      padding:20px;
+      box-shadow:var(--shadow);
+    }
+    .order-top{
+      display:flex;
+      justify-content:space-between;
+      gap:14px;
+      align-items:flex-start;
+      margin-bottom:14px;
+    }
+    .order-number{
+      font-size:1.2rem;
+      font-weight:900;
+      letter-spacing:-.02em;
+    }
+    .order-time{
+      margin-top:6px;
+      color:var(--soft);
+      font-size:.95rem;
+      font-weight:700;
+    }
+
+    .status{
+      display:inline-flex;
+      align-items:center;
+      min-height:36px;
+      padding:0 12px;
+      border-radius:999px;
+      font-weight:900;
+      font-size:.86rem;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+      white-space:nowrap;
+    }
+    .status-new{
+      background:var(--warn);
+      border:1px solid var(--warn-line);
+      color:#ffe5b8;
+    }
+    .status-ready{
+      background:var(--good);
+      border:1px solid var(--good-line);
+      color:#dff7e6;
+    }
+
+    .pickup{
+      margin:0 0 14px;
+      padding:14px 16px;
+      border-radius:18px;
+      background:rgba(215,174,114,.10);
+      border:1px solid rgba(215,174,114,.18);
+    }
+    .pickup-label{
+      color:var(--soft);
+      font-size:.8rem;
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+    .pickup-value{
+      margin-top:6px;
+      font-size:1.35rem;
+      font-weight:900;
+      color:var(--accent-2);
+      line-height:1.1;
+    }
+
+    .customer{
+      display:grid;
+      gap:6px;
+      margin-bottom:14px;
+    }
+    .customer-row{
+      color:var(--muted);
+      font-size:1rem;
+    }
+    .customer-row strong{
+      color:var(--text);
+    }
+
+    .items{
+      margin:0;
+      padding:0;
+      list-style:none;
+      display:grid;
+      gap:10px;
+      margin-bottom:14px;
+    }
+    .items li{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      padding:12px 0;
+      border-top:1px dashed rgba(255,255,255,.10);
+      color:var(--muted);
+      font-size:1rem;
+    }
+    .items li:first-child{border-top:0;padding-top:0}
+    .items strong{
+      color:var(--text);
+    }
+
+    .note{
+      margin-top:4px;
+      padding:14px 16px;
+      border-radius:16px;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.07);
+      color:var(--muted);
+    }
+    .note-label{
+      color:var(--soft);
+      font-size:.8rem;
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      margin-bottom:6px;
+    }
+
+    .total{
+      margin-top:14px;
+      padding-top:14px;
+      border-top:1px solid rgba(255,255,255,.10);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+    }
+    .total-label{
+      color:var(--soft);
+      font-size:.92rem;
+      font-weight:800;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+    }
+    .total-value{
+      font-size:1.5rem;
+      font-weight:900;
+      color:var(--accent-2);
+    }
+
+    .empty{
+      padding:28px;
+      border-radius:24px;
+      background:var(--panel);
+      border:1px solid var(--line);
+      color:var(--muted);
+      font-size:1.05rem;
+    }
+
+    @media (max-width:640px){
+      body{padding:12px}
+      .orders{grid-template-columns:1fr}
+      .order-card{padding:16px}
+      .pickup-value{font-size:1.15rem}
+      .total-value{font-size:1.28rem}
+      .brand{align-items:flex-start}
+      .brand-logo{width:58px;height:58px;border-radius:16px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="top">
+      <div class="brand">
+        <div class="brand-logo">
+          <img src="/puffs/assets/puffs_140.png" alt="Puff’s Smokehouse" />
+        </div>
+        <div class="brand-copy">
+          <h1>Puff’s Orders Screen</h1>
+          <p>Incoming pickup orders • Auto-refreshing live order view</p>
+        </div>
+      </div>
+
+      <div class="meta">
+        <div class="meta-box">
+          <div class="meta-label">Refresh</div>
+          <div class="meta-value">Every 15 seconds</div>
+        </div>
+        <div class="meta-box">
+          <div class="meta-label">Order lane</div>
+          <div class="meta-value">Pickup orders</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="toolbar">
+      <div class="pill">Status:<strong>Newest on top</strong></div>
+      <div class="pill">Device:<strong>Kitchen / Counter</strong></div>
+      <div class="pill">View:<strong>Live incoming orders</strong></div>
+      <div class="pill" id="lastUpdated">Last updated:<strong>Loading...</strong></div>
+    </section>
+
+    <section id="orders" class="orders">
+      <div class="empty">Loading orders...</div>
+    </section>
+  </div>
+
+  <script>
+    const ordersEl = document.getElementById("orders");
+    const lastUpdatedEl = document.getElementById("lastUpdated");
+
+    function money(n){
+      return `$${Number(n || 0).toFixed(2)}`;
+    }
+
+    function formatTimestamp(iso){
+      if (!iso) return "Just now";
+      const d = new Date(iso);
+      return d.toLocaleString([], {
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+      });
+    }
+
+    function escapeHtml(str){
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function statusBadge(status){
+      const s = String(status || "new").toLowerCase();
+      if (s === "ready") {
+        return `<div class="status status-ready">Ready</div>`;
+      }
+      return `<div class="status status-new">New</div>`;
+    }
+
+    function renderOrders(orders){
+      if (!orders.length) {
+        ordersEl.innerHTML = `<div class="empty">No orders yet.</div>`;
+        return;
+      }
+
+      ordersEl.innerHTML = orders.map(order => {
+        const itemsHtml = (order.items || []).map(item => `
+          <li>
+            <span><strong>${Number(item.qty || 0)} ×</strong> ${escapeHtml(item.name)}</span>
+            <strong>${money((item.qty || 0) * (item.price || 0))}</strong>
+          </li>
+        `).join("");
+
+        const noteBlock = order.notes
+          ? `
+            <div class="note">
+              <div class="note-label">Notes</div>
+              <div>${escapeHtml(order.notes)}</div>
+            </div>
+          `
+          : "";
+
+        return `
+          <article class="order-card">
+            <div class="order-top">
+              <div>
+                <div class="order-number">${escapeHtml(order.orderNumber || "Puff’s Order")}</div>
+                <div class="order-time">Received ${formatTimestamp(order.createdAt)}</div>
+              </div>
+              ${statusBadge(order.status)}
+            </div>
+
+            <div class="pickup">
+              <div class="pickup-label">Pickup</div>
+              <div class="pickup-value">${escapeHtml(order.pickupTime || "ASAP")}</div>
+            </div>
+
+            <div class="customer">
+              <div class="customer-row"><strong>Customer:</strong> ${escapeHtml(order.customerName || "—")}</div>
+              <div class="customer-row"><strong>Phone:</strong> ${escapeHtml(order.customerPhone || "—")}</div>
+            </div>
+
+            <ul class="items">${itemsHtml || `<li><span>No items</span><strong>—</strong></li>`}</ul>
+
+            ${noteBlock}
+
+            <div class="total">
+              <div class="total-label">Order Total</div>
+              <div class="total-value">${money(order.total)}</div>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    async function loadOrders(){
+      try {
+        const res = await fetch("/api/puffs-orders", { cache: "no-store" });
+        const data = await res.json();
+
+        if (!data.ok) {
+          throw new Error(data.error || "Failed to load");
+        }
+
+        const orders = Array.isArray(data.orders) ? data.orders : [];
+        renderOrders(orders);
+
+        const now = new Date();
+        lastUpdatedEl.innerHTML = `Last updated:<strong>${now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</strong>`;
+      } catch (err) {
+        ordersEl.innerHTML = `<div class="empty">Unable to load orders right now.</div>`;
+        lastUpdatedEl.innerHTML = `Last updated:<strong>Error</strong>`;
+      }
+    }
+
+    loadOrders();
+    setInterval(loadOrders, 15000);
+  </script>
+</body>
+</html>
