@@ -1,4 +1,4 @@
-// FILE: /api/delish-order-webhook.js
+// FILE: /api/delish/order-webhook.js
 import { Redis } from "@upstash/redis";
 import crypto from "node:crypto";
 import nodemailer from "nodemailer";
@@ -79,7 +79,6 @@ export default async function handler(req, res) {
     await redis.set(`delish:order:${id}`, order);
     await redis.lpush("delish:orders:list", id);
 
-    // 📧 EMAIL
     await transporter.sendMail({
       from: `"Delish Orders" <${process.env.DELISH_SMTP_USER}>`,
       to: process.env.DELISH_NOTIFY_EMAIL,
@@ -102,7 +101,6 @@ ${body.notes || "None"}
       `,
     });
 
-    // 📲 SMS (non-blocking)
     try {
       await twilioClient.messages.create({
         body: `New Delish order ${orderNumber} - Pickup ${body.pickupWindow}`,
