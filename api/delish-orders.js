@@ -31,7 +31,10 @@ export default async function handler(req, res) {
 
     const orderKeys = ids.map((id) => `delish:order:${id}`);
     const orders = await redis.mget(...orderKeys);
-    const cleanOrders = (orders || []).filter(Boolean);
+
+    const cleanOrders = (orders || [])
+      .filter(Boolean)
+      .filter((order) => order.status !== "completed");
 
     return res.status(200).json({
       ok: true,
