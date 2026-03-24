@@ -1,4 +1,4 @@
-<!-- /public/puffs/index.html (PASTE READY — FB/OG FULL REFRESH + cache-bust + pixel centralized) -->
+<!-- /public/puffs/index.html (PASTE READY — sms-optin reachable from index) -->
 <!doctype html>
 <html lang="en" data-sb-brand="puffs" data-sb-tier="public" data-sb-variant="puffs-index-v20260303">
 <head>
@@ -36,7 +36,6 @@
   <meta property="og:description" content="Order online, pickup on arrival. Plates include two sides and bread (except pig feet). Louisiana." />
   <meta property="og:url" content="https://www.squarebidness.com/puffs/" />
 
-  <!-- ✅ Cache-bust so Facebook re-scrapes -->
   <meta property="og:image" content="https://www.squarebidness.com/puffs/assets/puffs_hero_1200x630.jpg?v=20260303" />
   <meta property="og:image:secure_url" content="https://www.squarebidness.com/puffs/assets/puffs_hero_1200x630.jpg?v=20260303" />
   <meta property="og:image:width" content="1200" />
@@ -166,7 +165,6 @@
       gap:10px;
     }
 
-    /* SMS consent block (CTA proof for carriers) */
     .smsConsent{
       display:flex;
       align-items:flex-start;
@@ -208,17 +206,13 @@
   }
   </script>
 
-  <!-- ✅ Analytics -->
   <script defer src="/scripts/ga.js"></script>
   <script defer src="/scripts/sb-analytics.js"></script>
-
-  <!-- ✅ Meta Pixel centralized + SB→Meta bridge -->
   <script defer src="/scripts/meta-pixel.js"></script>
   <script defer src="/scripts/sb-meta-bridge.js"></script>
 </head>
 
 <body>
-  <!-- Closed banner -->
   <div id="closedBanner" class="closedBanner" style="display:none">
     <div class="wrap">
       <strong style="color:var(--accent)">Orders are currently CLOSED</strong>
@@ -265,7 +259,6 @@
     </div>
   </header>
 
-  <!-- Specials bar (CLS-safe) -->
   <div id="specialsBar" class="specialsBar is-hidden" aria-hidden="true">
     <div class="wrap">
       <span class="specialsBadge">Today’s Special</span>
@@ -274,13 +267,11 @@
   </div>
 
   <main class="wrap grid">
-    <!-- MENU -->
     <section class="card" id="menu">
       <h2>Menu</h2>
       <div class="sect" id="menuContent"><!-- injected --></div>
     </section>
 
-    <!-- CART / CHECKOUT -->
     <aside class="card">
       <h2>Your Order</h2>
       <div class="sect">
@@ -318,12 +309,21 @@
               <span class="tiny" style="display:block;margin-top:6px;opacity:.9">
                 Phone number is optional. If you do not opt in, we will not text you.
               </span>
-              <span style="opacity:.6"> · </span>
-              <a href="/puffs/privacy/" data-sb-component="consent" data-sb-action="open" data-sb-label="privacy" data-sb-href="/puffs/privacy/">Privacy Policy</a>
-              <span style="opacity:.6"> · </span>
-              <a href="/puffs/terms/" data-sb-component="consent" data-sb-action="open" data-sb-label="sms_terms" data-sb-href="/puffs/terms/">SMS Terms &amp; Conditions</a>
+              <span style="display:block;margin-top:8px">
+                <a href="/puffs/privacy/" data-sb-component="consent" data-sb-action="open" data-sb-label="privacy" data-sb-href="/puffs/privacy/">Privacy Policy</a>
+                <span style="opacity:.6"> · </span>
+                <a href="/puffs/terms/" data-sb-component="consent" data-sb-action="open" data-sb-label="sms_terms" data-sb-href="/puffs/terms/">SMS Terms &amp; Conditions</a>
+                <span style="opacity:.6"> · </span>
+                <a href="/puffs/sms-optin/" data-sb-component="consent" data-sb-action="open" data-sb-label="sms_optin_info" data-sb-href="/puffs/sms-optin/">SMS Consent Info</a>
+              </span>
             </span>
           </label>
+
+          <div class="tiny" style="margin-top:6px;opacity:.75">
+            SMS Consent Info page is provided for carrier verification:
+            <a href="/puffs/sms-optin/" style="color:#fff;text-decoration:underline"
+               data-sb-component="consent" data-sb-action="open" data-sb-label="sms_optin_proof_text" data-sb-href="/puffs/sms-optin/">/puffs/sms-optin/</a>
+          </div>
 
           <label>Notes (no onions, extra sauce, etc.)
             <textarea id="custNotes" rows="3"></textarea>
@@ -344,7 +344,6 @@
             You’ll pay at pickup (or by invoice link). Prices and availability subject to change. “Smoked Pig Feet Plate” available <strong>Sunday only</strong>.
           </p>
 
-          <!-- Owner panel -->
           <div id="ownerPanel" class="owner">
             <div class="rowBtns">
               <label><input type="checkbox" id="toggleClosed"> Mark orders CLOSED</label>
@@ -377,8 +376,8 @@
       <a href="/puffs/privacy/" style="color:#fff;text-decoration:underline">Privacy</a>
       <span style="opacity:.5"> · </span>
       <a href="/puffs/terms/" style="color:#fff;text-decoration:underline">SMS Terms</a>
-<span style="opacity:.5"> · </span>
-<a href="/puffs/sms-optin/" style="color:#fff;text-decoration:underline">SMS Consent Info</a>
+      <span style="opacity:.5"> · </span>
+      <a href="/puffs/sms-optin/" style="color:#fff;text-decoration:underline">SMS Consent Info</a>
     </div>
 
     <p style="margin:.85rem 0 0;color:#6b7280;font-size:.85rem;line-height:1.5;">
@@ -676,7 +675,6 @@
       const phoneField = document.getElementById("custPhone");
       const consent = document.getElementById("smsConsent");
 
-      // Require explicit SMS consent if a phone number is provided
       const phoneVal = String(phoneField?.value || "").trim();
       if (phoneVal.length && (!consent || !consent.checked)) {
         alert("Please agree to SMS terms before submitting your phone number.");
@@ -773,7 +771,6 @@
     }
   </script>
 
-  <!-- Unified SB click/outbound tracking -->
   <script>
     (function(){
       function sbPayloadFromAnchor(a){
@@ -810,7 +807,6 @@
     })();
   </script>
 
-  <!-- Meta Pixel — NOSCRIPT fallback -->
   <noscript>
     <img height="1" width="1" style="display:none"
          src="https://www.facebook.com/tr?id=914123084877133&ev=PageView&noscript=1"/>
