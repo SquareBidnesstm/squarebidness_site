@@ -1,4 +1,4 @@
-// FILE: /api/delish-finalize-checkout.js
+// FILE: /api/delish/finalize-checkout.js
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.DELISH_STRIPE_SECRET_KEY, {
@@ -50,7 +50,7 @@ export default async function handler(req, res) {
         ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
         : "https://www.squarebidness.com";
 
-    const webhookRes = await fetch(`${base}/api/delish-order-webhook/`, {
+    const webhookRes = await fetch(`${base}/api/delish/order-webhook/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
