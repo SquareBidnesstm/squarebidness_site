@@ -1,4 +1,4 @@
-// FILE: /api/delish-orders.js
+// FILE: /api/delish/orders.js
 import { Redis } from "@upstash/redis";
 
 const redis = new Redis({
@@ -41,7 +41,7 @@ export default async function handler(req, res) {
       orders: cleanOrders,
     });
   } catch (error) {
-    console.error("GET /api/delish-orders error:", error);
+    console.error("GET /api/delish/orders error:", error);
     return res.status(500).json({
       ok: false,
       error: "Failed to load orders.",
