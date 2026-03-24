@@ -32,6 +32,14 @@ export default async function handler(req, res) {
       });
     }
 
+    const successUrl =
+      process.env.DELISH_STRIPE_SUCCESS_URL ||
+      "https://www.squarebidness.com/delish/order/success/";
+
+    const cancelUrl =
+      process.env.DELISH_STRIPE_CANCEL_URL ||
+      "https://www.squarebidness.com/delish/order/";
+
     const body = req.body;
 
     if (!isValidOrder(body)) {
@@ -72,8 +80,8 @@ export default async function handler(req, res) {
       mode: "payment",
       payment_method_types: ["card"],
       line_items,
-      success_url: `${process.env.DELISH_STRIPE_SUCCESS_URL}?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: process.env.DELISH_STRIPE_CANCEL_URL,
+      success_url: `${successUrl}?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: cancelUrl,
       metadata: {
         customerName: body.customerName,
         customerPhone: body.customerPhone,
