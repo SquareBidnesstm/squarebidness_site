@@ -1,4 +1,4 @@
-// /api/puffs-order-submit.js
+// /api/puffs/order-submit.js
 function cors(res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST,OPTIONS");
@@ -59,14 +59,13 @@ export default async function handler(req, res) {
     });
 
     const data = await r.json().catch(() => ({}));
-    if (!r.ok) {
-      throw new Error(data.error || `Redis request failed (${r.status})`);
-    }
+    if (!r.ok) throw new Error(data.error || `Redis request failed (${r.status})`);
     return data;
   }
 
   try {
-    const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {});
+    const body =
+      typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {});
 
     const customerName = cleanString(body.customerName, 120);
     const customerPhone = cleanString(body.customerPhone, 40);
