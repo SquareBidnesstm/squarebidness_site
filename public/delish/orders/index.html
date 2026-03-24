@@ -1,6 +1,6 @@
 <!-- FILE: /public/delish/orders/index.html -->
 <!doctype html>
-<html lang="en" data-sb-brand="delish" data-sb-tier="ops" data-sb-variant="delish-kitchen-screen-v1">
+<html lang="en" data-sb-brand="delish" data-sb-tier="ops" data-sb-variant="delish-kitchen-screen-v2-complete-order">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -11,7 +11,6 @@
   <link rel="icon" type="image/png" sizes="16x16" href="/delish/assets/delish-favicon-16.png" />
   <link rel="icon" type="image/png" sizes="32x32" href="/delish/assets/delish-favicon-32.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/delish/assets/delish-logo-mark-180.png" />
-
 
   <style>
     :root{
@@ -26,6 +25,8 @@
       --accent-2:#f2d8ae;
       --good:#153822;
       --good-line:#255534;
+      --btn:#d7ae72;
+      --btn-text:#181410;
       --shadow:0 18px 54px rgba(0,0,0,.30);
       --max:1500px;
     }
@@ -248,6 +249,29 @@
       color:var(--accent-2);
     }
 
+    .card-actions{
+      margin-top:16px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:44px;
+      padding:0 16px;
+      border-radius:999px;
+      border:1px solid transparent;
+      background:var(--btn);
+      color:var(--btn-text);
+      font-weight:900;
+      cursor:pointer;
+      transition:transform .14s ease, opacity .18s ease;
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btn[disabled]{opacity:.6;cursor:not-allowed;transform:none}
+
     .empty{
       padding:28px;
       border-radius:24px;
@@ -287,14 +311,14 @@
     </section>
 
     <section class="toolbar">
-      <div class="pill">Status:<strong>Paid orders only</strong></div>
+      <div class="pill">Status:<strong>Active paid orders</strong></div>
       <div class="pill">Device:<strong>Kitchen tablet</strong></div>
       <div class="pill">Newest:<strong>On top</strong></div>
       <div class="pill" id="lastUpdated">Last updated:<strong>Loading...</strong></div>
     </section>
 
     <section id="orders" class="orders">
-      <div class="empty">Loading paid orders...</div>
+      <div class="empty">Loading active paid orders...</div>
     </section>
   </div>
 
@@ -325,9 +349,39 @@
         .replace(/'/g, "&#039;");
     }
 
+    async function completeOrder(id, button) {
+      if (!id) return;
+
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.textContent = "Completing...";
+
+      try {
+        const res = await fetch("/api/delish-complete-order/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ id })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || "Failed to complete order.");
+        }
+
+        await loadOrders();
+      } catch (error) {
+        button.disabled = false;
+        button.textContent = originalText;
+        alert(error.message || "Unable to complete order.");
+      }
+    }
+
     function renderOrders(orders){
       if (!orders.length) {
-        ordersEl.innerHTML = `<div class="empty">No paid orders yet.</div>`;
+        ordersEl.innerHTML = `<div class="empty">No active paid orders right now.</div>`;
         return;
       }
 
@@ -377,14 +431,24 @@
               <div class="total-label">Total Paid</div>
               <div class="total-value">${money(order.total)}</div>
             </div>
+
+            <div class="card-actions">
+              <button class="btn" data-complete-id="${escapeHtml(order.id)}">Mark Complete</button>
+            </div>
           </article>
         `;
       }).join("");
+
+      document.querySelectorAll("[data-complete-id]").forEach((button) => {
+        button.addEventListener("click", () => {
+          completeOrder(button.getAttribute("data-complete-id"), button);
+        });
+      });
     }
 
     async function loadOrders(){
       try {
-        const res = await fetch("/api/delish-orders", { cache: "no-store" });
+        const res = await fetch("/api/delish-orders/", { cache: "no-store" });
         const data = await res.json();
 
         if (!data.ok) {
@@ -396,7 +460,7 @@
         const now = new Date();
         lastUpdatedEl.innerHTML = `Last updated:<strong>${now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</strong>`;
       } catch (err) {
-        ordersEl.innerHTML = `<div class="empty">Unable to load paid orders right now.</div>`;
+        ordersEl.innerHTML = `<div class="empty">Unable to load active paid orders right now.</div>`;
         lastUpdatedEl.innerHTML = `Last updated:<strong>Error</strong>`;
       }
     }
