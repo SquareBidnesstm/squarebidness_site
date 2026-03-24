@@ -1,4 +1,4 @@
-// /api/puffs-orders.js
+// /api/puffs/orders.js
 export default async function handler(req, res) {
   res.setHeader("Content-Type", "application/json");
   res.setHeader("Cache-Control", "no-store");
@@ -23,9 +23,7 @@ export default async function handler(req, res) {
     });
 
     const data = await r.json().catch(() => ({}));
-    if (!r.ok) {
-      throw new Error(data.error || `Redis request failed (${r.status})`);
-    }
+    if (!r.ok) throw new Error(data.error || `Redis request failed (${r.status})`);
     return data;
   }
 
