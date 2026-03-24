@@ -71,6 +71,8 @@ export default async function handler(req, res) {
       id,
       orderNumber,
       createdAt: new Date().toISOString(),
+      completedAt: "",
+      status: "active",
       ...body,
     };
 
