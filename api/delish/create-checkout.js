@@ -1,4 +1,4 @@
-// FILE: /api/delish-create-checkout.js
+// FILE: /api/delish/create-checkout.js
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.DELISH_STRIPE_SECRET_KEY, {
