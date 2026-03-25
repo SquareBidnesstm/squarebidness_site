@@ -70,6 +70,8 @@ export default async function handler(req, res) {
     return res.status(200).json({
       ok: true,
       orderNumber: webhookData.orderNumber,
+      pickupDate: payload.pickupDate,
+      pickupWindow: payload.pickupWindow,
     });
   } catch (error) {
     console.error("DELISH FINALIZE CHECKOUT ERROR:", error);
