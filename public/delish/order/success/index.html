@@ -1,4 +1,4 @@
- <!-- FILE: /public/delish/order/success/index.html -->
+<!-- FILE: /public/delish/order/success/index.html -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -8,46 +8,106 @@
   <meta name="robots" content="noindex,nofollow" />
   <meta name="theme-color" content="#0f0f0f" />
 
-   
   <link rel="icon" type="image/png" sizes="16x16" href="/delish/assets/delish-favicon-16.png" />
   <link rel="icon" type="image/png" sizes="32x32" href="/delish/assets/delish-favicon-32.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/delish/assets/delish-logo-mark-180.png" />
 
   <style>
+    :root{
+      --bg:#0f0f10;
+      --panel:#171718;
+      --border:#2c2c2f;
+      --text:#f5f2ea;
+      --muted:#cfc7ba;
+      --gold:#d7ae72;
+      --gold-soft:rgba(215,174,114,.1);
+      --gold-border:rgba(215,174,114,.2);
+    }
+
+    *{ box-sizing:border-box; }
+
     body{
       margin:0;
       font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
       background:#0f0f10;
-      color:#f5f2ea;
+      color:var(--text);
     }
+
     .wrap{
       width:min(760px,92%);
       margin:0 auto;
       padding:64px 0;
     }
+
     .card{
-      border:1px solid #2c2c2f;
+      border:1px solid var(--border);
       border-radius:24px;
       padding:28px;
-      background:#171718;
+      background:var(--panel);
+      box-shadow:0 10px 30px rgba(0,0,0,.22);
     }
+
     h1{
       margin:0;
       font-size:clamp(2rem,4vw,3rem);
       letter-spacing:-.03em;
+      line-height:1;
     }
+
     p{
-      color:#cfc7ba;
+      margin:18px 0 0;
+      color:var(--muted);
       line-height:1.6;
+      font-size:clamp(1rem,2vw,1.15rem);
     }
+
     .status{
-      margin-top:16px;
-      padding:14px 16px;
-      border-radius:16px;
-      background:rgba(215,174,114,.1);
-      border:1px solid rgba(215,174,114,.2);
+      margin-top:22px;
+      padding:16px 18px;
+      border-radius:18px;
+      background:var(--gold-soft);
+      border:1px solid var(--gold-border);
       color:#f4ead8;
+      font-size:clamp(1rem,2vw,1.1rem);
     }
+
+    .pickup{
+      display:none;
+      margin-top:18px;
+      padding:20px 18px;
+      border-radius:20px;
+      background:linear-gradient(180deg,rgba(215,174,114,.12),rgba(215,174,114,.08));
+      border:1px solid rgba(215,174,114,.24);
+    }
+
+    .pickup.is-visible{
+      display:block;
+    }
+
+    .pickup-label{
+      font-size:.82rem;
+      font-weight:800;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:#cdb48d;
+      margin-bottom:10px;
+    }
+
+    .pickup-value{
+      font-size:clamp(1.2rem,3vw,1.8rem);
+      font-weight:800;
+      line-height:1.2;
+      color:#f3dfb8;
+      letter-spacing:-.02em;
+    }
+
+    .pickup-note{
+      margin-top:12px;
+      color:var(--muted);
+      font-size:.98rem;
+      line-height:1.5;
+    }
+
     .btn{
       display:inline-flex;
       align-items:center;
@@ -59,7 +119,14 @@
       color:#181410;
       font-weight:800;
       text-decoration:none;
-      margin-top:18px;
+      margin-top:22px;
+    }
+
+    @media (max-width:640px){
+      .wrap{ padding:28px 0; }
+      .card{ padding:22px; border-radius:22px; }
+      .status,
+      .pickup{ border-radius:16px; }
     }
   </style>
 </head>
@@ -68,16 +135,55 @@
     <div class="card">
       <h1>Order received.</h1>
       <p>
-        Your payment was completed successfully. Delish is now processing your pickup order.
+        Your order has been confirmed and is being prepared.
       </p>
+
       <div id="status" class="status">Finalizing your order record...</div>
+
+      <div id="pickupBlock" class="pickup" aria-live="polite">
+        <div class="pickup-label">Pickup Time</div>
+        <div id="pickupValue" class="pickup-value">Loading pickup window...</div>
+        <div class="pickup-note">Please arrive during your selected pickup window.</div>
+      </div>
+
       <a class="btn" href="/delish/">Back to Delish</a>
     </div>
   </div>
 
   <script>
+    function formatPickupDate(dateStr) {
+      if (!dateStr) return "";
+
+      const parts = String(dateStr).split("-");
+      if (parts.length !== 3) return dateStr;
+
+      const year = Number(parts[0]);
+      const month = Number(parts[1]) - 1;
+      const day = Number(parts[2]);
+
+      const date = new Date(year, month, day);
+      if (Number.isNaN(date.getTime())) return dateStr;
+
+      return date.toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric"
+      });
+    }
+
+    function formatPickupWindow(dateStr, windowStr) {
+      const formattedDate = formatPickupDate(dateStr);
+      const cleanWindow = (windowStr || "").trim();
+
+      if (formattedDate && cleanWindow) return `${formattedDate} • ${cleanWindow}`;
+      if (formattedDate) return formattedDate;
+      if (cleanWindow) return cleanWindow;
+      return "";
+    }
+
     async function finalizeOrder() {
       const statusEl = document.getElementById("status");
+      const pickupBlock = document.getElementById("pickupBlock");
+      const pickupValue = document.getElementById("pickupValue");
       const params = new URLSearchParams(window.location.search);
       const sessionId = params.get("session_id");
 
@@ -99,6 +205,13 @@
         }
 
         statusEl.textContent = `Order confirmed: ${data.orderNumber}`;
+
+        const pickupText = formatPickupWindow(data.pickupDate, data.pickupWindow);
+
+        if (pickupText) {
+          pickupValue.textContent = pickupText;
+          pickupBlock.classList.add("is-visible");
+        }
       } catch (error) {
         statusEl.textContent = "Payment completed, but final order confirmation is still being processed.";
       }
