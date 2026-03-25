@@ -17,10 +17,14 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const twilioClient = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
+const hasTwilio =
+  process.env.TWILIO_ACCOUNT_SID &&
+  process.env.TWILIO_AUTH_TOKEN &&
+  process.env.TWILIO_FROM_NUMBER;
+
+const twilioClient = hasTwilio
+  ? twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
+  : null;
 
 function makeOrderNumber() {
   const now = new Date();
@@ -49,6 +53,43 @@ function formatItems(items) {
   return items
     .map((i) => `${i.qty} x ${i.name} ($${i.price})`)
     .join("\n");
+}
+
+function formatPickupDate(dateStr) {
+  if (!dateStr) return "";
+
+  const parts = String(dateStr).split("-");
+  if (parts.length !== 3) return dateStr;
+
+  const year = Number(parts[0]);
+  const month = Number(parts[1]) - 1;
+  const day = Number(parts[2]);
+
+  const date = new Date(year, month, day);
+  if (Number.isNaN(date.getTime())) return dateStr;
+
+  return date.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric"
+  });
+}
+
+function normalizePhone(phone) {
+  const digits = String(phone || "").replace(/\D/g, "");
+
+  if (digits.length === 11 && digits.startsWith("1")) {
+    return `+${digits}`;
+  }
+
+  if (digits.length === 10) {
+    return `+1${digits}`;
+  }
+
+  if (String(phone || "").trim().startsWith("+")) {
+    return String(phone).trim();
+  }
+
+  return null;
 }
 
 export default async function handler(req, res) {
@@ -101,14 +142,38 @@ ${body.notes || "None"}
       `,
     });
 
-    try {
-      await twilioClient.messages.create({
-        body: `New Delish order ${orderNumber} - Pickup ${body.pickupWindow}`,
-        from: process.env.TWILIO_FROM_NUMBER,
-        to: process.env.TWILIO_TO_NUMBER,
-      });
-    } catch (smsError) {
-      console.error("TWILIO SMS ERROR:", smsError);
+    if (twilioClient) {
+      const customerPhone = normalizePhone(body.customerPhone);
+      const operatorPhone = process.env.TWILIO_TO_NUMBER
+        ? normalizePhone(process.env.TWILIO_TO_NUMBER)
+        : null;
+
+      const pickupDateText = formatPickupDate(body.pickupDate);
+      const pickupLine = [pickupDateText, body.pickupWindow].filter(Boolean).join(" • ");
+
+      if (customerPhone) {
+        try {
+          await twilioClient.messages.create({
+            body: `Delish: Your order is confirmed${pickupLine ? ` for ${pickupLine}` : ""}. Order ${orderNumber}.`,
+            from: process.env.TWILIO_FROM_NUMBER,
+            to: customerPhone,
+          });
+        } catch (smsError) {
+          console.error("DELISH CUSTOMER SMS ERROR:", smsError);
+        }
+      }
+
+      if (operatorPhone) {
+        try {
+          await twilioClient.messages.create({
+            body: `New Delish order ${orderNumber} - Pickup ${pickupLine || body.pickupWindow || "scheduled"}`,
+            from: process.env.TWILIO_FROM_NUMBER,
+            to: operatorPhone,
+          });
+        } catch (smsError) {
+          console.error("DELISH OPERATOR SMS ERROR:", smsError);
+        }
+      }
     }
 
     return res.status(200).json({ ok: true, orderNumber });
