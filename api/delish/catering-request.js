@@ -1,6 +1,13 @@
 // FILE: /api/delish/catering-request.js
+import { Redis } from "@upstash/redis";
+import crypto from "node:crypto";
 import nodemailer from "nodemailer";
 import twilio from "twilio";
+
+const redis = new Redis({
+  url: process.env.DELISH_UPSTASH_REDIS_REST_URL,
+  token: process.env.DELISH_UPSTASH_REDIS_REST_TOKEN,
+});
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -38,8 +45,21 @@ function isValidPayload(body) {
   );
 }
 
+function clean(value) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
 function line(label, value) {
   return `${label}: ${value || "Not provided"}`;
+}
+
+function makeRequestNumber() {
+  const now = new Date();
+  const y = now.getFullYear().toString().slice(-2);
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  const rand = Math.floor(1000 + Math.random() * 9000);
+  return `DC-${y}${m}${d}-${rand}`;
 }
 
 export default async function handler(req, res) {
@@ -59,6 +79,16 @@ export default async function handler(req, res) {
       });
     }
 
+    if (
+      !process.env.DELISH_UPSTASH_REDIS_REST_URL ||
+      !process.env.DELISH_UPSTASH_REDIS_REST_TOKEN
+    ) {
+      return res.status(500).json({
+        ok: false,
+        error: "Missing Delish Redis environment variables.",
+      });
+    }
+
     const body = req.body || {};
 
     if (!isValidPayload(body)) {
@@ -68,38 +98,89 @@ export default async function handler(req, res) {
       });
     }
 
-    const subject = `Delish Catering Request — ${body.fullName} — ${body.eventDate}`;
+    const id = crypto.randomUUID();
+    const requestNumber = makeRequestNumber();
+    const createdAt = new Date().toISOString();
+
+    const record = {
+      id,
+      requestNumber,
+      createdAt,
+      updatedAt: createdAt,
+      completedAt: "",
+      status: "new_request",
+
+      customerName: clean(body.fullName),
+      phone: clean(body.phone),
+      email: clean(body.email),
+
+      eventType: clean(body.eventType),
+      eventDate: clean(body.eventDate),
+      eventTime: clean(body.eventTime),
+      guestCount: clean(body.guestCount),
+      serviceType: clean(body.serviceType),
+      budget: clean(body.budget),
+      servingStyle: clean(body.headcountStyle),
+      eventAddress: clean(body.eventAddress),
+
+      requestedItems: clean(body.requestedItems),
+      notes: clean(body.notes),
+
+      depositPolicy:
+        clean(body.depositPolicy) ||
+        "25% non-refundable deposit required on approved catering orders",
+
+      depositAmount: "",
+      depositLink: "",
+      depositSessionId: "",
+      depositSentAt: "",
+      depositPaidAt: "",
+
+      source: clean(body._source) || "delish-catering-page",
+      brand: clean(body._brand) || "Delish",
+      form: clean(body._form) || "delish_catering_request",
+      page: clean(body._page),
+      submittedAt: clean(body._submittedAt) || createdAt,
+    };
+
+    await redis.set(`delish:catering:${id}`, record);
+    await redis.lpush("delish:catering:list", id);
+
+    const subject = `Delish Catering Request — ${record.customerName} — ${record.eventDate}`;
 
     const text = `
 New Delish Catering Request
 
-${line("Full Name", body.fullName)}
-${line("Phone", body.phone)}
-${line("Email", body.email)}
-${line("Event Type", body.eventType)}
-${line("Event Date", body.eventDate)}
-${line("Event Time", body.eventTime)}
-${line("Guest Count", body.guestCount)}
-${line("Pickup or Delivery", body.serviceType)}
-${line("Budget Range", body.budget)}
-${line("Serving Style", body.headcountStyle)}
-${line("Event Address", body.eventAddress)}
+Request #: ${requestNumber}
+Status: ${record.status}
+
+${line("Full Name", record.customerName)}
+${line("Phone", record.phone)}
+${line("Email", record.email)}
+${line("Event Type", record.eventType)}
+${line("Event Date", record.eventDate)}
+${line("Event Time", record.eventTime)}
+${line("Guest Count", record.guestCount)}
+${line("Pickup or Delivery", record.serviceType)}
+${line("Budget Range", record.budget)}
+${line("Serving Style", record.servingStyle)}
+${line("Event Address", record.eventAddress)}
 
 Requested Menu Items:
-${body.requestedItems || "Not provided"}
+${record.requestedItems || "Not provided"}
 
 Additional Details:
-${body.notes || "None"}
+${record.notes || "None"}
 
 Deposit Policy:
-${body.depositPolicy || "25% non-refundable deposit required on approved catering orders"}
+${record.depositPolicy}
 
 System Metadata:
-${line("Brand", body._brand)}
-${line("Form", body._form)}
-${line("Source", body._source)}
-${line("Page", body._page)}
-${line("Submitted At", body._submittedAt)}
+${line("Brand", record.brand)}
+${line("Form", record.form)}
+${line("Source", record.source)}
+${line("Page", record.page)}
+${line("Submitted At", record.submittedAt)}
     `.trim();
 
     await transporter.sendMail({
@@ -107,13 +188,16 @@ ${line("Submitted At", body._submittedAt)}
       to: process.env.DELISH_NOTIFY_EMAIL || "delishcatering33@gmail.com",
       subject,
       text,
-      replyTo: body.email || process.env.DELISH_NOTIFY_EMAIL || "delishcatering33@gmail.com",
+      replyTo:
+        record.email ||
+        process.env.DELISH_NOTIFY_EMAIL ||
+        "delishcatering33@gmail.com",
     });
 
     if (twilioClient) {
       try {
         await twilioClient.messages.create({
-          body: `New Delish catering request from ${body.fullName} for ${body.eventDate}. Check email.`,
+          body: `New Delish catering request ${requestNumber} from ${record.customerName} for ${record.eventDate}${record.eventTime ? ` at ${record.eventTime}` : ""}. Check email.`,
           from: process.env.TWILIO_FROM_NUMBER,
           to: process.env.TWILIO_TO_NUMBER,
         });
@@ -124,6 +208,9 @@ ${line("Submitted At", body._submittedAt)}
 
     return res.status(200).json({
       ok: true,
+      id,
+      requestNumber,
+      status: record.status,
       message: "Catering request submitted successfully.",
     });
   } catch (error) {
