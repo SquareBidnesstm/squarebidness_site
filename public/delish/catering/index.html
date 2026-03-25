@@ -568,69 +568,69 @@
   </footer>
 
   <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
+  document.getElementById("year").textContent = new Date().getFullYear();
 
-    const DELISH_CATERING_ENDPOINT = "/api/delish/catering-request/";
-    const form = document.getElementById("delishCateringForm");
-    const statusBox = document.getElementById("formStatus");
+  const DELISH_CATERING_ENDPOINT = "/api/delish/catering-request/";
+  const form = document.getElementById("delishCateringForm");
+  const statusBox = document.getElementById("formStatus");
 
-    function showStatus(type, message){
-      statusBox.className = "status " + (type === "success" ? "is-success" : "is-error");
-      statusBox.textContent = message;
+  function showStatus(type, message){
+    statusBox.className = "status " + (type === "success" ? "is-success" : "is-error");
+    statusBox.textContent = message;
+  }
+
+  function clearStatus(){
+    statusBox.className = "status";
+    statusBox.textContent = "";
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    clearStatus();
+
+    if (!form.reportValidity()) {
+      showStatus("error", "Please complete all required fields before submitting.");
+      return;
     }
 
-    function clearStatus(){
-      statusBox.className = "status";
-      statusBox.textContent = "";
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Submitting...";
+
+    const formData = new FormData(form);
+    const payload = Object.fromEntries(formData.entries());
+
+    payload._brand = "Delish";
+    payload._form = "catering_request";
+    payload._source = "delish-catering-page";
+    payload._page = window.location.href;
+    payload._submittedAt = new Date().toISOString();
+    payload.depositPolicy = "25% non-refundable deposit required on approved catering orders";
+
+    try {
+      const res = await fetch(DELISH_CATERING_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok || !data.ok) {
+        throw new Error(data.error || "Request failed");
+      }
+
+      form.reset();
+      window.location.href = "/delish/catering/thank-you/";
+    } catch (err) {
+      showStatus("error", "Something went wrong while sending your request. Please call Delish directly at (318) 787-9407.");
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalText;
+      return;
     }
-
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      clearStatus();
-
-      if (!form.reportValidity()) {
-        showStatus("error", "Please complete all required fields before submitting.");
-        return;
-      }
-
-      const submitBtn = form.querySelector('button[type="submit"]');
-      const originalText = submitBtn.textContent;
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Submitting...";
-
-      const formData = new FormData(form);
-      const payload = Object.fromEntries(formData.entries());
-
-      payload._brand = "Delish";
-      payload._form = "catering_request";
-      payload._source = "delish-catering-page";
-      payload._page = window.location.href;
-      payload._submittedAt = new Date().toISOString();
-      payload.depositPolicy = "25% non-refundable deposit required on approved catering orders";
-
-      try {
-        const res = await fetch(DELISH_CATERING_ENDPOINT, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-
-        const data = await res.json().catch(() => ({}));
-
-        if (!res.ok || !data.ok) {
-          throw new Error(data.error || "Request failed");
-        }
-
-        form.reset();
-        showStatus("success", "Thank you. Your catering request has been submitted. Delish will review your details and follow up about availability, pricing, and the required deposit.");
-      } catch (err) {
-        showStatus("error", "Something went wrong while sending your request. Please call Delish directly at (318) 787-9407.");
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = originalText;
-      }
-    });
-  </script>
+  });
+</script>
 
   <script type="application/ld+json">
   {
