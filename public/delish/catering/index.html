@@ -1,24 +1,24 @@
 <!-- FILE: /public/delish/catering/index.html -->
 <!doctype html>
-<html lang="en" data-sb-brand="delish" data-sb-tier="public" data-sb-variant="delish-catering-v20260319-no-images">
+<html lang="en" data-sb-brand="delish" data-sb-tier="public" data-sb-variant="delish-catering-v20260324-up-to-par">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
 
   <title>Delish Catering Request | Alexandria, Louisiana</title>
-  <meta name="description" content="Submit a Delish catering request for events, gatherings, and large food orders in Alexandria, Louisiana. Dates are reviewed before confirmation." />
+  <meta name="description" content="Submit a Delish catering request for events, gatherings, and large food orders in Alexandria, Louisiana. Catering requests are reviewed before confirmation, and a 25% non-refundable deposit may be required." />
 
   <link rel="canonical" href="https://www.squarebidness.com/delish/catering/" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
   <meta name="theme-color" content="#111111" />
   <meta name="color-scheme" content="dark light" />
-  <meta name="sb:build" content="v20260319-delish-catering-no-images" />
+  <meta name="sb:build" content="v20260324-delish-catering-deposit-updated" />
   <meta property="fb:app_id" content="802680062853443" />
 
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Delish Catering Request" />
-  <meta property="og:description" content="Request Delish catering for events and gatherings in Alexandria, Louisiana." />
+  <meta property="og:description" content="Request Delish catering for events and gatherings in Alexandria, Louisiana. A 25% non-refundable deposit may be required." />
   <meta property="og:url" content="https://www.squarebidness.com/delish/catering/" />
   <meta property="og:site_name" content="Square Bidness" />
   <meta property="og:image" content="https://www.squarebidness.com/delish/assets/delish-meta-1200x630.jpg" />
@@ -296,7 +296,7 @@
           <div class="hero__chips">
             <div class="chip">Events & gatherings</div>
             <div class="chip">Reviewed before confirmation</div>
-            <div class="chip">Deposit may be required</div>
+            <div class="chip">25% non-refundable deposit</div>
           </div>
         </div>
 
@@ -326,8 +326,7 @@
           <div class="card">
             <h2 class="card__title">Catering policy</h2>
             <p class="card__copy">
-              Catering requests are not confirmed until reviewed by Delish.
-              A deposit may be required to secure your date. Lead time matters.
+              Catering requests are not confirmed until reviewed by Delish. A 25% non-refundable deposit is required to secure approved catering orders. Lead time matters.
             </p>
             <ul class="list">
               <li>Best for events, office orders, gatherings, and group meals</li>
@@ -356,7 +355,7 @@
             <h2 class="section__title">Tell Delish what you need.</h2>
             <p class="section__copy">
               Start with the basics. Delish can review the event details, follow up, and confirm next steps.
-              Keep this form focused on catering and larger group orders only.
+              Approved catering orders require a 25% non-refundable deposit to secure the date.
             </p>
           </div>
         </div>
@@ -465,7 +464,7 @@
                     <div class="checkline">
                       <input id="policyAgree" name="policyAgree" type="checkbox" required />
                       <label for="policyAgree">
-                        I understand this is a request only. My catering order is not confirmed until Delish reviews the details and confirms availability.
+                        I understand this is a request only. My catering order is not confirmed until Delish reviews the details, confirms availability, and the required 25% non-refundable deposit is received.
                       </label>
                     </div>
                   </div>
@@ -502,15 +501,14 @@
                 </p>
                 <ul class="list">
                   <li><a href="tel:+13187879407">(318) 787-9407</a></li>
-                  <li><a href="mailto:baxterqwnetta@yahoo.com">baxterqwnetta@yahoo.com</a></li>
+                  <li><a href="mailto:delishcatering33@gmail.com">delishcatering33@gmail.com</a></li>
                 </ul>
               </div>
 
               <div class="card" style="margin-top:18px;">
-                <h3 class="card__title">Square Bidness operator note</h3>
+                <h3 class="card__title">Deposit note</h3>
                 <p class="card__copy">
-                  This page is built to separate catering from regular order traffic.
-                  That keeps the intake cleaner and helps Delish review serious inquiries faster.
+                  Approved catering orders require a 25% non-refundable deposit to secure the date. Final balance and service details are handled directly with Delish after review.
                 </p>
               </div>
             </div>
@@ -544,13 +542,13 @@
           </article>
           <article class="step">
             <div class="step__num">3</div>
-            <h3>Follow-up happens directly</h3>
-            <p>Delish confirms pricing, final menu, and whether delivery, pickup, or deposit is needed.</p>
+            <h3>Deposit secures the date</h3>
+            <p>Approved catering orders require a 25% non-refundable deposit before the date is locked in.</p>
           </article>
           <article class="step">
             <div class="step__num">4</div>
-            <h3>Date gets secured</h3>
-            <p>Once approved, the customer can be moved into the final confirmation and payment workflow.</p>
+            <h3>Final details get confirmed</h3>
+            <p>Delish confirms final menu, pickup or delivery details, and remaining payment timing directly with the customer.</p>
           </article>
         </div>
       </div>
@@ -570,10 +568,9 @@
   </footer>
 
   <script>
-    document.getElementById('year').textContent = new Date().getFullYear();
+    document.getElementById("year").textContent = new Date().getFullYear();
 
-    const DELISH_CATERING_ENDPOINT = "YOUR_APPS_SCRIPT_OR_WEBHOOK_URL_HERE";
-
+    const DELISH_CATERING_ENDPOINT = "/api/delish/catering-request/";
     const form = document.getElementById("delishCateringForm");
     const statusBox = document.getElementById("formStatus");
 
@@ -596,11 +593,6 @@
         return;
       }
 
-      if (DELISH_CATERING_ENDPOINT === "YOUR_APPS_SCRIPT_OR_WEBHOOK_URL_HERE") {
-        showStatus("error", "Add your real catering form endpoint before going live.");
-        return;
-      }
-
       const submitBtn = form.querySelector('button[type="submit"]');
       const originalText = submitBtn.textContent;
       submitBtn.disabled = true;
@@ -614,6 +606,7 @@
       payload._source = "delish-catering-page";
       payload._page = window.location.href;
       payload._submittedAt = new Date().toISOString();
+      payload.depositPolicy = "25% non-refundable deposit required on approved catering orders";
 
       try {
         const res = await fetch(DELISH_CATERING_ENDPOINT, {
@@ -622,10 +615,14 @@
           body: JSON.stringify(payload)
         });
 
-        if (!res.ok) throw new Error("Request failed");
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || "Request failed");
+        }
 
         form.reset();
-        showStatus("success", "Thank you. Your catering request has been submitted. Delish will review your details and follow up.");
+        showStatus("success", "Thank you. Your catering request has been submitted. Delish will review your details and follow up about availability, pricing, and the required deposit.");
       } catch (err) {
         showStatus("error", "Something went wrong while sending your request. Please call Delish directly at (318) 787-9407.");
       } finally {
@@ -643,7 +640,7 @@
     "url":"https://www.squarebidness.com/delish/catering/",
     "image":"https://www.squarebidness.com/delish/assets/delish-meta-1200x630.jpg",
     "telephone":"+1-318-787-9407",
-    "email":"baxterqwnetta@yahoo.com",
+    "email":"delishcatering33@gmail.com",
     "servesCuisine":["Soul Food","Southern","Catering"],
     "address":{
       "@type":"PostalAddress",
