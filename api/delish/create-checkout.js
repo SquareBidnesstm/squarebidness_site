@@ -234,6 +234,18 @@ function getAllowedItemsForToday() {
 function buildAllowedMap(items) {
   return new Map(items.map((item) => [item.id, item]));
 }
+function isSundayMenuDay(date = new Date()) {
+  const { weekday } = getCentralDateParts(date);
+  return weekday === "sunday";
+}
+
+function isAllowedEverydayItemForCurrentDay(itemId, todayDay) {
+  if (itemId === "extra_side_potato_salad" || itemId === "extra_side_rice_dressing") {
+    return todayDay === "friday" || todayDay === "sunday";
+  }
+
+  return true;
+}
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -287,12 +299,13 @@ export default async function handler(req, res) {
     const { today, items: allowedItems } = getAllowedItemsForToday();
     const allowedMap = buildAllowedMap(allowedItems);
 
-    const cleanItems = body.items
+        const cleanItems = body.items
       .map((item) => {
         const id = String(item.id || "").trim();
         const qty = Math.max(1, Number(item.qty || 1));
 
         if (!id || !allowedMap.has(id)) return null;
+        if (!isAllowedEverydayItemForCurrentDay(id, todayDay)) return null;
 
         const allowed = allowedMap.get(id);
 
