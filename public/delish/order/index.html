@@ -1,6 +1,6 @@
 <!-- FILE: /public/delish/order/index.html -->
 <!doctype html>
-<html lang="en" data-sb-brand="delish" data-sb-tier="order" data-sb-variant="delish-order-v7-daily-menu-lock-final">
+<html lang="en" data-sb-brand="delish" data-sb-tier="order" data-sb-variant="delish-order-v8-grouped">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -18,7 +18,7 @@
 
   <meta property="og:title" content="Order Delish — Prepaid Online Pickup" />
   <meta property="og:description" content="Order Delish through the prepaid online pickup lane. No call-in orders." />
-  <meta property="og:image" content="https://www.squarebidness.com/delish/assets/delish_meta_1200x630.jpg" />
+  <meta property="og:image" content="https://www.squarebidness.com/delish/assets/delish-meta_1200x630.jpg" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://www.squarebidness.com/delish/order/" />
 
@@ -28,7 +28,7 @@
     name="twitter:description"
     content="Select available items for today, choose your pickup window, and complete checkout online."
   />
-  <meta name="twitter:image" content="https://www.squarebidness.com/delish/assets/delish_meta_1200x630.jpg" />
+  <meta name="twitter:image" content="https://www.squarebidness.com/delish/assets/delish-meta_1200x630.jpg" />
 
   <link rel="manifest" href="/delish/manifest.json" />
   <link rel="icon" type="image/png" sizes="16x16" href="/delish/assets/delish-favicon-16.png" />
@@ -135,7 +135,32 @@
     input:focus,select:focus,textarea:focus{
       border-color:rgba(215,174,114,.55);background:rgba(255,255,255,.045);box-shadow:0 0 0 4px rgba(215,174,114,.10);
     }
+    .menu-group{
+      margin-top:22px;
+      padding:18px;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:20px;
+      background:rgba(255,255,255,.02);
+    }
+    .menu-group[hidden]{display:none!important}
+    .menu-group__head{
+      margin-bottom:14px;
+      padding-bottom:12px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .menu-group__head h3{
+      margin:0;
+      font-size:1.05rem;
+      letter-spacing:-.02em;
+      color:var(--accent-2);
+    }
+    .menu-group__head p{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:.94rem;
+    }
     .items{display:grid;gap:12px;margin-top:14px}
+    .menu-group .items{margin-top:0}
     .item{
       display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;padding:16px;
       border:1px solid rgba(255,255,255,.08);border-radius:18px;background:rgba(255,255,255,.03);
@@ -282,572 +307,599 @@
               </div>
             </div>
 
-            <div class="items">
-              <!-- MONDAY -->
-              <article
-                class="item"
-                data-id="monday_red_beans_fried_chicken"
-                data-day="monday"
-                data-name="Red Beans or Okra with Fried Chicken"
-                data-price="13.99"
-              >
-                <input class="item-select" type="checkbox" />
-                <div>
-                  <h3>Red Beans or Okra with Fried Chicken</h3>
-                  <p>Monday plate.</p>
-                </div>
-                <div class="item__meta">
-                  <div class="price">$13.99</div>
-                  <input class="qty" type="number" min="1" value="1" />
-                </div>
-              </article>
+            <div class="menu-group" id="group-main-menu">
+              <div class="menu-group__head">
+                <h3>Today’s Main Menu</h3>
+                <p>Available for today’s active menu.</p>
+              </div>
+              <div class="items">
+                <!-- MONDAY -->
+                <article
+                  class="item"
+                  data-id="monday_red_beans_fried_chicken"
+                  data-day="monday"
+                  data-name="Red Beans or Okra with Fried Chicken"
+                  data-price="13.99"
+                >
+                  <input class="item-select" type="checkbox" />
+                  <div>
+                    <h3>Red Beans or Okra with Fried Chicken</h3>
+                    <p>Monday plate.</p>
+                  </div>
+                  <div class="item__meta">
+                    <div class="price">$13.99</div>
+                    <input class="qty" type="number" min="1" value="1" />
+                  </div>
+                </article>
 
-              <article
-                class="item"
-                data-id="monday_hamburger_steak"
-                data-day="monday"
-                data-name="Hamburger Steak Plate"
-                data-price="13.99"
-              >
-                <input class="item-select" type="checkbox" />
-                <div>
-                  <h3>Hamburger Steak Plate</h3>
-                  <p>Rice or mashed potatoes, vegetables, and roll.</p>
-                </div>
-                <div class="item__meta">
-                  <div class="price">$13.99</div>
-                  <input class="qty" type="number" min="1" value="1" />
-                </div>
-              </article>
+                <article
+                  class="item"
+                  data-id="monday_hamburger_steak"
+                  data-day="monday"
+                  data-name="Hamburger Steak Plate"
+                  data-price="13.99"
+                >
+                  <input class="item-select" type="checkbox" />
+                  <div>
+                    <h3>Hamburger Steak Plate</h3>
+                    <p>Rice or mashed potatoes, vegetables, and roll.</p>
+                  </div>
+                  <div class="item__meta">
+                    <div class="price">$13.99</div>
+                    <input class="qty" type="number" min="1" value="1" />
+                  </div>
+                </article>
 
-              <!-- TUESDAY -->
-              <article
-                class="item"
-                data-id="tuesday_beef_tips"
-                data-day="tuesday"
-                data-name="Beef Tips Plate"
-                data-price="13.99"
-              >
-                <input class="item-select" type="checkbox" />
-                <div>
-                  <h3>Beef Tips Plate</h3>
-                  <p>Tuesday plate.</p>
-                </div>
-                <div class="item__meta">
-                  <div class="price">$13.99</div>
-                  <input class="qty" type="number" min="1" value="1" />
-                </div>
-              </article>
+                <!-- TUESDAY -->
+                <article
+                  class="item"
+                  data-id="tuesday_beef_tips"
+                  data-day="tuesday"
+                  data-name="Beef Tips Plate"
+                  data-price="13.99"
+                >
+                  <input class="item-select" type="checkbox" />
+                  <div>
+                    <h3>Beef Tips Plate</h3>
+                    <p>Tuesday plate.</p>
+                  </div>
+                  <div class="item__meta">
+                    <div class="price">$13.99</div>
+                    <input class="qty" type="number" min="1" value="1" />
+                  </div>
+                </article>
 
-              <article
-                class="item"
-                data-id="tuesday_meatloaf"
-                data-day="tuesday"
-                data-name="Meatloaf Plate"
-                data-price="13.99"
-              >
-                <input class="item-select" type="checkbox" />
-                <div>
-                  <h3>Meatloaf Plate</h3>
-                  <p>Tuesday plate.</p>
-                </div>
-                <div class="item__meta">
-                  <div class="price">$13.99</div>
-                  <input class="qty" type="number" min="1" value="1" />
-                </div>
-              </article>
+                <article
+                  class="item"
+                  data-id="tuesday_meatloaf"
+                  data-day="tuesday"
+                  data-name="Meatloaf Plate"
+                  data-price="13.99"
+                >
+                  <input class="item-select" type="checkbox" />
+                  <div>
+                    <h3>Meatloaf Plate</h3>
+                    <p>Tuesday plate.</p>
+                  </div>
+                  <div class="item__meta">
+                    <div class="price">$13.99</div>
+                    <input class="qty" type="number" min="1" value="1" />
+                  </div>
+                </article>
 
-              <!-- WEDNESDAY -->
-              <article
-                class="item"
-                data-id="wednesday_pork_neckbones"
-                data-day="wednesday"
-                data-name="Pork Neckbones Plate"
-                data-price="10.00"
-              >
-                <input class="item-select" type="checkbox" />
-                <div>
-                  <h3>Pork Neckbones Plate</h3>
-                  <p>Wednesday plate.</p>
-                </div>
-                <div class="item__meta">
-                  <div class="price">$10.00</div>
-                  <input class="qty" type="number" min="1" value="1" />
-                </div>
-              </article>
+                <!-- WEDNESDAY -->
+                <article
+                  class="item"
+                  data-id="wednesday_pork_neckbones"
+                  data-day="wednesday"
+                  data-name="Pork Neckbones Plate"
+                  data-price="10.00"
+                >
+                  <input class="item-select" type="checkbox" />
+                  <div>
+                    <h3>Pork Neckbones Plate</h3>
+                    <p>Wednesday plate.</p>
+                  </div>
+                  <div class="item__meta">
+                    <div class="price">$10.00</div>
+                    <input class="qty" type="number" min="1" value="1" />
+                  </div>
+                </article>
 
-              <article
-                class="item"
-                data-id="wednesday_baked_chicken"
-                data-day="wednesday"
-                data-name="Baked Chicken Plate"
-                data-price="10.00"
-              >
-                <input class="item-select" type="checkbox" />
-                <div>
-                  <h3>Baked Chicken Plate</h3>
-                  <p>Wednesday plate.</p>
-                </div>
-                <div class="item__meta">
-                  <div class="price">$10.00</div>
-                  <input class="qty" type="number" min="1" value="1" />
-                </div>
-              </article>
+                <article
+                  class="item"
+                  data-id="wednesday_baked_chicken"
+                  data-day="wednesday"
+                  data-name="Baked Chicken Plate"
+                  data-price="10.00"
+                >
+                  <input class="item-select" type="checkbox" />
+                  <div>
+                    <h3>Baked Chicken Plate</h3>
+                    <p>Wednesday plate.</p>
+                  </div>
+                  <div class="item__meta">
+                    <div class="price">$10.00</div>
+                    <input class="qty" type="number" min="1" value="1" />
+                  </div>
+                </article>
 
-              <article
-                class="item"
-                data-id="wednesday_country_fried_steak"
-                data-day="wednesday"
-                data-name="Country Fried Steak Plate"
-                data-price="10.00"
-              >
-                <input class="item-select" type="checkbox" />
-                <div>
-                  <h3>Country Fried Steak Plate</h3>
-                  <p>Wednesday plate.</p>
-                </div>
-                <div class="item__meta">
-                  <div class="price">$10.00</div>
-                  <input class="qty" type="number" min="1" value="1" />
-                </div>
-              </article>
+                <article
+                  class="item"
+                  data-id="wednesday_country_fried_steak"
+                  data-day="wednesday"
+                  data-name="Country Fried Steak Plate"
+                  data-price="10.00"
+                >
+                  <input class="item-select" type="checkbox" />
+                  <div>
+                    <h3>Country Fried Steak Plate</h3>
+                    <p>Wednesday plate.</p>
+                  </div>
+                  <div class="item__meta">
+                    <div class="price">$10.00</div>
+                    <input class="qty" type="number" min="1" value="1" />
+                  </div>
+                </article>
 
-              <!-- THURSDAY -->
-              <article
-                class="item"
-                data-id="thursday_turkey_wings"
-                data-day="thursday"
-                data-name="Turkey Wings Plate"
-                data-price="16.99"
-              >
-                <input class="item-select" type="checkbox" />
-                <div>
-                  <h3>Turkey Wings Plate</h3>
-                  <p>Cornbread dressing or rice with 2 sides.</p>
-                </div>
-                <div class="item__meta">
-                  <div class="price">$16.99</div>
-                  <input class="qty" type="number" min="1" value="1" />
-                </div>
-              </article>
+                <!-- THURSDAY -->
+                <article
+                  class="item"
+                  data-id="thursday_turkey_wings"
+                  data-day="thursday"
+                  data-name="Turkey Wings Plate"
+                  data-price="16.99"
+                >
+                  <input class="item-select" type="checkbox" />
+                  <div>
+                    <h3>Turkey Wings Plate</h3>
+                    <p>Cornbread dressing or rice with 2 sides.</p>
+                  </div>
+                  <div class="item__meta">
+                    <div class="price">$16.99</div>
+                    <input class="qty" type="number" min="1" value="1" />
+                  </div>
+                </article>
 
-              <!-- FRIDAY -->
-              <article
-                class="item"
-                data-id="friday_crawfish_etouffee"
-                data-day="friday"
-                data-name="Crawfish Étouffée Plate"
-                data-price="16.99"
-              >
-                <input class="item-select" type="checkbox" />
-                <div>
-                  <h3>Crawfish Étouffée Plate</h3>
-                  <p>Friday feature with 2 sides.</p>
-                </div>
-                <div class="item__meta">
-                  <div class="price">$16.99</div>
-                  <input class="qty" type="number" min="1" value="1" />
-                </div>
-              </article>
+                <!-- FRIDAY -->
+                <article
+                  class="item"
+                  data-id="friday_crawfish_etouffee"
+                  data-day="friday"
+                  data-name="Crawfish Étouffée Plate"
+                  data-price="16.99"
+                >
+                  <input class="item-select" type="checkbox" />
+                  <div>
+                    <h3>Crawfish Étouffée Plate</h3>
+                    <p>Friday feature with 2 sides.</p>
+                  </div>
+                  <div class="item__meta">
+                    <div class="price">$16.99</div>
+                    <input class="qty" type="number" min="1" value="1" />
+                  </div>
+                </article>
 
-              <article
-                class="item"
-                data-id="friday_shrimp_pasta"
-                data-day="friday"
-                data-name="Shrimp Pasta Plate"
-                data-price="16.99"
-              >
-                <input class="item-select" type="checkbox" />
-                <div>
-                  <h3>Shrimp Pasta Plate</h3>
-                  <p>Featured plate built for pickup demand.</p>
-                </div>
-                <div class="item__meta">
-                  <div class="price">$16.99</div>
-                  <input class="qty" type="number" min="1" value="1" />
-                </div>
-              </article>
+                <article
+                  class="item"
+                  data-id="friday_shrimp_pasta"
+                  data-day="friday"
+                  data-name="Shrimp Pasta Plate"
+                  data-price="16.99"
+                >
+                  <input class="item-select" type="checkbox" />
+                  <div>
+                    <h3>Shrimp Pasta Plate</h3>
+                    <p>Featured plate built for pickup demand.</p>
+                  </div>
+                  <div class="item__meta">
+                    <div class="price">$16.99</div>
+                    <input class="qty" type="number" min="1" value="1" />
+                  </div>
+                </article>
 
-              <article
-                class="item"
-                data-id="friday_fried_catfish"
-                data-day="friday"
-                data-name="Fried Catfish Plate (3 strips)"
-                data-price="15.99"
-              >
-                <input class="item-select" type="checkbox" />
-                <div>
-                  <h3>Fried Catfish Plate (3 strips)</h3>
-                  <p>Served with 2 sides.</p>
-                </div>
-                <div class="item__meta">
-                  <div class="price">$15.99</div>
-                  <input class="qty" type="number" min="1" value="1" />
-                </div>
-              </article>
+                <article
+                  class="item"
+                  data-id="friday_fried_catfish"
+                  data-day="friday"
+                  data-name="Fried Catfish Plate (3 strips)"
+                  data-price="15.99"
+                >
+                  <input class="item-select" type="checkbox" />
+                  <div>
+                    <h3>Fried Catfish Plate (3 strips)</h3>
+                    <p>Served with 2 sides.</p>
+                  </div>
+                  <div class="item__meta">
+                    <div class="price">$15.99</div>
+                    <input class="qty" type="number" min="1" value="1" />
+                  </div>
+                </article>
 
-              <article
-                class="item"
-                data-id="friday_baked_catfish"
-                data-day="friday"
-                data-name="Baked Catfish Plate"
-                data-price="16.99"
-              >
-                <input class="item-select" type="checkbox" />
-                <div>
-                  <h3>Baked Catfish Plate</h3>
-                  <p>Friday feature.</p>
-                </div>
-                <div class="item__meta">
-                  <div class="price">$16.99</div>
-                  <input class="qty" type="number" min="1" value="1" />
-                </div>
-              </article>
+                <article
+                  class="item"
+                  data-id="friday_baked_catfish"
+                  data-day="friday"
+                  data-name="Baked Catfish Plate"
+                  data-price="16.99"
+                >
+                  <input class="item-select" type="checkbox" />
+                  <div>
+                    <h3>Baked Catfish Plate</h3>
+                    <p>Friday feature.</p>
+                  </div>
+                  <div class="item__meta">
+                    <div class="price">$16.99</div>
+                    <input class="qty" type="number" min="1" value="1" />
+                  </div>
+                </article>
+              </div>
+            </div>
 
-              <!-- EVERYDAY DRINKS -->
-              <article
-                class="item"
-                data-id="drink_tropical_punch_koolaid"
-                data-day="everyday"
-                data-name="Tropical Punch Kool-Aid"
-                data-price="3.99"
-              >
-                <input class="item-select" type="checkbox" />
-                <div>
-                  <h3>Tropical Punch Kool-Aid</h3>
-                  <p>Everyday drink option.</p>
-                </div>
-                <div class="item__meta">
-                  <div class="price">$3.99</div>
-                  <input class="qty" type="number" min="1" value="1" />
-                </div>
-              </article>
+            <div class="menu-group" id="group-drinks">
+              <div class="menu-group__head">
+                <h3>Drinks</h3>
+                <p>Available every day.</p>
+              </div>
+              <div class="items">
+                <article
+                  class="item"
+                  data-id="drink_tropical_punch_koolaid"
+                  data-day="everyday"
+                  data-name="Tropical Punch Kool-Aid"
+                  data-price="3.99"
+                >
+                  <input class="item-select" type="checkbox" />
+                  <div>
+                    <h3>Tropical Punch Kool-Aid</h3>
+                    <p>Everyday drink option.</p>
+                  </div>
+                  <div class="item__meta">
+                    <div class="price">$3.99</div>
+                    <input class="qty" type="number" min="1" value="1" />
+                  </div>
+                </article>
 
-              <article
-                class="item"
-                data-id="drink_lemonade"
-                data-day="everyday"
-                data-name="Lemonade"
-                data-price="3.99"
-              >
-                <input class="item-select" type="checkbox" />
-                <div>
-                  <h3>Lemonade</h3>
-                  <p>Everyday drink option.</p>
-                </div>
-                <div class="item__meta">
-                  <div class="price">$3.99</div>
-                  <input class="qty" type="number" min="1" value="1" />
-                </div>
-              </article>
+                <article
+                  class="item"
+                  data-id="drink_lemonade"
+                  data-day="everyday"
+                  data-name="Lemonade"
+                  data-price="3.99"
+                >
+                  <input class="item-select" type="checkbox" />
+                  <div>
+                    <h3>Lemonade</h3>
+                    <p>Everyday drink option.</p>
+                  </div>
+                  <div class="item__meta">
+                    <div class="price">$3.99</div>
+                    <input class="qty" type="number" min="1" value="1" />
+                  </div>
+                </article>
 
-              <article
-                class="item"
-                data-id="drink_can_soda"
-                data-day="everyday"
-                data-name="Can Soda"
-                data-price="1.50"
-              >
-                <input class="item-select" type="checkbox" />
-                <div>
-                  <h3>Can Soda</h3>
-                  <p>Everyday drink option.</p>
-                </div>
-                <div class="item__meta">
-                  <div class="price">$1.50</div>
-                  <input class="qty" type="number" min="1" value="1" />
-                </div>
-              </article>
+                <article
+                  class="item"
+                  data-id="drink_can_soda"
+                  data-day="everyday"
+                  data-name="Can Soda"
+                  data-price="1.50"
+                >
+                  <input class="item-select" type="checkbox" />
+                  <div>
+                    <h3>Can Soda</h3>
+                    <p>Everyday drink option.</p>
+                  </div>
+                  <div class="item__meta">
+                    <div class="price">$1.50</div>
+                    <input class="qty" type="number" min="1" value="1" />
+                  </div>
+                </article>
 
-              <article
-                class="item"
-                data-id="drink_bottle_water"
-                data-day="everyday"
-                data-name="Bottle Water"
-                data-price="1.50"
-              >
-                <input class="item-select" type="checkbox" />
-                <div>
-                  <h3>Bottle Water</h3>
-                  <p>Everyday drink option.</p>
-                </div>
-                <div class="item__meta">
-                  <div class="price">$1.50</div>
-                  <input class="qty" type="number" min="1" value="1" />
-                </div>
-              </article>
+                <article
+                  class="item"
+                  data-id="drink_bottle_water"
+                  data-day="everyday"
+                  data-name="Bottle Water"
+                  data-price="1.50"
+                >
+                  <input class="item-select" type="checkbox" />
+                  <div>
+                    <h3>Bottle Water</h3>
+                    <p>Everyday drink option.</p>
+                  </div>
+                  <div class="item__meta">
+                    <div class="price">$1.50</div>
+                    <input class="qty" type="number" min="1" value="1" />
+                  </div>
+                </article>
+              </div>
+            </div>
 
-              <!-- EVERYDAY LAGNIAPPE -->
-              <article
-                class="item"
-                data-id="lagniappe_grilled_chicken_salad"
-                data-day="everyday"
-                data-name="Lagniappe Grilled Chicken Salad"
-                data-price="12.99"
-              >
-                <input class="item-select" type="checkbox" />
-                <div>
-                  <h3>Lagniappe — Grilled Chicken Salad</h3>
-                  <p>Chopped romaine, tomatoes, cucumber, eggs, shredded cheese, and your choice of ranch, Italian, or balsamic vinaigrette.</p>
-                </div>
-                <div class="item__meta">
-                  <div class="price">$12.99</div>
-                  <input class="qty" type="number" min="1" value="1" />
-                </div>
-              </article>
+            <div class="menu-group" id="group-lagniappe">
+              <div class="menu-group__head">
+                <h3>Lagniappe</h3>
+                <p>Everyday items.</p>
+              </div>
+              <div class="items">
+                <article
+                  class="item"
+                  data-id="lagniappe_grilled_chicken_salad"
+                  data-day="everyday"
+                  data-name="Lagniappe Grilled Chicken Salad"
+                  data-price="12.99"
+                >
+                  <input class="item-select" type="checkbox" />
+                  <div>
+                    <h3>Lagniappe — Grilled Chicken Salad</h3>
+                    <p>Chopped romaine, tomatoes, cucumber, eggs, shredded cheese, and your choice of ranch, Italian, or balsamic vinaigrette.</p>
+                  </div>
+                  <div class="item__meta">
+                    <div class="price">$12.99</div>
+                    <input class="qty" type="number" min="1" value="1" />
+                  </div>
+                </article>
 
-              <article
-                class="item"
-                data-id="lagniappe_grilled_shrimp_salad"
-                data-day="everyday"
-                data-name="Lagniappe Grilled Shrimp Salad"
-                data-price="12.99"
-              >
-                <input class="item-select" type="checkbox" />
-                <div>
-                  <h3>Lagniappe — Grilled Shrimp Salad</h3>
-                  <p>Chopped romaine, tomatoes, cucumber, eggs, shredded cheese, and your choice of ranch, Italian, or balsamic vinaigrette.</p>
-                </div>
-                <div class="item__meta">
-                  <div class="price">$12.99</div>
-                  <input class="qty" type="number" min="1" value="1" />
-                </div>
-              </article>
+                <article
+                  class="item"
+                  data-id="lagniappe_grilled_shrimp_salad"
+                  data-day="everyday"
+                  data-name="Lagniappe Grilled Shrimp Salad"
+                  data-price="12.99"
+                >
+                  <input class="item-select" type="checkbox" />
+                  <div>
+                    <h3>Lagniappe — Grilled Shrimp Salad</h3>
+                    <p>Chopped romaine, tomatoes, cucumber, eggs, shredded cheese, and your choice of ranch, Italian, or balsamic vinaigrette.</p>
+                  </div>
+                  <div class="item__meta">
+                    <div class="price">$12.99</div>
+                    <input class="qty" type="number" min="1" value="1" />
+                  </div>
+                </article>
 
-              <article
-                class="item"
-                data-id="lagniappe_both_meat_salad"
-                data-day="everyday"
-                data-name="Lagniappe Both Meat Salad"
-                data-price="16.99"
-              >
-                <input class="item-select" type="checkbox" />
-                <div>
-                  <h3>Lagniappe — Both Meat Salad</h3>
-                  <p>Chopped romaine, tomatoes, cucumber, eggs, shredded cheese, and your choice of ranch, Italian, or balsamic vinaigrette, with both grilled chicken and grilled shrimp.</p>
-                </div>
-                <div class="item__meta">
-                  <div class="price">$16.99</div>
-                  <input class="qty" type="number" min="1" value="1" />
-                </div>
-              </article>
+                <article
+                  class="item"
+                  data-id="lagniappe_both_meat_salad"
+                  data-day="everyday"
+                  data-name="Lagniappe Both Meat Salad"
+                  data-price="16.99"
+                >
+                  <input class="item-select" type="checkbox" />
+                  <div>
+                    <h3>Lagniappe — Both Meat Salad</h3>
+                    <p>Chopped romaine, tomatoes, cucumber, eggs, shredded cheese, and your choice of ranch, Italian, or balsamic vinaigrette, with both grilled chicken and grilled shrimp.</p>
+                  </div>
+                  <div class="item__meta">
+                    <div class="price">$16.99</div>
+                    <input class="qty" type="number" min="1" value="1" />
+                  </div>
+                </article>
 
-              <article
-                class="item"
-                data-id="lagniappe_chicken_tender_basket_fries"
-                data-day="everyday"
-                data-name="Lagniappe Chicken Tender Basket with Fries"
-                data-price="9.99"
-              >
-                <input class="item-select" type="checkbox" />
-                <div>
-                  <h3>Lagniappe — Chicken Tender Basket with Fries</h3>
-                  <p>Crispy chicken tenders served with fries.</p>
-                </div>
-                <div class="item__meta">
-                  <div class="price">$9.99</div>
-                  <input class="qty" type="number" min="1" value="1" />
-                </div>
-              </article>
+                <article
+                  class="item"
+                  data-id="lagniappe_chicken_tender_basket_fries"
+                  data-day="everyday"
+                  data-name="Lagniappe Chicken Tender Basket with Fries"
+                  data-price="9.99"
+                >
+                  <input class="item-select" type="checkbox" />
+                  <div>
+                    <h3>Lagniappe — Chicken Tender Basket with Fries</h3>
+                    <p>Crispy chicken tenders served with fries.</p>
+                  </div>
+                  <div class="item__meta">
+                    <div class="price">$9.99</div>
+                    <input class="qty" type="number" min="1" value="1" />
+                  </div>
+                </article>
 
-              <article
-                class="item"
-                data-id="lagniappe_fried_porkchop_sandwich_fries"
-                data-day="everyday"
-                data-name="Lagniappe Fried Porkchop Sandwich with Fries"
-                data-price="9.99"
-              >
-                <input class="item-select" type="checkbox" />
-                <div>
-                  <h3>Lagniappe — Fried Porkchop Sandwich with Fries</h3>
-                  <p>Fried porkchop sandwich served with fries.</p>
-                </div>
-                <div class="item__meta">
-                  <div class="price">$9.99</div>
-                  <input class="qty" type="number" min="1" value="1" />
-                </div>
-              </article>
+                <article
+                  class="item"
+                  data-id="lagniappe_fried_porkchop_sandwich_fries"
+                  data-day="everyday"
+                  data-name="Lagniappe Fried Porkchop Sandwich with Fries"
+                  data-price="9.99"
+                >
+                  <input class="item-select" type="checkbox" />
+                  <div>
+                    <h3>Lagniappe — Fried Porkchop Sandwich with Fries</h3>
+                    <p>Fried porkchop sandwich served with fries.</p>
+                  </div>
+                  <div class="item__meta">
+                    <div class="price">$9.99</div>
+                    <input class="qty" type="number" min="1" value="1" />
+                  </div>
+                </article>
 
-              <article
-                class="item"
-                data-id="lagniappe_cheeseburger_basket"
-                data-day="everyday"
-                data-name="Lagniappe Cheeseburger Basket"
-                data-price="9.99"
-              >
-                <input class="item-select" type="checkbox" />
-                <div>
-                  <h3>Lagniappe — Cheeseburger Basket</h3>
-                  <p>Cheeseburger served with fries.</p>
-                </div>
-                <div class="item__meta">
-                  <div class="price">$9.99</div>
-                  <input class="qty" type="number" min="1" value="1" />
-                </div>
-              </article>
+                <article
+                  class="item"
+                  data-id="lagniappe_cheeseburger_basket"
+                  data-day="everyday"
+                  data-name="Lagniappe Cheeseburger Basket"
+                  data-price="9.99"
+                >
+                  <input class="item-select" type="checkbox" />
+                  <div>
+                    <h3>Lagniappe — Cheeseburger Basket</h3>
+                    <p>Cheeseburger served with fries.</p>
+                  </div>
+                  <div class="item__meta">
+                    <div class="price">$9.99</div>
+                    <input class="qty" type="number" min="1" value="1" />
+                  </div>
+                </article>
+              </div>
+            </div>
 
-                            <!-- EXTRA SIDES -->
-              <article
-                class="item"
-                data-id="extra_side_mac_and_cheese"
-                data-day="everyday"
-                data-name="Extra Side - Mac and Cheese"
-                data-price="2.50"
-              >
-                <input class="item-select" type="checkbox" />
-                <div>
-                  <h3>Extra Side — Mac and Cheese</h3>
-                  <p>Extra side.</p>
-                </div>
-                <div class="item__meta">
-                  <div class="price">$2.50</div>
-                  <input class="qty" type="number" min="1" value="1" />
-                </div>
-              </article>
+            <div class="menu-group" id="group-extra-sides">
+              <div class="menu-group__head">
+                <h3>Extra Sides</h3>
+                <p>Add extra sides to your order.</p>
+              </div>
+              <div class="items">
+                <article
+                  class="item"
+                  data-id="extra_side_mac_and_cheese"
+                  data-day="everyday"
+                  data-name="Extra Side - Mac and Cheese"
+                  data-price="2.50"
+                >
+                  <input class="item-select" type="checkbox" />
+                  <div>
+                    <h3>Extra Side — Mac and Cheese</h3>
+                    <p>Extra side.</p>
+                  </div>
+                  <div class="item__meta">
+                    <div class="price">$2.50</div>
+                    <input class="qty" type="number" min="1" value="1" />
+                  </div>
+                </article>
 
-              <article
-                class="item"
-                data-id="extra_side_yams"
-                data-day="everyday"
-                data-name="Extra Side - Yams"
-                data-price="2.50"
-              >
-                <input class="item-select" type="checkbox" />
-                <div>
-                  <h3>Extra Side — Yams</h3>
-                  <p>Extra side.</p>
-                </div>
-                <div class="item__meta">
-                  <div class="price">$2.50</div>
-                  <input class="qty" type="number" min="1" value="1" />
-                </div>
-              </article>
+                <article
+                  class="item"
+                  data-id="extra_side_yams"
+                  data-day="everyday"
+                  data-name="Extra Side - Yams"
+                  data-price="2.50"
+                >
+                  <input class="item-select" type="checkbox" />
+                  <div>
+                    <h3>Extra Side — Yams</h3>
+                    <p>Extra side.</p>
+                  </div>
+                  <div class="item__meta">
+                    <div class="price">$2.50</div>
+                    <input class="qty" type="number" min="1" value="1" />
+                  </div>
+                </article>
 
-              <article
-                class="item"
-                data-id="extra_side_corn"
-                data-day="everyday"
-                data-name="Extra Side - Corn"
-                data-price="2.50"
-              >
-                <input class="item-select" type="checkbox" />
-                <div>
-                  <h3>Extra Side — Corn</h3>
-                  <p>Extra side.</p>
-                </div>
-                <div class="item__meta">
-                  <div class="price">$2.50</div>
-                  <input class="qty" type="number" min="1" value="1" />
-                </div>
-              </article>
+                <article
+                  class="item"
+                  data-id="extra_side_corn"
+                  data-day="everyday"
+                  data-name="Extra Side - Corn"
+                  data-price="2.50"
+                >
+                  <input class="item-select" type="checkbox" />
+                  <div>
+                    <h3>Extra Side — Corn</h3>
+                    <p>Extra side.</p>
+                  </div>
+                  <div class="item__meta">
+                    <div class="price">$2.50</div>
+                    <input class="qty" type="number" min="1" value="1" />
+                  </div>
+                </article>
 
-              <article
-                class="item"
-                data-id="extra_side_cabbage"
-                data-day="everyday"
-                data-name="Extra Side - Cabbage"
-                data-price="2.50"
-              >
-                <input class="item-select" type="checkbox" />
-                <div>
-                  <h3>Extra Side — Cabbage</h3>
-                  <p>Extra side.</p>
-                </div>
-                <div class="item__meta">
-                  <div class="price">$2.50</div>
-                  <input class="qty" type="number" min="1" value="1" />
-                </div>
-              </article>
+                <article
+                  class="item"
+                  data-id="extra_side_cabbage"
+                  data-day="everyday"
+                  data-name="Extra Side - Cabbage"
+                  data-price="2.50"
+                >
+                  <input class="item-select" type="checkbox" />
+                  <div>
+                    <h3>Extra Side — Cabbage</h3>
+                    <p>Extra side.</p>
+                  </div>
+                  <div class="item__meta">
+                    <div class="price">$2.50</div>
+                    <input class="qty" type="number" min="1" value="1" />
+                  </div>
+                </article>
 
-              <article
-                class="item"
-                data-id="extra_side_green_salad"
-                data-day="everyday"
-                data-name="Extra Side - Green Salad"
-                data-price="2.50"
-              >
-                <input class="item-select" type="checkbox" />
-                <div>
-                  <h3>Extra Side — Green Salad</h3>
-                  <p>Extra side.</p>
-                </div>
-                <div class="item__meta">
-                  <div class="price">$2.50</div>
-                  <input class="qty" type="number" min="1" value="1" />
-                </div>
-              </article>
+                <article
+                  class="item"
+                  data-id="extra_side_green_salad"
+                  data-day="everyday"
+                  data-name="Extra Side - Green Salad"
+                  data-price="2.50"
+                >
+                  <input class="item-select" type="checkbox" />
+                  <div>
+                    <h3>Extra Side — Green Salad</h3>
+                    <p>Extra side.</p>
+                  </div>
+                  <div class="item__meta">
+                    <div class="price">$2.50</div>
+                    <input class="qty" type="number" min="1" value="1" />
+                  </div>
+                </article>
 
-              <article
-                class="item"
-                data-id="extra_side_black_eyed_peas"
-                data-day="everyday"
-                data-name="Extra Side - Black Eyed Peas"
-                data-price="2.50"
-              >
-                <input class="item-select" type="checkbox" />
-                <div>
-                  <h3>Extra Side — Black Eyed Peas</h3>
-                  <p>Extra side.</p>
-                </div>
-                <div class="item__meta">
-                  <div class="price">$2.50</div>
-                  <input class="qty" type="number" min="1" value="1" />
-                </div>
-              </article>
+                <article
+                  class="item"
+                  data-id="extra_side_black_eyed_peas"
+                  data-day="everyday"
+                  data-name="Extra Side - Black Eyed Peas"
+                  data-price="2.50"
+                >
+                  <input class="item-select" type="checkbox" />
+                  <div>
+                    <h3>Extra Side — Black Eyed Peas</h3>
+                    <p>Extra side.</p>
+                  </div>
+                  <div class="item__meta">
+                    <div class="price">$2.50</div>
+                    <input class="qty" type="number" min="1" value="1" />
+                  </div>
+                </article>
 
-              <article
-                class="item"
-                data-id="extra_side_green_beans"
-                data-day="everyday"
-                data-name="Extra Side - Green Beans"
-                data-price="2.50"
-              >
-                <input class="item-select" type="checkbox" />
-                <div>
-                  <h3>Extra Side — Green Beans</h3>
-                  <p>Extra side.</p>
-                </div>
-                <div class="item__meta">
-                  <div class="price">$2.50</div>
-                  <input class="qty" type="number" min="1" value="1" />
-                </div>
-              </article>
+                <article
+                  class="item"
+                  data-id="extra_side_green_beans"
+                  data-day="everyday"
+                  data-name="Extra Side - Green Beans"
+                  data-price="2.50"
+                >
+                  <input class="item-select" type="checkbox" />
+                  <div>
+                    <h3>Extra Side — Green Beans</h3>
+                    <p>Extra side.</p>
+                  </div>
+                  <div class="item__meta">
+                    <div class="price">$2.50</div>
+                    <input class="qty" type="number" min="1" value="1" />
+                  </div>
+                </article>
 
-              <article
-                class="item"
-                data-id="extra_side_potato_salad"
-                data-day="friday"
-                data-name="Extra Side - Potato Salad"
-                data-price="2.50"
-              >
-                <input class="item-select" type="checkbox" />
-                <div>
-                  <h3>Extra Side — Potato Salad</h3>
-                  <p>Friday only.</p>
-                </div>
-                <div class="item__meta">
-                  <div class="price">$2.50</div>
-                  <input class="qty" type="number" min="1" value="1" />
-                </div>
-              </article>
+                <article
+                  class="item"
+                  data-id="extra_side_potato_salad"
+                  data-day="friday"
+                  data-name="Extra Side - Potato Salad"
+                  data-price="2.50"
+                >
+                  <input class="item-select" type="checkbox" />
+                  <div>
+                    <h3>Extra Side — Potato Salad</h3>
+                    <p>Friday only.</p>
+                  </div>
+                  <div class="item__meta">
+                    <div class="price">$2.50</div>
+                    <input class="qty" type="number" min="1" value="1" />
+                  </div>
+                </article>
 
-              <article
-                class="item"
-                data-id="extra_side_rice_dressing"
-                data-day="friday"
-                data-name="Extra Side - Rice Dressing"
-                data-price="2.50"
-              >
-                <input class="item-select" type="checkbox" />
-                <div>
-                  <h3>Extra Side — Rice Dressing</h3>
-                  <p>Friday only.</p>
-                </div>
-                <div class="item__meta">
-                  <div class="price">$2.50</div>
-                  <input class="qty" type="number" min="1" value="1" />
-                </div>
-              </article>
+                <article
+                  class="item"
+                  data-id="extra_side_rice_dressing"
+                  data-day="friday"
+                  data-name="Extra Side - Rice Dressing"
+                  data-price="2.50"
+                >
+                  <input class="item-select" type="checkbox" />
+                  <div>
+                    <h3>Extra Side — Rice Dressing</h3>
+                    <p>Friday only.</p>
+                  </div>
+                  <div class="item__meta">
+                    <div class="price">$2.50</div>
+                    <input class="qty" type="number" min="1" value="1" />
+                  </div>
+                </article>
+              </div>
             </div>
 
             <div class="field field--full">
@@ -1005,6 +1057,14 @@
       }
     }
 
+    function toggleGroupVisibility(groupId) {
+      const group = document.getElementById(groupId);
+      if (!group) return;
+
+      const visibleItems = Array.from(group.querySelectorAll(".item")).filter((item) => !item.hidden);
+      group.hidden = visibleItems.length === 0;
+    }
+
     function applyDailyMenuVisibility() {
       const today = getCentralDayNameClient();
 
@@ -1037,6 +1097,11 @@
           }
         });
 
+        toggleGroupVisibility("group-main-menu");
+        toggleGroupVisibility("group-drinks");
+        toggleGroupVisibility("group-lagniappe");
+        toggleGroupVisibility("group-extra-sides");
+
         if (checkoutBtn) {
           checkoutBtn.disabled = false;
         }
@@ -1062,6 +1127,11 @@
           if (checkbox) checkbox.checked = false;
           if (qty) qty.value = 1;
         });
+
+        toggleGroupVisibility("group-main-menu");
+        toggleGroupVisibility("group-drinks");
+        toggleGroupVisibility("group-lagniappe");
+        toggleGroupVisibility("group-extra-sides");
 
         if (checkoutBtn) {
           checkoutBtn.disabled = true;
