@@ -70,7 +70,7 @@ function formatPickupDate(dateStr) {
 
   return date.toLocaleDateString("en-US", {
     month: "long",
-    day: "numeric"
+    day: "numeric",
   });
 }
 
@@ -114,6 +114,7 @@ export default async function handler(req, res) {
       createdAt: new Date().toISOString(),
       completedAt: "",
       status: "active",
+      smsConsent: body.smsConsent === "yes" ? "yes" : "no",
       ...body,
     };
 
@@ -139,6 +140,9 @@ Total: $${body.total}
 
 Notes:
 ${body.notes || "None"}
+
+SMS Consent:
+${body.smsConsent === "yes" ? "Yes" : "No"}
       `,
     });
 
@@ -151,10 +155,10 @@ ${body.notes || "None"}
       const pickupDateText = formatPickupDate(body.pickupDate);
       const pickupLine = [pickupDateText, body.pickupWindow].filter(Boolean).join(" • ");
 
-      if (customerPhone) {
+      if (customerPhone && body.smsConsent === "yes") {
         try {
           await twilioClient.messages.create({
-            body: `Delish: Your order is confirmed${pickupLine ? ` for ${pickupLine}` : ""}. Order ${orderNumber}.`,
+            body: `Delish: Your order is confirmed${pickupLine ? ` for ${pickupLine}` : ""}. Order ${orderNumber}. Reply STOP to opt out.`,
             from: process.env.TWILIO_FROM_NUMBER,
             to: customerPhone,
           });
