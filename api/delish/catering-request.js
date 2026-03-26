@@ -62,6 +62,24 @@ function makeRequestNumber() {
   return `DC-${y}${m}${d}-${rand}`;
 }
 
+function normalizePhone(phone) {
+  const digits = String(phone || "").replace(/\D/g, "");
+
+  if (digits.length === 11 && digits.startsWith("1")) {
+    return `+${digits}`;
+  }
+
+  if (digits.length === 10) {
+    return `+1${digits}`;
+  }
+
+  if (String(phone || "").trim().startsWith("+")) {
+    return String(phone).trim();
+  }
+
+  return null;
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -113,6 +131,7 @@ export default async function handler(req, res) {
       customerName: clean(body.fullName),
       phone: clean(body.phone),
       email: clean(body.email),
+      smsConsent: clean(body.smsConsent) === "yes" ? "yes" : "no",
 
       eventType: clean(body.eventType),
       eventDate: clean(body.eventDate),
@@ -175,6 +194,9 @@ ${record.notes || "None"}
 Deposit Policy:
 ${record.depositPolicy}
 
+SMS Consent:
+${record.smsConsent === "yes" ? "Yes" : "No"}
+
 System Metadata:
 ${line("Brand", record.brand)}
 ${line("Form", record.form)}
@@ -202,7 +224,21 @@ ${line("Submitted At", record.submittedAt)}
           to: process.env.TWILIO_TO_NUMBER,
         });
       } catch (smsError) {
-        console.error("DELISH CATERING SMS ERROR:", smsError);
+        console.error("DELISH CATERING OPERATOR SMS ERROR:", smsError);
+      }
+
+      const customerPhone = normalizePhone(record.phone);
+
+      if (customerPhone && record.smsConsent === "yes") {
+        try {
+          await twilioClient.messages.create({
+            body: `Delish Catering: We received your request ${requestNumber}. We will review your event details and follow up if needed. Reply STOP to opt out.`,
+            from: process.env.TWILIO_FROM_NUMBER,
+            to: customerPhone,
+          });
+        } catch (smsError) {
+          console.error("DELISH CATERING CUSTOMER SMS ERROR:", smsError);
+        }
       }
     }
 
