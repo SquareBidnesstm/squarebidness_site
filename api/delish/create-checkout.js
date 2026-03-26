@@ -78,9 +78,24 @@ const MENU_BY_DAY = {
   ],
   everyday: [
   {
-    id: "drink_add_on",
-    name: "Drink Add-On",
+    id: "drink_tropical_punch_koolaid",
+    name: "Tropical Punch Kool-Aid",
     price: 3.99,
+  },
+  {
+    id: "drink_lemonade",
+    name: "Lemonade",
+    price: 3.99,
+  },
+  {
+    id: "drink_can_soda",
+    name: "Can Soda",
+    price: 1.50,
+  },
+  {
+    id: "drink_bottle_water",
+    name: "Bottle Water",
+    price: 1.50,
   },
   {
     id: "lagniappe_grilled_chicken_salad",
