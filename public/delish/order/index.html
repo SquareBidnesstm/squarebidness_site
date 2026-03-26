@@ -1,12 +1,12 @@
 <!-- FILE: /public/delish/order/index.html -->
 <!doctype html>
-<html lang="en" data-sb-brand="delish" data-sb-tier="order" data-sb-variant="delish-order-v5-public-facing-sms">
+<html lang="en" data-sb-brand="delish" data-sb-tier="order" data-sb-variant="delish-order-v6-daily-menu-lock">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
 
   <title>Order — Delish | Alexandria, Louisiana</title>
-  <meta name="description" content="Order Delish online for prepaid pickup. Select featured items, choose your pickup window, and complete checkout online." />
+  <meta name="description" content="Order Delish online for prepaid pickup. Select available items for today, choose your pickup window, and complete checkout online." />
 
   <link rel="canonical" href="https://www.squarebidness.com/delish/order/" />
   <meta name="robots" content="index,follow" />
@@ -21,7 +21,7 @@
 
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Order Delish — Prepaid Online Pickup" />
-  <meta name="twitter:description" content="Select featured items, choose your pickup window, and complete checkout online." />
+  <meta name="twitter:description" content="Select available items for today, choose your pickup window, and complete checkout online." />
   <meta name="twitter:image" content="https://www.squarebidness.com/delish/assets/delish-meta_1200x630.jpg" />
 
   <link rel="manifest" href="/delish/manifest.json" />
@@ -35,7 +35,7 @@
   <script defer src="/scripts/sb-analytics.js"></script>
   <script defer src="/scripts/meta-pixel.js"></script>
   <script defer src="/scripts/sb-meta-bridge.js"></script>
-
+  
   <style>
     :root{
       --bg:#0f0f10;
@@ -63,6 +63,7 @@
     }
     a{color:inherit;text-decoration:none}
     button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
     .wrap{width:min(var(--max),92%);margin:0 auto}
     .section{padding:40px 0}
     .topbar{
@@ -133,6 +134,7 @@
       display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;padding:16px;
       border:1px solid rgba(255,255,255,.08);border-radius:18px;background:rgba(255,255,255,.03);
     }
+    .item[hidden]{display:none!important}
     .item input[type="checkbox"]{width:18px;height:18px;margin-top:4px;accent-color:#d7ae72}
     .item h3{margin:0 0 4px;font-size:1rem;letter-spacing:-.02em}
     .item p{margin:0;color:var(--muted);font-size:.94rem}
@@ -163,6 +165,11 @@
     .footer__inner{
       border-top:1px solid rgba(255,255,255,.08);padding-top:18px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
     }
+    .closed-card{
+      margin-top:18px;padding:18px;border-radius:18px;border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.03);color:var(--muted);
+    }
+    .closed-card strong{color:var(--text)}
     @media (max-width:900px){.grid{grid-template-columns:1fr}}
     @media (max-width:640px){
       .topbar__inner{padding:14px 0}
@@ -205,9 +212,9 @@
   <section class="hero">
     <div class="wrap">
       <div class="eyebrow">Online ordering lane</div>
-      <h1>Order Delish online for prepaid pickup.</h1>
-      <p>
-        Order Delish through the prepaid online pickup lane. Select featured items, choose your pickup window,
+      <h1 id="menuDayTitle">Today’s pickup menu.</h1>
+      <p id="menuDayNote">
+        Order Delish through the prepaid online pickup lane. Select available items for today, choose your pickup window,
         and complete checkout online for a cleaner ordering experience.
       </p>
     </div>
@@ -219,9 +226,14 @@
         <div class="card">
           <h2>Start a pickup order</h2>
           <p>
-            This order lane is built for prepaid online pickup only. Select featured items, choose a pickup window,
+            This order lane is built for prepaid online pickup only. Select available items for today, choose a pickup window,
             and continue to secure checkout.
           </p>
+
+          <div id="closedMessage" class="closed-card" hidden>
+            <strong>Online ordering is closed today.</strong><br />
+            Please check back during active menu days.
+          </div>
 
           <form id="delishOrderForm" novalidate>
             <div class="form-grid">
@@ -265,19 +277,32 @@
             </div>
 
             <div class="items">
-              <article class="item" data-name="Turkey Wings Plate" data-price="16.99">
+              <!-- MONDAY -->
+              <article
+                class="item"
+                data-id="monday_red_beans_fried_chicken"
+                data-day="monday"
+                data-name="Red Beans or Okra with Fried Chicken"
+                data-price="13.99"
+              >
                 <input class="item-select" type="checkbox" />
                 <div>
-                  <h3>Turkey Wings Plate</h3>
-                  <p>Cornbread dressing or rice with 2 sides.</p>
+                  <h3>Red Beans or Okra with Fried Chicken</h3>
+                  <p>Monday plate.</p>
                 </div>
                 <div class="item__meta">
-                  <div class="price">$16.99</div>
+                  <div class="price">$13.99</div>
                   <input class="qty" type="number" min="1" value="1" />
                 </div>
               </article>
 
-              <article class="item" data-name="Hamburger Steak Plate" data-price="13.99">
+              <article
+                class="item"
+                data-id="monday_hamburger_steak"
+                data-day="monday"
+                data-name="Hamburger Steak Plate"
+                data-price="13.99"
+              >
                 <input class="item-select" type="checkbox" />
                 <div>
                   <h3>Hamburger Steak Plate</h3>
@@ -289,7 +314,125 @@
                 </div>
               </article>
 
-              <article class="item" data-name="Crawfish Étouffée Plate" data-price="16.99">
+              <!-- TUESDAY -->
+              <article
+                class="item"
+                data-id="tuesday_beef_tips"
+                data-day="tuesday"
+                data-name="Beef Tips Plate"
+                data-price="13.99"
+              >
+                <input class="item-select" type="checkbox" />
+                <div>
+                  <h3>Beef Tips Plate</h3>
+                  <p>Tuesday plate.</p>
+                </div>
+                <div class="item__meta">
+                  <div class="price">$13.99</div>
+                  <input class="qty" type="number" min="1" value="1" />
+                </div>
+              </article>
+
+              <article
+                class="item"
+                data-id="tuesday_meatloaf"
+                data-day="tuesday"
+                data-name="Meatloaf Plate"
+                data-price="13.99"
+              >
+                <input class="item-select" type="checkbox" />
+                <div>
+                  <h3>Meatloaf Plate</h3>
+                  <p>Tuesday plate.</p>
+                </div>
+                <div class="item__meta">
+                  <div class="price">$13.99</div>
+                  <input class="qty" type="number" min="1" value="1" />
+                </div>
+              </article>
+
+              <!-- WEDNESDAY -->
+              <article
+                class="item"
+                data-id="wednesday_pork_neckbones"
+                data-day="wednesday"
+                data-name="Pork Neckbones Plate"
+                data-price="10.00"
+              >
+                <input class="item-select" type="checkbox" />
+                <div>
+                  <h3>Pork Neckbones Plate</h3>
+                  <p>Wednesday plate.</p>
+                </div>
+                <div class="item__meta">
+                  <div class="price">$10.00</div>
+                  <input class="qty" type="number" min="1" value="1" />
+                </div>
+              </article>
+
+              <article
+                class="item"
+                data-id="wednesday_baked_chicken"
+                data-day="wednesday"
+                data-name="Baked Chicken Plate"
+                data-price="10.00"
+              >
+                <input class="item-select" type="checkbox" />
+                <div>
+                  <h3>Baked Chicken Plate</h3>
+                  <p>Wednesday plate.</p>
+                </div>
+                <div class="item__meta">
+                  <div class="price">$10.00</div>
+                  <input class="qty" type="number" min="1" value="1" />
+                </div>
+              </article>
+
+              <article
+                class="item"
+                data-id="wednesday_country_fried_steak"
+                data-day="wednesday"
+                data-name="Country Fried Steak Plate"
+                data-price="10.00"
+              >
+                <input class="item-select" type="checkbox" />
+                <div>
+                  <h3>Country Fried Steak Plate</h3>
+                  <p>Wednesday plate.</p>
+                </div>
+                <div class="item__meta">
+                  <div class="price">$10.00</div>
+                  <input class="qty" type="number" min="1" value="1" />
+                </div>
+              </article>
+
+              <!-- THURSDAY -->
+              <article
+                class="item"
+                data-id="thursday_turkey_wings"
+                data-day="thursday"
+                data-name="Turkey Wings Plate"
+                data-price="16.99"
+              >
+                <input class="item-select" type="checkbox" />
+                <div>
+                  <h3>Turkey Wings Plate</h3>
+                  <p>Cornbread dressing or rice with 2 sides.</p>
+                </div>
+                <div class="item__meta">
+                  <div class="price">$16.99</div>
+                  <input class="qty" type="number" min="1" value="1" />
+                </div>
+              </article>
+
+              <!-- FRIDAY -->
+              <article
+                class="item"
+                data-id="friday_crawfish_etouffee"
+                data-day="friday"
+                data-name="Crawfish Étouffée Plate"
+                data-price="16.99"
+              >
                 <input class="item-select" type="checkbox" />
                 <div>
                   <h3>Crawfish Étouffée Plate</h3>
@@ -301,7 +444,13 @@
                 </div>
               </article>
 
-              <article class="item" data-name="Shrimp Pasta Plate" data-price="16.99">
+              <article
+                class="item"
+                data-id="friday_shrimp_pasta"
+                data-day="friday"
+                data-name="Shrimp Pasta Plate"
+                data-price="16.99"
+              >
                 <input class="item-select" type="checkbox" />
                 <div>
                   <h3>Shrimp Pasta Plate</h3>
@@ -313,7 +462,13 @@
                 </div>
               </article>
 
-              <article class="item" data-name="Fried Catfish Plate (3 strips)" data-price="15.99">
+              <article
+                class="item"
+                data-id="friday_fried_catfish"
+                data-day="friday"
+                data-name="Fried Catfish Plate (3 strips)"
+                data-price="15.99"
+              >
                 <input class="item-select" type="checkbox" />
                 <div>
                   <h3>Fried Catfish Plate (3 strips)</h3>
@@ -325,7 +480,32 @@
                 </div>
               </article>
 
-              <article class="item" data-name="Drink Add-On" data-price="3.99">
+              <article
+                class="item"
+                data-id="friday_baked_catfish"
+                data-day="friday"
+                data-name="Baked Catfish Plate"
+                data-price="16.99"
+              >
+                <input class="item-select" type="checkbox" />
+                <div>
+                  <h3>Baked Catfish Plate</h3>
+                  <p>Friday feature.</p>
+                </div>
+                <div class="item__meta">
+                  <div class="price">$16.99</div>
+                  <input class="qty" type="number" min="1" value="1" />
+                </div>
+              </article>
+
+              <!-- EVERYDAY -->
+              <article
+                class="item"
+                data-id="drink_add_on"
+                data-day="everyday"
+                data-name="Drink Add-On"
+                data-price="3.99"
+              >
                 <input class="item-select" type="checkbox" />
                 <div>
                   <h3>Drink Add-On</h3>
@@ -383,7 +563,7 @@
           <h2>What to expect</h2>
           <ul class="list">
             <li>Prepaid online pickup orders only</li>
-            <li>Featured items based on current availability</li>
+            <li>Daily menu visibility based on current availability</li>
             <li>Pickup windows selected during checkout</li>
             <li>Order confirmation after secure payment</li>
           </ul>
@@ -422,6 +602,9 @@
     const statusEl = document.getElementById("status");
     const checkoutBtn = document.getElementById("checkoutBtn");
     const itemCards = Array.from(document.querySelectorAll(".item"));
+    const menuDayTitle = document.getElementById("menuDayTitle");
+    const menuDayNote = document.getElementById("menuDayNote");
+    const closedMessage = document.getElementById("closedMessage");
 
     function showStatus(message) {
       statusEl.textContent = message;
@@ -433,24 +616,98 @@
       statusEl.classList.remove("is-visible");
     }
 
+    function getCentralDayNameClient() {
+      return new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/Chicago",
+        weekday: "long"
+      }).format(new Date()).toLowerCase();
+    }
+
+    function titleCaseDay(day) {
+      return day.charAt(0).toUpperCase() + day.slice(1);
+    }
+
+    function applyDailyMenuVisibility() {
+      const today = getCentralDayNameClient();
+      const activeOrderingDays = new Set([
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday"
+      ]);
+
+      if (activeOrderingDays.has(today)) {
+        menuDayTitle.textContent = `${titleCaseDay(today)} pickup menu.`;
+        menuDayNote.textContent = `Only ${titleCaseDay(today)} items are available right now through the prepaid online pickup lane.`;
+        closedMessage.hidden = true;
+
+        itemCards.forEach((item) => {
+          const day = item.dataset.day;
+          const visible = day === today || day === "everyday";
+          item.hidden = !visible;
+
+          if (!visible) {
+            const checkbox = item.querySelector(".item-select");
+            const qty = item.querySelector(".qty");
+            if (checkbox) checkbox.checked = false;
+            if (qty) qty.value = 1;
+          }
+        });
+      } else {
+        menuDayTitle.textContent = "Online ordering is closed today.";
+        menuDayNote.textContent = "Please check back during active menu days.";
+        closedMessage.hidden = false;
+
+        itemCards.forEach((item) => {
+          item.hidden = true;
+          const checkbox = item.querySelector(".item-select");
+          const qty = item.querySelector(".qty");
+          if (checkbox) checkbox.checked = false;
+          if (qty) qty.value = 1;
+        });
+      }
+    }
+
     function getSelectedItems() {
+      const today = getCentralDayNameClient();
+
       return itemCards
         .map((item) => {
           const checked = item.querySelector(".item-select").checked;
           const qty = Math.max(1, parseInt(item.querySelector(".qty").value || "1", 10));
+          const id = item.dataset.id;
+          const day = item.dataset.day;
           const name = item.dataset.name;
           const price = Number(item.dataset.price || 0);
 
           if (!checked) return null;
+          if (!(day === today || day === "everyday")) return null;
 
-          return { name, qty, price };
+          return { id, name, qty, price };
         })
         .filter(Boolean);
     }
 
+    applyDailyMenuVisibility();
+
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       clearStatus();
+
+      const today = getCentralDayNameClient();
+      const activeOrderingDays = new Set([
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday"
+      ]);
+
+      if (!activeOrderingDays.has(today)) {
+        showStatus("Online ordering is closed today.");
+        return;
+      }
 
       if (!form.reportValidity()) {
         showStatus("Please complete the required fields before continuing.");
@@ -460,7 +717,7 @@
       const items = getSelectedItems();
 
       if (!items.length) {
-        showStatus("Please select at least one item before continuing.");
+        showStatus("Please select at least one available item before continuing.");
         return;
       }
 
@@ -497,7 +754,7 @@
         const data = await res.json();
 
         if (!res.ok || !data.ok || !data.checkout_url) {
-          throw new Error(data.error || "Unable to start checkout.");
+          throw new Error(data.message || data.error || "Unable to start checkout.");
         }
 
         window.location.href = data.checkout_url;
