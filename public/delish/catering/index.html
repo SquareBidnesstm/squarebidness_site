@@ -1,6 +1,6 @@
 <!-- FILE: /public/delish/catering/index.html -->
 <!doctype html>
-<html lang="en" data-sb-brand="delish" data-sb-tier="public" data-sb-variant="delish-catering-v20260324-up-to-par">
+<html lang="en" data-sb-brand="delish" data-sb-tier="public" data-sb-variant="delish-catering-v20260325-sms-consent">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -13,7 +13,7 @@
   <meta name="format-detection" content="telephone=no" />
   <meta name="theme-color" content="#111111" />
   <meta name="color-scheme" content="dark light" />
-  <meta name="sb:build" content="v20260324-delish-catering-deposit-updated" />
+  <meta name="sb:build" content="v20260325-delish-catering-sms-consent" />
   <meta property="fb:app_id" content="802680062853443" />
 
   <meta property="og:type" content="website" />
@@ -38,11 +38,8 @@
   <link rel="icon" type="image/png" sizes="192x192" href="/delish/assets/delish-logo-mark-192.png" />
   <link rel="icon" type="image/png" sizes="512x512" href="/delish/assets/delish-logo-mark-512.png" />
 
-  <!-- GA4 + SB Analytics -->
   <script defer src="/scripts/ga.js"></script>
   <script defer src="/scripts/sb-analytics.js"></script>
-
-  <!-- Meta Pixel + SB → Meta bridge -->
   <script defer src="/scripts/meta-pixel.js"></script>
   <script defer src="/scripts/sb-meta-bridge.js"></script>
 
@@ -194,8 +191,13 @@
     }
     .checkline input[type="checkbox"]{
       width:18px;height:18px;min-height:auto;margin-top:3px;padding:0;accent-color:#d7ae72;box-shadow:none;
+      flex:0 0 auto;
     }
     .checkline label{font-weight:700;color:var(--muted);line-height:1.45}
+    .checkline a{
+      text-decoration:underline;
+      color:#f6f2ea;
+    }
 
     .actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}
     .status{display:none;margin-top:16px;padding:14px 16px;border-radius:16px;font-weight:700;line-height:1.45}
@@ -462,6 +464,23 @@
 
                   <div class="field field--full">
                     <div class="checkline">
+                      <input id="smsConsent" name="smsConsent" type="checkbox" />
+                      <label for="smsConsent">
+                        I agree to receive <strong>transactional SMS messages</strong> from Delish related to my catering request,
+                        including request confirmations, status updates, deposit/payment confirmations, and follow-up needed to secure the event.
+                        Message frequency varies. Message and data rates may apply. Reply <strong>STOP</strong> to opt out. Reply <strong>HELP</strong> for assistance.
+                        <br /><br />
+                        <strong>Phone number is required for catering follow-up, but SMS consent is optional.</strong>
+                        If you do not check this box, you should not receive catering-related SMS messages.
+                        <br /><br />
+                        <a href="/delish/privacy/" target="_blank" rel="noopener">Privacy Policy</a> ·
+                        <a href="/delish/terms/" target="_blank" rel="noopener">SMS Terms &amp; Conditions</a>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div class="field field--full">
+                    <div class="checkline">
                       <input id="policyAgree" name="policyAgree" type="checkbox" required />
                       <label for="policyAgree">
                         I understand this is a request only. My catering order is not confirmed until Delish reviews the details, confirms availability, and the required 25% non-refundable deposit is received.
@@ -562,75 +581,78 @@
         <a href="/delish/">Home</a> ·
         <a href="/delish/order/">Order</a> ·
         <a href="/delish/catering/">Catering</a> ·
+        <a href="/delish/privacy/">Privacy</a> ·
+        <a href="/delish/terms/">SMS Terms</a> ·
         <a href="tel:+13187879407">Call</a>
       </div>
     </div>
   </footer>
 
   <script>
-  document.getElementById("year").textContent = new Date().getFullYear();
+    document.getElementById("year").textContent = new Date().getFullYear();
 
-  const DELISH_CATERING_ENDPOINT = "/api/delish/catering-request/";
-  const form = document.getElementById("delishCateringForm");
-  const statusBox = document.getElementById("formStatus");
+    const DELISH_CATERING_ENDPOINT = "/api/delish/catering-request/";
+    const form = document.getElementById("delishCateringForm");
+    const statusBox = document.getElementById("formStatus");
 
-  function showStatus(type, message){
-    statusBox.className = "status " + (type === "success" ? "is-success" : "is-error");
-    statusBox.textContent = message;
-  }
-
-  function clearStatus(){
-    statusBox.className = "status";
-    statusBox.textContent = "";
-  }
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    clearStatus();
-
-    if (!form.reportValidity()) {
-      showStatus("error", "Please complete all required fields before submitting.");
-      return;
+    function showStatus(type, message){
+      statusBox.className = "status " + (type === "success" ? "is-success" : "is-error");
+      statusBox.textContent = message;
     }
 
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const originalText = submitBtn.textContent;
-    submitBtn.disabled = true;
-    submitBtn.textContent = "Submitting...";
+    function clearStatus(){
+      statusBox.className = "status";
+      statusBox.textContent = "";
+    }
 
-    const formData = new FormData(form);
-    const payload = Object.fromEntries(formData.entries());
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearStatus();
 
-    payload._brand = "Delish";
-    payload._form = "catering_request";
-    payload._source = "delish-catering-page";
-    payload._page = window.location.href;
-    payload._submittedAt = new Date().toISOString();
-    payload.depositPolicy = "25% non-refundable deposit required on approved catering orders";
-
-    try {
-      const res = await fetch(DELISH_CATERING_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-
-      const data = await res.json().catch(() => ({}));
-
-      if (!res.ok || !data.ok) {
-        throw new Error(data.error || "Request failed");
+      if (!form.reportValidity()) {
+        showStatus("error", "Please complete all required fields before submitting.");
+        return;
       }
 
-      form.reset();
-      window.location.href = "/delish/catering/thank-you/";
-    } catch (err) {
-      showStatus("error", "Something went wrong while sending your request. Please call Delish directly at (318) 787-9407.");
-      submitBtn.disabled = false;
-      submitBtn.textContent = originalText;
-      return;
-    }
-  });
-</script>
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting...";
+
+      const formData = new FormData(form);
+      const payload = Object.fromEntries(formData.entries());
+
+      payload.smsConsent = document.getElementById("smsConsent").checked ? "yes" : "no";
+      payload._brand = "Delish";
+      payload._form = "catering_request";
+      payload._source = "delish-catering-page";
+      payload._page = window.location.href;
+      payload._submittedAt = new Date().toISOString();
+      payload.depositPolicy = "25% non-refundable deposit required on approved catering orders";
+
+      try {
+        const res = await fetch(DELISH_CATERING_ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || "Request failed");
+        }
+
+        form.reset();
+        window.location.href = "/delish/catering/thank-you/";
+      } catch (err) {
+        showStatus("error", "Something went wrong while sending your request. Please call Delish directly at (318) 787-9407.");
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+        return;
+      }
+    });
+  </script>
 
   <script type="application/ld+json">
   {
