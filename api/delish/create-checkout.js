@@ -5,6 +5,57 @@ const stripe = new Stripe(process.env.DELISH_STRIPE_SECRET_KEY, {
   apiVersion: "2025-02-24.acacia",
 });
 
+const MENU_BY_DAY = {
+  monday: [
+    { id: "monday_red_beans_fried_chicken", name: "Red Beans or Okra with Fried Chicken", price: 13.99 },
+    { id: "monday_hamburger_steak", name: "Hamburger Steak Plate", price: 13.99 },
+  ],
+  tuesday: [
+    { id: "tuesday_beef_tips", name: "Beef Tips Plate", price: 13.99 },
+    { id: "tuesday_meatloaf", name: "Meatloaf Plate", price: 13.99 },
+  ],
+  wednesday: [
+    { id: "wednesday_pork_neckbones", name: "Pork Neckbones Plate", price: 10.0 },
+    { id: "wednesday_baked_chicken", name: "Baked Chicken Plate", price: 10.0 },
+    { id: "wednesday_country_fried_steak", name: "Country Fried Steak Plate", price: 10.0 },
+  ],
+  thursday: [
+    { id: "thursday_turkey_wings", name: "Turkey Wings Plate", price: 16.99 },
+  ],
+  friday: [
+    { id: "friday_crawfish_etouffee", name: "Crawfish Etouffee Plate", price: 16.99 },
+    { id: "friday_shrimp_pasta", name: "Shrimp Pasta Plate", price: 16.99 },
+    { id: "friday_fried_catfish", name: "Fried Catfish Plate", price: 15.99 },
+    { id: "friday_baked_catfish", name: "Baked Catfish Plate", price: 16.99 },
+  ],
+  everyday: [
+    { id: "drink_add_on", name: "Drink Add-On", price: 3.99 },
+  ],
+};
+
+function getCentralDayName(date = new Date()) {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Chicago",
+    weekday: "long",
+  })
+    .format(date)
+    .toLowerCase();
+}
+
+function getAllowedItemsForToday() {
+  const today = getCentralDayName();
+  const dayItems = MENU_BY_DAY[today] || [];
+  const everydayItems = MENU_BY_DAY.everyday || [];
+  return {
+    today,
+    items: [...dayItems, ...everydayItems],
+  };
+}
+
+function buildAllowedMap(items) {
+  return new Map(items.map((item) => [item.id, item]));
+}
+
 function isValidOrder(body) {
   return (
     body &&
@@ -49,21 +100,72 @@ export default async function handler(req, res) {
       });
     }
 
-    const line_items = body.items.map((item) => ({
+    const { today, items: allowedItems } = getAllowedItemsForToday();
+    const allowedMap = buildAllowedMap(allowedItems);
+
+    const cleanItems = body.items
+      .map((item) => {
+        const id = String(item.id || "").trim();
+        const qty = Math.max(1, Number(item.qty || 1));
+
+        if (!id || !allowedMap.has(id)) return null;
+
+        const allowed = allowedMap.get(id);
+
+        return {
+          id: allowed.id,
+          name: allowed.name,
+          qty,
+          price: allowed.price,
+          total: qty * allowed.price,
+        };
+      })
+      .filter(Boolean);
+
+    if (!cleanItems.length) {
+      return res.status(400).json({
+        ok: false,
+        error: "NO_VALID_ITEMS_FOR_TODAY",
+        message: `No valid items are available for ${today}.`,
+      });
+    }
+
+    if (cleanItems.length !== body.items.length) {
+      return res.status(403).json({
+        ok: false,
+        error: "ITEM_NOT_AVAILABLE_TODAY",
+        message: `One or more selected items are not available on ${today.charAt(0).toUpperCase() + today.slice(1)}.`,
+      });
+    }
+
+    const subtotal = cleanItems.reduce((sum, item) => sum + item.total, 0);
+
+    const line_items = cleanItems.map((item) => ({
       quantity: item.qty,
       price_data: {
         currency: "usd",
         product_data: {
           name: item.name,
+          metadata: {
+            itemId: item.id,
+            activeMenuDay: today,
+            brand: "Delish",
+          },
         },
         unit_amount: Math.round(Number(item.price) * 100),
       },
     }));
 
-    const taxAmountCents =
-      Math.round((Number(body.total) - Number(body.subtotal)) * 100);
+    const submittedSubtotal = Number(body.subtotal ?? subtotal);
+    const submittedTax = Number(body.tax ?? 0);
+    const submittedTotal = Number(body.total ?? subtotal + submittedTax);
 
-    if (taxAmountCents > 0) {
+    const safeTaxAmountCents = Math.max(
+      0,
+      Math.round((submittedTotal - submittedSubtotal) * 100)
+    );
+
+    if (safeTaxAmountCents > 0) {
       line_items.push({
         quantity: 1,
         price_data: {
@@ -71,7 +173,7 @@ export default async function handler(req, res) {
           product_data: {
             name: "Sales Tax",
           },
-          unit_amount: taxAmountCents,
+          unit_amount: safeTaxAmountCents,
         },
       });
     }
@@ -90,11 +192,12 @@ export default async function handler(req, res) {
         pickupWindow: body.pickupWindow,
         notes: body.notes || "",
         smsConsent: body.smsConsent === "yes" ? "yes" : "no",
-        itemsJson: JSON.stringify(body.items),
-        subtotal: String(body.subtotal ?? 0),
-        tax: String(body.tax ?? 0),
-        total: String(body.total),
+        itemsJson: JSON.stringify(cleanItems),
+        subtotal: String(submittedSubtotal),
+        tax: String(submittedTax),
+        total: String(submittedTotal),
         source: body.source || "delish-order-page",
+        activeMenuDay: today,
       },
       customer_email: body.customerEmail || undefined,
     });
