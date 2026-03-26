@@ -76,7 +76,7 @@ const MENU_BY_DAY = {
       price: 16.99,
     },
   ],
-  everyday: [
+   everyday: [
     {
       id: "drink_tropical_punch_koolaid",
       name: "Tropical Punch Kool-Aid",
@@ -126,6 +126,51 @@ const MENU_BY_DAY = {
       id: "lagniappe_cheeseburger_basket",
       name: "Lagniappe Cheeseburger Basket",
       price: 9.99,
+    },
+    {
+      id: "extra_side_mac_and_cheese",
+      name: "Extra Side - Mac and Cheese",
+      price: 2.5,
+    },
+    {
+      id: "extra_side_yams",
+      name: "Extra Side - Yams",
+      price: 2.5,
+    },
+    {
+      id: "extra_side_corn",
+      name: "Extra Side - Corn",
+      price: 2.5,
+    },
+    {
+      id: "extra_side_cabbage",
+      name: "Extra Side - Cabbage",
+      price: 2.5,
+    },
+    {
+      id: "extra_side_green_salad",
+      name: "Extra Side - Green Salad",
+      price: 2.5,
+    },
+    {
+      id: "extra_side_black_eyed_peas",
+      name: "Extra Side - Black Eyed Peas",
+      price: 2.5,
+    },
+    {
+      id: "extra_side_green_beans",
+      name: "Extra Side - Green Beans",
+      price: 2.5,
+    },
+    {
+      id: "extra_side_potato_salad",
+      name: "Extra Side - Potato Salad",
+      price: 2.5,
+    },
+    {
+      id: "extra_side_rice_dressing",
+      name: "Extra Side - Rice Dressing",
+      price: 2.5,
     },
   ],
 };
