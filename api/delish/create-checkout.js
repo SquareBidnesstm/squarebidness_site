@@ -7,31 +7,96 @@ const stripe = new Stripe(process.env.DELISH_STRIPE_SECRET_KEY, {
 
 const MENU_BY_DAY = {
   monday: [
-    { id: "monday_red_beans_fried_chicken", name: "Red Beans or Okra with Fried Chicken", price: 13.99 },
-    { id: "monday_hamburger_steak", name: "Hamburger Steak Plate", price: 13.99 },
+    {
+      id: "monday_red_beans_fried_chicken",
+      name: "Red Beans or Okra with Fried Chicken",
+      price: 13.99,
+    },
+    {
+      id: "monday_hamburger_steak",
+      name: "Hamburger Steak Plate",
+      price: 13.99,
+    },
   ],
   tuesday: [
-    { id: "tuesday_beef_tips", name: "Beef Tips Plate", price: 13.99 },
-    { id: "tuesday_meatloaf", name: "Meatloaf Plate", price: 13.99 },
+    {
+      id: "tuesday_beef_tips",
+      name: "Beef Tips Plate",
+      price: 13.99,
+    },
+    {
+      id: "tuesday_meatloaf",
+      name: "Meatloaf Plate",
+      price: 13.99,
+    },
   ],
   wednesday: [
-    { id: "wednesday_pork_neckbones", name: "Pork Neckbones Plate", price: 10.0 },
-    { id: "wednesday_baked_chicken", name: "Baked Chicken Plate", price: 10.0 },
-    { id: "wednesday_country_fried_steak", name: "Country Fried Steak Plate", price: 10.0 },
+    {
+      id: "wednesday_pork_neckbones",
+      name: "Pork Neckbones Plate",
+      price: 10.0,
+    },
+    {
+      id: "wednesday_baked_chicken",
+      name: "Baked Chicken Plate",
+      price: 10.0,
+    },
+    {
+      id: "wednesday_country_fried_steak",
+      name: "Country Fried Steak Plate",
+      price: 10.0,
+    },
   ],
   thursday: [
-    { id: "thursday_turkey_wings", name: "Turkey Wings Plate", price: 16.99 },
+    {
+      id: "thursday_turkey_wings",
+      name: "Turkey Wings Plate",
+      price: 16.99,
+    },
   ],
   friday: [
-    { id: "friday_crawfish_etouffee", name: "Crawfish Etouffee Plate", price: 16.99 },
-    { id: "friday_shrimp_pasta", name: "Shrimp Pasta Plate", price: 16.99 },
-    { id: "friday_fried_catfish", name: "Fried Catfish Plate", price: 15.99 },
-    { id: "friday_baked_catfish", name: "Baked Catfish Plate", price: 16.99 },
+    {
+      id: "friday_crawfish_etouffee",
+      name: "Crawfish Étouffée Plate",
+      price: 16.99,
+    },
+    {
+      id: "friday_shrimp_pasta",
+      name: "Shrimp Pasta Plate",
+      price: 16.99,
+    },
+    {
+      id: "friday_fried_catfish",
+      name: "Fried Catfish Plate (3 strips)",
+      price: 15.99,
+    },
+    {
+      id: "friday_baked_catfish",
+      name: "Baked Catfish Plate",
+      price: 16.99,
+    },
   ],
   everyday: [
-    { id: "drink_add_on", name: "Drink Add-On", price: 3.99 },
+    {
+      id: "drink_add_on",
+      name: "Drink Add-On",
+      price: 3.99,
+    },
   ],
 };
+
+function isValidOrder(body) {
+  return (
+    body &&
+    typeof body.customerName === "string" &&
+    typeof body.customerPhone === "string" &&
+    typeof body.pickupDate === "string" &&
+    typeof body.pickupWindow === "string" &&
+    Array.isArray(body.items) &&
+    body.items.length > 0 &&
+    typeof body.total === "number"
+  );
+}
 
 function getCentralDayName(date = new Date()) {
   return new Intl.DateTimeFormat("en-US", {
@@ -54,19 +119,6 @@ function getAllowedItemsForToday() {
 
 function buildAllowedMap(items) {
   return new Map(items.map((item) => [item.id, item]));
-}
-
-function isValidOrder(body) {
-  return (
-    body &&
-    typeof body.customerName === "string" &&
-    typeof body.customerPhone === "string" &&
-    typeof body.pickupDate === "string" &&
-    typeof body.pickupWindow === "string" &&
-    Array.isArray(body.items) &&
-    body.items.length > 0 &&
-    typeof body.total === "number"
-  );
 }
 
 export default async function handler(req, res) {
