@@ -4,6 +4,55 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2025-02-24.acacia"
 });
 
+const MENU_BY_DAY = {
+  monday: [
+    { id: "monday_red_beans_fried_chicken", name: "Red Beans or Okra with Fried Chicken", price: 13.99 },
+    { id: "monday_hamburger_steak", name: "Hamburger Steak Plate", price: 13.99 }
+  ],
+  tuesday: [
+    { id: "tuesday_beef_tips", name: "Beef Tips Plate", price: 13.99 },
+    { id: "tuesday_meatloaf", name: "Meatloaf Plate", price: 13.99 }
+  ],
+  wednesday: [
+    { id: "wednesday_pork_neckbones", name: "Pork Neckbones Plate", price: 10.00 },
+    { id: "wednesday_baked_chicken", name: "Baked Chicken Plate", price: 10.00 },
+    { id: "wednesday_country_fried_steak", name: "Country Fried Steak Plate", price: 10.00 }
+  ],
+  thursday: [
+    { id: "thursday_turkey_wings", name: "Turkey Wings Plate", price: 16.99 }
+  ],
+  friday: [
+    { id: "friday_crawfish_etouffee", name: "Crawfish Étouffée Plate", price: 16.99 },
+    { id: "friday_shrimp_pasta", name: "Shrimp Pasta Plate", price: 16.99 },
+    { id: "friday_fried_catfish", name: "Fried Catfish Plate (3 strips)", price: 15.99 },
+    { id: "friday_baked_catfish", name: "Baked Catfish Plate (2)", price: 16.99 }
+  ],
+  everyday_addons: [
+    { id: "drink_add_on", name: "Drink Add-On", price: 3.99 }
+  ]
+};
+
+function getCentralDayName(date = new Date()) {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Chicago",
+    weekday: "long"
+  }).format(date).toLowerCase();
+}
+
+function getAllowedCatalogForToday() {
+  const today = getCentralDayName();
+  const dayItems = MENU_BY_DAY[today] || [];
+  const addonItems = MENU_BY_DAY.everyday_addons || [];
+  return {
+    today,
+    allowedItems: [...dayItems, ...addonItems]
+  };
+}
+
+function buildAllowedMap(items) {
+  return new Map(items.map((item) => [item.id, item]));
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ ok: false, error: "METHOD_NOT_ALLOWED" });
@@ -34,25 +83,42 @@ export default async function handler(req, res) {
       return res.status(400).json({ ok: false, error: "NO_ITEMS_SELECTED" });
     }
 
+    const { today, allowedItems } = getAllowedCatalogForToday();
+    const allowedMap = buildAllowedMap(allowedItems);
+
     const cleanItems = items
       .map((item) => {
+        const id = String(item.id || "").trim();
         const qty = Math.max(1, Number(item.qty || 1));
-        const price = Number(item.price || 0);
-        const name = String(item.name || "").trim();
-        if (!name || !price) return null;
+
+        if (!id || !allowedMap.has(id)) return null;
+
+        const catalogItem = allowedMap.get(id);
 
         return {
-          id: String(item.id || "").trim(),
-          name,
+          id: catalogItem.id,
+          name: catalogItem.name,
           qty,
-          price,
-          total: qty * price
+          price: catalogItem.price,
+          total: qty * catalogItem.price
         };
       })
       .filter(Boolean);
 
     if (!cleanItems.length) {
-      return res.status(400).json({ ok: false, error: "INVALID_ITEMS" });
+      return res.status(400).json({
+        ok: false,
+        error: "NO_VALID_ITEMS_FOR_TODAY",
+        message: `No valid items are available for ${today}.`
+      });
+    }
+
+    if (cleanItems.length !== items.length) {
+      return res.status(403).json({
+        ok: false,
+        error: "ITEM_NOT_AVAILABLE_TODAY",
+        message: `One or more selected items are not available on ${today.charAt(0).toUpperCase() + today.slice(1)}.`
+      });
     }
 
     const line_items = cleanItems.map((item) => ({
@@ -64,7 +130,9 @@ export default async function handler(req, res) {
           name: item.name,
           metadata: {
             brand: "Delish",
-            lane: "paid_pickup"
+            lane: "paid_pickup",
+            itemId: item.id,
+            availableDay: today
           }
         }
       }
@@ -86,14 +154,13 @@ export default async function handler(req, res) {
       items: cleanItems,
       subtotal: Number(subtotal || 0),
       estimatedTax: Number(estimatedTax || 0),
-      total: Number(total || 0)
+      total: Number(total || 0),
+      activeMenuDay: today
     };
 
     const intakeRes = await fetch(process.env.DELISH_APPS_SCRIPT_URL, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(orderPayload)
     });
 
@@ -124,7 +191,8 @@ export default async function handler(req, res) {
         customerName,
         customerPhone,
         pickupDate,
-        pickupWindow
+        pickupWindow,
+        activeMenuDay: today
       },
       payment_intent_data: {
         metadata: {
@@ -134,7 +202,8 @@ export default async function handler(req, res) {
           customerName,
           customerPhone,
           pickupDate,
-          pickupWindow
+          pickupWindow,
+          activeMenuDay: today
         }
       },
       automatic_tax: { enabled: false }
@@ -142,9 +211,7 @@ export default async function handler(req, res) {
 
     await fetch(process.env.DELISH_APPS_SCRIPT_URL, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         _brand: "Delish",
         _form: "order_checkout_created",
