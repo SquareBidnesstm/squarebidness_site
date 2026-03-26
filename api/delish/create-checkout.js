@@ -89,6 +89,7 @@ export default async function handler(req, res) {
         pickupDate: body.pickupDate,
         pickupWindow: body.pickupWindow,
         notes: body.notes || "",
+        smsConsent: body.smsConsent === "yes" ? "yes" : "no",
         itemsJson: JSON.stringify(body.items),
         subtotal: String(body.subtotal ?? 0),
         tax: String(body.tax ?? 0),
