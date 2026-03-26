@@ -1,6 +1,6 @@
 <!-- FILE: /public/delish/order/index.html -->
 <!doctype html>
-<html lang="en" data-sb-brand="delish" data-sb-tier="order" data-sb-variant="delish-order-v4-clean-routes">
+<html lang="en" data-sb-brand="delish" data-sb-tier="order" data-sb-variant="delish-order-v5-sms-consent">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -139,6 +139,23 @@
     .item__meta{display:grid;gap:8px;justify-items:end}
     .price{color:var(--accent-2);font-weight:900;font-size:1.02rem}
     .qty{width:82px;min-height:42px;text-align:center;padding:10px 12px;border-radius:12px}
+
+    .checkline{
+      display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:16px;
+      background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
+      margin-top:18px;
+    }
+    .checkline input[type="checkbox"]{
+      width:18px;height:18px;min-height:auto;margin-top:3px;padding:0;accent-color:#d7ae72;box-shadow:none;flex:0 0 auto;
+    }
+    .checkline label{
+      font-weight:700;color:var(--muted);line-height:1.5;font-size:.92rem;
+    }
+    .checkline a{
+      text-decoration:underline;
+      color:#f5f2ea;
+    }
+
     .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
     .status{
       display:none;margin-top:16px;padding:14px 16px;border-radius:16px;background:var(--danger);color:var(--danger-text);
@@ -324,6 +341,23 @@
               </article>
             </div>
 
+            <div class="field field--full">
+              <div class="checkline">
+                <input id="smsConsent" name="smsConsent" type="checkbox" />
+                <label for="smsConsent">
+                  I agree to receive <strong>transactional SMS messages</strong> from Delish related to my order,
+                  including confirmations, status updates, and pickup notifications. Message frequency varies.
+                  Message and data rates may apply. Reply <strong>STOP</strong> to opt out. Reply <strong>HELP</strong> for assistance.
+                  <br /><br />
+                  <strong>Phone number is required for the order lane, but SMS consent is optional.</strong>
+                  If you do not check this box, you should not receive order-related SMS messages.
+                  <br /><br />
+                  <a href="/delish/privacy/" target="_blank" rel="noopener">Privacy Policy</a> ·
+                  <a href="/delish/terms/" target="_blank" rel="noopener">SMS Terms &amp; Conditions</a>
+                </label>
+              </div>
+            </div>
+
             <div id="status" class="status" aria-live="polite"></div>
 
             <div class="actions">
@@ -376,7 +410,9 @@
       <div>© <span id="year"></span> Delish. Square Bidness ecosystem.</div>
       <div>
         <a href="/delish/">Home</a> ·
-        <a href="/delish/catering/">Catering</a>
+        <a href="/delish/catering/">Catering</a> ·
+        <a href="/delish/privacy/">Privacy</a> ·
+        <a href="/delish/terms/">SMS Terms</a>
       </div>
     </div>
   </footer>
@@ -442,6 +478,7 @@
         pickupDate: document.getElementById("pickupDate").value,
         pickupWindow: document.getElementById("pickupWindow").value,
         notes: document.getElementById("notes").value.trim(),
+        smsConsent: document.getElementById("smsConsent").checked ? "yes" : "no",
         items,
         subtotal: Number(subtotal.toFixed(2)),
         tax,
