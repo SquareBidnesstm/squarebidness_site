@@ -77,12 +77,42 @@ const MENU_BY_DAY = {
     },
   ],
   everyday: [
-    {
-      id: "drink_add_on",
-      name: "Drink Add-On",
-      price: 3.99,
-    },
-  ],
+  {
+    id: "drink_add_on",
+    name: "Drink Add-On",
+    price: 3.99,
+  },
+  {
+    id: "lagniappe_grilled_chicken_salad",
+    name: "Lagniappe Grilled Chicken Salad",
+    price: 12.99,
+  },
+  {
+    id: "lagniappe_grilled_shrimp_salad",
+    name: "Lagniappe Grilled Shrimp Salad",
+    price: 12.99,
+  },
+  {
+    id: "lagniappe_both_meat_salad",
+    name: "Lagniappe Both Meat Salad",
+    price: 16.99,
+  },
+  {
+    id: "lagniappe_chicken_tender_basket_fries",
+    name: "Lagniappe Chicken Tender Basket with Fries",
+    price: 9.99,
+  },
+  {
+    id: "lagniappe_fried_porkchop_sandwich_fries",
+    name: "Lagniappe Fried Porkchop Sandwich with Fries",
+    price: 9.99,
+  },
+  {
+    id: "lagniappe_cheeseburger_basket",
+    name: "Lagniappe Cheeseburger Basket",
+    price: 9.99,
+  },
+],
 };
 
 function isValidOrder(body) {
