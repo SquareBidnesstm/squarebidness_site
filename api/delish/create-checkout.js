@@ -77,58 +77,66 @@ const MENU_BY_DAY = {
     },
   ],
   everyday: [
-  {
-    id: "drink_tropical_punch_koolaid",
-    name: "Tropical Punch Kool-Aid",
-    price: 3.99,
-  },
-  {
-    id: "drink_lemonade",
-    name: "Lemonade",
-    price: 3.99,
-  },
-  {
-    id: "drink_can_soda",
-    name: "Can Soda",
-    price: 1.50,
-  },
-  {
-    id: "drink_bottle_water",
-    name: "Bottle Water",
-    price: 1.50,
-  },
-  {
-    id: "lagniappe_grilled_chicken_salad",
-    name: "Lagniappe Grilled Chicken Salad",
-    price: 12.99,
-  },
-  {
-    id: "lagniappe_grilled_shrimp_salad",
-    name: "Lagniappe Grilled Shrimp Salad",
-    price: 12.99,
-  },
-  {
-    id: "lagniappe_both_meat_salad",
-    name: "Lagniappe Both Meat Salad",
-    price: 16.99,
-  },
-  {
-    id: "lagniappe_chicken_tender_basket_fries",
-    name: "Lagniappe Chicken Tender Basket with Fries",
-    price: 9.99,
-  },
-  {
-    id: "lagniappe_fried_porkchop_sandwich_fries",
-    name: "Lagniappe Fried Porkchop Sandwich with Fries",
-    price: 9.99,
-  },
-  {
-    id: "lagniappe_cheeseburger_basket",
-    name: "Lagniappe Cheeseburger Basket",
-    price: 9.99,
-  },
-],
+    {
+      id: "drink_tropical_punch_koolaid",
+      name: "Tropical Punch Kool-Aid",
+      price: 3.99,
+    },
+    {
+      id: "drink_lemonade",
+      name: "Lemonade",
+      price: 3.99,
+    },
+    {
+      id: "drink_can_soda",
+      name: "Can Soda",
+      price: 1.5,
+    },
+    {
+      id: "drink_bottle_water",
+      name: "Bottle Water",
+      price: 1.5,
+    },
+    {
+      id: "lagniappe_grilled_chicken_salad",
+      name: "Lagniappe Grilled Chicken Salad",
+      price: 12.99,
+    },
+    {
+      id: "lagniappe_grilled_shrimp_salad",
+      name: "Lagniappe Grilled Shrimp Salad",
+      price: 12.99,
+    },
+    {
+      id: "lagniappe_both_meat_salad",
+      name: "Lagniappe Both Meat Salad",
+      price: 16.99,
+    },
+    {
+      id: "lagniappe_chicken_tender_basket_fries",
+      name: "Lagniappe Chicken Tender Basket with Fries",
+      price: 9.99,
+    },
+    {
+      id: "lagniappe_fried_porkchop_sandwich_fries",
+      name: "Lagniappe Fried Porkchop Sandwich with Fries",
+      price: 9.99,
+    },
+    {
+      id: "lagniappe_cheeseburger_basket",
+      name: "Lagniappe Cheeseburger Basket",
+      price: 9.99,
+    },
+  ],
 };
+
+const ACTIVE_ORDERING_DAYS = new Set([
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+]);
 
 function isValidOrder(body) {
   return (
@@ -153,11 +161,17 @@ function getCentralDateParts(date = new Date()) {
   });
 
   const parts = formatter.formatToParts(date);
-  const map = Object.fromEntries(parts.map((p) => [p.type, p.value]));
+  const map = {};
+
+  for (const part of parts) {
+    if (part.type !== "literal") {
+      map[part.type] = part.value;
+    }
+  }
 
   return {
     isoDate: `${map.year}-${map.month}-${map.day}`,
-    weekday: map.weekday.toLowerCase(),
+    weekday: String(map.weekday || "").toLowerCase(),
   };
 }
 
@@ -209,6 +223,14 @@ export default async function handler(req, res) {
 
     const { isoDate: todayIso, weekday: todayDay } = getCentralDateParts();
 
+    if (!ACTIVE_ORDERING_DAYS.has(todayDay)) {
+      return res.status(403).json({
+        ok: false,
+        error: "ORDERING_CLOSED_TODAY",
+        message: "Online ordering is closed today.",
+      });
+    }
+
     if (body.pickupDate !== todayIso) {
       return res.status(403).json({
         ok: false,
@@ -256,6 +278,9 @@ export default async function handler(req, res) {
     }
 
     const subtotal = cleanItems.reduce((sum, item) => sum + item.total, 0);
+    const submittedSubtotal = Number(body.subtotal ?? subtotal);
+    const submittedTax = Number(body.tax ?? 0);
+    const submittedTotal = Number(body.total ?? subtotal + submittedTax);
 
     const line_items = cleanItems.map((item) => ({
       quantity: item.qty,
@@ -272,10 +297,6 @@ export default async function handler(req, res) {
         unit_amount: Math.round(Number(item.price) * 100),
       },
     }));
-
-    const submittedSubtotal = Number(body.subtotal ?? subtotal);
-    const submittedTax = Number(body.tax ?? 0);
-    const submittedTotal = Number(body.total ?? subtotal + submittedTax);
 
     const safeTaxAmountCents = Math.max(
       0,
