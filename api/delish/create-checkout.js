@@ -76,7 +76,7 @@ const MENU_BY_DAY = {
       price: 16.99,
     },
   ],
-   everyday: [
+  everyday: [
     {
       id: "drink_tropical_punch_koolaid",
       name: "Tropical Punch Kool-Aid",
@@ -183,6 +183,11 @@ const ACTIVE_ORDERING_DAYS = new Set([
   "friday",
 ]);
 
+const FRIDAY_ONLY_ITEM_IDS = new Set([
+  "extra_side_potato_salad",
+  "extra_side_rice_dressing",
+]);
+
 function isValidOrder(body) {
   return (
     body &&
@@ -220,28 +225,20 @@ function getCentralDateParts(date = new Date()) {
   };
 }
 
-function getAllowedItemsForToday() {
-  const { weekday } = getCentralDateParts();
-  const dayItems = MENU_BY_DAY[weekday] || [];
+function getAllowedItemsForToday(todayDay) {
+  const dayItems = MENU_BY_DAY[todayDay] || [];
   const everydayItems = MENU_BY_DAY.everyday || [];
 
-  return {
-    today: weekday,
-    items: [...dayItems, ...everydayItems],
-  };
+  return [...dayItems, ...everydayItems];
 }
 
 function buildAllowedMap(items) {
   return new Map(items.map((item) => [item.id, item]));
 }
-function isSundayMenuDay(date = new Date()) {
-  const { weekday } = getCentralDateParts(date);
-  return weekday === "sunday";
-}
 
-function isAllowedEverydayItemForCurrentDay(itemId, todayDay) {
-  if (itemId === "extra_side_potato_salad" || itemId === "extra_side_rice_dressing") {
-    return todayDay === "friday" || todayDay === "sunday";
+function isItemAllowedForCurrentDay(itemId, todayDay) {
+  if (FRIDAY_ONLY_ITEM_IDS.has(itemId)) {
+    return todayDay === "friday";
   }
 
   return true;
@@ -296,16 +293,16 @@ export default async function handler(req, res) {
       });
     }
 
-    const { today, items: allowedItems } = getAllowedItemsForToday();
+    const allowedItems = getAllowedItemsForToday(todayDay);
     const allowedMap = buildAllowedMap(allowedItems);
 
-        const cleanItems = body.items
+    const cleanItems = body.items
       .map((item) => {
         const id = String(item.id || "").trim();
         const qty = Math.max(1, Number(item.qty || 1));
 
         if (!id || !allowedMap.has(id)) return null;
-        if (!isAllowedEverydayItemForCurrentDay(id, todayDay)) return null;
+        if (!isItemAllowedForCurrentDay(id, todayDay)) return null;
 
         const allowed = allowedMap.get(id);
 
@@ -323,7 +320,7 @@ export default async function handler(req, res) {
       return res.status(400).json({
         ok: false,
         error: "NO_VALID_ITEMS_FOR_TODAY",
-        message: `No valid items are available for ${today}.`,
+        message: `No valid items are available for ${todayDay}.`,
       });
     }
 
@@ -331,14 +328,14 @@ export default async function handler(req, res) {
       return res.status(403).json({
         ok: false,
         error: "ITEM_NOT_AVAILABLE_TODAY",
-        message: `One or more selected items are not available on ${today.charAt(0).toUpperCase() + today.slice(1)}.`,
+        message: `One or more selected items are not available on ${todayDay.charAt(0).toUpperCase() + todayDay.slice(1)}.`,
       });
     }
 
-    const subtotal = cleanItems.reduce((sum, item) => sum + item.total, 0);
-    const submittedSubtotal = Number(body.subtotal ?? subtotal);
+    const calculatedSubtotal = cleanItems.reduce((sum, item) => sum + item.total, 0);
+    const submittedSubtotal = Number(body.subtotal ?? calculatedSubtotal);
     const submittedTax = Number(body.tax ?? 0);
-    const submittedTotal = Number(body.total ?? subtotal + submittedTax);
+    const submittedTotal = Number(body.total ?? calculatedSubtotal + submittedTax);
 
     const line_items = cleanItems.map((item) => ({
       quantity: item.qty,
@@ -348,7 +345,7 @@ export default async function handler(req, res) {
           name: item.name,
           metadata: {
             itemId: item.id,
-            activeMenuDay: today,
+            activeMenuDay: todayDay,
             brand: "Delish",
           },
         },
@@ -393,7 +390,7 @@ export default async function handler(req, res) {
         tax: String(submittedTax),
         total: String(submittedTotal),
         source: body.source || "delish-order-page",
-        activeMenuDay: today,
+        activeMenuDay: todayDay,
       },
       customer_email: body.customerEmail || undefined,
     });
