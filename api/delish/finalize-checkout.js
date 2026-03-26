@@ -36,6 +36,7 @@ export default async function handler(req, res) {
       pickupDate: metadata.pickupDate || "",
       pickupWindow: metadata.pickupWindow || "",
       notes: metadata.notes || "",
+      smsConsent: metadata.smsConsent === "yes" ? "yes" : "no",
       items: JSON.parse(metadata.itemsJson || "[]"),
       subtotal: Number(metadata.subtotal || 0),
       tax: Number(metadata.tax || 0),
@@ -72,6 +73,7 @@ export default async function handler(req, res) {
       orderNumber: webhookData.orderNumber,
       pickupDate: payload.pickupDate,
       pickupWindow: payload.pickupWindow,
+      smsConsent: payload.smsConsent,
     });
   } catch (error) {
     console.error("DELISH FINALIZE CHECKOUT ERROR:", error);
