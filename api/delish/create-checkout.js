@@ -98,21 +98,31 @@ function isValidOrder(body) {
   );
 }
 
-function getCentralDayName(date = new Date()) {
-  return new Intl.DateTimeFormat("en-US", {
+function getCentralDateParts(date = new Date()) {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/Chicago",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
     weekday: "long",
-  })
-    .format(date)
-    .toLowerCase();
+  });
+
+  const parts = formatter.formatToParts(date);
+  const map = Object.fromEntries(parts.map((p) => [p.type, p.value]));
+
+  return {
+    isoDate: `${map.year}-${map.month}-${map.day}`,
+    weekday: map.weekday.toLowerCase(),
+  };
 }
 
 function getAllowedItemsForToday() {
-  const today = getCentralDayName();
-  const dayItems = MENU_BY_DAY[today] || [];
+  const { weekday } = getCentralDateParts();
+  const dayItems = MENU_BY_DAY[weekday] || [];
   const everydayItems = MENU_BY_DAY.everyday || [];
+
   return {
-    today,
+    today: weekday,
     items: [...dayItems, ...everydayItems],
   };
 }
@@ -149,6 +159,16 @@ export default async function handler(req, res) {
       return res.status(400).json({
         ok: false,
         error: "Invalid order payload.",
+      });
+    }
+
+    const { isoDate: todayIso, weekday: todayDay } = getCentralDateParts();
+
+    if (body.pickupDate !== todayIso) {
+      return res.status(403).json({
+        ok: false,
+        error: "PICKUP_DATE_NOT_ALLOWED",
+        message: `Pickup date must be ${todayIso} for the active ${todayDay} menu.`,
       });
     }
 
