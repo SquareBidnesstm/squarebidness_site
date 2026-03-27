@@ -210,6 +210,82 @@
       .item{grid-template-columns:auto 1fr}
       .item__meta{grid-column:2;justify-items:start}
     }
+    .prelaunch-banner{
+  margin:18px 0 0;
+  padding:16px 18px;
+  border-radius:16px;
+  text-align:center;
+  background:rgba(215,174,114,.12);
+  border:1px solid rgba(215,174,114,.28);
+  color:var(--accent-2);
+  font-weight:800;
+  line-height:1.45;
+}
+.prelaunch-banner span{
+  display:block;
+  margin-top:4px;
+  color:var(--muted);
+  font-weight:600;
+  font-size:.94rem;
+}
+
+.waitlist-card{
+  margin-top:22px;
+  padding:18px;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:20px;
+  background:rgba(255,255,255,.02);
+}
+
+.waitlist-card h3{
+  margin:0 0 6px;
+  font-size:1.04rem;
+  letter-spacing:-.02em;
+  color:var(--accent-2);
+}
+
+.waitlist-card p{
+  margin:0 0 14px;
+  color:var(--muted);
+  font-size:.95rem;
+}
+
+.waitlist-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+
+.waitlist-grid .field--full{
+  grid-column:1 / -1;
+}
+
+.waitlist-note{
+  margin-top:10px;
+  color:var(--soft);
+  font-size:.9rem;
+}
+
+.waitlist-status{
+  display:none;
+  margin-top:12px;
+  padding:12px 14px;
+  border-radius:14px;
+  background:rgba(215,174,114,.12);
+  border:1px solid rgba(215,174,114,.22);
+  color:var(--accent-2);
+  font-weight:700;
+}
+
+.waitlist-status.is-visible{
+  display:block;
+}
+
+@media (max-width:640px){
+  .waitlist-grid{
+    grid-template-columns:1fr;
+  }
+}
   </style>
 </head>
 <body>
@@ -248,6 +324,10 @@
         Order Delish through the prepaid online pickup lane. Select available items for today, choose your pickup window,
         and complete checkout online for a cleaner ordering experience.
       </p>
+      <div class="prelaunch-banner">
+  🚧 Opening Soon — Browse the menu and get ready to order
+  <span>We just added online ordering as a new feature. Opening very soon.</span>
+</div>
     </div>
   </section>
 
@@ -902,6 +982,40 @@
               </div>
             </div>
 
+            <div class="waitlist-card">
+  <h3>Notify Me When We Open</h3>
+  <p>
+    Want a heads up when Delish opens online ordering? Join the waitlist and we’ll let you know.
+  </p>
+
+  <div class="waitlist-grid">
+    <div class="field">
+      <label for="waitlistName">Full name</label>
+      <input id="waitlistName" name="waitlistName" type="text" placeholder="Your full name" />
+    </div>
+
+    <div class="field">
+      <label for="waitlistPhone">Phone number</label>
+      <input id="waitlistPhone" name="waitlistPhone" type="tel" placeholder="(318) 555-1234" />
+    </div>
+
+    <div class="field field--full">
+      <label for="waitlistEmail">Email address</label>
+      <input id="waitlistEmail" name="waitlistEmail" type="email" placeholder="you@example.com" />
+    </div>
+  </div>
+
+  <div class="actions" style="margin-top:14px;">
+    <button id="waitlistBtn" class="btn btn--dark" type="button">Notify Me When We Open</button>
+  </div>
+
+  <div id="waitlistStatus" class="waitlist-status" aria-live="polite"></div>
+
+  <div class="waitlist-note">
+    By joining, you’re asking to be notified when online ordering goes live.
+  </div>
+</div>
+
             <div class="field field--full">
               <div class="checkline">
                 <input id="smsConsent" name="smsConsent" type="checkbox" />
@@ -922,7 +1036,7 @@
             <div id="status" class="status" aria-live="polite"></div>
 
             <div class="actions">
-              <button id="checkoutBtn" class="btn btn--gold" type="submit">Continue to Secure Checkout</button>
+             <button id="checkoutBtn" class="btn btn--gold" type="submit" disabled>Opening Soon</button>
               <a href="/delish/catering/" class="btn btn--dark">Need Catering?</a>
             </div>
           </form>
@@ -978,290 +1092,250 @@
     </div>
   </footer>
 
-  <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
+ <script>
+  document.getElementById("year").textContent = new Date().getFullYear();
 
-    const TAX_RATE = 0.09;
-    const form = document.getElementById("delishOrderForm");
-    const statusEl = document.getElementById("status");
-    const checkoutBtn = document.getElementById("checkoutBtn");
-    const itemCards = Array.from(document.querySelectorAll(".item"));
-    const menuDayTitle = document.getElementById("menuDayTitle");
-    const menuDayNote = document.getElementById("menuDayNote");
-    const closedMessage = document.getElementById("closedMessage");
-    const pickupDateInput = document.getElementById("pickupDate");
+  const WAITLIST_ENDPOINT = "/api/delish/waitlist/";
+  const statusEl = document.getElementById("status");
+  const checkoutBtn = document.getElementById("checkoutBtn");
+  const waitlistBtn = document.getElementById("waitlistBtn");
+  const waitlistStatus = document.getElementById("waitlistStatus");
+  const itemCards = Array.from(document.querySelectorAll(".item"));
+  const menuDayTitle = document.getElementById("menuDayTitle");
+  const menuDayNote = document.getElementById("menuDayNote");
+  const closedMessage = document.getElementById("closedMessage");
+  const pickupDateInput = document.getElementById("pickupDate");
 
-    const ACTIVE_ORDERING_DAYS = new Set([
-      "monday",
-      "tuesday",
-      "wednesday",
-      "thursday",
-      "friday"
-    ]);
+  const ACTIVE_ORDERING_DAYS = new Set([
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday"
+  ]);
 
-    function showStatus(message) {
-      statusEl.textContent = message;
-      statusEl.classList.add("is-visible");
-    }
+  function showStatus(message) {
+    if (!statusEl) return;
+    statusEl.textContent = message;
+    statusEl.classList.add("is-visible");
+  }
 
-    function clearStatus() {
-      statusEl.textContent = "";
-      statusEl.classList.remove("is-visible");
-    }
+  function clearStatus() {
+    if (!statusEl) return;
+    statusEl.textContent = "";
+    statusEl.classList.remove("is-visible");
+  }
 
-    function getCentralNowParts() {
-      const formatter = new Intl.DateTimeFormat("en-CA", {
-        timeZone: "America/Chicago",
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        weekday: "long"
-      });
+  function showWaitlistStatus(message) {
+    if (!waitlistStatus) return;
+    waitlistStatus.textContent = message;
+    waitlistStatus.classList.add("is-visible");
+  }
 
-      const parts = formatter.formatToParts(new Date());
-      const map = {};
+  function clearWaitlistStatus() {
+    if (!waitlistStatus) return;
+    waitlistStatus.textContent = "";
+    waitlistStatus.classList.remove("is-visible");
+  }
 
-      parts.forEach((part) => {
-        if (part.type !== "literal") {
-          map[part.type] = part.value;
-        }
-      });
+  function getCentralNowParts() {
+    const formatter = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/Chicago",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      weekday: "long"
+    });
 
-      return {
-        weekday: String(map.weekday || "").toLowerCase(),
-        date: `${map.year}-${map.month}-${map.day}`
-      };
-    }
+    const parts = formatter.formatToParts(new Date());
+    const map = {};
 
-    function getCentralDayNameClient() {
-      return getCentralNowParts().weekday;
-    }
+    parts.forEach((part) => {
+      if (part.type !== "literal") {
+        map[part.type] = part.value;
+      }
+    });
 
-    function getCentralDateString() {
-      return getCentralNowParts().date;
-    }
+    return {
+      weekday: String(map.weekday || "").toLowerCase(),
+      date: `${map.year}-${map.month}-${map.day}`
+    };
+  }
 
-    function titleCaseDay(day) {
-      return day.charAt(0).toUpperCase() + day.slice(1);
-    }
+  function getCentralDayNameClient() {
+    return getCentralNowParts().weekday;
+  }
 
-    function setPickupDateMin() {
-      const todayCentral = getCentralDateString();
+  function getCentralDateString() {
+    return getCentralNowParts().date;
+  }
 
-      if (pickupDateInput) {
-        pickupDateInput.min = todayCentral;
+  function titleCaseDay(day) {
+    return day.charAt(0).toUpperCase() + day.slice(1);
+  }
 
-        if (!pickupDateInput.value) {
-          pickupDateInput.value = todayCentral;
-        }
+  function setPickupDateMin() {
+    const todayCentral = getCentralDateString();
+
+    if (pickupDateInput) {
+      pickupDateInput.min = todayCentral;
+      if (!pickupDateInput.value) {
+        pickupDateInput.value = todayCentral;
       }
     }
+  }
 
-    function toggleGroupVisibility(groupId) {
-      const group = document.getElementById(groupId);
-      if (!group) return;
+  function toggleGroupVisibility(groupId) {
+    const group = document.getElementById(groupId);
+    if (!group) return;
 
-      const visibleItems = Array.from(group.querySelectorAll(".item")).filter((item) => !item.hidden);
-      group.hidden = visibleItems.length === 0;
-    }
+    const visibleItems = Array.from(group.querySelectorAll(".item")).filter((item) => !item.hidden);
+    group.hidden = visibleItems.length === 0;
+  }
 
-    function applyDailyMenuVisibility() {
-      const today = getCentralDayNameClient();
+  function applyDailyMenuVisibility() {
+    const today = getCentralDayNameClient();
 
-      if (ACTIVE_ORDERING_DAYS.has(today)) {
-        if (menuDayTitle) {
-          menuDayTitle.textContent = `${titleCaseDay(today)} pickup menu.`;
-        }
+    if (ACTIVE_ORDERING_DAYS.has(today)) {
+      if (menuDayTitle) {
+        menuDayTitle.textContent = `${titleCaseDay(today)} pickup menu.`;
+      }
 
-        if (menuDayNote) {
-          menuDayNote.textContent =
-            `Only ${titleCaseDay(today)} items are available right now through the prepaid online pickup lane.`;
-        }
+      if (menuDayNote) {
+        menuDayNote.textContent =
+          `Browse ${titleCaseDay(today)} items now and get ready to order when we open.`;
+      }
 
-        if (closedMessage) {
-          closedMessage.hidden = true;
-        }
+      if (closedMessage) {
+        closedMessage.hidden = true;
+      }
 
-        itemCards.forEach((item) => {
-          const day = String(item.dataset.day || "").toLowerCase();
-          const visible = day === today || day === "everyday";
+      itemCards.forEach((item) => {
+        const day = String(item.dataset.day || "").toLowerCase();
+        const visible = day === today || day === "everyday";
 
-          item.hidden = !visible;
+        item.hidden = !visible;
 
-          if (!visible) {
-            const checkbox = item.querySelector(".item-select");
-            const qty = item.querySelector(".qty");
-
-            if (checkbox) checkbox.checked = false;
-            if (qty) qty.value = 1;
-          }
-        });
-
-        toggleGroupVisibility("group-main-menu");
-        toggleGroupVisibility("group-drinks");
-        toggleGroupVisibility("group-lagniappe");
-        toggleGroupVisibility("group-extra-sides");
-
-        if (checkoutBtn) {
-          checkoutBtn.disabled = false;
-        }
-      } else {
-        if (menuDayTitle) {
-          menuDayTitle.textContent = "Online ordering is closed today.";
-        }
-
-        if (menuDayNote) {
-          menuDayNote.textContent = "Please check back during active menu days.";
-        }
-
-        if (closedMessage) {
-          closedMessage.hidden = false;
-        }
-
-        itemCards.forEach((item) => {
-          item.hidden = true;
-
+        if (!visible) {
           const checkbox = item.querySelector(".item-select");
           const qty = item.querySelector(".qty");
-
           if (checkbox) checkbox.checked = false;
           if (qty) qty.value = 1;
-        });
-
-        toggleGroupVisibility("group-main-menu");
-        toggleGroupVisibility("group-drinks");
-        toggleGroupVisibility("group-lagniappe");
-        toggleGroupVisibility("group-extra-sides");
-
-        if (checkoutBtn) {
-          checkoutBtn.disabled = true;
         }
+      });
+
+      toggleGroupVisibility("group-main-menu");
+      toggleGroupVisibility("group-drinks");
+      toggleGroupVisibility("group-lagniappe");
+      toggleGroupVisibility("group-extra-sides");
+    } else {
+      if (menuDayTitle) {
+        menuDayTitle.textContent = "Opening Soon";
       }
-    }
 
-    function getSelectedItems() {
-      const today = getCentralDayNameClient();
+      if (menuDayNote) {
+        menuDayNote.textContent = "Browse the menu and join the waitlist so you’re ready when ordering goes live.";
+      }
 
-      return itemCards
-        .map((item) => {
+      if (closedMessage) {
+        closedMessage.hidden = false;
+      }
+
+      itemCards.forEach((item) => {
+        const day = String(item.dataset.day || "").toLowerCase();
+        const visible = day === "everyday";
+        item.hidden = !visible;
+
+        if (!visible) {
           const checkbox = item.querySelector(".item-select");
-          const qtyInput = item.querySelector(".qty");
+          const qty = item.querySelector(".qty");
+          if (checkbox) checkbox.checked = false;
+          if (qty) qty.value = 1;
+        }
+      });
 
-          if (!checkbox || !checkbox.checked) return null;
-
-          const id = String(item.dataset.id || "").trim();
-          const day = String(item.dataset.day || "").trim().toLowerCase();
-          const name = String(item.dataset.name || "").trim();
-          const price = Number(item.dataset.price || 0);
-          const qty = Math.max(1, parseInt(qtyInput?.value || "1", 10));
-
-          if (!id || !name || !price) return null;
-          if (!(day === today || day === "everyday")) return null;
-
-          return {
-            id,
-            name,
-            qty,
-            price
-          };
-        })
-        .filter(Boolean);
+      toggleGroupVisibility("group-main-menu");
+      toggleGroupVisibility("group-drinks");
+      toggleGroupVisibility("group-lagniappe");
+      toggleGroupVisibility("group-extra-sides");
     }
 
-    function validatePickupDate() {
-      if (!pickupDateInput) return true;
-
-      const selectedDate = pickupDateInput.value;
-      const todayCentral = getCentralDateString();
-
-      if (!selectedDate) {
-        showStatus("Please select a pickup date.");
-        return false;
-      }
-
-      if (selectedDate !== todayCentral) {
-        showStatus("Online ordering is currently set for today’s menu only. Please select today’s date.");
-        return false;
-      }
-
-      return true;
+    if (checkoutBtn) {
+      checkoutBtn.disabled = true;
+      checkoutBtn.textContent = "Opening Soon";
     }
+  }
 
-    setPickupDateMin();
-    applyDailyMenuVisibility();
+  setPickupDateMin();
+  applyDailyMenuVisibility();
 
-    form.addEventListener("submit", async (e) => {
+  if (checkoutBtn) {
+    checkoutBtn.addEventListener("click", function (e) {
       e.preventDefault();
       clearStatus();
+      showStatus("Online ordering is opening soon. Browse the menu and join the waitlist.");
+    });
+  }
 
+  if (waitlistBtn) {
+    waitlistBtn.addEventListener("click", async function () {
+      clearWaitlistStatus();
+
+      const name = document.getElementById("waitlistName").value.trim();
+      const phone = document.getElementById("waitlistPhone").value.trim();
+      const email = document.getElementById("waitlistEmail").value.trim();
       const today = getCentralDayNameClient();
 
-      if (!ACTIVE_ORDERING_DAYS.has(today)) {
-        showStatus("Online ordering is closed today.");
+      if (!name && !phone && !email) {
+        showWaitlistStatus("Please enter your name and at least a phone number or email.");
         return;
       }
 
-      if (!form.reportValidity()) {
-        showStatus("Please complete the required fields before continuing.");
+      if (!phone && !email) {
+        showWaitlistStatus("Please enter a phone number or email so we can notify you.");
         return;
       }
 
-      if (!validatePickupDate()) {
-        return;
-      }
-
-      const items = getSelectedItems();
-
-      if (!items.length) {
-        showStatus("Please select at least one available item before continuing.");
-        return;
-      }
-
-      const subtotal = items.reduce((sum, item) => sum + (item.qty * item.price), 0);
-      const tax = Number((subtotal * TAX_RATE).toFixed(2));
-      const total = Number((subtotal + tax).toFixed(2));
-
-      const payload = {
-        customerName: document.getElementById("customerName").value.trim(),
-        customerPhone: document.getElementById("customerPhone").value.trim(),
-        customerEmail: document.getElementById("customerEmail").value.trim(),
-        pickupDate: pickupDateInput.value,
-        pickupWindow: document.getElementById("pickupWindow").value,
-        notes: document.getElementById("notes").value.trim(),
-        smsConsent: document.getElementById("smsConsent").checked ? "yes" : "no",
-        items,
-        subtotal: Number(subtotal.toFixed(2)),
-        tax,
-        total,
-        source: "delish-order-page"
-      };
-
-      const originalText = checkoutBtn.textContent;
-      checkoutBtn.disabled = true;
-      checkoutBtn.textContent = "Starting secure checkout...";
+      const originalText = waitlistBtn.textContent;
+      waitlistBtn.disabled = true;
+      waitlistBtn.textContent = "Joining waitlist...";
 
       try {
-        const res = await fetch("/api/delish/create-checkout/", {
+        const res = await fetch(WAITLIST_ENDPOINT, {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify(payload)
+          body: JSON.stringify({
+            name,
+            phone,
+            email,
+            source: "delish-order-page",
+            interest: "opening-notification",
+            viewedMenuDay: today,
+            submittedAt: new Date().toISOString()
+          })
         });
 
         const data = await res.json();
 
-        if (!res.ok || !data.ok || !data.checkout_url) {
-          throw new Error(data.message || data.error || "Unable to start checkout.");
+        if (!res.ok || !data.ok) {
+          throw new Error(data.message || data.error || "Unable to join waitlist.");
         }
 
-        window.location.href = data.checkout_url;
+        showWaitlistStatus("You’re on the list. We’ll let you know when Delish opens online ordering.");
+
+        document.getElementById("waitlistName").value = "";
+        document.getElementById("waitlistPhone").value = "";
+        document.getElementById("waitlistEmail").value = "";
       } catch (error) {
-        showStatus(error.message || "Unable to start checkout right now.");
-        checkoutBtn.disabled = false;
-        checkoutBtn.textContent = originalText;
+        showWaitlistStatus(error.message || "Unable to join waitlist right now.");
+      } finally {
+        waitlistBtn.disabled = false;
+        waitlistBtn.textContent = originalText;
       }
     });
-  </script>
+  }
+</script>
 </body>
 </html>
