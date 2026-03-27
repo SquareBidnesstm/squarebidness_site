@@ -6,13 +6,13 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
 
   <title>Puff’s Smokehouse — Menu & Pickup Orders</title>
-  <meta name="description" content="View the Puff’s Smokehouse menu, build your order, and pay online for pickup." />
+  <meta name="description" content="View the Puff’s Smokehouse Saturday and Sunday menus, build your order, and pay online for pickup." />
   <link rel="canonical" href="https://www.squarebidness.com/puffs/menu/" />
   <meta name="robots" content="index,follow" />
   <meta name="author" content="Denerian Collins" />
   <meta name="format-detection" content="telephone=no" />
   <meta name="theme-color" content="#0b0b0b" />
-  <meta name="sb:build" content="v20260327-puffs-menu-checkout" />
+  <meta name="sb:build" content="v20260327-puffs-menu-separated-days" />
 
   <link rel="manifest" href="/puffs/manifest.webmanifest" />
   <link rel="icon" href="/puffs/icons/icon-192.png" type="image/png" />
@@ -24,7 +24,7 @@
 
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Puff’s Smokehouse" />
-  <meta property="og:title" content="Puff’s Smokehouse — Menu & Pickup Orders" />
+  <meta property="og:title" content="Puff’s Smokehouse — Saturday & Sunday Menu" />
   <meta property="og:description" content="Build your order, pay online, and pick up from Puff’s Smokehouse." />
   <meta property="og:url" content="https://www.squarebidness.com/puffs/menu/" />
   <meta property="og:image" content="https://www.squarebidness.com/puffs/assets/puffs_hero_1200x630.jpg?v=20260327" />
@@ -32,7 +32,7 @@
   <meta property="og:image:height" content="630" />
 
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Puff’s Smokehouse — Menu & Pickup Orders" />
+  <meta name="twitter:title" content="Puff’s Smokehouse — Saturday & Sunday Menu" />
   <meta name="twitter:description" content="Build your order, pay online, and pick up from Puff’s Smokehouse." />
   <meta name="twitter:image" content="https://www.squarebidness.com/puffs/assets/puffs_hero_1200x630.jpg?v=20260327" />
 
@@ -112,6 +112,23 @@
       margin-top:10px;padding:10px 12px;border-radius:12px;border:1px solid #1f4527;
       background:#0d1b10;color:#b8efc3;display:none;
     }
+    .daySection + .daySection{margin-top:24px}
+    .dayHead{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      margin:0 0 12px;padding-bottom:10px;border-bottom:1px solid #2a2a2a;
+    }
+    .dayHead h3{
+      margin:0;font-size:1.15rem;
+    }
+    .dayTag{
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:5px 10px;border-radius:999px;border:1px solid #3b3b3b;
+      background:#171717;color:var(--accent);font-size:.78rem;font-weight:700;
+      white-space:nowrap;
+    }
+    .emptyDay{
+      padding:12px 0;color:#8f8f8f;font-size:.92rem;
+    }
   </style>
 
   <script defer src="/scripts/sb-analytics.js"></script>
@@ -135,7 +152,7 @@
         </picture>
 
         <p class="sub">
-          Build your order, pay online, and pick up from Puff’s Smokehouse.
+          Saturday and Sunday menus are separated clean. Build your order, pay online, and pick up from Puff’s Smokehouse.
           Catering stays on its own lane.
         </p>
 
@@ -150,7 +167,7 @@
 
   <main class="wrap" style="padding-top:18px">
     <div id="topMessage" class="banner">
-      Daily pickup orders are prepaid online. Build your order below, then continue to secure checkout.
+      Daily pickup orders are prepaid online. Sunday menu is limited to Pigfeet, Corn, and Potatoe. Everything else is Saturday.
     </div>
 
     <div class="grid">
@@ -224,8 +241,30 @@
 
     const cart = new Map();
 
+    const SUNDAY_NAMES = new Set([
+      "pigfeet",
+      "pig feet",
+      "corn",
+      "potatoe",
+      "potato",
+      "potatoes"
+    ]);
+
     function money(n) {
       return `$${Number(n || 0).toFixed(2)}`;
+    }
+
+    function normalizeName(value) {
+      return String(value || "")
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function isSundayItem(item) {
+      const name = normalizeName(item?.name);
+      return SUNDAY_NAMES.has(name);
     }
 
     function showError(msg) {
@@ -256,67 +295,145 @@
       return data;
     }
 
+    function createRow(item) {
+      const row = document.createElement("div");
+      row.className = "row";
+
+      const left = document.createElement("div");
+      left.innerHTML =
+        `<strong>${item.name || ""}</strong>` +
+        (item.subnote ? `<div class="tiny muted">${item.subnote}</div>` : "") +
+        (item.badge ? `<div class="tiny" style="margin-top:3px;color:#ffd28a">${item.badge}</div>` : "");
+
+      const price = document.createElement("div");
+      price.className = "price";
+      price.textContent = money(item.price || 0);
+
+      const qty = document.createElement("div");
+      qty.className = "qty";
+
+      const minus = document.createElement("button");
+      minus.type = "button";
+      minus.textContent = "–";
+      minus.onclick = () => updateQty(item.id, -1);
+
+      const val = document.createElement("span");
+      val.textContent = String(cart.get(item.id) || 0);
+      val.dataset.bindQty = item.id;
+      val.style.minWidth = "18px";
+      val.style.textAlign = "center";
+
+      const plus = document.createElement("button");
+      plus.type = "button";
+      plus.textContent = "+";
+      plus.onclick = () => updateQty(item.id, 1);
+
+      qty.append(minus, val, plus);
+      row.append(left, price, qty);
+
+      return row;
+    }
+
+    function appendSectionItems(container, title, note, items) {
+      const block = document.createElement("section");
+      block.className = "sectionBlock";
+
+      const h = document.createElement("h4");
+      h.className = "sectionTitle";
+      h.textContent = title || "";
+
+      block.appendChild(h);
+
+      if (note) {
+        const noteEl = document.createElement("div");
+        noteEl.className = "note";
+        noteEl.textContent = note;
+        block.appendChild(noteEl);
+      }
+
+      items.forEach((item) => {
+        block.appendChild(createRow(item));
+      });
+
+      container.appendChild(block);
+    }
+
+    function createDaySection(title, tagText) {
+      const section = document.createElement("section");
+      section.className = "daySection";
+
+      const head = document.createElement("div");
+      head.className = "dayHead";
+
+      const h = document.createElement("h3");
+      h.textContent = title;
+
+      const tag = document.createElement("span");
+      tag.className = "dayTag";
+      tag.textContent = tagText;
+
+      head.append(h, tag);
+      section.appendChild(head);
+
+      return section;
+    }
+
     function renderMenu() {
       const root = document.getElementById("menuContent");
       root.innerHTML = "";
 
+      const saturdayWrap = createDaySection("Saturday Menu", "Main Saturday Lane");
+      const sundayWrap = createDaySection("Sunday Menu", "Sunday Only");
+
+      let saturdayCount = 0;
+      let sundayCount = 0;
+
       MENU.forEach((section) => {
-        const block = document.createElement("section");
-        block.className = "sectionBlock";
-
-        const h = document.createElement("h3");
-        h.className = "sectionTitle";
-        h.textContent = section.section || "";
-
-        block.appendChild(h);
-
-        if (section.note) {
-          const note = document.createElement("div");
-          note.className = "note";
-          note.textContent = section.note;
-          block.appendChild(note);
-        }
+        const saturdayItems = [];
+        const sundayItems = [];
 
         (section.items || []).forEach((item) => {
-          const row = document.createElement("div");
-          row.className = "row";
-
-          const left = document.createElement("div");
-          left.innerHTML =
-            `<strong>${item.name || ""}</strong>` +
-            (item.subnote ? `<div class="tiny muted">${item.subnote}</div>` : "") +
-            (item.badge ? `<div class="tiny" style="margin-top:3px;color:#ffd28a">${item.badge}</div>` : "");
-
-          const price = document.createElement("div");
-          price.className = "price";
-          price.textContent = money(item.price || 0);
-
-          const qty = document.createElement("div");
-          qty.className = "qty";
-
-          const minus = document.createElement("button");
-          minus.type = "button";
-          minus.textContent = "–";
-          minus.onclick = () => updateQty(item.id, -1);
-
-          const val = document.createElement("span");
-          val.textContent = "0";
-          val.dataset.bindQty = item.id;
-          val.style.minWidth = "18px";
-          val.style.textAlign = "center";
-
-          const plus = document.createElement("button");
-          plus.type = "button";
-          plus.textContent = "+";
-          plus.onclick = () => updateQty(item.id, 1);
-
-          qty.append(minus, val, plus);
-          row.append(left, price, qty);
-          block.appendChild(row);
+          if (isSundayItem(item)) sundayItems.push(item);
+          else saturdayItems.push(item);
         });
 
-        root.appendChild(block);
+        if (saturdayItems.length) {
+          appendSectionItems(
+            saturdayWrap,
+            section.section || "",
+            section.note || "",
+            saturdayItems
+          );
+          saturdayCount += saturdayItems.length;
+        }
+
+        if (sundayItems.length) {
+          appendSectionItems(
+            sundayWrap,
+            section.section || "",
+            section.note || "",
+            sundayItems
+          );
+          sundayCount += sundayItems.length;
+        }
       });
+
+      if (!saturdayCount) {
+        const empty = document.createElement("div");
+        empty.className = "emptyDay";
+        empty.textContent = "No Saturday items are loaded yet.";
+        saturdayWrap.appendChild(empty);
+      }
+
+      if (!sundayCount) {
+        const empty = document.createElement("div");
+        empty.className = "emptyDay";
+        empty.textContent = "No Sunday items are loaded yet.";
+        sundayWrap.appendChild(empty);
+      }
+
+      root.appendChild(saturdayWrap);
+      root.appendChild(sundayWrap);
     }
 
     function flattenItems() {
@@ -336,8 +453,10 @@
       if (next === 0) cart.delete(id);
       else cart.set(id, next);
 
-      const el = document.querySelector(`[data-bind-qty="${CSS.escape(id)}"]`);
-      if (el) el.textContent = String(next);
+      const els = document.querySelectorAll(`[data-bind-qty="${CSS.escape(id)}"]`);
+      els.forEach((el) => {
+        el.textContent = String(next);
+      });
 
       renderCart();
     }
