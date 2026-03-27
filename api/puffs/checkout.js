@@ -34,6 +34,11 @@ function readMenuFile() {
   return JSON.parse(raw);
 }
 
+function getItemDay(item) {
+  const day = String(item?.day || "").toLowerCase().trim();
+  return day === "sunday" ? "sunday" : "saturday";
+}
+
 function flattenMenu(menu) {
   const map = new Map();
 
@@ -45,7 +50,8 @@ function flattenMenu(menu) {
         price: Number(item.price || 0),
         badge: item.badge || "",
         subnote: item.subnote || "",
-        section: section.section || ""
+        section: section.section || "",
+        day: getItemDay(item)
       });
     }
   }
@@ -75,6 +81,11 @@ async function redisSet(key, value) {
   const encodedKey = encodeURIComponent(key);
   const encodedValue = encodeURIComponent(JSON.stringify(value));
   return redisPost(`/set/${encodedKey}/${encodedValue}`);
+}
+
+function getRequestedMenuDay(value) {
+  const day = String(value || "").toLowerCase().trim();
+  return day === "sunday" ? "sunday" : "saturday";
 }
 
 export default async function handler(req, res) {
@@ -111,6 +122,7 @@ export default async function handler(req, res) {
     const pickupTime = cleanString(body.pickupTime, 80) || "ASAP";
     const notes = cleanString(body.notes, 500);
     const smsConsent = body.smsConsent === true;
+    const requestedDay = getRequestedMenuDay(body.menuDay);
 
     const submittedItems = Array.isArray(body.items) ? body.items : [];
 
@@ -145,12 +157,20 @@ export default async function handler(req, res) {
         });
       }
 
+      if (match.day !== requestedDay) {
+        return res.status(400).json({
+          ok: false,
+          error: `${match.name} is only available on ${match.day}.`
+        });
+      }
+
       normalizedItems.push({
         id: match.id,
         name: match.name,
         qty,
         price: Number(match.price),
-        section: match.section
+        section: match.section,
+        day: match.day
       });
     }
 
@@ -172,7 +192,8 @@ export default async function handler(req, res) {
           name: item.name,
           metadata: {
             item_id: item.id,
-            section: item.section || ""
+            section: item.section || "",
+            day: item.day || ""
           }
         },
         unit_amount: Math.round(item.price * 100)
@@ -205,6 +226,7 @@ export default async function handler(req, res) {
       metadata: {
         brand: "puffs",
         orderNumber,
+        menuDay: requestedDay,
         customerName,
         customerPhone,
         pickupTime,
@@ -213,7 +235,7 @@ export default async function handler(req, res) {
       },
       custom_text: {
         submit: {
-          message: `Pickup: ${pickupTime}${notes ? ` • Notes: ${notes}` : ""}`
+          message: `Menu: ${requestedDay.charAt(0).toUpperCase() + requestedDay.slice(1)} • Pickup: ${pickupTime}${notes ? ` • Notes: ${notes}` : ""}`
         }
       }
     });
@@ -224,6 +246,7 @@ export default async function handler(req, res) {
       stripeSessionId: session.id,
       stripeCheckoutUrl: session.url,
       paymentStatus: "pending",
+      menuDay: requestedDay,
       pickupTime,
       customerName,
       customerPhone,
