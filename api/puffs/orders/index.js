@@ -43,23 +43,33 @@ function normalizeOrder(order) {
   };
 }
 
-async function redisGetList(redisUrl, redisToken, key, start = 0, stop = 49) {
-  const url = `${redisUrl}/lrange/${encodeURIComponent(key)}/${start}/${stop}`;
+async function redisPost(pathname) {
+  const REDIS_URL = process.env.UPSTASH_REDIS_REST_URL;
+  const REDIS_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-  const res = await fetch(url, {
+  const res = await fetch(`${REDIS_URL}${pathname}`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${redisToken}`
+      Authorization: `Bearer ${REDIS_TOKEN}`
     }
   });
 
   const data = await res.json().catch(() => ({}));
-
   if (!res.ok) {
     throw new Error(data.error || `Redis request failed (${res.status})`);
   }
+  return data;
+}
 
-  return Array.isArray(data.result) ? data.result : [];
+async function redisGetList(key, start = 0, stop = 49) {
+  const result = await redisPost(`/lrange/${encodeURIComponent(key)}/${start}/${stop}`);
+  return Array.isArray(result.result) ? result.result : [];
+}
+
+async function redisGet(key) {
+  const result = await redisPost(`/get/${encodeURIComponent(key)}`);
+  if (!result || typeof result.result !== "string") return null;
+  return safeJsonParse(result.result);
 }
 
 export default async function handler(req, res) {
@@ -90,17 +100,33 @@ export default async function handler(req, res) {
   }
 
   try {
-    const rawOrders = await redisGetList(REDIS_URL, REDIS_TOKEN, ORDERS_KEY, 0, 49);
+    const rawOrders = await redisGetList(ORDERS_KEY, 0, 49);
 
-    const orders = rawOrders
-      .map((entry) => safeJsonParse(entry))
-      .map((order) => normalizeOrder(order))
-      .filter(Boolean);
+    const mergedOrders = [];
+    for (const entry of rawOrders) {
+      const parsed = safeJsonParse(entry);
+      const order = normalizeOrder(parsed);
+      if (!order || !order.orderNumber) continue;
+
+      const meta = await redisGet(`puffs:order-meta:${order.orderNumber}`);
+      if (meta && typeof meta === "object") {
+        order.status = String(meta.status || order.status || "new").toLowerCase();
+        order.hidden = meta.hidden === true;
+        order.updatedAt = meta.updatedAt || "";
+      } else {
+        order.hidden = false;
+        order.updatedAt = "";
+      }
+
+      if (order.hidden !== true) {
+        mergedOrders.push(order);
+      }
+    }
 
     return res.status(200).json({
       ok: true,
-      count: orders.length,
-      orders
+      count: mergedOrders.length,
+      orders: mergedOrders
     });
   } catch (err) {
     return res.status(500).json({
