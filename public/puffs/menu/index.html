@@ -12,7 +12,7 @@
   <meta name="author" content="Denerian Collins" />
   <meta name="format-detection" content="telephone=no" />
   <meta name="theme-color" content="#0b0b0b" />
-  <meta name="sb:build" content="v20260327-puffs-menu-separated-days" />
+  <meta name="sb:build" content="v20260327-puffs-menu-day-wired" />
 
   <link rel="manifest" href="/puffs/manifest.webmanifest" />
   <link rel="icon" href="/puffs/icons/icon-192.png" type="image/png" />
@@ -117,9 +117,7 @@
       display:flex;align-items:center;justify-content:space-between;gap:10px;
       margin:0 0 12px;padding-bottom:10px;border-bottom:1px solid #2a2a2a;
     }
-    .dayHead h3{
-      margin:0;font-size:1.15rem;
-    }
+    .dayHead h3{margin:0;font-size:1.15rem}
     .dayTag{
       display:inline-flex;align-items:center;justify-content:center;
       padding:5px 10px;border-radius:999px;border:1px solid #3b3b3b;
@@ -241,30 +239,13 @@
 
     const cart = new Map();
 
-    const SUNDAY_NAMES = new Set([
-      "pigfeet",
-      "pig feet",
-      "corn",
-      "potatoe",
-      "potato",
-      "potatoes"
-    ]);
-
     function money(n) {
       return `$${Number(n || 0).toFixed(2)}`;
     }
 
-    function normalizeName(value) {
-      return String(value || "")
-        .toLowerCase()
-        .replace(/[^a-z0-9\s]/g, "")
-        .replace(/\s+/g, " ")
-        .trim();
-    }
-
-    function isSundayItem(item) {
-      const name = normalizeName(item?.name);
-      return SUNDAY_NAMES.has(name);
+    function getItemDay(item) {
+      const day = String(item?.day || "").toLowerCase().trim();
+      return day === "sunday" ? "sunday" : "saturday";
     }
 
     function showError(msg) {
@@ -393,7 +374,7 @@
         const sundayItems = [];
 
         (section.items || []).forEach((item) => {
-          if (isSundayItem(item)) sundayItems.push(item);
+          if (getItemDay(item) === "sunday") sundayItems.push(item);
           else saturdayItems.push(item);
         });
 
