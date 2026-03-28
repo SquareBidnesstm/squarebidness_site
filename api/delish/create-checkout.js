@@ -75,6 +75,21 @@ const MENU_BY_DAY = {
       name: "Baked Catfish Plate",
       price: 16.99,
     },
+    {
+  id: "sunday_pork_steak_gravy",
+  name: "Pork Steak and Gravy Plate",
+  price: 15.99,
+},
+{
+  id: "sunday_oxtails",
+  name: "Oxtails Plate",
+  price: 24.99,
+},
+{
+  id: "sunday_baked_chicken",
+  name: "Baked Chicken Plate",
+  price: 13.99,
+},
   ],
   everyday: [
     {
