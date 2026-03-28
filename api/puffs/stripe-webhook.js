@@ -1,47 +1,5 @@
+// /api/puffs/stripe-webhook.js
 import Stripe from "stripe";
-
-const stripe = new Stripe(process.env.PUFFS_STRIPE_SECRET_KEY
-process.env.PUFFS_STRIPE_WEBHOOK_SECRET
-process.env.PUFFS_STRIPE_SUCCESS_URL
-process.env.PUFFS_STRIPE_CANCEL_URL);
-
-function buffer(req) {
-  return new Promise((resolve, reject) => {
-    const chunks = [];
-    req.on("data", (chunk) => chunks.push(chunk));
-    req.on("end", () => resolve(Buffer.concat(chunks)));
-    req.on("error", reject);
-  });
-}
-
-async function redisGet(key) {
-  const res = await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/get/${encodeURIComponent(key)}`, {
-    headers: {
-      Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`
-    }
-  });
-  const data = await res.json();
-  return data.result ? JSON.parse(data.result) : null;
-}
-
-async function redisSet(key, value) {
-  await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/set/${encodeURIComponent(key)}/${encodeURIComponent(JSON.stringify(value))}`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`
-    }
-  });
-}
-
-async function redisPush(order) {
-  const encoded = encodeURIComponent(JSON.stringify(order));
-  await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/lpush/puffs:orders/${encoded}`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`
-    }
-  });
-}
 
 export const config = {
   api: {
@@ -49,38 +7,107 @@ export const config = {
   }
 };
 
+const stripe = new Stripe(process.env.PUFFS_STRIPE_SECRET_KEY);
+
+async function readRawBody(req) {
+  const chunks = [];
+  for await (const chunk of req) {
+    chunks.push(typeof chunk === "string" ? Buffer.from(chunk) : chunk);
+  }
+  return Buffer.concat(chunks);
+}
+
+async function redisPost(pathname) {
+  const REDIS_URL = process.env.UPSTASH_REDIS_REST_URL;
+  const REDIS_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+  const res = await fetch(`${REDIS_URL}${pathname}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${REDIS_TOKEN}`
+    }
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.error || `Redis request failed (${res.status})`);
+  }
+  return data;
+}
+
+async function redisGet(key) {
+  const result = await redisPost(`/get/${encodeURIComponent(key)}`);
+  if (!result || typeof result.result !== "string") return null;
+
+  try {
+    return JSON.parse(result.result);
+  } catch {
+    return null;
+  }
+}
+
+async function redisSet(key, value) {
+  const encodedKey = encodeURIComponent(key);
+  const encodedValue = encodeURIComponent(JSON.stringify(value));
+  return redisPost(`/set/${encodedKey}/${encodedValue}`);
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).end();
+    return res.status(405).send("Method not allowed");
+  }
+
+  if (
+    !process.env.PUFFS_STRIPE_SECRET_KEY ||
+    !process.env.PUFFS_STRIPE_WEBHOOK_SECRET ||
+    !process.env.UPSTASH_REDIS_REST_URL ||
+    !process.env.UPSTASH_REDIS_REST_TOKEN
+  ) {
+    return res.status(500).send("Missing env vars");
+  }
+
+  let event;
+
+  try {
+    const rawBody = await readRawBody(req);
+    const signature = req.headers["stripe-signature"];
+
+    event = stripe.webhooks.constructEvent(
+      rawBody,
+      signature,
+      process.env.PUFFS_STRIPE_WEBHOOK_SECRET
+    );
+  } catch (err) {
+    return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
   try {
-    const sig = req.headers["stripe-signature"];
-    const rawBody = await buffer(req);
-
-    const event = stripe.webhooks.constructEvent(
-      rawBody,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET
-    );
-
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
 
-      const key = `puffs:checkout:${session.id}`;
-      const order = await redisGet(key);
+      const pendingKey = `puffs:checkout:${session.id}`;
+      const pending = await redisGet(pendingKey);
 
-      if (order) {
-        order.paymentStatus = "paid";
-        order.paidAt = new Date().toISOString();
+      const paidOrder = {
+        ...(pending || {}),
+        stripeSessionId: session.id,
+        stripePaymentIntent: session.payment_intent || "",
+        stripeCustomerDetails: session.customer_details || null,
+        paidAt: new Date().toISOString(),
+        paymentStatus: session.payment_status || "paid",
+        status: "new"
+      };
 
-        await redisSet(key, order);
-        await redisPush(order);
-      }
+      const encoded = encodeURIComponent(JSON.stringify(paidOrder));
+
+      await redisPost(`/lpush/${encodeURIComponent("puffs:orders")}/${encoded}`);
+      await redisPost(`/ltrim/${encodeURIComponent("puffs:orders")}/0/199`);
+      await redisSet(`puffs:paid:${session.id}`, paidOrder);
+      await redisSet(`puffs:checkout:${session.id}`, paidOrder);
     }
 
     return res.status(200).json({ received: true });
   } catch (err) {
-    return res.status(400).send(`Webhook Error: ${err.message}`);
+    return res.status(500).send(err.message || "Webhook processing failed");
   }
 }
