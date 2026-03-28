@@ -613,6 +613,61 @@
                     <input class="qty" type="number" min="1" value="1" />
                   </div>
                 </article>
+
+                <!-- SUNDAY (1st & 3rd Sundays only) -->
+<article
+  class="item"
+  data-id="sunday_pork_steak_gravy"
+  data-day="sunday"
+  data-name="Pork Steak and Gravy Plate"
+  data-price="15.99"
+>
+  <input class="item-select" type="checkbox" />
+  <div>
+    <h3>Pork Steak and Gravy Plate</h3>
+    <p>Rice or mashed potatoes with 2 sides.</p>
+  </div>
+  <div class="item__meta">
+    <div class="price">$15.99</div>
+    <input class="qty" type="number" min="1" value="1" />
+  </div>
+</article>
+
+<article
+  class="item"
+  data-id="sunday_oxtails"
+  data-day="sunday"
+  data-name="Oxtails Plate"
+  data-price="24.99"
+>
+  <input class="item-select" type="checkbox" />
+  <div>
+    <h3>Oxtails Plate</h3>
+    <p>Rice or mashed potatoes with 2 sides.</p>
+  </div>
+  <div class="item__meta">
+    <div class="price">$24.99</div>
+    <input class="qty" type="number" min="1" value="1" />
+  </div>
+</article>
+
+<article
+  class="item"
+  data-id="sunday_baked_chicken"
+  data-day="sunday"
+  data-name="Baked Chicken Plate"
+  data-price="13.99"
+>
+  <input class="item-select" type="checkbox" />
+  <div>
+    <h3>Baked Chicken Plate</h3>
+    <p>Rice or mashed potatoes with 2 sides.</p>
+  </div>
+  <div class="item__meta">
+    <div class="price">$13.99</div>
+    <input class="qty" type="number" min="1" value="1" />
+  </div>
+</article>
               </div>
             </div>
 
@@ -1091,8 +1146,7 @@
       </div>
     </div>
   </footer>
-
- <script>
+<script>
   document.getElementById("year").textContent = new Date().getFullYear();
 
   const WAITLIST_ENDPOINT = "/api/delish/waitlist/";
@@ -1106,7 +1160,7 @@
   const closedMessage = document.getElementById("closedMessage");
   const pickupDateInput = document.getElementById("pickupDate");
 
-  const ACTIVE_ORDERING_DAYS = new Set([
+  const WEEKDAY_ORDERING_DAYS = new Set([
     "monday",
     "tuesday",
     "wednesday",
@@ -1158,7 +1212,8 @@
 
     return {
       weekday: String(map.weekday || "").toLowerCase(),
-      date: `${map.year}-${map.month}-${map.day}`
+      date: `${map.year}-${map.month}-${map.day}`,
+      dayOfMonth: Number(map.day || 0)
     };
   }
 
@@ -1168,6 +1223,54 @@
 
   function getCentralDateString() {
     return getCentralNowParts().date;
+  }
+
+  function getSundayOccurrence(dayOfMonth) {
+    return Math.ceil(dayOfMonth / 7);
+  }
+
+  function getServiceMode() {
+    const now = getCentralNowParts();
+    const today = now.weekday;
+    const sundayOccurrence = getSundayOccurrence(now.dayOfMonth);
+
+    const isSaturday = today === "saturday";
+    const isSunday = today === "sunday";
+    const isFirstOrThirdSunday =
+      isSunday && (sundayOccurrence === 1 || sundayOccurrence === 3);
+
+    if (WEEKDAY_ORDERING_DAYS.has(today)) {
+      return {
+        mode: "weekday",
+        today
+      };
+    }
+
+    if (isSaturday) {
+      return {
+        mode: "closed-saturday",
+        today
+      };
+    }
+
+    if (isFirstOrThirdSunday) {
+      return {
+        mode: "sunday-special",
+        today
+      };
+    }
+
+    if (isSunday) {
+      return {
+        mode: "closed-sunday",
+        today
+      };
+    }
+
+    return {
+      mode: "closed",
+      today
+    };
   }
 
   function titleCaseDay(day) {
@@ -1193,10 +1296,28 @@
     group.hidden = visibleItems.length === 0;
   }
 
-  function applyDailyMenuVisibility() {
-    const today = getCentralDayNameClient();
+  function hideAllItems() {
+    itemCards.forEach((item) => {
+      item.hidden = true;
 
-    if (ACTIVE_ORDERING_DAYS.has(today)) {
+      const checkbox = item.querySelector(".item-select");
+      const qty = item.querySelector(".qty");
+
+      if (checkbox) checkbox.checked = false;
+      if (qty) qty.value = 1;
+    });
+  }
+
+  function setClosedMessage(html) {
+    if (!closedMessage) return;
+    closedMessage.innerHTML = html;
+    closedMessage.hidden = false;
+  }
+
+  function applyDailyMenuVisibility() {
+    const { mode, today } = getServiceMode();
+
+    if (mode === "weekday") {
       if (menuDayTitle) {
         menuDayTitle.textContent = `${titleCaseDay(today)} pickup menu.`;
       }
@@ -1213,7 +1334,6 @@
       itemCards.forEach((item) => {
         const day = String(item.dataset.day || "").toLowerCase();
         const visible = day === today || day === "everyday";
-
         item.hidden = !visible;
 
         if (!visible) {
@@ -1223,42 +1343,80 @@
           if (qty) qty.value = 1;
         }
       });
+    } else if (mode === "sunday-special") {
+      if (menuDayTitle) {
+        menuDayTitle.textContent = "Sunday featured menu.";
+      }
 
-      toggleGroupVisibility("group-main-menu");
-      toggleGroupVisibility("group-drinks");
-      toggleGroupVisibility("group-lagniappe");
-      toggleGroupVisibility("group-extra-sides");
+      if (menuDayNote) {
+        menuDayNote.textContent =
+          "It’s a 1st or 3rd Sunday. Sunday specials can be shown here, along with everyday items.";
+      }
+
+      if (closedMessage) {
+        closedMessage.hidden = true;
+      }
+
+      itemCards.forEach((item) => {
+        const day = String(item.dataset.day || "").toLowerCase();
+        const visible = day === "sunday" || day === "everyday";
+        item.hidden = !visible;
+
+        if (!visible) {
+          const checkbox = item.querySelector(".item-select");
+          const qty = item.querySelector(".qty");
+          if (checkbox) checkbox.checked = false;
+          if (qty) qty.value = 1;
+        }
+      });
+    } else if (mode === "closed-saturday") {
+      if (menuDayTitle) {
+        menuDayTitle.textContent = "Closed Today";
+      }
+
+      if (menuDayNote) {
+        menuDayNote.textContent =
+          "Delish is closed on Saturdays. 1st and 3rd Sunday menu returns Sunday. Otherwise, see you Monday.";
+      }
+
+      hideAllItems();
+      setClosedMessage(
+        "<strong>Closed on Saturday.</strong><br />1st &amp; 3rd Sunday menu returns Sunday. Otherwise, see you Monday."
+      );
+    } else if (mode === "closed-sunday") {
+      if (menuDayTitle) {
+        menuDayTitle.textContent = "Closed Today";
+      }
+
+      if (menuDayNote) {
+        menuDayNote.textContent =
+          "This Sunday is closed. Delish serves featured Sunday menu on 1st and 3rd Sundays only. See you Monday.";
+      }
+
+      hideAllItems();
+      setClosedMessage(
+        "<strong>Closed this Sunday.</strong><br />Delish serves 1st &amp; 3rd Sundays only. See you Monday."
+      );
     } else {
       if (menuDayTitle) {
         menuDayTitle.textContent = "Opening Soon";
       }
 
       if (menuDayNote) {
-        menuDayNote.textContent = "Browse the menu and join the waitlist so you’re ready when ordering goes live.";
+        menuDayNote.textContent =
+          "Browse the menu and join the waitlist so you’re ready when ordering goes live.";
       }
 
-      if (closedMessage) {
-        closedMessage.hidden = false;
-      }
-
-      itemCards.forEach((item) => {
-        const day = String(item.dataset.day || "").toLowerCase();
-        const visible = day === "everyday";
-        item.hidden = !visible;
-
-        if (!visible) {
-          const checkbox = item.querySelector(".item-select");
-          const qty = item.querySelector(".qty");
-          if (checkbox) checkbox.checked = false;
-          if (qty) qty.value = 1;
-        }
-      });
-
-      toggleGroupVisibility("group-main-menu");
-      toggleGroupVisibility("group-drinks");
-      toggleGroupVisibility("group-lagniappe");
-      toggleGroupVisibility("group-extra-sides");
+      hideAllItems();
+      setClosedMessage(
+        "<strong>Opening Soon.</strong><br />Browse the menu and join the waitlist so you’re ready when ordering goes live."
+      );
     }
+
+    toggleGroupVisibility("group-main-menu");
+    toggleGroupVisibility("group-drinks");
+    toggleGroupVisibility("group-lagniappe");
+    toggleGroupVisibility("group-extra-sides");
 
     if (checkoutBtn) {
       checkoutBtn.disabled = true;
