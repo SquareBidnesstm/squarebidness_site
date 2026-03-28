@@ -1,6 +1,9 @@
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe = new Stripe(process.env.PUFFS_STRIPE_SECRET_KEY
+process.env.PUFFS_STRIPE_WEBHOOK_SECRET
+process.env.PUFFS_STRIPE_SUCCESS_URL
+process.env.PUFFS_STRIPE_CANCEL_URL);
 
 function buffer(req) {
   return new Promise((resolve, reject) => {
