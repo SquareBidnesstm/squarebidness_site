@@ -101,17 +101,18 @@ export default async function handler(req, res) {
     return res.status(405).json({ ok: false, error: "Method not allowed." });
   }
 
-  if (
-    !process.env.STRIPE_SECRET_KEY ||
-    !process.env.UPSTASH_REDIS_REST_URL ||
-    !process.env.UPSTASH_REDIS_REST_TOKEN ||
-    !process.env.SITE_URL
-  ) {
-    return res.status(500).json({
-      ok: false,
-      error: "Missing required env vars."
-    });
-  }
+ if (
+  !process.env.PUFFS_STRIPE_SECRET_KEY ||
+  !process.env.UPSTASH_REDIS_REST_URL ||
+  !process.env.UPSTASH_REDIS_REST_TOKEN ||
+  !process.env.PUFFS_STRIPE_SUCCESS_URL ||
+  !process.env.PUFFS_STRIPE_CANCEL_URL
+) {
+  return res.status(500).json({
+    ok: false,
+    error: "Missing required env vars."
+  });
+}
 
   try {
     const body =
