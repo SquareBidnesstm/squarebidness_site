@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe = new Stripe(process.env.PUFFS_STRIPE_SECRET_KEY);
 
 function cors(res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -218,8 +218,8 @@ export default async function handler(req, res) {
       mode: "payment",
       payment_method_types: ["card"],
       line_items,
-      success_url: `${process.env.SITE_URL}/puffs/thank-you/?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.SITE_URL}/puffs/menu/?canceled=1`,
+     success_url: process.env.PUFFS_STRIPE_SUCCESS_URL,
+cancel_url: process.env.PUFFS_STRIPE_CANCEL_URL,
       billing_address_collection: "auto",
       phone_number_collection: {
         enabled: true
