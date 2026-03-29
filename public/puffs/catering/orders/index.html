@@ -1,0 +1,625 @@
+<!-- FILE: /public/puffs/catering/orders/index.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Puff’s Catering Orders</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#0b0b0b" />
+
+  <link rel="icon" href="/puffs/icons/icon-192.png" type="image/png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/puffs/icons/icon-180.png" />
+
+  <style>
+    :root{
+      --bg:#0b0b0b;
+      --panel:#171718;
+      --panel-2:#1d1d20;
+      --border:#2c2c2f;
+      --text:#f5f2ea;
+      --muted:#cfc7ba;
+      --gold:#d7ae72;
+      --gold-2:#f2d7ad;
+      --gold-soft:rgba(215,174,114,.1);
+      --gold-border:rgba(215,174,114,.24);
+      --shadow:0 14px 40px rgba(0,0,0,.28);
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{
+      margin:0;
+      padding:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    }
+
+    .wrap{
+      width:min(1120px,92%);
+      margin:0 auto;
+      padding:36px 0 72px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:26px;
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-size:.8rem;
+      font-weight:800;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:#cfb78f;
+      margin-bottom:10px;
+    }
+
+    .dot{
+      width:8px;
+      height:8px;
+      border-radius:999px;
+      background:var(--gold);
+      box-shadow:0 0 0 5px rgba(215,174,114,.12);
+      flex:0 0 auto;
+    }
+
+    h1{
+      margin:0;
+      font-size:clamp(2rem,4vw,3.25rem);
+      letter-spacing:-.04em;
+      line-height:.98;
+    }
+
+    .sub{
+      margin:12px 0 0;
+      max-width:760px;
+      color:var(--muted);
+      font-size:1.02rem;
+      line-height:1.6;
+    }
+
+    .refresh-btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:48px;
+      padding:0 18px;
+      border-radius:999px;
+      border:1px solid rgba(215,174,114,.28);
+      background:linear-gradient(180deg,#f2d7ad,#d7ae72);
+      color:#181410;
+      font-weight:800;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+
+    .summary{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:14px;
+      margin:22px 0 24px;
+    }
+
+    .summary-card{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:18px 18px 16px;
+      box-shadow:var(--shadow);
+    }
+
+    .summary-label{
+      color:#cdbda3;
+      font-size:.8rem;
+      font-weight:800;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      margin-bottom:8px;
+    }
+
+    .summary-value{
+      font-size:clamp(1.4rem,2.2vw,2rem);
+      font-weight:800;
+      letter-spacing:-.03em;
+      line-height:1;
+    }
+
+    .status-bar{
+      margin-bottom:18px;
+      padding:14px 16px;
+      border-radius:16px;
+      background:var(--gold-soft);
+      border:1px solid var(--gold-border);
+      color:#f4ead8;
+      font-size:.98rem;
+    }
+
+    .orders{
+      display:grid;
+      gap:18px;
+    }
+
+    .empty{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:24px;
+      padding:28px;
+      color:var(--muted);
+      line-height:1.7;
+      box-shadow:var(--shadow);
+    }
+
+    .order-card{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:24px;
+      padding:22px;
+      box-shadow:var(--shadow);
+    }
+
+    .order-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:16px;
+      margin-bottom:18px;
+    }
+
+    .request-number{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      background:rgba(215,174,114,.08);
+      border:1px solid rgba(215,174,114,.18);
+      color:#ead3ab;
+      font-size:.85rem;
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+
+    .status-pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:36px;
+      padding:6px 12px;
+      border-radius:999px;
+      border:1px solid rgba(215,174,114,.2);
+      background:rgba(215,174,114,.08);
+      color:#f1ddba;
+      font-size:.82rem;
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+
+    .status-pill.status-new_request{
+      background:rgba(215,174,114,.10);
+      border-color:rgba(215,174,114,.24);
+      color:#f3dfb8;
+    }
+
+    .status-pill.status-deposit_sent{
+      background:rgba(114,157,215,.12);
+      border-color:rgba(114,157,215,.24);
+      color:#d6e6ff;
+    }
+
+    .status-pill.status-deposit_paid{
+      background:rgba(86,180,120,.14);
+      border-color:rgba(86,180,120,.26);
+      color:#d7f3df;
+    }
+
+    .status-pill.status-closed{
+      background:rgba(120,120,120,.12);
+      border-color:rgba(160,160,160,.24);
+      color:#ececec;
+    }
+
+    .customer-name{
+      margin:12px 0 0;
+      font-size:clamp(1.25rem,2.2vw,1.7rem);
+      letter-spacing:-.03em;
+      line-height:1.1;
+    }
+
+    .customer-meta{
+      margin:8px 0 0;
+      color:var(--muted);
+      line-height:1.6;
+      font-size:.98rem;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:14px;
+      margin-top:18px;
+    }
+
+    .panel{
+      background:var(--panel-2);
+      border:1px solid #2a2a2d;
+      border-radius:20px;
+      padding:16px;
+    }
+
+    .label{
+      font-size:.78rem;
+      font-weight:800;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:#cdbda3;
+      margin-bottom:10px;
+    }
+
+    .value{
+      color:var(--text);
+      line-height:1.55;
+      font-size:1rem;
+      word-break:break-word;
+    }
+
+    .value.muted{
+      color:var(--muted);
+    }
+
+    .footer-meta{
+      margin-top:18px;
+      padding-top:16px;
+      border-top:1px solid rgba(255,255,255,.06);
+      color:#a9a193;
+      font-size:.9rem;
+      line-height:1.6;
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px 18px;
+    }
+
+    .meta-chip{
+      padding:8px 10px;
+      border-radius:999px;
+      background:#121214;
+      border:1px solid #2a2a2d;
+    }
+
+    .approve-bar{
+      margin-top:16px;
+      display:flex;
+      gap:12px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .deposit-input{
+      min-height:48px;
+      min-width:180px;
+      padding:0 14px;
+      border-radius:14px;
+      border:1px solid #343438;
+      background:#121214;
+      color:#f5f2ea;
+      font:inherit;
+    }
+
+    .approve-btn{
+      min-height:48px;
+      padding:0 18px;
+      border:none;
+      border-radius:999px;
+      background:linear-gradient(180deg,#f2d7ad,#d7ae72);
+      color:#181410;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .approve-btn[disabled]{
+      opacity:.6;
+      cursor:not-allowed;
+    }
+
+    .mini-status{
+      color:#cfc7ba;
+      font-size:.94rem;
+    }
+
+    a.inline-link{
+      color:#f2d7ad;
+      text-decoration:underline;
+    }
+
+    @media (max-width:900px){
+      .summary{ grid-template-columns:1fr; }
+      .grid{ grid-template-columns:1fr; }
+      .topbar{ flex-direction:column; align-items:flex-start; }
+    }
+
+    @media (max-width:640px){
+      .wrap{ padding:24px 0 56px; }
+      .order-head{ flex-direction:column; align-items:flex-start; }
+      .refresh-btn{ width:100%; }
+      .deposit-input{ width:100%; }
+      .approve-btn{ width:100%; }
+      .approve-bar{ display:block; }
+      .approve-bar > * + *{ margin-top:10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <div class="eyebrow"><span class="dot"></span>Puff’s Catering Pipeline</div>
+        <h1>Catering Orders</h1>
+        <p class="sub">
+          Review incoming Puff’s catering requests, send deposit links, and manage confirmed catering from one place.
+        </p>
+      </div>
+      <button id="refreshBtn" class="refresh-btn" type="button">Refresh</button>
+    </div>
+
+    <section class="summary">
+      <div class="summary-card">
+        <div class="summary-label">Active Requests</div>
+        <div id="summaryTotal" class="summary-value">—</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">New Requests</div>
+        <div id="summaryNew" class="summary-value">—</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">Deposit Paid</div>
+        <div id="summaryPaid" class="summary-value">—</div>
+      </div>
+    </section>
+
+    <div id="statusBar" class="status-bar">Loading catering requests...</div>
+    <section id="orders" class="orders" aria-live="polite"></section>
+  </div>
+
+  <script>
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function formatDate(value) {
+      if (!value) return "Not provided";
+      const parts = String(value).split("-");
+      if (parts.length === 3) {
+        const date = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+        if (!Number.isNaN(date.getTime())) {
+          return date.toLocaleDateString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric"
+          });
+        }
+      }
+      return value;
+    }
+
+    function formatDateTime(value) {
+      if (!value) return "—";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return value;
+      return date.toLocaleString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+      });
+    }
+
+    function prettyStatus(status) {
+      return String(status || "unknown")
+        .replace(/_/g, " ")
+        .replace(/\b\w/g, (m) => m.toUpperCase());
+    }
+
+    function setSummary(orders) {
+      document.getElementById("summaryTotal").textContent = orders.length;
+      document.getElementById("summaryNew").textContent = orders.filter((o) => o.status === "new_request").length;
+      document.getElementById("summaryPaid").textContent = orders.filter((o) => o.status === "deposit_paid").length;
+    }
+
+    async function approveCatering(id) {
+      const input = document.querySelector(`[data-deposit-input="${id}"]`);
+      const status = document.querySelector(`[data-approve-status="${id}"]`);
+      const btn = document.querySelector(`[data-approve-btn="${id}"]`);
+
+      const depositAmount = Number(input.value);
+
+      if (!Number.isFinite(depositAmount) || depositAmount <= 0) {
+        status.textContent = "Enter a valid deposit amount.";
+        return;
+      }
+
+      btn.disabled = true;
+      status.textContent = "Creating deposit link...";
+
+      try {
+        const res = await fetch("/api/puffs/approve-catering/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ id, depositAmount })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || "Failed to approve catering request.");
+        }
+
+        status.textContent = `Deposit sent: $${data.depositAmount}`;
+        await loadOrders();
+      } catch (error) {
+        status.textContent = error.message || "Unable to send deposit.";
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function renderOrderCard(order) {
+      const canApprove = order.status === "new_request";
+      const depositAmount = order.depositAmount ? escapeHtml(order.depositAmount) : "";
+
+      return `
+        <article class="order-card">
+          <div class="order-head">
+            <div>
+              <div class="request-number">${escapeHtml(order.requestNumber || "Pending")}</div>
+              <h2 class="customer-name">${escapeHtml(order.customerName || "Unknown customer")}</h2>
+              <div class="customer-meta">
+                ${escapeHtml(order.phone || "Not provided")}<br />
+                ${escapeHtml(order.email || "Not provided")}
+              </div>
+            </div>
+            <div class="status-pill status-${escapeHtml(order.status || "unknown")}">${prettyStatus(order.status)}</div>
+          </div>
+
+          <div class="grid">
+            <div class="panel">
+              <div class="label">Event Details</div>
+              <div class="value">
+                <strong>Type:</strong> ${escapeHtml(order.eventType || "Not provided")}<br />
+                <strong>Date:</strong> ${escapeHtml(formatDate(order.eventDate))}<br />
+                <strong>Time:</strong> ${escapeHtml(order.eventTime || "Not provided")}<br />
+                <strong>Guests:</strong> ${escapeHtml(order.guestCount || "Not provided")}<br />
+                <strong>Service:</strong> ${escapeHtml(order.serviceType || "Not provided")}
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="label">Planning Details</div>
+              <div class="value">
+                <strong>Budget:</strong> ${escapeHtml(order.budget || "Not provided")}<br />
+                <strong>Serving Style:</strong> ${escapeHtml(order.servingStyle || "Not provided")}<br />
+                <strong>Event Address:</strong> ${escapeHtml(order.eventAddress || "Not provided")}
+              </div>
+            </div>
+          </div>
+
+          <div class="panel" style="margin-top:14px;">
+            <div class="label">Requested Items</div>
+            <div class="value">${escapeHtml(order.requestedItems || "Not provided").replace(/\n/g, "<br />")}</div>
+          </div>
+
+          <div class="panel" style="margin-top:14px;">
+            <div class="label">Notes</div>
+            <div class="value muted">${escapeHtml(order.notes || "No additional details.").replace(/\n/g, "<br />")}</div>
+          </div>
+
+          <div class="grid" style="margin-top:14px;">
+            <div class="panel">
+              <div class="label">Deposit</div>
+              <div class="value">
+                <strong>Amount:</strong> ${escapeHtml(order.depositAmount || "—")}<br />
+                <strong>Sent At:</strong> ${escapeHtml(formatDateTime(order.depositSentAt))}<br />
+                <strong>Paid At:</strong> ${escapeHtml(formatDateTime(order.depositPaidAt))}
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="label">Deposit Link</div>
+              <div class="value">
+                ${order.depositLink ? `<a class="inline-link" href="${escapeHtml(order.depositLink)}" target="_blank" rel="noopener noreferrer">Open deposit link</a>` : "—"}
+              </div>
+            </div>
+          </div>
+
+          <div class="approve-bar">
+            ${canApprove ? `
+              <input
+                class="deposit-input"
+                type="number"
+                min="1"
+                step="0.01"
+                placeholder="Deposit amount"
+                value="${depositAmount}"
+                data-deposit-input="${escapeHtml(order.id)}"
+              />
+              <button
+                class="approve-btn"
+                type="button"
+                data-approve-btn="${escapeHtml(order.id)}"
+                onclick="approveCatering('${escapeHtml(order.id)}')"
+              >
+                Approve + Send Deposit
+              </button>
+            ` : ""}
+            <div class="mini-status" data-approve-status="${escapeHtml(order.id)}"></div>
+          </div>
+
+          <div class="footer-meta">
+            <span class="meta-chip"><strong>Created:</strong> ${escapeHtml(formatDateTime(order.createdAt))}</span>
+            <span class="meta-chip"><strong>ID:</strong> ${escapeHtml(order.id || "—")}</span>
+            <span class="meta-chip"><strong>Source:</strong> ${escapeHtml(order.source || "—")}</span>
+          </div>
+        </article>
+      `;
+    }
+
+    async function loadOrders() {
+      const ordersEl = document.getElementById("orders");
+      const statusBar = document.getElementById("statusBar");
+
+      statusBar.textContent = "Loading catering requests...";
+      ordersEl.innerHTML = "";
+
+      try {
+        const res = await fetch("/api/puffs/catering-orders/", {
+          method: "GET",
+          cache: "no-store"
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || "Failed to load catering orders.");
+        }
+
+        const orders = Array.isArray(data.orders) ? data.orders : [];
+        setSummary(orders);
+
+        if (!orders.length) {
+          statusBar.textContent = "No active catering requests right now.";
+          ordersEl.innerHTML = `<div class="empty">No catering requests are currently active.</div>`;
+          return;
+        }
+
+        statusBar.textContent = `${orders.length} catering request${orders.length === 1 ? "" : "s"} loaded.`;
+        ordersEl.innerHTML = orders.map(renderOrderCard).join("");
+      } catch (error) {
+        setSummary([]);
+        statusBar.textContent = "Unable to load catering requests right now.";
+        ordersEl.innerHTML = `<div class="empty">There was a problem loading the catering pipeline.</div>`;
+        console.error("PUFFS CATERING ORDERS PAGE ERROR:", error);
+      }
+    }
+
+    document.getElementById("refreshBtn").addEventListener("click", loadOrders);
+    loadOrders();
+
+    window.approveCatering = approveCatering;
+  </script>
+</body>
+</html>
