@@ -6,13 +6,13 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
 
   <title>Puff’s Smokehouse — Menu & Pickup Orders</title>
-  <meta name="description" content="View the Puff’s Smokehouse Saturday and Sunday menus and get ready for online pickup ordering." />
+  <meta name="description" content="View the Puff’s Smokehouse Saturday and Sunday menus, place your pickup order, and pay online." />
   <link rel="canonical" href="https://www.squarebidness.com/puffs/" />
   <meta name="robots" content="index,follow" />
   <meta name="author" content="Denerian Collins" />
   <meta name="format-detection" content="telephone=no" />
   <meta name="theme-color" content="#0b0b0b" />
-  <meta name="sb:build" content="v20260329-puffs-root-menu" />
+  <meta name="sb:build" content="v20260329-puffs-root-menu-live" />
 
   <link rel="manifest" href="/puffs/manifest.webmanifest" />
   <link rel="icon" href="/puffs/icons/icon-192.png" type="image/png" />
@@ -25,7 +25,7 @@
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Puff’s Smokehouse" />
   <meta property="og:title" content="Puff’s Smokehouse — Saturday & Sunday Menu" />
-  <meta property="og:description" content="Browse the Saturday and Sunday menus and get ready for online pickup ordering." />
+  <meta property="og:description" content="Browse the Saturday and Sunday menus, place your pickup order, and pay online." />
   <meta property="og:url" content="https://www.squarebidness.com/puffs/" />
   <meta property="og:image" content="https://www.squarebidness.com/puffs/assets/puffs_hero_1200x630.jpg?v=20260327" />
   <meta property="og:image:width" content="1200" />
@@ -33,7 +33,7 @@
 
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Puff’s Smokehouse — Saturday & Sunday Menu" />
-  <meta name="twitter:description" content="Browse the Saturday and Sunday menus and get ready for online pickup ordering." />
+  <meta name="twitter:description" content="Browse the Saturday and Sunday menus, place your pickup order, and pay online." />
   <meta name="twitter:image" content="https://www.squarebidness.com/puffs/assets/puffs_hero_1200x630.jpg?v=20260327" />
 
   <style>
@@ -150,7 +150,7 @@
         </picture>
 
         <p class="sub">
-          Saturday and Sunday menus are separated clean. Browse the menu, build your order, and get ready for online pickup ordering.
+          Saturday and Sunday menus are separated clean. Build your order, pay online, and pick up from Puff’s.
           Catering stays on its own lane.
         </p>
 
@@ -163,7 +163,7 @@
 
   <main class="wrap" style="padding-top:18px">
     <div id="topMessage" class="banner">
-      Online ordering is being finalized now. Browse the menu and get ready. Sunday menu is limited to Pigfeet, Corn, and Potatoe. Everything else is Saturday.
+      Saturday and Sunday menus are separated by day. Sunday menu is limited to Pigfeet, Corn, and Potatoe. Everything else is Saturday.
     </div>
 
     <div class="grid">
@@ -216,7 +216,7 @@
           </div>
 
           <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
-            <button class="btn primary" id="btnCheckout" type="button">Ordering Soon</button>
+            <button class="btn primary" id="btnCheckout" type="button">Pay &amp; Place Order</button>
             <button class="btn" id="btnCopy" type="button">Copy Summary</button>
             <button class="btn" id="btnClear" type="button">Clear</button>
           </div>
@@ -273,6 +273,10 @@
       STORE_OPEN = data.open !== false;
 
       document.getElementById("closedBanner").style.display = STORE_OPEN ? "none" : "block";
+
+      const btn = document.getElementById("btnCheckout");
+      btn.disabled = !STORE_OPEN;
+      btn.classList.toggle("disabled", !STORE_OPEN);
 
       return data;
     }
@@ -380,22 +384,12 @@
         });
 
         if (saturdayItems.length) {
-          appendSectionItems(
-            saturdayWrap,
-            section.section || "",
-            section.note || "",
-            saturdayItems
-          );
+          appendSectionItems(saturdayWrap, section.section || "", section.note || "", saturdayItems);
           saturdayCount += saturdayItems.length;
         }
 
         if (sundayItems.length) {
-          appendSectionItems(
-            sundayWrap,
-            section.section || "",
-            section.note || "",
-            sundayItems
-          );
+          appendSectionItems(sundayWrap, section.section || "", section.note || "", sundayItems);
           sundayCount += sundayItems.length;
         }
       });
@@ -562,14 +556,63 @@
     document.getElementById("btnCheckout").onclick = async () => {
       clearError();
 
+      if (!STORE_OPEN) {
+        showError("Orders are currently closed.");
+        return;
+      }
+
+      const customerName = String(document.getElementById("custName").value || "").trim();
+      const customerPhone = String(document.getElementById("custPhone").value || "").trim();
+      const pickupTime = document.getElementById("pickup").value || "ASAP";
+      const notes = String(document.getElementById("custNotes").value || "").trim();
+      const smsConsent = document.getElementById("smsConsent").checked;
       const items = buildOrderItems();
+
+      if (!customerName) {
+        showError("Customer name is required.");
+        return;
+      }
 
       if (!items.length) {
         showError("Add at least one item first.");
         return;
       }
 
-      showError("Online ordering is being finalized now. Browse the menu and get ready for launch.");
+      const btn = document.getElementById("btnCheckout");
+      btn.disabled = true;
+      btn.textContent = "Starting Checkout...";
+
+      try {
+        const res = await fetch("/api/puffs/checkout/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            customerName,
+            customerPhone,
+            pickupTime,
+            notes,
+            smsConsent,
+            menuDay: getActiveMenuDay(),
+            items
+          })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.ok || !data.url) {
+          throw new Error(data.error || "Unable to start checkout.");
+        }
+
+        document.getElementById("successNote").style.display = "block";
+        window.location.href = data.url;
+      } catch (err) {
+        showError(err.message || "Unable to start checkout.");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Pay & Place Order";
+      }
     };
 
     (async function boot() {
@@ -577,11 +620,6 @@
         await loadMenuJSON();
         renderMenu();
         renderCart();
-
-        const btn = document.getElementById("btnCheckout");
-        btn.disabled = true;
-        btn.classList.add("disabled");
-        btn.textContent = "Ordering Soon";
 
         const qs = new URLSearchParams(window.location.search);
         if (qs.get("canceled") === "1") {
@@ -604,5 +642,19 @@
       });
     }
   </script>
+  <footer style="border-top:1px solid #252525;margin-top:22px">
+  <div class="wrap" style="padding:18px 16px 28px;color:#9c9c9c;font-size:.9rem;display:flex;flex-wrap:wrap;gap:10px 16px;justify-content:space-between;align-items:center">
+    <div>
+      © 2026 Puff’s Smokehouse
+    </div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:10px 14px">
+      <a href="/puffs/catering/" style="text-decoration:none;color:#f4f4f4">Catering</a>
+      <a href="/puffs/terms/" style="text-decoration:none;color:#f4f4f4">Terms</a>
+      <a href="/puffs/privacy/" style="text-decoration:none;color:#f4f4f4">Privacy</a>
+      <a href="/puffs/sms-optin/" style="text-decoration:none;color:#f4f4f4">SMS</a>
+    </div>
+  </div>
+</footer>
 </body>
 </html>
