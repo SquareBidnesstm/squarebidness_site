@@ -1,0 +1,368 @@
+<!-- FILE: /public/puffs/catering/request/index.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <title>Puff’s Smokehouse — Catering Request</title>
+  <meta name="description" content="Submit a catering request to Puff’s Smokehouse." />
+  <meta name="robots" content="index,follow" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="theme-color" content="#0b0b0b" />
+  <meta name="color-scheme" content="dark light" />
+
+  <link rel="canonical" href="https://www.squarebidness.com/puffs/catering/request/" />
+  <link rel="icon" href="/puffs/icons/icon-192.png" type="image/png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/puffs/icons/icon-180.png" />
+
+  <style>
+    :root{
+      --bg:#0b0b0b;
+      --card:#121212;
+      --card2:#181818;
+      --text:#f3f3f3;
+      --muted:#b8b8b8;
+      --line:rgba(255,255,255,.10);
+      --btn:#ffffff;
+      --btnText:#0b0b0b;
+      --btnGhost:rgba(255,255,255,.08);
+      --shadow:0 12px 40px rgba(0,0,0,.45);
+      --r:18px;
+      --max:980px;
+      --accent:#d7ae72;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:
+        radial-gradient(1200px 600px at 30% -10%, rgba(255,255,255,.08), transparent 55%),
+        radial-gradient(800px 500px at 90% 20%, rgba(255,255,255,.06), transparent 55%),
+        var(--bg);
+      color:var(--text);
+      font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    }
+    a{color:inherit}
+    .wrap{max-width:var(--max);margin:0 auto;padding:28px 18px 40px}
+
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;
+      gap:12px;margin-bottom:18px;flex-wrap:wrap;
+    }
+    .brandRow{display:flex;align-items:center;gap:12px;min-width:0}
+    .logoLink{
+      display:inline-flex;align-items:center;justify-content:center;
+      width:42px;height:42px;border-radius:14px;border:1px solid var(--line);
+      background:rgba(255,255,255,.04);overflow:hidden;text-decoration:none;
+      flex:0 0 auto;box-shadow:0 10px 24px rgba(0,0,0,.25);
+    }
+    .logoLink img{width:100%;height:100%;object-fit:cover;display:block}
+    .brand{display:flex;flex-direction:column;gap:2px;min-width:0}
+    .brand b{font-size:14px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .brand span{font-size:12px;color:var(--muted)}
+    .pill{
+      border:1px solid var(--line);
+      padding:8px 10px;border-radius:999px;font-size:12px;color:var(--muted);
+      background:rgba(255,255,255,.04);white-space:nowrap;
+    }
+
+    .hero{
+      border:1px solid var(--line);
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border-radius:calc(var(--r) + 6px);
+      padding:22px 18px;
+      box-shadow:var(--shadow);
+      margin-bottom:16px;
+    }
+    .hero h1{margin:0 0 6px;font-size:22px}
+    .hero p{margin:0;color:var(--muted)}
+    .rule{
+      margin:12px 0 0;padding:12px;border-radius:14px;
+      border:1px solid var(--line);background:rgba(255,255,255,.02);
+      color:var(--muted);font-size:13px;
+    }
+
+    .card{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+      border-radius:var(--r);
+      padding:16px;
+      box-shadow:var(--shadow);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+    }
+    .full{grid-column:1 / -1}
+
+    label{
+      display:grid;
+      gap:8px;
+      font-size:14px;
+      color:#eaeaea;
+      font-weight:600;
+    }
+    input,select,textarea{
+      width:100%;
+      background:#0f0f0f;
+      border:1px solid #2b2b2b;
+      color:#fff;
+      border-radius:12px;
+      padding:12px 13px;
+      font:inherit;
+    }
+    textarea{resize:vertical;min-height:120px}
+
+    .btnrow{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:12px 14px;border-radius:14px;border:1px solid transparent;
+      text-decoration:none;font-weight:700;letter-spacing:.01em;
+      transition:transform .06s ease, opacity .15s ease, background .15s ease;
+      user-select:none;cursor:pointer;
+    }
+    .btn:active{transform:translateY(1px)}
+    .btn.primary{background:var(--btn);color:var(--btnText)}
+    .btn.ghost{background:var(--btnGhost);color:var(--text);border-color:var(--line)}
+
+    .help{margin-top:10px;font-size:12px;color:var(--muted)}
+    .error{
+      display:none;margin-top:12px;padding:12px;border-radius:12px;
+      border:1px solid rgba(255,120,120,.22);background:rgba(120,0,0,.14);color:#ffd7d7;
+    }
+    .success{
+      display:none;margin-top:12px;padding:14px;border-radius:12px;
+      border:1px solid rgba(86,180,120,.26);background:rgba(86,180,120,.12);color:#d7f3df;
+    }
+
+    footer{
+      margin-top:18px;padding-top:14px;border-top:1px solid var(--line);
+      display:flex;flex-direction:column;gap:8px;color:var(--muted);font-size:12px;
+    }
+
+    @media (max-width:760px){
+      .grid{grid-template-columns:1fr}
+    }
+  </style>
+
+  <script defer src="/scripts/sb-analytics.js"></script>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brandRow">
+        <a class="logoLink" href="/puffs/" aria-label="Back to Puff’s Smokehouse">
+          <img src="/puffs/icons/icon-192.png" alt="Puff’s Smokehouse" loading="eager" decoding="async" />
+        </a>
+        <div class="brand">
+          <b>Puff’s Smokehouse</b>
+          <span>Catering Request</span>
+        </div>
+      </div>
+
+      <div class="pill">Request first • Deposit after approval</div>
+    </div>
+
+    <section class="hero">
+      <h1>Puff’s Smokehouse — Catering Request</h1>
+      <p>
+        Submit your catering details here. Puff’s will review the request, confirm the quote,
+        and send a secure deposit link to lock in your date.
+      </p>
+
+      <div class="rule">
+        <b>How it works:</b> Request first. Review second. Deposit link after approval.
+      </div>
+    </section>
+
+    <section class="card">
+      <form id="requestForm" novalidate>
+        <div class="grid">
+          <label>
+            Name
+            <input id="customerName" name="customerName" autocomplete="name" required />
+          </label>
+
+          <label>
+            Phone
+            <input id="phone" name="phone" inputmode="tel" autocomplete="tel" />
+          </label>
+
+          <label>
+            Email
+            <input id="email" name="email" type="email" autocomplete="email" />
+          </label>
+
+          <label>
+            Event Type
+            <input id="eventType" name="eventType" placeholder="Birthday, wedding, reunion, office lunch..." />
+          </label>
+
+          <label>
+            Event Date
+            <input id="eventDate" name="eventDate" type="date" required />
+          </label>
+
+          <label>
+            Event Time
+            <input id="eventTime" name="eventTime" placeholder="2:00 PM" />
+          </label>
+
+          <label>
+            Guest Count
+            <input id="guestCount" name="guestCount" inputmode="numeric" placeholder="50" required />
+          </label>
+
+          <label>
+            Service Type
+            <select id="serviceType" name="serviceType">
+              <option value="">Select one</option>
+              <option>Pickup</option>
+              <option>Delivery</option>
+              <option>Setup</option>
+              <option>Full Service</option>
+            </select>
+          </label>
+
+          <label>
+            Budget
+            <select id="budget" name="budget">
+              <option value="">Select one</option>
+              <option>$250-$500</option>
+              <option>$500-$1,000</option>
+              <option>$1,000-$2,500</option>
+              <option>$2,500+</option>
+            </select>
+          </label>
+
+          <label>
+            Serving Style
+            <select id="servingStyle" name="servingStyle">
+              <option value="">Select one</option>
+              <option>Trays</option>
+              <option>Plates</option>
+              <option>Buffet</option>
+              <option>Family Style</option>
+            </select>
+          </label>
+
+          <label class="full">
+            Event Address
+            <input id="eventAddress" name="eventAddress" placeholder="City, venue, or event address" />
+          </label>
+
+          <label class="full">
+            Requested Items
+            <textarea id="requestedItems" name="requestedItems" placeholder="Tell Puff’s what food you want..." required></textarea>
+          </label>
+
+          <label class="full">
+            Notes
+            <textarea id="notes" name="notes" placeholder="Any other details, setup timing, special requests, etc."></textarea>
+          </label>
+        </div>
+
+        <div class="btnrow">
+          <button class="btn primary" id="submitBtn" type="submit">Submit Catering Request</button>
+          <a class="btn ghost" href="/puffs/catering/">Back to Catering</a>
+        </div>
+
+        <div class="help">
+          Puff’s will review your request and send a deposit link after approval.
+        </div>
+
+        <div id="errorBox" class="error"></div>
+        <div id="successBox" class="success"></div>
+      </form>
+    </section>
+
+    <footer>
+      <div>For daily food orders, use the main Puff’s menu lane.</div>
+      <div>Quietly powered by Square Bidness infrastructure.</div>
+    </footer>
+  </div>
+
+  <script>
+    const form = document.getElementById("requestForm");
+    const submitBtn = document.getElementById("submitBtn");
+    const errorBox = document.getElementById("errorBox");
+    const successBox = document.getElementById("successBox");
+
+    function showError(message) {
+      errorBox.style.display = "block";
+      errorBox.textContent = message || "Something went wrong.";
+      successBox.style.display = "none";
+      successBox.textContent = "";
+    }
+
+    function showSuccess(message) {
+      successBox.style.display = "block";
+      successBox.innerHTML = message || "Request submitted.";
+      errorBox.style.display = "none";
+      errorBox.textContent = "";
+    }
+
+    function clearMessages() {
+      errorBox.style.display = "none";
+      errorBox.textContent = "";
+      successBox.style.display = "none";
+      successBox.textContent = "";
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      clearMessages();
+
+      const payload = {
+        customerName: document.getElementById("customerName").value,
+        phone: document.getElementById("phone").value,
+        email: document.getElementById("email").value,
+        eventType: document.getElementById("eventType").value,
+        eventDate: document.getElementById("eventDate").value,
+        eventTime: document.getElementById("eventTime").value,
+        guestCount: document.getElementById("guestCount").value,
+        serviceType: document.getElementById("serviceType").value,
+        budget: document.getElementById("budget").value,
+        servingStyle: document.getElementById("servingStyle").value,
+        eventAddress: document.getElementById("eventAddress").value,
+        requestedItems: document.getElementById("requestedItems").value,
+        notes: document.getElementById("notes").value,
+        source: "puffs_catering_request_form"
+      };
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting...";
+
+      try {
+        const res = await fetch("/api/puffs/catering-request/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || "Unable to submit catering request.");
+        }
+
+        form.reset();
+
+        showSuccess(
+          `Request received.<br><br><strong>Request Number:</strong> ${data.requestNumber}<br><br>Puff’s will review it and send a deposit link after approval.`
+        );
+      } catch (error) {
+        showError(error.message || "Unable to submit catering request.");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit Catering Request";
+      }
+    });
+  </script>
+</body>
+</html>
