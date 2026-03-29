@@ -1,106 +1,199 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<title>Puff's Table Tent</title>
-<style>
-  body {
-    margin: 0;
-    background: #fff;
-  }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Puff's Table Tent</title>
+  <style>
+    @page {
+      size: 10.25in 7.25in;
+      margin: 0;
+    }
 
-  .sheet {
-    width: 10.25in;
-    height: 7.25in;
-    position: relative;
-    font-family: Arial, sans-serif;
-  }
+    * {
+      box-sizing: border-box;
+    }
 
-  .panel {
-    width: 5in;
-    height: 7in;
-    position: absolute;
-    top: 0.125in;
-    background: #2B1B12;
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 0.5in;
-    box-sizing: border-box;
-  }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #ffffff;
+      font-family: Arial, sans-serif;
+    }
 
-  .left {
-    left: 0.125in;
-  }
+    body {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
 
-  .right {
-    right: 0.125in;
-  }
+    .sheet {
+      position: relative;
+      width: 10.25in;
+      height: 7.25in;
+      overflow: hidden;
+      background: #2B1B12;
+    }
 
-  .logo {
-    font-size: 28px;
-    font-weight: bold;
-    margin-bottom: 20px;
-    color: #D4AF37;
-    text-align: center;
-  }
+    .panel {
+      position: absolute;
+      top: 0.125in;
+      width: 5in;
+      height: 7in;
+      color: #fff;
+      padding: 0.38in 0.38in 0.34in;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      text-align: center;
+      background:
+        radial-gradient(circle at 50% 28%, rgba(212,175,55,0.18) 0%, rgba(212,175,55,0.06) 18%, rgba(43,27,18,0) 40%),
+        radial-gradient(circle at 20% 30%, rgba(74,46,31,0.45) 0%, rgba(43,27,18,0) 42%),
+        radial-gradient(circle at 80% 38%, rgba(74,46,31,0.42) 0%, rgba(43,27,18,0) 42%),
+        radial-gradient(circle at 50% 80%, rgba(0,0,0,0.24) 0%, rgba(43,27,18,0) 55%),
+        linear-gradient(180deg, #3a2418 0%, #2B1B12 55%, #24150e 100%);
+    }
 
-  .cta {
-    font-size: 20px;
-    letter-spacing: 2px;
-    margin-bottom: 10px;
-  }
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 0.22in;
+      border: 1.5px solid rgba(212,175,55,0.65);
+      border-radius: 0.16in;
+      pointer-events: none;
+    }
 
-  .sub {
-    font-size: 14px;
-    opacity: 0.8;
-    margin-bottom: 20px;
-  }
+    .panel::after {
+      content: "";
+      position: absolute;
+      inset: 0.32in;
+      border: 1px solid rgba(212,175,55,0.22);
+      border-radius: 0.14in;
+      pointer-events: none;
+    }
 
-  .qr {
-    width: 180px;
-    height: 180px;
-    background: #fff;
-    padding: 10px;
-  }
+    .left {
+      left: 0.125in;
+    }
 
-  .tag {
-    margin-top: 15px;
-    font-size: 12px;
-    letter-spacing: 2px;
-  }
+    .right {
+      right: 0.125in;
+    }
 
-</style>
+    .brand-logo {
+      width: 3.05in;
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto 0.1in;
+      filter: drop-shadow(0 8px 18px rgba(0,0,0,0.28));
+    }
+
+    .cta {
+      margin-top: 0.02in;
+      font-size: 0.26in;
+      line-height: 1.1;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: #F3EEE7;
+      text-transform: uppercase;
+    }
+
+    .sub {
+      margin-top: 0.08in;
+      margin-bottom: 0.22in;
+      font-size: 0.14in;
+      line-height: 1.35;
+      color: rgba(255,255,255,0.82);
+      letter-spacing: 0.02em;
+    }
+
+    .qr-wrap {
+      background: rgba(212,175,55,0.16);
+      padding: 0.11in;
+      border-radius: 0.1in;
+      margin-top: auto;
+    }
+
+    .qr {
+      width: 2in;
+      height: 2in;
+      display: block;
+      background: #fff;
+      padding: 0.1in;
+    }
+
+    .tag {
+      margin-top: 0.16in;
+      font-size: 0.115in;
+      line-height: 1.2;
+      letter-spacing: 0.16em;
+      font-weight: 700;
+      color: #D4AF37;
+      text-transform: uppercase;
+    }
+
+    .smoked {
+      margin-top: 0.09in;
+      font-size: 0.1in;
+      letter-spacing: 0.12em;
+      color: rgba(255,255,255,0.74);
+      text-transform: uppercase;
+    }
+
+    .fold-guide {
+      position: absolute;
+      top: 0.325in;
+      bottom: 0.325in;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 1px dashed rgba(255,255,255,0.18);
+      pointer-events: none;
+    }
+
+    @media print {
+      html, body {
+        width: 10.25in;
+        height: 7.25in;
+      }
+    }
+  </style>
 </head>
 <body>
 
-<div class="sheet">
+  <div class="sheet">
 
-  <!-- LEFT PANEL (FRONT) -->
-  <div class="panel left">
-    <div class="logo">PUFF’S SMOKEHOUSE</div>
-    <div class="cta">ORDER ONLINE</div>
-    <div class="sub">Ponchatoula, Louisiana</div>
+    <div class="fold-guide" aria-hidden="true"></div>
 
-    <img class="qr" src="puffs_qr.png" />
+    <!-- LEFT PANEL -->
+    <section class="panel left" aria-label="Order online panel">
+      <img class="brand-logo" src="/puffs/assets/icon-512.png" alt="Puff's Smoke House logo" />
+      <div class="cta">ORDER ONLINE</div>
+      <div class="sub">Ponchatoula, LA</div>
 
-    <div class="tag">SCAN TO ORDER</div>
+      <div class="qr-wrap">
+        <img class="qr" src="/puffs/print/assets/puffs_qr.png" alt="QR code to order online from Puff's Smoke House" />
+      </div>
+
+      <div class="tag">SCAN TO ORDER</div>
+      <div class="smoked">Smoked Daily</div>
+    </section>
+
+    <!-- RIGHT PANEL -->
+    <section class="panel right" aria-label="Catering panel">
+      <img class="brand-logo" src="/puffs/assets/icon-512.png" alt="Puff's Smoke House logo" />
+      <div class="cta">CATERING</div>
+      <div class="sub">Events • Parties • Bulk Orders</div>
+
+      <div class="qr-wrap">
+        <img class="qr" src="/puffs/print/assets/puffs_catering_qr.png" alt="QR code for Puff's Smoke House catering" />
+      </div>
+
+      <div class="tag">SCAN FOR CATERING</div>
+      <div class="smoked">Smoked Daily</div>
+    </section>
+
   </div>
-
-  <!-- RIGHT PANEL (BACK / CATERING SIDE) -->
-  <div class="panel right">
-    <div class="logo">PUFF’S SMOKEHOUSE</div>
-    <div class="cta">CATERING AVAILABLE</div>
-    <div class="sub">Events • Parties • Bulk Orders</div>
-
-    <img class="qr" src="puffs_catering_qr.png" />
-
-    <div class="tag">SCAN FOR CATERING</div>
-  </div>
-
-</div>
 
 </body>
 </html>
