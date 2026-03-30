@@ -357,6 +357,31 @@
       .approve-bar{ display:block; }
       .approve-bar > * + *{ margin-top:10px; }
     }
+
+    .ops-links{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:18px;
+}
+.ops-link{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:44px;
+  padding:0 14px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:var(--panel);
+  color:var(--text);
+  text-decoration:none;
+  font-weight:800;
+}
+.ops-link.active{
+  background:var(--gold-soft);
+  border-color:var(--gold-border);
+  color:var(--gold-2);
+}
   </style>
 </head>
 <body>
@@ -371,6 +396,11 @@
       </div>
       <button id="refreshBtn" class="refresh-btn" type="button">Refresh</button>
     </div>
+
+    <section class="ops-links" aria-label="Operations navigation">
+  <a class="ops-link" href="/puffs/orders/">Pickup Orders</a>
+  <a class="ops-link active" id="cateringOrdersLink" href="/puffs/catering/orders/">Catering Orders</a>
+</section>
 
     <section class="summary">
       <div class="summary-card">
@@ -436,11 +466,20 @@
         .replace(/\b\w/g, (m) => m.toUpperCase());
     }
 
-    function setSummary(orders) {
-      document.getElementById("summaryTotal").textContent = orders.length;
-      document.getElementById("summaryNew").textContent = orders.filter((o) => o.status === "new_request").length;
-      document.getElementById("summaryPaid").textContent = orders.filter((o) => o.status === "deposit_paid").length;
-    }
+   function setSummary(orders) {
+  const newCount = orders.filter((o) => o.status === "new_request").length;
+
+  document.getElementById("summaryTotal").textContent = orders.length;
+  document.getElementById("summaryNew").textContent = newCount;
+  document.getElementById("summaryPaid").textContent = orders.filter((o) => o.status === "deposit_paid").length;
+
+  const cateringLink = document.getElementById("cateringOrdersLink");
+  if (cateringLink) {
+    cateringLink.textContent = newCount > 0
+      ? `Catering Orders (${newCount} New)`
+      : "Catering Orders";
+  }
+}
 
     async function approveCatering(id) {
       const input = document.querySelector(`[data-deposit-input="${id}"]`);
