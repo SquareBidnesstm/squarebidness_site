@@ -228,459 +228,453 @@
     </div>
   </main>
 
-  <script>
-    const BUILD = document.querySelector('meta[name="sb:build"]')?.content || "v1";
+ <script>
+  const BUILD = document.querySelector('meta[name="sb:build"]')?.content || "v1";
 
-    let MENU = [];
-    let TAX_RATE = 0.0895;
-    let STORE_OPEN = true;
+  let MENU = [];
+  let TAX_RATE = 0.0895;
+  let STORE_OPEN = true;
 
-    const cart = new Map();
+  const cart = new Map();
 
-    function money(n) {
-      return `$${Number(n || 0).toFixed(2)}`;
+  function money(n) {
+    return `$${Number(n || 0).toFixed(2)}`;
+  }
+
+  function getItemDay(item) {
+    const day = String(item?.day || "").toLowerCase().trim();
+    return day === "sunday" ? "sunday" : "saturday";
+  }
+
+  function getActiveMenuDay() {
+    const today = new Date().toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
+    return today === "sunday" ? "sunday" : "saturday";
+  }
+
+  function getMenuDisplayMode() {
+    const today = new Date().toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
+
+    if (today === "saturday") return "saturday_only";
+    if (today === "sunday") return "sunday_only";
+    return "both";
+  }
+
+  function showError(msg) {
+    const box = document.getElementById("errorBox");
+    box.style.display = "";
+    box.textContent = msg || "Something went wrong.";
+  }
+
+  function clearError() {
+    const box = document.getElementById("errorBox");
+    box.style.display = "none";
+    box.textContent = "";
+  }
+
+  async function loadMenuJSON() {
+    const res = await fetch(`/puffs/menu.json?v=${encodeURIComponent(BUILD)}`);
+    if (!res.ok) throw new Error("menu.json not found");
+
+    const data = await res.json();
+    MENU = Array.isArray(data.sections) ? data.sections : [];
+    TAX_RATE = Number.isFinite(Number(data.taxRate)) ? Number(data.taxRate) : 0.0895;
+    STORE_OPEN = data.open !== false;
+
+    document.getElementById("closedBanner").style.display = STORE_OPEN ? "none" : "block";
+
+    const btn = document.getElementById("btnCheckout");
+    btn.disabled = !STORE_OPEN;
+    btn.classList.toggle("disabled", !STORE_OPEN);
+
+    return data;
+  }
+
+  function createRow(item) {
+    const row = document.createElement("div");
+    row.className = "row";
+
+    const left = document.createElement("div");
+    left.innerHTML =
+      `<strong>${item.name || ""}</strong>` +
+      (item.subnote ? `<div class="tiny muted">${item.subnote}</div>` : "") +
+      (item.badge ? `<div class="tiny" style="margin-top:3px;color:#ffd28a">${item.badge}</div>` : "");
+
+    const price = document.createElement("div");
+    price.className = "price";
+    price.textContent = money(item.price || 0);
+
+    const qty = document.createElement("div");
+    qty.className = "qty";
+
+    const minus = document.createElement("button");
+    minus.type = "button";
+    minus.textContent = "–";
+    minus.onclick = () => updateQty(item.id, -1);
+
+    const val = document.createElement("span");
+    val.textContent = String(cart.get(item.id) || 0);
+    val.dataset.bindQty = item.id;
+    val.style.minWidth = "18px";
+    val.style.textAlign = "center";
+
+    const plus = document.createElement("button");
+    plus.type = "button";
+    plus.textContent = "+";
+    plus.onclick = () => updateQty(item.id, 1);
+
+    qty.append(minus, val, plus);
+    row.append(left, price, qty);
+
+    return row;
+  }
+
+  function appendSectionItems(container, title, note, items) {
+    const block = document.createElement("section");
+    block.className = "sectionBlock";
+
+    const h = document.createElement("h4");
+    h.className = "sectionTitle";
+    h.textContent = title || "";
+
+    block.appendChild(h);
+
+    if (note) {
+      const noteEl = document.createElement("div");
+      noteEl.className = "note";
+      noteEl.textContent = note;
+      block.appendChild(noteEl);
     }
 
-    function getItemDay(item) {
-      const day = String(item?.day || "").toLowerCase().trim();
-      return day === "sunday" ? "sunday" : "saturday";
-    }
-
-    function getActiveMenuDay() {
-      const today = new Date().toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
-      return today === "sunday" ? "sunday" : "saturday";
-    }
-   
-    function getMenuDisplayMode() {
-  const today = new Date().toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
-
-  if (today === "saturday") return "saturday_only";
-  if (today === "sunday") return "sunday_only";
-  return "both";
-}
-
-    function showError(msg) {
-      const box = document.getElementById("errorBox");
-      box.style.display = "";
-      box.textContent = msg || "Something went wrong.";
-    }
-
-    function clearError() {
-      const box = document.getElementById("errorBox");
-      box.style.display = "none";
-      box.textContent = "";
-    }
-
-    async function loadMenuJSON() {
-      const res = await fetch(`/puffs/menu.json?v=${encodeURIComponent(BUILD)}`);
-      if (!res.ok) throw new Error("menu.json not found");
-
-      const data = await res.json();
-      MENU = Array.isArray(data.sections) ? data.sections : [];
-      TAX_RATE = Number.isFinite(Number(data.taxRate)) ? Number(data.taxRate) : 0.0895;
-      STORE_OPEN = data.open !== false;
-
-      document.getElementById("closedBanner").style.display = STORE_OPEN ? "none" : "block";
-
-      const btn = document.getElementById("btnCheckout");
-      btn.disabled = !STORE_OPEN;
-      btn.classList.toggle("disabled", !STORE_OPEN);
-
-      return data;
-    }
-
-    function createRow(item) {
-      const row = document.createElement("div");
-      row.className = "row";
-
-      const left = document.createElement("div");
-      left.innerHTML =
-        `<strong>${item.name || ""}</strong>` +
-        (item.subnote ? `<div class="tiny muted">${item.subnote}</div>` : "") +
-        (item.badge ? `<div class="tiny" style="margin-top:3px;color:#ffd28a">${item.badge}</div>` : "");
-
-      const price = document.createElement("div");
-      price.className = "price";
-      price.textContent = money(item.price || 0);
-
-      const qty = document.createElement("div");
-      qty.className = "qty";
-
-      const minus = document.createElement("button");
-      minus.type = "button";
-      minus.textContent = "–";
-      minus.onclick = () => updateQty(item.id, -1);
-
-      const val = document.createElement("span");
-      val.textContent = String(cart.get(item.id) || 0);
-      val.dataset.bindQty = item.id;
-      val.style.minWidth = "18px";
-      val.style.textAlign = "center";
-
-      const plus = document.createElement("button");
-      plus.type = "button";
-      plus.textContent = "+";
-      plus.onclick = () => updateQty(item.id, 1);
-
-      qty.append(minus, val, plus);
-      row.append(left, price, qty);
-
-      return row;
-    }
-
-    function appendSectionItems(container, title, note, items) {
-      const block = document.createElement("section");
-      block.className = "sectionBlock";
-
-      const h = document.createElement("h4");
-      h.className = "sectionTitle";
-      h.textContent = title || "";
-
-      block.appendChild(h);
-
-      if (note) {
-        const noteEl = document.createElement("div");
-        noteEl.className = "note";
-        noteEl.textContent = note;
-        block.appendChild(noteEl);
-      }
-
-      items.forEach((item) => {
-        block.appendChild(createRow(item));
-      });
-
-      container.appendChild(block);
-    }
-
-    function createDaySection(title, tagText) {
-      const section = document.createElement("section");
-      section.className = "daySection";
-
-      const head = document.createElement("div");
-      head.className = "dayHead";
-
-      const h = document.createElement("h3");
-      h.textContent = title;
-
-      const tag = document.createElement("span");
-      tag.className = "dayTag";
-      tag.textContent = tagText;
-
-      head.append(h, tag);
-      section.appendChild(head);
-
-      return section;
-    }
-
-    function renderMenu() {
-  const root = document.getElementById("menuContent");
-  root.innerHTML = "";
-
-  const saturdayWrap = createDaySection("Saturday Menu", "Main Saturday Lane");
-  const sundayWrap = createDaySection("Sunday Menu", "Sunday Only");
-
-  let saturdayCount = 0;
-  let sundayCount = 0;
-
-  MENU.forEach((section) => {
-    const saturdayItems = [];
-    const sundayItems = [];
-
-    (section.items || []).forEach((item) => {
-      if (getItemDay(item) === "sunday") sundayItems.push(item);
-      else saturdayItems.push(item);
+    items.forEach((item) => {
+      block.appendChild(createRow(item));
     });
 
-    if (saturdayItems.length) {
-      appendSectionItems(
-        saturdayWrap,
-        section.section || "",
-        section.note || "",
-        saturdayItems
-      );
-      saturdayCount += saturdayItems.length;
-    }
-
-    if (sundayItems.length) {
-      appendSectionItems(
-        sundayWrap,
-        section.section || "",
-        section.note || "",
-        sundayItems
-      );
-      sundayCount += sundayItems.length;
-    }
-  });
-
-  if (!saturdayCount) {
-    const empty = document.createElement("div");
-    empty.className = "emptyDay";
-    empty.textContent = "No Saturday items are loaded yet.";
-    saturdayWrap.appendChild(empty);
+    container.appendChild(block);
   }
 
-  if (!sundayCount) {
-    const empty = document.createElement("div");
-    empty.className = "emptyDay";
-    empty.textContent = "No Sunday items are loaded yet.";
-    sundayWrap.appendChild(empty);
+  function createDaySection(title, tagText) {
+    const section = document.createElement("section");
+    section.className = "daySection";
+
+    const head = document.createElement("div");
+    head.className = "dayHead";
+
+    const h = document.createElement("h3");
+    h.textContent = title;
+
+    const tag = document.createElement("span");
+    tag.className = "dayTag";
+    tag.textContent = tagText;
+
+    head.append(h, tag);
+    section.appendChild(head);
+
+    return section;
   }
 
-  const mode = getMenuDisplayMode();
+  function renderMenu() {
+    const root = document.getElementById("menuContent");
+    root.innerHTML = "";
 
-  if (mode === "saturday_only") {
-    root.appendChild(saturdayWrap);
-    return;
-  }
+    const saturdayWrap = createDaySection("Saturday Menu", "Main Saturday Lane");
+    const sundayWrap = createDaySection("Sunday Menu", "Sunday Only");
 
-  if (mode === "sunday_only") {
-    root.appendChild(sundayWrap);
-    return;
-  }
+    let saturdayCount = 0;
+    let sundayCount = 0;
 
-  root.appendChild(saturdayWrap);
-  root.appendChild(sundayWrap);
-}
+    MENU.forEach((section) => {
+      const saturdayItems = [];
+      const sundayItems = [];
+
+      (section.items || []).forEach((item) => {
+        if (getItemDay(item) === "sunday") sundayItems.push(item);
+        else saturdayItems.push(item);
       });
 
-      if (!saturdayCount) {
-        const empty = document.createElement("div");
-        empty.className = "emptyDay";
-        empty.textContent = "No Saturday items are loaded yet.";
-        saturdayWrap.appendChild(empty);
+      if (saturdayItems.length) {
+        appendSectionItems(
+          saturdayWrap,
+          section.section || "",
+          section.note || "",
+          saturdayItems
+        );
+        saturdayCount += saturdayItems.length;
       }
 
-      if (!sundayCount) {
-        const empty = document.createElement("div");
-        empty.className = "emptyDay";
-        empty.textContent = "No Sunday items are loaded yet.";
-        sundayWrap.appendChild(empty);
+      if (sundayItems.length) {
+        appendSectionItems(
+          sundayWrap,
+          section.section || "",
+          section.note || "",
+          sundayItems
+        );
+        sundayCount += sundayItems.length;
       }
+    });
 
+    if (!saturdayCount) {
+      const empty = document.createElement("div");
+      empty.className = "emptyDay";
+      empty.textContent = "No Saturday items are loaded yet.";
+      saturdayWrap.appendChild(empty);
+    }
+
+    if (!sundayCount) {
+      const empty = document.createElement("div");
+      empty.className = "emptyDay";
+      empty.textContent = "No Sunday items are loaded yet.";
+      sundayWrap.appendChild(empty);
+    }
+
+    const mode = getMenuDisplayMode();
+
+    if (mode === "saturday_only") {
       root.appendChild(saturdayWrap);
+      return;
+    }
+
+    if (mode === "sunday_only") {
       root.appendChild(sundayWrap);
+      return;
     }
 
-    function flattenItems() {
-      const out = [];
-      for (const sec of MENU) {
-        for (const item of (sec.items || [])) {
-          out.push(item);
-        }
+    root.appendChild(saturdayWrap);
+    root.appendChild(sundayWrap);
+  }
+
+  function flattenItems() {
+    const out = [];
+    for (const sec of MENU) {
+      for (const item of (sec.items || [])) {
+        out.push(item);
       }
-      return out;
+    }
+    return out;
+  }
+
+  function updateQty(id, delta) {
+    if (!STORE_OPEN) return;
+
+    const next = Math.max(0, (cart.get(id) || 0) + delta);
+    if (next === 0) cart.delete(id);
+    else cart.set(id, next);
+
+    const els = document.querySelectorAll(`[data-bind-qty="${CSS.escape(id)}"]`);
+    els.forEach((el) => {
+      el.textContent = String(next);
+    });
+
+    renderCart();
+  }
+
+  function totals() {
+    const catalog = flattenItems();
+    let subtotal = 0;
+
+    for (const item of catalog) {
+      const qty = cart.get(item.id) || 0;
+      if (!qty) continue;
+      subtotal += qty * Number(item.price || 0);
     }
 
-    function updateQty(id, delta) {
-      if (!STORE_OPEN) return;
+    const tax = Number((subtotal * TAX_RATE).toFixed(2));
+    const total = Number((subtotal + tax).toFixed(2));
 
-      const next = Math.max(0, (cart.get(id) || 0) + delta);
-      if (next === 0) cart.delete(id);
-      else cart.set(id, next);
+    return { subtotal, tax, total };
+  }
 
-      const els = document.querySelectorAll(`[data-bind-qty="${CSS.escape(id)}"]`);
-      els.forEach((el) => {
-        el.textContent = String(next);
+  function renderCart() {
+    const lines = document.getElementById("cartLines");
+    lines.innerHTML = "";
+
+    const catalog = flattenItems();
+    let hasItems = false;
+
+    for (const item of catalog) {
+      const qty = cart.get(item.id) || 0;
+      if (!qty) continue;
+      hasItems = true;
+
+      const row = document.createElement("div");
+      row.style.display = "flex";
+      row.style.justifyContent = "space-between";
+      row.style.gap = "10px";
+      row.innerHTML = `<span>${qty} × ${item.name}</span><strong>${money(qty * Number(item.price || 0))}</strong>`;
+      lines.appendChild(row);
+    }
+
+    if (!hasItems) {
+      lines.textContent = "No items yet.";
+    }
+
+    const t = totals();
+    document.getElementById("sub").textContent = money(t.subtotal);
+    document.getElementById("tax").textContent = money(t.tax);
+    document.getElementById("tot").textContent = money(t.total);
+  }
+
+  function buildOrderItems() {
+    const items = [];
+    for (const sec of MENU) {
+      for (const item of (sec.items || [])) {
+        const qty = cart.get(item.id) || 0;
+        if (!qty) continue;
+        items.push({ id: item.id, qty });
+      }
+    }
+    return items;
+  }
+
+  function buildSummary() {
+    const when = document.getElementById("pickup").value;
+    const name = document.getElementById("custName").value || "—";
+    const phone = document.getElementById("custPhone").value || "—";
+    const notes = document.getElementById("custNotes").value || "—";
+
+    const catalog = flattenItems();
+    const lines = [
+      "Puff’s Smokehouse — Pickup Order",
+      `Pickup: ${when}`,
+      `Name: ${name}`,
+      `Phone: ${phone}`,
+      `Menu Day: ${getActiveMenuDay()}`,
+      "",
+      "Items:"
+    ];
+
+    for (const item of catalog) {
+      const qty = cart.get(item.id) || 0;
+      if (!qty) continue;
+      lines.push(`• ${qty} × ${item.name}  ${money(qty * Number(item.price || 0))}`);
+    }
+
+    const t = totals();
+
+    lines.push(
+      "",
+      `Subtotal: ${money(t.subtotal)}`,
+      `Tax: ${money(t.tax)}`,
+      `Total: ${money(t.total)}`,
+      "",
+      `Notes: ${notes}`,
+      "",
+      "Pickup order lane: squarebidness.com/puffs/"
+    );
+
+    return lines.join("\n");
+  }
+
+  document.getElementById("btnClear").onclick = () => {
+    cart.clear();
+    document.querySelectorAll("[data-bind-qty]").forEach((el) => {
+      el.textContent = "0";
+    });
+    renderCart();
+    clearError();
+  };
+
+  document.getElementById("btnCopy").onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(buildSummary());
+      clearError();
+      alert("Order summary copied.");
+    } catch {
+      showError("Unable to copy summary.");
+    }
+  };
+
+  document.getElementById("btnCheckout").onclick = async () => {
+    clearError();
+
+    if (!STORE_OPEN) {
+      showError("Orders are currently closed.");
+      return;
+    }
+
+    const customerName = String(document.getElementById("custName").value || "").trim();
+    const customerPhone = String(document.getElementById("custPhone").value || "").trim();
+    const pickupTime = document.getElementById("pickup").value || "ASAP";
+    const notes = String(document.getElementById("custNotes").value || "").trim();
+    const smsConsent = document.getElementById("smsConsent").checked;
+    const items = buildOrderItems();
+
+    if (!customerName) {
+      showError("Customer name is required.");
+      return;
+    }
+
+    if (!items.length) {
+      showError("Add at least one item first.");
+      return;
+    }
+
+    const btn = document.getElementById("btnCheckout");
+    btn.disabled = true;
+    btn.textContent = "Starting Checkout...";
+
+    try {
+      const res = await fetch("/api/puffs/checkout/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          customerName,
+          customerPhone,
+          pickupTime,
+          notes,
+          smsConsent,
+          menuDay: getActiveMenuDay(),
+          items
+        })
       });
 
+      const data = await res.json();
+
+      if (!res.ok || !data.ok || !data.url) {
+        throw new Error(data.error || "Unable to start checkout.");
+      }
+
+      document.getElementById("successNote").style.display = "block";
+      window.location.href = data.url;
+    } catch (err) {
+      showError(err.message || "Unable to start checkout.");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Pay & Place Order";
+    }
+  };
+
+  (async function boot() {
+    try {
+      await loadMenuJSON();
+      renderMenu();
       renderCart();
-    }
 
-    function totals() {
-      const catalog = flattenItems();
-      let subtotal = 0;
+      const topMessage = document.getElementById("topMessage");
+      const mode = getMenuDisplayMode();
 
-      for (const item of catalog) {
-        const qty = cart.get(item.id) || 0;
-        if (!qty) continue;
-        subtotal += qty * Number(item.price || 0);
-      }
-
-      const tax = Number((subtotal * TAX_RATE).toFixed(2));
-      const total = Number((subtotal + tax).toFixed(2));
-
-      return { subtotal, tax, total };
-    }
-
-    function renderCart() {
-      const lines = document.getElementById("cartLines");
-      lines.innerHTML = "";
-
-      const catalog = flattenItems();
-      let hasItems = false;
-
-      for (const item of catalog) {
-        const qty = cart.get(item.id) || 0;
-        if (!qty) continue;
-        hasItems = true;
-
-        const row = document.createElement("div");
-        row.style.display = "flex";
-        row.style.justifyContent = "space-between";
-        row.style.gap = "10px";
-        row.innerHTML = `<span>${qty} × ${item.name}</span><strong>${money(qty * Number(item.price || 0))}</strong>`;
-        lines.appendChild(row);
-      }
-
-      if (!hasItems) {
-        lines.textContent = "No items yet.";
-      }
-
-      const t = totals();
-      document.getElementById("sub").textContent = money(t.subtotal);
-      document.getElementById("tax").textContent = money(t.tax);
-      document.getElementById("tot").textContent = money(t.total);
-    }
-
-    function buildOrderItems() {
-      const items = [];
-      for (const sec of MENU) {
-        for (const item of (sec.items || [])) {
-          const qty = cart.get(item.id) || 0;
-          if (!qty) continue;
-          items.push({ id: item.id, qty });
+      if (topMessage) {
+        if (mode === "saturday_only") {
+          topMessage.textContent = "Today is Saturday. Showing the Saturday menu only.";
+        } else if (mode === "sunday_only") {
+          topMessage.textContent = "Today is Sunday. Showing the Sunday menu only — Pigfeet, Corn, and Potatoe.";
+        } else {
+          topMessage.textContent = "Monday–Friday preview: Both menus visible. Saturday and Sunday run separately.";
         }
       }
-      return items;
+
+      const qs = new URLSearchParams(window.location.search);
+      if (qs.get("canceled") === "1") {
+        showError("Checkout was canceled. Your cart is still here.");
+      }
+    } catch (err) {
+      document.getElementById("menuContent").innerHTML =
+        `<div class="tiny error">Menu failed to load. Please refresh.</div>`;
+      showError(err.message || "Menu failed to load.");
     }
-
-    function buildSummary() {
-      const when = document.getElementById("pickup").value;
-      const name = document.getElementById("custName").value || "—";
-      const phone = document.getElementById("custPhone").value || "—";
-      const notes = document.getElementById("custNotes").value || "—";
-
-      const catalog = flattenItems();
-      const lines = [
-        "Puff’s Smokehouse — Pickup Order",
-        `Pickup: ${when}`,
-        `Name: ${name}`,
-        `Phone: ${phone}`,
-        `Menu Day: ${getActiveMenuDay()}`,
-        "",
-        "Items:"
-      ];
-
-      for (const item of catalog) {
-        const qty = cart.get(item.id) || 0;
-        if (!qty) continue;
-        lines.push(`• ${qty} × ${item.name}  ${money(qty * Number(item.price || 0))}`);
-      }
-
-      const t = totals();
-
-      lines.push(
-        "",
-        `Subtotal: ${money(t.subtotal)}`,
-        `Tax: ${money(t.tax)}`,
-        `Total: ${money(t.total)}`,
-        "",
-        `Notes: ${notes}`,
-        "",
-        "Pickup order lane: squarebidness.com/puffs/"
-      );
-
-      return lines.join("\n");
-    }
-
-    document.getElementById("btnClear").onclick = () => {
-      cart.clear();
-      document.querySelectorAll("[data-bind-qty]").forEach((el) => {
-        el.textContent = "0";
-      });
-      renderCart();
-      clearError();
-    };
-
-    document.getElementById("btnCopy").onclick = async () => {
-      try {
-        await navigator.clipboard.writeText(buildSummary());
-        clearError();
-        alert("Order summary copied.");
-      } catch {
-        showError("Unable to copy summary.");
-      }
-    };
-
-    document.getElementById("btnCheckout").onclick = async () => {
-      clearError();
-
-      if (!STORE_OPEN) {
-        showError("Orders are currently closed.");
-        return;
-      }
-
-      const customerName = String(document.getElementById("custName").value || "").trim();
-      const customerPhone = String(document.getElementById("custPhone").value || "").trim();
-      const pickupTime = document.getElementById("pickup").value || "ASAP";
-      const notes = String(document.getElementById("custNotes").value || "").trim();
-      const smsConsent = document.getElementById("smsConsent").checked;
-      const items = buildOrderItems();
-
-      if (!customerName) {
-        showError("Customer name is required.");
-        return;
-      }
-
-      if (!items.length) {
-        showError("Add at least one item first.");
-        return;
-      }
-
-      const btn = document.getElementById("btnCheckout");
-      btn.disabled = true;
-      btn.textContent = "Starting Checkout...";
-
-      try {
-        const res = await fetch("/api/puffs/checkout/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            customerName,
-            customerPhone,
-            pickupTime,
-            notes,
-            smsConsent,
-            menuDay: getActiveMenuDay(),
-            items
-          })
-        });
-
-        const data = await res.json();
-
-        if (!res.ok || !data.ok || !data.url) {
-          throw new Error(data.error || "Unable to start checkout.");
-        }
-
-        document.getElementById("successNote").style.display = "block";
-        window.location.href = data.url;
-      } catch (err) {
-        showError(err.message || "Unable to start checkout.");
-      } finally {
-        btn.disabled = false;
-        btn.textContent = "Pay & Place Order";
-      }
-    };
-
-    (async function boot() {
-      try {
-        await loadMenuJSON();
-        renderMenu();
-        renderCart();
-
-        const qs = new URLSearchParams(window.location.search);
-        if (qs.get("canceled") === "1") {
-          showError("Checkout was canceled. Your cart is still here.");
-        }
-      } catch (err) {
-        document.getElementById("menuContent").innerHTML =
-          `<div class="tiny error">Menu failed to load. Please refresh.</div>`;
-        showError(err.message || "Menu failed to load.");
-      }
-    })();
-  </script>
+  })();
+</script>
 
   <script>
     if ("serviceWorker" in navigator) {
