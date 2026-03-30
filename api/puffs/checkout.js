@@ -1,4 +1,3 @@
-```js
 // /api/puffs/checkout.js
 import fs from "fs";
 import path from "path";
@@ -217,8 +216,8 @@ export default async function handler(req, res) {
       mode: "payment",
       payment_method_types: ["card"],
       line_items,
-      success_url: 'https://www.squarebidness.com/puffs/thank-you/',
-      cancel_url: 'https://www.squarebidness.com/puffs/?canceled=1',
+      success_url: "https://www.squarebidness.com/puffs/thank-you/",
+      cancel_url: "https://www.squarebidness.com/puffs/?canceled=1",
       billing_address_collection: "auto",
       phone_number_collection: {
         enabled: true
@@ -273,4 +272,3 @@ export default async function handler(req, res) {
     });
   }
 }
-```
