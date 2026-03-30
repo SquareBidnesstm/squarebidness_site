@@ -1,5 +1,6 @@
 // /api/puffs/stripe-webhook.js
 import Stripe from "stripe";
+import twilio from "twilio";
 
 export const config = {
   api: {
@@ -8,6 +9,11 @@ export const config = {
 };
 
 const stripe = new Stripe(process.env.PUFFS_STRIPE_SECRET_KEY);
+
+const twilioClient =
+  process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN
+    ? twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
+    : null;
 
 async function readRawBody(req) {
   const chunks = [];
@@ -58,6 +64,64 @@ async function pushFoodOrder(order) {
   await redisPost(`/ltrim/${encodeURIComponent("puffs:orders")}/0/199`);
 }
 
+function formatMoney(value) {
+  return Number(value || 0).toFixed(2);
+}
+
+function formatItemsForSms(items) {
+  if (!Array.isArray(items) || !items.length) return "Items: See order screen";
+  return items
+    .map((item) => `${Number(item.qty || 0)}x ${String(item.name || "").trim()}`)
+    .filter(Boolean)
+    .join(", ");
+}
+
+async function sendSms(body) {
+  if (
+    !twilioClient ||
+    !process.env.PUFFS_TWILIO_MESSAGING_SERVICE_SID ||
+    !process.env.PUFFS_ALERT_NUMBER
+  ) {
+    return;
+  }
+
+  await twilioClient.messages.create({
+    body,
+    messagingServiceSid: process.env.PUFFS_TWILIO_MESSAGING_SERVICE_SID,
+    to: process.env.PUFFS_ALERT_NUMBER
+  });
+}
+
+async function sendFoodOrderAlert(order) {
+  const body = [
+    "🔥 NEW PUFF'S ORDER",
+    order.orderNumber || "",
+    `Name: ${order.customerName || "Customer"}`,
+    `Phone: ${order.customerPhone || "N/A"}`,
+    `Pickup: ${order.pickupTime || "ASAP"}`,
+    `Total: $${formatMoney(order.total)}`,
+    formatItemsForSms(order.items)
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  await sendSms(body);
+}
+
+async function sendCateringDepositAlert(order) {
+  const body = [
+    "✅ PUFF'S CATERING DEPOSIT PAID",
+    order.requestNumber || order.id || "",
+    `Name: ${order.customerName || "Customer"}`,
+    `Event Date: ${order.eventDate || "N/A"}`,
+    `Deposit: $${formatMoney(order.depositAmount)}`
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  await sendSms(body);
+}
+
 async function handleFoodOrderCompleted(session) {
   const pendingKey = `puffs:checkout:${session.id}`;
   const pending = await redisGet(pendingKey);
@@ -75,6 +139,7 @@ async function handleFoodOrderCompleted(session) {
   await pushFoodOrder(paidOrder);
   await redisSet(`puffs:paid:${session.id}`, paidOrder);
   await redisSet(`puffs:checkout:${session.id}`, paidOrder);
+  await sendFoodOrderAlert(paidOrder);
 }
 
 async function handleCateringDepositCompleted(session) {
@@ -97,6 +162,7 @@ async function handleCateringDepositCompleted(session) {
 
   await redisSet(requestKey, updated);
   await redisSet(`puffs:catering:paid:${requestId}`, updated);
+  await sendCateringDepositAlert(updated);
 }
 
 export default async function handler(req, res) {
