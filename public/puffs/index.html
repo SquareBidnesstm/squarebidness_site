@@ -250,6 +250,14 @@
       const today = new Date().toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
       return today === "sunday" ? "sunday" : "saturday";
     }
+   
+    function getMenuDisplayMode() {
+  const today = new Date().toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
+
+  if (today === "saturday") return "saturday_only";
+  if (today === "sunday") return "sunday_only";
+  return "both";
+}
 
     function showError(msg) {
       const box = document.getElementById("errorBox");
@@ -365,33 +373,74 @@
     }
 
     function renderMenu() {
-      const root = document.getElementById("menuContent");
-      root.innerHTML = "";
+  const root = document.getElementById("menuContent");
+  root.innerHTML = "";
 
-      const saturdayWrap = createDaySection("Saturday Menu", "Main Saturday Lane");
-      const sundayWrap = createDaySection("Sunday Menu", "Sunday Only");
+  const saturdayWrap = createDaySection("Saturday Menu", "Main Saturday Lane");
+  const sundayWrap = createDaySection("Sunday Menu", "Sunday Only");
 
-      let saturdayCount = 0;
-      let sundayCount = 0;
+  let saturdayCount = 0;
+  let sundayCount = 0;
 
-      MENU.forEach((section) => {
-        const saturdayItems = [];
-        const sundayItems = [];
+  MENU.forEach((section) => {
+    const saturdayItems = [];
+    const sundayItems = [];
 
-        (section.items || []).forEach((item) => {
-          if (getItemDay(item) === "sunday") sundayItems.push(item);
-          else saturdayItems.push(item);
-        });
+    (section.items || []).forEach((item) => {
+      if (getItemDay(item) === "sunday") sundayItems.push(item);
+      else saturdayItems.push(item);
+    });
 
-        if (saturdayItems.length) {
-          appendSectionItems(saturdayWrap, section.section || "", section.note || "", saturdayItems);
-          saturdayCount += saturdayItems.length;
-        }
+    if (saturdayItems.length) {
+      appendSectionItems(
+        saturdayWrap,
+        section.section || "",
+        section.note || "",
+        saturdayItems
+      );
+      saturdayCount += saturdayItems.length;
+    }
 
-        if (sundayItems.length) {
-          appendSectionItems(sundayWrap, section.section || "", section.note || "", sundayItems);
-          sundayCount += sundayItems.length;
-        }
+    if (sundayItems.length) {
+      appendSectionItems(
+        sundayWrap,
+        section.section || "",
+        section.note || "",
+        sundayItems
+      );
+      sundayCount += sundayItems.length;
+    }
+  });
+
+  if (!saturdayCount) {
+    const empty = document.createElement("div");
+    empty.className = "emptyDay";
+    empty.textContent = "No Saturday items are loaded yet.";
+    saturdayWrap.appendChild(empty);
+  }
+
+  if (!sundayCount) {
+    const empty = document.createElement("div");
+    empty.className = "emptyDay";
+    empty.textContent = "No Sunday items are loaded yet.";
+    sundayWrap.appendChild(empty);
+  }
+
+  const mode = getMenuDisplayMode();
+
+  if (mode === "saturday_only") {
+    root.appendChild(saturdayWrap);
+    return;
+  }
+
+  if (mode === "sunday_only") {
+    root.appendChild(sundayWrap);
+    return;
+  }
+
+  root.appendChild(saturdayWrap);
+  root.appendChild(sundayWrap);
+}
       });
 
       if (!saturdayCount) {
