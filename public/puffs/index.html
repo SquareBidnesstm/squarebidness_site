@@ -127,6 +127,20 @@
     .emptyDay{
       padding:12px 0;color:#8f8f8f;font-size:.92rem;
     }
+    .dayHead {
+  background: #2B1B12; /* Puff’s brown */
+  color: #D4AF37; /* gold accent */
+  padding: 14px 16px;
+  border-radius: 10px;
+  margin: 18px 0 10px;
+}
+
+.dayHead h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
   </style>
 
   <script defer src="/scripts/sb-analytics.js"></script>
@@ -348,20 +362,31 @@
   }
 
   function createDaySection(title) {
-    const section = document.createElement("section");
-    section.className = "daySection";
+  const section = document.createElement("section");
+  section.className = "daySection";
 
-    const head = document.createElement("div");
-    head.className = "dayHead";
+  const head = document.createElement("div");
+  head.className = "dayHead";
 
-    const h = document.createElement("h3");
-    h.textContent = title;
+  // force styling inline so it hits immediately
+  head.style.background = "#2B1B12";
+  head.style.color = "#D4AF37";
+  head.style.padding = "14px 16px";
+  head.style.borderRadius = "10px";
+  head.style.margin = "18px 0 10px";
 
-    head.appendChild(h);
-    section.appendChild(head);
+  const h = document.createElement("h3");
+  h.textContent = title;
+  h.style.margin = "0";
+  h.style.fontSize = "20px";
+  h.style.fontWeight = "700";
+  h.style.letterSpacing = "0.5px";
 
-    return section;
-  }
+  head.appendChild(h);
+  section.appendChild(head);
+
+  return section;
+}
 
   function renderMenu() {
     const root = document.getElementById("menuContent");
