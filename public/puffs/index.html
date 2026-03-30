@@ -651,19 +651,6 @@
       renderMenu();
       renderCart();
 
-      const topMessage = document.getElementById("topMessage");
-      const mode = getMenuDisplayMode();
-
-      if (topMessage) {
-        if (mode === "saturday_only") {
-          topMessage.textContent = "Today is Saturday. Showing the Saturday menu only.";
-        } else if (mode === "sunday_only") {
-          topMessage.textContent = "Today is Sunday. Showing the Sunday menu only — Pigfeet, Corn, and Potatoe.";
-        } else {
-          topMessage.textContent = "Monday–Friday preview: Both menus visible. Saturday and Sunday run separately.";
-        }
-      }
-
       const qs = new URLSearchParams(window.location.search);
       if (qs.get("canceled") === "1") {
         showError("Checkout was canceled. Your cart is still here.");
@@ -675,7 +662,7 @@
     }
   })();
 </script>
-
+  
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
