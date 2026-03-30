@@ -224,7 +224,7 @@
     </div>
   </main>
 
- <script>
+<script>
   const BUILD = document.querySelector('meta[name="sb:build"]')?.content || "v1";
 
   let MENU = [];
@@ -292,8 +292,7 @@
     const left = document.createElement("div");
     left.innerHTML =
       `<strong>${item.name || ""}</strong>` +
-      (item.subnote ? `<div class="tiny muted">${item.subnote}</div>` : "") +
-      (item.badge ? `<div class="tiny" style="margin-top:3px;color:#ffd28a">${item.badge}</div>` : "");
+      (item.subnote ? `<div class="tiny muted">${item.subnote}</div>` : "");
 
     const price = document.createElement("div");
     price.className = "price";
@@ -348,7 +347,7 @@
     container.appendChild(block);
   }
 
-  function createDaySection(title, tagText) {
+  function createDaySection(title) {
     const section = document.createElement("section");
     section.className = "daySection";
 
@@ -358,11 +357,7 @@
     const h = document.createElement("h3");
     h.textContent = title;
 
-    const tag = document.createElement("span");
-    tag.className = "dayTag";
-    tag.textContent = tagText;
-
-    head.append(h, tag);
+    head.appendChild(h);
     section.appendChild(head);
 
     return section;
@@ -372,8 +367,8 @@
     const root = document.getElementById("menuContent");
     root.innerHTML = "";
 
-    const saturdayWrap = createDaySection("Saturday Menu", "Main Saturday Lane");
-    const sundayWrap = createDaySection("Sunday Menu", "Sunday Only");
+    const saturdayWrap = createDaySection("Saturday Menu");
+    const sundayWrap = createDaySection("Sunday Menu");
 
     let saturdayCount = 0;
     let sundayCount = 0;
@@ -387,11 +382,22 @@
         else saturdayItems.push(item);
       });
 
+      const sectionTitle = section.section === "Plates" ? "Plates" : (section.section || "");
+      const saturdayNote =
+        section.section === "Plates"
+          ? "All plates come with two sides and bread."
+          : (section.note || "");
+
+      const sundayNote =
+        section.section === "Plates"
+          ? ""
+          : (section.note || "");
+
       if (saturdayItems.length) {
         appendSectionItems(
           saturdayWrap,
-          section.section || "",
-          section.note || "",
+          sectionTitle,
+          saturdayNote,
           saturdayItems
         );
         saturdayCount += saturdayItems.length;
@@ -400,8 +406,8 @@
       if (sundayItems.length) {
         appendSectionItems(
           sundayWrap,
-          section.section || "",
-          section.note || "",
+          sectionTitle,
+          sundayNote,
           sundayItems
         );
         sundayCount += sundayItems.length;
@@ -658,7 +664,6 @@
     }
   })();
 </script>
-  
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
