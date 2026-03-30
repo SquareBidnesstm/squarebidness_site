@@ -1,3 +1,4 @@
+```js
 // /api/puffs/checkout.js
 import fs from "fs";
 import path from "path";
@@ -101,18 +102,16 @@ export default async function handler(req, res) {
     return res.status(405).json({ ok: false, error: "Method not allowed." });
   }
 
- if (
-  !process.env.PUFFS_STRIPE_SECRET_KEY ||
-  !process.env.UPSTASH_REDIS_REST_URL ||
-  !process.env.UPSTASH_REDIS_REST_TOKEN ||
-  !process.env.PUFFS_STRIPE_SUCCESS_URL ||
-  !process.env.PUFFS_STRIPE_CANCEL_URL
-) {
-  return res.status(500).json({
-    ok: false,
-    error: "Missing required env vars."
-  });
-}
+  if (
+    !process.env.PUFFS_STRIPE_SECRET_KEY ||
+    !process.env.UPSTASH_REDIS_REST_URL ||
+    !process.env.UPSTASH_REDIS_REST_TOKEN
+  ) {
+    return res.status(500).json({
+      ok: false,
+      error: "Missing required env vars."
+    });
+  }
 
   try {
     const body =
@@ -218,8 +217,8 @@ export default async function handler(req, res) {
       mode: "payment",
       payment_method_types: ["card"],
       line_items,
-     success_url: process.env.PUFFS_STRIPE_SUCCESS_URL,
-cancel_url: process.env.PUFFS_STRIPE_CANCEL_URL,
+      success_url: 'https://www.squarebidness.com/puffs/thank-you/',
+      cancel_url: 'https://www.squarebidness.com/puffs/?canceled=1',
       billing_address_collection: "auto",
       phone_number_collection: {
         enabled: true
@@ -274,3 +273,4 @@ cancel_url: process.env.PUFFS_STRIPE_CANCEL_URL,
     });
   }
 }
+```
