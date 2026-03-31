@@ -1,9 +1,12 @@
+<!-- FILE: /public/delish/order/success/index.html -->
 <!doctype html>
-<html lang="en">
+<html lang="en" data-sb-brand="delish" data-sb-tier="success" data-sb-build="v20260331-delish-success">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+
   <title>Order Confirmed — Delish</title>
+  <meta name="description" content="Your Delish order was received and paid successfully." />
   <meta name="robots" content="noindex,nofollow" />
   <meta name="theme-color" content="#0f0f0f" />
 
@@ -11,80 +14,195 @@
   <link rel="icon" sizes="32x32" href="/delish/assets/delish-favicon-32.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/delish/assets/delish-logo-mark-180.png" />
 
+  <script defer src="/scripts/ga.js"></script>
+  <script defer src="/scripts/sb-analytics.js"></script>
+  <script defer src="/scripts/meta-pixel.js"></script>
+  <script defer src="/scripts/sb-meta-bridge.js"></script>
+
   <style>
+    :root{
+      --bg:#0b0b0b;
+      --panel:#121212;
+      --panel-2:#171717;
+      --line:#262626;
+      --text:#ffffff;
+      --muted:#cfcfcf;
+      --soft:#9c9c9c;
+      --accent:#D4AF37;
+      --accent-dark:#181410;
+      --max:560px;
+      --shadow:0 18px 50px rgba(0,0,0,.28);
+    }
+
+    *{box-sizing:border-box}
+
     body{
       margin:0;
-      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-      background:#0b0b0b;
-      color:#fff;
       min-height:100vh;
       display:flex;
       align-items:center;
       justify-content:center;
       padding:24px;
+      background:
+        radial-gradient(circle at top left, rgba(212,175,55,.12), transparent 28%),
+        linear-gradient(180deg,#111 0%, #0b0b0b 100%);
+      color:var(--text);
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
     }
+
     .wrap{
-      width:min(100%,540px);
+      width:min(100%, var(--max));
+    }
+
+    .card{
+      background:linear-gradient(180deg,var(--panel-2),var(--panel));
+      border:1px solid var(--line);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      padding:28px 24px;
       text-align:center;
     }
+
     .badge{
-      display:inline-block;
-      background:#D4AF37;
-      color:#000;
-      padding:8px 14px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:38px;
+      padding:0 14px;
       border-radius:999px;
-      font-weight:800;
+      background:var(--accent);
+      color:var(--accent-dark);
+      font-size:.9rem;
+      font-weight:900;
+      letter-spacing:.02em;
       margin-bottom:16px;
     }
+
     h1{
-      margin:0 0 12px;
-      font-size:clamp(2rem,5vw,2.6rem);
-      line-height:1.02;
-    }
-    p{
       margin:0;
-      color:#cfcfcf;
+      font-size:clamp(2rem,5vw,2.8rem);
+      line-height:1.02;
+      letter-spacing:-.03em;
+    }
+
+    .lead{
+      margin:14px auto 0;
+      color:var(--muted);
       font-size:1rem;
       line-height:1.6;
+      max-width:460px;
     }
+
     .status{
       margin-top:22px;
-      background:#121212;
-      border:1px solid #242424;
-      border-radius:16px;
       padding:18px;
-      color:#f3f3f3;
+      border-radius:18px;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.08);
+      color:var(--text);
+      line-height:1.7;
+    }
+
+    .status strong{
+      color:var(--accent);
+    }
+
+    .sub{
+      margin-top:12px;
+      color:var(--soft);
+      font-size:.95rem;
       line-height:1.6;
     }
+
+    .actions{
+      margin-top:22px;
+      display:flex;
+      gap:12px;
+      justify-content:center;
+      flex-wrap:wrap;
+    }
+
     .btn{
       display:inline-flex;
       align-items:center;
       justify-content:center;
       min-height:48px;
       padding:0 18px;
-      margin-top:22px;
       border-radius:999px;
-      background:#D4AF37;
-      color:#000;
-      font-weight:800;
       text-decoration:none;
+      font-weight:800;
+      transition:transform .14s ease, opacity .18s ease;
+      border:1px solid transparent;
+      white-space:nowrap;
+    }
+
+    .btn:hover{transform:translateY(-1px)}
+
+    .btn--gold{
+      background:var(--accent);
+      color:var(--accent-dark);
+    }
+
+    .btn--dark{
+      background:rgba(255,255,255,.04);
+      border-color:rgba(255,255,255,.1);
+      color:var(--text);
+    }
+
+    .meta{
+      margin-top:18px;
+      color:var(--soft);
+      font-size:.88rem;
+      word-break:break-word;
+    }
+
+    @media (max-width:560px){
+      body{padding:16px}
+      .card{padding:22px 18px}
+      .actions{
+        flex-direction:column;
+      }
+      .btn{
+        width:100%;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="badge">Order Confirmed</div>
-    <h1>Thank you. Your order is in.</h1>
-    <p>
-      Your payment was successful and Delish is preparing your food.
-    </p>
+  <main class="wrap">
+    <section class="card">
+      <div class="badge">Order Confirmed</div>
 
-    <div class="status">
-      Please arrive during your selected pickup time.<br><br>
-      Your order will be ready for pickup when you arrive.
-    </div>
+      <h1>Thank you. Your order is in.</h1>
 
-    <a class="btn" href="/delish/">Back to Delish</a>
-  </div>
+      <p class="lead">
+        Your payment was successful and Delish has received your order.
+      </p>
+
+      <div class="status">
+        Please arrive during your <strong>selected pickup window</strong>.<br />
+        Your food will be prepared and ready for pickup when you arrive.
+      </div>
+
+      <p class="sub">
+        If you need to place another order, head back to the daily menu.
+      </p>
+
+      <div class="actions">
+        <a class="btn btn--gold" href="/delish/">Back to Delish</a>
+        <a class="btn btn--dark" href="/delish/catering/">Need Catering?</a>
+      </div>
+
+      <div class="meta" id="sessionMeta"></div>
+    </section>
+  </main>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get("session_id");
+    if (sessionId) {
+      document.getElementById("sessionMeta").textContent = `Confirmation ID: ${sessionId}`;
+    }
+  </script>
 </body>
 </html>
