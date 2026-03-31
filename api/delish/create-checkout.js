@@ -218,7 +218,6 @@ function isValidOrder(body) {
     typeof body.total === "number"
   );
 }
-
 function getCentralDateParts(date = new Date()) {
   const formatter = new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/Chicago",
@@ -228,6 +227,24 @@ function getCentralDateParts(date = new Date()) {
     weekday: "long",
   });
 
+  const parts = formatter.formatToParts(date);
+  const map = {};
+
+  for (const part of parts) {
+    if (part.type !== "literal") {
+      map[part.type] = part.value;
+    }
+  }
+
+  const dayOfMonth = Number(map.day || 0);
+
+  return {
+    isoDate: `${map.year}-${map.month}-${map.day}`,
+    weekday: String(map.weekday || "").toLowerCase(),
+    dayOfMonth,
+    sundayOccurrence: dayOfMonth ? Math.ceil(dayOfMonth / 7) : 0,
+  };
+}
   const parts = formatter.formatToParts(date);
   const map = {};
 
