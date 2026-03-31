@@ -1,34 +1,33 @@
-<!-- /public/puffs/catering/index.html -->
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- Basics -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
 
-  <title>Puff’s Smokehouse — Catering</title>
-  <meta name="description" content="Submit a catering request to Puff’s Smokehouse. Puff’s will review the request, send a deposit link, and your date is locked in once the deposit is paid." />
+  <title>Puff’s Smokehouse — Catering Request</title>
+  <meta
+    name="description"
+    content="Send a catering request to Puff’s Smokehouse. Share your event details and Puff’s will review it and follow up with a deposit link."
+  />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
   <meta name="theme-color" content="#0b0b0b" />
   <meta name="color-scheme" content="dark light" />
 
-  <link rel="canonical" href="https://www.squarebidness.com/puffs/catering/" />
+  <link rel="canonical" href="https://www.squarebidness.com/puffs/catering/request/" />
 
-  <!-- Open Graph -->
-  <meta property="og:title" content="Puff’s Smokehouse — Catering" />
-  <meta property="og:description" content="Request catering online. Puff’s reviews the request, sends a deposit link, and the date is locked in once the deposit is paid." />
+  <meta property="og:title" content="Puff’s Smokehouse — Catering Request" />
+  <meta
+    property="og:description"
+    content="Submit your Puff’s Smokehouse catering request online. Puff’s reviews the request and sends a deposit link after approval."
+  />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://www.squarebidness.com/puffs/catering/" />
+  <meta property="og:url" content="https://www.squarebidness.com/puffs/catering/request/" />
 
-  <meta name="sb:build" content="v20260329-puffs-catering-digital" />
+  <meta name="sb:build" content="v20260330-puffs-catering-request-form" />
 
   <link rel="icon" href="/puffs/icons/icon-192.png" type="image/png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/puffs/icons/icon-180.png" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-  <meta name="apple-mobile-web-app-title" content="Puff’s Smokehouse" />
 
   <style>
     :root{
@@ -37,200 +36,323 @@
       --text:#f3f3f3;
       --muted:#b8b8b8;
       --line:rgba(255,255,255,.10);
+      --field:#151515;
       --btn:#ffffff;
       --btnText:#0b0b0b;
       --btnGhost:rgba(255,255,255,.10);
-      --shadow: 0 12px 40px rgba(0,0,0,.45);
+      --danger:#ff7b7b;
+      --ok:#8ee0b0;
+      --shadow:0 12px 40px rgba(0,0,0,.45);
       --r:18px;
       --max:980px;
     }
+
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0;
-      background: radial-gradient(1200px 600px at 30% -10%, rgba(255,255,255,.08), transparent 55%),
-                  radial-gradient(800px 500px at 90% 20%, rgba(255,255,255,.06), transparent 55%),
-                  var(--bg);
+      background:
+        radial-gradient(1200px 600px at 30% -10%, rgba(255,255,255,.08), transparent 55%),
+        radial-gradient(800px 500px at 90% 20%, rgba(255,255,255,.06), transparent 55%),
+        var(--bg);
       color:var(--text);
-      font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
     }
     a{color:inherit}
-    .wrap{max-width:var(--max); margin:0 auto; padding:28px 18px 40px}
+    .wrap{max-width:var(--max);margin:0 auto;padding:28px 18px 40px}
 
     .topbar{
-      display:flex; align-items:center; justify-content:space-between;
-      gap:12px; margin-bottom:18px;
-      flex-wrap:wrap;
+      display:flex;align-items:center;justify-content:space-between;
+      gap:12px;margin-bottom:18px;flex-wrap:wrap;
     }
-    .brandRow{display:flex; align-items:center; gap:12px; min-width:0}
+    .brandRow{display:flex;align-items:center;gap:12px;min-width:0}
     .logoLink{
-      display:inline-flex; align-items:center; justify-content:center;
-      width:42px; height:42px;
-      border-radius: 14px;
-      border:1px solid var(--line);
-      background: rgba(255,255,255,.04);
-      overflow:hidden;
-      text-decoration:none;
-      flex: 0 0 auto;
-      box-shadow: 0 10px 24px rgba(0,0,0,.25);
+      display:inline-flex;align-items:center;justify-content:center;
+      width:42px;height:42px;border-radius:14px;border:1px solid var(--line);
+      background:rgba(255,255,255,.04);overflow:hidden;text-decoration:none;
+      flex:0 0 auto;box-shadow:0 10px 24px rgba(0,0,0,.25);
     }
-    .logoLink img{width:100%; height:100%; object-fit:cover; display:block}
-    .brand{display:flex; flex-direction:column; gap:2px; min-width:0}
-    .brand b{font-size:14px; letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-    .brand span{font-size:12px; color:var(--muted)}
+    .logoLink img{width:100%;height:100%;object-fit:cover;display:block}
+    .brand{display:flex;flex-direction:column;gap:2px;min-width:0}
+    .brand b{
+      font-size:14px;letter-spacing:.06em;text-transform:uppercase;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+    }
+    .brand span{font-size:12px;color:var(--muted)}
     .pill{
       border:1px solid var(--line);
-      padding:8px 10px;
-      border-radius:999px;
-      font-size:12px;
-      color:var(--muted);
-      background: rgba(255,255,255,.04);
-      white-space:nowrap;
+      padding:8px 10px;border-radius:999px;font-size:12px;color:var(--muted);
+      background:rgba(255,255,255,.04);white-space:nowrap;
     }
 
     .hero{
       border:1px solid var(--line);
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-      border-radius: calc(var(--r) + 6px);
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border-radius:calc(var(--r) + 6px);
       padding:22px 18px;
-      box-shadow: var(--shadow);
+      box-shadow:var(--shadow);
       margin-bottom:16px;
     }
-    .hero h1{margin:0 0 6px; font-size:22px}
-    .hero p{margin:0; color:var(--muted)}
+    .hero h1{margin:0 0 6px;font-size:22px}
+    .hero p{margin:0;color:var(--muted)}
     .rule{
-      margin:12px 0 0;
+      margin-top:12px;
       padding:12px;
-      border-radius: 14px;
+      border-radius:14px;
       border:1px solid var(--line);
-      background: rgba(255,255,255,.02);
-      color: var(--muted);
-      font-size: 13px;
+      background:rgba(255,255,255,.02);
+      color:var(--muted);
+      font-size:13px;
     }
-    .cta{margin-top:12px; display:flex; flex-wrap:wrap; gap:10px}
 
-    .grid{display:grid; grid-template-columns: repeat(12, 1fr); gap:12px}
-    .card{
-      grid-column: span 12;
+    .shell{
       border:1px solid var(--line);
-      background: rgba(255,255,255,.03);
-      border-radius: var(--r);
-      padding:16px;
+      background:rgba(255,255,255,.03);
+      border-radius:var(--r);
+      padding:18px;
+      box-shadow:var(--shadow);
     }
-    @media (min-width: 860px){
-      .card.half{grid-column: span 6;}
-    }
-    .card h2{margin:0 0 6px; font-size:16px}
-    .card p{margin:0 0 12px; color:var(--muted); font-size:14px}
 
-    .btnrow{display:flex; flex-wrap:wrap; gap:10px}
-    .btn{
-      display:inline-flex; align-items:center; justify-content:center;
-      padding:12px 14px;
-      border-radius: 14px;
-      border:1px solid transparent;
-      text-decoration:none;
-      font-weight:700;
-      letter-spacing:.01em;
-      transition: transform .06s ease, opacity .15s ease, background .15s ease;
-      user-select:none;
+    form{
+      display:grid;
+      grid-template-columns:repeat(12,1fr);
+      gap:12px;
     }
-    .btn:active{transform: translateY(1px)}
-    .btn.primary{background:var(--btn); color:var(--btnText)}
-    .btn.ghost{background:var(--btnGhost); color:var(--text); border-color: var(--line)}
-    .note{margin-top:10px; font-size:12px; color:var(--muted)}
 
-    footer{
-      margin-top:18px;
-      padding-top:14px;
-      border-top:1px solid var(--line);
+    .field{
+      grid-column:span 12;
       display:flex;
       flex-direction:column;
-      gap:8px;
+      gap:6px;
+    }
+    .field.half{grid-column:span 12}
+    @media (min-width:860px){
+      .field.half{grid-column:span 6}
+    }
+
+    label{
+      font-size:13px;
       color:var(--muted);
-      font-size:12px;
+      font-weight:600;
+    }
+
+    input, select, textarea{
+      width:100%;
+      border:1px solid var(--line);
+      background:var(--field);
+      color:var(--text);
+      border-radius:14px;
+      padding:13px 14px;
+      font:inherit;
+      outline:none;
+    }
+    textarea{min-height:130px;resize:vertical}
+    input::placeholder, textarea::placeholder{color:#8e8e8e}
+
+    .actions{
+      grid-column:span 12;
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:4px;
+    }
+
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:12px 14px;border-radius:14px;border:1px solid transparent;
+      text-decoration:none;font-weight:700;letter-spacing:.01em;
+      transition:transform .06s ease, opacity .15s ease, background .15s ease;
+      user-select:none; cursor:pointer;
+    }
+    .btn:active{transform:translateY(1px)}
+    .btn.primary{background:var(--btn);color:var(--btnText)}
+    .btn.ghost{background:var(--btnGhost);color:var(--text);border-color:var(--line)}
+    .btn[disabled]{opacity:.6;cursor:not-allowed}
+
+    .fineprint,
+    .status{
+      grid-column:span 12;
+      font-size:13px;
+      color:var(--muted);
+    }
+    .status{display:none}
+    .status.show{display:block}
+    .status.error{color:var(--danger)}
+    .status.success{color:var(--ok)}
+
+    footer{
+      margin-top:18px;padding-top:14px;border-top:1px solid var(--line);
+      display:flex;flex-direction:column;gap:8px;color:var(--muted);font-size:12px;
     }
     footer a{color:var(--muted)}
   </style>
 
   <script defer src="/scripts/sb-analytics.js"></script>
 </head>
-
 <body>
   <div class="wrap">
     <div class="topbar">
       <div class="brandRow">
-        <a class="logoLink" href="/puffs/" aria-label="Back to Puff’s Smokehouse">
+        <a class="logoLink" href="/puffs/catering/" aria-label="Back to Puff’s catering">
           <img src="/puffs/icons/icon-192.png" alt="Puff’s Smokehouse" loading="eager" decoding="async" />
         </a>
 
         <div class="brand">
           <b>Puff’s Smokehouse</b>
-          <span>Catering</span>
+          <span>Catering Request</span>
         </div>
       </div>
 
-      <div class="pill">Deposit required • Date locked after payment</div>
+      <div class="pill">Request first • Deposit sent after review</div>
     </div>
 
     <section class="hero">
-      <h1>Puff’s Smokehouse — Catering</h1>
+      <h1>Request Puff’s Catering</h1>
       <p>
-        Submit your catering request online. Puff’s will review the request, confirm the quote, and send a secure deposit link.
-        Once the deposit is paid, your catering date is locked in.
+        Fill out the details below and Puff’s will review your request, confirm availability,
+        and follow up with pricing and a deposit link.
       </p>
 
       <div class="rule">
-        <b>Deposit policy:</b> Catering is not confirmed until Puff’s reviews the request and the required deposit is paid.
-        Once the deposit is received, your date is locked in.
-      </div>
-
-      <div class="cta">
-        <a class="btn primary" href="/puffs/catering/request/">Request Catering</a>
-        <a class="btn ghost" href="/puffs/catering/orders/">Catering Orders</a>
+        <b>Important:</b> Submitting this form does not confirm the booking. Your date is locked in only after Puff’s reviews the request and the deposit is paid.
       </div>
     </section>
 
-    <section class="grid" aria-label="Catering lanes">
-      <article class="card half">
-        <h2>Deposit Required</h2>
-        <p>
-          Puff’s sends the deposit amount after reviewing your request. Catering is locked in only after the deposit is paid.
-        </p>
-        <div class="btnrow">
-          <a class="btn primary" href="/puffs/catering/request/">Start Catering Request</a>
-          <a class="btn ghost" href="/puffs/">Back to Puff’s</a>
-        </div>
-        <div class="note">Request first. Review second. Deposit locks the date.</div>
-      </article>
+    <section class="shell">
+      <form id="cateringRequestForm" novalidate>
+        <input type="hidden" name="form_name" value="puffs_catering_request" />
+        <input type="hidden" name="lane" value="catering" />
+        <input type="hidden" name="partner" value="puffs" />
+        <input type="hidden" name="_source" value="puffs_catering_request" />
+        <input type="hidden" name="source_page" value="/puffs/catering/request/" />
 
-      <article class="card half">
-        <h2>Remaining Balance</h2>
-        <p>
-          After the deposit secures the date, Puff’s will send the remaining balance link when the event is close or ready to finalize.
-        </p>
-        <div class="btnrow">
-          <a class="btn primary" href="/puffs/catering/orders/">View Catering Orders</a>
-          <a class="btn ghost" href="/puffs/pay/">Pay Online</a>
+        <div class="field half">
+          <label for="name">Full name</label>
+          <input id="name" name="name" type="text" placeholder="Your name" required />
         </div>
-        <div class="note">Keeps everything clean: deposit now, balance later.</div>
-      </article>
 
-      <article class="card">
-        <h2>What happens after payment</h2>
-        <p>
-          • Puff’s reviews your catering request<br>
-          • Deposit link is sent after approval<br>
-          • Once the deposit is paid, the date is locked in<br>
-          • Remaining balance is handled closer to the event
-        </p>
-      </article>
+        <div class="field half">
+          <label for="phone">Phone</label>
+          <input id="phone" name="phone" type="tel" placeholder="Best number to reach you" required />
+        </div>
+
+        <div class="field half">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" placeholder="you@example.com" />
+        </div>
+
+        <div class="field half">
+          <label for="eventDate">Event date</label>
+          <input id="eventDate" name="event_date" type="date" required />
+        </div>
+
+        <div class="field half">
+          <label for="eventTime">Event time</label>
+          <input id="eventTime" name="event_time" type="text" placeholder="Example: 2:00 PM" />
+        </div>
+
+        <div class="field half">
+          <label for="guestCount">Estimated guest count</label>
+          <input id="guestCount" name="guest_count" type="number" min="1" step="1" placeholder="How many people?" required />
+        </div>
+
+        <div class="field half">
+          <label for="serviceType">Service type</label>
+          <select id="serviceType" name="service_type" required>
+            <option value="">Select one</option>
+            <option value="pickup">Pickup</option>
+            <option value="delivery">Delivery</option>
+            <option value="full_service">Full service / setup</option>
+          </select>
+        </div>
+
+        <div class="field half">
+          <label for="location">Event location</label>
+          <input id="location" name="event_location" type="text" placeholder="City or event address" />
+        </div>
+
+        <div class="field">
+          <label for="orderDetails">What do you need catered?</label>
+          <textarea
+            id="orderDetails"
+            name="order_details"
+            placeholder="Tell Puff’s what food you want, serving style, any sides, and anything important about the event."
+            required
+          ></textarea>
+        </div>
+
+        <div class="field">
+          <label for="notes">Extra notes</label>
+          <textarea
+            id="notes"
+            name="notes"
+            placeholder="Budget, delivery instructions, setup notes, special requests, or anything else."
+          ></textarea>
+        </div>
+
+        <div id="formStatus" class="status" aria-live="polite"></div>
+
+        <div class="actions">
+          <button id="submitBtn" class="btn primary" type="submit">Send Catering Request</button>
+          <a class="btn ghost" href="/puffs/catering/">Back to Catering</a>
+        </div>
+
+        <div class="fineprint">
+          Puff’s will review your request before sending a deposit link. Submission does not guarantee availability.
+        </div>
+      </form>
     </section>
 
     <footer>
-      <div>For daily food orders: <a href="/puffs/">/puffs/</a></div>
+      <div>Daily food orders: <a href="/puffs/">/puffs/</a></div>
+      <div>Main catering page: <a href="/puffs/catering/">/puffs/catering/</a></div>
       <div>Quietly powered by Square Bidness infrastructure.</div>
     </footer>
   </div>
+
+  <script>
+    const form = document.getElementById('cateringRequestForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const formStatus = document.getElementById('formStatus');
+
+    function showStatus(message, type){
+      formStatus.className = 'status show ' + type;
+      formStatus.textContent = message;
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (!form.reportValidity()) return;
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending...';
+      showStatus('Sending your request...', 'success');
+
+      const payload = Object.fromEntries(new FormData(form).entries());
+
+      try {
+        const res = await fetch('/api/puffs/catering-request/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Unable to submit request right now.');
+        }
+
+        showStatus('Request sent. Puff’s will review it and follow up soon.', 'success');
+        form.reset();
+      } catch (err) {
+        showStatus(err.message || 'Something went wrong. Please try again.', 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Send Catering Request';
+      }
+    });
+  </script>
 </body>
 </html>
