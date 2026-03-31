@@ -60,12 +60,12 @@ export default async function handler(req, res) {
     }
 
     const successUrl =
-      process.env.DELISH_CATERING_SUCCESS_URL ||
+      process.env.DELISH_CATERING_STRIPE_SUCCESS_URL ||
       "https://www.squarebidness.com/delish/catering/success/";
 
     const cancelUrl =
-      process.env.DELISH_CATERING_CANCEL_URL ||
-      "https://www.squarebidness.com/delish/catering/orders/";
+      process.env.DELISH_CATERING_STRIPE_CANCEL_URL ||
+      "https://www.squarebidness.com/delish/catering/";
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -75,6 +75,8 @@ export default async function handler(req, res) {
       customer_email: existing.email || undefined,
       metadata: {
         brand: "Delish",
+        lane: "catering",
+        type: "deposit",
         orderType: "catering_deposit",
         cateringRequestId: existing.id,
         requestNumber: existing.requestNumber,
