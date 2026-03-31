@@ -1,6 +1,6 @@
 <!-- FILE: /public/delish/index.html -->
 <!doctype html>
-<html lang="en" data-sb-brand="delish" data-sb-tier="public" data-sb-variant="delish-index-v20260331-final-header-status">
+<html lang="en" data-sb-brand="delish" data-sb-tier="public" data-sb-variant="delish-index-v20260331-live-checkout">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -16,7 +16,7 @@
   <meta name="format-detection" content="telephone=no" />
   <meta name="theme-color" content="#0f0f0f" />
   <meta name="color-scheme" content="dark light" />
-  <meta name="sb:build" content="v20260331-delish-index-final-header-status" />
+  <meta name="sb:build" content="v20260331-delish-index-live-checkout" />
 
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Delish Daily Menu" />
@@ -114,9 +114,7 @@
       text-align:right;
       margin-left:auto;
     }
-    .header-meta div{
-      color:var(--text);
-    }
+    .header-meta div{color:var(--text)}
 
     .cta-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
     .btn{
@@ -152,9 +150,7 @@
       box-shadow:none;
     }
 
-    .hero{
-      padding:28px 0 18px;
-    }
+    .hero{padding:28px 0 18px}
     .hero__shell{
       border:1px solid rgba(255,255,255,.08);
       background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
@@ -254,10 +250,7 @@
       font-size:.92rem;
     }
 
-    .menu-items{
-      display:grid;
-      gap:10px;
-    }
+    .menu-items{display:grid;gap:10px}
     .menu-item{
       display:flex;
       justify-content:space-between;
@@ -304,6 +297,18 @@
       border-radius:12px;
     }
 
+    .status{
+      display:none;
+      margin-top:16px;
+      padding:14px 16px;
+      border-radius:16px;
+      background:var(--danger);
+      color:var(--danger-text);
+      border:1px solid rgba(127,29,29,.12);
+      font-weight:700;
+    }
+    .status.is-visible{display:block}
+
     .paybar{
       margin-top:20px;
       padding-top:18px;
@@ -341,14 +346,10 @@
     }
 
     @media (max-width:980px){
-      .order-grid{
-        grid-template-columns:1fr;
-      }
+      .order-grid{grid-template-columns:1fr}
     }
     @media (max-width:820px){
-      .topbar__inner{
-        align-items:flex-start;
-      }
+      .topbar__inner{align-items:flex-start}
       .header-meta{
         width:100%;
         text-align:left;
@@ -363,15 +364,9 @@
       .menu-block{
         padding:18px;
       }
-      .menu-item{
-        flex-direction:column;
-      }
-      .paybar{
-        align-items:flex-start;
-      }
-      .paybar .btn{
-        width:100%;
-      }
+      .menu-item{flex-direction:column}
+      .paybar{align-items:flex-start}
+      .paybar .btn{width:100%}
     }
   </style>
 </head>
@@ -388,7 +383,7 @@
 
   <header class="topbar" id="top">
     <div class="wrap topbar__inner">
-      <a class="brand" href="/delish/order/" aria-label="Delish order page">
+      <a class="brand" href="/delish/" aria-label="Delish daily menu">
         <img class="brand__mark" src="/delish/assets/delish-logo-mark-512.png" alt="Delish logo mark" loading="eager" decoding="async" />
         <div class="brand__text">
           <p class="brand__name">Delish</p>
@@ -469,10 +464,10 @@
                   <label for="drinkSelect">Choose a drink</label>
                   <select id="drinkSelect" name="drinkSelect">
                     <option value="">No drink</option>
-                    <option value="Tropical Punch Kool-Aid">Tropical Punch Kool-Aid</option>
-                    <option value="Lemonade">Lemonade</option>
-                    <option value="Can Soda">Can Soda</option>
-                    <option value="Bottle Water">Bottle Water</option>
+                    <option value="drink_tropical_punch_koolaid">Tropical Punch Kool-Aid</option>
+                    <option value="drink_lemonade">Lemonade</option>
+                    <option value="drink_can_soda">Can Soda</option>
+                    <option value="drink_bottle_water">Bottle Water</option>
                   </select>
                 </div>
               </div>
@@ -504,6 +499,8 @@
                   </select>
                 </div>
               </div>
+
+              <div id="status" class="status" aria-live="polite"></div>
 
               <div class="paybar">
                 <div class="paybar-copy">
@@ -537,70 +534,110 @@
         heading: "Monday Main Dishes",
         sub: "Available today from 11:00 AM – 3:00 PM.",
         mains: [
-          { id: "redBeansChicken", name: "Red Beans or Okra with Fried Chicken" },
-          { id: "hamburgerSteak", name: "Hamburger Steak Plate" }
+          { id: "monday_red_beans_fried_chicken", name: "Red Beans or Okra with Fried Chicken", price: 13.99 },
+          { id: "monday_hamburger_steak", name: "Hamburger Steak Plate", price: 13.99 }
         ],
-        extraSides: ["Mac and Cheese", "Yams", "Corn", "Cabbage", "Green Salad", "Black Eyed Peas", "Green Beans"]
+        extraSides: [
+          { id: "extra_side_mac_and_cheese", name: "Mac and Cheese", price: 2.50 },
+          { id: "extra_side_yams", name: "Yams", price: 2.50 },
+          { id: "extra_side_corn", name: "Corn", price: 2.50 },
+          { id: "extra_side_cabbage", name: "Cabbage", price: 2.50 },
+          { id: "extra_side_green_salad", name: "Green Salad", price: 2.50 },
+          { id: "extra_side_black_eyed_peas", name: "Black Eyed Peas", price: 2.50 },
+          { id: "extra_side_green_beans", name: "Green Beans", price: 2.50 }
+        ]
       },
       tuesday: {
         heading: "Tuesday Main Dishes",
         sub: "Available today from 11:00 AM – 3:00 PM.",
         mains: [
-          { id: "beefTips", name: "Beef Tips Plate" },
-          { id: "meatloaf", name: "Meatloaf Plate" }
+          { id: "tuesday_beef_tips", name: "Beef Tips Plate", price: 13.99 },
+          { id: "tuesday_meatloaf", name: "Meatloaf Plate", price: 13.99 }
         ],
-        extraSides: ["Mac and Cheese", "Yams", "Corn", "Cabbage", "Green Salad", "Black Eyed Peas", "Green Beans"]
+        extraSides: [
+          { id: "extra_side_mac_and_cheese", name: "Mac and Cheese", price: 2.50 },
+          { id: "extra_side_yams", name: "Yams", price: 2.50 },
+          { id: "extra_side_corn", name: "Corn", price: 2.50 },
+          { id: "extra_side_cabbage", name: "Cabbage", price: 2.50 },
+          { id: "extra_side_green_salad", name: "Green Salad", price: 2.50 },
+          { id: "extra_side_black_eyed_peas", name: "Black Eyed Peas", price: 2.50 },
+          { id: "extra_side_green_beans", name: "Green Beans", price: 2.50 }
+        ]
       },
       wednesday: {
         heading: "Wednesday Main Dishes",
         sub: "Available today from 11:00 AM – 3:00 PM.",
         mains: [
-          { id: "porkNeckbones", name: "Pork Neckbones Plate" },
-          { id: "bakedChicken", name: "Baked Chicken Plate" },
-          { id: "countryFriedSteak", name: "Country Fried Steak Plate" }
+          { id: "wednesday_pork_neckbones", name: "Pork Neckbones Plate", price: 10.00 },
+          { id: "wednesday_baked_chicken", name: "Baked Chicken Plate", price: 10.00 },
+          { id: "wednesday_country_fried_steak", name: "Country Fried Steak Plate", price: 10.00 }
         ],
-        extraSides: ["Mac and Cheese", "Yams", "Corn", "Cabbage", "Green Salad", "Black Eyed Peas", "Green Beans"]
+        extraSides: [
+          { id: "extra_side_mac_and_cheese", name: "Mac and Cheese", price: 2.50 },
+          { id: "extra_side_yams", name: "Yams", price: 2.50 },
+          { id: "extra_side_corn", name: "Corn", price: 2.50 },
+          { id: "extra_side_cabbage", name: "Cabbage", price: 2.50 },
+          { id: "extra_side_green_salad", name: "Green Salad", price: 2.50 },
+          { id: "extra_side_black_eyed_peas", name: "Black Eyed Peas", price: 2.50 },
+          { id: "extra_side_green_beans", name: "Green Beans", price: 2.50 }
+        ]
       },
       thursday: {
         heading: "Thursday Main Dishes",
         sub: "Available today from 11:00 AM – 3:00 PM.",
         mains: [
-          { id: "turkeyWings", name: "Turkey Wings Plate" }
+          { id: "thursday_turkey_wings", name: "Turkey Wings Plate", price: 16.99 }
         ],
-        extraSides: ["Mac and Cheese", "Yams", "Corn", "Cabbage", "Green Salad", "Black Eyed Peas", "Green Beans"]
+        extraSides: [
+          { id: "extra_side_mac_and_cheese", name: "Mac and Cheese", price: 2.50 },
+          { id: "extra_side_yams", name: "Yams", price: 2.50 },
+          { id: "extra_side_corn", name: "Corn", price: 2.50 },
+          { id: "extra_side_cabbage", name: "Cabbage", price: 2.50 },
+          { id: "extra_side_green_salad", name: "Green Salad", price: 2.50 },
+          { id: "extra_side_black_eyed_peas", name: "Black Eyed Peas", price: 2.50 },
+          { id: "extra_side_green_beans", name: "Green Beans", price: 2.50 }
+        ]
       },
       friday: {
         heading: "Friday Main Dishes",
         sub: "Available today from 11:00 AM – 3:00 PM.",
         mains: [
-          { id: "crawfishEtouffee", name: "Crawfish Étouffée Plate" },
-          { id: "shrimpPasta", name: "Shrimp Pasta Plate" },
-          { id: "friedCatfish", name: "Fried Catfish Plate" },
-          { id: "bakedCatfish", name: "Baked Catfish Plate" }
+          { id: "friday_crawfish_etouffee", name: "Crawfish Étouffée Plate", price: 16.99 },
+          { id: "friday_shrimp_pasta", name: "Shrimp Pasta Plate", price: 16.99 },
+          { id: "friday_fried_catfish", name: "Fried Catfish Plate (3 strips)", price: 15.99 },
+          { id: "friday_baked_catfish", name: "Baked Catfish Plate", price: 16.99 }
         ],
-        extraSides: ["Mac and Cheese", "Yams", "Corn", "Cabbage", "Green Salad", "Black Eyed Peas", "Green Beans", "Potato Salad", "Rice Dressing"]
-      },
-      sunday: {
-        heading: "Sunday Main Dishes",
-        sub: "Available on 1st & 3rd Sundays from 11:00 AM – 3:00 PM.",
-        mains: [
-          { id: "porkSteakGravy", name: "Pork Steak and Gravy Plate" },
-          { id: "oxtails", name: "Oxtails Plate" },
-          { id: "sundayBakedChicken", name: "Baked Chicken Plate" }
-        ],
-        extraSides: ["Mac and Cheese", "Yams", "Corn", "Cabbage", "Green Salad", "Black Eyed Peas", "Green Beans", "Potato Salad", "Rice Dressing"]
+        extraSides: [
+          { id: "extra_side_mac_and_cheese", name: "Mac and Cheese", price: 2.50 },
+          { id: "extra_side_yams", name: "Yams", price: 2.50 },
+          { id: "extra_side_corn", name: "Corn", price: 2.50 },
+          { id: "extra_side_cabbage", name: "Cabbage", price: 2.50 },
+          { id: "extra_side_green_salad", name: "Green Salad", price: 2.50 },
+          { id: "extra_side_black_eyed_peas", name: "Black Eyed Peas", price: 2.50 },
+          { id: "extra_side_green_beans", name: "Green Beans", price: 2.50 },
+          { id: "extra_side_potato_salad", name: "Potato Salad", price: 2.50 },
+          { id: "extra_side_rice_dressing", name: "Rice Dressing", price: 2.50 }
+        ]
       }
     };
 
-    const LAGNIAPPE = [
-      "Grilled Chicken Salad",
-      "Grilled Shrimp Salad",
-      "Both Meat Salad",
-      "Chicken Tender Basket with Fries",
-      "Fried Porkchop Sandwich with Fries",
-      "Cheeseburger Basket"
-    ];
+    const DRINKS = {
+      drink_tropical_punch_koolaid: { id: "drink_tropical_punch_koolaid", name: "Tropical Punch Kool-Aid", price: 3.99 },
+      drink_lemonade: { id: "drink_lemonade", name: "Lemonade", price: 3.99 },
+      drink_can_soda: { id: "drink_can_soda", name: "Can Soda", price: 1.50 },
+      drink_bottle_water: { id: "drink_bottle_water", name: "Bottle Water", price: 1.50 }
+    };
 
+    const LAGNIAPPE = {
+      lagniappe_grilled_chicken_salad: { id: "lagniappe_grilled_chicken_salad", name: "Grilled Chicken Salad", price: 12.99 },
+      lagniappe_grilled_shrimp_salad: { id: "lagniappe_grilled_shrimp_salad", name: "Grilled Shrimp Salad", price: 12.99 },
+      lagniappe_both_meat_salad: { id: "lagniappe_both_meat_salad", name: "Both Meat Salad", price: 16.99 },
+      lagniappe_chicken_tender_basket_fries: { id: "lagniappe_chicken_tender_basket_fries", name: "Chicken Tender Basket with Fries", price: 9.99 },
+      lagniappe_fried_porkchop_sandwich_fries: { id: "lagniappe_fried_porkchop_sandwich_fries", name: "Fried Porkchop Sandwich with Fries", price: 9.99 },
+      lagniappe_cheeseburger_basket: { id: "lagniappe_cheeseburger_basket", name: "Cheeseburger Basket", price: 9.99 }
+    };
+
+    const statusEl = document.getElementById("status");
     const mainDishHeading = document.getElementById("mainDishHeading");
     const mainDishSub = document.getElementById("mainDishSub");
     const mainDishItems = document.getElementById("mainDishItems");
@@ -611,6 +648,16 @@
     const payStatusSub = document.getElementById("payStatusSub");
     const sundayStatusLine = document.getElementById("sundayStatusLine");
     const orderForm = document.getElementById("delishOrderForm");
+
+    function showStatus(message) {
+      statusEl.textContent = message;
+      statusEl.classList.add("is-visible");
+    }
+
+    function clearStatus() {
+      statusEl.textContent = "";
+      statusEl.classList.remove("is-visible");
+    }
 
     function getCentralDayParts(date = new Date()) {
       const formatter = new Intl.DateTimeFormat("en-CA", {
@@ -627,9 +674,7 @@
       const parts = formatter.formatToParts(date);
       const map = {};
       parts.forEach((part) => {
-        if (part.type !== "literal") {
-          map[part.type] = part.value;
-        }
+        if (part.type !== "literal") map[part.type] = part.value;
       });
 
       return {
@@ -638,7 +683,8 @@
         hour: Number(map.hour || 0),
         minute: Number(map.minute || 0),
         month: Number(map.month || 0),
-        year: Number(map.year || 0)
+        year: Number(map.year || 0),
+        isoDate: `${map.year}-${map.month}-${map.day}`
       };
     }
 
@@ -651,32 +697,12 @@
       const openMinutes = 11 * 60;
       const closeMinutes = 15 * 60;
 
-      if (currentMinutes < openMinutes || currentMinutes >= closeMinutes) {
-        return false;
-      }
-
-      if (["monday","tuesday","wednesday","thursday","friday"].includes(parts.weekday)) {
-        return true;
-      }
-
-      if (parts.weekday === "sunday") {
-        const occ = getSundayOccurrence(parts.dayOfMonth);
-        return occ === 1 || occ === 3;
-      }
-
-      return false;
+      if (currentMinutes < openMinutes || currentMinutes >= closeMinutes) return false;
+      return ["monday","tuesday","wednesday","thursday","friday"].includes(parts.weekday);
     }
 
     function getTodayMenu(parts) {
-      if (MENU_BY_DAY[parts.weekday]) {
-        if (parts.weekday === "sunday") {
-          const occ = getSundayOccurrence(parts.dayOfMonth);
-          if (occ === 1 || occ === 3) return MENU_BY_DAY.sunday;
-          return null;
-        }
-        return MENU_BY_DAY[parts.weekday];
-      }
-      return null;
+      return MENU_BY_DAY[parts.weekday] || null;
     }
 
     function renderQtyItem(item) {
@@ -704,7 +730,6 @@
 
     function getNextSundayInfo() {
       const now = new Date();
-
       const formatter = new Intl.DateTimeFormat("en-US", {
         timeZone: "America/Chicago",
         weekday: "long",
@@ -716,12 +741,11 @@
       for (let i = 0; i < 14; i++) {
         const testDate = new Date(now);
         testDate.setDate(now.getDate() + i);
-
         const parts = getCentralDayParts(testDate);
+
         if (parts.weekday === "sunday") {
-          const occurrence = getSundayOccurrence(parts.dayOfMonth);
           return {
-            occurrence,
+            occurrence: getSundayOccurrence(parts.dayOfMonth),
             formattedDate: formatter.format(testDate)
           };
         }
@@ -731,8 +755,6 @@
     }
 
     function setSundayStatusLine() {
-      if (!sundayStatusLine) return;
-
       const parts = getCentralDayParts();
       const nextSunday = getNextSundayInfo();
 
@@ -741,19 +763,16 @@
           sundayStatusLine.textContent = `Closed Saturday · Open this Sunday (${formatOrdinal(nextSunday.occurrence)} Sunday — ${nextSunday.formattedDate})`;
           return;
         }
-
         if (nextSunday) {
           sundayStatusLine.textContent = `Closed Saturday · Closed this Sunday (${formatOrdinal(nextSunday.occurrence)} Sunday — ${nextSunday.formattedDate})`;
           return;
         }
-
         sundayStatusLine.textContent = "Closed Saturday";
         return;
       }
 
       if (parts.weekday === "sunday") {
         const occurrence = getSundayOccurrence(parts.dayOfMonth);
-
         if (occurrence === 1 || occurrence === 3) {
           sundayStatusLine.textContent = `Open this Sunday (${formatOrdinal(occurrence)} Sunday) · 11:00 AM – 3:00 PM`;
         } else {
@@ -783,10 +802,10 @@
       mainDishSub.textContent = todayMenu.sub;
       mainDishItems.innerHTML = todayMenu.mains.map(renderQtyItem).join("");
       extraSideSelect.innerHTML = '<option value="">No extra side</option>' +
-        todayMenu.extraSides.map(side => `<option value="${side}">${side}</option>`).join("");
+        todayMenu.extraSides.map(side => `<option value="${side.id}">${side.name}</option>`).join("");
     } else {
       mainDishHeading.textContent = "Today’s Menu";
-      mainDishSub.textContent = "Delish is closed today.";
+      mainDishSub.textContent = todayParts.weekday === "sunday" ? "Closed today. Sunday schedule is informational only." : "Delish is closed today.";
       mainDishItems.innerHTML = `
         <div class="menu-item">
           <div>
@@ -798,7 +817,9 @@
       extraSideSelect.innerHTML = '<option value="">No extra side</option>';
     }
 
-    lagniappeSelect.innerHTML += LAGNIAPPE.map(item => `<option value="${item}">${item}</option>`).join("");
+    lagniappeSelect.innerHTML += Object.values(LAGNIAPPE)
+      .map(item => `<option value="${item.id}">${item.name}</option>`)
+      .join("");
 
     document.addEventListener("click", (e) => {
       const btn = e.target.closest(".qty-btn");
@@ -808,11 +829,7 @@
       if (!input) return;
 
       const current = Number(input.value || 0);
-      if (btn.dataset.action === "increase") {
-        input.value = current + 1;
-      } else {
-        input.value = Math.max(0, current - 1);
-      }
+      input.value = btn.dataset.action === "increase" ? current + 1 : Math.max(0, current - 1);
       updatePayState();
     });
 
@@ -822,16 +839,22 @@
       }
     });
 
-    function hasMainSelection() {
-      if (!todayMenu) return false;
-      return todayMenu.mains.some(item => Number(document.getElementById(`${item.id}Qty`)?.value || 0) > 0);
+    function getSelectedMainItems() {
+      if (!todayMenu) return [];
+      return todayMenu.mains
+        .map(item => {
+          const qty = Number(document.getElementById(`${item.id}Qty`)?.value || 0);
+          return qty > 0 ? { id: item.id, qty, price: item.price } : null;
+        })
+        .filter(Boolean);
     }
 
     function updatePayState() {
       const nameOk = document.getElementById("customerName").value.trim().length > 0;
       const phoneOk = document.getElementById("customerPhone").value.trim().length > 0;
       const pickupOk = document.getElementById("pickupWindow").value.trim().length > 0;
-      const mainOk = hasMainSelection();
+      const mainItems = getSelectedMainItems();
+      const mainOk = mainItems.length > 0;
 
       if (!todayMenu) {
         payNowBtn.disabled = true;
@@ -863,10 +886,84 @@
       payStatusSub.textContent = "Your order details are complete.";
     }
 
-    orderForm.addEventListener("submit", (e) => {
+    orderForm.addEventListener("submit", async (e) => {
       e.preventDefault();
+      clearStatus();
+
       if (payNowBtn.disabled) return;
-      alert("Pay Now flow connects here.");
+
+      const customerName = document.getElementById("customerName").value.trim();
+      const customerPhone = document.getElementById("customerPhone").value.trim();
+      const pickupWindow = document.getElementById("pickupWindow").value.trim();
+      const mainItems = getSelectedMainItems();
+
+      if (!customerName || !customerPhone || !pickupWindow || !mainItems.length) {
+        showStatus("Complete your order details before checkout.");
+        return;
+      }
+
+      payNowBtn.disabled = true;
+      payNowBtn.textContent = "Processing...";
+
+      try {
+        const items = [...mainItems];
+
+        const drinkId = document.getElementById("drinkSelect").value;
+        if (drinkId && DRINKS[drinkId]) {
+          items.push({ id: drinkId, qty: 1, price: DRINKS[drinkId].price });
+        }
+
+        const extraSideId = document.getElementById("extraSideSelect").value;
+        if (extraSideId) {
+          const selectedSide = (todayMenu.extraSides || []).find(side => side.id === extraSideId);
+          if (selectedSide) {
+            items.push({ id: selectedSide.id, qty: 1, price: selectedSide.price });
+          }
+        }
+
+        const lagniappeId = document.getElementById("lagniappeSelect").value;
+        if (lagniappeId && LAGNIAPPE[lagniappeId]) {
+          items.push({ id: lagniappeId, qty: 1, price: LAGNIAPPE[lagniappeId].price });
+        }
+
+        const subtotal = items.reduce((sum, item) => sum + ((item.price || 0) * item.qty), 0);
+        const tax = 0;
+        const total = subtotal + tax;
+
+        const payload = {
+          customerName,
+          customerPhone,
+          customerEmail: "",
+          pickupDate: todayParts.isoDate,
+          pickupWindow,
+          notes: "",
+          smsConsent: "no",
+          items: items.map(item => ({ id: item.id, qty: item.qty })),
+          subtotal,
+          tax,
+          total,
+          source: "delish-web"
+        };
+
+        const res = await fetch("/api/delish/create-checkout/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.ok || !data.checkout_url) {
+          throw new Error(data.message || data.error || "Checkout failed.");
+        }
+
+        window.location.href = data.checkout_url;
+      } catch (err) {
+        showStatus(err.message || "Something went wrong while starting checkout.");
+        updatePayState();
+      }
     });
 
     updatePayState();
