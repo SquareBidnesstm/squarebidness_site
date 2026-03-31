@@ -45,10 +45,14 @@ export default async function handler(req, res) {
       const session = event.data.object;
       const metadata = session.metadata || {};
 
-      if (
-        metadata.orderType === "catering_deposit" &&
-        metadata.cateringRequestId
-      ) {
+      const isCateringDeposit =
+        metadata.cateringRequestId &&
+        (
+          metadata.orderType === "catering_deposit" ||
+          (metadata.lane === "catering" && metadata.type === "deposit")
+        );
+
+      if (isCateringDeposit) {
         const key = `delish:catering:${metadata.cateringRequestId}`;
         const existing = await redis.get(key);
 
@@ -59,9 +63,22 @@ export default async function handler(req, res) {
             status: "deposit_paid",
             depositPaidAt: new Date().toISOString(),
             depositSessionId: session.id || existing.depositSessionId || "",
+            depositPaymentIntentId:
+              typeof session.payment_intent === "string"
+                ? session.payment_intent
+                : existing.depositPaymentIntentId || "",
+            depositAmountPaid:
+              typeof session.amount_total === "number"
+                ? (session.amount_total / 100).toFixed(2)
+                : existing.depositAmountPaid || existing.depositAmount || "",
           };
 
           await redis.set(key, updated);
+          console.log(
+            "DELISH CATERING DEPOSIT PAID:",
+            metadata.cateringRequestId,
+            updated.requestNumber || ""
+          );
         }
       }
     }
