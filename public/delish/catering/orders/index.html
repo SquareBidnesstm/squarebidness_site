@@ -346,34 +346,34 @@
     }
 
     .cross-links{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
 
-.cross-link{
-  display:inline-flex;
-  align-items:center;
-  min-height:42px;
-  padding:0 14px;
-  border-radius:999px;
-  background:#171718;
-  border:1px solid #2c2c2f;
-  color:#cfc7ba;
-  font-weight:800;
-  text-decoration:none;
-}
+    .cross-link{
+      display:inline-flex;
+      align-items:center;
+      min-height:42px;
+      padding:0 14px;
+      border-radius:999px;
+      background:#171718;
+      border:1px solid #2c2c2f;
+      color:#cfc7ba;
+      font-weight:800;
+      text-decoration:none;
+    }
 
-.cross-link:hover{
-  color:#fff;
-  border-color:rgba(255,255,255,.2);
-}
+    .cross-link:hover{
+      color:#fff;
+      border-color:rgba(255,255,255,.2);
+    }
 
-.cross-link.active{
-  background:rgba(215,174,114,.15);
-  border-color:rgba(215,174,114,.35);
-  color:#f2d7ad;
-}
+    .cross-link.active{
+      background:rgba(215,174,114,.15);
+      border-color:rgba(215,174,114,.35);
+      color:#f2d7ad;
+    }
   </style>
 </head>
 <body>
@@ -390,9 +390,9 @@
     </div>
 
     <div class="cross-links" style="margin-bottom:18px;">
-  <a href="/delish/orders/" class="cross-link">Kitchen Orders</a>
-  <a href="/delish/catering/orders/" class="cross-link active">Catering Orders</a>
-</div>
+      <a href="/delish/orders/" class="cross-link">Kitchen Orders</a>
+      <a href="/delish/catering/orders/" class="cross-link active">Catering Orders</a>
+    </div>
 
     <section class="summary">
       <div class="summary-card">
@@ -494,7 +494,12 @@
           throw new Error(data.error || "Failed to approve catering request.");
         }
 
-        status.textContent = `Deposit sent: $${data.depositAmount}`;
+        if (data.alreadyExists) {
+          status.textContent = "Deposit link already exists.";
+        } else {
+          status.textContent = `Deposit sent: $${data.depositAmount}`;
+        }
+
         await loadOrders();
       } catch (error) {
         status.textContent = error.message || "Unable to send deposit.";
@@ -643,6 +648,7 @@
 
     document.getElementById("refreshBtn").addEventListener("click", loadOrders);
     loadOrders();
+    setInterval(loadOrders, 15000);
   </script>
 </body>
 </html>
