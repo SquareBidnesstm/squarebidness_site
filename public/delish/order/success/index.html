@@ -1,223 +1,77 @@
-<!-- FILE: /public/delish/order/success/index.html -->
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Order Confirmed — Delish</title>
-  <meta name="robots" content="noindex,nofollow" />
-  <meta name="theme-color" content="#0f0f0f" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 
-  <link rel="icon" type="image/png" sizes="16x16" href="/delish/assets/delish-favicon-16.png" />
-  <link rel="icon" type="image/png" sizes="32x32" href="/delish/assets/delish-favicon-32.png" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/delish/assets/delish-logo-mark-180.png" />
+<title>Order Confirmed — Delish</title>
 
-  <style>
-    :root{
-      --bg:#0f0f10;
-      --panel:#171718;
-      --border:#2c2c2f;
-      --text:#f5f2ea;
-      --muted:#cfc7ba;
-      --gold:#d7ae72;
-      --gold-soft:rgba(215,174,114,.1);
-      --gold-border:rgba(215,174,114,.2);
-    }
+<style>
+body {
+  margin:0;
+  font-family:system-ui;
+  background:#0b0b0b;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:100vh;
+}
 
-    *{ box-sizing:border-box; }
+.wrap {
+  max-width:500px;
+  padding:30px;
+  text-align:center;
+}
 
-    body{
-      margin:0;
-      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-      background:#0f0f10;
-      color:var(--text);
-    }
+h1 {
+  font-size:28px;
+  margin-bottom:10px;
+}
 
-    .wrap{
-      width:min(760px,92%);
-      margin:0 auto;
-      padding:64px 0;
-    }
+p {
+  color:#ccc;
+  margin-bottom:20px;
+}
 
-    .card{
-      border:1px solid var(--border);
-      border-radius:24px;
-      padding:28px;
-      background:var(--panel);
-      box-shadow:0 10px 30px rgba(0,0,0,.22);
-    }
+.status {
+  background:#111;
+  padding:16px;
+  border-radius:12px;
+  margin-top:20px;
+  font-size:15px;
+}
 
-    h1{
-      margin:0;
-      font-size:clamp(2rem,4vw,3rem);
-      letter-spacing:-.03em;
-      line-height:1;
-    }
-
-    p{
-      margin:18px 0 0;
-      color:var(--muted);
-      line-height:1.6;
-      font-size:clamp(1rem,2vw,1.15rem);
-    }
-
-    .status{
-      margin-top:22px;
-      padding:16px 18px;
-      border-radius:18px;
-      background:var(--gold-soft);
-      border:1px solid var(--gold-border);
-      color:#f4ead8;
-      font-size:clamp(1rem,2vw,1.1rem);
-    }
-
-    .pickup{
-      display:none;
-      margin-top:18px;
-      padding:20px 18px;
-      border-radius:20px;
-      background:linear-gradient(180deg,rgba(215,174,114,.12),rgba(215,174,114,.08));
-      border:1px solid rgba(215,174,114,.24);
-    }
-
-    .pickup.is-visible{
-      display:block;
-    }
-
-    .pickup-label{
-      font-size:.82rem;
-      font-weight:800;
-      letter-spacing:.14em;
-      text-transform:uppercase;
-      color:#cdb48d;
-      margin-bottom:10px;
-    }
-
-    .pickup-value{
-      font-size:clamp(1.2rem,3vw,1.8rem);
-      font-weight:800;
-      line-height:1.2;
-      color:#f3dfb8;
-      letter-spacing:-.02em;
-    }
-
-    .pickup-note{
-      margin-top:12px;
-      color:var(--muted);
-      font-size:.98rem;
-      line-height:1.5;
-    }
-
-    .btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      min-height:48px;
-      padding:0 18px;
-      border-radius:999px;
-      background:linear-gradient(180deg,#f2d7ad,#d7ae72);
-      color:#181410;
-      font-weight:800;
-      text-decoration:none;
-      margin-top:22px;
-    }
-
-    @media (max-width:640px){
-      .wrap{ padding:28px 0; }
-      .card{ padding:22px; border-radius:22px; }
-      .status,
-      .pickup{ border-radius:16px; }
-    }
-  </style>
+.badge {
+  display:inline-block;
+  background:#D4AF37;
+  color:#000;
+  padding:6px 12px;
+  border-radius:999px;
+  font-weight:bold;
+  margin-bottom:15px;
+}
+</style>
 </head>
+
 <body>
-  <div class="wrap">
-    <div class="card">
-      <h1>Order received.</h1>
-      <p>
-        Your order is confirmed and being prepared.
-      </p>
 
-      <div id="status" class="status">Finalizing your order record...</div>
+<div class="wrap">
 
-      <div id="pickupBlock" class="pickup" aria-live="polite">
-        <div class="pickup-label">Pickup Time</div>
-        <div id="pickupValue" class="pickup-value">Loading pickup window...</div>
-        <div class="pickup-note">Please arrive during your selected pickup window.</div>
-      </div>
+  <div class="badge">Order Confirmed</div>
 
-      <a class="btn" href="/delish/">Back to Delish</a>
-    </div>
+  <h1>Thank you. Your order is in.</h1>
+
+  <p>
+    Your payment was successful and Delish is preparing your food.
+  </p>
+
+  <div class="status">
+    Please arrive during your selected pickup time.<br><br>
+    Your order will be ready for pickup when you arrive.
   </div>
 
-  <script>
-    function formatPickupDate(dateStr) {
-      if (!dateStr) return "";
+</div>
 
-      const parts = String(dateStr).split("-");
-      if (parts.length !== 3) return dateStr;
-
-      const year = Number(parts[0]);
-      const month = Number(parts[1]) - 1;
-      const day = Number(parts[2]);
-
-      const date = new Date(year, month, day);
-      if (Number.isNaN(date.getTime())) return dateStr;
-
-      return date.toLocaleDateString("en-US", {
-        month: "long",
-        day: "numeric"
-      });
-    }
-
-    function formatPickupWindow(dateStr, windowStr) {
-      const formattedDate = formatPickupDate(dateStr);
-      const cleanWindow = (windowStr || "").trim();
-
-      if (formattedDate && cleanWindow) return `${formattedDate} • ${cleanWindow}`;
-      if (formattedDate) return formattedDate;
-      if (cleanWindow) return cleanWindow;
-      return "";
-    }
-
-    async function finalizeOrder() {
-      const statusEl = document.getElementById("status");
-      const pickupBlock = document.getElementById("pickupBlock");
-      const pickupValue = document.getElementById("pickupValue");
-      const params = new URLSearchParams(window.location.search);
-      const sessionId = params.get("session_id");
-
-      if (!sessionId) {
-        statusEl.textContent = "Missing session information.";
-        return;
-      }
-
-      try {
-        const res = await fetch(`/api/delish/finalize-checkout/?session_id=${encodeURIComponent(sessionId)}`, {
-          method: "GET",
-          cache: "no-store"
-        });
-
-        const data = await res.json();
-
-        if (!data.ok) {
-          throw new Error(data.error || "Unable to finalize order.");
-        }
-
-        statusEl.textContent = `Order confirmed: ${data.orderNumber}`;
-
-        const pickupText = formatPickupWindow(data.pickupDate, data.pickupWindow);
-
-        if (pickupText) {
-          pickupValue.textContent = pickupText;
-          pickupBlock.classList.add("is-visible");
-        }
-      } catch (error) {
-        statusEl.textContent = "Payment completed, but final order confirmation is still being processed.";
-      }
-    }
-
-    finalizeOrder();
-  </script>
 </body>
 </html>
