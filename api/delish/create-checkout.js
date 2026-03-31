@@ -54,45 +54,45 @@ const MENU_BY_DAY = {
       price: 16.99,
     },
   ],
- friday: [
-  {
-    id: "friday_crawfish_etouffee",
-    name: "Crawfish Étouffée Plate",
-    price: 16.99,
-  },
-  {
-    id: "friday_shrimp_pasta",
-    name: "Shrimp Pasta Plate",
-    price: 16.99,
-  },
-  {
-    id: "friday_fried_catfish",
-    name: "Fried Catfish Plate (3 strips)",
-    price: 15.99,
-  },
-  {
-    id: "friday_baked_catfish",
-    name: "Baked Catfish Plate",
-    price: 16.99,
-  }
-],
+  friday: [
+    {
+      id: "friday_crawfish_etouffee",
+      name: "Crawfish Étouffée Plate",
+      price: 16.99,
+    },
+    {
+      id: "friday_shrimp_pasta",
+      name: "Shrimp Pasta Plate",
+      price: 16.99,
+    },
+    {
+      id: "friday_fried_catfish",
+      name: "Fried Catfish Plate (3 strips)",
+      price: 15.99,
+    },
+    {
+      id: "friday_baked_catfish",
+      name: "Baked Catfish Plate",
+      price: 16.99,
+    },
+  ],
   sunday: [
-  {
-    id: "sunday_pork_steak_gravy",
-    name: "Pork Steak and Gravy Plate",
-    price: 15.99,
-  },
-  {
-    id: "sunday_oxtails",
-    name: "Oxtails Plate",
-    price: 24.99,
-  },
-  {
-    id: "sunday_baked_chicken",
-    name: "Baked Chicken Plate",
-    price: 13.99,
-  }
-],
+    {
+      id: "sunday_pork_steak_gravy",
+      name: "Pork Steak and Gravy Plate",
+      price: 15.99,
+    },
+    {
+      id: "sunday_oxtails",
+      name: "Oxtails Plate",
+      price: 24.99,
+    },
+    {
+      id: "sunday_baked_chicken",
+      name: "Baked Chicken Plate",
+      price: 13.99,
+    },
+  ],
   everyday: [
     {
       id: "drink_tropical_punch_koolaid",
@@ -200,18 +200,14 @@ const ACTIVE_ORDERING_DAYS = new Set([
   "friday",
   "sunday",
 ]);
+
 const SUNDAY_ORDERING_OCCURRENCES = new Set([1, 3]);
+
 const FRIDAY_ONLY_ITEM_IDS = new Set([
   "extra_side_potato_salad",
   "extra_side_rice_dressing",
 ]);
-if (todayDay === "sunday" && !SUNDAY_ORDERING_OCCURRENCES.has(sundayOccurrence)) {
-  return res.status(403).json({
-    ok: false,
-    error: "ORDERING_CLOSED_TODAY",
-    message: "Sunday ordering is only available on 1st and 3rd Sundays.",
-  });
-}
+
 function isValidOrder(body) {
   return (
     body &&
@@ -224,6 +220,7 @@ function isValidOrder(body) {
     typeof body.total === "number"
   );
 }
+
 function getCentralDateParts(date = new Date()) {
   const formatter = new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/Chicago",
@@ -249,20 +246,6 @@ function getCentralDateParts(date = new Date()) {
     weekday: String(map.weekday || "").toLowerCase(),
     dayOfMonth,
     sundayOccurrence: dayOfMonth ? Math.ceil(dayOfMonth / 7) : 0,
-  };
-}
-  const parts = formatter.formatToParts(date);
-  const map = {};
-
-  for (const part of parts) {
-    if (part.type !== "literal") {
-      map[part.type] = part.value;
-    }
-  }
-
-  return {
-    isoDate: `${map.year}-${map.month}-${map.day}`,
-    weekday: String(map.weekday || "").toLowerCase(),
   };
 }
 
@@ -316,17 +299,28 @@ export default async function handler(req, res) {
       });
     }
 
-   const {
-  isoDate: todayIso,
-  weekday: todayDay,
-  sundayOccurrence,
-} = getCentralDateParts();
+    const {
+      isoDate: todayIso,
+      weekday: todayDay,
+      sundayOccurrence,
+    } = getCentralDateParts();
 
     if (!ACTIVE_ORDERING_DAYS.has(todayDay)) {
       return res.status(403).json({
         ok: false,
         error: "ORDERING_CLOSED_TODAY",
         message: "Online ordering is closed today.",
+      });
+    }
+
+    if (
+      todayDay === "sunday" &&
+      !SUNDAY_ORDERING_OCCURRENCES.has(sundayOccurrence)
+    ) {
+      return res.status(403).json({
+        ok: false,
+        error: "ORDERING_CLOSED_TODAY",
+        message: "Sunday ordering is only available on 1st and 3rd Sundays.",
       });
     }
 
