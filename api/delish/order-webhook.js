@@ -101,6 +101,11 @@ export default async function handler(req, res) {
   try {
     const body = req.body;
 
+    // Prevent catering deposits from entering order pipeline
+    if (body?.lane === "catering") {
+      return res.status(200).json({ ok: true, ignored: "catering flow" });
+    }
+
     if (!isValidOrder(body)) {
       return res.status(400).json({ ok: false, error: "Invalid payload" });
     }
