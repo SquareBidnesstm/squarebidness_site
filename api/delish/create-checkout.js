@@ -252,7 +252,6 @@ function getCentralDateParts(date = new Date()) {
 function getAllowedItemsForToday(todayDay) {
   const dayItems = MENU_BY_DAY[todayDay] || [];
   const everydayItems = MENU_BY_DAY.everyday || [];
-
   return [...dayItems, ...everydayItems];
 }
 
@@ -264,7 +263,6 @@ function isItemAllowedForCurrentDay(itemId, todayDay) {
   if (FRIDAY_ONLY_ITEM_IDS.has(itemId)) {
     return todayDay === "friday";
   }
-
   return true;
 }
 
