@@ -45,6 +45,19 @@ export default async function handler(req, res) {
       const session = event.data.object;
       const metadata = session.metadata || {};
 
+      // Prevent duplicate processing if Stripe retries webhook delivery
+      const sessionId = session.id;
+      const alreadyProcessed = await redis.get(`delish:stripe:session:${sessionId}`);
+
+      if (alreadyProcessed) {
+        return res.status(200).json({ received: true, duplicate: true });
+      }
+
+      await redis.set(`delish:stripe:session:${sessionId}`, {
+        processedAt: new Date().toISOString(),
+        eventType: event.type,
+      });
+
       const isCateringDeposit =
         metadata.cateringRequestId &&
         (
@@ -74,6 +87,7 @@ export default async function handler(req, res) {
           };
 
           await redis.set(key, updated);
+
           console.log(
             "DELISH CATERING DEPOSIT PAID:",
             metadata.cateringRequestId,
