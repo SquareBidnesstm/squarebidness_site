@@ -59,6 +59,15 @@ export default async function handler(req, res) {
       return res.status(404).json({ ok: false, error: "Catering request not found." });
     }
 
+    // Prevent duplicate deposit session creation
+    if (existing.depositSessionId && existing.status === "deposit_sent") {
+      return res.status(200).json({
+        ok: true,
+        alreadyExists: true,
+        depositLink: existing.depositLink,
+      });
+    }
+
     const successUrl =
       process.env.DELISH_CATERING_STRIPE_SUCCESS_URL ||
       "https://www.squarebidness.com/delish/catering/success/";
@@ -73,21 +82,29 @@ export default async function handler(req, res) {
       success_url: `${successUrl}?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${cancelUrl}?request_id=${encodeURIComponent(id)}`,
       customer_email: existing.email || undefined,
+
       metadata: {
         brand: "Delish",
+
+        // 🔑 CRITICAL FOR WEBHOOK
         lane: "catering",
         type: "deposit",
         orderType: "catering_deposit",
+
         cateringRequestId: existing.id,
         requestNumber: existing.requestNumber,
+
         customerName: existing.customerName || "",
         customerPhone: existing.phone || "",
         customerEmail: existing.email || "",
+
         eventDate: existing.eventDate || "",
         eventTime: existing.eventTime || "",
         serviceType: existing.serviceType || "",
+
         depositAmount: String(deposit),
       },
+
       line_items: [
         {
           quantity: 1,
@@ -96,7 +113,9 @@ export default async function handler(req, res) {
             unit_amount: moneyToCents(deposit),
             product_data: {
               name: `Delish Catering Deposit — ${existing.requestNumber}`,
-              description: `${existing.eventDate || "Event date TBD"}${existing.eventTime ? ` • ${existing.eventTime}` : ""}`,
+              description: `${existing.eventDate || "Event date TBD"}${
+                existing.eventTime ? ` • ${existing.eventTime}` : ""
+              }`,
             },
           },
         },
@@ -115,6 +134,7 @@ export default async function handler(req, res) {
 
     await redis.set(key, updated);
 
+    // 📧 EMAIL
     if (existing.email) {
       await transporter.sendMail({
         from: `"Delish Catering" <${process.env.DELISH_SMTP_USER}>`,
@@ -139,6 +159,7 @@ Delish Catering
       });
     }
 
+    // 📱 SMS (optional)
     if (twilioClient && existing.phone) {
       try {
         await twilioClient.messages.create({
@@ -159,6 +180,7 @@ Delish Catering
       depositAmount: updated.depositAmount,
       depositLink: updated.depositLink,
     });
+
   } catch (error) {
     console.error("POST /api/delish/approve-catering error:", error);
     return res.status(500).json({
