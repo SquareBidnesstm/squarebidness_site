@@ -200,12 +200,18 @@ const ACTIVE_ORDERING_DAYS = new Set([
   "friday",
   "sunday",
 ]);
-
+const SUNDAY_ORDERING_OCCURRENCES = new Set([1, 3]);
 const FRIDAY_ONLY_ITEM_IDS = new Set([
   "extra_side_potato_salad",
   "extra_side_rice_dressing",
 ]);
-
+if (todayDay === "sunday" && !SUNDAY_ORDERING_OCCURRENCES.has(sundayOccurrence)) {
+  return res.status(403).json({
+    ok: false,
+    error: "ORDERING_CLOSED_TODAY",
+    message: "Sunday ordering is only available on 1st and 3rd Sundays.",
+  });
+}
 function isValidOrder(body) {
   return (
     body &&
@@ -310,7 +316,11 @@ export default async function handler(req, res) {
       });
     }
 
-    const { isoDate: todayIso, weekday: todayDay } = getCentralDateParts();
+   const {
+  isoDate: todayIso,
+  weekday: todayDay,
+  sundayOccurrence,
+} = getCentralDateParts();
 
     if (!ACTIVE_ORDERING_DAYS.has(todayDay)) {
       return res.status(403).json({
