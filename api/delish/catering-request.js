@@ -20,8 +20,7 @@ const transporter = nodemailer.createTransport({
 const hasTwilio =
   process.env.TWILIO_ACCOUNT_SID &&
   process.env.TWILIO_AUTH_TOKEN &&
-  process.env.TWILIO_FROM_NUMBER &&
-  process.env.TWILIO_TO_NUMBER;
+  process.env.TWILIO_FROM_NUMBER;
 
 const twilioClient = hasTwilio
   ? twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
@@ -116,9 +115,19 @@ export default async function handler(req, res) {
       });
     }
 
+    const normalizedPhone = normalizePhone(body.phone);
+    if (!normalizedPhone) {
+      return res.status(400).json({
+        ok: false,
+        error: "A valid phone number is required.",
+      });
+    }
+
     const id = crypto.randomUUID();
     const requestNumber = makeRequestNumber();
     const createdAt = new Date().toISOString();
+
+    const initialStatus = hasTwilio ? "awaiting_sms_confirmation" : "new_request";
 
     const record = {
       id,
@@ -126,12 +135,16 @@ export default async function handler(req, res) {
       createdAt,
       updatedAt: createdAt,
       completedAt: "",
-      status: "new_request",
+      status: initialStatus,
+
+      verified: hasTwilio ? "no" : "unknown",
+      verifiedAt: "",
+      smsSentAt: "",
 
       customerName: clean(body.fullName),
-      phone: clean(body.phone),
+      phone: normalizedPhone,
       email: clean(body.email),
-      smsConsent: clean(body.smsConsent) === "yes" ? "yes" : "no",
+      smsConsent: "yes",
 
       eventType: clean(body.eventType),
       eventDate: clean(body.eventDate),
@@ -154,6 +167,8 @@ export default async function handler(req, res) {
       depositSessionId: "",
       depositSentAt: "",
       depositPaidAt: "",
+      depositPaymentIntentId: "",
+      depositAmountPaid: "",
 
       source: clean(body._source) || "delish-catering-page",
       brand: clean(body._brand) || "Delish",
@@ -165,6 +180,10 @@ export default async function handler(req, res) {
     await redis.set(`delish:catering:${id}`, record);
     await redis.lpush("delish:catering:list", id);
 
+    if (hasTwilio) {
+      await redis.set(`delish:catering:phone:${normalizedPhone}`, id);
+    }
+
     const subject = `Delish Catering Request — ${record.customerName} — ${record.eventDate}`;
 
     const text = `
@@ -172,6 +191,7 @@ New Delish Catering Request
 
 Request #: ${requestNumber}
 Status: ${record.status}
+Verified: ${record.verified}
 
 ${line("Full Name", record.customerName)}
 ${line("Phone", record.phone)}
@@ -194,9 +214,6 @@ ${record.notes || "None"}
 Deposit Policy:
 ${record.depositPolicy}
 
-SMS Consent:
-${record.smsConsent === "yes" ? "Yes" : "No"}
-
 System Metadata:
 ${line("Brand", record.brand)}
 ${line("Form", record.form)}
@@ -216,29 +233,30 @@ ${line("Submitted At", record.submittedAt)}
         "delishcatering33@gmail.com",
     });
 
-    if (twilioClient) {
+    if (twilioClient && process.env.TWILIO_TO_NUMBER) {
       try {
         await twilioClient.messages.create({
-          body: `New Delish catering request ${requestNumber} from ${record.customerName} for ${record.eventDate}${record.eventTime ? ` at ${record.eventTime}` : ""}. Check email.`,
+          body: `New Delish catering request ${requestNumber} from ${record.customerName} for ${record.eventDate}${record.eventTime ? ` at ${record.eventTime}` : ""}.`,
           from: process.env.TWILIO_FROM_NUMBER,
           to: process.env.TWILIO_TO_NUMBER,
         });
       } catch (smsError) {
         console.error("DELISH CATERING OPERATOR SMS ERROR:", smsError);
       }
+    }
 
-      const customerPhone = normalizePhone(record.phone);
+    if (twilioClient) {
+      try {
+        await twilioClient.messages.create({
+          body: "Hey, confirming your catering request with Delish — reply YES to confirm your request.",
+          from: process.env.TWILIO_FROM_NUMBER,
+          to: normalizedPhone,
+        });
 
-      if (customerPhone && record.smsConsent === "yes") {
-        try {
-          await twilioClient.messages.create({
-            body: `Delish Catering: We received your request ${requestNumber}. We will review your event details and follow up if needed. Reply STOP to opt out.`,
-            from: process.env.TWILIO_FROM_NUMBER,
-            to: customerPhone,
-          });
-        } catch (smsError) {
-          console.error("DELISH CATERING CUSTOMER SMS ERROR:", smsError);
-        }
+        record.smsSentAt = new Date().toISOString();
+        await redis.set(`delish:catering:${id}`, record);
+      } catch (smsError) {
+        console.error("DELISH CATERING CUSTOMER SMS ERROR:", smsError);
       }
     }
 
@@ -247,6 +265,7 @@ ${line("Submitted At", record.submittedAt)}
       id,
       requestNumber,
       status: record.status,
+      verified: record.verified,
       message: "Catering request submitted successfully.",
     });
   } catch (error) {
