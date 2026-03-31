@@ -190,15 +190,18 @@ els.btn.addEventListener("click", async ()=>{
     });
 
     const data = await res.json();
-    if (!data.ok) throw new Error(data.error);
 
-    window.location.href = data.checkout_url;
+if (!res.ok || !data.ok) {
+  throw new Error(data.message || data.error || "Checkout failed");
+}
 
-  } catch (e) {
-    alert("Checkout failed");
-    els.btn.disabled = false;
-    els.btn.textContent = "Pay Now";
-  }
+window.location.href = data.checkout_url;
+
+} catch (e) {
+  alert(e.message || "Checkout failed");
+  els.btn.disabled = false;
+  els.btn.textContent = "Pay Now";
+}
 });
 </script>
 
