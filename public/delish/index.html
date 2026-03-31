@@ -1,6 +1,6 @@
 <!-- FILE: /public/delish/index.html -->
 <!doctype html>
-<html lang="en" data-sb-brand="delish" data-sb-tier="public" data-sb-variant="delish-index-v20260331-day-menu-only">
+<html lang="en" data-sb-brand="delish" data-sb-tier="public" data-sb-variant="delish-index-v20260331-day-menu-dropdowns">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -16,7 +16,7 @@
   <meta name="format-detection" content="telephone=no" />
   <meta name="theme-color" content="#0f0f0f" />
   <meta name="color-scheme" content="dark light" />
-  <meta name="sb:build" content="v20260331-delish-day-menu-only" />
+  <meta name="sb:build" content="v20260331-delish-day-menu-dropdowns" />
 
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Delish Daily Menu" />
@@ -490,8 +490,15 @@
                   <p>Optional</p>
                 </div>
 
-                <div class="menu-items" id="drinkItems">
-                  <!-- populated by JS -->
+                <div class="field field--full">
+                  <label for="drinkSelect">Choose a drink</label>
+                  <select id="drinkSelect" name="drinkSelect">
+                    <option value="">No drink</option>
+                    <option value="Tropical Punch Kool-Aid">Tropical Punch Kool-Aid</option>
+                    <option value="Lemonade">Lemonade</option>
+                    <option value="Can Soda">Can Soda</option>
+                    <option value="Bottle Water">Bottle Water</option>
+                  </select>
                 </div>
               </div>
 
@@ -501,8 +508,18 @@
                   <p>Optional</p>
                 </div>
 
-                <div class="menu-items" id="extraSideItems">
-                  <!-- populated by JS -->
+                <div class="field field--full">
+                  <label for="extraSideSelect">Choose an extra side</label>
+                  <select id="extraSideSelect" name="extraSideSelect">
+                    <option value="">No extra side</option>
+                    <option value="Mac and Cheese">Mac and Cheese</option>
+                    <option value="Yams">Yams</option>
+                    <option value="Corn">Corn</option>
+                    <option value="Cabbage">Cabbage</option>
+                    <option value="Green Salad">Green Salad</option>
+                    <option value="Black Eyed Peas">Black Eyed Peas</option>
+                    <option value="Green Beans">Green Beans</option>
+                  </select>
                 </div>
               </div>
 
@@ -630,23 +647,6 @@
       }
     };
 
-    const DRINKS = [
-      { id: "tropicalPunch", name: "Tropical Punch Kool-Aid" },
-      { id: "lemonade", name: "Lemonade" },
-      { id: "canSoda", name: "Can Soda" },
-      { id: "bottleWater", name: "Bottle Water" }
-    ];
-
-    const EXTRA_SIDES = [
-      { id: "macCheese", name: "Mac and Cheese" },
-      { id: "yams", name: "Yams" },
-      { id: "corn", name: "Corn" },
-      { id: "cabbage", name: "Cabbage" },
-      { id: "greenSalad", name: "Green Salad" },
-      { id: "blackEyedPeas", name: "Black Eyed Peas" },
-      { id: "greenBeans", name: "Green Beans" }
-    ];
-
     const LAGNIAPPE = [
       "Grilled Chicken Salad",
       "Grilled Shrimp Salad",
@@ -695,7 +695,7 @@
         return false;
       }
 
-      if (parts.weekday === "monday" || parts.weekday === "tuesday" || parts.weekday === "wednesday" || parts.weekday === "thursday" || parts.weekday === "friday") {
+      if (["monday","tuesday","wednesday","thursday","friday"].includes(parts.weekday)) {
         return true;
       }
 
@@ -737,8 +737,6 @@
     const mainDishHeading = document.getElementById("mainDishHeading");
     const mainDishSub = document.getElementById("mainDishSub");
     const mainDishItems = document.getElementById("mainDishItems");
-    const drinkItems = document.getElementById("drinkItems");
-    const extraSideItems = document.getElementById("extraSideItems");
     const lagniappeSelect = document.getElementById("lagniappeSelect");
     const payNowBtn = document.getElementById("payNowBtn");
     const payStatusLabel = document.getElementById("payStatusLabel");
@@ -766,8 +764,6 @@
       `;
     }
 
-    drinkItems.innerHTML = DRINKS.map(renderQtyItem).join("");
-    extraSideItems.innerHTML = EXTRA_SIDES.map(renderQtyItem).join("");
     lagniappeSelect.innerHTML += LAGNIAPPE.map(item => `<option value="${item}">${item}</option>`).join("");
 
     document.addEventListener("click", (e) => {
@@ -840,7 +836,6 @@
     });
 
     updatePayState();
-    document.getElementById("year").textContent = new Date().getFullYear();
   </script>
 
   <script type="application/ld+json">
