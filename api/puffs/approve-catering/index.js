@@ -1,4 +1,3 @@
-// /api/puffs/approve-catering/index.js
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.PUFFS_STRIPE_SECRET_KEY);
@@ -111,13 +110,35 @@ export default async function handler(req, res) {
       });
     }
 
+    if (order.status === "deposit_paid") {
+      return res.status(400).json({
+        ok: false,
+        error: "Deposit has already been paid for this request."
+      });
+    }
+
+    if (order.status === "closed") {
+      return res.status(400).json({
+        ok: false,
+        error: "This catering request is closed."
+      });
+    }
+
+    if (order.status !== "new_request" && order.status !== "deposit_sent") {
+      return res.status(400).json({
+        ok: false,
+        error: "This request cannot be approved from its current status."
+      });
+    }
+
     const successUrl =
       process.env.PUFFS_CATERING_SUCCESS_URL ||
       "https://www.squarebidness.com/puffs/catering/";
 
     const cancelUrl =
       process.env.PUFFS_CATERING_CANCEL_URL ||
-      "https://www.squarebidness.com/puffs/catering/orders/";
+      process.env.PUFFS_STRIPE_CANCEL_URL ||
+      "https://www.squarebidness.com/puffs/?canceled=1";
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -148,12 +169,15 @@ export default async function handler(req, res) {
       }
     });
 
+    const nowIso = new Date().toISOString();
+
     const updated = {
       ...order,
       status: "deposit_sent",
       depositAmount: depositAmount.toFixed(2),
       depositLink: session.url || "",
-      depositSentAt: new Date().toISOString()
+      depositSentAt: nowIso,
+      updatedAt: nowIso
     };
 
     await redisSet(key, updated);
