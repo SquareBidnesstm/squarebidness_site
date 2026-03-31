@@ -1,6 +1,6 @@
 <!-- FILE: /public/delish/index.html -->
 <!doctype html>
-<html lang="en" data-sb-brand="delish" data-sb-tier="public" data-sb-variant="delish-index-v20260331-day-menu-header-meta">
+<html lang="en" data-sb-brand="delish" data-sb-tier="public" data-sb-variant="delish-index-v20260331-final-header-status">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -16,7 +16,7 @@
   <meta name="format-detection" content="telephone=no" />
   <meta name="theme-color" content="#0f0f0f" />
   <meta name="color-scheme" content="dark light" />
-  <meta name="sb:build" content="v20260331-delish-day-menu-header-meta" />
+  <meta name="sb:build" content="v20260331-delish-index-final-header-status" />
 
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Delish Daily Menu" />
@@ -56,6 +56,8 @@
       --soft:#a79c8d;
       --accent:#d7ae72;
       --accent-2:#f2d7ad;
+      --danger:#ffd9d2;
+      --danger-text:#7f1d1d;
       --shadow:0 16px 50px rgba(0,0,0,.28);
       --max:1160px;
     }
@@ -63,7 +65,7 @@
     html{scroll-behavior:smooth}
     body{
       margin:0;
-      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
       background:
         radial-gradient(circle at top left, rgba(215,174,114,.14), transparent 28%),
         radial-gradient(circle at top right, rgba(215,174,114,.09), transparent 24%),
@@ -74,6 +76,7 @@
     img{max-width:100%;display:block}
     a{color:inherit;text-decoration:none}
     input,select,textarea,button{font:inherit}
+    button{cursor:pointer}
     .wrap{width:min(calc(100% - 32px),var(--max));margin:0 auto}
 
     .topbar{
@@ -103,24 +106,15 @@
     .brand__sub{margin:2px 0 0;color:var(--soft);font-size:.88rem}
 
     .header-meta{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      align-items:center;
+      display:grid;
+      gap:2px;
       color:var(--muted);
       font-size:.9rem;
       font-weight:600;
-      flex:1 1 100%;
+      text-align:right;
+      margin-left:auto;
     }
-
-    .header-chip{
-      display:inline-flex;
-      align-items:center;
-      min-height:36px;
-      padding:0 12px;
-      border-radius:999px;
-      background:rgba(255,255,255,.04);
-      border:1px solid rgba(255,255,255,.08);
+    .header-meta div{
       color:var(--text);
     }
 
@@ -357,6 +351,8 @@
       }
       .header-meta{
         width:100%;
+        text-align:left;
+        margin-left:0;
       }
     }
     @media (max-width:560px){
@@ -401,10 +397,10 @@
       </a>
 
       <div class="header-meta">
-        <span class="header-chip">3710 South MacArthur Drive, Alexandria, LA 71303</span>
-        <span class="header-chip">Common Point Shopping Center</span>
-        <span class="header-chip">Monday–Friday · 11:00 AM – 3:00 PM</span>
-        <span class="header-chip">1st &amp; 3rd Sundays · 11:00 AM – 3:00 PM</span>
+        <div>3710 South MacArthur Drive, Alexandria, LA 71303</div>
+        <div>Common Point Shopping Center</div>
+        <div>Monday–Friday · 11:00 AM – 3:00 PM</div>
+        <div id="sundayStatusLine">Checking Sunday schedule...</div>
       </div>
 
       <div class="cta-row">
@@ -491,13 +487,6 @@
                   <label for="extraSideSelect">Choose an extra side</label>
                   <select id="extraSideSelect" name="extraSideSelect">
                     <option value="">No extra side</option>
-                    <option value="Mac and Cheese">Mac and Cheese</option>
-                    <option value="Yams">Yams</option>
-                    <option value="Corn">Corn</option>
-                    <option value="Cabbage">Cabbage</option>
-                    <option value="Green Salad">Green Salad</option>
-                    <option value="Black Eyed Peas">Black Eyed Peas</option>
-                    <option value="Green Beans">Green Beans</option>
                   </select>
                 </div>
               </div>
@@ -536,9 +525,7 @@
   <footer class="footer">
     <div class="wrap footer__inner">
       <div>© <span id="year"></span> Delish.</div>
-      <div>
-        <a href="/delish/catering/">Catering</a>
-      </div>
+      <div><a href="/delish/catering/">Catering</a></div>
     </div>
   </footer>
 
@@ -552,7 +539,8 @@
         mains: [
           { id: "redBeansChicken", name: "Red Beans or Okra with Fried Chicken" },
           { id: "hamburgerSteak", name: "Hamburger Steak Plate" }
-        ]
+        ],
+        extraSides: ["Mac and Cheese", "Yams", "Corn", "Cabbage", "Green Salad", "Black Eyed Peas", "Green Beans"]
       },
       tuesday: {
         heading: "Tuesday Main Dishes",
@@ -560,7 +548,8 @@
         mains: [
           { id: "beefTips", name: "Beef Tips Plate" },
           { id: "meatloaf", name: "Meatloaf Plate" }
-        ]
+        ],
+        extraSides: ["Mac and Cheese", "Yams", "Corn", "Cabbage", "Green Salad", "Black Eyed Peas", "Green Beans"]
       },
       wednesday: {
         heading: "Wednesday Main Dishes",
@@ -569,14 +558,16 @@
           { id: "porkNeckbones", name: "Pork Neckbones Plate" },
           { id: "bakedChicken", name: "Baked Chicken Plate" },
           { id: "countryFriedSteak", name: "Country Fried Steak Plate" }
-        ]
+        ],
+        extraSides: ["Mac and Cheese", "Yams", "Corn", "Cabbage", "Green Salad", "Black Eyed Peas", "Green Beans"]
       },
       thursday: {
         heading: "Thursday Main Dishes",
         sub: "Available today from 11:00 AM – 3:00 PM.",
         mains: [
           { id: "turkeyWings", name: "Turkey Wings Plate" }
-        ]
+        ],
+        extraSides: ["Mac and Cheese", "Yams", "Corn", "Cabbage", "Green Salad", "Black Eyed Peas", "Green Beans"]
       },
       friday: {
         heading: "Friday Main Dishes",
@@ -586,7 +577,8 @@
           { id: "shrimpPasta", name: "Shrimp Pasta Plate" },
           { id: "friedCatfish", name: "Fried Catfish Plate" },
           { id: "bakedCatfish", name: "Baked Catfish Plate" }
-        ]
+        ],
+        extraSides: ["Mac and Cheese", "Yams", "Corn", "Cabbage", "Green Salad", "Black Eyed Peas", "Green Beans", "Potato Salad", "Rice Dressing"]
       },
       sunday: {
         heading: "Sunday Main Dishes",
@@ -595,7 +587,8 @@
           { id: "porkSteakGravy", name: "Pork Steak and Gravy Plate" },
           { id: "oxtails", name: "Oxtails Plate" },
           { id: "sundayBakedChicken", name: "Baked Chicken Plate" }
-        ]
+        ],
+        extraSides: ["Mac and Cheese", "Yams", "Corn", "Cabbage", "Green Salad", "Black Eyed Peas", "Green Beans", "Potato Salad", "Rice Dressing"]
       }
     };
 
@@ -608,17 +601,30 @@
       "Cheeseburger Basket"
     ];
 
-    function getCentralDayParts() {
+    const mainDishHeading = document.getElementById("mainDishHeading");
+    const mainDishSub = document.getElementById("mainDishSub");
+    const mainDishItems = document.getElementById("mainDishItems");
+    const extraSideSelect = document.getElementById("extraSideSelect");
+    const lagniappeSelect = document.getElementById("lagniappeSelect");
+    const payNowBtn = document.getElementById("payNowBtn");
+    const payStatusLabel = document.getElementById("payStatusLabel");
+    const payStatusSub = document.getElementById("payStatusSub");
+    const sundayStatusLine = document.getElementById("sundayStatusLine");
+    const orderForm = document.getElementById("delishOrderForm");
+
+    function getCentralDayParts(date = new Date()) {
       const formatter = new Intl.DateTimeFormat("en-CA", {
         timeZone: "America/Chicago",
         weekday: "long",
         day: "2-digit",
         hour: "2-digit",
         minute: "2-digit",
+        month: "2-digit",
+        year: "numeric",
         hour12: false
       });
 
-      const parts = formatter.formatToParts(new Date());
+      const parts = formatter.formatToParts(date);
       const map = {};
       parts.forEach((part) => {
         if (part.type !== "literal") {
@@ -630,7 +636,9 @@
         weekday: String(map.weekday || "").toLowerCase(),
         dayOfMonth: Number(map.day || 0),
         hour: Number(map.hour || 0),
-        minute: Number(map.minute || 0)
+        minute: Number(map.minute || 0),
+        month: Number(map.month || 0),
+        year: Number(map.year || 0)
       };
     }
 
@@ -686,14 +694,85 @@
       `;
     }
 
-    const mainDishHeading = document.getElementById("mainDishHeading");
-    const mainDishSub = document.getElementById("mainDishSub");
-    const mainDishItems = document.getElementById("mainDishItems");
-    const lagniappeSelect = document.getElementById("lagniappeSelect");
-    const payNowBtn = document.getElementById("payNowBtn");
-    const payStatusLabel = document.getElementById("payStatusLabel");
-    const payStatusSub = document.getElementById("payStatusSub");
-    const orderForm = document.getElementById("delishOrderForm");
+    function formatOrdinal(n) {
+      if (n === 1) return "1st";
+      if (n === 2) return "2nd";
+      if (n === 3) return "3rd";
+      if (n === 4) return "4th";
+      return `${n}th`;
+    }
+
+    function getNextSundayInfo() {
+      const now = new Date();
+
+      const formatter = new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/Chicago",
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year: "numeric"
+      });
+
+      for (let i = 0; i < 14; i++) {
+        const testDate = new Date(now);
+        testDate.setDate(now.getDate() + i);
+
+        const parts = getCentralDayParts(testDate);
+        if (parts.weekday === "sunday") {
+          const occurrence = getSundayOccurrence(parts.dayOfMonth);
+          return {
+            occurrence,
+            formattedDate: formatter.format(testDate)
+          };
+        }
+      }
+
+      return null;
+    }
+
+    function setSundayStatusLine() {
+      if (!sundayStatusLine) return;
+
+      const parts = getCentralDayParts();
+      const nextSunday = getNextSundayInfo();
+
+      if (parts.weekday === "saturday") {
+        if (nextSunday && (nextSunday.occurrence === 1 || nextSunday.occurrence === 3)) {
+          sundayStatusLine.textContent = `Closed Saturday · Open this Sunday (${formatOrdinal(nextSunday.occurrence)} Sunday — ${nextSunday.formattedDate})`;
+          return;
+        }
+
+        if (nextSunday) {
+          sundayStatusLine.textContent = `Closed Saturday · Closed this Sunday (${formatOrdinal(nextSunday.occurrence)} Sunday — ${nextSunday.formattedDate})`;
+          return;
+        }
+
+        sundayStatusLine.textContent = "Closed Saturday";
+        return;
+      }
+
+      if (parts.weekday === "sunday") {
+        const occurrence = getSundayOccurrence(parts.dayOfMonth);
+
+        if (occurrence === 1 || occurrence === 3) {
+          sundayStatusLine.textContent = `Open this Sunday (${formatOrdinal(occurrence)} Sunday) · 11:00 AM – 3:00 PM`;
+        } else {
+          sundayStatusLine.textContent = `Closed this Sunday (${formatOrdinal(occurrence)} Sunday)`;
+        }
+        return;
+      }
+
+      if (nextSunday) {
+        if (nextSunday.occurrence === 1 || nextSunday.occurrence === 3) {
+          sundayStatusLine.textContent = `Open this Sunday (${formatOrdinal(nextSunday.occurrence)} Sunday — ${nextSunday.formattedDate})`;
+        } else {
+          sundayStatusLine.textContent = `Closed this Sunday (${formatOrdinal(nextSunday.occurrence)} Sunday — ${nextSunday.formattedDate})`;
+        }
+        return;
+      }
+
+      sundayStatusLine.textContent = "1st & 3rd Sundays · 11:00 AM – 3:00 PM";
+    }
 
     const todayParts = getCentralDayParts();
     const todayMenu = getTodayMenu(todayParts);
@@ -703,6 +782,8 @@
       mainDishHeading.textContent = todayMenu.heading;
       mainDishSub.textContent = todayMenu.sub;
       mainDishItems.innerHTML = todayMenu.mains.map(renderQtyItem).join("");
+      extraSideSelect.innerHTML = '<option value="">No extra side</option>' +
+        todayMenu.extraSides.map(side => `<option value="${side}">${side}</option>`).join("");
     } else {
       mainDishHeading.textContent = "Today’s Menu";
       mainDishSub.textContent = "Delish is closed today.";
@@ -714,6 +795,7 @@
           </div>
         </div>
       `;
+      extraSideSelect.innerHTML = '<option value="">No extra side</option>';
     }
 
     lagniappeSelect.innerHTML += LAGNIAPPE.map(item => `<option value="${item}">${item}</option>`).join("");
@@ -788,6 +870,7 @@
     });
 
     updatePayState();
+    setSundayStatusLine();
   </script>
 
   <script type="application/ld+json">
