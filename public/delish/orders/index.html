@@ -290,35 +290,50 @@
     }
 
     .cross-links{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-bottom:14px;
-}
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:14px;
+    }
 
-.cross-link{
-  display:inline-flex;
-  align-items:center;
-  min-height:42px;
-  padding:0 14px;
-  border-radius:999px;
-  background:var(--panel);
-  border:1px solid var(--line);
-  color:var(--muted);
-  font-weight:800;
-  text-decoration:none;
-}
+    .cross-link{
+      display:inline-flex;
+      align-items:center;
+      min-height:42px;
+      padding:0 14px;
+      border-radius:999px;
+      background:var(--panel);
+      border:1px solid var(--line);
+      color:var(--muted);
+      font-weight:800;
+      text-decoration:none;
+    }
 
-.cross-link:hover{
-  color:var(--text);
-  border-color:rgba(255,255,255,.2);
-}
+    .cross-link:hover{
+      color:var(--text);
+      border-color:rgba(255,255,255,.2);
+    }
 
-.cross-link.active{
-  background:rgba(215,174,114,.15);
-  border-color:rgba(215,174,114,.35);
-  color:var(--accent-2);
-}
+    .cross-link.active{
+      background:rgba(215,174,114,.15);
+      border-color:rgba(215,174,114,.35);
+      color:var(--accent-2);
+    }
+
+    .badge{
+      margin-left:8px;
+      min-width:22px;
+      height:22px;
+      padding:0 6px;
+      border-radius:999px;
+      background:#d7ae72;
+      color:#181410;
+      font-size:.75rem;
+      font-weight:900;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+    }
   </style>
 </head>
 <body>
@@ -349,9 +364,14 @@
     </section>
 
     <div class="cross-links">
-  <a href="/delish/orders/" class="cross-link active">Kitchen Orders</a>
-  <a href="/delish/catering/orders/" class="cross-link">Catering Orders</a>
-</div>
+      <a href="/delish/orders/" class="cross-link active">
+        Kitchen Orders
+      </a>
+      <a href="/delish/catering/orders/" class="cross-link" id="cateringLink">
+        Catering Orders
+        <span id="cateringBadge" class="badge" style="display:none;">0</span>
+      </a>
+    </div>
 
     <section id="orders" class="orders">
       <div class="empty">Loading active paid orders...</div>
@@ -408,6 +428,7 @@
         }
 
         await loadOrders();
+        await loadCateringCount();
       } catch (error) {
         button.disabled = false;
         button.textContent = originalText;
@@ -482,6 +503,27 @@
       });
     }
 
+    async function loadCateringCount(){
+      try {
+        const res = await fetch("/api/delish/catering-orders/", { cache: "no-store" });
+        const data = await res.json();
+
+        if (!data.ok) return;
+
+        const count = (data.orders || []).length;
+        const badge = document.getElementById("cateringBadge");
+
+        if (count > 0) {
+          badge.style.display = "inline-flex";
+          badge.textContent = count;
+        } else {
+          badge.style.display = "none";
+        }
+      } catch (e) {
+        console.error("Catering badge error:", e);
+      }
+    }
+
     async function loadOrders(){
       try {
         const res = await fetch("/api/delish/orders/", { cache: "no-store" });
@@ -501,8 +543,13 @@
       }
     }
 
-    loadOrders();
-    setInterval(loadOrders, 15000);
+    async function refreshAll() {
+      await loadOrders();
+      await loadCateringCount();
+    }
+
+    refreshAll();
+    setInterval(refreshAll, 15000);
   </script>
 </body>
 </html>
