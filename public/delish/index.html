@@ -175,13 +175,34 @@ els.btn.addEventListener("click", async ()=>{
     if (els.rib.value > 0)
       items.push({ id:"rib", qty:+els.rib.value });
 
-    const payload = {
-      customerName: customerName.value,
-      customerPhone: customerPhone.value,
-      pickupWindow: pickupWindow.value,
-      items,
-      total: Number(els.total.textContent)
-    };
+    function getCentralDateString() {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Chicago",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(new Date());
+
+  const map = {};
+  parts.forEach((part) => {
+    if (part.type !== "literal") map[part.type] = part.value;
+  });
+
+  return `${map.year}-${map.month}-${map.day}`;
+}
+
+const payload = {
+  customerName: customerName.value.trim(),
+  customerPhone: customerPhone.value.trim(),
+  customerEmail: "",
+  pickupDate: getCentralDateString(),
+  pickupWindow: pickupWindow.value,
+  items,
+  subtotal: Number(els.total.textContent),
+  tax: 0,
+  total: Number(els.total.textContent),
+  source: "delish-web"
+};
 
     const res = await fetch("/api/delish/create-checkout/", {
       method:"POST",
