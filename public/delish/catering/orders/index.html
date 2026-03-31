@@ -103,7 +103,7 @@
 
     .summary{
       display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
+      grid-template-columns:repeat(4,minmax(0,1fr));
       gap:14px;
       margin:22px 0 24px;
     }
@@ -204,10 +204,16 @@
       text-transform:uppercase;
     }
 
-    .status-pill.status-new_request{
+    .status-pill.status-awaiting_sms_confirmation{
       background:rgba(215,174,114,.10);
       border-color:rgba(215,174,114,.24);
       color:#f3dfb8;
+    }
+
+    .status-pill.status-verified{
+      background:rgba(86,180,120,.14);
+      border-color:rgba(86,180,120,.26);
+      color:#d7f3df;
     }
 
     .status-pill.status-deposit_sent{
@@ -329,6 +335,15 @@
       font-size:.94rem;
     }
 
+    .verify-note{
+      padding:12px 14px;
+      border-radius:14px;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.07);
+      color:var(--muted);
+      font-size:.95rem;
+    }
+
     @media (max-width:900px){
       .summary{ grid-template-columns:1fr; }
       .grid{ grid-template-columns:1fr; }
@@ -400,8 +415,12 @@
         <div id="summaryTotal" class="summary-value">—</div>
       </div>
       <div class="summary-card">
-        <div class="summary-label">New Requests</div>
-        <div id="summaryNew" class="summary-value">—</div>
+        <div class="summary-label">Awaiting SMS</div>
+        <div id="summaryAwaiting" class="summary-value">—</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">Verified</div>
+        <div id="summaryVerified" class="summary-value">—</div>
       </div>
       <div class="summary-card">
         <div class="summary-label">Deposit Paid</div>
@@ -460,8 +479,12 @@
 
     function setSummary(orders) {
       document.getElementById("summaryTotal").textContent = orders.length;
-      document.getElementById("summaryNew").textContent = orders.filter((o) => o.status === "new_request").length;
-      document.getElementById("summaryPaid").textContent = orders.filter((o) => o.status === "deposit_paid").length;
+      document.getElementById("summaryAwaiting").textContent =
+        orders.filter((o) => o.status === "awaiting_sms_confirmation").length;
+      document.getElementById("summaryVerified").textContent =
+        orders.filter((o) => o.status === "verified").length;
+      document.getElementById("summaryPaid").textContent =
+        orders.filter((o) => o.status === "deposit_paid").length;
     }
 
     async function approveCatering(id) {
@@ -509,7 +532,8 @@
     }
 
     function renderOrderCard(order) {
-      const canApprove = order.status === "new_request";
+      const canApprove = order.status === "verified";
+      const isAwaiting = order.status === "awaiting_sms_confirmation";
       const depositAmount = order.depositAmount ? escapeHtml(order.depositAmount) : "";
 
       return `
@@ -560,8 +584,10 @@
 
           <div class="grid" style="margin-top:14px;">
             <div class="panel">
-              <div class="label">Deposit</div>
+              <div class="label">Verification / Deposit</div>
               <div class="value">
+                <strong>Verified:</strong> ${escapeHtml(order.verified || "no")}<br />
+                <strong>Verified At:</strong> ${escapeHtml(formatDateTime(order.verifiedAt))}<br />
                 <strong>Amount:</strong> ${escapeHtml(order.depositAmount || "—")}<br />
                 <strong>Sent At:</strong> ${escapeHtml(formatDateTime(order.depositSentAt))}<br />
                 <strong>Paid At:</strong> ${escapeHtml(formatDateTime(order.depositPaidAt))}
@@ -595,7 +621,14 @@
               >
                 Approve + Send Deposit
               </button>
-            ` : ""}
+            ` : isAwaiting ? `
+              <div class="verify-note">Awaiting SMS confirmation (customer must reply YES)</div>
+            ` : `
+              <div class="mini-status">
+                ${order.status === "deposit_sent" ? "Deposit sent" : ""}
+                ${order.status === "deposit_paid" ? "Deposit paid" : ""}
+              </div>
+            `}
             <div class="mini-status" data-approve-status="${escapeHtml(order.id)}"></div>
           </div>
 
