@@ -1,15 +1,11 @@
-<!-- FILE: /public/delish/index.html -->
 <!doctype html>
-<html lang="en" data-sb-brand="delish" data-sb-tier="public" data-sb-variant="delish-index-v20260331-live-checkout">
+<html lang="en" data-sb-brand="delish" data-sb-tier="public" data-sb-build="v20260331-delish-index-live-checkout">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
 
   <title>Delish Daily Menu | Alexandria, Louisiana</title>
-  <meta
-    name="description"
-    content="Delish daily menu in Alexandria, Louisiana. Order online and pick up on arrival."
-  />
+  <meta name="description" content="Delish daily menu in Alexandria, Louisiana. Order online and pick up on arrival." />
 
   <link rel="canonical" href="https://www.squarebidness.com/delish/" />
   <meta name="robots" content="index,follow" />
@@ -18,6 +14,7 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="sb:build" content="v20260331-delish-index-live-checkout" />
 
+  <!-- OG -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Delish Daily Menu" />
   <meta property="og:description" content="Order online. Pickup on arrival." />
@@ -29,965 +26,181 @@
   <meta property="og:image:alt" content="Delish daily menu in Alexandria, Louisiana" />
   <meta property="fb:app_id" content="802680062853443" />
 
+  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Delish Daily Menu" />
   <meta name="twitter:description" content="Order online. Pickup on arrival." />
   <meta name="twitter:image" content="https://www.squarebidness.com/delish/assets/delish-meta_1200x630.jpg" />
 
+  <!-- Icons -->
   <link rel="manifest" href="/delish/manifest.json" />
-  <link rel="icon" type="image/png" sizes="16x16" href="/delish/assets/delish-favicon-16.png" />
-  <link rel="icon" type="image/png" sizes="32x32" href="/delish/assets/delish-favicon-32.png" />
+  <link rel="icon" sizes="16x16" href="/delish/assets/delish-favicon-16.png" />
+  <link rel="icon" sizes="32x32" href="/delish/assets/delish-favicon-32.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/delish/assets/delish-logo-mark-180.png" />
-  <link rel="icon" type="image/png" sizes="192x192" href="/delish/assets/delish-logo-mark-192.png" />
-  <link rel="icon" type="image/png" sizes="512x512" href="/delish/assets/delish-logo-mark-512.png" />
 
+  <!-- Analytics -->
   <script defer src="/scripts/ga.js"></script>
   <script defer src="/scripts/sb-analytics.js"></script>
   <script defer src="/scripts/meta-pixel.js"></script>
   <script defer src="/scripts/sb-meta-bridge.js"></script>
 
   <style>
-    :root{
-      --bg:#0f0f10;
-      --card:#1d1d1f;
-      --line:#2c2c2f;
-      --text:#f5f2ea;
-      --muted:#cfc7ba;
-      --soft:#a79c8d;
-      --accent:#d7ae72;
-      --accent-2:#f2d7ad;
-      --danger:#ffd9d2;
-      --danger-text:#7f1d1d;
-      --shadow:0 16px 50px rgba(0,0,0,.28);
-      --max:1160px;
+    body { margin:0; font-family:system-ui; background:#0b0b0b; color:#fff; }
+    .wrap { max-width:700px; margin:auto; padding:20px; }
+    h1 { font-size:28px; }
+    .section { margin-top:24px; }
+    input, select {
+      width:100%; padding:14px; margin-top:8px;
+      border-radius:10px; border:none; font-size:16px;
     }
-    *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
-    body{
-      margin:0;
-      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-      background:
-        radial-gradient(circle at top left, rgba(215,174,114,.14), transparent 28%),
-        radial-gradient(circle at top right, rgba(215,174,114,.09), transparent 24%),
-        linear-gradient(180deg,#111112 0%,#0c0c0d 100%);
-      color:var(--text);
-      line-height:1.55;
+    .menuItem { display:flex; justify-content:space-between; margin:12px 0; }
+    .qty { width:70px; }
+    .totalBox { margin-top:20px; font-size:20px; font-weight:bold; }
+    button {
+      width:100%; padding:16px; margin-top:20px;
+      border:none; border-radius:12px;
+      background:#D4AF37; color:#000;
+      font-size:18px; font-weight:bold;
     }
-    img{max-width:100%;display:block}
-    a{color:inherit;text-decoration:none}
-    input,select,textarea,button{font:inherit}
-    button{cursor:pointer}
-    .wrap{width:min(calc(100% - 32px),var(--max));margin:0 auto}
-
-    .topbar{
-      position:sticky;
-      top:0;
-      z-index:50;
-      backdrop-filter:blur(14px);
-      background:rgba(12,12,13,.76);
-      border-bottom:1px solid rgba(255,255,255,.06);
-    }
-    .topbar__inner{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:16px;
-      min-height:74px;
-      flex-wrap:wrap;
-      padding:12px 0;
-    }
-    .brand{display:flex;align-items:center;gap:12px;min-width:0}
-    .brand__mark{
-      width:44px;height:44px;border-radius:14px;object-fit:cover;background:#fff;
-      border:1px solid rgba(255,255,255,.08);box-shadow:var(--shadow);flex:0 0 auto;
-    }
-    .brand__text{min-width:0}
-    .brand__name{margin:0;font-size:1.05rem;font-weight:800;letter-spacing:.01em}
-    .brand__sub{margin:2px 0 0;color:var(--soft);font-size:.88rem}
-
-    .header-meta{
-      display:grid;
-      gap:2px;
-      color:var(--muted);
-      font-size:.9rem;
-      font-weight:600;
-      text-align:right;
-      margin-left:auto;
-    }
-    .header-meta div{color:var(--text)}
-
-    .cta-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-    .btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      border:1px solid transparent;
-      border-radius:999px;
-      min-height:48px;
-      padding:0 18px;
-      font-weight:800;
-      letter-spacing:.01em;
-      transition:transform .14s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease, opacity .18s ease;
-      cursor:pointer;
-      white-space:nowrap;
-    }
-    .btn:hover{transform:translateY(-1px)}
-    .btn--gold{
-      background:linear-gradient(180deg,var(--accent-2),var(--accent));
-      color:#181410;
-      box-shadow:0 12px 30px rgba(215,174,114,.24);
-    }
-    .btn--dark{
-      background:rgba(255,255,255,.04);
-      border-color:rgba(255,255,255,.10);
-      color:var(--text);
-    }
-    .btn[disabled]{
-      opacity:.55;
-      cursor:not-allowed;
-      transform:none;
-      box-shadow:none;
-    }
-
-    .hero{padding:28px 0 18px}
-    .hero__shell{
-      border:1px solid rgba(255,255,255,.08);
-      background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
-      border-radius:28px;
-      box-shadow:var(--shadow);
-      overflow:hidden;
-      padding:22px;
-    }
-
-    .section__eyebrow{
-      margin:0 0 8px;
-      color:var(--accent-2);
-      font-size:.82rem;
-      text-transform:uppercase;
-      letter-spacing:.08em;
-      font-weight:900;
-    }
-    .section__title{
-      margin:0;
-      font-size:clamp(2rem,4.4vw,3.3rem);
-      line-height:.96;
-      letter-spacing:-.04em;
-    }
-    .section__copy{
-      margin:12px 0 0;
-      color:var(--muted);
-      max-width:680px;
-      font-size:1rem;
-    }
-
-    .order-shell{
-      margin-top:18px;
-      background:
-        radial-gradient(circle at top right, rgba(215,174,114,.08), transparent 32%),
-        linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:28px;
-      box-shadow:var(--shadow);
-      padding:22px;
-    }
-
-    .order-grid{
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:14px;
-    }
-    .field{display:grid;gap:8px}
-    .field--full{grid-column:1 / -1}
-    label{
-      font-size:.93rem;
-      font-weight:800;
-      color:var(--text);
-    }
-    .req{color:var(--accent-2);margin-left:4px}
-    input,select,textarea{
-      width:100%;
-      min-height:52px;
-      padding:14px 15px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.03);
-      color:var(--text);
-      outline:none;
-      transition:border-color .18s ease, background .18s ease, box-shadow .18s ease;
-    }
-    input::placeholder,textarea::placeholder{color:#968d81}
-    input:focus,select:focus,textarea:focus{
-      border-color:rgba(215,174,114,.55);
-      background:rgba(255,255,255,.045);
-      box-shadow:0 0 0 4px rgba(215,174,114,.10);
-    }
-
-    .menu-block{
-      margin-top:18px;
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:22px;
-      background:rgba(255,255,255,.03);
-      padding:18px;
-    }
-    .menu-head{
-      display:flex;
-      justify-content:space-between;
-      align-items:end;
-      gap:12px;
-      flex-wrap:wrap;
-      margin-bottom:12px;
-    }
-    .menu-head h2{
-      margin:0;
-      font-size:1.08rem;
-      letter-spacing:-.02em;
-      color:var(--accent-2);
-    }
-    .menu-head p{
-      margin:0;
-      color:var(--soft);
-      font-size:.92rem;
-    }
-
-    .menu-items{display:grid;gap:10px}
-    .menu-item{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:14px;
-      padding:14px 0;
-      border-top:1px dashed rgba(255,255,255,.08);
-    }
-    .menu-item:first-child{
-      padding-top:0;
-      border-top:0;
-    }
-    .menu-item strong{
-      display:block;
-      color:var(--text);
-      margin-bottom:4px;
-    }
-    .menu-item span{
-      color:var(--muted);
-      font-size:.95rem;
-    }
-
-    .qty-box{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      flex:0 0 auto;
-    }
-    .qty-btn{
-      width:36px;
-      height:36px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.04);
-      color:var(--text);
-      font-weight:900;
-      cursor:pointer;
-    }
-    .qty-input{
-      width:58px;
-      min-height:40px;
-      text-align:center;
-      padding:8px 10px;
-      border-radius:12px;
-    }
-
-    .status{
-      display:none;
-      margin-top:16px;
-      padding:14px 16px;
-      border-radius:16px;
-      background:var(--danger);
-      color:var(--danger-text);
-      border:1px solid rgba(127,29,29,.12);
-      font-weight:700;
-    }
-    .status.is-visible{display:block}
-
-    .paybar{
-      margin-top:20px;
-      padding-top:18px;
-      border-top:1px solid rgba(255,255,255,.08);
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:16px;
-      flex-wrap:wrap;
-    }
-    .paybar-copy{
-      display:grid;
-      gap:4px;
-    }
-    .paybar-copy strong{
-      font-size:1rem;
-      color:var(--text);
-    }
-    .paybar-copy span{
-      color:var(--soft);
-      font-size:.92rem;
-    }
-
-    .footer{
-      padding:28px 0 44px;
-      color:var(--soft);
-    }
-    .footer__inner{
-      display:flex;
-      justify-content:space-between;
-      gap:20px;
-      flex-wrap:wrap;
-      padding-top:20px;
-      border-top:1px solid rgba(255,255,255,.08);
-    }
-
-    @media (max-width:980px){
-      .order-grid{grid-template-columns:1fr}
-    }
-    @media (max-width:820px){
-      .topbar__inner{align-items:flex-start}
-      .header-meta{
-        width:100%;
-        text-align:left;
-        margin-left:0;
-      }
-    }
-    @media (max-width:560px){
-      .wrap{width:min(calc(100% - 20px),var(--max))}
-      .hero{padding-top:18px}
-      .hero__shell,
-      .order-shell,
-      .menu-block{
-        padding:18px;
-      }
-      .menu-item{flex-direction:column}
-      .paybar{align-items:flex-start}
-      .paybar .btn{width:100%}
-    }
+    button:disabled { background:#555; }
+    .headerNote { font-size:14px; color:#ccc; margin-top:6px; }
   </style>
 </head>
+
 <body>
-  <noscript>
-    <img
-      height="1"
-      width="1"
-      style="display:none"
-      src="https://www.facebook.com/tr?id=914123084877133&ev=PageView&noscript=1"
-      alt=""
-    />
-  </noscript>
 
-  <header class="topbar" id="top">
-    <div class="wrap topbar__inner">
-      <a class="brand" href="/delish/" aria-label="Delish daily menu">
-        <img class="brand__mark" src="/delish/assets/delish-logo-mark-512.png" alt="Delish logo mark" loading="eager" decoding="async" />
-        <div class="brand__text">
-          <p class="brand__name">Delish</p>
-          <p class="brand__sub">Today’s Menu</p>
-        </div>
-      </a>
+<div class="wrap">
 
-      <div class="header-meta">
-        <div>3710 South MacArthur Drive, Alexandria, LA 71303</div>
-        <div>Common Point Shopping Center</div>
-        <div>Monday–Friday · 11:00 AM – 3:00 PM</div>
-        <div id="sundayStatusLine">Checking Sunday schedule...</div>
-      </div>
+  <h1>Delish — Daily Menu</h1>
+  <div class="headerNote">
+    Pickup Only · Alexandria, Louisiana · Order online, pickup on arrival
+  </div>
 
-      <div class="cta-row">
-        <a class="btn btn--dark" href="/delish/catering/">Catering</a>
-      </div>
+  <!-- CUSTOMER -->
+  <div class="section">
+    <input id="customerName" placeholder="Full Name" />
+    <input id="customerPhone" placeholder="Phone Number" />
+    <select id="pickupWindow">
+      <option value="">Select Pickup Time</option>
+      <option>11:30 AM</option>
+      <option>12:00 PM</option>
+      <option>12:30 PM</option>
+      <option>1:00 PM</option>
+      <option>1:30 PM</option>
+      <option>2:00 PM</option>
+    </select>
+  </div>
+
+  <!-- MENU -->
+  <div class="section">
+    <h2>Main Plates</h2>
+
+    <div class="menuItem">
+      <span>Turkey Wings ($15)</span>
+      <input type="number" min="0" value="0" id="turkeyQty" class="qty"/>
     </div>
-  </header>
 
-  <main>
-    <section class="hero">
-      <div class="wrap">
-        <div class="hero__shell">
-          <p class="section__eyebrow">Today’s Menu</p>
-          <h1 class="section__title">Order online. Pickup on arrival.</h1>
-          <p class="section__copy">
-            Build your order below and pay online when ordering opens.
-          </p>
-
-          <section class="order-shell">
-            <form id="delishOrderForm" novalidate>
-              <div class="order-grid">
-                <div class="field">
-                  <label for="customerName">Name<span class="req">*</span></label>
-                  <input id="customerName" name="customerName" type="text" placeholder="Your name" required />
-                </div>
-
-                <div class="field">
-                  <label for="customerPhone">Phone number<span class="req">*</span></label>
-                  <input id="customerPhone" name="customerPhone" type="tel" inputmode="tel" placeholder="(318) 555-1234" required />
-                </div>
-
-                <div class="field field--full">
-                  <label for="pickupWindow">Pickup window<span class="req">*</span></label>
-                  <select id="pickupWindow" name="pickupWindow" required>
-                    <option value="">Select pickup window</option>
-                    <option>11:00 AM – 11:30 AM</option>
-                    <option>11:30 AM – 12:00 PM</option>
-                    <option>12:00 PM – 12:30 PM</option>
-                    <option>12:30 PM – 1:00 PM</option>
-                    <option>1:00 PM – 1:30 PM</option>
-                    <option>1:30 PM – 2:00 PM</option>
-                    <option>2:00 PM – 2:30 PM</option>
-                    <option>2:30 PM – 3:00 PM</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="menu-block">
-                <div class="menu-head">
-                  <h2 id="mainDishHeading">Main Dish Selection</h2>
-                  <p id="mainDishSub">Select at least one main item.</p>
-                </div>
-
-                <div class="menu-items" id="mainDishItems">
-                  <!-- populated by JS -->
-                </div>
-              </div>
-
-              <div class="menu-block">
-                <div class="menu-head">
-                  <h2>Add Drink</h2>
-                  <p>Optional</p>
-                </div>
-
-                <div class="field field--full">
-                  <label for="drinkSelect">Choose a drink</label>
-                  <select id="drinkSelect" name="drinkSelect">
-                    <option value="">No drink</option>
-                    <option value="drink_tropical_punch_koolaid">Tropical Punch Kool-Aid</option>
-                    <option value="drink_lemonade">Lemonade</option>
-                    <option value="drink_can_soda">Can Soda</option>
-                    <option value="drink_bottle_water">Bottle Water</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="menu-block">
-                <div class="menu-head">
-                  <h2>Add Extra Side</h2>
-                  <p>Optional</p>
-                </div>
-
-                <div class="field field--full">
-                  <label for="extraSideSelect">Choose an extra side</label>
-                  <select id="extraSideSelect" name="extraSideSelect">
-                    <option value="">No extra side</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="menu-block">
-                <div class="menu-head">
-                  <h2>Lagniappe</h2>
-                  <p>Optional add-on</p>
-                </div>
-
-                <div class="field field--full">
-                  <label for="lagniappeSelect">Choose Lagniappe</label>
-                  <select id="lagniappeSelect" name="lagniappeSelect">
-                    <option value="">No Lagniappe</option>
-                  </select>
-                </div>
-              </div>
-
-              <div id="status" class="status" aria-live="polite"></div>
-
-              <div class="paybar">
-                <div class="paybar-copy">
-                  <strong id="payStatusLabel">Opening Soon</strong>
-                  <span id="payStatusSub">Ordering is not open yet.</span>
-                </div>
-
-                <button id="payNowBtn" class="btn btn--gold" type="submit" disabled>
-                  Opening Soon
-                </button>
-              </div>
-            </form>
-          </section>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer class="footer">
-    <div class="wrap footer__inner">
-      <div>© <span id="year"></span> Delish.</div>
-      <div><a href="/delish/catering/">Catering</a></div>
+    <div class="menuItem">
+      <span>Rib Plate ($20)</span>
+      <input type="number" min="0" value="0" id="ribQty" class="qty"/>
     </div>
-  </footer>
+  </div>
 
-  <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
+  <!-- ADD ONS -->
+  <div class="section">
+    <h3>Add Ons</h3>
+    <select id="drink">
+      <option value="">Drink (optional)</option>
+      <option value="3">Drink ($3)</option>
+    </select>
 
-    const MENU_BY_DAY = {
-      monday: {
-        heading: "Monday Main Dishes",
-        sub: "Available today from 11:00 AM – 3:00 PM.",
-        mains: [
-          { id: "monday_red_beans_fried_chicken", name: "Red Beans or Okra with Fried Chicken", price: 13.99 },
-          { id: "monday_hamburger_steak", name: "Hamburger Steak Plate", price: 13.99 }
-        ],
-        extraSides: [
-          { id: "extra_side_mac_and_cheese", name: "Mac and Cheese", price: 2.50 },
-          { id: "extra_side_yams", name: "Yams", price: 2.50 },
-          { id: "extra_side_corn", name: "Corn", price: 2.50 },
-          { id: "extra_side_cabbage", name: "Cabbage", price: 2.50 },
-          { id: "extra_side_green_salad", name: "Green Salad", price: 2.50 },
-          { id: "extra_side_black_eyed_peas", name: "Black Eyed Peas", price: 2.50 },
-          { id: "extra_side_green_beans", name: "Green Beans", price: 2.50 }
-        ]
-      },
-      tuesday: {
-        heading: "Tuesday Main Dishes",
-        sub: "Available today from 11:00 AM – 3:00 PM.",
-        mains: [
-          { id: "tuesday_beef_tips", name: "Beef Tips Plate", price: 13.99 },
-          { id: "tuesday_meatloaf", name: "Meatloaf Plate", price: 13.99 }
-        ],
-        extraSides: [
-          { id: "extra_side_mac_and_cheese", name: "Mac and Cheese", price: 2.50 },
-          { id: "extra_side_yams", name: "Yams", price: 2.50 },
-          { id: "extra_side_corn", name: "Corn", price: 2.50 },
-          { id: "extra_side_cabbage", name: "Cabbage", price: 2.50 },
-          { id: "extra_side_green_salad", name: "Green Salad", price: 2.50 },
-          { id: "extra_side_black_eyed_peas", name: "Black Eyed Peas", price: 2.50 },
-          { id: "extra_side_green_beans", name: "Green Beans", price: 2.50 }
-        ]
-      },
-      wednesday: {
-        heading: "Wednesday Main Dishes",
-        sub: "Available today from 11:00 AM – 3:00 PM.",
-        mains: [
-          { id: "wednesday_pork_neckbones", name: "Pork Neckbones Plate", price: 10.00 },
-          { id: "wednesday_baked_chicken", name: "Baked Chicken Plate", price: 10.00 },
-          { id: "wednesday_country_fried_steak", name: "Country Fried Steak Plate", price: 10.00 }
-        ],
-        extraSides: [
-          { id: "extra_side_mac_and_cheese", name: "Mac and Cheese", price: 2.50 },
-          { id: "extra_side_yams", name: "Yams", price: 2.50 },
-          { id: "extra_side_corn", name: "Corn", price: 2.50 },
-          { id: "extra_side_cabbage", name: "Cabbage", price: 2.50 },
-          { id: "extra_side_green_salad", name: "Green Salad", price: 2.50 },
-          { id: "extra_side_black_eyed_peas", name: "Black Eyed Peas", price: 2.50 },
-          { id: "extra_side_green_beans", name: "Green Beans", price: 2.50 }
-        ]
-      },
-      thursday: {
-        heading: "Thursday Main Dishes",
-        sub: "Available today from 11:00 AM – 3:00 PM.",
-        mains: [
-          { id: "thursday_turkey_wings", name: "Turkey Wings Plate", price: 16.99 }
-        ],
-        extraSides: [
-          { id: "extra_side_mac_and_cheese", name: "Mac and Cheese", price: 2.50 },
-          { id: "extra_side_yams", name: "Yams", price: 2.50 },
-          { id: "extra_side_corn", name: "Corn", price: 2.50 },
-          { id: "extra_side_cabbage", name: "Cabbage", price: 2.50 },
-          { id: "extra_side_green_salad", name: "Green Salad", price: 2.50 },
-          { id: "extra_side_black_eyed_peas", name: "Black Eyed Peas", price: 2.50 },
-          { id: "extra_side_green_beans", name: "Green Beans", price: 2.50 }
-        ]
-      },
-      friday: {
-        heading: "Friday Main Dishes",
-        sub: "Available today from 11:00 AM – 3:00 PM.",
-        mains: [
-          { id: "friday_crawfish_etouffee", name: "Crawfish Étouffée Plate", price: 16.99 },
-          { id: "friday_shrimp_pasta", name: "Shrimp Pasta Plate", price: 16.99 },
-          { id: "friday_fried_catfish", name: "Fried Catfish Plate (3 strips)", price: 15.99 },
-          { id: "friday_baked_catfish", name: "Baked Catfish Plate", price: 16.99 }
-        ],
-        extraSides: [
-          { id: "extra_side_mac_and_cheese", name: "Mac and Cheese", price: 2.50 },
-          { id: "extra_side_yams", name: "Yams", price: 2.50 },
-          { id: "extra_side_corn", name: "Corn", price: 2.50 },
-          { id: "extra_side_cabbage", name: "Cabbage", price: 2.50 },
-          { id: "extra_side_green_salad", name: "Green Salad", price: 2.50 },
-          { id: "extra_side_black_eyed_peas", name: "Black Eyed Peas", price: 2.50 },
-          { id: "extra_side_green_beans", name: "Green Beans", price: 2.50 },
-          { id: "extra_side_potato_salad", name: "Potato Salad", price: 2.50 },
-          { id: "extra_side_rice_dressing", name: "Rice Dressing", price: 2.50 }
-        ]
-      }
+    <select id="side">
+      <option value="">Extra Side (optional)</option>
+      <option value="5">Extra Side ($5)</option>
+    </select>
+  </div>
+
+  <!-- TOTAL -->
+  <div class="totalBox">
+    Total: $<span id="total">0</span>
+  </div>
+
+  <button id="payNowBtn" disabled>Pay Now</button>
+
+</div>
+
+<script>
+const prices = { turkey:15, rib:20 };
+
+const els = {
+  turkey: document.getElementById("turkeyQty"),
+  rib: document.getElementById("ribQty"),
+  drink: document.getElementById("drink"),
+  side: document.getElementById("side"),
+  total: document.getElementById("total"),
+  btn: document.getElementById("payNowBtn")
+};
+
+function calc() {
+  let total = 0;
+
+  total += els.turkey.value * prices.turkey;
+  total += els.rib.value * prices.rib;
+  total += Number(els.drink.value || 0);
+  total += Number(els.side.value || 0);
+
+  els.total.textContent = total;
+
+  const name = customerName.value.trim();
+  const phone = customerPhone.value.trim();
+  const pickup = pickupWindow.value;
+
+  els.btn.disabled = !(name && phone && pickup && total > 0);
+}
+
+document.querySelectorAll("input, select").forEach(el=>{
+  el.addEventListener("input", calc);
+});
+
+els.btn.addEventListener("click", async ()=>{
+  els.btn.disabled = true;
+  els.btn.textContent = "Processing...";
+
+  try {
+    const items = [];
+
+    if (els.turkey.value > 0)
+      items.push({ id:"turkey", qty:+els.turkey.value });
+
+    if (els.rib.value > 0)
+      items.push({ id:"rib", qty:+els.rib.value });
+
+    const payload = {
+      customerName: customerName.value,
+      customerPhone: customerPhone.value,
+      pickupWindow: pickupWindow.value,
+      items,
+      total: Number(els.total.textContent)
     };
 
-    const DRINKS = {
-      drink_tropical_punch_koolaid: { id: "drink_tropical_punch_koolaid", name: "Tropical Punch Kool-Aid", price: 3.99 },
-      drink_lemonade: { id: "drink_lemonade", name: "Lemonade", price: 3.99 },
-      drink_can_soda: { id: "drink_can_soda", name: "Can Soda", price: 1.50 },
-      drink_bottle_water: { id: "drink_bottle_water", name: "Bottle Water", price: 1.50 }
-    };
-
-    const LAGNIAPPE = {
-      lagniappe_grilled_chicken_salad: { id: "lagniappe_grilled_chicken_salad", name: "Grilled Chicken Salad", price: 12.99 },
-      lagniappe_grilled_shrimp_salad: { id: "lagniappe_grilled_shrimp_salad", name: "Grilled Shrimp Salad", price: 12.99 },
-      lagniappe_both_meat_salad: { id: "lagniappe_both_meat_salad", name: "Both Meat Salad", price: 16.99 },
-      lagniappe_chicken_tender_basket_fries: { id: "lagniappe_chicken_tender_basket_fries", name: "Chicken Tender Basket with Fries", price: 9.99 },
-      lagniappe_fried_porkchop_sandwich_fries: { id: "lagniappe_fried_porkchop_sandwich_fries", name: "Fried Porkchop Sandwich with Fries", price: 9.99 },
-      lagniappe_cheeseburger_basket: { id: "lagniappe_cheeseburger_basket", name: "Cheeseburger Basket", price: 9.99 }
-    };
-
-    const statusEl = document.getElementById("status");
-    const mainDishHeading = document.getElementById("mainDishHeading");
-    const mainDishSub = document.getElementById("mainDishSub");
-    const mainDishItems = document.getElementById("mainDishItems");
-    const extraSideSelect = document.getElementById("extraSideSelect");
-    const lagniappeSelect = document.getElementById("lagniappeSelect");
-    const payNowBtn = document.getElementById("payNowBtn");
-    const payStatusLabel = document.getElementById("payStatusLabel");
-    const payStatusSub = document.getElementById("payStatusSub");
-    const sundayStatusLine = document.getElementById("sundayStatusLine");
-    const orderForm = document.getElementById("delishOrderForm");
-
-    function showStatus(message) {
-      statusEl.textContent = message;
-      statusEl.classList.add("is-visible");
-    }
-
-    function clearStatus() {
-      statusEl.textContent = "";
-      statusEl.classList.remove("is-visible");
-    }
-
-    function getCentralDayParts(date = new Date()) {
-      const formatter = new Intl.DateTimeFormat("en-CA", {
-        timeZone: "America/Chicago",
-        weekday: "long",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour12: false
-      });
-
-      const parts = formatter.formatToParts(date);
-      const map = {};
-      parts.forEach((part) => {
-        if (part.type !== "literal") map[part.type] = part.value;
-      });
-
-      return {
-        weekday: String(map.weekday || "").toLowerCase(),
-        dayOfMonth: Number(map.day || 0),
-        hour: Number(map.hour || 0),
-        minute: Number(map.minute || 0),
-        month: Number(map.month || 0),
-        year: Number(map.year || 0),
-        isoDate: `${map.year}-${map.month}-${map.day}`
-      };
-    }
-
-    function getSundayOccurrence(dayOfMonth) {
-      return Math.ceil(dayOfMonth / 7);
-    }
-
-    function isOpenNow(parts) {
-      const currentMinutes = (parts.hour * 60) + parts.minute;
-      const openMinutes = 11 * 60;
-      const closeMinutes = 15 * 60;
-
-      if (currentMinutes < openMinutes || currentMinutes >= closeMinutes) return false;
-      return ["monday","tuesday","wednesday","thursday","friday"].includes(parts.weekday);
-    }
-
-    function getTodayMenu(parts) {
-      return MENU_BY_DAY[parts.weekday] || null;
-    }
-
-    function renderQtyItem(item) {
-      return `
-        <label class="menu-item">
-          <div>
-            <strong>${item.name}</strong>
-          </div>
-          <div class="qty-box">
-            <button type="button" class="qty-btn" data-target="${item.id}Qty" data-action="decrease">−</button>
-            <input class="qty-input" id="${item.id}Qty" name="${item.id}Qty" type="number" min="0" value="0" />
-            <button type="button" class="qty-btn" data-target="${item.id}Qty" data-action="increase">+</button>
-          </div>
-        </label>
-      `;
-    }
-
-    function formatOrdinal(n) {
-      if (n === 1) return "1st";
-      if (n === 2) return "2nd";
-      if (n === 3) return "3rd";
-      if (n === 4) return "4th";
-      return `${n}th`;
-    }
-
-    function getNextSundayInfo() {
-      const now = new Date();
-      const formatter = new Intl.DateTimeFormat("en-US", {
-        timeZone: "America/Chicago",
-        weekday: "long",
-        month: "long",
-        day: "numeric",
-        year: "numeric"
-      });
-
-      for (let i = 0; i < 14; i++) {
-        const testDate = new Date(now);
-        testDate.setDate(now.getDate() + i);
-        const parts = getCentralDayParts(testDate);
-
-        if (parts.weekday === "sunday") {
-          return {
-            occurrence: getSundayOccurrence(parts.dayOfMonth),
-            formattedDate: formatter.format(testDate)
-          };
-        }
-      }
-
-      return null;
-    }
-
-    function setSundayStatusLine() {
-      const parts = getCentralDayParts();
-      const nextSunday = getNextSundayInfo();
-
-      if (parts.weekday === "saturday") {
-        if (nextSunday && (nextSunday.occurrence === 1 || nextSunday.occurrence === 3)) {
-          sundayStatusLine.textContent = `Closed Saturday · Open this Sunday (${formatOrdinal(nextSunday.occurrence)} Sunday — ${nextSunday.formattedDate})`;
-          return;
-        }
-        if (nextSunday) {
-          sundayStatusLine.textContent = `Closed Saturday · Closed this Sunday (${formatOrdinal(nextSunday.occurrence)} Sunday — ${nextSunday.formattedDate})`;
-          return;
-        }
-        sundayStatusLine.textContent = "Closed Saturday";
-        return;
-      }
-
-      if (parts.weekday === "sunday") {
-        const occurrence = getSundayOccurrence(parts.dayOfMonth);
-        if (occurrence === 1 || occurrence === 3) {
-          sundayStatusLine.textContent = `Open this Sunday (${formatOrdinal(occurrence)} Sunday) · 11:00 AM – 3:00 PM`;
-        } else {
-          sundayStatusLine.textContent = `Closed this Sunday (${formatOrdinal(occurrence)} Sunday)`;
-        }
-        return;
-      }
-
-      if (nextSunday) {
-        if (nextSunday.occurrence === 1 || nextSunday.occurrence === 3) {
-          sundayStatusLine.textContent = `Open this Sunday (${formatOrdinal(nextSunday.occurrence)} Sunday — ${nextSunday.formattedDate})`;
-        } else {
-          sundayStatusLine.textContent = `Closed this Sunday (${formatOrdinal(nextSunday.occurrence)} Sunday — ${nextSunday.formattedDate})`;
-        }
-        return;
-      }
-
-      sundayStatusLine.textContent = "1st & 3rd Sundays · 11:00 AM – 3:00 PM";
-    }
-
-    const todayParts = getCentralDayParts();
-    const todayMenu = getTodayMenu(todayParts);
-    const openNow = isOpenNow(todayParts);
-
-    if (todayMenu) {
-      mainDishHeading.textContent = todayMenu.heading;
-      mainDishSub.textContent = todayMenu.sub;
-      mainDishItems.innerHTML = todayMenu.mains.map(renderQtyItem).join("");
-      extraSideSelect.innerHTML = '<option value="">No extra side</option>' +
-        todayMenu.extraSides.map(side => `<option value="${side.id}">${side.name}</option>`).join("");
-    } else {
-      mainDishHeading.textContent = "Today’s Menu";
-      mainDishSub.textContent = todayParts.weekday === "sunday" ? "Closed today. Sunday schedule is informational only." : "Delish is closed today.";
-      mainDishItems.innerHTML = `
-        <div class="menu-item">
-          <div>
-            <strong>Closed Today</strong>
-            <span>Please check back during service hours.</span>
-          </div>
-        </div>
-      `;
-      extraSideSelect.innerHTML = '<option value="">No extra side</option>';
-    }
-
-    lagniappeSelect.innerHTML += Object.values(LAGNIAPPE)
-      .map(item => `<option value="${item.id}">${item.name}</option>`)
-      .join("");
-
-    document.addEventListener("click", (e) => {
-      const btn = e.target.closest(".qty-btn");
-      if (!btn) return;
-
-      const input = document.getElementById(btn.dataset.target);
-      if (!input) return;
-
-      const current = Number(input.value || 0);
-      input.value = btn.dataset.action === "increase" ? current + 1 : Math.max(0, current - 1);
-      updatePayState();
+    const res = await fetch("/api/delish/create-checkout/", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify(payload)
     });
 
-    document.addEventListener("input", (e) => {
-      if (e.target.matches("input, select")) {
-        updatePayState();
-      }
-    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error);
 
-    function getSelectedMainItems() {
-      if (!todayMenu) return [];
-      return todayMenu.mains
-        .map(item => {
-          const qty = Number(document.getElementById(`${item.id}Qty`)?.value || 0);
-          return qty > 0 ? { id: item.id, qty, price: item.price } : null;
-        })
-        .filter(Boolean);
-    }
+    window.location.href = data.checkout_url;
 
-    function updatePayState() {
-      const nameOk = document.getElementById("customerName").value.trim().length > 0;
-      const phoneOk = document.getElementById("customerPhone").value.trim().length > 0;
-      const pickupOk = document.getElementById("pickupWindow").value.trim().length > 0;
-      const mainItems = getSelectedMainItems();
-      const mainOk = mainItems.length > 0;
-
-      if (!todayMenu) {
-        payNowBtn.disabled = true;
-        payNowBtn.textContent = "Closed Today";
-        payStatusLabel.textContent = "Closed Today";
-        payStatusSub.textContent = "No ordering is available today.";
-        return;
-      }
-
-      if (!openNow) {
-        payNowBtn.disabled = true;
-        payNowBtn.textContent = "Opening Soon";
-        payStatusLabel.textContent = "Opening Soon";
-        payStatusSub.textContent = "Ordering is not open yet.";
-        return;
-      }
-
-      if (!(nameOk && phoneOk && pickupOk && mainOk)) {
-        payNowBtn.disabled = true;
-        payNowBtn.textContent = "Complete Order";
-        payStatusLabel.textContent = "Complete your order details";
-        payStatusSub.textContent = "Name, phone, pickup window, and at least one main dish are required.";
-        return;
-      }
-
-      payNowBtn.disabled = false;
-      payNowBtn.textContent = "Pay Now";
-      payStatusLabel.textContent = "Ready to pay";
-      payStatusSub.textContent = "Your order details are complete.";
-    }
-
-    orderForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      clearStatus();
-
-      if (payNowBtn.disabled) return;
-
-      const customerName = document.getElementById("customerName").value.trim();
-      const customerPhone = document.getElementById("customerPhone").value.trim();
-      const pickupWindow = document.getElementById("pickupWindow").value.trim();
-      const mainItems = getSelectedMainItems();
-
-      if (!customerName || !customerPhone || !pickupWindow || !mainItems.length) {
-        showStatus("Complete your order details before checkout.");
-        return;
-      }
-
-      payNowBtn.disabled = true;
-      payNowBtn.textContent = "Processing...";
-
-      try {
-        const items = [...mainItems];
-
-        const drinkId = document.getElementById("drinkSelect").value;
-        if (drinkId && DRINKS[drinkId]) {
-          items.push({ id: drinkId, qty: 1, price: DRINKS[drinkId].price });
-        }
-
-        const extraSideId = document.getElementById("extraSideSelect").value;
-        if (extraSideId) {
-          const selectedSide = (todayMenu.extraSides || []).find(side => side.id === extraSideId);
-          if (selectedSide) {
-            items.push({ id: selectedSide.id, qty: 1, price: selectedSide.price });
-          }
-        }
-
-        const lagniappeId = document.getElementById("lagniappeSelect").value;
-        if (lagniappeId && LAGNIAPPE[lagniappeId]) {
-          items.push({ id: lagniappeId, qty: 1, price: LAGNIAPPE[lagniappeId].price });
-        }
-
-        const subtotal = items.reduce((sum, item) => sum + ((item.price || 0) * item.qty), 0);
-        const tax = 0;
-        const total = subtotal + tax;
-
-        const payload = {
-          customerName,
-          customerPhone,
-          customerEmail: "",
-          pickupDate: todayParts.isoDate,
-          pickupWindow,
-          notes: "",
-          smsConsent: "no",
-          items: items.map(item => ({ id: item.id, qty: item.qty })),
-          subtotal,
-          tax,
-          total,
-          source: "delish-web"
-        };
-
-        const res = await fetch("/api/delish/create-checkout/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(payload)
-        });
-
-        const data = await res.json();
-
-        if (!res.ok || !data.ok || !data.checkout_url) {
-          throw new Error(data.message || data.error || "Checkout failed.");
-        }
-
-        window.location.href = data.checkout_url;
-      } catch (err) {
-        showStatus(err.message || "Something went wrong while starting checkout.");
-        updatePayState();
-      }
-    });
-
-    updatePayState();
-    setSundayStatusLine();
-  </script>
-
-  <script type="application/ld+json">
-  {
-    "@context":"https://schema.org",
-    "@type":"Restaurant",
-    "name":"Delish",
-    "url":"https://www.squarebidness.com/delish/",
-    "image":"https://www.squarebidness.com/delish/assets/delish-meta_1200x630.jpg",
-    "priceRange":"$$",
-    "servesCuisine":["Soul Food","Southern","Catering"],
-    "address":{
-      "@type":"PostalAddress",
-      "streetAddress":"3710 South MacArthur Drive",
-      "addressLocality":"Alexandria",
-      "addressRegion":"LA",
-      "postalCode":"71303",
-      "addressCountry":"US"
-    }
+  } catch (e) {
+    alert("Checkout failed");
+    els.btn.disabled = false;
+    els.btn.textContent = "Pay Now";
   }
-  </script>
+});
+</script>
+
 </body>
 </html>
