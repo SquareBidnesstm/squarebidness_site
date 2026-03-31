@@ -505,7 +505,7 @@
 
     async function loadCateringCount(){
       try {
-        const res = await fetch("/api/delish/catering-orders/", { cache: "no-store" });
+        const res = await fetch(`/api/delish/catering-orders/?t=${Date.now()}`, { cache: "no-store" });
         const data = await res.json();
 
         if (!data.ok) return;
@@ -526,7 +526,7 @@
 
     async function loadOrders(){
       try {
-        const res = await fetch("/api/delish/orders/", { cache: "no-store" });
+        const res = await fetch(`/api/delish/orders/?t=${Date.now()}`, { cache: "no-store" });
         const data = await res.json();
 
         if (!data.ok) {
@@ -547,6 +547,10 @@
       await loadOrders();
       await loadCateringCount();
     }
+
+    window.addEventListener("offline", () => {
+      alert("Internet connection lost. Orders may not update.");
+    });
 
     refreshAll();
     setInterval(refreshAll, 15000);
