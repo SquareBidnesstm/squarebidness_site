@@ -54,43 +54,45 @@ const MENU_BY_DAY = {
       price: 16.99,
     },
   ],
-  friday: [
-    {
-      id: "friday_crawfish_etouffee",
-      name: "Crawfish Étouffée Plate",
-      price: 16.99,
-    },
-    {
-      id: "friday_shrimp_pasta",
-      name: "Shrimp Pasta Plate",
-      price: 16.99,
-    },
-    {
-      id: "friday_fried_catfish",
-      name: "Fried Catfish Plate (3 strips)",
-      price: 15.99,
-    },
-    {
-      id: "friday_baked_catfish",
-      name: "Baked Catfish Plate",
-      price: 16.99,
-    },
-    {
-  id: "sunday_pork_steak_gravy",
-  name: "Pork Steak and Gravy Plate",
-  price: 15.99,
-},
-{
-  id: "sunday_oxtails",
-  name: "Oxtails Plate",
-  price: 24.99,
-},
-{
-  id: "sunday_baked_chicken",
-  name: "Baked Chicken Plate",
-  price: 13.99,
-},
-  ],
+ friday: [
+  {
+    id: "friday_crawfish_etouffee",
+    name: "Crawfish Étouffée Plate",
+    price: 16.99,
+  },
+  {
+    id: "friday_shrimp_pasta",
+    name: "Shrimp Pasta Plate",
+    price: 16.99,
+  },
+  {
+    id: "friday_fried_catfish",
+    name: "Fried Catfish Plate (3 strips)",
+    price: 15.99,
+  },
+  {
+    id: "friday_baked_catfish",
+    name: "Baked Catfish Plate",
+    price: 16.99,
+  }
+],
+  sunday: [
+  {
+    id: "sunday_pork_steak_gravy",
+    name: "Pork Steak and Gravy Plate",
+    price: 15.99,
+  },
+  {
+    id: "sunday_oxtails",
+    name: "Oxtails Plate",
+    price: 24.99,
+  },
+  {
+    id: "sunday_baked_chicken",
+    name: "Baked Chicken Plate",
+    price: 13.99,
+  }
+],
   everyday: [
     {
       id: "drink_tropical_punch_koolaid",
@@ -196,6 +198,7 @@ const ACTIVE_ORDERING_DAYS = new Set([
   "wednesday",
   "thursday",
   "friday",
+  "sunday",
 ]);
 
 const FRIDAY_ONLY_ITEM_IDS = new Set([
