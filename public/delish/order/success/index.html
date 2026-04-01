@@ -333,63 +333,66 @@
   </main>
 
   <script>
-    function escapeHtml(str) {
-      return String(str || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
+  function escapeHtml(str) {
+    return String(str || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
 
-    function money(n) {
-      return `$${Number(n || 0).toFixed(2)}`;
-    }
+  function money(n) {
+    return `$${Number(n || 0).toFixed(2)}`;
+  }
 
-    async function loadOrder() {
-      const params = new URLSearchParams(window.location.search);
-      const sessionId = params.get("session_id");
-      const metaEl = document.getElementById("sessionMeta");
-      const pickupValueEl = document.getElementById("pickupValue");
+  async function loadOrder() {
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get("session_id");
+    const metaEl = document.getElementById("sessionMeta");
+    const pickupValueEl = document.getElementById("pickupValue");
 
-      if (!sessionId || !metaEl || !pickupValueEl) return;
+    if (!sessionId || !metaEl || !pickupValueEl) return;
 
-      try {
-        const res = await fetch(`/api/delish/finalize-checkout/?session_id=${encodeURIComponent(sessionId)}`);
-        const data = await res.json();
+    try {
+      const res = await fetch(`/api/delish/finalize-checkout/?session_id=${encodeURIComponent(sessionId)}`);
+      const data = await res.json();
 
-        if (!res.ok || !data.ok || !data.order) {
-          throw new Error("Unable to load order");
-        }
-
-        const order = data.order;
-        const items = Array.isArray(order.items) ? order.items : [];
-
-       pickupValueEl.textContent = "Pickup details unavailable";
-metaEl.innerHTML = `<div class="meta">Confirmation ID: ${escapeHtml(sessionId)}</div>`;
-          <div class="detail-row"><strong>Order #:</strong> ${escapeHtml(order.orderNumber || sessionId)}</div>
-          <div class="detail-row"><strong>Name:</strong> ${escapeHtml(order.customerName || "")}</div>
-          <div class="section-label">Items</div>
-          <ul class="items">
-            ${items.length ? items.map(i => `
-              <li>
-                <span><strong>${Number(i.qty || 0)} ×</strong> ${escapeHtml(i.name || "")}</span>
-                <strong>${money(Number(i.qty || 0) * Number(i.price || 0))}</strong>
-              </li>
-            `).join("") : `<li><span>Order items unavailable.</span></li>`}
-          </ul>
-          <div class="total">
-            <div class="total__label">Total Paid</div>
-            <div class="total__value">${money(order.total)}</div>
-          </div>
-        `;
-      } catch (err) {
-        pickupValueEl.textContent = "Pickup details unavailable";
-        metaEl.innerHTML = `<div class="meta">Confirmation ID: ${escapeHtml(sessionId)}</div>`;
+      if (!res.ok || !data.ok || !data.order) {
+        throw new Error("Unable to load order");
       }
-    }
 
-    loadOrder();
-  </script>
+      const order = data.order;
+      const items = Array.isArray(order.items) ? order.items : [];
+
+      pickupValueEl.textContent = `${order.pickupDate || ""} • ${order.pickupWindow || ""}`;
+
+      metaEl.innerHTML = `
+        <div class="detail-row"><strong>Order #:</strong> ${escapeHtml(order.orderNumber || sessionId)}</div>
+        <div class="detail-row"><strong>Name:</strong> ${escapeHtml(order.customerName || "")}</div>
+
+        <div class="section-label">Items</div>
+        <ul class="items">
+          ${items.length ? items.map(i => `
+            <li>
+              <span><strong>${Number(i.qty || 0)} ×</strong> ${escapeHtml(i.name || "")}</span>
+              <strong>${money(Number(i.qty || 0) * Number(i.price || 0))}</strong>
+            </li>
+          `).join("") : `<li><span>Order items unavailable.</span></li>`}
+        </ul>
+
+        <div class="total">
+          <div class="total__label">Total Paid</div>
+          <div class="total__value">${money(order.total)}</div>
+        </div>
+      `;
+    } catch (err) {
+      pickupValueEl.textContent = "Pickup details unavailable";
+      metaEl.innerHTML = `<div class="meta">Confirmation ID: ${escapeHtml(sessionId)}</div>`;
+    }
+  }
+
+  loadOrder();
+</script>
 </body>
 </html>
