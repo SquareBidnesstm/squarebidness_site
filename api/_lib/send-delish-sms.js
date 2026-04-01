@@ -47,7 +47,6 @@ export async function sendDelishSms({ to, message }) {
     ok: res.ok,
     status: res.status,
     sid: data.sid,
-    messageSid: data.sid,
     errorCode: data.error_code,
     errorMessage: data.error_message,
     twilioStatus: data.status,
