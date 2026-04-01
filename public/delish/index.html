@@ -129,145 +129,138 @@
 
 </div>
 <script>
-  if (window.location.search.includes("session_id")) {
-  const params = new URLSearchParams(window.location.search);
-  const sessionId = params.get("session_id");
-  if (sessionId) {
-    window.location.href = "/delish/order/success/?session_id=" + encodeURIComponent(sessionId);
-  }
-}
 const params = new URLSearchParams(window.location.search);
 const sessionId = params.get("session_id");
 
 if (sessionId) {
-  window.location.replace(`/delish/order/success/?session_id=${encodeURIComponent(sessionId)}`);
-}
+  window.location.replace("/delish/order/success/?session_id=" + encodeURIComponent(sessionId));
+} else {
+  const prices = {
+    thursday_turkey_wings: 16.99,
+    friday_fried_catfish: 15.99,
+    drink_tropical_punch_koolaid: 3.99,
+    extra_side_mac_and_cheese: 2.50
+  };
 
-const prices = {
-  thursday_turkey_wings: 16.99,
-  friday_fried_catfish: 15.99,
-  drink_tropical_punch_koolaid: 3.99,
-  extra_side_mac_and_cheese: 2.50
-};
+  const els = {
+    turkey: document.getElementById("turkeyQty"),
+    rib: document.getElementById("ribQty"),
+    drink: document.getElementById("drink"),
+    side: document.getElementById("side"),
+    total: document.getElementById("total"),
+    btn: document.getElementById("payNowBtn")
+  };
 
-const els = {
-  turkey: document.getElementById("turkeyQty"),
-  rib: document.getElementById("ribQty"),
-  drink: document.getElementById("drink"),
-  side: document.getElementById("side"),
-  total: document.getElementById("total"),
-  btn: document.getElementById("payNowBtn")
-};
+  function getCentralDateString() {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/Chicago",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).formatToParts(new Date());
 
-function getCentralDateString() {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Chicago",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit"
-  }).formatToParts(new Date());
-
-  const map = {};
-  parts.forEach((part) => {
-    if (part.type !== "literal") map[part.type] = part.value;
-  });
-
-  return `${map.year}-${map.month}-${map.day}`;
-}
-
-function calc() {
-  let total = 0;
-
-  total += Number(els.turkey.value || 0) * prices.thursday_turkey_wings;
-  total += Number(els.rib.value || 0) * prices.friday_fried_catfish;
-  total += Number(els.drink.value || 0);
-  total += Number(els.side.value || 0);
-
-  els.total.textContent = total.toFixed(2);
-
-  const name = customerName.value.trim();
-  const phone = customerPhone.value.trim();
-  const pickup = pickupWindow.value;
-
-  els.btn.disabled = !(name && phone && pickup && total > 0);
-}
-
-document.querySelectorAll("input, select").forEach((el) => {
-  el.addEventListener("input", calc);
-  el.addEventListener("change", calc);
-});
-
-els.btn.addEventListener("click", async () => {
-  els.btn.disabled = true;
-  els.btn.textContent = "Processing...";
-
-  try {
-    const items = [];
-
-    if (Number(els.turkey.value) > 0) {
-      items.push({
-        id: "thursday_turkey_wings",
-        qty: Number(els.turkey.value)
-      });
-    }
-
-    if (Number(els.rib.value) > 0) {
-      items.push({
-        id: "friday_fried_catfish",
-        qty: Number(els.rib.value)
-      });
-    }
-
-    if (els.drink.value) {
-      items.push({
-        id: "drink_tropical_punch_koolaid",
-        qty: 1
-      });
-    }
-
-    if (els.side.value) {
-      items.push({
-        id: "extra_side_mac_and_cheese",
-        qty: 1
-      });
-    }
-
-    const total = Number(els.total.textContent);
-
-    const payload = {
-      customerName: customerName.value.trim(),
-      customerPhone: customerPhone.value.trim(),
-      customerEmail: "",
-      pickupDate: getCentralDateString(),
-      pickupWindow: pickupWindow.value,
-      notes: "",
-      smsConsent: "yes",
-      items,
-      subtotal: total,
-      tax: 0,
-      total: total,
-      source: "delish-web"
-    };
-
-    const res = await fetch("/api/delish/create-checkout/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+    const map = {};
+    parts.forEach((part) => {
+      if (part.type !== "literal") map[part.type] = part.value;
     });
 
-    const data = await res.json();
-
-    if (!res.ok || !data.ok) {
-      throw new Error(data.message || data.error || "Checkout failed");
-    }
-
-    window.location.href = data.checkout_url;
-  } catch (e) {
-    alert(e.message || "Checkout failed");
-    els.btn.disabled = false;
-    els.btn.textContent = "Pay Now";
+    return `${map.year}-${map.month}-${map.day}`;
   }
-});
+
+  function calc() {
+    let total = 0;
+
+    total += Number(els.turkey.value || 0) * prices.thursday_turkey_wings;
+    total += Number(els.rib.value || 0) * prices.friday_fried_catfish;
+    total += Number(els.drink.value || 0);
+    total += Number(els.side.value || 0);
+
+    els.total.textContent = total.toFixed(2);
+
+    const name = customerName.value.trim();
+    const phone = customerPhone.value.trim();
+    const pickup = pickupWindow.value;
+
+    els.btn.disabled = !(name && phone && pickup && total > 0);
+  }
+
+  document.querySelectorAll("input, select").forEach((el) => {
+    el.addEventListener("input", calc);
+    el.addEventListener("change", calc);
+  });
+
+  els.btn.addEventListener("click", async () => {
+    els.btn.disabled = true;
+    els.btn.textContent = "Processing...";
+
+    try {
+      const items = [];
+
+      if (Number(els.turkey.value) > 0) {
+        items.push({
+          id: "thursday_turkey_wings",
+          qty: Number(els.turkey.value)
+        });
+      }
+
+      if (Number(els.rib.value) > 0) {
+        items.push({
+          id: "friday_fried_catfish",
+          qty: Number(els.rib.value)
+        });
+      }
+
+      if (els.drink.value) {
+        items.push({
+          id: "drink_tropical_punch_koolaid",
+          qty: 1
+        });
+      }
+
+      if (els.side.value) {
+        items.push({
+          id: "extra_side_mac_and_cheese",
+          qty: 1
+        });
+      }
+
+      const total = Number(els.total.textContent);
+
+      const payload = {
+        customerName: customerName.value.trim(),
+        customerPhone: customerPhone.value.trim(),
+        customerEmail: "",
+        pickupDate: getCentralDateString(),
+        pickupWindow: pickupWindow.value,
+        notes: "",
+        smsConsent: "yes",
+        items,
+        subtotal: total,
+        tax: 0,
+        total: total,
+        source: "delish-web"
+      };
+
+      const res = await fetch("/api/delish/create-checkout/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.ok) {
+        throw new Error(data.message || data.error || "Checkout failed");
+      }
+
+      window.location.href = data.checkout_url;
+    } catch (e) {
+      alert(e.message || "Checkout failed");
+      els.btn.disabled = false;
+      els.btn.textContent = "Pay Now";
+    }
+  });
+}
 </script>
 </body>
 </html>
