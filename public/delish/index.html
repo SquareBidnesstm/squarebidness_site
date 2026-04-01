@@ -1,436 +1,626 @@
+<!doctype html>
+<html lang="en" data-sb-brand="delish" data-sb-tier="public" data-sb-build="v20260401-delish-index-day-aware-simple">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <title>Delish Daily Menu | Alexandria, Louisiana</title>
+  <meta name="description" content="Delish is open in Alexandria, Louisiana. Authentic soul food, weekly favorites, and catering — order online and pick up fresh." />
+
+  <link rel="canonical" href="https://www.squarebidness.com/delish/" />
+  <meta name="robots" content="index,follow" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="theme-color" content="#0f0f0f" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="sb:build" content="v20260401-delish-index-day-aware-simple" />
+
+  <!-- OG -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Delish Daily Menu" />
+  <meta property="og:description" content="Order online. Pickup on arrival." />
+  <meta property="og:url" content="https://www.squarebidness.com/delish/" />
+  <meta property="og:site_name" content="Square Bidness" />
+  <meta property="og:image" content="https://www.squarebidness.com/delish/assets/delish-meta_1200x630.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Delish daily menu in Alexandria, Louisiana" />
+  <meta property="fb:app_id" content="802680062853443" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Delish Daily Menu" />
+  <meta name="twitter:description" content="Order online. Pickup on arrival." />
+  <meta name="twitter:image" content="https://www.squarebidness.com/delish/assets/delish-meta_1200x630.jpg" />
+
+  <!-- Icons -->
+  <link rel="manifest" href="/delish/manifest.json" />
+  <link rel="icon" sizes="16x16" href="/delish/assets/delish-favicon-16.png" />
+  <link rel="icon" sizes="32x32" href="/delish/assets/delish-favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/delish/assets/delish-logo-mark-180.png" />
+
+  <!-- Analytics -->
+  <script defer src="/scripts/ga.js"></script>
+  <script defer src="/scripts/sb-analytics.js"></script>
+  <script defer src="/scripts/meta-pixel.js"></script>
+  <script defer src="/scripts/sb-meta-bridge.js"></script>
+
+  <style>
+    body { margin:0; font-family:system-ui; background:#0b0b0b; color:#fff; }
+    .wrap { max-width:700px; margin:auto; padding:20px; }
+    h1 { font-size:28px; margin:0; }
+    h2 { margin:0 0 8px; }
+    h3 { margin:0 0 8px; }
+    .section { margin-top:24px; }
+    input, select {
+      width:100%; padding:14px; margin-top:8px;
+      border-radius:10px; border:none; font-size:16px;
+      box-sizing:border-box;
+    }
+    .menuItem {
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:14px;
+      margin:12px 0;
+      padding:12px 0;
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .menuItem:last-child { border-bottom:none; }
+    .menuCopy { flex:1; }
+    .menuCopy small { display:block; color:#bbb; margin-top:4px; line-height:1.4; }
+    .qtyWrap { display:flex; align-items:center; gap:8px; }
+    .qtyBtn {
+      width:32px; height:32px; border:none; border-radius:999px;
+      background:#222; color:#fff; font-size:18px; cursor:pointer;
+    }
+    .qty {
+      width:70px;
+      min-width:70px;
+      text-align:center;
+      margin-top:0;
+    }
+    .totalBox { margin-top:20px; font-size:20px; font-weight:bold; }
+    button.mainBtn {
+      width:100%; padding:16px; margin-top:20px;
+      border:none; border-radius:12px;
+      background:#D4AF37; color:#000;
+      font-size:18px; font-weight:bold;
+    }
+    button.mainBtn:disabled { background:#555; color:#ddd; }
+    .headerNote { font-size:14px; color:#ccc; margin-top:6px; line-height:1.45; }
+    .menuNote { font-size:14px; color:#d8d8d8; margin-top:4px; line-height:1.5; }
+    .status {
+      display:none;
+      margin-top:14px;
+      padding:12px 14px;
+      border-radius:10px;
+      background:#3a1111;
+      color:#ffd6d6;
+      font-size:14px;
+      line-height:1.45;
+    }
+    .status.is-visible { display:block; }
+    .optionNote { font-size:13px; color:#bbb; margin-top:4px; }
+    .actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:20px; }
+    .linkBtn {
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:14px 16px; border-radius:12px; text-decoration:none;
+      background:#1a1a1a; color:#fff; font-weight:600;
+      border:1px solid rgba(255,255,255,.08);
+      flex:1;
+      min-width:160px;
+    }
+  </style>
+</head>
+
+<body>
+<div class="wrap">
+
+  <h1 id="menuDayTitle">Delish — Daily Menu</h1>
+  <div class="headerNote" id="menuDayNote">
+    Pickup Only · Alexandria, Louisiana · Order online, pickup on arrival
+  </div>
+
+  <!-- CUSTOMER -->
+  <div class="section">
+    <input id="customerName" placeholder="Full Name" />
+    <input id="customerPhone" placeholder="Phone Number" />
+    <select id="pickupWindow">
+      <option value="">Select Pickup Time</option>
+      <option value="11:00 AM - 11:30 AM">11:00 AM - 11:30 AM</option>
+      <option value="11:30 AM - 12:00 PM">11:30 AM - 12:00 PM</option>
+      <option value="12:00 PM - 12:30 PM">12:00 PM - 12:30 PM</option>
+      <option value="12:30 PM - 1:00 PM">12:30 PM - 1:00 PM</option>
+      <option value="1:00 PM - 1:30 PM">1:00 PM - 1:30 PM</option>
+      <option value="1:30 PM - 2:00 PM">1:30 PM - 2:00 PM</option>
+      <option value="2:00 PM - 2:30 PM">2:00 PM - 2:30 PM</option>
+      <option value="2:30 PM - 3:00 PM">2:30 PM - 3:00 PM</option>
+    </select>
+  </div>
+
+  <!-- MENU -->
+  <div class="section">
+    <h2>Main Plates</h2>
+    <div class="menuNote" id="mainMenuNote">Available for today’s active menu.</div>
+    <div id="mainMenuItems"></div>
+  </div>
+
+  <!-- ADD ONS -->
+  <div class="section">
+    <h3>Drinks</h3>
+    <select id="drinkSelect">
+      <option value="">No drink</option>
+    </select>
+    <div class="optionNote">Optional</div>
+  </div>
+
+  <div class="section">
+    <h3>Extra Side</h3>
+    <select id="extraSideSelect">
+      <option value="">No extra side</option>
+    </select>
+    <div class="optionNote">Optional</div>
+  </div>
+
+  <div class="section">
+    <h3>Lagniappe</h3>
+    <select id="lagniappeSelect">
+      <option value="">No Lagniappe</option>
+    </select>
+    <div class="optionNote">Optional add-on</div>
+  </div>
+
+  <div id="status" class="status" aria-live="polite"></div>
+
+  <!-- TOTAL -->
+  <div class="totalBox">
+    Subtotal: $<span id="subtotalDisplay">0.00</span><br />
+    Total: $<span id="totalDisplay">0.00</span>
+  </div>
+
+  <button id="checkoutBtn" class="mainBtn" disabled>Loading Menu...</button>
+
+  <div class="actions">
+    <a class="linkBtn" href="/delish/catering/">Catering</a>
+  </div>
+
+</div>
+
 <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
+(function () {
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get("session_id");
 
-    const MENU_BY_DAY = {
-      monday: {
-        title: "Monday pickup menu.",
-        note: "Monday items available today.",
-        mains: [
-          { id: "monday_red_beans_fried_chicken", name: "Red Beans or Okra with Fried Chicken", price: 13.99, desc: "Monday plate." },
-          { id: "monday_hamburger_steak", name: "Hamburger Steak Plate", price: 13.99, desc: "Rice or mashed potatoes, vegetables, and roll." }
-        ]
-      },
-      tuesday: {
-        title: "Tuesday pickup menu.",
-        note: "Tuesday items available today.",
-        mains: [
-          { id: "tuesday_beef_tips", name: "Beef Tips Plate", price: 13.99, desc: "Tuesday plate." },
-          { id: "tuesday_meatloaf", name: "Meatloaf Plate", price: 13.99, desc: "Tuesday plate." }
-        ]
-      },
-      wednesday: {
-        title: "Wednesday pickup menu.",
-        note: "Wednesday items available today.",
-        mains: [
-          { id: "wednesday_pork_neckbones", name: "Pork Neckbones Plate", price: 10.00, desc: "Wednesday plate." },
-          { id: "wednesday_baked_chicken", name: "Baked Chicken Plate", price: 10.00, desc: "Wednesday plate." },
-          { id: "wednesday_country_fried_steak", name: "Country Fried Steak Plate", price: 10.00, desc: "Wednesday plate." }
-        ]
-      },
-      thursday: {
-        title: "Thursday pickup menu.",
-        note: "Thursday items available today.",
-        mains: [
-          { id: "thursday_turkey_wings", name: "Turkey Wings Plate", price: 16.99, desc: "Cornbread dressing or rice with 2 sides." }
-        ]
-      },
-      friday: {
-        title: "Friday pickup menu.",
-        note: "Friday items available today.",
-        mains: [
-          { id: "friday_crawfish_etouffee", name: "Crawfish Étouffée Plate", price: 16.99, desc: "Friday feature with 2 sides." },
-          { id: "friday_shrimp_pasta", name: "Shrimp Pasta Plate", price: 16.99, desc: "Featured plate built for pickup demand." },
-          { id: "friday_fried_catfish", name: "Fried Catfish Plate (3 strips)", price: 15.99, desc: "Served with 2 sides." },
-          { id: "friday_baked_catfish", name: "Baked Catfish Plate", price: 16.99, desc: "Friday feature." }
-        ]
-      },
-      sunday: {
-        title: "Sunday featured menu.",
-        note: "1st and 3rd Sundays only.",
-        mains: [
-          { id: "sunday_pork_steak_gravy", name: "Pork Steak and Gravy Plate", price: 15.99, desc: "Rice or mashed potatoes with 2 sides." },
-          { id: "sunday_oxtails", name: "Oxtails Plate", price: 24.99, desc: "Rice or mashed potatoes with 2 sides." },
-          { id: "sunday_baked_chicken", name: "Baked Chicken Plate", price: 13.99, desc: "Rice or mashed potatoes with 2 sides." }
-        ]
-      }
+  if (sessionId) {
+    window.location.replace("/delish/order/success/?session_id=" + encodeURIComponent(sessionId));
+    return;
+  }
+
+  const MENU_BY_DAY = {
+    monday: {
+      title: "Delish — Monday Menu",
+      note: "Monday pickup menu. Order online and pick up on arrival.",
+      mains: [
+        { id: "monday_red_beans_fried_chicken", name: "Red Beans or Okra with Fried Chicken", price: 13.99, desc: "Monday plate." },
+        { id: "monday_hamburger_steak", name: "Hamburger Steak Plate", price: 13.99, desc: "Rice or mashed potatoes, vegetables, and roll." }
+      ]
+    },
+    tuesday: {
+      title: "Delish — Tuesday Menu",
+      note: "Tuesday pickup menu. Order online and pick up on arrival.",
+      mains: [
+        { id: "tuesday_beef_tips", name: "Beef Tips Plate", price: 13.99, desc: "Tuesday plate." },
+        { id: "tuesday_meatloaf", name: "Meatloaf Plate", price: 13.99, desc: "Tuesday plate." }
+      ]
+    },
+    wednesday: {
+      title: "Delish — Wednesday Menu",
+      note: "Wednesday pickup menu. Order online and pick up on arrival.",
+      mains: [
+        { id: "wednesday_pork_neckbones", name: "Pork Neckbones Plate", price: 10.00, desc: "Wednesday plate." },
+        { id: "wednesday_baked_chicken", name: "Baked Chicken Plate", price: 10.00, desc: "Wednesday plate." },
+        { id: "wednesday_country_fried_steak", name: "Country Fried Steak Plate", price: 10.00, desc: "Wednesday plate." }
+      ]
+    },
+    thursday: {
+      title: "Delish — Thursday Menu",
+      note: "Thursday pickup menu. Order online and pick up on arrival.",
+      mains: [
+        { id: "thursday_turkey_wings", name: "Turkey Wings Plate", price: 16.99, desc: "Cornbread dressing or rice with 2 sides." }
+      ]
+    },
+    friday: {
+      title: "Delish — Friday Menu",
+      note: "Friday pickup menu. Order online and pick up on arrival.",
+      mains: [
+        { id: "friday_crawfish_etouffee", name: "Crawfish Étouffée Plate", price: 16.99, desc: "Friday feature with 2 sides." },
+        { id: "friday_shrimp_pasta", name: "Shrimp Pasta Plate", price: 16.99, desc: "Featured plate built for pickup demand." },
+        { id: "friday_fried_catfish", name: "Fried Catfish Plate (3 strips)", price: 15.99, desc: "Served with 2 sides." },
+        { id: "friday_baked_catfish", name: "Baked Catfish Plate", price: 16.99, desc: "Friday feature." }
+      ]
+    },
+    sunday: {
+      title: "Delish — Sunday Menu",
+      note: "Sunday featured menu. 1st and 3rd Sundays only.",
+      mains: [
+        { id: "sunday_pork_steak_gravy", name: "Pork Steak and Gravy Plate", price: 15.99, desc: "Rice or mashed potatoes with 2 sides." },
+        { id: "sunday_oxtails", name: "Oxtails Plate", price: 24.99, desc: "Rice or mashed potatoes with 2 sides." },
+        { id: "sunday_baked_chicken", name: "Baked Chicken Plate", price: 13.99, desc: "Rice or mashed potatoes with 2 sides." }
+      ]
+    }
+  };
+
+  const DRINKS = [
+    { id: "drink_tropical_punch_koolaid", name: "Tropical Punch Kool-Aid", price: 3.99 },
+    { id: "drink_lemonade", name: "Lemonade", price: 3.99 },
+    { id: "drink_can_soda", name: "Can Soda", price: 1.50 },
+    { id: "drink_bottle_water", name: "Bottle Water", price: 1.50 }
+  ];
+
+  const EXTRA_SIDES_BASE = [
+    { id: "extra_side_mac_and_cheese", name: "Mac and Cheese", price: 2.50 },
+    { id: "extra_side_yams", name: "Yams", price: 2.50 },
+    { id: "extra_side_corn", name: "Corn", price: 2.50 },
+    { id: "extra_side_cabbage", name: "Cabbage", price: 2.50 },
+    { id: "extra_side_green_salad", name: "Green Salad", price: 2.50 },
+    { id: "extra_side_black_eyed_peas", name: "Black Eyed Peas", price: 2.50 },
+    { id: "extra_side_green_beans", name: "Green Beans", price: 2.50 }
+  ];
+
+  const EXTRA_SIDES_FRIDAY_ONLY = [
+    { id: "extra_side_potato_salad", name: "Potato Salad", price: 2.50 },
+    { id: "extra_side_rice_dressing", name: "Rice Dressing", price: 2.50 }
+  ];
+
+  const LAGNIAPPE = [
+    { id: "lagniappe_grilled_chicken_salad", name: "Lagniappe Grilled Chicken Salad", price: 12.99 },
+    { id: "lagniappe_grilled_shrimp_salad", name: "Lagniappe Grilled Shrimp Salad", price: 12.99 },
+    { id: "lagniappe_both_meat_salad", name: "Lagniappe Both Meat Salad", price: 16.99 },
+    { id: "lagniappe_chicken_tender_basket_fries", name: "Lagniappe Chicken Tender Basket with Fries", price: 9.99 },
+    { id: "lagniappe_fried_porkchop_sandwich_fries", name: "Lagniappe Fried Porkchop Sandwich with Fries", price: 9.99 },
+    { id: "lagniappe_cheeseburger_basket", name: "Lagniappe Cheeseburger Basket", price: 9.99 }
+  ];
+
+  const customerName = document.getElementById("customerName");
+  const customerPhone = document.getElementById("customerPhone");
+  const pickupWindow = document.getElementById("pickupWindow");
+  const menuDayTitle = document.getElementById("menuDayTitle");
+  const menuDayNote = document.getElementById("menuDayNote");
+  const mainMenuNote = document.getElementById("mainMenuNote");
+  const mainMenuItems = document.getElementById("mainMenuItems");
+  const drinkSelect = document.getElementById("drinkSelect");
+  const extraSideSelect = document.getElementById("extraSideSelect");
+  const lagniappeSelect = document.getElementById("lagniappeSelect");
+  const subtotalDisplay = document.getElementById("subtotalDisplay");
+  const totalDisplay = document.getElementById("totalDisplay");
+  const checkoutBtn = document.getElementById("checkoutBtn");
+  const statusEl = document.getElementById("status");
+
+  let currentDay = null;
+  let currentMode = "closed";
+
+  function showStatus(message) {
+    statusEl.textContent = message;
+    statusEl.classList.add("is-visible");
+  }
+
+  function clearStatus() {
+    statusEl.textContent = "";
+    statusEl.classList.remove("is-visible");
+  }
+
+  function getCentralNowParts() {
+    const formatter = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/Chicago",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      weekday: "long",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false
+    });
+
+    const parts = formatter.formatToParts(new Date());
+    const map = {};
+
+    parts.forEach((part) => {
+      if (part.type !== "literal") map[part.type] = part.value;
+    });
+
+    const dayOfMonth = Number(map.day || 0);
+
+    return {
+      isoDate: `${map.year}-${map.month}-${map.day}`,
+      weekday: String(map.weekday || "").toLowerCase(),
+      dayOfMonth,
+      sundayOccurrence: dayOfMonth ? Math.ceil(dayOfMonth / 7) : 0,
+      hour: Number(map.hour || 0),
+      minute: Number(map.minute || 0)
     };
+  }
 
-    const DRINKS = [
-      { id: "drink_tropical_punch_koolaid", name: "Tropical Punch Kool-Aid", price: 3.99 },
-      { id: "drink_lemonade", name: "Lemonade", price: 3.99 },
-      { id: "drink_can_soda", name: "Can Soda", price: 1.50 },
-      { id: "drink_bottle_water", name: "Bottle Water", price: 1.50 }
-    ];
+  function isOpenNow(parts) {
+    const currentMinutes = (parts.hour * 60) + parts.minute;
+    const openMinutes = 11 * 60;
+    const closeMinutes = 15 * 60;
+    return currentMinutes >= openMinutes && currentMinutes < closeMinutes;
+  }
 
-    const EXTRA_SIDES_BASE = [
-      { id: "extra_side_mac_and_cheese", name: "Mac and Cheese", price: 2.50 },
-      { id: "extra_side_yams", name: "Yams", price: 2.50 },
-      { id: "extra_side_corn", name: "Corn", price: 2.50 },
-      { id: "extra_side_cabbage", name: "Cabbage", price: 2.50 },
-      { id: "extra_side_green_salad", name: "Green Salad", price: 2.50 },
-      { id: "extra_side_black_eyed_peas", name: "Black Eyed Peas", price: 2.50 },
-      { id: "extra_side_green_beans", name: "Green Beans", price: 2.50 }
-    ];
+  function getServiceState() {
+    const parts = getCentralNowParts();
+    const day = parts.weekday;
 
-    const EXTRA_SIDES_FRIDAY_ONLY = [
-      { id: "extra_side_potato_salad", name: "Potato Salad", price: 2.50 },
-      { id: "extra_side_rice_dressing", name: "Rice Dressing", price: 2.50 }
-    ];
-
-    const LAGNIAPPE = [
-      { id: "lagniappe_grilled_chicken_salad", name: "Lagniappe Grilled Chicken Salad", price: 12.99 },
-      { id: "lagniappe_grilled_shrimp_salad", name: "Lagniappe Grilled Shrimp Salad", price: 12.99 },
-      { id: "lagniappe_both_meat_salad", name: "Lagniappe Both Meat Salad", price: 16.99 },
-      { id: "lagniappe_chicken_tender_basket_fries", name: "Lagniappe Chicken Tender Basket with Fries", price: 9.99 },
-      { id: "lagniappe_fried_porkchop_sandwich_fries", name: "Lagniappe Fried Porkchop Sandwich with Fries", price: 9.99 },
-      { id: "lagniappe_cheeseburger_basket", name: "Lagniappe Cheeseburger Basket", price: 9.99 }
-    ];
-
-    const statusEl = document.getElementById("status");
-    const checkoutBtn = document.getElementById("checkoutBtn");
-    const menuDayTitle = document.getElementById("menuDayTitle");
-    const menuDayNote = document.getElementById("menuDayNote");
-    const mainMenuNote = document.getElementById("mainMenuNote");
-    const mainMenuItems = document.getElementById("mainMenuItems");
-    const customerNameEl = document.getElementById("customerName");
-    const customerPhoneEl = document.getElementById("customerPhone");
-    const pickupWindowEl = document.getElementById("pickupWindow");
-    const drinkSelect = document.getElementById("drinkSelect");
-    const extraSideSelect = document.getElementById("extraSideSelect");
-    const lagniappeSelect = document.getElementById("lagniappeSelect");
-    const subtotalDisplay = document.getElementById("subtotalDisplay");
-    const totalDisplay = document.getElementById("totalDisplay");
-
-    let currentDay = null;
-    let currentMode = "closed";
-
-    function showStatus(message) {
-      statusEl.textContent = message;
-      statusEl.classList.add("is-visible");
+    if (["monday", "tuesday", "wednesday", "thursday", "friday"].includes(day)) {
+      return { mode: "open-day", today: day, parts };
     }
 
-    function clearStatus() {
-      statusEl.textContent = "";
-      statusEl.classList.remove("is-visible");
+    if (day === "sunday" && (parts.sundayOccurrence === 1 || parts.sundayOccurrence === 3)) {
+      return { mode: "open-sunday", today: "sunday", parts };
     }
 
-    function getCentralNowParts() {
-      const formatter = new Intl.DateTimeFormat("en-CA", {
-        timeZone: "America/Chicago",
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        weekday: "long",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false
-      });
+    if (day === "saturday") {
+      return { mode: "closed-saturday", today: day, parts };
+    }
 
-      const parts = formatter.formatToParts(new Date());
-      const map = {};
+    if (day === "sunday") {
+      return { mode: "closed-sunday", today: day, parts };
+    }
 
-      for (const part of parts) {
-        if (part.type !== "literal") {
-          map[part.type] = part.value;
-        }
-      }
+    return { mode: "closed", today: day, parts };
+  }
 
-      const dayOfMonth = Number(map.day || 0);
+  function renderMainItem(item) {
+    return `
+      <div class="menuItem">
+        <div class="menuCopy">
+          <span>${item.name} ($${Number(item.price).toFixed(2)})</span>
+          ${item.desc ? `<small>${item.desc}</small>` : ""}
+        </div>
+        <div class="qtyWrap">
+          <button type="button" class="qtyBtn" data-target="${item.id}Qty" data-action="decrease">−</button>
+          <input type="number" min="0" value="0" id="${item.id}Qty" class="qty" />
+          <button type="button" class="qtyBtn" data-target="${item.id}Qty" data-action="increase">+</button>
+        </div>
+      </div>
+    `;
+  }
 
-      return {
-        isoDate: `${map.year}-${map.month}-${map.day}`,
-        weekday: String(map.weekday || "").toLowerCase(),
-        dayOfMonth,
-        sundayOccurrence: dayOfMonth ? Math.ceil(dayOfMonth / 7) : 0,
-        hour: Number(map.hour || 0),
-        minute: Number(map.minute || 0)
+  function renderSelectOptions(selectEl, items, placeholder) {
+    selectEl.innerHTML =
+      `<option value="">${placeholder}</option>` +
+      items.map(item => `<option value="${item.id}">${item.name} ($${Number(item.price).toFixed(2)})</option>`).join("");
+  }
+
+  function getExtraSidesForDay(day) {
+    return day === "friday"
+      ? [...EXTRA_SIDES_BASE, ...EXTRA_SIDES_FRIDAY_ONLY]
+      : [...EXTRA_SIDES_BASE];
+  }
+
+  function attachQtyButtons() {
+    document.querySelectorAll(".qtyBtn").forEach((btn) => {
+      btn.onclick = () => {
+        const input = document.getElementById(btn.dataset.target);
+        if (!input) return;
+        const current = Number(input.value || 0);
+        input.value = btn.dataset.action === "increase"
+          ? current + 1
+          : Math.max(0, current - 1);
+        calc();
       };
-    }
+    });
+  }
 
-    function isOpenNow(parts) {
-      const currentMinutes = (parts.hour * 60) + parts.minute;
-      const openMinutes = 11 * 60;
-      const closeMinutes = 15 * 60;
-      return currentMinutes >= openMinutes && currentMinutes < closeMinutes;
-    }
+  function applyDailyMenu() {
+    const state = getServiceState();
+    currentMode = state.mode;
+    currentDay = state.today;
 
-    function getServiceState() {
-      const parts = getCentralNowParts();
-      const day = parts.weekday;
-
-      if (["monday", "tuesday", "wednesday", "thursday", "friday"].includes(day)) {
-        return { mode: "open-day", today: day, parts };
-      }
-
-      if (day === "sunday" && (parts.sundayOccurrence === 1 || parts.sundayOccurrence === 3)) {
-        return { mode: "open-sunday", today: "sunday", parts };
-      }
-
-      if (day === "saturday") {
-        return { mode: "closed-saturday", today: day, parts };
-      }
-
-      if (day === "sunday") {
-        return { mode: "closed-sunday", today: day, parts };
-      }
-
-      return { mode: "closed", today: day, parts };
-    }
-
-    function renderMainItem(item) {
-      return `
-        <article class="item" data-id="${item.id}">
-          <div>
-            <h3>${item.name}</h3>
-            <p>${item.desc || ""}</p>
+    if (state.mode === "open-day" || state.mode === "open-sunday") {
+      const menu = MENU_BY_DAY[state.today];
+      menuDayTitle.textContent = menu.title;
+      menuDayNote.textContent = "Pickup Only · Alexandria, Louisiana · Order online, pickup on arrival";
+      mainMenuNote.textContent = menu.note;
+      mainMenuItems.innerHTML = menu.mains.map(renderMainItem).join("");
+      renderSelectOptions(drinkSelect, DRINKS, "Drink (optional)");
+      renderSelectOptions(extraSideSelect, getExtraSidesForDay(state.today), "Extra Side (optional)");
+      renderSelectOptions(lagniappeSelect, LAGNIAPPE, "Lagniappe (optional)");
+    } else if (state.mode === "closed-saturday") {
+      menuDayTitle.textContent = "Delish — Closed Today";
+      menuDayNote.textContent = "Pickup Only · Alexandria, Louisiana";
+      mainMenuNote.textContent = "Delish is closed on Saturdays.";
+      mainMenuItems.innerHTML = `
+        <div class="menuItem">
+          <div class="menuCopy">
+            <span>Closed Today</span>
+            <small>Check back Monday or on the 1st and 3rd Sunday.</small>
           </div>
-          <div class="item__meta">
-            <div class="price">$${Number(item.price).toFixed(2)}</div>
-            <div class="qty-wrap">
-              <button type="button" class="qty-btn" data-target="${item.id}Qty" data-action="decrease">−</button>
-              <input class="qty" id="${item.id}Qty" type="number" min="0" value="0" />
-              <button type="button" class="qty-btn" data-target="${item.id}Qty" data-action="increase">+</button>
-            </div>
-          </div>
-        </article>
+        </div>
       `;
+      renderSelectOptions(drinkSelect, [], "Drink (optional)");
+      renderSelectOptions(extraSideSelect, [], "Extra Side (optional)");
+      renderSelectOptions(lagniappeSelect, [], "Lagniappe (optional)");
+    } else if (state.mode === "closed-sunday") {
+      menuDayTitle.textContent = "Delish — Closed Today";
+      menuDayNote.textContent = "Pickup Only · Alexandria, Louisiana";
+      mainMenuNote.textContent = "Sunday ordering is only available on the 1st and 3rd Sundays.";
+      mainMenuItems.innerHTML = `
+        <div class="menuItem">
+          <div class="menuCopy">
+            <span>Closed Today</span>
+            <small>Sunday ordering is only available on the 1st and 3rd Sundays.</small>
+          </div>
+        </div>
+      `;
+      renderSelectOptions(drinkSelect, [], "Drink (optional)");
+      renderSelectOptions(extraSideSelect, [], "Extra Side (optional)");
+      renderSelectOptions(lagniappeSelect, [], "Lagniappe (optional)");
+    } else {
+      menuDayTitle.textContent = "Delish — Closed Today";
+      menuDayNote.textContent = "Pickup Only · Alexandria, Louisiana";
+      mainMenuNote.textContent = "Online ordering is closed today.";
+      mainMenuItems.innerHTML = `
+        <div class="menuItem">
+          <div class="menuCopy">
+            <span>Closed Today</span>
+            <small>Please come back during active ordering days.</small>
+          </div>
+        </div>
+      `;
+      renderSelectOptions(drinkSelect, [], "Drink (optional)");
+      renderSelectOptions(extraSideSelect, [], "Extra Side (optional)");
+      renderSelectOptions(lagniappeSelect, [], "Lagniappe (optional)");
     }
 
-    function renderSelectOptions(selectEl, items, placeholder) {
-      selectEl.innerHTML =
-        `<option value="">${placeholder}</option>` +
-        items.map(item => `<option value="${item.id}">${item.name} ($${Number(item.price).toFixed(2)})</option>`).join("");
-    }
+    attachQtyButtons();
+    calc();
+  }
 
-    function getExtraSidesForDay(day) {
-      if (day === "friday") {
-        return [...EXTRA_SIDES_BASE, ...EXTRA_SIDES_FRIDAY_ONLY];
+  function getCurrentMainItems() {
+    const menu = MENU_BY_DAY[currentDay];
+    return menu && Array.isArray(menu.mains) ? menu.mains : [];
+  }
+
+  function getSelectedOptionalItem(selectEl, sourceItems) {
+    const value = selectEl.value;
+    if (!value) return null;
+    return sourceItems.find(item => item.id === value) || null;
+  }
+
+  function getSelectedItems() {
+    const items = [];
+
+    getCurrentMainItems().forEach((item) => {
+      const qtyEl = document.getElementById(`${item.id}Qty`);
+      const qty = Number(qtyEl?.value || 0);
+      if (qty > 0) {
+        items.push({ id: item.id, name: item.name, price: item.price, qty });
       }
-      return [...EXTRA_SIDES_BASE];
+    });
+
+    const drink = getSelectedOptionalItem(drinkSelect, DRINKS);
+    if (drink) items.push({ id: drink.id, name: drink.name, price: drink.price, qty: 1 });
+
+    const side = getSelectedOptionalItem(extraSideSelect, getExtraSidesForDay(currentDay));
+    if (side) items.push({ id: side.id, name: side.name, price: side.price, qty: 1 });
+
+    const lagniappe = getSelectedOptionalItem(lagniappeSelect, LAGNIAPPE);
+    if (lagniappe) items.push({ id: lagniappe.id, name: lagniappe.name, price: lagniappe.price, qty: 1 });
+
+    return items;
+  }
+
+  function calc() {
+    const selectedItems = getSelectedItems();
+    const subtotal = selectedItems.reduce(
+      (sum, item) => sum + (Number(item.qty || 0) * Number(item.price || 0)),
+      0
+    );
+
+    subtotalDisplay.textContent = subtotal.toFixed(2);
+    totalDisplay.textContent = subtotal.toFixed(2);
+
+    const state = getServiceState();
+    const openNow = isOpenNow(state.parts);
+    const nameOk = customerName.value.trim().length > 0;
+    const phoneOk = customerPhone.value.trim().length > 0;
+    const pickupOk = pickupWindow.value.trim().length > 0;
+    const itemsOk = selectedItems.length > 0;
+
+    if (!(state.mode === "open-day" || state.mode === "open-sunday")) {
+      checkoutBtn.disabled = true;
+      checkoutBtn.textContent = "Closed Today";
+      return;
     }
 
-    function applyDailyMenu() {
-      const state = getServiceState();
-      currentMode = state.mode;
-      currentDay = state.today;
-
-      if (state.mode === "open-day" || state.mode === "open-sunday") {
-        const menu = MENU_BY_DAY[state.today];
-        menuDayTitle.textContent = menu.title;
-        menuDayNote.textContent = "Select your pickup window, build your order, and pay online.";
-        mainMenuNote.textContent = menu.note;
-        mainMenuItems.innerHTML = menu.mains.map(renderMainItem).join("");
-        renderSelectOptions(drinkSelect, DRINKS, "No drink");
-        renderSelectOptions(extraSideSelect, getExtraSidesForDay(state.today), "No extra side");
-        renderSelectOptions(lagniappeSelect, LAGNIAPPE, "No Lagniappe");
-      } else if (state.mode === "closed-saturday") {
-        menuDayTitle.textContent = "Closed Today";
-        menuDayNote.textContent = "Delish is closed on Saturdays.";
-        mainMenuNote.textContent = "No menu available today.";
-        mainMenuItems.innerHTML = `
-          <article class="item">
-            <div>
-              <h3>Closed Today</h3>
-              <p>Check back Monday or on the 1st and 3rd Sunday.</p>
-            </div>
-          </article>
-        `;
-        renderSelectOptions(drinkSelect, [], "No drink");
-        renderSelectOptions(extraSideSelect, [], "No extra side");
-        renderSelectOptions(lagniappeSelect, [], "No Lagniappe");
-      } else if (state.mode === "closed-sunday") {
-        menuDayTitle.textContent = "Closed Today";
-        menuDayNote.textContent = "Sunday ordering is only available on the 1st and 3rd Sundays.";
-        mainMenuNote.textContent = "No menu available today.";
-        mainMenuItems.innerHTML = `
-          <article class="item">
-            <div>
-              <h3>Closed Today</h3>
-              <p>Sunday ordering is only available on the 1st and 3rd Sundays.</p>
-            </div>
-          </article>
-        `;
-        renderSelectOptions(drinkSelect, [], "No drink");
-        renderSelectOptions(extraSideSelect, [], "No extra side");
-        renderSelectOptions(lagniappeSelect, [], "No Lagniappe");
-      } else {
-        menuDayTitle.textContent = "Closed Today";
-        menuDayNote.textContent = "Online ordering is closed today.";
-        mainMenuNote.textContent = "No menu available today.";
-        mainMenuItems.innerHTML = `
-          <article class="item">
-            <div>
-              <h3>Closed Today</h3>
-              <p>Please come back during active ordering days.</p>
-            </div>
-          </article>
-        `;
-        renderSelectOptions(drinkSelect, [], "No drink");
-        renderSelectOptions(extraSideSelect, [], "No extra side");
-        renderSelectOptions(lagniappeSelect, [], "No Lagniappe");
-      }
-
-      attachQtyButtons();
-      calc();
+    if (!openNow) {
+      checkoutBtn.disabled = true;
+      checkoutBtn.textContent = "Opening Soon";
+      return;
     }
 
-    function attachQtyButtons() {
-      document.querySelectorAll(".qty-btn").forEach((btn) => {
-        btn.onclick = () => {
-          const input = document.getElementById(btn.dataset.target);
-          if (!input) return;
-          const current = Number(input.value || 0);
-          input.value = btn.dataset.action === "increase" ? current + 1 : Math.max(0, current - 1);
-          calc();
-        };
+    if (!(nameOk && phoneOk && pickupOk && itemsOk)) {
+      checkoutBtn.disabled = true;
+      checkoutBtn.textContent = "Complete Order";
+      return;
+    }
+
+    checkoutBtn.disabled = false;
+    checkoutBtn.textContent = "Pay Now";
+  }
+
+  document.querySelectorAll("input, select").forEach((el) => {
+    el.addEventListener("input", calc);
+    el.addEventListener("change", calc);
+  });
+
+  checkoutBtn.addEventListener("click", async () => {
+    clearStatus();
+
+    const state = getServiceState();
+
+    if (!(state.mode === "open-day" || state.mode === "open-sunday")) {
+      showStatus("Online ordering is closed today.");
+      return;
+    }
+
+    if (!isOpenNow(state.parts)) {
+      showStatus("Ordering is available from 11:00 AM to 3:00 PM.");
+      return;
+    }
+
+    const selectedItems = getSelectedItems();
+    if (!selectedItems.length) {
+      showStatus("Add at least one item first.");
+      return;
+    }
+
+    checkoutBtn.disabled = true;
+    checkoutBtn.textContent = "Processing...";
+
+    try {
+      const subtotal = Number(
+        selectedItems.reduce((sum, item) => sum + (item.qty * item.price), 0).toFixed(2)
+      );
+
+      const payload = {
+        customerName: customerName.value.trim(),
+        customerPhone: customerPhone.value.trim(),
+        customerEmail: "",
+        pickupDate: state.parts.isoDate,
+        pickupWindow: pickupWindow.value,
+        notes: "",
+        smsConsent: "yes",
+        items: selectedItems.map(item => ({ id: item.id, qty: item.qty })),
+        subtotal,
+        tax: 0,
+        total: subtotal,
+        source: "delish-web"
+      };
+
+      const res = await fetch("/api/delish/create-checkout/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
       });
-    }
 
-    function getCurrentMainItems() {
-      const menu = MENU_BY_DAY[currentDay];
-      return menu && Array.isArray(menu.mains) ? menu.mains : [];
-    }
+      const data = await res.json();
 
-    function getSelectedOptionalItem(selectEl, sourceItems) {
-      const value = selectEl.value;
-      if (!value) return null;
-      return sourceItems.find(item => item.id === value) || null;
-    }
-
-    function getSelectedItems() {
-      const items = [];
-
-      getCurrentMainItems().forEach((item) => {
-        const qtyEl = document.getElementById(`${item.id}Qty`);
-        const qty = Number(qtyEl?.value || 0);
-        if (qty > 0) {
-          items.push({ id: item.id, name: item.name, price: item.price, qty });
-        }
-      });
-
-      const drink = getSelectedOptionalItem(drinkSelect, DRINKS);
-      if (drink) items.push({ id: drink.id, name: drink.name, price: drink.price, qty: 1 });
-
-      const side = getSelectedOptionalItem(extraSideSelect, getExtraSidesForDay(currentDay));
-      if (side) items.push({ id: side.id, name: side.name, price: side.price, qty: 1 });
-
-      const lagniappe = getSelectedOptionalItem(lagniappeSelect, LAGNIAPPE);
-      if (lagniappe) items.push({ id: lagniappe.id, name: lagniappe.name, price: lagniappe.price, qty: 1 });
-
-      return items;
-    }
-
-    function calc() {
-      const selectedItems = getSelectedItems();
-      const subtotal = selectedItems.reduce((sum, item) => sum + (Number(item.qty || 0) * Number(item.price || 0)), 0);
-
-      subtotalDisplay.textContent = `$${subtotal.toFixed(2)}`;
-      totalDisplay.textContent = `$${subtotal.toFixed(2)}`;
-
-      const state = getServiceState();
-      const openNow = isOpenNow(state.parts);
-      const nameOk = customerNameEl.value.trim().length > 0;
-      const phoneOk = customerPhoneEl.value.trim().length > 0;
-      const pickupOk = pickupWindowEl.value.trim().length > 0;
-      const itemsOk = selectedItems.length > 0;
-
-      if (!(state.mode === "open-day" || state.mode === "open-sunday")) {
-        checkoutBtn.disabled = true;
-        checkoutBtn.textContent = "Closed Today";
-        return;
+      if (!res.ok || !data.ok) {
+        throw new Error(data.message || data.error || "Checkout failed");
       }
 
-      if (!openNow) {
-        checkoutBtn.disabled = true;
-        checkoutBtn.textContent = "Opening Soon";
-        return;
-      }
-
-      if (!(nameOk && phoneOk && pickupOk && itemsOk)) {
-        checkoutBtn.disabled = true;
-        checkoutBtn.textContent = "Complete Order";
-        return;
-      }
-
+      window.location.href = data.checkout_url;
+    } catch (e) {
+      showStatus(e.message || "Checkout failed");
       checkoutBtn.disabled = false;
       checkoutBtn.textContent = "Pay Now";
     }
+  });
 
-    document.addEventListener("input", (e) => {
-      if (e.target.matches("input, select, textarea")) {
-        calc();
-      }
-    });
-
-    document.getElementById("delishOrderForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      clearStatus();
-
-      const state = getServiceState();
-      if (!(state.mode === "open-day" || state.mode === "open-sunday")) {
-        showStatus("Online ordering is closed today.");
-        return;
-      }
-
-      if (!isOpenNow(state.parts)) {
-        showStatus("Ordering is available from 11:00 AM to 3:00 PM.");
-        return;
-      }
-
-      const selectedItems = getSelectedItems();
-      if (!selectedItems.length) {
-        showStatus("Add at least one item first.");
-        return;
-      }
-
-      checkoutBtn.disabled = true;
-      checkoutBtn.textContent = "Processing...";
-
-      try {
-        const payload = {
-          customerName: customerNameEl.value.trim(),
-          customerPhone: customerPhoneEl.value.trim(),
-          customerEmail: "",
-          pickupDate: state.parts.isoDate,
-          pickupWindow: pickupWindowEl.value,
-          notes: "",
-          smsConsent: "yes",
-          items: selectedItems.map(item => ({ id: item.id, qty: item.qty })),
-          subtotal: Number(selectedItems.reduce((sum, item) => sum + (item.qty * item.price), 0).toFixed(2)),
-          tax: 0,
-          total: Number(selectedItems.reduce((sum, item) => sum + (item.qty * item.price), 0).toFixed(2)),
-          source: "delish-web"
-        };
-
-        const res = await fetch("/api/delish/create-checkout/", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-
-        const data = await res.json();
-
-        if (!res.ok || !data.ok) {
-          throw new Error(data.message || data.error || "Checkout failed");
-        }
-
-        window.location.href = data.checkout_url;
-      } catch (err) {
-        showStatus(err.message || "Checkout failed.");
-        checkoutBtn.disabled = false;
-        checkoutBtn.textContent = "Pay Now";
-      }
-    });
-
-    (function init() {
-      const params = new URLSearchParams(window.location.search);
-      const sessionId = params.get("session_id");
-
-      if (sessionId) {
-        window.location.replace("/delish/order/success/?session_id=" + encodeURIComponent(sessionId));
-        return;
-      }
-
-      applyDailyMenu();
-    })();
-  </script>
+  applyDailyMenu();
+})();
+</script>
+</body>
+</html>
