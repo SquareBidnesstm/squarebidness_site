@@ -161,19 +161,32 @@ export default async function handler(req, res) {
           const smsTo = normalizeUsPhone(metadata.customerPhone || "");
 
           if (smsConsent && smsTo) {
-            await sendDelishSms({
-              to: smsTo,
-              message: buildPickupSms({
-                ...metadata,
-                amountTotal:
-                  typeof session.amount_total === "number"
-                    ? (session.amount_total / 100).toFixed(2)
-                    : "",
-              }),
-            });
+  console.log("DELISH ABOUT TO CALL SMS HELPER:", {
+    sessionId: session.id,
+    smsTo,
+    smsConsent
+  });
 
-            console.log("DELISH PICKUP SMS SENT:", session.id);
-          }
+  const smsResult = await sendDelishSms({
+    to: smsTo,
+    message: buildPickupSms({
+      ...metadata,
+      amountTotal:
+        typeof session.amount_total === "number"
+          ? (session.amount_total / 100).toFixed(2)
+          : "",
+    }),
+  });
+
+  console.log("DELISH SMS HELPER RESULT:", smsResult);
+  console.log("DELISH PICKUP SMS SENT:", session.id);
+} else {
+  console.log("DELISH PICKUP SMS SKIPPED:", {
+    smsConsent,
+    rawPhone: metadata.customerPhone || "",
+    normalizedPhone: smsTo
+  });
+}
         } catch (smsError) {
           console.error("DELISH PICKUP SMS ERROR:", smsError);
         }
