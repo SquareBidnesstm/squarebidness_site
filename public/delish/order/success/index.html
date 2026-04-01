@@ -306,27 +306,22 @@
     </div>
 
     <section class="card">
-      <div class="eyebrow">Order Confirmed</div>
+     <div class="eyebrow">Order Confirmed</div>
 
-      <h1>Thank you. Your order is in.</h1>
+<h1>You’re all set.</h1>
 
-      <p class="lead">
-        Your payment was successful and Delish has received your order.
-      </p>
+<p class="lead">
+  Your order has been confirmed and Delish has received your payment.
+</p>
 
-      <div class="pickup-panel" id="pickupPanel">
-        <div class="pickup-label">Pickup Window</div>
-        <div class="pickup-value" id="pickupValue">Loading your pickup details...</div>
-      </div>
+<div class="pickup-panel" id="pickupPanel">
+  <div class="pickup-label">Pickup</div>
+  <div class="pickup-value" id="pickupValue">Loading pickup details...</div>
+</div>
 
-      <p class="sub">
-        Please arrive during your selected pickup window. Your food will be prepared and ready for pickup when you arrive.
-      </p>
-
-      <div class="order-box" id="sessionMeta">
-        <div class="meta">Loading your order details...</div>
-      </div>
-
+<p class="sub">
+  Please arrive during your pickup window. We’ll have your order ready when you get here.
+</p>
       <div class="actions">
         <a class="btn btn--gold" href="/delish/">Back to Delish</a>
         <a class="btn btn--dark" href="/delish/catering/">Need Catering?</a>
@@ -367,9 +362,8 @@
         const order = data.order;
         const items = Array.isArray(order.items) ? order.items : [];
 
-        pickupValueEl.textContent = `${order.pickupDate || ""} • ${order.pickupWindow || ""}`;
-
-        metaEl.innerHTML = `
+       pickupValueEl.textContent = "Pickup details unavailable";
+metaEl.innerHTML = `<div class="meta">Confirmation ID: ${escapeHtml(sessionId)}</div>`;
           <div class="detail-row"><strong>Order #:</strong> ${escapeHtml(order.orderNumber || sessionId)}</div>
           <div class="detail-row"><strong>Name:</strong> ${escapeHtml(order.customerName || "")}</div>
           <div class="section-label">Items</div>
