@@ -97,10 +97,9 @@ export default async function handler(req, res) {
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
       const metadata = session.metadata || {};
-
       const sessionId = session.id;
-      const alreadyProcessed = await redis.get(`delish:stripe:session:${sessionId}`);
 
+      const alreadyProcessed = await redis.get(`delish:stripe:session:${sessionId}`);
       if (alreadyProcessed) {
         return res.status(200).json({ received: true, duplicate: true });
       }
@@ -140,12 +139,6 @@ export default async function handler(req, res) {
 
           await redis.set(key, updated);
 
-          console.log(
-            "DELISH CATERING DEPOSIT PAID:",
-            metadata.cateringRequestId,
-            updated.requestNumber || ""
-          );
-
           try {
             const smsTo = normalizeUsPhone(
               updated.customerPhone || metadata.customerPhone || ""
@@ -156,11 +149,6 @@ export default async function handler(req, res) {
                 to: smsTo,
                 message: buildCateringDepositSms(metadata, updated),
               });
-            } else {
-              console.warn(
-                "DELISH CATERING SMS SKIPPED: invalid phone",
-                updated.customerPhone || metadata.customerPhone || ""
-              );
             }
           } catch (smsError) {
             console.error("DELISH CATERING SMS ERROR:", smsError);
@@ -171,14 +159,7 @@ export default async function handler(req, res) {
           const smsConsent = metadata.smsConsent === "yes";
           const smsTo = normalizeUsPhone(metadata.customerPhone || "");
 
-          if (!smsConsent) {
-            console.log("DELISH PICKUP SMS SKIPPED: smsConsent not granted");
-          } else if (!smsTo) {
-            console.warn(
-              "DELISH PICKUP SMS SKIPPED: invalid phone",
-              metadata.customerPhone || ""
-            );
-          } else {
+          if (smsConsent && smsTo) {
             await sendDelishSms({
               to: smsTo,
               message: buildPickupSms({
