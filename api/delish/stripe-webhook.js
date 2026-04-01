@@ -97,6 +97,7 @@ export default async function handler(req, res) {
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
       const metadata = session.metadata || {};
+      console.log("DELISH LIVE METADATA:", metadata);
       const sessionId = session.id;
 
       const alreadyProcessed = await redis.get(`delish:stripe:session:${sessionId}`);
