@@ -130,6 +130,13 @@
 </div>
 
 <script>
+const params = new URLSearchParams(window.location.search);
+const sessionId = params.get("session_id");
+
+if (sessionId) {
+  window.location.replace(`/delish/order/success/?session_id=${encodeURIComponent(sessionId)}`);
+}
+
 const prices = {
   thursday_turkey_wings: 16.99,
   friday_fried_catfish: 15.99,
@@ -145,14 +152,6 @@ const els = {
   total: document.getElementById("total"),
   btn: document.getElementById("payNowBtn")
 };
-
-// Rescue redirect if Stripe lands on /delish/ with session_id
-const params = new URLSearchParams(window.location.search);
-const sessionId = params.get("session_id");
-
-if (sessionId) {
-  window.location.replace(`/delish/order/success/?session_id=${encodeURIComponent(sessionId)}`);
-}
 
 function getCentralDateString() {
   const parts = new Intl.DateTimeFormat("en-CA", {
