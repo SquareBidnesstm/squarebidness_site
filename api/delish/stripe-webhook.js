@@ -1,6 +1,7 @@
 // FILE: /api/delish/stripe-webhook.js
 import { Redis } from "@upstash/redis";
 import Stripe from "stripe";
+import { sendDelishSms } from "./_lib/send-delish-sms.js";
 
 const redis = new Redis({
   url: process.env.DELISH_UPSTASH_REDIS_REST_URL,
@@ -23,6 +24,52 @@ async function readRawBody(req) {
     chunks.push(typeof chunk === "string" ? Buffer.from(chunk) : chunk);
   }
   return Buffer.concat(chunks);
+}
+
+function normalizeUsPhone(phone) {
+  const digits = String(phone || "").replace(/\D/g, "");
+  if (digits.length === 10) return `+1${digits}`;
+  if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
+  return null;
+}
+
+function money(n) {
+  return Number(n || 0).toFixed(2);
+}
+
+function buildPickupSms(metadata) {
+  const orderNumber = metadata.orderNumber || metadata.requestNumber || "DELISH";
+  const pickupDate = metadata.pickupDate || "";
+  const pickupWindow = metadata.pickupWindow || "";
+  const total =
+    metadata.total ||
+    metadata.amountTotal ||
+    metadata.subtotal ||
+    "";
+
+  const totalText = total ? ` Total paid $${money(total)}.` : "";
+
+  return `Delish: Order ${orderNumber} confirmed. Pickup ${pickupDate} at ${pickupWindow}.${totalText}`;
+}
+
+function buildCateringDepositSms(metadata, existing) {
+  const requestNumber =
+    metadata.requestNumber ||
+    (existing && existing.requestNumber) ||
+    metadata.cateringRequestId ||
+    "DELISH";
+
+  const eventDate =
+    metadata.eventDate ||
+    (existing && existing.eventDate) ||
+    "";
+
+  const eventTime =
+    metadata.eventTime ||
+    (existing && existing.eventTime) ||
+    "";
+
+  return `Delish Catering: Deposit received for request ${requestNumber}.${eventDate ? ` Event date ${eventDate}` : ""}${eventTime ? ` at ${eventTime}` : ""}.`;
 }
 
 export default async function handler(req, res) {
@@ -93,6 +140,53 @@ export default async function handler(req, res) {
             metadata.cateringRequestId,
             updated.requestNumber || ""
           );
+
+          try {
+            const smsTo = normalizeUsPhone(
+              updated.customerPhone || metadata.customerPhone || ""
+            );
+
+            if (smsTo) {
+              await sendDelishSms({
+                to: smsTo,
+                message: buildCateringDepositSms(metadata, updated),
+              });
+            } else {
+              console.warn(
+                "DELISH CATERING SMS SKIPPED: invalid phone",
+                updated.customerPhone || metadata.customerPhone || ""
+              );
+            }
+          } catch (smsError) {
+            console.error("DELISH CATERING SMS ERROR:", smsError);
+          }
+        }
+      } else {
+        // Standard Delish paid pickup confirmation SMS
+        try {
+          const smsTo = normalizeUsPhone(metadata.customerPhone || "");
+
+          if (smsTo) {
+            await sendDelishSms({
+              to: smsTo,
+              message: buildPickupSms({
+                ...metadata,
+                amountTotal:
+                  typeof session.amount_total === "number"
+                    ? (session.amount_total / 100).toFixed(2)
+                    : "",
+              }),
+            });
+
+            console.log("DELISH PICKUP SMS SENT:", session.id);
+          } else {
+            console.warn(
+              "DELISH PICKUP SMS SKIPPED: invalid phone",
+              metadata.customerPhone || ""
+            );
+          }
+        } catch (smsError) {
+          console.error("DELISH PICKUP SMS ERROR:", smsError);
         }
       }
     }
