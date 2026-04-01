@@ -6,19 +6,6 @@
   <link rel="preconnect" href="https://www.google-analytics.com" crossorigin>
   <link rel="preconnect" href="https://static.cloudflareinsights.com" crossorigin>
 
-  <!-- ✅ Preload HERO (LCP) — richardson_1_* -->
-  <link
-    rel="preload"
-    as="image"
-    href="/richardson/assets/richardson_1_640.webp"
-    imagesrcset="
-      /richardson/assets/richardson_1_420.webp 420w,
-      /richardson/assets/richardson_1_640.webp 640w
-    "
-    imagesizes="(max-width: 900px) 100vw, 420px"
-    fetchpriority="high"
-  />
-
   <!-- GA4 (site-wide) -->
   <script defer src="/scripts/ga.js"></script>
   <script defer src="/scripts/sb-analytics.js"></script>
@@ -35,7 +22,7 @@
   <meta name="format-detection" content="telephone=no" />
 
   <!-- Build stamp -->
-  <meta name="sb:build" content="v20260401-richardson-prom-refresh" />
+  <meta name="sb:build" content="v20260401-richardson-text-hero" />
 
   <!-- CSS -->
   <link rel="stylesheet" href="/styles/style.css" />
@@ -104,324 +91,514 @@
 }
   </script>
 
- <style>
-  .rf-hero{
-    display:grid;
-    gap:1.5rem;
-    align-items:center;
-    margin-bottom:1.5rem;
-    padding:1rem 0 .5rem;
-  }
+  <style>
+    *{ box-sizing:border-box; }
 
-  @media (min-width: 980px){
-    .rf-hero{
-      grid-template-columns:minmax(0,1.25fr) minmax(320px,420px);
-      gap:2rem;
-      min-height:520px;
-    }
-  }
-
-  .rf-hero-copy{
-    position:relative;
-    z-index:2;
-    max-width:640px;
-  }
-
-  .rf-brand{
-    display:flex;
-    align-items:center;
-    gap:.9rem;
-    margin-bottom:.85rem;
-  }
-
-  .rf-brand-icon{
-    width:62px;
-    height:62px;
-    border-radius:14px;
-    overflow:hidden;
-    flex:0 0 auto;
-    border:1px solid #1a1a1a;
-    background:#000;
-    box-shadow:0 18px 40px rgba(0,0,0,.7);
-  }
-
-  .rf-brand-icon img{
-    display:block;
-    width:100%;
-    height:100%;
-    object-fit:cover;
-  }
-
-  .rf-eyebrow{
-    font-size:.75rem;
-    text-transform:uppercase;
-    letter-spacing:.08em;
-    color:#a1a1aa;
-    margin-bottom:.2rem;
-    font-weight:600;
-  }
-
-  .rf-title{
-    font-size:clamp(2rem,3vw,2.6rem);
-    font-weight:800;
-    margin:0;
-    line-height:1.02;
-    letter-spacing:-.02em;
-  }
-
-  .rf-kicker{
-    margin:0 0 .8rem;
-    color:#C9A227;
-    font-size:.78rem;
-    font-weight:700;
-    letter-spacing:.16em;
-    text-transform:uppercase;
-  }
-
-  .rf-hero-headline{
-    margin:0 0 .8rem;
-    font-size:clamp(2.35rem,5vw,4.9rem);
-    line-height:.94;
-    font-weight:900;
-    letter-spacing:-.045em;
-    color:#f5f5f5;
-    max-width:8.5ch;
-  }
-
-  .rf-hero-headline span{
-    display:block;
-    color:#d4d4d8;
-  }
-
-  .rf-sub--hero{
-    max-width:34rem;
-    font-size:1rem;
-    line-height:1.65;
-    color:#bfbfc6;
-    margin:0 0 1rem;
-  }
-
-  .rf-meta{
-    font-size:.95rem;
-    color:#a1a1aa;
-    margin:.2rem 0 1rem;
-    line-height:1.6;
-  }
-
-  .rf-meta a{
-    color:#C9A227;
-    text-decoration:underline;
-  }
-
-  .rf-hero-actions{
-    display:flex;
-    flex-wrap:wrap;
-    gap:.7rem;
-    margin-top:.15rem;
-  }
-
-  .rf-hero-note{
-    margin-top:.95rem;
-    color:#8d8d96;
-    font-size:.9rem;
-  }
-
-  .rf-hero-editorial{
-    position:relative;
-    width:100%;
-    max-width:420px;
-    margin-left:auto;
-  }
-
-  .rf-hero-badge{
-    position:absolute;
-    top:-12px;
-    left:18px;
-    z-index:3;
-    display:inline-flex;
-    align-items:center;
-    padding:.52rem .82rem;
-    border-radius:999px;
-    background:#080808;
-    border:1px solid rgba(201,162,39,.45);
-    color:#f5f5f5;
-    font-size:.76rem;
-    font-weight:700;
-    letter-spacing:.1em;
-    text-transform:uppercase;
-    box-shadow:0 10px 30px rgba(0,0,0,.45);
-  }
-
-  .rf-hero-frame{
-    position:relative;
-    background:#050505;
-    border:1px solid #1a1a1a;
-    border-radius:26px;
-    padding:18px;
-    box-shadow:0 28px 70px rgba(0,0,0,.72);
-    overflow:hidden;
-  }
-
-  .rf-hero-frame::before{
-    content:"";
-    position:absolute;
-    inset:0;
-    background:
-      linear-gradient(180deg, rgba(201,162,39,.07), transparent 26%),
-      linear-gradient(135deg, rgba(185,28,28,.10), transparent 45%);
-    pointer-events:none;
-  }
-
-  .rf-hero-frame::after{
-    content:"";
-    position:absolute;
-    right:-40px;
-    bottom:-40px;
-    width:180px;
-    height:180px;
-    background:radial-gradient(circle, rgba(185,28,28,.18), transparent 68%);
-    pointer-events:none;
-    filter:blur(8px);
-  }
-
-  .rf-hero-frame picture,
-  .rf-hero-frame img{
-    display:block;
-    width:100%;
-    height:auto;
-    border-radius:18px;
-    overflow:hidden;
-    position:relative;
-    z-index:1;
-    background:#000;
-  }
-
-  .rf-hero-caption{
-    margin-top:.8rem;
-    padding-left:.15rem;
-    color:#8d8d96;
-    font-size:.84rem;
-    line-height:1.5;
-    text-transform:uppercase;
-    letter-spacing:.08em;
-  }
-
-  @media (max-width: 979px){
-    .rf-hero{
-      gap:1.2rem;
+    body.theme-dark.richardson-body{
+      background:#000000;
+      color:#f5f5f5;
     }
 
-    .rf-hero-copy{
-      max-width:none;
+    .rf-shell{
+      max-width:1100px;
+      margin:0 auto;
+      padding:1.75rem 1rem 3rem;
     }
 
-    .rf-hero-headline{
-      max-width:10ch;
-      font-size:clamp(2rem,10vw,3.25rem);
-    }
-
-    .rf-hero-editorial{
-      max-width:560px;
-      margin:0;
+    .rf-brand{
+      display:flex;
+      align-items:center;
+      gap:.9rem;
+      margin-bottom:.85rem;
     }
 
     .rf-brand-icon{
-      width:54px;
-      height:54px;
+      width:62px;
+      height:62px;
+      border-radius:14px;
+      overflow:hidden;
+      flex:0 0 auto;
+      border:1px solid #1a1a1a;
+      background:#000;
+      box-shadow:0 18px 40px rgba(0,0,0,.7);
     }
-  }
-</style>
+
+    .rf-brand-icon img{
+      display:block;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+
+    .rf-brand-copy{
+      min-width:0;
+    }
+
+    .rf-eyebrow{
+      font-size:.75rem;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      color:#a1a1aa;
+      margin-bottom:.2rem;
+      font-weight:600;
+    }
+
+    .rf-title{
+      font-size:clamp(2rem,3vw,2.6rem);
+      font-weight:800;
+      margin:0;
+      line-height:1.02;
+      letter-spacing:-.02em;
+    }
+
+    .rf-hero{
+      position:relative;
+      margin-bottom:1.4rem;
+      padding:1.25rem 0 1rem;
+      border-bottom:1px solid #1a1a1a;
+    }
+
+    .rf-hero::after{
+      content:"";
+      position:absolute;
+      right:0;
+      top:0;
+      width:260px;
+      height:260px;
+      background:radial-gradient(circle, rgba(185,28,28,.14), transparent 68%);
+      filter:blur(14px);
+      pointer-events:none;
+      opacity:.9;
+    }
+
+    .rf-hero-copy{
+      position:relative;
+      z-index:2;
+      max-width:760px;
+    }
+
+    .rf-kicker{
+      margin:0 0 .8rem;
+      color:#C9A227;
+      font-size:.78rem;
+      font-weight:700;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+    }
+
+    .rf-hero-headline{
+      margin:0 0 .85rem;
+      font-size:clamp(2.5rem,6vw,5.2rem);
+      line-height:.93;
+      font-weight:900;
+      letter-spacing:-.05em;
+      color:#f5f5f5;
+      max-width:10ch;
+    }
+
+    .rf-hero-headline span{
+      display:block;
+      color:#d4d4d8;
+    }
+
+    .rf-sub{
+      color:#d4d4d8;
+      max-width:34rem;
+      margin:0 0 .8rem;
+    }
+
+    .rf-sub--hero{
+      max-width:40rem;
+      font-size:1rem;
+      line-height:1.7;
+      color:#bfbfc6;
+      margin:0 0 1rem;
+    }
+
+    .rf-meta{
+      font-size:.95rem;
+      color:#a1a1aa;
+      margin:.2rem 0 1rem;
+      line-height:1.6;
+    }
+
+    .rf-meta a,
+    .rf-contact-block a{
+      color:#C9A227;
+      text-decoration:underline;
+    }
+
+    .rf-hero-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:.7rem;
+      margin-top:.15rem;
+    }
+
+    .rf-hero-note{
+      margin-top:.95rem;
+      color:#8d8d96;
+      font-size:.9rem;
+    }
+
+    .rf-promo-band{
+      margin:0 0 2rem;
+      border:1px solid #1a1a1a;
+      border-radius:20px;
+      background:
+        linear-gradient(180deg, rgba(185,28,28,.12), rgba(0,0,0,.96)),
+        #050505;
+      box-shadow:0 24px 60px rgba(0,0,0,.55);
+      overflow:hidden;
+    }
+
+    .rf-promo-band__inner{
+      display:grid;
+      gap:1rem;
+      padding:1.15rem 1rem 1.2rem;
+      align-items:center;
+    }
+
+    @media (min-width:900px){
+      .rf-promo-band__inner{
+        grid-template-columns:1.2fr .8fr;
+        padding:1.2rem 1.2rem 1.25rem;
+      }
+    }
+
+    .rf-promo-band__eyebrow{
+      margin:0 0 .2rem;
+      color:#C9A227;
+      font-size:.74rem;
+      font-weight:700;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+    }
+
+    .rf-promo-band h2{
+      margin:0 0 .35rem;
+      font-size:1.45rem;
+      line-height:1.1;
+      color:#f5f5f5;
+    }
+
+    .rf-promo-band p{
+      margin:0;
+      color:#d4d4d8;
+      font-size:.95rem;
+      line-height:1.6;
+      max-width:44rem;
+    }
+
+    .rf-promo-band__actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:.7rem;
+      align-items:center;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:999px;
+      border:1px solid transparent;
+      font-weight:700;
+      font-size:.92rem;
+      padding:.72rem 1.12rem;
+      text-decoration:none;
+      cursor:pointer;
+      transition:transform .12s ease-out, box-shadow .12s ease-out, background-color .12s ease-out, border-color .12s ease-out, color .12s ease-out, opacity .12s ease-out;
+      will-change:transform;
+    }
+
+    .btn:active{ transform:translateY(1px); }
+
+    .btn--gold{
+      background:#C9A227;
+      border-color:#C9A227;
+      color:#000;
+      box-shadow:0 10px 30px rgba(201,162,39,.4);
+    }
+
+    .btn--gold:hover{
+      background:#E5C158;
+      border-color:#E5C158;
+    }
+
+    .btn--ghost{
+      background:#000;
+      border:1px solid #1a1a1a;
+      color:#f5f5f5;
+    }
+
+    .btn--ghost:hover{
+      border-color:#C9A227;
+      color:#C9A227;
+      background:#050505;
+    }
+
+    .rf-section{
+      margin-top:2rem;
+    }
+
+    .rf-section h2{
+      margin:0 0 .35rem;
+      font-size:1.22rem;
+      font-weight:700;
+      color:#f5f5f5;
+    }
+
+    .rf-section > p{
+      margin:0 0 .75rem;
+      color:#a1a1aa;
+      font-size:.95rem;
+    }
+
+    .rf-grid{
+      display:grid;
+      gap:1rem;
+      margin-top:.75rem;
+    }
+
+    @media (min-width:880px){
+      .rf-grid--3{
+        grid-template-columns:repeat(3, minmax(0,1fr));
+      }
+    }
+
+    .rf-card{
+      background:#050505;
+      border-radius:14px;
+      border:1px solid #1a1a1a;
+      padding:1rem;
+      box-shadow:0 20px 50px rgba(0,0,0,.6);
+    }
+
+    .rf-card h3{
+      margin:0 0 .35rem;
+      font-size:1rem;
+      font-weight:700;
+      color:#f5f5f5;
+    }
+
+    .rf-card p,
+    .rf-card ul{
+      color:#a1a1aa;
+      font-size:.92rem;
+      line-height:1.6;
+    }
+
+    .rf-card p{ margin:0; }
+
+    .rf-card ul{
+      margin:.5rem 0 0;
+      padding-left:1.1rem;
+    }
+
+    .rf-card-media{
+      margin-top:.75rem;
+      border-radius:14px;
+      overflow:hidden;
+      border:1px solid #1a1a1a;
+      background:#000;
+      box-shadow:0 16px 36px rgba(0,0,0,.45);
+    }
+
+    .rf-card-media img{
+      display:block;
+      width:100%;
+      height:auto;
+      object-fit:cover;
+    }
+
+    .rf-form-card{
+      background:#050505;
+      border-radius:16px;
+      border:1px solid #1a1a1a;
+      padding:1.25rem 1rem 1.4rem;
+      box-shadow:0 25px 60px rgba(0,0,0,.7);
+      margin-top:1.25rem;
+    }
+
+    .rf-form-grid{
+      display:grid;
+      gap:.9rem;
+    }
+
+    @media (min-width:880px){
+      .rf-form-grid{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+      .rf-form-grid .rf-form-full{
+        grid-column:1 / -1;
+      }
+    }
+
+    label{
+      display:block;
+      font-size:.8rem;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      margin-bottom:.2rem;
+      color:#a1a1aa;
+    }
+
+    .rf-input,
+    .rf-textarea,
+    .rf-select{
+      width:100%;
+      background:#000;
+      border-radius:10px;
+      border:1px solid #1a1a1a;
+      padding:.6rem .72rem;
+      color:#f5f5f5;
+      font-size:.92rem;
+      outline:none;
+    }
+
+    .rf-input:focus,
+    .rf-textarea:focus,
+    .rf-select:focus{
+      border-color:#C9A227;
+      box-shadow:0 0 0 1px rgba(201,162,39,.4);
+    }
+
+    .rf-textarea{
+      min-height:110px;
+      resize:vertical;
+    }
+
+    .rf-note{
+      font-size:.8rem;
+      color:#6b7280;
+      margin-top:.6rem;
+      line-height:1.55;
+    }
+
+    .rf-form-actions{
+      margin-top:1rem;
+      display:flex;
+      flex-wrap:wrap;
+      gap:.6rem;
+      align-items:center;
+    }
+
+    .rf-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:.3rem;
+      font-size:.75rem;
+      color:#a1a1aa;
+    }
+
+    .rf-badge span{
+      font-size:.85rem;
+    }
+
+    .rf-contact-block{
+      font-size:.92rem;
+      color:#a1a1aa;
+      margin-top:1rem;
+      line-height:1.6;
+    }
+
+    a:focus-visible,
+    button:focus-visible{
+      outline:2px solid rgba(201,162,39,.65);
+      outline-offset:3px;
+      border-radius:10px;
+    }
+
+    .rf-status{
+      margin-top:.9rem;
+      padding:.9rem .95rem;
+      border-radius:14px;
+      border:1px solid #1a1a1a;
+      background:#050505;
+      color:#e5e7eb;
+      font-size:.95rem;
+      line-height:1.5;
+    }
+
+    .rf-status--success{
+      border-color:#16a34a;
+      background:rgba(22,163,74,.08);
+    }
+
+    .rf-status--error{
+      border-color:#dc2626;
+      background:rgba(220,38,38,.08);
+    }
+
+    .rf-status strong{
+      color:#fff;
+    }
+
+    @media (max-width:979px){
+      .rf-brand-icon{
+        width:54px;
+        height:54px;
+      }
+
+      .rf-hero-headline{
+        font-size:clamp(2.15rem,10vw,3.5rem);
+        max-width:11ch;
+      }
+    }
+  </style>
 </head>
 
 <body class="theme-dark richardson-body" id="top">
   <main class="rf-shell">
-   <section class="rf-hero">
-  <div class="rf-hero-copy">
-    <div class="rf-brand">
-      <div class="rf-brand-icon" aria-hidden="true">
-        <img
-          src="/richardson/icons/icon-512.png"
-          alt=""
-          width="512"
-          height="512"
-          loading="eager"
-          decoding="async"
-        />
+    <section class="rf-hero">
+      <div class="rf-hero-copy">
+        <div class="rf-brand">
+          <div class="rf-brand-icon" aria-hidden="true">
+            <img
+              src="/richardson/icons/icon-512.png"
+              alt=""
+              width="512"
+              height="512"
+              loading="eager"
+              decoding="async"
+            />
+          </div>
+
+          <div class="rf-brand-copy">
+            <div class="rf-eyebrow">Hammond, Louisiana</div>
+            <h1 class="rf-title">Richardson Fashion</h1>
+          </div>
+        </div>
+
+        <p class="rf-kicker">Prom. Weddings. Church. Business. Special events.</p>
+
+        <h2 class="rf-hero-headline">
+          Built for the nights
+          <span>you need to look right.</span>
+        </h2>
+
+        <p class="rf-sub rf-sub--hero">
+          Sharp suits, tuxedos, dress shirts, shoes, and accessories for prom season,
+          weddings, church, business, and special events.
+        </p>
+
+        <p class="rf-meta">
+          2751 W Thomas St C · Hammond, LA 70403<br>
+          <a href="tel:+19855071718">985-507-1718</a> ·
+          <a href="https://maps.google.com/?q=2751+W+Thomas+St+C,+Hammond,+LA+70403" target="_blank" rel="noopener">Tap for directions</a>
+        </p>
+
+        <div class="rf-hero-actions">
+          <a class="btn btn--gold" href="tel:+19855071718">Call About Prom Fits</a>
+          <a class="btn btn--ghost" href="#wedding-form">Book Fitting / Appointment</a>
+        </div>
+
+        <div class="rf-hero-note">
+          Walk in for a fit, or call ahead for prom groups, tuxedos, and wedding parties.
+        </div>
       </div>
-
-      <div class="rf-brand-copy">
-        <div class="rf-eyebrow">Hammond, Louisiana</div>
-        <h1 class="rf-title">Richardson Fashion</h1>
-      </div>
-    </div>
-
-    <p class="rf-kicker">Prom. Weddings. Church. Business. Special events.</p>
-
-    <h2 class="rf-hero-headline">
-      Built for the nights
-      <span>you need to look right.</span>
-    </h2>
-
-    <p class="rf-sub rf-sub--hero">
-      Sharp suits, tuxedos, dress shirts, shoes, and accessories for prom season,
-      weddings, church, business, and special events.
-    </p>
-
-    <p class="rf-meta">
-      2751 W Thomas St C · Hammond, LA 70403<br>
-      <a href="tel:+19855071718">985-507-1718</a> ·
-      <a href="https://maps.google.com/?q=2751+W+Thomas+St+C,+Hammond,+LA+70403" target="_blank" rel="noopener">Tap for directions</a>
-    </p>
-
-    <div class="rf-hero-actions">
-      <a class="btn btn--gold" href="tel:+19855071718">Call About Prom Fits</a>
-      <a class="btn btn--ghost" href="#wedding-form">Book Fitting / Appointment</a>
-    </div>
-
-    <div class="rf-hero-note">
-      Walk in for a fit, or call ahead for prom groups, tuxedos, and wedding parties.
-    </div>
-  </div>
-
-  <div class="rf-hero-editorial">
-    <div class="rf-hero-badge">Prom Season Ready</div>
-
-    <div class="rf-hero-frame">
-      <picture>
-        <source
-          type="image/webp"
-          srcset="
-            /richardson/assets/richardson_1_420.webp 420w,
-            /richardson/assets/richardson_1_640.webp 640w
-          "
-          sizes="(max-width: 900px) 100vw, 420px"
-        />
-        <source
-          type="image/jpeg"
-          srcset="
-            /richardson/assets/richardson_1_420.jpg 420w,
-            /richardson/assets/richardson_1_640.jpg 640w
-          "
-          sizes="(max-width: 900px) 100vw, 420px"
-        />
-        <img
-          src="/richardson/assets/richardson_1_640.jpg"
-          alt="Richardson Fashion in Hammond, Louisiana — suits and formalwear"
-          width="640"
-          height="427"
-          loading="eager"
-          decoding="async"
-          fetchpriority="high"
-          onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';"
-        />
-      </picture>
-    </div>
-
-    <div class="rf-hero-caption">
-      Prom fits, tuxedos, accessories, and clean formalwear for the season.
-    </div>
-  </div>
-</section>
+    </section>
 
     <section class="rf-promo-band" aria-label="Prom season message">
       <div class="rf-promo-band__inner">
@@ -464,38 +641,6 @@
             <li>Tuxedos &amp; formal accessories</li>
             <li>Group fittings by appointment</li>
           </ul>
-
-          <div class="rf-card-media" aria-hidden="true">
-            <picture>
-              <source
-                type="image/webp"
-                srcset="
-                  /richardson/assets/richardson_420.webp 420w,
-                  /richardson/assets/richardson_640.webp 640w,
-                  /richardson/assets/richardson_780.webp 780w
-                "
-                sizes="(max-width: 880px) 100vw, 320px"
-              />
-              <source
-                type="image/jpeg"
-                srcset="
-                  /richardson/assets/richardson_420.jpg 420w,
-                  /richardson/assets/richardson_640.jpg 640w,
-                  /richardson/assets/richardson_780.jpg 780w
-                "
-                sizes="(max-width: 880px) 100vw, 320px"
-              />
-              <img
-                src="/richardson/assets/richardson_640.jpg"
-                alt="Tuxedo and formalwear options at Richardson Fashion"
-                width="640"
-                height="427"
-                loading="lazy"
-                decoding="async"
-                onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';"
-              />
-            </picture>
-          </div>
         </article>
 
         <article class="rf-card">
@@ -506,6 +651,36 @@
             <li>Hem, sleeve, and waist adjustments</li>
             <li>Ask in-store for fit and pricing</li>
           </ul>
+
+          <div class="rf-card-media" aria-hidden="true">
+            <picture>
+              <source
+                type="image/webp"
+                srcset="
+                  /richardson/assets/richardson_1_420.webp 420w,
+                  /richardson/assets/richardson_1_640.webp 640w
+                "
+                sizes="(max-width: 880px) 100vw, 320px"
+              />
+              <source
+                type="image/jpeg"
+                srcset="
+                  /richardson/assets/richardson_1_420.jpg 420w,
+                  /richardson/assets/richardson_1_640.jpg 640w
+                "
+                sizes="(max-width: 880px) 100vw, 320px"
+              />
+              <img
+                src="/richardson/assets/richardson_1_640.jpg"
+                alt="Richardson Fashion everyday suits and alterations"
+                width="640"
+                height="427"
+                loading="lazy"
+                decoding="async"
+                onerror="this.onerror=null;this.src='/assets/placeholder-wide.png';"
+              />
+            </picture>
+          </div>
         </article>
       </div>
     </section>
