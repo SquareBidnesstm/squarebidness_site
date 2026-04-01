@@ -145,14 +145,17 @@
     extra_side_mac_and_cheese: 2.50
   };
 
-  const els = {
-    turkey: document.getElementById("turkeyQty"),
-    rib: document.getElementById("ribQty"),
-    drink: document.getElementById("drink"),
-    side: document.getElementById("side"),
-    total: document.getElementById("total"),
-    btn: document.getElementById("payNowBtn")
-  };
+ const els = {
+  turkey: document.getElementById("turkeyQty"),
+  rib: document.getElementById("ribQty"),
+  drink: document.getElementById("drink"),
+  side: document.getElementById("side"),
+  total: document.getElementById("total"),
+  btn: document.getElementById("payNowBtn"),
+  name: document.getElementById("customerName"),
+  phone: document.getElementById("customerPhone"),
+  pickup: document.getElementById("pickupWindow")
+};
 
   function getCentralDateString() {
     const parts = new Intl.DateTimeFormat("en-CA", {
@@ -179,11 +182,10 @@
     total += Number(els.side.value || 0);
 
     els.total.textContent = total.toFixed(2);
-
-    const name = customerName.value.trim();
-    const phone = customerPhone.value.trim();
-    const pickup = pickupWindow.value;
-
+const name = els.name.value.trim();
+const phone = els.phone.value.trim();
+const pickup = els.pickup.value;
+    
     els.btn.disabled = !(name && phone && pickup && total > 0);
   }
 
