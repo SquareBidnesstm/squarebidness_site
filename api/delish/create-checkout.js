@@ -385,7 +385,9 @@ export default async function handler(req, res) {
       price_data: {
         currency: "usd",
         product_data: {
-          name: item.name,
+  name: item.side1Name && item.side2Name
+    ? `${item.name} (${item.side1Name}, ${item.side2Name})`
+    : item.name,
           metadata: {
             itemId: item.id,
             activeMenuDay: todayDay,
