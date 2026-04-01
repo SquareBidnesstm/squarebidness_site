@@ -373,13 +373,25 @@
 
         <div class="section-label">Items</div>
         <ul class="items">
-          ${items.length ? items.map(i => `
-            <li>
-              <span><strong>${Number(i.qty || 0)} ×</strong> ${escapeHtml(i.name || "")}</span>
-              <strong>${money(Number(i.qty || 0) * Number(i.price || 0))}</strong>
-            </li>
-          `).join("") : `<li><span>Order items unavailable.</span></li>`}
-        </ul>
+  ${items.length ? items.map(i => {
+    const sideBits = [];
+    if (i.side1Name) sideBits.push(i.side1Name);
+    if (i.side2Name) sideBits.push(i.side2Name);
+    const sideLine = sideBits.length
+      ? `<div class="meta" style="margin-top:4px;">Sides: ${escapeHtml(sideBits.join(", "))}</div>`
+      : "";
+
+    return `
+      <li>
+        <span>
+          <strong>${Number(i.qty || 0)} ×</strong> ${escapeHtml(i.name || "")}
+          ${sideLine}
+        </span>
+        <strong>${money(Number(i.qty || 0) * Number(i.price || 0))}</strong>
+      </li>
+    `;
+  }).join("") : `<li><span>Order items unavailable.</span></li>`}
+</ul>
 
         <div class="total">
           <div class="total__label">Total Paid</div>
