@@ -21,17 +21,18 @@
 
   <style>
     :root{
-      --bg:#0b0b0b;
-      --panel:#121212;
-      --panel-2:#171717;
-      --line:#262626;
-      --text:#ffffff;
-      --muted:#cfcfcf;
-      --soft:#9c9c9c;
-      --accent:#D4AF37;
+      --bg:#0f0f10;
+      --panel:#171718;
+      --panel-2:#1d1d20;
+      --line:#2c2c2f;
+      --text:#f5f2ea;
+      --muted:#cfc7ba;
+      --soft:#a79c8d;
+      --accent:#d7ae72;
+      --accent-2:#f2d7ad;
       --accent-dark:#181410;
-      --max:700px;
-      --shadow:0 18px 50px rgba(0,0,0,.28);
+      --shadow:0 16px 50px rgba(0,0,0,.28);
+      --max:760px;
     }
 
     *{box-sizing:border-box}
@@ -39,200 +40,273 @@
     body{
       margin:0;
       min-height:100vh;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
       background:
-        radial-gradient(circle at top left, rgba(212,175,55,.12), transparent 28%),
-        linear-gradient(180deg,#111 0%, #0b0b0b 100%);
+        radial-gradient(circle at top left, rgba(215,174,114,.14), transparent 28%),
+        linear-gradient(180deg,#111112 0%,#0c0c0d 100%);
       color:var(--text);
-      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      line-height:1.55;
     }
 
+    a{color:inherit;text-decoration:none}
+
     .wrap{
-      width:min(100%, var(--max));
-      margin:auto;
-      padding:28px 20px 40px;
+      width:min(var(--max),92%);
+      margin:0 auto;
+      padding:38px 0 44px;
+    }
+
+    .topbar{
+      margin-bottom:22px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .brand__mark{
+      width:44px;
+      height:44px;
+      border-radius:14px;
+      object-fit:cover;
+      background:#fff;
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:var(--shadow);
+    }
+
+    .brand__name{
+      margin:0;
+      font-size:1.04rem;
+      font-weight:800;
+    }
+
+    .brand__sub{
+      margin:2px 0 0;
+      color:var(--soft);
+      font-size:.88rem;
     }
 
     .card{
-      background:linear-gradient(180deg,var(--panel-2),var(--panel));
       border:1px solid var(--line);
       border-radius:24px;
+      padding:26px;
+      background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
       box-shadow:var(--shadow);
-      padding:28px 24px;
-      text-align:center;
     }
 
-    .badge{
+    .eyebrow{
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      min-height:38px;
+      min-height:36px;
       padding:0 14px;
       border-radius:999px;
-      background:var(--accent);
-      color:var(--accent-dark);
-      font-size:.9rem;
+      background:rgba(215,174,114,.12);
+      border:1px solid rgba(215,174,114,.18);
+      color:var(--accent-2);
+      font-size:.82rem;
       font-weight:900;
-      letter-spacing:.02em;
+      letter-spacing:.08em;
+      text-transform:uppercase;
       margin-bottom:16px;
     }
 
     h1{
+      font-size:clamp(2.2rem,5vw,3.3rem);
       margin:0;
-      font-size:clamp(2.1rem,6vw,3.25rem);
+      letter-spacing:-.03em;
       line-height:1.02;
-      letter-spacing:-.04em;
     }
 
     .lead{
-      margin:14px auto 0;
       color:var(--muted);
-      font-size:1.05rem;
-      line-height:1.65;
-      max-width:560px;
-    }
-
-    .status{
-      margin-top:22px;
-      padding:18px;
-      border-radius:20px;
-      background:rgba(255,255,255,.03);
-      border:1px solid rgba(255,255,255,.08);
-      color:var(--text);
-      line-height:1.7;
+      max-width:620px;
+      margin:14px 0 0;
       font-size:1.02rem;
     }
 
-    .status strong{
-      color:var(--accent);
+    .pickup-panel{
+      margin-top:20px;
+      padding:18px;
+      border-radius:20px;
+      background:rgba(215,174,114,.10);
+      border:1px solid rgba(215,174,114,.18);
+    }
+
+    .pickup-label{
+      color:var(--soft);
+      font-size:.8rem;
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+
+    .pickup-value{
+      margin-top:8px;
+      font-size:1.45rem;
+      font-weight:900;
+      color:var(--accent-2);
+      line-height:1.1;
     }
 
     .sub{
-      margin-top:16px;
+      margin-top:14px;
       color:var(--soft);
-      font-size:1rem;
-      line-height:1.65;
+      font-size:.98rem;
     }
 
     .order-box{
-      margin-top:22px;
-      text-align:left;
-      background:rgba(255,255,255,.03);
+      margin-top:20px;
+      padding:18px;
       border:1px solid rgba(255,255,255,.08);
       border-radius:20px;
-      padding:18px;
+      background:rgba(255,255,255,.02);
     }
 
-    .order-row{
-      margin-bottom:10px;
+    .detail-row{
       color:var(--muted);
-      line-height:1.6;
+      margin-bottom:10px;
       font-size:1rem;
     }
 
-    .order-row strong{
+    .detail-row strong{
       color:var(--text);
     }
 
-    .order-label{
-      margin:14px 0 8px;
+    .section-label{
+      margin:16px 0 10px;
       color:var(--text);
-      font-weight:800;
+      font-size:.92rem;
+      font-weight:900;
+      letter-spacing:.04em;
+      text-transform:uppercase;
     }
 
-    .order-items{
+    .items{
       margin:0;
       padding:0;
       list-style:none;
       display:grid;
-      gap:8px;
+      gap:10px;
     }
 
-    .order-items li{
+    .items li{
       display:flex;
       justify-content:space-between;
       gap:10px;
-      padding:10px 0;
+      padding:12px 0;
       border-top:1px dashed rgba(255,255,255,.10);
       color:var(--muted);
+      font-size:1rem;
     }
 
-    .order-items li:first-child{
+    .items li:first-child{
       border-top:0;
       padding-top:0;
     }
 
-    .order-items strong{
+    .items strong{
       color:var(--text);
     }
 
-    .order-total{
+    .total{
       margin-top:14px;
       padding-top:14px;
       border-top:1px solid rgba(255,255,255,.10);
-      font-size:1.05rem;
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+    }
+
+    .total__label{
+      color:var(--soft);
+      font-size:.9rem;
+      font-weight:800;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+    }
+
+    .total__value{
+      color:var(--accent-2);
+      font-size:1.4rem;
       font-weight:900;
-      color:var(--accent);
     }
 
     .actions{
-      margin-top:22px;
       display:flex;
       gap:12px;
-      justify-content:center;
       flex-wrap:wrap;
+      margin-top:22px;
     }
 
     .btn{
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      min-height:50px;
-      padding:0 20px;
+      padding:14px 18px;
       border-radius:999px;
-      text-decoration:none;
       font-weight:800;
-      transition:transform .14s ease, opacity .18s ease;
+      text-decoration:none;
       border:1px solid transparent;
+      transition:transform .14s ease, background .18s ease, border-color .18s ease, opacity .18s ease;
       white-space:nowrap;
     }
 
     .btn:hover{transform:translateY(-1px)}
 
     .btn--gold{
-      background:var(--accent);
+      background:linear-gradient(180deg,var(--accent-2),var(--accent));
       color:var(--accent-dark);
+      box-shadow:0 12px 30px rgba(215,174,114,.24);
     }
 
     .btn--dark{
       background:rgba(255,255,255,.04);
-      border-color:rgba(255,255,255,.1);
+      border-color:rgba(255,255,255,.10);
       color:var(--text);
     }
 
     .meta{
-      margin-top:18px;
+      margin-top:16px;
       color:var(--soft);
-      font-size:.95rem;
+      font-size:.92rem;
       word-break:break-word;
-      text-align:center;
     }
 
-    @media (max-width:560px){
-      .wrap{padding:18px 14px 28px}
-      .card{padding:22px 18px}
-      .actions{flex-direction:column}
-      .btn{width:100%}
-      .order-items li{
+    @media (max-width:640px){
+      .wrap{padding:22px 0 30px}
+      .card{padding:18px}
+      .pickup-value{font-size:1.18rem}
+      .items li{
         flex-direction:column;
         align-items:flex-start;
+      }
+      .actions{
+        flex-direction:column;
+      }
+      .btn{
+        width:100%;
       }
     }
   </style>
 </head>
 <body>
   <main class="wrap">
+    <div class="topbar">
+      <a class="brand" href="/delish/" aria-label="Back to Delish">
+        <img class="brand__mark" src="/delish/assets/delish-logo-mark-512.png" alt="Delish logo" loading="eager" decoding="async" />
+        <div>
+          <p class="brand__name">Delish</p>
+          <p class="brand__sub">Prepaid online pickup</p>
+        </div>
+      </a>
+    </div>
+
     <section class="card">
-      <div class="badge">Order Confirmed</div>
+      <div class="eyebrow">Order Confirmed</div>
 
       <h1>Thank you. Your order is in.</h1>
 
@@ -240,13 +314,13 @@
         Your payment was successful and Delish has received your order.
       </p>
 
-      <div class="status">
-        Please arrive during your <strong>selected pickup window</strong>.<br />
-        Your food will be prepared and ready for pickup when you arrive.
+      <div class="pickup-panel" id="pickupPanel">
+        <div class="pickup-label">Pickup Window</div>
+        <div class="pickup-value" id="pickupValue">Loading your pickup details...</div>
       </div>
 
       <p class="sub">
-        If you need to place another order, head back to the daily menu.
+        Please arrive during your selected pickup window. Your food will be prepared and ready for pickup when you arrive.
       </p>
 
       <div class="order-box" id="sessionMeta">
@@ -278,13 +352,9 @@
       const params = new URLSearchParams(window.location.search);
       const sessionId = params.get("session_id");
       const metaEl = document.getElementById("sessionMeta");
+      const pickupValueEl = document.getElementById("pickupValue");
 
-      if (!metaEl) return;
-
-      if (!sessionId) {
-        metaEl.innerHTML = `<div class="meta">Confirmation details unavailable.</div>`;
-        return;
-      }
+      if (!sessionId || !metaEl || !pickupValueEl) return;
 
       try {
         const res = await fetch(`/api/delish/finalize-checkout/?session_id=${encodeURIComponent(sessionId)}`);
@@ -297,13 +367,13 @@
         const order = data.order;
         const items = Array.isArray(order.items) ? order.items : [];
 
-        metaEl.innerHTML = `
-          <div class="order-row"><strong>Order #:</strong> ${escapeHtml(order.orderNumber || sessionId)}</div>
-          <div class="order-row"><strong>Name:</strong> ${escapeHtml(order.customerName || "")}</div>
-          <div class="order-row"><strong>Pickup:</strong> ${escapeHtml(order.pickupDate || "")} • ${escapeHtml(order.pickupWindow || "")}</div>
+        pickupValueEl.textContent = `${order.pickupDate || ""} • ${order.pickupWindow || ""}`;
 
-          <div class="order-label">Items</div>
-          <ul class="order-items">
+        metaEl.innerHTML = `
+          <div class="detail-row"><strong>Order #:</strong> ${escapeHtml(order.orderNumber || sessionId)}</div>
+          <div class="detail-row"><strong>Name:</strong> ${escapeHtml(order.customerName || "")}</div>
+          <div class="section-label">Items</div>
+          <ul class="items">
             ${items.length ? items.map(i => `
               <li>
                 <span><strong>${Number(i.qty || 0)} ×</strong> ${escapeHtml(i.name || "")}</span>
@@ -311,15 +381,14 @@
               </li>
             `).join("") : `<li><span>Order items unavailable.</span></li>`}
           </ul>
-
-          <div class="order-total">Total Paid: ${money(order.total)}</div>
-        `;
-      } catch (err) {
-        metaEl.innerHTML = `
-          <div class="meta">
-            Confirmation ID: ${escapeHtml(sessionId)}
+          <div class="total">
+            <div class="total__label">Total Paid</div>
+            <div class="total__value">${money(order.total)}</div>
           </div>
         `;
+      } catch (err) {
+        pickupValueEl.textContent = "Pickup details unavailable";
+        metaEl.innerHTML = `<div class="meta">Confirmation ID: ${escapeHtml(sessionId)}</div>`;
       }
     }
 
