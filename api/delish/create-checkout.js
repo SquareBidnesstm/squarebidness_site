@@ -333,25 +333,31 @@ export default async function handler(req, res) {
     const allowedItems = getAllowedItemsForToday(todayDay);
     const allowedMap = buildAllowedMap(allowedItems);
 
-    const cleanItems = body.items
-      .map((item) => {
-        const id = String(item.id || "").trim();
-        const qty = Math.max(1, Number(item.qty || 1));
+   const cleanItems = body.items
+  .map((item) => {
+    const id = String(item.id || "").trim();
+    const qty = Math.max(1, Number(item.qty || 1));
 
-        if (!id || !allowedMap.has(id)) return null;
-        if (!isItemAllowedForCurrentDay(id, todayDay)) return null;
+    if (!id || !allowedMap.has(id)) return null;
+    if (!isItemAllowedForCurrentDay(id, todayDay)) return null;
 
-        const allowed = allowedMap.get(id);
+    const allowed = allowedMap.get(id);
 
-        return {
-          id: allowed.id,
-          name: allowed.name,
-          qty,
-          price: allowed.price,
-          total: qty * allowed.price,
-        };
-      })
-      .filter(Boolean);
+    return {
+      id: allowed.id,
+      name: allowed.name,
+      qty,
+      price: allowed.price,
+      total: qty * allowed.price,
+
+      // 🔥 PRESERVE SIDES
+      side1Id: item.side1Id || "",
+      side2Id: item.side2Id || "",
+      side1Name: item.side1Name || "",
+      side2Name: item.side2Name || "",
+    };
+  })
+  .filter(Boolean);
 
     if (!cleanItems.length) {
       return res.status(400).json({
