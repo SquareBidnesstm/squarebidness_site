@@ -750,22 +750,24 @@
         selectedItems.reduce((sum, item) => sum + (item.qty * item.price), 0).toFixed(2)
       );
 
-      const autoNotes = selected.sideNotes.join(" | ");
+      const plateNotes = selected.sideNotes.length
+  ? `Plate sides: ${selected.sideNotes.join(" | ")}`
+  : "";
 
-      const payload = {
-        customerName: customerName.value.trim(),
-        customerPhone: customerPhone.value.trim(),
-        customerEmail: "",
-        pickupDate: state.parts.isoDate,
-        pickupWindow: pickupWindow.value,
-        notes: autoNotes,
-        smsConsent: "yes",
-        items: selectedItems.map(item => ({ id: item.id, qty: item.qty })),
-        subtotal,
-        tax: 0,
-        total: subtotal,
-        source: "delish-web"
-      };
+const payload = {
+  customerName: customerName.value.trim(),
+  customerPhone: customerPhone.value.trim(),
+  customerEmail: "",
+  pickupDate: state.parts.isoDate,
+  pickupWindow: pickupWindow.value,
+  notes: plateNotes,
+  smsConsent: "yes",
+  items: selectedItems.map(item => ({ id: item.id, qty: item.qty })),
+  subtotal,
+  tax: 0,
+  total: subtotal,
+  source: "delish-web"
+};
 
       const res = await fetch("/api/delish/create-checkout/", {
         method: "POST",
