@@ -1,7 +1,7 @@
 // FILE: /api/delish/stripe-webhook.js
 import { Redis } from "@upstash/redis";
 import Stripe from "stripe";
-import { sendDelishSms } from "./_lib/send-delish-sms.js";
+import { sendDelishSms } from "../_lib/send-delish-sms.js";
 
 const redis = new Redis({
   url: process.env.DELISH_UPSTASH_REDIS_REST_URL,
@@ -41,15 +41,21 @@ function buildPickupSms(metadata) {
   const orderNumber = metadata.orderNumber || metadata.requestNumber || "DELISH";
   const pickupDate = metadata.pickupDate || "";
   const pickupWindow = metadata.pickupWindow || "";
-  const total =
-    metadata.total ||
-    metadata.amountTotal ||
-    metadata.subtotal ||
-    "";
+  const total = metadata.total || metadata.amountTotal || metadata.subtotal || "";
+
+  let itemsText = "";
+  try {
+    const items = JSON.parse(metadata.itemsJson || "[]");
+    if (Array.isArray(items) && items.length) {
+      itemsText = ` Items: ${items.map((i) => `${i.qty}x ${i.name}`).join(", ")}.`;
+    }
+  } catch (err) {
+    console.warn("Unable to parse itemsJson for pickup SMS.");
+  }
 
   const totalText = total ? ` Total paid $${money(total)}.` : "";
 
-  return `Delish: Order ${orderNumber} confirmed. Pickup ${pickupDate} at ${pickupWindow}.${totalText}`;
+  return `Delish: Order ${orderNumber} confirmed. Pickup ${pickupDate} at ${pickupWindow}.${itemsText}${totalText}`;
 }
 
 function buildCateringDepositSms(metadata, existing) {
@@ -69,7 +75,7 @@ function buildCateringDepositSms(metadata, existing) {
     (existing && existing.eventTime) ||
     "";
 
-  return `Delish Catering: Deposit received for request ${requestNumber}.${eventDate ? ` Event date ${eventDate}` : ""}${eventTime ? ` at ${eventTime}` : ""}.`;
+  return `Delish Catering: Deposit received for request ${requestNumber}.${eventDate ? ` Event date ${eventDate}.` : ""}${eventTime ? ` Event time ${eventTime}.` : ""}`;
 }
 
 export default async function handler(req, res) {
@@ -92,7 +98,6 @@ export default async function handler(req, res) {
       const session = event.data.object;
       const metadata = session.metadata || {};
 
-      // Prevent duplicate processing if Stripe retries webhook delivery
       const sessionId = session.id;
       const alreadyProcessed = await redis.get(`delish:stripe:session:${sessionId}`);
 
@@ -162,11 +167,18 @@ export default async function handler(req, res) {
           }
         }
       } else {
-        // Standard Delish paid pickup confirmation SMS
         try {
+          const smsConsent = metadata.smsConsent === "yes";
           const smsTo = normalizeUsPhone(metadata.customerPhone || "");
 
-          if (smsTo) {
+          if (!smsConsent) {
+            console.log("DELISH PICKUP SMS SKIPPED: smsConsent not granted");
+          } else if (!smsTo) {
+            console.warn(
+              "DELISH PICKUP SMS SKIPPED: invalid phone",
+              metadata.customerPhone || ""
+            );
+          } else {
             await sendDelishSms({
               to: smsTo,
               message: buildPickupSms({
@@ -179,11 +191,6 @@ export default async function handler(req, res) {
             });
 
             console.log("DELISH PICKUP SMS SENT:", session.id);
-          } else {
-            console.warn(
-              "DELISH PICKUP SMS SKIPPED: invalid phone",
-              metadata.customerPhone || ""
-            );
           }
         } catch (smsError) {
           console.error("DELISH PICKUP SMS ERROR:", smsError);
