@@ -13,6 +13,14 @@ export async function sendDelishSms({ to, message }) {
     return { ok: false, skipped: true, reason: "missing_to_or_message" };
   }
 
+  console.log("DELISH SMS DEBUG:", {
+    to,
+    from,
+    hasSid: !!sid,
+    hasToken: !!token,
+    message
+  });
+
   const body = new URLSearchParams({
     To: to,
     From: from,
@@ -35,10 +43,22 @@ export async function sendDelishSms({ to, message }) {
 
   const data = await res.json();
 
+  console.log("DELISH SMS TWILIO RESPONSE:", {
+    ok: res.ok,
+    status: res.status,
+    sid: data.sid,
+    messageSid: data.sid,
+    errorCode: data.error_code,
+    errorMessage: data.error_message,
+    twilioStatus: data.status,
+    to: data.to,
+    from: data.from
+  });
+
   if (!res.ok) {
     console.error("Delish SMS error:", data);
     return { ok: false, error: data };
   }
 
-  return { ok: true, sid: data.sid };
+  return { ok: true, sid: data.sid, data };
 }
