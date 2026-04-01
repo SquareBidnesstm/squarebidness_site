@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-sb-brand="delish" data-sb-tier="public" data-sb-build="v20260401-delish-index-day-aware-simple">
+<html lang="en" data-sb-brand="delish" data-sb-tier="public" data-sb-build="v20260401-delish-index-day-aware-2-sides">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -12,9 +12,8 @@
   <meta name="format-detection" content="telephone=no" />
   <meta name="theme-color" content="#0f0f0f" />
   <meta name="color-scheme" content="dark light" />
-  <meta name="sb:build" content="v20260401-delish-index-day-aware-simple" />
+  <meta name="sb:build" content="v20260401-delish-index-day-aware-2-sides" />
 
-  <!-- OG -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Delish Daily Menu" />
   <meta property="og:description" content="Order online. Pickup on arrival." />
@@ -26,19 +25,16 @@
   <meta property="og:image:alt" content="Delish daily menu in Alexandria, Louisiana" />
   <meta property="fb:app_id" content="802680062853443" />
 
-  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Delish Daily Menu" />
   <meta name="twitter:description" content="Order online. Pickup on arrival." />
   <meta name="twitter:image" content="https://www.squarebidness.com/delish/assets/delish-meta_1200x630.jpg" />
 
-  <!-- Icons -->
   <link rel="manifest" href="/delish/manifest.json" />
   <link rel="icon" sizes="16x16" href="/delish/assets/delish-favicon-16.png" />
   <link rel="icon" sizes="32x32" href="/delish/assets/delish-favicon-32.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/delish/assets/delish-logo-mark-180.png" />
 
-  <!-- Analytics -->
   <script defer src="/scripts/ga.js"></script>
   <script defer src="/scripts/sb-analytics.js"></script>
   <script defer src="/scripts/meta-pixel.js"></script>
@@ -52,26 +48,38 @@
     h3 { margin:0 0 8px; }
     .section { margin-top:24px; }
     input, select {
-      width:100%; padding:14px; margin-top:8px;
-      border-radius:10px; border:none; font-size:16px;
+      width:100%;
+      padding:14px;
+      margin-top:8px;
+      border-radius:10px;
+      border:none;
+      font-size:16px;
       box-sizing:border-box;
     }
     .menuItem {
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:14px;
       margin:12px 0;
       padding:12px 0;
       border-bottom:1px solid rgba(255,255,255,.08);
     }
     .menuItem:last-child { border-bottom:none; }
+    .menuTop {
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:14px;
+    }
     .menuCopy { flex:1; }
     .menuCopy small { display:block; color:#bbb; margin-top:4px; line-height:1.4; }
     .qtyWrap { display:flex; align-items:center; gap:8px; }
     .qtyBtn {
-      width:32px; height:32px; border:none; border-radius:999px;
-      background:#222; color:#fff; font-size:18px; cursor:pointer;
+      width:32px;
+      height:32px;
+      border:none;
+      border-radius:999px;
+      background:#222;
+      color:#fff;
+      font-size:18px;
+      cursor:pointer;
     }
     .qty {
       width:70px;
@@ -79,12 +87,32 @@
       text-align:center;
       margin-top:0;
     }
-    .totalBox { margin-top:20px; font-size:20px; font-weight:bold; }
+    .plateSides {
+      display:none;
+      margin-top:12px;
+      padding:12px;
+      border-radius:10px;
+      background:#121212;
+      border:1px solid rgba(255,255,255,.07);
+    }
+    .plateSides.is-visible { display:block; }
+    .sideLabel {
+      display:block;
+      font-size:13px;
+      color:#d4d4d4;
+      margin-top:8px;
+    }
+    .totalBox { margin-top:20px; font-size:20px; font-weight:bold; line-height:1.5; }
     button.mainBtn {
-      width:100%; padding:16px; margin-top:20px;
-      border:none; border-radius:12px;
-      background:#D4AF37; color:#000;
-      font-size:18px; font-weight:bold;
+      width:100%;
+      padding:16px;
+      margin-top:20px;
+      border:none;
+      border-radius:12px;
+      background:#D4AF37;
+      color:#000;
+      font-size:18px;
+      font-weight:bold;
     }
     button.mainBtn:disabled { background:#555; color:#ddd; }
     .headerNote { font-size:14px; color:#ccc; margin-top:6px; line-height:1.45; }
@@ -103,9 +131,15 @@
     .optionNote { font-size:13px; color:#bbb; margin-top:4px; }
     .actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:20px; }
     .linkBtn {
-      display:inline-flex; align-items:center; justify-content:center;
-      padding:14px 16px; border-radius:12px; text-decoration:none;
-      background:#1a1a1a; color:#fff; font-weight:600;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:14px 16px;
+      border-radius:12px;
+      text-decoration:none;
+      background:#1a1a1a;
+      color:#fff;
+      font-weight:600;
       border:1px solid rgba(255,255,255,.08);
       flex:1;
       min-width:160px;
@@ -121,7 +155,6 @@
     Pickup Only · Alexandria, Louisiana · Order online, pickup on arrival
   </div>
 
-  <!-- CUSTOMER -->
   <div class="section">
     <input id="customerName" placeholder="Full Name" />
     <input id="customerPhone" placeholder="Phone Number" />
@@ -138,18 +171,16 @@
     </select>
   </div>
 
-  <!-- MENU -->
   <div class="section">
     <h2>Main Plates</h2>
     <div class="menuNote" id="mainMenuNote">Available for today’s active menu.</div>
     <div id="mainMenuItems"></div>
   </div>
 
-  <!-- ADD ONS -->
   <div class="section">
     <h3>Drinks</h3>
     <select id="drinkSelect">
-      <option value="">No drink</option>
+      <option value="">Drink (optional)</option>
     </select>
     <div class="optionNote">Optional</div>
   </div>
@@ -157,22 +188,21 @@
   <div class="section">
     <h3>Extra Side</h3>
     <select id="extraSideSelect">
-      <option value="">No extra side</option>
+      <option value="">Extra Side (optional)</option>
     </select>
-    <div class="optionNote">Optional</div>
+    <div class="optionNote">Optional extra side outside of your 2 plate sides.</div>
   </div>
 
   <div class="section">
     <h3>Lagniappe</h3>
     <select id="lagniappeSelect">
-      <option value="">No Lagniappe</option>
+      <option value="">Lagniappe (optional)</option>
     </select>
     <div class="optionNote">Optional add-on</div>
   </div>
 
   <div id="status" class="status" aria-live="polite"></div>
 
-  <!-- TOTAL -->
   <div class="totalBox">
     Subtotal: $<span id="subtotalDisplay">0.00</span><br />
     Total: $<span id="totalDisplay">0.00</span>
@@ -370,20 +400,10 @@
     return { mode: "closed", today: day, parts };
   }
 
-  function renderMainItem(item) {
-    return `
-      <div class="menuItem">
-        <div class="menuCopy">
-          <span>${item.name} ($${Number(item.price).toFixed(2)})</span>
-          ${item.desc ? `<small>${item.desc}</small>` : ""}
-        </div>
-        <div class="qtyWrap">
-          <button type="button" class="qtyBtn" data-target="${item.id}Qty" data-action="decrease">−</button>
-          <input type="number" min="0" value="0" id="${item.id}Qty" class="qty" />
-          <button type="button" class="qtyBtn" data-target="${item.id}Qty" data-action="increase">+</button>
-        </div>
-      </div>
-    `;
+  function getExtraSidesForDay(day) {
+    return day === "friday"
+      ? [...EXTRA_SIDES_BASE, ...EXTRA_SIDES_FRIDAY_ONLY]
+      : [...EXTRA_SIDES_BASE];
   }
 
   function renderSelectOptions(selectEl, items, placeholder) {
@@ -392,10 +412,42 @@
       items.map(item => `<option value="${item.id}">${item.name} ($${Number(item.price).toFixed(2)})</option>`).join("");
   }
 
-  function getExtraSidesForDay(day) {
-    return day === "friday"
-      ? [...EXTRA_SIDES_BASE, ...EXTRA_SIDES_FRIDAY_ONLY]
-      : [...EXTRA_SIDES_BASE];
+  function renderPlateSideOptions(day) {
+    const sides = getExtraSidesForDay(day);
+    return [
+      `<option value="">Choose a side</option>`,
+      ...sides.map(side => `<option value="${side.id}">${side.name}</option>`)
+    ].join("");
+  }
+
+  function renderMainItem(item, day) {
+    return `
+      <div class="menuItem">
+        <div class="menuTop">
+          <div class="menuCopy">
+            <span>${item.name} ($${Number(item.price).toFixed(2)})</span>
+            ${item.desc ? `<small>${item.desc}</small>` : ""}
+          </div>
+          <div class="qtyWrap">
+            <button type="button" class="qtyBtn" data-target="${item.id}Qty" data-action="decrease">−</button>
+            <input type="number" min="0" max="1" value="0" id="${item.id}Qty" class="qty" />
+            <button type="button" class="qtyBtn" data-target="${item.id}Qty" data-action="increase">+</button>
+          </div>
+        </div>
+
+        <div class="plateSides" id="${item.id}SidesWrap">
+          <label class="sideLabel" for="${item.id}Side1">Side 1</label>
+          <select id="${item.id}Side1" data-plate-side="${item.id}">
+            ${renderPlateSideOptions(day)}
+          </select>
+
+          <label class="sideLabel" for="${item.id}Side2">Side 2</label>
+          <select id="${item.id}Side2" data-plate-side="${item.id}">
+            ${renderPlateSideOptions(day)}
+          </select>
+        </div>
+      </div>
+    `;
   }
 
   function attachQtyButtons() {
@@ -403,13 +455,36 @@
       btn.onclick = () => {
         const input = document.getElementById(btn.dataset.target);
         if (!input) return;
+
         const current = Number(input.value || 0);
-        input.value = btn.dataset.action === "increase"
-          ? current + 1
-          : Math.max(0, current - 1);
+        let next = btn.dataset.action === "increase" ? current + 1 : current - 1;
+        next = Math.max(0, Math.min(1, next));
+        input.value = next;
+
+        togglePlateSides(input.id.replace("Qty", ""), next > 0);
         calc();
       };
     });
+  }
+
+  function attachPlateSideListeners() {
+    document.querySelectorAll("[data-plate-side]").forEach((select) => {
+      select.addEventListener("change", calc);
+    });
+  }
+
+  function togglePlateSides(plateId, visible) {
+    const wrap = document.getElementById(`${plateId}SidesWrap`);
+    if (!wrap) return;
+
+    wrap.classList.toggle("is-visible", visible);
+
+    if (!visible) {
+      const side1 = document.getElementById(`${plateId}Side1`);
+      const side2 = document.getElementById(`${plateId}Side2`);
+      if (side1) side1.value = "";
+      if (side2) side2.value = "";
+    }
   }
 
   function applyDailyMenu() {
@@ -422,10 +497,12 @@
       menuDayTitle.textContent = menu.title;
       menuDayNote.textContent = "Pickup Only · Alexandria, Louisiana · Order online, pickup on arrival";
       mainMenuNote.textContent = menu.note;
-      mainMenuItems.innerHTML = menu.mains.map(renderMainItem).join("");
+      mainMenuItems.innerHTML = menu.mains.map(item => renderMainItem(item, state.today)).join("");
       renderSelectOptions(drinkSelect, DRINKS, "Drink (optional)");
       renderSelectOptions(extraSideSelect, getExtraSidesForDay(state.today), "Extra Side (optional)");
       renderSelectOptions(lagniappeSelect, LAGNIAPPE, "Lagniappe (optional)");
+      attachQtyButtons();
+      attachPlateSideListeners();
     } else if (state.mode === "closed-saturday") {
       menuDayTitle.textContent = "Delish — Closed Today";
       menuDayNote.textContent = "Pickup Only · Alexandria, Louisiana";
@@ -473,7 +550,6 @@
       renderSelectOptions(lagniappeSelect, [], "Lagniappe (optional)");
     }
 
-    attachQtyButtons();
     calc();
   }
 
@@ -488,16 +564,57 @@
     return sourceItems.find(item => item.id === value) || null;
   }
 
-  function getSelectedItems() {
+  function getPlateSelections() {
     const items = [];
+    const sideNotes = [];
+    const mains = getCurrentMainItems();
 
-    getCurrentMainItems().forEach((item) => {
+    mains.forEach((item) => {
       const qtyEl = document.getElementById(`${item.id}Qty`);
       const qty = Number(qtyEl?.value || 0);
+
       if (qty > 0) {
-        items.push({ id: item.id, name: item.name, price: item.price, qty });
+        const side1El = document.getElementById(`${item.id}Side1`);
+        const side2El = document.getElementById(`${item.id}Side2`);
+        const side1Id = side1El ? side1El.value : "";
+        const side2Id = side2El ? side2El.value : "";
+
+        const sideOptions = getExtraSidesForDay(currentDay);
+        const side1 = sideOptions.find(side => side.id === side1Id);
+        const side2 = sideOptions.find(side => side.id === side2Id);
+
+        items.push({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          qty,
+          side1Id,
+          side2Id,
+          side1Name: side1 ? side1.name : "",
+          side2Name: side2 ? side2.name : ""
+        });
+
+        if (side1 && side2) {
+          sideNotes.push(`${item.name}: ${side1.name}, ${side2.name}`);
+        }
       }
     });
+
+    return { items, sideNotes };
+  }
+
+  function getSelectedItems() {
+    const plateSelections = getPlateSelections();
+    const items = plateSelections.items.map(item => ({
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      qty: item.qty,
+      side1Id: item.side1Id,
+      side2Id: item.side2Id,
+      side1Name: item.side1Name,
+      side2Name: item.side2Name
+    }));
 
     const drink = getSelectedOptionalItem(drinkSelect, DRINKS);
     if (drink) items.push({ id: drink.id, name: drink.name, price: drink.price, qty: 1 });
@@ -508,11 +625,18 @@
     const lagniappe = getSelectedOptionalItem(lagniappeSelect, LAGNIAPPE);
     if (lagniappe) items.push({ id: lagniappe.id, name: lagniappe.name, price: lagniappe.price, qty: 1 });
 
-    return items;
+    return { items, sideNotes: plateSelections.sideNotes };
+  }
+
+  function selectedPlatesHaveSides() {
+    const plates = getPlateSelections().items;
+    if (!plates.length) return false;
+    return plates.every(item => item.side1Id && item.side2Id);
   }
 
   function calc() {
-    const selectedItems = getSelectedItems();
+    const selected = getSelectedItems();
+    const selectedItems = selected.items;
     const subtotal = selectedItems.reduce(
       (sum, item) => sum + (Number(item.qty || 0) * Number(item.price || 0)),
       0
@@ -526,7 +650,8 @@
     const nameOk = customerName.value.trim().length > 0;
     const phoneOk = customerPhone.value.trim().length > 0;
     const pickupOk = pickupWindow.value.trim().length > 0;
-    const itemsOk = selectedItems.length > 0;
+    const plateItemsOk = getPlateSelections().items.length > 0;
+    const sidesOk = selectedPlatesHaveSides();
 
     if (!(state.mode === "open-day" || state.mode === "open-sunday")) {
       checkoutBtn.disabled = true;
@@ -540,7 +665,7 @@
       return;
     }
 
-    if (!(nameOk && phoneOk && pickupOk && itemsOk)) {
+    if (!(nameOk && phoneOk && pickupOk && plateItemsOk && sidesOk)) {
       checkoutBtn.disabled = true;
       checkoutBtn.textContent = "Complete Order";
       return;
@@ -570,9 +695,17 @@
       return;
     }
 
-    const selectedItems = getSelectedItems();
-    if (!selectedItems.length) {
-      showStatus("Add at least one item first.");
+    const selected = getSelectedItems();
+    const selectedItems = selected.items;
+    const plateSelections = getPlateSelections();
+
+    if (!plateSelections.items.length) {
+      showStatus("Add at least one main plate first.");
+      return;
+    }
+
+    if (!selectedPlatesHaveSides()) {
+      showStatus("Each main plate requires 2 sides before checkout.");
       return;
     }
 
@@ -584,13 +717,15 @@
         selectedItems.reduce((sum, item) => sum + (item.qty * item.price), 0).toFixed(2)
       );
 
+      const autoNotes = selected.sideNotes.join(" | ");
+
       const payload = {
         customerName: customerName.value.trim(),
         customerPhone: customerPhone.value.trim(),
         customerEmail: "",
         pickupDate: state.parts.isoDate,
         pickupWindow: pickupWindow.value,
-        notes: "",
+        notes: autoNotes,
         smsConsent: "yes",
         items: selectedItems.map(item => ({ id: item.id, qty: item.qty })),
         subtotal,
