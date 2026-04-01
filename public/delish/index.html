@@ -450,43 +450,75 @@
     `;
   }
 
-  function attachQtyButtons() {
-    document.querySelectorAll(".qtyBtn").forEach((btn) => {
-      btn.onclick = () => {
-        const input = document.getElementById(btn.dataset.target);
-        if (!input) return;
+ function attachQtyButtons() {
+  document.querySelectorAll(".qtyBtn").forEach((btn) => {
+    btn.onclick = () => {
+      const input = document.getElementById(btn.dataset.target);
+      if (!input) return;
 
-        const current = Number(input.value || 0);
-        let next = btn.dataset.action === "increase" ? current + 1 : current - 1;
-        next = Math.max(0, Math.min(1, next));
-        input.value = next;
+      const current = Number(input.value || 0);
+      let next = btn.dataset.action === "increase" ? current + 1 : current - 1;
+      next = Math.max(0, Math.min(1, next));
+      input.value = next;
 
-        togglePlateSides(input.id.replace("Qty", ""), next > 0);
-        calc();
-      };
+      syncPlateSides();
+      calc();
+    };
+  });
+
+  document.querySelectorAll(".qty").forEach((input) => {
+    input.addEventListener("input", () => {
+      let next = Number(input.value || 0);
+      next = Math.max(0, Math.min(1, next));
+      input.value = next;
+
+      syncPlateSides();
+      calc();
     });
-  }
 
+    input.addEventListener("change", () => {
+      let next = Number(input.value || 0);
+      next = Math.max(0, Math.min(1, next));
+      input.value = next;
+
+      syncPlateSides();
+      calc();
+    });
+  });
+}
+
+  function syncPlateSides() {
+  getCurrentMainItems().forEach((item) => {
+    const qtyEl = document.getElementById(`${item.id}Qty`);
+    const qty = Number(qtyEl?.value || 0);
+    togglePlateSides(item.id, qty > 0);
+  });
+}
+  
   function attachPlateSideListeners() {
     document.querySelectorAll("[data-plate-side]").forEach((select) => {
       select.addEventListener("change", calc);
     });
   }
 
-  function togglePlateSides(plateId, visible) {
-    const wrap = document.getElementById(`${plateId}SidesWrap`);
-    if (!wrap) return;
+ function togglePlateSides(plateId, visible) {
+  const wrap = document.getElementById(`${plateId}SidesWrap`);
+  if (!wrap) return;
 
-    wrap.classList.toggle("is-visible", visible);
+  wrap.classList.toggle("is-visible", visible);
 
-    if (!visible) {
-      const side1 = document.getElementById(`${plateId}Side1`);
-      const side2 = document.getElementById(`${plateId}Side2`);
-      if (side1) side1.value = "";
-      if (side2) side2.value = "";
-    }
+  const side1 = document.getElementById(`${plateId}Side1`);
+  const side2 = document.getElementById(`${plateId}Side2`);
+
+  if (side1) side1.disabled = !visible;
+  if (side2) side2.disabled = !visible;
+
+  if (!visible) {
+    if (side1) side1.value = "";
+    if (side2) side2.value = "";
   }
-
+}
+  
   function applyDailyMenu() {
     const state = getServiceState();
     currentMode = state.mode;
@@ -503,6 +535,7 @@
       renderSelectOptions(lagniappeSelect, LAGNIAPPE, "Lagniappe (optional)");
       attachQtyButtons();
       attachPlateSideListeners();
+      syncPlateSides();
     } else if (state.mode === "closed-saturday") {
       menuDayTitle.textContent = "Delish — Closed Today";
       menuDayNote.textContent = "Pickup Only · Alexandria, Louisiana";
