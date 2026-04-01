@@ -196,13 +196,46 @@
       <div class="meta" id="sessionMeta"></div>
     </section>
   </main>
+ <script>
+async function loadOrder() {
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get("session_id");
 
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const sessionId = params.get("session_id");
-    if (sessionId) {
-      document.getElementById("sessionMeta").textContent = `Confirmation ID: ${sessionId}`;
-    }
-  </script>
+  if (!sessionId) return;
+
+  try {
+    const res = await fetch(`/api/delish/finalize-checkout/?session_id=${sessionId}`);
+    const data = await res.json();
+
+    if (!data.ok) throw new Error("Unable to load order");
+
+    const order = data.order;
+
+    document.getElementById("sessionMeta").innerHTML = `
+      <div style="margin-top:20px;text-align:left">
+        <div><strong>Order #:</strong> ${order.orderNumber}</div>
+        <div><strong>Name:</strong> ${order.customerName}</div>
+        <div><strong>Pickup:</strong> ${order.pickupDate} • ${order.pickupWindow}</div>
+
+        <div style="margin-top:14px;"><strong>Items:</strong></div>
+        <ul style="margin-top:8px;">
+          ${order.items.map(i => `
+            <li>${i.qty} × ${i.name} — $${(i.qty * i.price).toFixed(2)}</li>
+          `).join("")}
+        </ul>
+
+        <div style="margin-top:12px;font-weight:bold;">
+          Total Paid: $${Number(order.total).toFixed(2)}
+        </div>
+      </div>
+    `;
+  } catch (err) {
+    document.getElementById("sessionMeta").textContent =
+      "Order loaded, but details unavailable.";
+  }
+}
+
+loadOrder();
+</script>
 </body>
 </html>
