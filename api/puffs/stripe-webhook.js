@@ -76,20 +76,65 @@ function formatItemsForSms(items) {
     .join(", ");
 }
 
-async function sendSms(body) {
+function normalizeUsPhone(phone) {
+  const digits = String(phone || "").replace(/\D/g, "");
+  if (digits.length === 10) return `+1${digits}`;
+  if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
+  return null;
+}
+
+async function sendSms({ to, body }) {
   if (
     !twilioClient ||
     !process.env.PUFFS_TWILIO_MESSAGING_SERVICE_SID ||
-    !process.env.PUFFS_ALERT_NUMBER
+    !to ||
+    !body
   ) {
-    return;
+    return { ok: false, skipped: true };
   }
 
-  await twilioClient.messages.create({
+  const message = await twilioClient.messages.create({
     body,
     messagingServiceSid: process.env.PUFFS_TWILIO_MESSAGING_SERVICE_SID,
-    to: process.env.PUFFS_ALERT_NUMBER
+    to
   });
+
+  return { ok: true, sid: message.sid, status: message.status };
+}
+
+async function sendInternalAlert(body) {
+  if (!process.env.PUFFS_ALERT_NUMBER) {
+    return { ok: false, skipped: true, reason: "missing_alert_number" };
+  }
+
+  return sendSms({
+    to: process.env.PUFFS_ALERT_NUMBER,
+    body
+  });
+}
+
+function buildCustomerOrderSms(order) {
+  const customerName = String(order.customerName || "").trim();
+  const pickupTime = String(order.pickupTime || "").trim() || "ASAP";
+  const greeting = customerName
+    ? `Puff's: ${customerName}, your order is confirmed.`
+    : `Puff's: Your order is confirmed.`;
+
+  let itemLine = "Items unavailable";
+  if (Array.isArray(order.items) && order.items.length) {
+    itemLine = order.items
+      .map((item) => `${String(item.name || "").trim()} (x${Number(item.qty || 0)})`)
+      .filter(Boolean)
+      .join(", ");
+  }
+
+  return `${greeting}
+
+Pickup: ${pickupTime}
+Item: ${itemLine}
+Total: $${formatMoney(order.total)}
+
+See you soon.`;
 }
 
 async function sendFoodOrderAlert(order) {
@@ -105,7 +150,27 @@ async function sendFoodOrderAlert(order) {
     .filter(Boolean)
     .join("\n");
 
-  await sendSms(body);
+  return sendInternalAlert(body);
+}
+
+async function sendCustomerOrderSms(order) {
+  const smsConsent = order.smsConsent === true || order.smsConsent === "yes";
+  const customerPhone = normalizeUsPhone(order.customerPhone || "");
+
+  if (!smsConsent || !customerPhone) {
+    return {
+      ok: false,
+      skipped: true,
+      reason: "missing_consent_or_phone",
+      smsConsent,
+      customerPhone: order.customerPhone || ""
+    };
+  }
+
+  return sendSms({
+    to: customerPhone,
+    body: buildCustomerOrderSms(order)
+  });
 }
 
 async function sendCateringDepositAlert(order) {
@@ -119,7 +184,7 @@ async function sendCateringDepositAlert(order) {
     .filter(Boolean)
     .join("\n");
 
-  await sendSms(body);
+  return sendInternalAlert(body);
 }
 
 async function handleFoodOrderCompleted(session) {
@@ -139,7 +204,12 @@ async function handleFoodOrderCompleted(session) {
   await pushFoodOrder(paidOrder);
   await redisSet(`puffs:paid:${session.id}`, paidOrder);
   await redisSet(`puffs:checkout:${session.id}`, paidOrder);
-  await sendFoodOrderAlert(paidOrder);
+
+  const alertResult = await sendFoodOrderAlert(paidOrder);
+  console.log("PUFFS INTERNAL ALERT RESULT:", alertResult);
+
+  const customerSmsResult = await sendCustomerOrderSms(paidOrder);
+  console.log("PUFFS CUSTOMER SMS RESULT:", customerSmsResult);
 }
 
 async function handleCateringDepositCompleted(session) {
@@ -162,7 +232,9 @@ async function handleCateringDepositCompleted(session) {
 
   await redisSet(requestKey, updated);
   await redisSet(`puffs:catering:paid:${requestId}`, updated);
-  await sendCateringDepositAlert(updated);
+
+  const cateringAlertResult = await sendCateringDepositAlert(updated);
+  console.log("PUFFS CATERING ALERT RESULT:", cateringAlertResult);
 }
 
 export default async function handler(req, res) {
