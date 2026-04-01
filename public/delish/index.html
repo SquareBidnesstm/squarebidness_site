@@ -129,13 +129,15 @@
 
 </div>
 <script>
-const params = new URLSearchParams(window.location.search);
-const sessionId = params.get("session_id");
+(function () {
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get("session_id");
 
-if (sessionId) {
-  window.location.replace("/delish/order/success/?session_id=" + encodeURIComponent(sessionId));
-  return;
-} else {
+  if (sessionId) {
+    window.location.replace("/delish/order/success/?session_id=" + encodeURIComponent(sessionId));
+    return;
+  }
+
   const prices = {
     thursday_turkey_wings: 16.99,
     friday_fried_catfish: 15.99,
@@ -261,7 +263,7 @@ if (sessionId) {
       els.btn.textContent = "Pay Now";
     }
   });
-}
+})();
 </script>
 </body>
 </html>
