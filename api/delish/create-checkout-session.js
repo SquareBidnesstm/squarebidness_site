@@ -1,3 +1,4 @@
+// FILE: /api/delish/create-checkout-session.js
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
@@ -14,9 +15,9 @@ const MENU_BY_DAY = {
     { id: "tuesday_meatloaf", name: "Meatloaf Plate", price: 13.99 }
   ],
   wednesday: [
-    { id: "wednesday_pork_neckbones", name: "Pork Neckbones Plate", price: 10.00 },
-    { id: "wednesday_baked_chicken", name: "Baked Chicken Plate", price: 10.00 },
-    { id: "wednesday_country_fried_steak", name: "Country Fried Steak Plate", price: 10.00 }
+    { id: "wednesday_pork_neckbones", name: "Pork Neckbones Plate", price: 10.0 },
+    { id: "wednesday_baked_chicken", name: "Baked Chicken Plate", price: 10.0 },
+    { id: "wednesday_country_fried_steak", name: "Country Fried Steak Plate", price: 10.0 }
   ],
   thursday: [
     { id: "thursday_turkey_wings", name: "Turkey Wings Plate", price: 16.99 }
@@ -121,6 +122,10 @@ export default async function handler(req, res) {
       });
     }
 
+    const numericSubtotal = Number(subtotal || 0);
+    const numericEstimatedTax = Number(estimatedTax || 0);
+    const numericTotal = Number(total || 0);
+
     const line_items = cleanItems.map((item) => ({
       quantity: item.qty,
       price_data: {
@@ -152,9 +157,9 @@ export default async function handler(req, res) {
       pickupDate,
       pickupWindow,
       items: cleanItems,
-      subtotal: Number(subtotal || 0),
-      estimatedTax: Number(estimatedTax || 0),
-      total: Number(total || 0),
+      subtotal: numericSubtotal,
+      estimatedTax: numericEstimatedTax,
+      total: numericTotal,
       activeMenuDay: today
     };
 
@@ -176,35 +181,34 @@ export default async function handler(req, res) {
 
     const recordId = intakeJson.id;
 
+    const sharedMetadata = {
+      brand: "Delish",
+      recordId,
+      orderType: "paid_pickup",
+      customerName,
+      customerPhone,
+      customerEmail: customerEmail || "",
+      pickupDate,
+      pickupWindow,
+      activeMenuDay: today,
+      smsConsent: "yes",
+      itemsJson: JSON.stringify(cleanItems),
+      subtotal: String(numericSubtotal),
+      tax: String(numericEstimatedTax),
+      total: String(numericTotal)
+    };
+
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       billing_address_collection: "auto",
       phone_number_collection: { enabled: true },
       customer_email: customerEmail || undefined,
-      success_url: `${process.env.DELISH_SUCCESS_URL}?session_id={CHECKOUT_SESSION_ID}&record_id=${encodeURIComponent(recordId)}`,
-      cancel_url: `${process.env.DELISH_CANCEL_URL}?record_id=${encodeURIComponent(recordId)}`,
+      success_url: `https://www.squarebidness.com/delish/order/success/?session_id={CHECKOUT_SESSION_ID}&record_id=${encodeURIComponent(recordId)}`,
+      cancel_url: `https://www.squarebidness.com/delish/order/?record_id=${encodeURIComponent(recordId)}`,
       line_items,
-      metadata: {
-        brand: "Delish",
-        recordId,
-        orderType: "paid_pickup",
-        customerName,
-        customerPhone,
-        pickupDate,
-        pickupWindow,
-        activeMenuDay: today
-      },
+      metadata: sharedMetadata,
       payment_intent_data: {
-        metadata: {
-          brand: "Delish",
-          recordId,
-          orderType: "paid_pickup",
-          customerName,
-          customerPhone,
-          pickupDate,
-          pickupWindow,
-          activeMenuDay: today
-        }
+        metadata: sharedMetadata
       },
       automatic_tax: { enabled: false }
     });
