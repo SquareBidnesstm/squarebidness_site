@@ -1,4 +1,4 @@
-<!-- FILE: /public/delish/order/success/index.html -->
+x<!-- FILE: /public/delish/order/success/index.html -->
 <!doctype html>
 <html lang="en" data-sb-brand="delish" data-sb-tier="success" data-sb-build="v20260331-delish-success">
 <head>
@@ -152,7 +152,7 @@
     .meta{
       margin-top:18px;
       color:var(--soft);
-      font-size:.88rem;
+      font-size:.95rem;
       word-break:break-word;
     }
 
@@ -196,46 +196,65 @@
       <div class="meta" id="sessionMeta"></div>
     </section>
   </main>
- <script>
-async function loadOrder() {
-  const params = new URLSearchParams(window.location.search);
-  const sessionId = params.get("session_id");
 
-  if (!sessionId) return;
+  <script>
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
 
-  try {
-    const res = await fetch(`/api/delish/finalize-checkout/?session_id=${sessionId}`);
-    const data = await res.json();
+    function money(n) {
+      return `$${Number(n || 0).toFixed(2)}`;
+    }
 
-    if (!data.ok) throw new Error("Unable to load order");
+    async function loadOrder() {
+      const params = new URLSearchParams(window.location.search);
+      const sessionId = params.get("session_id");
+      const metaEl = document.getElementById("sessionMeta");
 
-    const order = data.order;
+      if (!sessionId || !metaEl) return;
 
-    document.getElementById("sessionMeta").innerHTML = `
-      <div style="margin-top:20px;text-align:left">
-        <div><strong>Order #:</strong> ${order.orderNumber}</div>
-        <div><strong>Name:</strong> ${order.customerName}</div>
-        <div><strong>Pickup:</strong> ${order.pickupDate} • ${order.pickupWindow}</div>
+      try {
+        const res = await fetch(`/api/delish/finalize-checkout/?session_id=${encodeURIComponent(sessionId)}`);
+        const data = await res.json();
 
-        <div style="margin-top:14px;"><strong>Items:</strong></div>
-        <ul style="margin-top:8px;">
-          ${order.items.map(i => `
-            <li>${i.qty} × ${i.name} — $${(i.qty * i.price).toFixed(2)}</li>
-          `).join("")}
-        </ul>
+        if (!res.ok || !data.ok || !data.order) {
+          throw new Error("Unable to load order");
+        }
 
-        <div style="margin-top:12px;font-weight:bold;">
-          Total Paid: $${Number(order.total).toFixed(2)}
-        </div>
-      </div>
-    `;
-  } catch (err) {
-    document.getElementById("sessionMeta").textContent =
-      "Order loaded, but details unavailable.";
-  }
-}
+        const order = data.order;
+        const items = Array.isArray(order.items) ? order.items : [];
 
-loadOrder();
-</script>
+        metaEl.innerHTML = `
+          <div style="margin-top:20px;text-align:left;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px;">
+            <div style="margin-bottom:8px;"><strong>Order #:</strong> ${escapeHtml(order.orderNumber || sessionId)}</div>
+            <div style="margin-bottom:8px;"><strong>Name:</strong> ${escapeHtml(order.customerName || "")}</div>
+            <div style="margin-bottom:12px;"><strong>Pickup:</strong> ${escapeHtml(order.pickupDate || "")} • ${escapeHtml(order.pickupWindow || "")}</div>
+
+            <div style="margin-bottom:8px;"><strong>Items:</strong></div>
+            <ul style="margin:0 0 12px 18px;padding:0;">
+              ${items.length ? items.map(i => `
+                <li style="margin:6px 0;">
+                  ${Number(i.qty || 0)} × ${escapeHtml(i.name || "")} — ${money(Number(i.qty || 0) * Number(i.price || 0))}
+                </li>
+              `).join("") : `<li>Order items unavailable.</li>`}
+            </ul>
+
+            <div style="font-weight:800;">
+              Total Paid: ${money(order.total)}
+            </div>
+          </div>
+        `;
+      } catch (err) {
+        metaEl.textContent = `Confirmation ID: ${sessionId}`;
+      }
+    }
+
+    loadOrder();
+  </script>
 </body>
 </html>
