@@ -42,25 +42,3 @@ export async function sendDelishSms({ to, message }) {
 
   return { ok: true, sid: data.sid };
 }
-import twilio from "twilio";
-
-const client = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
-
-export async function sendDelishSMS({ to, message }) {
-  if (!to || !message) return;
-
-  try {
-    await client.messages.create({
-      body: message,
-      from: process.env.DELISH_TWILIO_FROM_NUMBER,
-      to,
-    });
-
-    console.log("DELISH SMS SENT:", to);
-  } catch (err) {
-    console.error("DELISH SMS ERROR:", err.message);
-  }
-}
