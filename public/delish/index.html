@@ -146,10 +146,12 @@ const els = {
   btn: document.getElementById("payNowBtn")
 };
 
-// Redirect if Stripe session hits main page
+// Rescue redirect if Stripe lands on /delish/ with session_id
 const params = new URLSearchParams(window.location.search);
-if (params.get("session_id")) {
-  window.location.href = `/delish/order/success/?session_id=${encodeURIComponent(params.get("session_id"))}`;
+const sessionId = params.get("session_id");
+
+if (sessionId) {
+  window.location.replace(`/delish/order/success/?session_id=${encodeURIComponent(sessionId)}`);
 }
 
 function getCentralDateString() {
