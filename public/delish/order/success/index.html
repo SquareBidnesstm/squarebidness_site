@@ -1,6 +1,6 @@
-x<!-- FILE: /public/delish/order/success/index.html -->
+<!-- FILE: /public/delish/order/success/index.html -->
 <!doctype html>
-<html lang="en" data-sb-brand="delish" data-sb-tier="success" data-sb-build="v20260331-delish-success">
+<html lang="en" data-sb-brand="delish" data-sb-tier="success" data-sb-build="v20260401-delish-success-polish">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -30,7 +30,7 @@ x<!-- FILE: /public/delish/order/success/index.html -->
       --soft:#9c9c9c;
       --accent:#D4AF37;
       --accent-dark:#181410;
-      --max:560px;
+      --max:700px;
       --shadow:0 18px 50px rgba(0,0,0,.28);
     }
 
@@ -39,19 +39,17 @@ x<!-- FILE: /public/delish/order/success/index.html -->
     body{
       margin:0;
       min-height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:24px;
       background:
         radial-gradient(circle at top left, rgba(212,175,55,.12), transparent 28%),
         linear-gradient(180deg,#111 0%, #0b0b0b 100%);
       color:var(--text);
-      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
     }
 
     .wrap{
       width:min(100%, var(--max));
+      margin:auto;
+      padding:28px 20px 40px;
     }
 
     .card{
@@ -80,27 +78,28 @@ x<!-- FILE: /public/delish/order/success/index.html -->
 
     h1{
       margin:0;
-      font-size:clamp(2rem,5vw,2.8rem);
+      font-size:clamp(2.1rem,6vw,3.25rem);
       line-height:1.02;
-      letter-spacing:-.03em;
+      letter-spacing:-.04em;
     }
 
     .lead{
       margin:14px auto 0;
       color:var(--muted);
-      font-size:1rem;
-      line-height:1.6;
-      max-width:460px;
+      font-size:1.05rem;
+      line-height:1.65;
+      max-width:560px;
     }
 
     .status{
       margin-top:22px;
       padding:18px;
-      border-radius:18px;
+      border-radius:20px;
       background:rgba(255,255,255,.03);
       border:1px solid rgba(255,255,255,.08);
       color:var(--text);
       line-height:1.7;
+      font-size:1.02rem;
     }
 
     .status strong{
@@ -108,10 +107,71 @@ x<!-- FILE: /public/delish/order/success/index.html -->
     }
 
     .sub{
-      margin-top:12px;
+      margin-top:16px;
       color:var(--soft);
-      font-size:.95rem;
+      font-size:1rem;
+      line-height:1.65;
+    }
+
+    .order-box{
+      margin-top:22px;
+      text-align:left;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:20px;
+      padding:18px;
+    }
+
+    .order-row{
+      margin-bottom:10px;
+      color:var(--muted);
       line-height:1.6;
+      font-size:1rem;
+    }
+
+    .order-row strong{
+      color:var(--text);
+    }
+
+    .order-label{
+      margin:14px 0 8px;
+      color:var(--text);
+      font-weight:800;
+    }
+
+    .order-items{
+      margin:0;
+      padding:0;
+      list-style:none;
+      display:grid;
+      gap:8px;
+    }
+
+    .order-items li{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 0;
+      border-top:1px dashed rgba(255,255,255,.10);
+      color:var(--muted);
+    }
+
+    .order-items li:first-child{
+      border-top:0;
+      padding-top:0;
+    }
+
+    .order-items strong{
+      color:var(--text);
+    }
+
+    .order-total{
+      margin-top:14px;
+      padding-top:14px;
+      border-top:1px solid rgba(255,255,255,.10);
+      font-size:1.05rem;
+      font-weight:900;
+      color:var(--accent);
     }
 
     .actions{
@@ -126,8 +186,8 @@ x<!-- FILE: /public/delish/order/success/index.html -->
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      min-height:48px;
-      padding:0 18px;
+      min-height:50px;
+      padding:0 20px;
       border-radius:999px;
       text-decoration:none;
       font-weight:800;
@@ -154,16 +214,17 @@ x<!-- FILE: /public/delish/order/success/index.html -->
       color:var(--soft);
       font-size:.95rem;
       word-break:break-word;
+      text-align:center;
     }
 
     @media (max-width:560px){
-      body{padding:16px}
+      .wrap{padding:18px 14px 28px}
       .card{padding:22px 18px}
-      .actions{
+      .actions{flex-direction:column}
+      .btn{width:100%}
+      .order-items li{
         flex-direction:column;
-      }
-      .btn{
-        width:100%;
+        align-items:flex-start;
       }
     }
   </style>
@@ -188,12 +249,14 @@ x<!-- FILE: /public/delish/order/success/index.html -->
         If you need to place another order, head back to the daily menu.
       </p>
 
+      <div class="order-box" id="sessionMeta">
+        <div class="meta">Loading your order details...</div>
+      </div>
+
       <div class="actions">
         <a class="btn btn--gold" href="/delish/">Back to Delish</a>
         <a class="btn btn--dark" href="/delish/catering/">Need Catering?</a>
       </div>
-
-      <div class="meta" id="sessionMeta"></div>
     </section>
   </main>
 
@@ -216,7 +279,12 @@ x<!-- FILE: /public/delish/order/success/index.html -->
       const sessionId = params.get("session_id");
       const metaEl = document.getElementById("sessionMeta");
 
-      if (!sessionId || !metaEl) return;
+      if (!metaEl) return;
+
+      if (!sessionId) {
+        metaEl.innerHTML = `<div class="meta">Confirmation details unavailable.</div>`;
+        return;
+      }
 
       try {
         const res = await fetch(`/api/delish/finalize-checkout/?session_id=${encodeURIComponent(sessionId)}`);
@@ -230,27 +298,28 @@ x<!-- FILE: /public/delish/order/success/index.html -->
         const items = Array.isArray(order.items) ? order.items : [];
 
         metaEl.innerHTML = `
-          <div style="margin-top:20px;text-align:left;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px;">
-            <div style="margin-bottom:8px;"><strong>Order #:</strong> ${escapeHtml(order.orderNumber || sessionId)}</div>
-            <div style="margin-bottom:8px;"><strong>Name:</strong> ${escapeHtml(order.customerName || "")}</div>
-            <div style="margin-bottom:12px;"><strong>Pickup:</strong> ${escapeHtml(order.pickupDate || "")} • ${escapeHtml(order.pickupWindow || "")}</div>
+          <div class="order-row"><strong>Order #:</strong> ${escapeHtml(order.orderNumber || sessionId)}</div>
+          <div class="order-row"><strong>Name:</strong> ${escapeHtml(order.customerName || "")}</div>
+          <div class="order-row"><strong>Pickup:</strong> ${escapeHtml(order.pickupDate || "")} • ${escapeHtml(order.pickupWindow || "")}</div>
 
-            <div style="margin-bottom:8px;"><strong>Items:</strong></div>
-            <ul style="margin:0 0 12px 18px;padding:0;">
-              ${items.length ? items.map(i => `
-                <li style="margin:6px 0;">
-                  ${Number(i.qty || 0)} × ${escapeHtml(i.name || "")} — ${money(Number(i.qty || 0) * Number(i.price || 0))}
-                </li>
-              `).join("") : `<li>Order items unavailable.</li>`}
-            </ul>
+          <div class="order-label">Items</div>
+          <ul class="order-items">
+            ${items.length ? items.map(i => `
+              <li>
+                <span><strong>${Number(i.qty || 0)} ×</strong> ${escapeHtml(i.name || "")}</span>
+                <strong>${money(Number(i.qty || 0) * Number(i.price || 0))}</strong>
+              </li>
+            `).join("") : `<li><span>Order items unavailable.</span></li>`}
+          </ul>
 
-            <div style="font-weight:800;">
-              Total Paid: ${money(order.total)}
-            </div>
-          </div>
+          <div class="order-total">Total Paid: ${money(order.total)}</div>
         `;
       } catch (err) {
-        metaEl.textContent = `Confirmation ID: ${sessionId}`;
+        metaEl.innerHTML = `
+          <div class="meta">
+            Confirmation ID: ${escapeHtml(sessionId)}
+          </div>
+        `;
       }
     }
 
