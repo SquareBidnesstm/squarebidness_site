@@ -408,29 +408,50 @@ export default async function handler(req, res) {
       });
     }
 
-    const session = await stripe.checkout.sessions.create({
-      mode: "payment",
-      payment_method_types: ["card"],
-      line_items,
-      success_url: `${successUrl}?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: cancelUrl,
-      metadata: {
-        customerName: body.customerName,
-        customerPhone: body.customerPhone,
-        customerEmail: body.customerEmail || "",
-        pickupDate: body.pickupDate,
-        pickupWindow: body.pickupWindow,
-        notes: body.notes || "",
-        smsConsent: body.smsConsent === "yes" ? "yes" : "no",
-        itemsJson: JSON.stringify(cleanItems),
-        subtotal: String(submittedSubtotal),
-        tax: String(submittedTax),
-        total: String(submittedTotal),
-        source: body.source || "delish-order-page",
-        activeMenuDay: todayDay,
-      },
-      customer_email: body.customerEmail || undefined,
-    });
+   const session = await stripe.checkout.sessions.create({
+  mode: "payment",
+  payment_method_types: ["card"],
+  line_items,
+
+  // 🔒 HARD LOCK SUCCESS + CANCEL
+  success_url: `https://www.squarebidness.com/delish/order/success/?session_id={CHECKOUT_SESSION_ID}`,
+  cancel_url: `https://www.squarebidness.com/delish/order/`,
+
+  metadata: {
+    customerName: body.customerName,
+    customerPhone: body.customerPhone,
+    customerEmail: body.customerEmail || "",
+    pickupDate: body.pickupDate,
+    pickupWindow: body.pickupWindow,
+    notes: body.notes || "",
+
+    // 🔥 SMS MUST HAVE THIS
+    smsConsent: "yes",
+
+    // 🔥 REQUIRED FOR SUCCESS PAGE + TEXT
+    itemsJson: JSON.stringify(cleanItems),
+    subtotal: String(submittedSubtotal),
+    tax: String(submittedTax),
+    total: String(submittedTotal),
+
+    source: body.source || "delish-order-page",
+    activeMenuDay: todayDay,
+  },
+
+  payment_intent_data: {
+    metadata: {
+      customerName: body.customerName,
+      customerPhone: body.customerPhone,
+      pickupDate: body.pickupDate,
+      pickupWindow: body.pickupWindow,
+      smsConsent: "yes",
+      itemsJson: JSON.stringify(cleanItems),
+      total: String(submittedTotal),
+    },
+  },
+
+  customer_email: body.customerEmail || undefined,
+});
 
     return res.status(200).json({
       ok: true,
