@@ -328,6 +328,19 @@
 
   let currentDay = null;
   let currentMode = "closed";
+  let orderingStatus = null;
+
+  async function loadOrderingStatus() {
+  const res = await fetch("/api/delish/ordering-status/");
+  const data = await res.json();
+
+  if (!res.ok || !data.ok) {
+    throw new Error(data.error || "Failed to load ordering status.");
+  }
+
+  orderingStatus = data;
+  return data;
+}
 
   function showStatus(message) {
     statusEl.textContent = message;
@@ -378,27 +391,28 @@
   }
 
   function getServiceState() {
-    const parts = getCentralNowParts();
-    const day = parts.weekday;
-
-    if (["monday", "tuesday", "wednesday", "thursday", "friday"].includes(day)) {
-      return { mode: "open-day", today: day, parts };
-    }
-
-    if (day === "sunday" && (parts.sundayOccurrence === 1 || parts.sundayOccurrence === 3)) {
-      return { mode: "open-sunday", today: "sunday", parts };
-    }
-
-    if (day === "saturday") {
-      return { mode: "closed-saturday", today: day, parts };
-    }
-
-    if (day === "sunday") {
-      return { mode: "closed-sunday", today: day, parts };
-    }
-
-    return { mode: "closed", today: day, parts };
+  if (!orderingStatus) {
+    return {
+      mode: "closed",
+      today: getCentralNowParts().weekday,
+      parts: getCentralNowParts(),
+      openNow: false,
+      reason: "status_not_loaded",
+      openTime: "",
+      closeTime: ""
+    };
   }
+
+  return {
+    mode: orderingStatus.mode === "open" ? "open-day" : "closed",
+    today: orderingStatus.today,
+    parts: orderingStatus.now,
+    openNow: orderingStatus.openNow,
+    reason: orderingStatus.reason,
+    openTime: orderingStatus.openTime,
+    closeTime: orderingStatus.closeTime
+  };
+}
 
   function getExtraSidesForDay(day) {
     return day === "friday"
@@ -693,10 +707,18 @@
     }
 
     if (!openNow) {
-      checkoutBtn.disabled = true;
-      checkoutBtn.textContent = "Opening Soon";
-      return;
-    }
+  checkoutBtn.disabled = true;
+
+  if (state.reason === "manual_closed") {
+    checkoutBtn.textContent = "Ordering Paused";
+  } else if (state.reason === "outside_service_window") {
+    checkoutBtn.textContent = "Opening Soon";
+  } else {
+    checkoutBtn.textContent = "Closed Today";
+  }
+
+  return;
+}
 
     if (!(nameOk && phoneOk && pickupOk && plateItemsOk && sidesOk)) {
       checkoutBtn.disabled = true;
@@ -796,7 +818,17 @@ const payload = {
     }
   });
 
-  applyDailyMenu();
+    (async function init() {
+    try {
+      await loadOrderingStatus();
+      applyDailyMenu();
+    } catch (error) {
+      console.error("DELISH INIT ERROR:", error);
+      showStatus("Unable to load ordering status right now.");
+      checkoutBtn.disabled = true;
+      checkoutBtn.textContent = "Unavailable";
+    }
+  })();
 })();
 </script> 
 </body>
