@@ -684,12 +684,19 @@
     const plateItemsOk = getPlateSelections().items.length > 0;
     const sidesOk = selectedPlatesHaveSides();
 
-    if (!(state.mode === "open-day" || state.mode === "open-sunday")) {
-      checkoutBtn.disabled = true;
-      checkoutBtn.textContent = "Closed Today";
-      return;
-    }
+    if (!state.openNow) {
+  checkoutBtn.disabled = true;
 
+  if (state.reason === "manual_closed") {
+    checkoutBtn.textContent = "Ordering Paused";
+  } else if (state.reason === "outside_service_window") {
+    checkoutBtn.textContent = "Opening Soon";
+  } else {
+    checkoutBtn.textContent = "Closed Today";
+  }
+
+  return;
+}
     if (!openNow) {
   checkoutBtn.disabled = true;
 
