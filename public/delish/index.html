@@ -697,19 +697,7 @@
 
   return;
 }
-    if (!openNow) {
-  checkoutBtn.disabled = true;
 
-  if (state.reason === "manual_closed") {
-    checkoutBtn.textContent = "Ordering Paused";
-  } else if (state.reason === "outside_service_window") {
-    checkoutBtn.textContent = "Opening Soon";
-  } else {
-    checkoutBtn.textContent = "Closed Today";
-  }
-
-  return;
-}
 
     if (!(nameOk && phoneOk && pickupOk && plateItemsOk && sidesOk)) {
       checkoutBtn.disabled = true;
@@ -731,10 +719,18 @@
 
     const state = getServiceState();
 
-    if (!(state.mode === "open-day" || state.mode === "open-sunday")) {
-      showStatus("Online ordering is closed today.");
-      return;
-    }
+    if (!state.openNow) {
+  if (state.reason === "manual_closed") {
+    showStatus("Online ordering is currently paused.");
+  } else if (state.reason === "outside_service_window") {
+    showStatus(`Ordering is available from ${state.openTime} to ${state.closeTime}.`);
+  } else if (state.reason === "not_a_service_day") {
+    showStatus("Online ordering is closed today.");
+  } else {
+    showStatus("Online ordering is closed right now.");
+  }
+  return;
+}
 
     if (!state.openNow) {
       if (state.reason === "manual_closed") {
