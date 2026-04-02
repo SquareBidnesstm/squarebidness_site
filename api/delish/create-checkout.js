@@ -1,5 +1,6 @@
 // FILE: /api/delish/create-checkout.js
 import Stripe from "stripe";
+import { getDelishOrderingState } from "../_lib/delish-ordering-config.js";
 
 const stripe = new Stripe(process.env.DELISH_STRIPE_SECRET_KEY, {
   apiVersion: "2025-02-24.acacia",
@@ -192,14 +193,7 @@ const MENU_BY_DAY = {
   ],
 };
 
-const ACTIVE_ORDERING_DAYS = new Set([
-  "monday",
-  "tuesday",
-  "wednesday",
-  "thursday",
-  "friday",
-  "sunday",
-]);
+
 
 const SUNDAY_ORDERING_OCCURRENCES = new Set([1, 3]);
 
@@ -297,31 +291,29 @@ export default async function handler(req, res) {
       });
     }
 
-    const {
-      isoDate: todayIso,
-      weekday: todayDay,
-      sundayOccurrence,
-    } = getCentralDateParts();
+const orderingState = getDelishOrderingState();
+const todayIso = orderingState.now.isoDate;
+const todayDay = orderingState.today;
 
-    if (!ACTIVE_ORDERING_DAYS.has(todayDay)) {
-      return res.status(403).json({
-        ok: false,
-        error: "ORDERING_CLOSED_TODAY",
-        message: "Online ordering is closed today.",
-      });
-    }
+if (!orderingState.openNow) {
+  let message = "Online ordering is closed right now.";
 
-    if (
-      todayDay === "sunday" &&
-      !SUNDAY_ORDERING_OCCURRENCES.has(sundayOccurrence)
-    ) {
-      return res.status(403).json({
-        ok: false,
-        error: "ORDERING_CLOSED_TODAY",
-        message: "Sunday ordering is only available on 1st and 3rd Sundays.",
-      });
-    }
+  if (orderingState.reason === "manual_closed") {
+    message = "Online ordering is currently paused.";
+  } else if (orderingState.reason === "outside_service_window") {
+    message = `Ordering is available from ${orderingState.openTime} to ${orderingState.closeTime}.`;
+  } else if (orderingState.reason === "sunday_not_scheduled") {
+    message = "Sunday ordering is only available on 1st and 3rd Sundays.";
+  } else if (orderingState.reason === "not_a_service_day") {
+    message = "Online ordering is closed today.";
+  }
 
+  return res.status(403).json({
+    ok: false,
+    error: "ORDERING_CLOSED_NOW",
+    message
+  });
+}
     if (body.pickupDate !== todayIso) {
       return res.status(403).json({
         ok: false,
