@@ -735,7 +735,7 @@
     el.addEventListener("change", calc);
   });
 
-  checkoutBtn.addEventListener("click", async () => {
+   checkoutBtn.addEventListener("click", async () => {
     clearStatus();
 
     const state = getServiceState();
@@ -745,8 +745,14 @@
       return;
     }
 
-    if (!isOpenNow(state.parts)) {
-      showStatus("Ordering is available from 11:00 AM to 3:00 PM.");
+    if (!state.openNow) {
+      if (state.reason === "manual_closed") {
+        showStatus("Online ordering is currently paused.");
+      } else if (state.reason === "outside_service_window") {
+        showStatus(`Ordering is available from ${state.openTime} to ${state.closeTime}.`);
+      } else {
+        showStatus("Online ordering is closed right now.");
+      }
       return;
     }
 
@@ -773,30 +779,30 @@
       );
 
       const plateNotes = selected.sideNotes.length
-  ? `Plate sides: ${selected.sideNotes.join(" | ")}`
-  : "";
+        ? `Plate sides: ${selected.sideNotes.join(" | ")}`
+        : "";
 
-const payload = {
-  customerName: customerName.value.trim(),
-  customerPhone: customerPhone.value.trim(),
-  customerEmail: "",
-  pickupDate: state.parts.isoDate,
-  pickupWindow: pickupWindow.value,
-  notes: plateNotes,
-  smsConsent: "yes",
-  items: selectedItems.map(item => ({
-  id: item.id,
-  qty: item.qty,
-  side1Id: item.side1Id || "",
-  side2Id: item.side2Id || "",
-  side1Name: item.side1Name || "",
-  side2Name: item.side2Name || ""
-})),
-  subtotal,
-  tax: 0,
-  total: subtotal,
-  source: "delish-web"
-};
+      const payload = {
+        customerName: customerName.value.trim(),
+        customerPhone: customerPhone.value.trim(),
+        customerEmail: "",
+        pickupDate: state.parts.isoDate,
+        pickupWindow: pickupWindow.value,
+        notes: plateNotes,
+        smsConsent: "yes",
+        items: selectedItems.map(item => ({
+          id: item.id,
+          qty: item.qty,
+          side1Id: item.side1Id || "",
+          side2Id: item.side2Id || "",
+          side1Name: item.side1Name || "",
+          side2Name: item.side2Name || ""
+        })),
+        subtotal,
+        tax: 0,
+        total: subtotal,
+        source: "delish-web"
+      };
 
       const res = await fetch("/api/delish/create-checkout/", {
         method: "POST",
@@ -818,7 +824,7 @@ const payload = {
     }
   });
 
-    (async function init() {
+  (async function init() {
     try {
       await loadOrderingStatus();
       applyDailyMenu();
@@ -830,6 +836,6 @@ const payload = {
     }
   })();
 })();
-</script> 
+</script>
 </body>
 </html>
