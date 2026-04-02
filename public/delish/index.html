@@ -533,73 +533,57 @@
     }
   }
 
-  function applyDailyMenu() {
-    const state = getServiceState();
-    currentMode = state.mode;
-    currentDay = state.today;
+ function applyDailyMenu() {
+  const state = getServiceState();
+  currentMode = state.mode;
+  currentDay = state.today;
 
-    if (state.mode === "open-day" || state.mode === "open-sunday") {
-      const menu = MENU_BY_DAY[state.today];
-      menuDayTitle.textContent = menu.title;
-      menuDayNote.textContent = "Pickup Only · Alexandria, Louisiana · Order online, pickup on arrival";
-      mainMenuNote.textContent = menu.note;
-      mainMenuItems.innerHTML = menu.mains.map(item => renderMainItem(item, state.today)).join("");
-      renderSelectOptions(drinkSelect, DRINKS, "Drink (optional)");
-      renderSelectOptions(extraSideSelect, getExtraSidesForDay(state.today), "Extra Side (optional)");
-      renderSelectOptions(lagniappeSelect, LAGNIAPPE, "Lagniappe (optional)");
-      attachQtyButtons();
-      attachPlateSideListeners();
-      syncPlateSides();
-    } else if (state.mode === "closed-saturday") {
-      menuDayTitle.textContent = "Delish — Closed Today";
-      menuDayNote.textContent = "Pickup Only · Alexandria, Louisiana";
-      mainMenuNote.textContent = "Delish is closed on Saturdays.";
-      mainMenuItems.innerHTML = `
-        <div class="menuItem">
-          <div class="menuCopy">
-            <span>Closed Today</span>
-            <small>Check back Monday or on the 1st and 3rd Sunday.</small>
-          </div>
+  if (state.today && MENU_BY_DAY[state.today]) {
+    const menu = MENU_BY_DAY[state.today];
+    menuDayTitle.textContent = menu.title;
+    menuDayNote.textContent = "Pickup Only · Alexandria, Louisiana · Order online, pickup on arrival";
+    mainMenuNote.textContent = menu.note;
+    mainMenuItems.innerHTML = menu.mains.map(item => renderMainItem(item, state.today)).join("");
+    renderSelectOptions(drinkSelect, DRINKS, "Drink (optional)");
+    renderSelectOptions(extraSideSelect, getExtraSidesForDay(state.today), "Extra Side (optional)");
+    renderSelectOptions(lagniappeSelect, LAGNIAPPE, "Lagniappe (optional)");
+    attachQtyButtons();
+    attachPlateSideListeners();
+    syncPlateSides();
+  } else if (state.reason === "not_a_service_day") {
+    menuDayTitle.textContent = "Delish — Closed Today";
+    menuDayNote.textContent = "Pickup Only · Alexandria, Louisiana";
+    mainMenuNote.textContent = "Online ordering is closed today.";
+    mainMenuItems.innerHTML = `
+      <div class="menuItem">
+        <div class="menuCopy">
+          <span>Closed Today</span>
+          <small>Please come back during active ordering days.</small>
         </div>
-      `;
-      renderSelectOptions(drinkSelect, [], "Drink (optional)");
-      renderSelectOptions(extraSideSelect, [], "Extra Side (optional)");
-      renderSelectOptions(lagniappeSelect, [], "Lagniappe (optional)");
-    } else if (state.mode === "closed-sunday") {
-      menuDayTitle.textContent = "Delish — Closed Today";
-      menuDayNote.textContent = "Pickup Only · Alexandria, Louisiana";
-      mainMenuNote.textContent = "Sunday ordering is only available on the 1st and 3rd Sundays.";
-      mainMenuItems.innerHTML = `
-        <div class="menuItem">
-          <div class="menuCopy">
-            <span>Closed Today</span>
-            <small>Sunday ordering is only available on the 1st and 3rd Sundays.</small>
-          </div>
+      </div>
+    `;
+    renderSelectOptions(drinkSelect, [], "Drink (optional)");
+    renderSelectOptions(extraSideSelect, [], "Extra Side (optional)");
+    renderSelectOptions(lagniappeSelect, [], "Lagniappe (optional)");
+  } else {
+    menuDayTitle.textContent = "Delish — Temporarily Unavailable";
+    menuDayNote.textContent = "Pickup Only · Alexandria, Louisiana";
+    mainMenuNote.textContent = "Online ordering is currently unavailable.";
+    mainMenuItems.innerHTML = `
+      <div class="menuItem">
+        <div class="menuCopy">
+          <span>Ordering Unavailable</span>
+          <small>Please check back shortly.</small>
         </div>
-      `;
-      renderSelectOptions(drinkSelect, [], "Drink (optional)");
-      renderSelectOptions(extraSideSelect, [], "Extra Side (optional)");
-      renderSelectOptions(lagniappeSelect, [], "Lagniappe (optional)");
-    } else {
-      menuDayTitle.textContent = "Delish — Closed Today";
-      menuDayNote.textContent = "Pickup Only · Alexandria, Louisiana";
-      mainMenuNote.textContent = "Online ordering is closed today.";
-      mainMenuItems.innerHTML = `
-        <div class="menuItem">
-          <div class="menuCopy">
-            <span>Closed Today</span>
-            <small>Please come back during active ordering days.</small>
-          </div>
-        </div>
-      `;
-      renderSelectOptions(drinkSelect, [], "Drink (optional)");
-      renderSelectOptions(extraSideSelect, [], "Extra Side (optional)");
-      renderSelectOptions(lagniappeSelect, [], "Lagniappe (optional)");
-    }
-
-    calc();
+      </div>
+    `;
+    renderSelectOptions(drinkSelect, [], "Drink (optional)");
+    renderSelectOptions(extraSideSelect, [], "Extra Side (optional)");
+    renderSelectOptions(lagniappeSelect, [], "Lagniappe (optional)");
   }
 
+  calc();
+}
   function getCurrentMainItems() {
     const menu = MENU_BY_DAY[currentDay];
     return menu && Array.isArray(menu.mains) ? menu.mains : [];
