@@ -1,24 +1,24 @@
 <!doctype html>
-<html lang="en" data-sb-brand="delish" data-sb-tier="public" data-sb-build="v20260401-delish-index-day-aware-2-sides">
+<html lang="en" data-sb-brand="delish" data-sb-tier="public" data-sb-build="v20260403-delish-index-conversion-clean-footer-icon">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
 
   <title>Delish Daily Menu | Alexandria, Louisiana</title>
-  <meta name="description" content="Delish is open in Alexandria, Louisiana. Authentic soul food, weekly favorites, and catering — order online and pick up fresh." />
+  <meta name="description" content="Delish in Alexandria, Louisiana. Order online, select your plate sides, add extras, and pick up fresh." />
 
   <link rel="canonical" href="https://www.squarebidness.com/delish/" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
   <meta name="theme-color" content="#0f0f0f" />
   <meta name="color-scheme" content="dark light" />
-  <meta name="sb:build" content="v20260401-delish-index-day-aware-2-sides" />
+  <meta name="sb:build" content="v20260403-delish-index-conversion-clean-footer-icon" />
 
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Delish Daily Menu" />
-  <meta property="og:description" content="Order online. Pickup on arrival." />
+  <meta property="og:description" content="Order online, select your sides, and pick up fresh in Alexandria, Louisiana." />
   <meta property="og:url" content="https://www.squarebidness.com/delish/" />
-  <meta property="og:site_name" content="Square Bidness" />
+  <meta property="og:site_name" content="Delish" />
   <meta property="og:image" content="https://www.squarebidness.com/delish/assets/delish-meta_1200x630.jpg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -27,7 +27,7 @@
 
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Delish Daily Menu" />
-  <meta name="twitter:description" content="Order online. Pickup on arrival." />
+  <meta name="twitter:description" content="Order online, select your sides, and pick up fresh." />
   <meta name="twitter:image" content="https://www.squarebidness.com/delish/assets/delish-meta_1200x630.jpg" />
 
   <link rel="manifest" href="/delish/manifest.json" />
@@ -43,6 +43,34 @@
   <style>
     body { margin:0; font-family:system-ui; background:#0b0b0b; color:#fff; }
     .wrap { max-width:700px; margin:auto; padding:20px; }
+
+    .brandRow{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-bottom:12px;
+    }
+    .brandMark{
+      width:52px;
+      height:52px;
+      border-radius:14px;
+      object-fit:cover;
+      background:#fff;
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .brandName{
+      margin:0;
+      font-size:18px;
+      font-weight:800;
+      line-height:1.1;
+    }
+    .brandSub{
+      margin:4px 0 0;
+      font-size:13px;
+      color:#bbb;
+      line-height:1.3;
+    }
+
     h1 { font-size:28px; margin:0; }
     h2 { margin:0 0 8px; }
     h3 { margin:0 0 8px; }
@@ -128,6 +156,16 @@
       line-height:1.45;
     }
     .status.is-visible { display:block; }
+    .liveNote {
+      margin-top:14px;
+      padding:12px 14px;
+      border-radius:10px;
+      background:#121212;
+      border:1px solid rgba(255,255,255,.08);
+      color:#f5f5f5;
+      font-size:14px;
+      line-height:1.45;
+    }
     .optionNote { font-size:13px; color:#bbb; margin-top:4px; }
     .actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:20px; }
     .linkBtn {
@@ -144,16 +182,39 @@
       flex:1;
       min-width:160px;
     }
+
+    .footer{
+      margin-top:28px;
+      padding-top:20px;
+      border-top:1px solid rgba(255,255,255,.08);
+      color:#aaa;
+      font-size:14px;
+      line-height:1.45;
+      text-align:center;
+    }
+    .footer a{
+      color:#fff;
+      text-decoration:none;
+    }
   </style>
 </head>
 
 <body>
 <div class="wrap">
 
+  <div class="brandRow">
+    <img class="brandMark" src="/delish/assets/delish-logo-mark-512.png" alt="Delish logo" loading="eager" decoding="async" />
+    <div>
+      <p class="brandName">Delish</p>
+      <p class="brandSub">Pickup ordering · Alexandria, Louisiana</p>
+    </div>
+  </div>
+
   <h1 id="menuDayTitle">Delish — Daily Menu</h1>
   <div class="headerNote" id="menuDayNote">
     Pickup Only · Alexandria, Louisiana · Order online, pickup on arrival
   </div>
+  <div class="liveNote" id="orderingBanner">Loading today’s ordering status...</div>
 
   <div class="section">
     <input id="customerName" placeholder="Full Name" />
@@ -212,6 +273,10 @@
 
   <div class="actions">
     <a class="linkBtn" href="/delish/catering/">Catering</a>
+  </div>
+
+  <div class="footer">
+    © 2026 Delish · Alexandria, Louisiana · <a href="/delish/catering/">Catering</a>
   </div>
 
 </div>
@@ -325,22 +390,23 @@
   const totalDisplay = document.getElementById("totalDisplay");
   const checkoutBtn = document.getElementById("checkoutBtn");
   const statusEl = document.getElementById("status");
+  const orderingBanner = document.getElementById("orderingBanner");
 
   let currentDay = null;
   let currentMode = "closed";
   let orderingStatus = null;
 
   async function loadOrderingStatus() {
-  const res = await fetch("/api/delish/ordering-status/");
-  const data = await res.json();
+    const res = await fetch("/api/delish/ordering-status/");
+    const data = await res.json();
 
-  if (!res.ok || !data.ok) {
-    throw new Error(data.error || "Failed to load ordering status.");
+    if (!res.ok || !data.ok) {
+      throw new Error(data.error || "Failed to load ordering status.");
+    }
+
+    orderingStatus = data;
+    return data;
   }
-
-  orderingStatus = data;
-  return data;
-}
 
   function showStatus(message) {
     statusEl.textContent = message;
@@ -383,36 +449,60 @@
     };
   }
 
-  function isOpenNow(parts) {
-    const currentMinutes = (parts.hour * 60) + parts.minute;
-    const openMinutes = 11 * 60;
-    const closeMinutes = 15 * 60;
-    return currentMinutes >= openMinutes && currentMinutes < closeMinutes;
-  }
-
   function getServiceState() {
-  if (!orderingStatus) {
+    if (!orderingStatus) {
+      return {
+        mode: "closed",
+        today: getCentralNowParts().weekday,
+        parts: getCentralNowParts(),
+        openNow: false,
+        reason: "status_not_loaded",
+        openTime: "",
+        closeTime: ""
+      };
+    }
+
     return {
-      mode: "closed",
-      today: getCentralNowParts().weekday,
-      parts: getCentralNowParts(),
-      openNow: false,
-      reason: "status_not_loaded",
-      openTime: "",
-      closeTime: ""
+      mode: orderingStatus.mode === "open" ? "open-day" : "closed",
+      today: orderingStatus.today,
+      parts: orderingStatus.now,
+      openNow: orderingStatus.openNow,
+      reason: orderingStatus.reason,
+      openTime: orderingStatus.openTime,
+      closeTime: orderingStatus.closeTime
     };
   }
 
-  return {
-    mode: orderingStatus.mode === "open" ? "open-day" : "closed",
-    today: orderingStatus.today,
-    parts: orderingStatus.now,
-    openNow: orderingStatus.openNow,
-    reason: orderingStatus.reason,
-    openTime: orderingStatus.openTime,
-    closeTime: orderingStatus.closeTime
-  };
-}
+  function updateOrderingBanner(state) {
+    if (!orderingBanner) return;
+
+    if (state.openNow) {
+      orderingBanner.textContent = `Open now · Ordering available until ${state.closeTime}.`;
+      return;
+    }
+
+    if (state.reason === "outside_service_window") {
+      orderingBanner.textContent = `Ordering opens from ${state.openTime} to ${state.closeTime}.`;
+      return;
+    }
+
+    if (state.reason === "manual_closed") {
+      orderingBanner.textContent = "Ordering is currently paused.";
+      return;
+    }
+
+    if (state.reason === "not_a_service_day") {
+      orderingBanner.textContent = "Closed today. Check the menu for the next active service day.";
+      return;
+    }
+
+    if (state.reason === "sunday_not_scheduled") {
+      orderingBanner.textContent = "Sunday ordering is only available on the 1st and 3rd Sundays.";
+      return;
+    }
+
+    orderingBanner.textContent = "Check today’s menu and ordering status below.";
+  }
 
   function getExtraSidesForDay(day) {
     return day === "friday"
@@ -533,57 +623,60 @@
     }
   }
 
- function applyDailyMenu() {
-  const state = getServiceState();
-  currentMode = state.mode;
-  currentDay = state.today;
+  function applyDailyMenu() {
+    const state = getServiceState();
+    currentMode = state.mode;
+    currentDay = state.today;
 
-  if (state.today && MENU_BY_DAY[state.today]) {
-    const menu = MENU_BY_DAY[state.today];
-    menuDayTitle.textContent = menu.title;
-    menuDayNote.textContent = "Pickup Only · Alexandria, Louisiana · Order online, pickup on arrival";
-    mainMenuNote.textContent = menu.note;
-    mainMenuItems.innerHTML = menu.mains.map(item => renderMainItem(item, state.today)).join("");
-    renderSelectOptions(drinkSelect, DRINKS, "Drink (optional)");
-    renderSelectOptions(extraSideSelect, getExtraSidesForDay(state.today), "Extra Side (optional)");
-    renderSelectOptions(lagniappeSelect, LAGNIAPPE, "Lagniappe (optional)");
-    attachQtyButtons();
-    attachPlateSideListeners();
-    syncPlateSides();
-  } else if (state.reason === "not_a_service_day") {
-    menuDayTitle.textContent = "Delish — Closed Today";
-    menuDayNote.textContent = "Pickup Only · Alexandria, Louisiana";
-    mainMenuNote.textContent = "Online ordering is closed today.";
-    mainMenuItems.innerHTML = `
-      <div class="menuItem">
-        <div class="menuCopy">
-          <span>Closed Today</span>
-          <small>Please come back during active ordering days.</small>
+    updateOrderingBanner(state);
+
+    if (state.today && MENU_BY_DAY[state.today]) {
+      const menu = MENU_BY_DAY[state.today];
+      menuDayTitle.textContent = menu.title;
+      menuDayNote.textContent = "Pickup Only · Alexandria, Louisiana · Order online, pickup on arrival";
+      mainMenuNote.textContent = menu.note;
+      mainMenuItems.innerHTML = menu.mains.map(item => renderMainItem(item, state.today)).join("");
+      renderSelectOptions(drinkSelect, DRINKS, "Drink (optional)");
+      renderSelectOptions(extraSideSelect, getExtraSidesForDay(state.today), "Extra Side (optional)");
+      renderSelectOptions(lagniappeSelect, LAGNIAPPE, "Lagniappe (optional)");
+      attachQtyButtons();
+      attachPlateSideListeners();
+      syncPlateSides();
+    } else if (state.reason === "not_a_service_day") {
+      menuDayTitle.textContent = "Delish — Closed Today";
+      menuDayNote.textContent = "Pickup Only · Alexandria, Louisiana";
+      mainMenuNote.textContent = "Online ordering is closed today.";
+      mainMenuItems.innerHTML = `
+        <div class="menuItem">
+          <div class="menuCopy">
+            <span>Closed Today</span>
+            <small>Please come back during active ordering days.</small>
+          </div>
         </div>
-      </div>
-    `;
-    renderSelectOptions(drinkSelect, [], "Drink (optional)");
-    renderSelectOptions(extraSideSelect, [], "Extra Side (optional)");
-    renderSelectOptions(lagniappeSelect, [], "Lagniappe (optional)");
-  } else {
-    menuDayTitle.textContent = "Delish — Temporarily Unavailable";
-    menuDayNote.textContent = "Pickup Only · Alexandria, Louisiana";
-    mainMenuNote.textContent = "Online ordering is currently unavailable.";
-    mainMenuItems.innerHTML = `
-      <div class="menuItem">
-        <div class="menuCopy">
-          <span>Ordering Unavailable</span>
-          <small>Please check back shortly.</small>
+      `;
+      renderSelectOptions(drinkSelect, [], "Drink (optional)");
+      renderSelectOptions(extraSideSelect, [], "Extra Side (optional)");
+      renderSelectOptions(lagniappeSelect, [], "Lagniappe (optional)");
+    } else {
+      menuDayTitle.textContent = "Delish — Temporarily Unavailable";
+      menuDayNote.textContent = "Pickup Only · Alexandria, Louisiana";
+      mainMenuNote.textContent = "Online ordering is currently unavailable.";
+      mainMenuItems.innerHTML = `
+        <div class="menuItem">
+          <div class="menuCopy">
+            <span>Ordering Unavailable</span>
+            <small>Please check back shortly.</small>
+          </div>
         </div>
-      </div>
-    `;
-    renderSelectOptions(drinkSelect, [], "Drink (optional)");
-    renderSelectOptions(extraSideSelect, [], "Extra Side (optional)");
-    renderSelectOptions(lagniappeSelect, [], "Lagniappe (optional)");
+      `;
+      renderSelectOptions(drinkSelect, [], "Drink (optional)");
+      renderSelectOptions(extraSideSelect, [], "Extra Side (optional)");
+      renderSelectOptions(lagniappeSelect, [], "Lagniappe (optional)");
+    }
+
+    calc();
   }
 
-  calc();
-}
   function getCurrentMainItems() {
     const menu = MENU_BY_DAY[currentDay];
     return menu && Array.isArray(menu.mains) ? menu.mains : [];
@@ -684,19 +777,18 @@
     const sidesOk = selectedPlatesHaveSides();
 
     if (!state.openNow) {
-  checkoutBtn.disabled = true;
+      checkoutBtn.disabled = true;
 
-  if (state.reason === "manual_closed") {
-    checkoutBtn.textContent = "Ordering Paused";
-  } else if (state.reason === "outside_service_window") {
-    checkoutBtn.textContent = "Opening Soon";
-  } else {
-    checkoutBtn.textContent = "Closed Today";
-  }
+      if (state.reason === "manual_closed") {
+        checkoutBtn.textContent = "Ordering Paused";
+      } else if (state.reason === "outside_service_window") {
+        checkoutBtn.textContent = "Opening Soon";
+      } else {
+        checkoutBtn.textContent = "Closed Today";
+      }
 
-  return;
-}
-
+      return;
+    }
 
     if (!(nameOk && phoneOk && pickupOk && plateItemsOk && sidesOk)) {
       checkoutBtn.disabled = true;
@@ -713,29 +805,18 @@
     el.addEventListener("change", calc);
   });
 
-   checkoutBtn.addEventListener("click", async () => {
+  checkoutBtn.addEventListener("click", async () => {
     clearStatus();
 
     const state = getServiceState();
-
-    if (!state.openNow) {
-  if (state.reason === "manual_closed") {
-    showStatus("Online ordering is currently paused.");
-  } else if (state.reason === "outside_service_window") {
-    showStatus(`Ordering is available from ${state.openTime} to ${state.closeTime}.`);
-  } else if (state.reason === "not_a_service_day") {
-    showStatus("Online ordering is closed today.");
-  } else {
-    showStatus("Online ordering is closed right now.");
-  }
-  return;
-}
 
     if (!state.openNow) {
       if (state.reason === "manual_closed") {
         showStatus("Online ordering is currently paused.");
       } else if (state.reason === "outside_service_window") {
         showStatus(`Ordering is available from ${state.openTime} to ${state.closeTime}.`);
+      } else if (state.reason === "not_a_service_day") {
+        showStatus("Online ordering is closed today.");
       } else {
         showStatus("Online ordering is closed right now.");
       }
@@ -819,6 +900,7 @@
       showStatus("Unable to load ordering status right now.");
       checkoutBtn.disabled = true;
       checkoutBtn.textContent = "Unavailable";
+      if (orderingBanner) orderingBanner.textContent = "Unable to load ordering status right now.";
     }
   })();
 })();
