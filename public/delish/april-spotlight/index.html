@@ -11,7 +11,7 @@
     content="Delish in Alexandria, Louisiana — weekly menu, hours of operation, online ordering guide, drinks, extra sides, lagniappe, and catering information."
   />
 
- <link rel="canonical" href="https://www.squarebidness.com/delish/april-spotlight/" />
+  <link rel="canonical" href="https://www.squarebidness.com/delish/april-spotlight/" />
   <meta name="robots" content="index,follow" />
   <meta name="format-detection" content="telephone=no" />
   <meta name="theme-color" content="#0f0f0f" />
@@ -19,7 +19,7 @@
   <meta name="sb:build" content="v20260403-delish-april-spotlight-guide-page" />
 
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Delish — April Spotlight" />>
+  <meta property="og:title" content="Delish — April Spotlight" />
   <meta property="og:description" content="Now serving Alexandria, Louisiana. View the weekly menu, learn how ordering works, and order online for pickup." />
   <meta property="og:url" content="https://www.squarebidness.com/delish/april-spotlight/" />
   <meta property="og:site_name" content="Delish" />
@@ -40,8 +40,6 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/delish/assets/delish-logo-mark-180.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/delish/assets/delish-logo-mark-192.png" />
   <link rel="icon" type="image/png" sizes="512x512" href="/delish/assets/delish-logo-mark-512.png" />
-
-  
 
   <script defer src="/scripts/ga.js"></script>
   <script defer src="/scripts/sb-analytics.js"></script>
@@ -419,6 +417,24 @@
       max-width:720px;
     }
 
+    .waitlist-form{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      width:100%;
+      max-width:540px;
+    }
+
+    .waitlist-form input{
+      min-height:48px;
+      border-radius:999px;
+      padding:0 16px;
+      border:none;
+      outline:none;
+      min-width:180px;
+      flex:1 1 180px;
+    }
+
     .footer{
       padding:28px 0 44px;
       color:var(--soft);
@@ -464,6 +480,9 @@
       .quote,.cta,.card,.menu-day{padding:20px}
       .cta-row{width:100%}
       .cta-row .btn{width:100%}
+      .waitlist-form{max-width:none}
+      .waitlist-form input,
+      .waitlist-form button{width:100%}
     }
   </style>
 </head>
@@ -502,12 +521,12 @@
           <span class="eyebrow">Delish Information</span>
           <h1>Order online, skip the wait, and pick up fresh.</h1>
 
-        <p>
-  Delish serves authentic soul food, weekly favorites, and catering in Alexandria, Louisiana with a cleaner ordering system built for real demand.
-</p>
+          <p>
+            Delish serves authentic soul food, weekly favorites, and catering in Alexandria, Louisiana with a cleaner ordering system built for real demand.
+          </p>
           <p style="margin-top:10px;color:#a79c8d;font-size:.95rem;">
-  Built to reduce call-ins, missed orders, and confusion — Delish now runs on a cleaner pickup system.
-</p>
+            Built to reduce call-ins, missed orders, and confusion — Delish now runs on a cleaner pickup system.
+          </p>
 
           <div class="status-strip">
             <span class="status-chip status-chip--live">Weekly Menu</span>
@@ -546,9 +565,13 @@
       </div>
     </section>
 
-    <div class="status-strip" style="margin-top:10px;">
-  <span class="status-chip status-chip--live">Ordering Status: Check Menu Page</span>
-</div>
+    <section class="section" style="padding-top:0;">
+      <div class="wrap">
+        <div class="status-strip" style="margin-top:0;">
+          <span class="status-chip status-chip--live">Ordering Status: Check Menu Page</span>
+        </div>
+      </div>
+    </section>
 
     <section class="section">
       <div class="wrap">
@@ -559,63 +582,41 @@
       </div>
     </section>
 
-    <form id="waitlistForm" class="cta-row" style="gap:10px;">
-  <input 
-    id="wlName"
-    type="text" 
-    placeholder="Your name" 
-    required
-    style="min-height:48px;border-radius:999px;padding:0 16px;border:none;"
-  />
+    <section class="section">
+      <div class="wrap">
+        <div class="cta">
+          <div>
+            <h2>Be first to know when ordering opens.</h2>
+            <p>
+              Join the Delish waitlist and get notified when online ordering is live.
+            </p>
+          </div>
 
-  <input 
-    id="wlPhone"
-    type="tel" 
-    placeholder="Phone number" 
-    required 
-    style="min-height:48px;border-radius:999px;padding:0 16px;border:none;"
-  />
-
-  <button class="btn btn--gold" type="submit">Join Waitlist</button>
-</form>
-
-<script>
-document.getElementById("waitlistForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const name = document.getElementById("wlName").value.trim();
-  const phone = document.getElementById("wlPhone").value.trim();
-
-  if (!name || !phone) return alert("Enter name and phone");
-
-  try {
-    await fetch("https://script.google.com/macros/s/AKfycbw8QqG2PxkIN8fZmnsoTx38Z08JQSvEKWGMM3282_O94waiKt3EcWsiO_Df7JIVwWUD/exec", {
-      method: "POST",
-      body: JSON.stringify({
-        name,
-        phone,
-        interest: "opening-notification",
-        source: "delish-spotlight",
-        viewedMenuDay: new Date().toLocaleString("en-US", { weekday: "long" }).toLowerCase()
-      })
-    });
-
-    alert("You’re on the list. We’ll text you when ordering opens.");
-
-    e.target.reset();
-  } catch (err) {
-    console.error(err);
-    alert("Something went wrong. Try again.");
-  }
-});
-</script>
+          <form id="waitlistForm" class="waitlist-form">
+            <input
+              id="wlName"
+              type="text"
+              placeholder="Your name"
+              required
+            />
+            <input
+              id="wlPhone"
+              type="tel"
+              placeholder="Phone number"
+              required
+            />
+            <button class="btn btn--gold" type="submit">Join Waitlist</button>
+          </form>
+        </div>
+      </div>
+    </section>
 
     <section class="section">
       <div class="wrap">
         <p class="section__eyebrow">How to use the system</p>
         <h2 class="section__title">Simple online pickup ordering.</h2>
         <p class="section__copy">
-         Choose your main plate, select your 2 sides, add extras if needed, choose your pickup window, and pay online before arrival.
+          Choose your main plate, select your 2 sides, add extras if needed, choose your pickup window, and pay online before arrival.
         </p>
 
         <div class="grid-3">
@@ -802,6 +803,37 @@ document.getElementById("waitlistForm").addEventListener("submit", async (e) => 
 
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
+
+    document.getElementById("waitlistForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById("wlName").value.trim();
+      const phone = document.getElementById("wlPhone").value.trim();
+
+      if (!name || !phone) {
+        alert("Enter name and phone");
+        return;
+      }
+
+      try {
+        await fetch("https://script.google.com/macros/s/AKfycbw8QqG2PxkIN8fZmnsoTx38Z08JQSvEKWGMM3282_O94waiKt3EcWsiO_Df7JIVwWUD/exec", {
+          method: "POST",
+          body: JSON.stringify({
+            name,
+            phone,
+            interest: "opening-notification",
+            source: "delish-spotlight",
+            viewedMenuDay: new Date().toLocaleString("en-US", { weekday: "long" }).toLowerCase()
+          })
+        });
+
+        alert("You’re on the list. We’ll text you when ordering opens.");
+        e.target.reset();
+      } catch (err) {
+        console.error(err);
+        alert("Something went wrong. Try again.");
+      }
+    });
   </script>
 
   <script type="application/ld+json">
