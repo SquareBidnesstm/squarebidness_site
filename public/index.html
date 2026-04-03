@@ -17,7 +17,7 @@
   <meta name="format-detection" content="telephone=no" />
 
   <!-- Build/version stamp -->
-  <meta name="sb:build" content="v20260301-home-ladies-teaser-hero" />
+  <meta name="sb:build" content="v20260403-home-delish-spotlight-hero" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
@@ -44,16 +44,6 @@
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
   <link rel="preconnect" href="https://www.google-analytics.com" crossorigin />
 
-  <!-- ✅ Preload HERO poster (LCP-safe) -->
-  <link
-    rel="preload"
-    as="image"
-    href="/assets/video/ladies-teaser_780.jpg"
-    imagesrcset="/assets/video/ladies-teaser_420.webp 420w, /assets/video/ladies-teaser_640.webp 640w, /assets/video/ladies-teaser_780.jpg 780w"
-    imagesizes="(max-width: 768px) 90vw, 52vw"
-    fetchpriority="high"
-  />
-
   <!-- Global CSS -->
   <link rel="preload" href="/styles/style.css" as="style" />
   <link rel="stylesheet" href="/styles/style.css" />
@@ -63,7 +53,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/icon-180.png" />
   <link rel="manifest" href="/manifest.webmanifest" />
 
-  <!-- Structured Data (WebSite + WebPage + Organization) — ✅ NO STREET ADDRESS -->
+  <!-- Structured Data (WebSite + WebPage + Organization) -->
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
@@ -135,7 +125,7 @@
   <script defer src="/scripts/partials.js"></script>
   <script defer src="/scripts/sw-register.js"></script>
 
-  <!-- Meta Pixel (Square Bidness) — external -->
+  <!-- Meta Pixel (Square Bidness) -->
   <script defer src="/scripts/meta-pixel.js"></script>
   <script defer src="/scripts/sb-meta-bridge.js"></script>
 
@@ -163,7 +153,7 @@
       .hero__inner{ grid-template-columns:1fr 1fr;align-items:center; }
     }
 
-    /* HERO MEDIA (VIDEO) — keep original hero height, show FULL video (no crop) */
+    /* HERO MEDIA FEATURE TILE */
     .hero__media{
       position:relative;
       border-radius:12px;
@@ -171,83 +161,88 @@
       overflow:hidden;
       background:#0b0b0b;
       aspect-ratio: 3 / 2;
-      display:grid;
-      place-items:center;
+      display:block;
+      text-decoration:none;
+      color:#fff;
     }
-    .hero__media::before{
-      content:"";
+    .hero__media:hover .hero__media-overlay{
+      background:linear-gradient(to top, rgba(0,0,0,.82), rgba(0,0,0,.30));
+    }
+    .hero__media:hover .hero__media-cta{
+      color:#c7a65c;
+    }
+
+    .hero__media-poster{
       position:absolute;
       inset:0;
-      background:
-        radial-gradient(900px 520px at 50% 40%, rgba(255,255,255,.06), rgba(0,0,0,.82)),
-        linear-gradient(to bottom, rgba(0,0,0,.05), rgba(0,0,0,.55));
-      z-index:0;
-      pointer-events:none;
-    }
-
-    .hero__poster{
-      position:absolute; inset:0; z-index:1;
-      display:grid; place-items:center;
-    }
-    .hero__poster img{
-      width:100%; height:100%; display:block;
-      object-fit:contain; object-position:center;
-      background:#0b0b0b;
-    }
-
-    .hero__video{
-      position:absolute; inset:0; z-index:2;
-      width:100%; height:100%;
-      object-fit:contain; object-position:center; /* ✅ shows full portrait video */
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      object-position:center top;
       display:block;
-      opacity:1;
-      background:#0b0b0b;
     }
 
-    .heroPlayFallback{
-      position:absolute; inset:0; z-index:9;
-      display:none; place-items:center;
-      background:transparent; border:0; color:#fff;
-      cursor:pointer;
-    }
-    .heroPlayFallback__pill{
-      padding:.55rem 1rem;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.18);
-      background:rgba(0,0,0,.35);
-      backdrop-filter:blur(6px);
-      font:600 14px system-ui,-apple-system,Segoe UI,Roboto,Inter,sans-serif;
-      letter-spacing:.02em;
-      text-transform:lowercase;
-    }
-
-    /* WOMEN’S LANE — HERO PILL (bottom-right) */
-    .nae-hero-stillridin{
+    .hero__media-overlay{
       position:absolute;
-      right:1rem;
-      bottom:1rem;
-      z-index:12;
+      inset:0;
+      background:linear-gradient(to top, rgba(0,0,0,.76), rgba(0,0,0,.24));
+      transition:background .18s ease;
+      z-index:1;
+    }
+
+    .hero__feature-badge{
+      position:absolute;
+      top:1rem;
+      left:1rem;
+      z-index:2;
       display:inline-flex;
       align-items:center;
       gap:.35rem;
-      padding:.55rem 1.05rem;
+      padding:.45rem .8rem;
       border-radius:999px;
-      border:1px solid rgba(255,255,255,.16);
+      border:1px solid rgba(255,255,255,.14);
       background:rgba(0,0,0,.45);
-      color:#fff;
+      color:#f2d7ad;
       font-weight:800;
-      letter-spacing:.12em;
+      letter-spacing:.08em;
       text-transform:uppercase;
-      font-size:.78rem;
-      text-decoration:none;
+      font-size:.72rem;
       backdrop-filter: blur(6px);
     }
-    .nae-hero-stillridin:hover{
-      border-color:rgba(199,166,92,.9);
-      color:#c7a65c;
+
+    .hero__feature-copy{
+      position:absolute;
+      left:1rem;
+      right:1rem;
+      bottom:1rem;
+      z-index:2;
     }
-    @media (max-width:480px){
-      .nae-hero-stillridin{ right:.75rem; bottom:.75rem; }
+
+    .hero__feature-title{
+      margin:0;
+      font-size:clamp(1.6rem,3vw,2.4rem);
+      line-height:1.02;
+      font-weight:800;
+      letter-spacing:-.03em;
+    }
+
+    .hero__feature-text{
+      margin:.45rem 0 0;
+      color:#e5e7eb;
+      max-width:36ch;
+      font-size:.96rem;
+      line-height:1.45;
+    }
+
+    .hero__media-cta{
+      display:inline-flex;
+      align-items:center;
+      gap:.35rem;
+      margin-top:.75rem;
+      color:#fff;
+      font-weight:700;
+      font-size:.92rem;
+      transition:color .18s ease;
     }
 
     header.hero.hero--dark{ min-height:260px; }
@@ -290,7 +285,6 @@
 </head>
 
 <body class="theme-dark" id="top">
-  <!-- Meta Pixel noscript (keep in body) -->
   <noscript>
     <img height="1" width="1" style="display:none"
          src="https://www.facebook.com/tr?id=914123084877133&ev=PageView&noscript=1" />
@@ -302,54 +296,41 @@
     <div class="container">
 
       <a href="/fleetlog/" class="taxpass-pill">
-  <div>
-    <div class="taxpass-pill__label">Square Bidness Tech Lab</div>
-    <div class="taxpass-pill__title">SB FleetLog™ <span class="taxpass-pill__arrow">→</span></div>
-    <div class="taxpass-pill__tagline">Simple digital logs for modern operators.</div>
-  </div>
-</a>
+        <div>
+          <div class="taxpass-pill__label">Square Bidness Tech Lab</div>
+          <div class="taxpass-pill__title">SB FleetLog™ <span class="taxpass-pill__arrow">→</span></div>
+          <div class="taxpass-pill__tagline">Simple digital logs for modern operators.</div>
+        </div>
+      </a>
 
       <div class="hero__inner">
-        <div class="hero__media" id="homeHeroMedia">
-          <!-- poster behind video -->
-          <picture class="hero__poster" aria-hidden="true">
-            <source type="image/webp"
-              srcset="/assets/video/ladies-teaser_420.webp 420w, /assets/video/ladies-teaser_640.webp 640w"
-              sizes="(max-width: 768px) 90vw, 52vw" />
-            <source type="image/jpeg"
-              srcset="/assets/video/ladies-teaser_780.jpg 780w"
-              sizes="(max-width: 768px) 90vw, 52vw" />
-            <img src="/assets/video/ladies-teaser_780.jpg" width="780" height="520" alt="" loading="eager" decoding="async" fetchpriority="high" />
-          </picture>
+        <a class="hero__media" id="homeHeroMedia" href="/delish/april-spotlight/" aria-label="View Delish April Spotlight">
+          <img
+            class="hero__media-poster"
+            src="/delish/assets/delish-3-meta_1200x630.jpg"
+            alt="Delish April Spotlight"
+            width="1200"
+            height="630"
+            loading="eager"
+            decoding="async"
+            fetchpriority="high"
+          />
 
-          <!-- video -->
-          <video
-            id="homeHeroVideo"
-            class="hero__video"
-            autoplay
-            muted
-            playsinline
-            webkit-playsinline
-            loop
-            preload="metadata"
-            poster="/assets/video/ladies-teaser_780.jpg">
-            <source src="/assets/video/ladies-teaser.mp4?v=20260301a" type="video/mp4" />
-          </video>
+          <div class="hero__media-overlay"></div>
 
-          <!-- fallback play -->
-          <button id="homeHeroPlayFallback" class="heroPlayFallback" type="button" aria-label="Play video">
-            <span class="heroPlayFallback__pill">play</span>
-          </button>
+          <div class="hero__feature-badge">April Spotlight</div>
 
-          <!-- HERO pill (bottom-right) -->
-          <a class="ladies-teaser_hero" href="/ladies/" aria-label="Women’s Lane">
-            WOMEN'S LANE <span aria-hidden="true">→</span>
-          </a>
-        </div>
+          <div class="hero__feature-copy">
+            <h2 class="hero__feature-title">Delish</h2>
+            <p class="hero__feature-text">Order online, skip the wait, and pick up fresh.</p>
+            <span class="hero__media-cta">View Delish Spotlight <span aria-hidden="true">→</span></span>
+          </div>
+        </a>
 
         <div class="hero__copy">
           <h1 class="brand">Square Bidness</h1>
           <p class="tagline">Principles. Morals. Business Done Right.</p>
+          <p class="section__lead" style="margin-top:.5rem;">Installing digital infrastructure for independent operators.</p>
 
           <div class="cta-row">
             <a class="btn btn--gold" href="/vsop/">Shop VSOP</a>
@@ -470,7 +451,6 @@
             </div>
           </article>
 
-          <!-- Women Coming Soon (Marquesha) -->
           <article class="card">
             <div class="card__media">
               <picture>
@@ -512,9 +492,8 @@
     <section class="section section--band">
       <div class="container loop-strip">
         <p>
-          <a href="/vsop/">VSOP</a> · <a href="/nae-day/">Nae Day</a> ·
+          <a href="/philson-le-fleuriste/">Philson Le Fleuriste</a> ·
           <a href="/courageaux/">Courageaux</a> ·
-          <a href="/wintergames/">Winter Games</a> ·
           <a href="/phomatic/">Phomatic Photography</a> ·
           <a href="/start2finish/">Start 2 Finish</a> ·
           <a href="/puffs/">Puff's Smokehouse</a> ·
@@ -526,7 +505,6 @@
     </section>
   </main>
 
-  <!-- Product hydration (text/price only) -->
   <script>
     fetch("/products.json", { cache: "no-store" })
       .then(r => r.ok ? r.json() : null)
@@ -551,48 +529,6 @@
         });
       })
       .catch(() => {});
-  </script>
-
-  <!-- HERO VIDEO: reliable start + fallback -->
-  <script>
-  (function () {
-    const v = document.getElementById("homeHeroVideo");
-    const btn = document.getElementById("homeHeroPlayFallback");
-    if (!v) return;
-
-    v.muted = true;
-    v.defaultMuted = true;
-    v.setAttribute("muted", "");
-    v.setAttribute("playsinline", "");
-    v.setAttribute("webkit-playsinline", "");
-    v.setAttribute("autoplay", "");
-
-    const showBtn = () => { if (btn) btn.style.display = "grid"; };
-    const hideBtn = () => { if (btn) btn.style.display = "none"; };
-
-    async function tryPlay() {
-      try {
-        v.load(); // Safari “forget source” fix
-        const p = v.play();
-        if (p && typeof p.then === "function") await p;
-        hideBtn();
-      } catch (_) {
-        showBtn();
-      }
-    }
-
-    window.addEventListener("load", tryPlay, { once:true });
-    v.addEventListener("loadedmetadata", tryPlay, { once:true, passive:true });
-    v.addEventListener("canplay", tryPlay, { once:true, passive:true });
-
-    document.addEventListener("click", tryPlay, { once:true });
-    document.addEventListener("touchstart", tryPlay, { once:true, passive:true });
-    if (btn) btn.addEventListener("click", tryPlay);
-
-    document.addEventListener("visibilitychange", function(){
-      if (!document.hidden) tryPlay();
-    });
-  })();
   </script>
 
   <div id="site-footer" aria-busy="true" style="content-visibility:auto;contain-intrinsic-size:140px;"></div>
