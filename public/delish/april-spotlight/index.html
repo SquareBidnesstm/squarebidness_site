@@ -546,6 +546,10 @@
       </div>
     </section>
 
+    <div class="status-strip" style="margin-top:10px;">
+  <span class="status-chip status-chip--live">Ordering Status: Check Menu Page</span>
+</div>
+
     <section class="section">
       <div class="wrap">
         <div class="quote">
@@ -554,6 +558,57 @@
         </div>
       </div>
     </section>
+
+    <form id="waitlistForm" class="cta-row" style="gap:10px;">
+  <input 
+    id="wlName"
+    type="text" 
+    placeholder="Your name" 
+    required
+    style="min-height:48px;border-radius:999px;padding:0 16px;border:none;"
+  />
+
+  <input 
+    id="wlPhone"
+    type="tel" 
+    placeholder="Phone number" 
+    required 
+    style="min-height:48px;border-radius:999px;padding:0 16px;border:none;"
+  />
+
+  <button class="btn btn--gold" type="submit">Join Waitlist</button>
+</form>
+
+<script>
+document.getElementById("waitlistForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const name = document.getElementById("wlName").value.trim();
+  const phone = document.getElementById("wlPhone").value.trim();
+
+  if (!name || !phone) return alert("Enter name and phone");
+
+  try {
+    await fetch("https://script.google.com/macros/s/AKfycbw8QqG2PxkIN8fZmnsoTx38Z08JQSvEKWGMM3282_O94waiKt3EcWsiO_Df7JIVwWUD/exec", {
+      method: "POST",
+      body: JSON.stringify({
+        name,
+        phone,
+        interest: "opening-notification",
+        source: "delish-spotlight",
+        viewedMenuDay: new Date().toLocaleString("en-US", { weekday: "long" }).toLowerCase()
+      })
+    });
+
+    alert("You’re on the list. We’ll text you when ordering opens.");
+
+    e.target.reset();
+  } catch (err) {
+    console.error(err);
+    alert("Something went wrong. Try again.");
+  }
+});
+</script>
 
     <section class="section">
       <div class="wrap">
