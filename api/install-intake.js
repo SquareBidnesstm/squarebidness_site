@@ -4,6 +4,19 @@ export default async function handler(req, res) {
     return res.status(405).json({ ok: false, error: "Method not allowed." });
   }
 
+  function clean(value) {
+    return String(value || "").trim();
+  }
+
+  function buildLeadId() {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    const t = String(d.getTime()).slice(-6);
+    return `SBI-${y}${m}${day}-${t}`;
+  }
+
   try {
     const {
       name = "",
@@ -16,41 +29,69 @@ export default async function handler(req, res) {
       prepaidInterest = "",
       cateringNeeded = "",
       budgetRange = "",
+      monthlyVolume = "",
+      launchTimeline = "",
       notes = "",
-      source = "install-page",
-      submittedAt = new Date().toISOString()
+      source = "install-page"
     } = req.body || {};
 
-    if (!name.trim() || !business.trim() || !phone.trim() || !city.trim() || !state.trim()) {
+    if (
+      !clean(name) ||
+      !clean(business) ||
+      !clean(phone) ||
+      !clean(city) ||
+      !clean(state)
+    ) {
       return res.status(400).json({
         ok: false,
         error: "Missing required fields."
       });
     }
 
-    const scriptUrl = "https://script.google.com/macros/s/AKfycbwHyuHpkBzyQQyA9XTWnYIubE4JTAVTvufsWvrdxLvReEh9BlbX3lgsmL9Yqe7wVUH6GA/exec";
+    const now = new Date().toISOString();
+    const leadId = buildLeadId();
+
+    const payload = {
+      timestamp: now,
+      leadId,
+      contactName: clean(name),
+      businessName: clean(business),
+      phone: clean(phone),
+      email: clean(email),
+      city: clean(city),
+      state: clean(state),
+      businessType: "Restaurant",
+      currentOrderMethod: clean(orderFlow),
+      wantsPrepaidSystem: clean(prepaidInterest),
+      cateringNeeded: clean(cateringNeeded),
+      budgetRange: clean(budgetRange),
+      monthlyVolume: clean(monthlyVolume),
+      launchTimeline: clean(launchTimeline),
+      notes: clean(notes),
+      source: clean(source),
+      status: "New Lead",
+      statusUpdatedAt: now,
+      internalOwner: "Marcus",
+      smsAlertSent: "No",
+      lastContactDate: "",
+      nextStep: "Review lead and contact operator",
+      nextStepDate: "",
+      installPackage: "",
+      estimatedValue: "",
+      depositStatus: "Not Sent",
+      onboardingLink: "",
+      goLiveDate: ""
+    };
+
+    const scriptUrl =
+      "https://script.google.com/macros/s/AKfycbwHyuHpkBzyQQyA9XTWnYIubE4JTAVTvufsWvrdxLvReEh9BlbX3lgsmL9Yqe7wVUH6GA/exec";
 
     const upstream = await fetch(scriptUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        submittedAt,
-        name: name.trim(),
-        business: business.trim(),
-        phone: phone.trim(),
-        email: email.trim(),
-        city: city.trim(),
-        state: state.trim(),
-        orderFlow: orderFlow.trim(),
-        prepaidInterest: prepaidInterest.trim(),
-        cateringNeeded: cateringNeeded.trim(),
-        budgetRange: budgetRange.trim(),
-        notes: notes.trim(),
-        source: source.trim(),
-        status: "NEW_INSTALL_LEAD"
-      })
+      body: JSON.stringify(payload)
     });
 
     const text = await upstream.text();
@@ -65,11 +106,15 @@ export default async function handler(req, res) {
     if (!upstream.ok || data.ok === false) {
       return res.status(502).json({
         ok: false,
-        error: data.error || "Failed to submit install intake."
+        error: data.error || "Failed to submit install intake.",
+        detail: data
       });
     }
 
-    return res.status(200).json({ ok: true });
+    return res.status(200).json({
+      ok: true,
+      leadId
+    });
   } catch (error) {
     console.error("POST /api/install-intake error:", error);
     return res.status(500).json({
