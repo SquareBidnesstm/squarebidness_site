@@ -28,7 +28,7 @@ export default async function handler(req, res) {
       });
     }
 
-    const scriptUrl = "YOUR_GOOGLE_SCRIPT_URL_HERE";
+    const scriptUrl = "https://script.google.com/macros/s/AKfycbwHyuHpkBzyQQyA9XTWnYIubE4JTAVTvufsWvrdxLvReEh9BlbX3lgsmL9Yqe7wVUH6GA/exec";
 
     const upstream = await fetch(scriptUrl, {
       method: "POST",
