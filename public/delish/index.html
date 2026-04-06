@@ -506,6 +506,21 @@
       : [...EXTRA_SIDES_BASE];
   }
 
+  function getBaseOptionsForPlate() {
+  return [
+    { id: "base_rice", name: "Rice" },
+    { id: "base_mashed_potatoes", name: "Mashed Potatoes" }
+  ];
+}
+
+function renderBaseOptions() {
+  const bases = getBaseOptionsForPlate();
+  return [
+    `<option value="">Choose rice or mashed potatoes</option>`,
+    ...bases.map(base => `<option value="${base.id}">${base.name}</option>`)
+  ].join("");
+}
+
   function renderSelectOptions(selectEl, items, placeholder) {
     selectEl.innerHTML =
       `<option value="">${placeholder}</option>` +
@@ -521,34 +536,39 @@
   }
 
   function renderMainItem(item, day) {
-    return `
-      <div class="menuItem">
-        <div class="menuTop">
-          <div class="menuCopy">
-            <span>${item.name} ($${Number(item.price).toFixed(2)})</span>
-            ${item.desc ? `<small>${item.desc}</small>` : ""}
-          </div>
-          <div class="qtyWrap">
-            <button type="button" class="qtyBtn" data-target="${item.id}Qty" data-action="decrease">−</button>
-            <input type="number" min="0" max="1" value="0" id="${item.id}Qty" class="qty" />
-            <button type="button" class="qtyBtn" data-target="${item.id}Qty" data-action="increase">+</button>
-          </div>
+  return `
+    <div class="menuItem">
+      <div class="menuTop">
+        <div class="menuCopy">
+          <span>${item.name} ($${Number(item.price).toFixed(2)})</span>
+          ${item.desc ? `<small>${item.desc}</small>` : ""}
         </div>
-
-        <div class="plateSides" id="${item.id}SidesWrap">
-          <label class="sideLabel" for="${item.id}Side1">Side 1</label>
-          <select id="${item.id}Side1" data-plate-side="${item.id}">
-            ${renderPlateSideOptions(day)}
-          </select>
-
-          <label class="sideLabel" for="${item.id}Side2">Side 2</label>
-          <select id="${item.id}Side2" data-plate-side="${item.id}">
-            ${renderPlateSideOptions(day)}
-          </select>
+        <div class="qtyWrap">
+          <button type="button" class="qtyBtn" data-target="${item.id}Qty" data-action="decrease">−</button>
+          <input type="number" min="0" max="1" value="0" id="${item.id}Qty" class="qty" />
+          <button type="button" class="qtyBtn" data-target="${item.id}Qty" data-action="increase">+</button>
         </div>
       </div>
-    `;
-  }
+
+      <div class="plateSides" id="${item.id}SidesWrap">
+        <label class="sideLabel" for="${item.id}Base">Rice or Mashed Potatoes</label>
+        <select id="${item.id}Base" data-plate-base="${item.id}">
+          ${renderBaseOptions()}
+        </select>
+
+        <label class="sideLabel" for="${item.id}Side1">Side 1</label>
+        <select id="${item.id}Side1" data-plate-side="${item.id}">
+          ${renderPlateSideOptions(day)}
+        </select>
+
+        <label class="sideLabel" for="${item.id}Side2">Side 2</label>
+        <select id="${item.id}Side2" data-plate-side="${item.id}">
+          ${renderPlateSideOptions(day)}
+        </select>
+      </div>
+    </div>
+  `;
+}
 
   function attachQtyButtons() {
     document.querySelectorAll(".qtyBtn").forEach((btn) => {
@@ -595,29 +615,33 @@
     });
   }
 
-  function attachPlateSideListeners() {
-    document.querySelectorAll("[data-plate-side]").forEach((select) => {
-      select.addEventListener("change", calc);
-    });
+ function attachPlateSideListeners() {
+  document.querySelectorAll("[data-plate-side], [data-plate-base]").forEach((select) => {
+    select.addEventListener("change", calc);
+  });
+}
+
+ function togglePlateSides(plateId, visible) {
+  const wrap = document.getElementById(`${plateId}SidesWrap`);
+  if (!wrap) return;
+
+  wrap.classList.toggle("is-visible", visible);
+
+  const base = document.getElementById(`${plateId}Base`);
+  const side1 = document.getElementById(`${plateId}Side1`);
+  const side2 = document.getElementById(`${plateId}Side2`);
+
+  if (base) base.disabled = !visible;
+  if (side1) side1.disabled = !visible;
+  if (side2) side2.disabled = !visible;
+
+  if (!visible) {
+    if (base) base.value = "";
+    if (side1) side1.value = "";
+    if (side2) side2.value = "";
   }
-
-  function togglePlateSides(plateId, visible) {
-    const wrap = document.getElementById(`${plateId}SidesWrap`);
-    if (!wrap) return;
-
-    wrap.classList.toggle("is-visible", visible);
-
-    const side1 = document.getElementById(`${plateId}Side1`);
-    const side2 = document.getElementById(`${plateId}Side2`);
-
-    if (side1) side1.disabled = !visible;
-    if (side2) side2.disabled = !visible;
-
-    if (!visible) {
-      if (side1) side1.value = "";
-      if (side2) side2.value = "";
-    }
-  }
+}
+  
 
   function applyDailyMenu() {
     const state = getServiceState();
@@ -684,44 +708,57 @@
     return sourceItems.find(item => item.id === value) || null;
   }
 
-  function getPlateSelections() {
-    const items = [];
-    const sideNotes = [];
-    const mains = getCurrentMainItems();
+ function getPlateSelections() {
+  const items = [];
+  const sideNotes = [];
+  const mains = getCurrentMainItems();
 
-    mains.forEach((item) => {
-      const qtyEl = document.getElementById(`${item.id}Qty`);
-      const qty = Number(qtyEl?.value || 0);
+  mains.forEach((item) => {
+    const qtyEl = document.getElementById(`${item.id}Qty`);
+    const qty = Number(qtyEl?.value || 0);
 
-      if (qty > 0) {
-        const side1El = document.getElementById(`${item.id}Side1`);
-        const side2El = document.getElementById(`${item.id}Side2`);
-        const side1Id = side1El ? side1El.value : "";
-        const side2Id = side2El ? side2El.value : "";
+    if (qty > 0) {
+      const baseEl = document.getElementById(`${item.id}Base`);
+      const side1El = document.getElementById(`${item.id}Side1`);
+      const side2El = document.getElementById(`${item.id}Side2`);
 
-        const sideOptions = getExtraSidesForDay(currentDay);
-        const side1 = sideOptions.find(side => side.id === side1Id);
-        const side2 = sideOptions.find(side => side.id === side2Id);
+      const baseId = baseEl ? baseEl.value : "";
+      const side1Id = side1El ? side1El.value : "";
+      const side2Id = side2El ? side2El.value : "";
 
-        items.push({
-          id: item.id,
-          name: item.name,
-          price: item.price,
-          qty,
-          side1Id,
-          side2Id,
-          side1Name: side1 ? side1.name : "",
-          side2Name: side2 ? side2.name : ""
-        });
+      const baseOptions = getBaseOptionsForPlate();
+      const sideOptions = getExtraSidesForDay(currentDay);
 
-        if (side1 && side2) {
-          sideNotes.push(`${item.name}: ${side1.name}, ${side2.name}`);
-        }
+      const base = baseOptions.find(option => option.id === baseId);
+      const side1 = sideOptions.find(side => side.id === side1Id);
+      const side2 = sideOptions.find(side => side.id === side2Id);
+
+      items.push({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        qty,
+        baseId,
+        baseName: base ? base.name : "",
+        side1Id,
+        side2Id,
+        side1Name: side1 ? side1.name : "",
+        side2Name: side2 ? side2.name : ""
+      });
+
+      const noteParts = [];
+      if (base) noteParts.push(base.name);
+      if (side1) noteParts.push(side1.name);
+      if (side2) noteParts.push(side2.name);
+
+      if (noteParts.length === 3) {
+        sideNotes.push(`${item.name}: ${noteParts.join(", ")}`);
       }
-    });
+    }
+  });
 
-    return { items, sideNotes };
-  }
+  return { items, sideNotes };
+}
 
   function getSelectedItems() {
     const plateSelections = getPlateSelections();
@@ -749,10 +786,10 @@
   }
 
   function selectedPlatesHaveSides() {
-    const plates = getPlateSelections().items;
-    if (!plates.length) return false;
-    return plates.every(item => item.side1Id && item.side2Id);
-  }
+  const plates = getPlateSelections().items;
+  if (!plates.length) return false;
+  return plates.every(item => item.baseId && item.side1Id && item.side2Id);
+}
 
   function calc() {
     const selected = getSelectedItems();
@@ -761,6 +798,33 @@
       (sum, item) => sum + (Number(item.qty || 0) * Number(item.price || 0)),
       0
     );
+
+    function getSelectedItems() {
+  const plateSelections = getPlateSelections();
+  const items = plateSelections.items.map(item => ({
+    id: item.id,
+    name: item.name,
+    price: item.price,
+    qty: item.qty,
+    baseId: item.baseId,
+    baseName: item.baseName,
+    side1Id: item.side1Id,
+    side2Id: item.side2Id,
+    side1Name: item.side1Name,
+    side2Name: item.side2Name
+  }));
+
+  const drink = getSelectedOptionalItem(drinkSelect, DRINKS);
+  if (drink) items.push({ id: drink.id, name: drink.name, price: drink.price, qty: 1 });
+
+  const side = getSelectedOptionalItem(extraSideSelect, getExtraSidesForDay(currentDay));
+  if (side) items.push({ id: side.id, name: side.name, price: side.price, qty: 1 });
+
+  const lagniappe = getSelectedOptionalItem(lagniappeSelect, LAGNIAPPE);
+  if (lagniappe) items.push({ id: lagniappe.id, name: lagniappe.name, price: lagniappe.price, qty: 1 });
+
+  return { items, sideNotes: plateSelections.sideNotes };
+}
 
     subtotalDisplay.textContent = subtotal.toFixed(2);
     totalDisplay.textContent = subtotal.toFixed(2);
@@ -829,7 +893,7 @@
     }
 
     if (!selectedPlatesHaveSides()) {
-      showStatus("Each main plate requires 2 sides before checkout.");
+      showStatus("Each main plate requires rice or mashed potatoes, plus 2 sides before checkout.");
       return;
     }
 
@@ -842,8 +906,8 @@
       );
 
       const plateNotes = selected.sideNotes.length
-        ? `Plate sides: ${selected.sideNotes.join(" | ")}`
-        : "";
+  ? `Plate selections: ${selected.sideNotes.join(" | ")}`
+  : "";
 
       const payload = {
         customerName: customerName.value.trim(),
@@ -854,13 +918,15 @@
         notes: plateNotes,
         smsConsent: "yes",
         items: selectedItems.map(item => ({
-          id: item.id,
-          qty: item.qty,
-          side1Id: item.side1Id || "",
-          side2Id: item.side2Id || "",
-          side1Name: item.side1Name || "",
-          side2Name: item.side2Name || ""
-        })),
+  id: item.id,
+  qty: item.qty,
+  baseId: item.baseId || "",
+  baseName: item.baseName || "",
+  side1Id: item.side1Id || "",
+  side2Id: item.side2Id || "",
+  side1Name: item.side1Name || "",
+  side2Name: item.side2Name || ""
+})),
         subtotal,
         tax: 0,
         total: subtotal,
