@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-sb-brand="squarebidness" data-sb-tier="public" data-sb-build="v20260405-install-page-pricing">
+<html lang="en" data-sb-brand="squarebidness" data-sb-tier="public" data-sb-build="v20260406-install-page-pipeline">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -125,6 +125,11 @@
       background:#1b1b1b;
       color:#fff;
       border-color:var(--line);
+    }
+
+    .btn[disabled]{
+      opacity:.65;
+      cursor:not-allowed;
     }
 
     .hero{
@@ -516,13 +521,31 @@
               </select>
             </div>
 
+            <div class="grid-2">
+              <select name="monthlyVolume" id="monthlyVolume">
+                <option value="">Monthly order volume</option>
+                <option value="under_250">Under 250 orders</option>
+                <option value="250_500">250–500 orders</option>
+                <option value="500_1000">500–1,000 orders</option>
+                <option value="1000_plus">1,000+ orders</option>
+              </select>
+
+              <select name="launchTimeline" id="launchTimeline">
+                <option value="">Launch timeline</option>
+                <option value="asap">ASAP</option>
+                <option value="2_4_weeks">2–4 weeks</option>
+                <option value="30_60_days">30–60 days</option>
+                <option value="just_exploring">Just exploring</option>
+              </select>
+            </div>
+
             <textarea
               name="notes"
               id="notes"
               placeholder="Tell us about your restaurant, your menu, and what’s breaking in your current order flow."
             ></textarea>
 
-            <button class="btn btn--gold" type="submit">Submit Install Request</button>
+            <button class="btn btn--gold" id="submitBtn" type="submit">Submit Install Request</button>
           </form>
 
           <div id="successBox" class="successBox">
@@ -550,13 +573,20 @@
       const form = document.getElementById("installRequestForm");
       const successBox = document.getElementById("successBox");
       const errorBox = document.getElementById("errorBox");
+      const submitBtn = document.getElementById("submitBtn");
 
       if (!form) return;
 
       form.addEventListener("submit", async function (e) {
         e.preventDefault();
+
         successBox.classList.remove("is-visible");
         errorBox.classList.remove("is-visible");
+
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Submitting...";
+        }
 
         const payload = {
           name: document.getElementById("name").value.trim(),
@@ -569,9 +599,10 @@
           prepaidInterest: document.getElementById("prepaidInterest").value,
           cateringNeeded: document.getElementById("cateringNeeded").value,
           budgetRange: document.getElementById("budgetRange").value,
+          monthlyVolume: document.getElementById("monthlyVolume").value,
+          launchTimeline: document.getElementById("launchTimeline").value,
           notes: document.getElementById("notes").value.trim(),
-          source: "install-page",
-          submittedAt: new Date().toISOString()
+          source: "install-page"
         };
 
         try {
@@ -589,9 +620,15 @@
 
           form.reset();
           successBox.classList.add("is-visible");
+          window.location.href = "/install/success/";
         } catch (err) {
-          console.error(err);
+          console.error("Install intake submit error:", err);
           errorBox.classList.add("is-visible");
+        } finally {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Submit Install Request";
+          }
         }
       });
     })();
