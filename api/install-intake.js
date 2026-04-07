@@ -25,8 +25,8 @@ export default async function handler(req, res) {
       email = "",
       city = "",
       state = "",
+      businessType = "",
       orderFlow = "",
-      prepaidInterest = "",
       cateringNeeded = "",
       budgetRange = "",
       monthlyVolume = "",
@@ -52,23 +52,22 @@ export default async function handler(req, res) {
     const leadId = buildLeadId();
 
     const payload = {
-      timestamp: now,
-      leadId,
-      contactName: clean(name),
-      businessName: clean(business),
+      submittedAt: now,
+      name: clean(name),
+      business: clean(business),
       phone: clean(phone),
       email: clean(email),
       city: clean(city),
       state: clean(state),
-      businessType: "Restaurant",
-      currentOrderMethod: clean(orderFlow),
-      wantsPrepaidSystem: clean(prepaidInterest),
+      businessType: clean(businessType),
+      orderFlow: clean(orderFlow),
       cateringNeeded: clean(cateringNeeded),
       budgetRange: clean(budgetRange),
       monthlyVolume: clean(monthlyVolume),
       launchTimeline: clean(launchTimeline),
       notes: clean(notes),
       source: clean(source),
+      leadId,
       status: "New Lead",
       statusUpdatedAt: now,
       internalOwner: "Marcus",
@@ -84,7 +83,7 @@ export default async function handler(req, res) {
     };
 
     const scriptUrl =
-      "https://script.google.com/a/macros/squarebidness.com/s/AKfycby040eNFYM4H_VbohTxA3OLrph18eOIg71CWufV6SyhBCqmdVNg3wHmWtYq9JGPbrD6/exec";
+      "https://script.google.com/macros/s/AKfycby040eNFYM4H_VbohTxA3OLrph18eOIg71CWufV6SyhBCqmdVNg3wHmWtYq9JGPbrD6/exec";
 
     const upstream = await fetch(scriptUrl, {
       method: "POST",
@@ -104,6 +103,12 @@ export default async function handler(req, res) {
     }
 
     if (!upstream.ok || data.ok === false) {
+      console.error("Install intake upstream error:", {
+        status: upstream.status,
+        statusText: upstream.statusText,
+        data
+      });
+
       return res.status(502).json({
         ok: false,
         error: data.error || "Failed to submit install intake.",
@@ -119,7 +124,7 @@ export default async function handler(req, res) {
     console.error("POST /api/install-intake error:", error);
     return res.status(500).json({
       ok: false,
-      error: "Server error."
+      error: error.message || "Server error."
     });
   }
 }
