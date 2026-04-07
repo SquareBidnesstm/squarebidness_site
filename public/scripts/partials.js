@@ -1,13 +1,12 @@
 // /public/scripts/partials.js
 (() => {
-  // Prevent double-initialization if script is included twice
   if (window.__SB_PARTIALS_INIT__) return;
   window.__SB_PARTIALS_INIT__ = true;
 
   const BUILD =
-    (window.SB_BUILD ||
-      document.querySelector('meta[name="sb:build"]')?.content ||
-      "v1");
+    window.SB_BUILD ||
+    document.querySelector('meta[name="sb:build"]')?.content ||
+    "v1";
 
   const bust = `?v=${encodeURIComponent(BUILD)}`;
 
@@ -19,9 +18,6 @@
     }
   }
 
-  // Support BOTH ID conventions across the repo:
-  // - older pages:  nav-placeholder / footer-placeholder
-  // - newer pages:  site-header / site-footer
   const NAV_TARGET_IDS = ["site-header", "nav-placeholder"];
   const FOOT_TARGET_IDS = ["site-footer", "footer-placeholder"];
 
@@ -33,6 +29,41 @@
     return null;
   }
 
+  async function fetchPartial(url) {
+    const res = await fetch(url + bust, {
+      cache: "no-cache",
+      credentials: "same-origin",
+    });
+
+    if (!res.ok) {
+      throw new Error(`[partials] not ok: ${url} ${res.status}`);
+    }
+
+    return res.text();
+  }
+
+  function applyPartial(el, html) {
+    const wrapper = document.createElement("div");
+    wrapper.innerHTML = html;
+
+    const frag = document.createDocumentFragment();
+    while (wrapper.firstChild) {
+      frag.appendChild(wrapper.firstChild);
+    }
+
+    el.replaceChildren(frag);
+    el.classList.add("fade-in");
+
+    if (el.hasAttribute("aria-busy")) {
+      el.setAttribute("aria-busy", "false");
+    }
+
+    const yearEl = el.querySelector("#sb-year");
+    if (yearEl) {
+      yearEl.textContent = String(new Date().getFullYear());
+    }
+  }
+
   async function injectPartial(url, targetId) {
     const el = document.getElementById(targetId);
     if (!el) {
@@ -41,38 +72,8 @@
     }
 
     try {
-      const res = await fetch(url + bust, {
-  cache: "no-store",
-  credentials: "same-origin",
-});
-
-      if (!res.ok) {
-        console.warn("[partials] not ok:", url, res.status);
-        return false;
-      }
-
-      const html = await res.text();
-
-      // Single batched DOM write to reduce layout thrash
-      const wrapper = document.createElement("div");
-      wrapper.innerHTML = html;
-
-      const frag = document.createDocumentFragment();
-      while (wrapper.firstChild) {
-        frag.appendChild(wrapper.firstChild);
-      }
-
-      // Replace existing children in one shot
-      el.replaceChildren(frag);
-
-      // Optional fade-in hook (only matters if your CSS defines it)
-      el.classList.add("fade-in");
-
-      // Clear aria-busy if it was set in the HTML
-      if (el.hasAttribute("aria-busy")) {
-        el.setAttribute("aria-busy", "false");
-      }
-
+      const html = await fetchPartial(url);
+      applyPartial(el, html);
       return true;
     } catch (err) {
       console.warn("[partials] fetch fail:", url, err);
@@ -81,16 +82,13 @@
   }
 
   function markActiveNav() {
-    // Support either host ID
     const host =
       document.getElementById("site-header") ||
       document.getElementById("nav-placeholder");
 
     if (!host) return;
 
-    // Some nav templates wrap with .site-header, support either
     const scope = host.querySelector(".site-header") || host;
-
     const current = location.pathname.replace(/\/+$/, "") || "/";
 
     scope.querySelectorAll("a[href]").forEach((a) => {
@@ -110,7 +108,6 @@
 
       const isActive =
         hrefPath === current ||
-        (hrefPath !== "/" && current === hrefPath) ||
         (hrefPath !== "/" && current.startsWith(hrefPath + "/"));
 
       if (isActive) {
@@ -124,12 +121,17 @@
   }
 
   onReady(() => {
-    // Let first paint happen, then inject nav/footer
     window.requestAnimationFrame(async () => {
       const navTargetId = findFirstExistingId(NAV_TARGET_IDS);
       const footTargetId = findFirstExistingId(FOOT_TARGET_IDS);
 
-      // Kick off both fetches in parallel to minimize time on main thread
+      if (!navTargetId) {
+        console.warn("[partials] no nav target found.");
+      }
+      if (!footTargetId) {
+        console.warn("[partials] no footer target found.");
+      }
+
       const navPromise = navTargetId
         ? injectPartial("/nav/index.html", navTargetId)
         : Promise.resolve(false);
@@ -138,21 +140,9 @@
         ? injectPartial("/footer/index.html", footTargetId)
         : Promise.resolve(false);
 
-      if (!navTargetId) {
-        console.warn(
-          "[partials] no nav target found (site-header or nav-placeholder)."
-        );
-      }
-      if (!footTargetId) {
-        console.warn(
-          "[partials] no footer target found (site-footer or footer-placeholder)."
-        );
-      }
-
       const [navOk, footOk] = await Promise.all([navPromise, footPromise]);
 
       if (navOk) {
-        // Mark active link AFTER nav HTML is in place
         markActiveNav();
       }
 
