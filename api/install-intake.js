@@ -1,3 +1,5 @@
+import { sendInstallSms } from "./_lib/send-install-sms.js";
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -116,9 +118,26 @@ export default async function handler(req, res) {
       });
     }
 
+    const smsBody =
+`NEW INSTALL LEAD
+Business: ${clean(business)}
+Contact: ${clean(name)}
+Type: ${clean(businessType)}
+City: ${clean(city)}, ${clean(state)}
+Phone: ${clean(phone)}
+Budget: ${clean(budgetRange)}
+Timeline: ${clean(launchTimeline)}
+Lead ID: ${leadId}`;
+
+    const smsResult = await sendInstallSms({
+      to: process.env.SB_INSTALL_ALERT_TO,
+      body: smsBody
+    });
+
     return res.status(200).json({
       ok: true,
-      leadId
+      leadId,
+      sms: smsResult
     });
   } catch (error) {
     console.error("POST /api/install-intake error:", error);
