@@ -4,7 +4,11 @@ export async function sendInstallSms({ to, body }) {
   const from = process.env.SB_TWILIO_FROM_NUMBER;
 
   if (!sid || !token || !from) {
-    return { ok: false, skipped: true, reason: "Missing Twilio env vars" };
+    return {
+      ok: false,
+      skipped: true,
+      reason: "Missing Twilio env vars"
+    };
   }
 
   const auth = Buffer.from(`${sid}:${token}`).toString("base64");
@@ -35,5 +39,8 @@ export async function sendInstallSms({ to, body }) {
     };
   }
 
-  return { ok: true, data: json };
+  return {
+    ok: true,
+    data: json
+  };
 }
