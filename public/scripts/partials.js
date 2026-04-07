@@ -42,9 +42,9 @@
 
     try {
       const res = await fetch(url + bust, {
-        cache: "force-cache",
-        credentials: "same-origin",
-      });
+  cache: "no-store",
+  credentials: "same-origin",
+});
 
       if (!res.ok) {
         console.warn("[partials] not ok:", url, res.status);
