@@ -553,6 +553,19 @@ function updateOrderingBanner(state) {
   }
 
  
+function getBaseLabel(item) {
+  const bases = item.baseOptions || [
+    { id: "base_rice", name: "Rice" },
+    { id: "base_mashed_potatoes", name: "Mashed Potatoes" }
+  ];
+
+  if (!bases.length) return "Choose Base";
+  if (bases.length === 1) return `Choose ${bases[0].name}`;
+  if (bases.length === 2) return `Choose ${bases[0].name} or ${bases[1].name}`;
+
+  return "Choose Base";
+}
+
 function renderBaseOptions(item) {
   const bases = item.baseOptions || [
     { id: "base_rice", name: "Rice" },
@@ -560,11 +573,10 @@ function renderBaseOptions(item) {
   ];
 
   return [
-    `<option value="">Choose base</option>`,
+    `<option value="">${getBaseLabel(item)}</option>`,
     ...bases.map(base => `<option value="${base.id}">${base.name}</option>`)
   ].join("");
 }
-
   function renderSelectOptions(selectEl, items, placeholder) {
     selectEl.innerHTML =
       `<option value="">${placeholder}</option>` +
