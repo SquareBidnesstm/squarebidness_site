@@ -891,32 +891,7 @@ function renderBaseOptions(item) {
   checkoutBtn.disabled = false;
   checkoutBtn.textContent = "Pay Now";
 }
-    function getSelectedItems() {
-  const plateSelections = getPlateSelections();
-  const items = plateSelections.items.map(item => ({
-    id: item.id,
-    name: item.name,
-    price: item.price,
-    qty: item.qty,
-    baseId: item.baseId,
-    baseName: item.baseName,
-    side1Id: item.side1Id,
-    side2Id: item.side2Id,
-    side1Name: item.side1Name,
-    side2Name: item.side2Name
-  }));
-
-  const drink = getSelectedOptionalItem(drinkSelect, DRINKS);
-  if (drink) items.push({ id: drink.id, name: drink.name, price: drink.price, qty: 1 });
-
-  const side = getSelectedOptionalItem(extraSideSelect, getExtraSidesForDay(currentDay));
-  if (side) items.push({ id: side.id, name: side.name, price: side.price, qty: 1 });
-
-  const lagniappe = getSelectedOptionalItem(lagniappeSelect, LAGNIAPPE);
-  if (lagniappe) items.push({ id: lagniappe.id, name: lagniappe.name, price: lagniappe.price, qty: 1 });
-
-  return { items, sideNotes: plateSelections.sideNotes };
-}
+   
     subtotalDisplay.textContent = subtotal.toFixed(2);
     totalDisplay.textContent = subtotal.toFixed(2);
 
