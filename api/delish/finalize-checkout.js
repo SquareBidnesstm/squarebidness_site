@@ -29,6 +29,14 @@ export default async function handler(req, res) {
 
     const metadata = session.metadata || {};
 
+    let items = [];
+    try {
+      items = JSON.parse(metadata.itemsJson || "[]");
+      if (!Array.isArray(items)) items = [];
+    } catch {
+      items = [];
+    }
+
     const payload = {
       customerName: metadata.customerName || "",
       customerPhone: metadata.customerPhone || "",
@@ -37,7 +45,7 @@ export default async function handler(req, res) {
       pickupWindow: metadata.pickupWindow || "",
       notes: metadata.notes || "",
       smsConsent: metadata.smsConsent === "yes" ? "yes" : "no",
-      items: JSON.parse(metadata.itemsJson || "[]"),
+      items,
       subtotal: Number(metadata.subtotal || 0),
       tax: Number(metadata.tax || 0),
       total: Number(metadata.total || 0),
@@ -70,10 +78,22 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       ok: true,
-      orderNumber: webhookData.orderNumber,
-      pickupDate: payload.pickupDate,
-      pickupWindow: payload.pickupWindow,
-      smsConsent: payload.smsConsent,
+      order: {
+        orderNumber: webhookData.orderNumber || "",
+        customerName: payload.customerName,
+        customerPhone: payload.customerPhone,
+        customerEmail: payload.customerEmail,
+        pickupDate: payload.pickupDate,
+        pickupWindow: payload.pickupWindow,
+        notes: payload.notes,
+        smsConsent: payload.smsConsent,
+        items: payload.items,
+        subtotal: payload.subtotal,
+        tax: payload.tax,
+        total: payload.total,
+        paymentStatus: payload.paymentStatus,
+        stripeSessionId: payload.stripeSessionId,
+      },
     });
   } catch (error) {
     console.error("DELISH FINALIZE CHECKOUT ERROR:", error);
