@@ -898,100 +898,100 @@ function renderBaseOptions(item) {
     el.addEventListener("change", calc);
   });
 
-  checkoutBtn.addEventListener("click", async () => {
-    clearStatus();
+ checkoutBtn.addEventListener("click", async () => {
+  clearStatus();
 
-    const state = getServiceState();
+  const state = getServiceState();
 
-    if (!state.openNow) {
-      if (state.reason === "manual_closed") {
-        showStatus("Online ordering is currently paused.");
-      } else if (state.reason === "outside_service_window") {
-        showStatus(`Ordering is available from ${state.openTime} to ${state.closeTime}.`);
-      } else if (state.reason === "not_a_service_day") {
-        showStatus("Online ordering is closed today.");
-      } else {
-        showStatus("Online ordering is closed right now.");
-      }
-      return;
+  if (!state.openNow) {
+    if (state.reason === "manual_closed") {
+      showStatus("Online ordering is currently paused.");
+    } else if (state.reason === "outside_service_window") {
+      showStatus(`Ordering is available from ${state.openTime} to ${state.closeTime}.`);
+    } else if (state.reason === "not_a_service_day") {
+      showStatus("Online ordering is closed today.");
+    } else {
+      showStatus("Online ordering is closed right now.");
+    }
+    return;
+  }
+
+  const selected = getSelectedItems();
+  const selectedItems = selected.items;
+  const plateSelections = getPlateSelections();
+
+  if (!plateSelections.items.length) {
+    showStatus("Add at least one main plate first.");
+    return;
+  }
+
+  if (!selectedPlatesHaveSides()) {
+    showStatus("Each main plate requires a base choice and 2 sides before checkout.");
+    return;
+  }
+
+  checkoutBtn.disabled = true;
+  checkoutBtn.textContent = "Processing...";
+
+  try {
+    const subtotal = Number(
+      selectedItems.reduce((sum, item) => sum + (item.qty * item.price), 0).toFixed(2)
+    );
+
+    const plateNotes = selected.sideNotes.length
+      ? `Plate selections: ${selected.sideNotes.join(" | ")}`
+      : "";
+
+    const payload = {
+      customerName: customerName.value.trim(),
+      customerPhone: customerPhone.value.trim(),
+      customerEmail: "",
+      pickupDate: state.parts.isoDate,
+      pickupWindow: pickupWindow.value,
+      notes: plateNotes,
+      smsConsent: "yes",
+      items: selectedItems.map(item => ({
+        id: item.id,
+        qty: item.qty,
+        baseId: item.baseId || "",
+        baseName: item.baseName || "",
+        side1Id: item.side1Id || "",
+        side2Id: item.side2Id || "",
+        side1Name: item.side1Name || "",
+        side2Name: item.side2Name || ""
+      })),
+      subtotal,
+      tax: 0,
+      total: subtotal,
+      source: "delish-web"
+    };
+
+    const res = await fetch("/api/delish/create-checkout/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.ok) {
+      throw new Error(data.message || data.error || "Checkout failed");
     }
 
-    const selected = getSelectedItems();
-    const selectedItems = selected.items;
-    const plateSelections = getPlateSelections();
+    window.location.href = data.checkout_url;
+  } catch (e) {
+    showStatus(e.message || "Checkout failed");
+    checkoutBtn.disabled = false;
+    checkoutBtn.textContent = "Pay Now";
+  }
+});
 
-    if (!plateSelections.items.length) {
-      showStatus("Add at least one main plate first.");
-      return;
-    }
-
-    if (!selectedPlatesHaveSides()) {
-      showStatus("Each main plate requires a base choice and 2 sides before checkout.");
-      return;
-    }
-
-    checkoutBtn.disabled = true;
-    checkoutBtn.textContent = "Processing...";
-
-    try {
-      const subtotal = Number(
-        selectedItems.reduce((sum, item) => sum + (item.qty * item.price), 0).toFixed(2)
-      );
-
-      const plateNotes = selected.sideNotes.length
-  ? `Plate selections: ${selected.sideNotes.join(" | ")}`
-  : "";
-
-      const payload = {
-        customerName: customerName.value.trim(),
-        customerPhone: customerPhone.value.trim(),
-        customerEmail: "",
-        pickupDate: state.parts.isoDate,
-        pickupWindow: pickupWindow.value,
-        notes: plateNotes,
-        smsConsent: "yes",
-        items: selectedItems.map(item => ({
-  id: item.id,
-  qty: item.qty,
-  baseId: item.baseId || "",
-  baseName: item.baseName || "",
-  side1Id: item.side1Id || "",
-  side2Id: item.side2Id || "",
-  side1Name: item.side1Name || "",
-  side2Name: item.side2Name || ""
-})),
-        subtotal,
-        tax: 0,
-        total: subtotal,
-        source: "delish-web"
-      };
-
-      const res = await fetch("/api/delish/create-checkout/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-
-      const data = await res.json();
-
-      if (!res.ok || !data.ok) {
-        throw new Error(data.message || data.error || "Checkout failed");
-      }
-
-      window.location.href = data.checkout_url;
-    } catch (e) {
-      showStatus(e.message || "Checkout failed");
-      checkoutBtn.disabled = false;
-      checkoutBtn.textContent = "Pay Now";
-    }
-  });
 (async function init() {
   try {
     await loadOrderingStatus();
   } catch (error) {
     console.error("ORDERING STATUS FAILED:", error);
 
-    // 👇 FALLBACK — FORCE SYSTEM ON
     orderingStatus = {
       mode: "open",
       today: getCentralNowParts().weekday,
@@ -1003,7 +1003,6 @@ function renderBaseOptions(item) {
     };
   }
 
-  // 👇 ALWAYS RUN THIS NO MATTER WHAT
   applyDailyMenu();
 })();
 </script>
