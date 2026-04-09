@@ -892,40 +892,7 @@ function renderBaseOptions(item) {
   checkoutBtn.textContent = "Pay Now";
 }
    
-    subtotalDisplay.textContent = subtotal.toFixed(2);
-    totalDisplay.textContent = subtotal.toFixed(2);
-
-    const state = getServiceState();
-    const nameOk = customerName.value.trim().length > 0;
-    const phoneOk = customerPhone.value.trim().length > 0;
-    const pickupOk = pickupWindow.value.trim().length > 0;
-    const plateItemsOk = getPlateSelections().items.length > 0;
-    const sidesOk = selectedPlatesHaveSides();
-
-    if (!state.openNow) {
-      checkoutBtn.disabled = true;
-
-      if (state.reason === "manual_closed") {
-        checkoutBtn.textContent = "Ordering Paused";
-      } else if (state.reason === "outside_service_window") {
-        checkoutBtn.textContent = "Opening Soon";
-      } else {
-        checkoutBtn.textContent = "Closed Today";
-      }
-
-      return;
-    }
-
-    if (!(nameOk && phoneOk && pickupOk && plateItemsOk && sidesOk)) {
-      checkoutBtn.disabled = true;
-      checkoutBtn.textContent = "Complete Order";
-      return;
-    }
-
-    checkoutBtn.disabled = false;
-    checkoutBtn.textContent = "Pay Now";
-  }
-
+    
   document.querySelectorAll("input, select").forEach((el) => {
     el.addEventListener("input", calc);
     el.addEventListener("change", calc);
