@@ -525,10 +525,14 @@ function updateOrderingBanner(state) {
   }
 
  
-function renderBaseOptions() {
-  const bases = getBaseOptionsForPlate();
+function renderBaseOptions(item) {
+  const bases = item.baseOptions || [
+    { id: "base_rice", name: "Rice" },
+    { id: "base_mashed_potatoes", name: "Mashed Potatoes" }
+  ];
+
   return [
-    `<option value="">Choose rice or mashed potatoes</option>`,
+    `<option value="">Choose base</option>`,
     ...bases.map(base => `<option value="${base.id}">${base.name}</option>`)
   ].join("");
 }
