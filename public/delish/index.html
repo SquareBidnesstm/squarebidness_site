@@ -749,46 +749,36 @@
     };
   }
 
-  function formatDisplayTime(time24) {
-  if (!time24) return "";
-  const [hourStr, minuteStr] = String(time24).split(":");
-  const hour = Number(hourStr);
-  const minute = Number(minuteStr || 0);
-  const suffix = hour >= 12 ? "PM" : "AM";
-  const adjustedHour = hour % 12 === 0 ? 12 : hour % 12;
-  return `${adjustedHour}:${String(minute).padStart(2, "0")} ${suffix}`;
-}
+  function updateOrderingBanner(state) {
+    if (!orderingBanner) return;
 
-function updateOrderingBanner(state) {
-  if (!orderingBanner) return;
+    if (state.openNow) {
+      orderingBanner.textContent = `Open now · Ordering available until ${state.closeTime}.`;
+      return;
+    }
 
-  if (state.openNow) {
-    orderingBanner.textContent = `Open now · Ordering available until ${formatDisplayTime(state.closeTime)}.`;
-    return;
+    if (state.reason === "outside_service_window") {
+      orderingBanner.textContent = `Ordering opens from ${state.openTime} to ${state.closeTime}.`;
+      return;
+    }
+
+    if (state.reason === "manual_closed") {
+      orderingBanner.textContent = "Ordering is currently paused.";
+      return;
+    }
+
+    if (state.reason === "not_a_service_day") {
+      orderingBanner.textContent = "Closed today. Check the menu for the next active service day.";
+      return;
+    }
+
+    if (state.reason === "sunday_not_scheduled") {
+      orderingBanner.textContent = "Sunday ordering is only available on the 1st and 3rd Sundays.";
+      return;
+    }
+
+    orderingBanner.textContent = "Check today’s menu and ordering status below.";
   }
-
-  if (state.reason === "outside_service_window") {
-    orderingBanner.textContent = `Ordering opens from ${formatDisplayTime(state.openTime)} to ${formatDisplayTime(state.closeTime)}.`;
-    return;
-  }
-
-  if (state.reason === "manual_closed") {
-    orderingBanner.textContent = "Ordering is currently paused.";
-    return;
-  }
-
-  if (state.reason === "not_a_service_day") {
-    orderingBanner.textContent = "Closed today. Check the menu for the next active service day.";
-    return;
-  }
-
-  if (state.reason === "sunday_not_scheduled") {
-    orderingBanner.textContent = "Sunday ordering is only available on the 1st and 3rd Sundays.";
-    return;
-  }
-
-  orderingBanner.textContent = "Check today’s menu and ordering status below.";
-}
 
   function getExtraSidesForDay(day) {
     return day === "friday"
