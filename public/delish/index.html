@@ -985,19 +985,27 @@ function renderBaseOptions(item) {
       checkoutBtn.textContent = "Pay Now";
     }
   });
+(async function init() {
+  try {
+    await loadOrderingStatus();
+  } catch (error) {
+    console.error("ORDERING STATUS FAILED:", error);
 
-  (async function init() {
-    try {
-      await loadOrderingStatus();
-      applyDailyMenu();
-    } catch (error) {
-      console.error("DELISH INIT ERROR:", error);
-      showStatus("Unable to load ordering status right now.");
-      checkoutBtn.disabled = true;
-      checkoutBtn.textContent = "Unavailable";
-      if (orderingBanner) orderingBanner.textContent = "Unable to load ordering status right now.";
-    }
-  })();
+    // 👇 FALLBACK — FORCE SYSTEM ON
+    orderingStatus = {
+      mode: "open",
+      today: getCentralNowParts().weekday,
+      now: getCentralNowParts(),
+      openNow: true,
+      reason: "",
+      openTime: "11:00",
+      closeTime: "15:00"
+    };
+  }
+
+  // 👇 ALWAYS RUN THIS NO MATTER WHAT
+  applyDailyMenu();
+})();
 })();
 </script>
 </body>
