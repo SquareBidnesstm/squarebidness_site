@@ -850,14 +850,47 @@ function renderBaseOptions(item) {
   return plates.every(item => item.baseId && item.side1Id && item.side2Id);
 }
 
-  function calc() {
-    const selected = getSelectedItems();
-    const selectedItems = selected.items;
-    const subtotal = selectedItems.reduce(
-      (sum, item) => sum + (Number(item.qty || 0) * Number(item.price || 0)),
-      0
-    );
+ function calc() {
+  const selected = getSelectedItems();
+  const selectedItems = selected.items;
+  const subtotal = selectedItems.reduce(
+    (sum, item) => sum + (Number(item.qty || 0) * Number(item.price || 0)),
+    0
+  );
 
+  subtotalDisplay.textContent = subtotal.toFixed(2);
+  totalDisplay.textContent = subtotal.toFixed(2);
+
+  const state = getServiceState();
+  const nameOk = customerName.value.trim().length > 0;
+  const phoneOk = customerPhone.value.trim().length > 0;
+  const pickupOk = pickupWindow.value.trim().length > 0;
+  const plateItemsOk = getPlateSelections().items.length > 0;
+  const sidesOk = selectedPlatesHaveSides();
+
+  if (!state.openNow) {
+    checkoutBtn.disabled = true;
+
+    if (state.reason === "manual_closed") {
+      checkoutBtn.textContent = "Ordering Paused";
+    } else if (state.reason === "outside_service_window") {
+      checkoutBtn.textContent = "Opening Soon";
+    } else {
+      checkoutBtn.textContent = "Closed Today";
+    }
+
+    return;
+  }
+
+  if (!(nameOk && phoneOk && pickupOk && plateItemsOk && sidesOk)) {
+    checkoutBtn.disabled = true;
+    checkoutBtn.textContent = "Complete Order";
+    return;
+  }
+
+  checkoutBtn.disabled = false;
+  checkoutBtn.textContent = "Pay Now";
+}
     function getSelectedItems() {
   const plateSelections = getPlateSelections();
   const items = plateSelections.items.map(item => ({
@@ -884,7 +917,6 @@ function renderBaseOptions(item) {
 
   return { items, sideNotes: plateSelections.sideNotes };
 }
-
     subtotalDisplay.textContent = subtotal.toFixed(2);
     totalDisplay.textContent = subtotal.toFixed(2);
 
