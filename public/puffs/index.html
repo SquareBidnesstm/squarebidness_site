@@ -113,6 +113,17 @@
       margin-top:10px;padding:10px 12px;border-radius:12px;border:1px solid #1f4527;
       background:#0d1b10;color:#b8efc3;display:none;
     }
+    .specialBanner{
+      display:none;
+      margin:0 0 14px;
+      padding:12px 14px;
+      border:1px solid #5a3a08;
+      border-radius:14px;
+      background:linear-gradient(90deg,#2c1c07,#171717);
+      color:#ffe6b7;
+      font-weight:700;
+      line-height:1.5;
+    }
     .daySection + .daySection{margin-top:24px}
     .dayHead{
       display:flex;align-items:center;justify-content:space-between;gap:10px;
@@ -174,6 +185,7 @@
     <div class="grid">
       <section class="card">
         <h2>Menu</h2>
+        <div id="specialBanner" class="specialBanner"></div>
         <div class="sect" id="menuContent">
           <div class="tiny">Loading menu…</div>
         </div>
@@ -382,6 +394,19 @@
       MENU = Array.isArray(data.sections) ? data.sections : [];
       TAX_RATE = Number.isFinite(Number(data.taxRate)) ? Number(data.taxRate) : 0.0895;
       MENU_OPEN = data.open !== false;
+
+      const specialBanner = document.getElementById("specialBanner");
+      const specialText = String(data.special || "").trim();
+
+      if (specialBanner) {
+        if (specialText) {
+          specialBanner.style.display = "block";
+          specialBanner.textContent = specialText;
+        } else {
+          specialBanner.style.display = "none";
+          specialBanner.textContent = "";
+        }
+      }
 
       applyStoreState();
 
