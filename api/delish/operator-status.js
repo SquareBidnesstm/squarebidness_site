@@ -1,76 +1,146 @@
 export default async function handler(req, res) {
-  if (req.method !== "GET") {
-    res.setHeader("Allow", "GET");
+  if (req.method !== "POST") {
+    res.setHeader("Allow", "POST");
     return res.status(405).json({ ok: false, error: "Method not allowed" });
   }
 
   try {
-    const redisUrl = process.env.DELISH_UPSTASH_REDIS_REST_URL;
-    const redisToken = process.env.DELISH_UPSTASH_REDIS_REST_TOKEN;
+    const expectedToken = (process.env.DELISH_OPERATOR_TOKEN || "").trim();
+    const providedToken = (
+      req.headers["x-operator-token"] ||
+      req.headers["x-delish-operator-token"] ||
+      ""
+    ).toString().trim();
 
-    const fallbackMode = (process.env.DELISH_ORDERING_MODE || "auto").toLowerCase();
-    const fallbackMessage = "";
-    const fallbackResumeAt = "";
-
-    if (!redisUrl || !redisToken) {
-      return res.status(200).json({
-        ok: true,
-        mode: fallbackMode,
-        resumeAt: fallbackResumeAt,
-        resumeAtDisplay: "",
-        message: fallbackMessage,
-        source: "env-fallback"
+    if (!expectedToken) {
+      return res.status(503).json({
+        ok: false,
+        error: "DELISH_OPERATOR_TOKEN is not set yet"
       });
     }
 
-    const [modeRes, resumeRes, messageRes] = await Promise.all([
-      redisGet(redisUrl, redisToken, "delish:ordering:mode"),
-      redisGet(redisUrl, redisToken, "delish:ordering:resume_at"),
-      redisGet(redisUrl, redisToken, "delish:ordering:message")
-    ]);
+    if (providedToken !== expectedToken) {
+      return res.status(401).json({
+        ok: false,
+        error: "Unauthorized"
+      });
+    }
 
-    const mode = normalizeMode(modeRes ?? fallbackMode);
-    const resumeAt = typeof resumeRes === "string" ? resumeRes : "";
-    const message = typeof messageRes === "string" ? messageRes : fallbackMessage;
+    const redisUrl = process.env.DELISH_UPSTASH_REDIS_REST_URL;
+    const redisToken = process.env.DELISH_UPSTASH_REDIS_REST_TOKEN;
 
-    return res.status(200).json({
-      ok: true,
-      mode,
-      resumeAt,
-      resumeAtDisplay: formatCentral(resumeAt),
-      message,
-      source: "redis"
+    if (!redisUrl || !redisToken) {
+      return res.status(503).json({
+        ok: false,
+        error: "Redis is not configured"
+      });
+    }
+
+    const body = parseBody(req.body);
+    const mode = normalizeMode(body.mode);
+    const pauseMinutes = Number(body.pauseMinutes || 0);
+    const resumeAtInput = typeof body.resumeAt === "string" ? body.resumeAt.trim() : "";
+    const messageOnly = !!body.messageOnly;
+    const message = typeof body.message === "string" ? body.message.trim() : "";
+
+    if (messageOnly) {
+      await redisSet(redisUrl, redisToken, "delish:ordering:message", message);
+      return res.status(200).json({
+        ok: true,
+        updated: {
+          message
+        }
+      });
+    }
+
+    if (!mode) {
+      return res.status(400).json({
+        ok: false,
+        error: "Invalid mode"
+      });
+    }
+
+    if (mode === "open" || mode === "auto" || mode === "closed") {
+      await Promise.all([
+        redisSet(redisUrl, redisToken, "delish:ordering:mode", mode),
+        redisDel(redisUrl, redisToken, "delish:ordering:resume_at")
+      ]);
+
+      return res.status(200).json({
+        ok: true,
+        updated: {
+          mode,
+          resumeAt: ""
+        }
+      });
+    }
+
+    if (mode === "paused") {
+      let resumeAt = "";
+
+      if (resumeAtInput) {
+        const parsed = new Date(resumeAtInput);
+        if (Number.isNaN(parsed.getTime())) {
+          return res.status(400).json({
+            ok: false,
+            error: "Invalid resumeAt value"
+          });
+        }
+        resumeAt = parsed.toISOString();
+      } else if (pauseMinutes > 0) {
+        const future = new Date(Date.now() + pauseMinutes * 60 * 1000);
+        resumeAt = future.toISOString();
+      }
+
+      await Promise.all([
+        redisSet(redisUrl, redisToken, "delish:ordering:mode", "paused"),
+        redisSet(redisUrl, redisToken, "delish:ordering:resume_at", resumeAt)
+      ]);
+
+      return res.status(200).json({
+        ok: true,
+        updated: {
+          mode: "paused",
+          resumeAt
+        }
+      });
+    }
+
+    return res.status(400).json({
+      ok: false,
+      error: "Unhandled mode"
     });
   } catch (error) {
-    console.error("DELISH operator-status error:", error);
+    console.error("DELISH operator-control error:", error);
     return res.status(500).json({
       ok: false,
-      error: "Unable to load operator status"
+      error: "Unable to update operator control"
     });
+  }
+}
+
+function parseBody(body) {
+  if (!body) return {};
+  if (typeof body === "object") return body;
+  try {
+    return JSON.parse(body);
+  } catch {
+    return {};
   }
 }
 
 function normalizeMode(value) {
   const mode = String(value || "").toLowerCase().trim();
   if (["auto", "open", "paused", "closed"].includes(mode)) return mode;
-  return "auto";
+  return "";
 }
 
-function formatCentral(iso) {
-  if (!iso) return "";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "";
-  return new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/Chicago",
-    hour: "numeric",
-    minute: "2-digit"
-  }).format(d);
-}
+async function redisSet(redisUrl, redisToken, key, value) {
+  const safeValue = value == null ? "" : String(value);
+  const url = `${redisUrl.replace(/\/$/, "")}/set/${encodeURIComponent(key)}/${encodeURIComponent(safeValue)}`;
 
-async function redisGet(redisUrl, redisToken, key) {
-  const url = `${redisUrl.replace(/\/$/, "")}/get/${encodeURIComponent(key)}`;
   const response = await fetch(url, {
-    method: "GET",
+    method: "POST",
     headers: {
       Authorization: `Bearer ${redisToken}`
     }
@@ -78,9 +148,26 @@ async function redisGet(redisUrl, redisToken, key) {
 
   if (!response.ok) {
     const text = await response.text();
-    throw new Error(`Redis GET failed: ${response.status} ${text}`);
+    throw new Error(`Redis SET failed: ${response.status} ${text}`);
   }
 
-  const data = await response.json();
-  return data?.result ?? null;
+  return response.json();
+}
+
+async function redisDel(redisUrl, redisToken, key) {
+  const url = `${redisUrl.replace(/\/$/, "")}/del/${encodeURIComponent(key)}`;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${redisToken}`
+    }
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Redis DEL failed: ${response.status} ${text}`);
+  }
+
+  return response.json();
 }
