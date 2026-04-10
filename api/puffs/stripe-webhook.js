@@ -90,7 +90,14 @@ async function sendSms({ to, body }) {
     !to ||
     !body
   ) {
-    return { ok: false, skipped: true };
+    return {
+      ok: false,
+      skipped: true,
+      hasTwilioClient: !!twilioClient,
+      hasMessagingServiceSid: !!process.env.PUFFS_TWILIO_MESSAGING_SERVICE_SID,
+      hasTo: !!to,
+      hasBody: !!body
+    };
   }
 
   const message = await twilioClient.messages.create({
@@ -99,7 +106,12 @@ async function sendSms({ to, body }) {
     to
   });
 
-  return { ok: true, sid: message.sid, status: message.status };
+  return {
+    ok: true,
+    sid: message.sid,
+    status: message.status,
+    to
+  };
 }
 
 async function sendInternalAlert(body) {
@@ -163,7 +175,8 @@ async function sendCustomerOrderSms(order) {
       skipped: true,
       reason: "missing_consent_or_phone",
       smsConsent,
-      customerPhone: order.customerPhone || ""
+      customerPhone: order.customerPhone || "",
+      normalizedPhone: customerPhone
     };
   }
 
@@ -191,6 +204,13 @@ async function handleFoodOrderCompleted(session) {
   const pendingKey = `puffs:checkout:${session.id}`;
   const pending = await redisGet(pendingKey);
 
+  console.log("PUFFS FOOD ORDER COMPLETED:", {
+    sessionId: session.id,
+    paymentStatus: session.payment_status,
+    customerPhone: pending?.customerPhone || "",
+    smsConsent: pending?.smsConsent
+  });
+
   const paidOrder = {
     ...(pending || {}),
     stripeSessionId: session.id,
@@ -205,8 +225,19 @@ async function handleFoodOrderCompleted(session) {
   await redisSet(`puffs:paid:${session.id}`, paidOrder);
   await redisSet(`puffs:checkout:${session.id}`, paidOrder);
 
+  console.log("PUFFS INTERNAL ALERT INPUT:", {
+    to: process.env.PUFFS_ALERT_NUMBER || "",
+    messagingServiceSid: process.env.PUFFS_TWILIO_MESSAGING_SERVICE_SID || ""
+  });
+
   const alertResult = await sendFoodOrderAlert(paidOrder);
   console.log("PUFFS INTERNAL ALERT RESULT:", alertResult);
+
+  console.log("PUFFS CUSTOMER SMS INPUT:", {
+    rawPhone: paidOrder.customerPhone || "",
+    smsConsent: paidOrder.smsConsent,
+    normalizedPhone: normalizeUsPhone(paidOrder.customerPhone || "")
+  });
 
   const customerSmsResult = await sendCustomerOrderSms(paidOrder);
   console.log("PUFFS CUSTOMER SMS RESULT:", customerSmsResult);
@@ -251,6 +282,8 @@ export default async function handler(req, res) {
     return res.status(500).send("Missing env vars");
   }
 
+  console.log("PUFFS WEBHOOK HIT:", req.method, new Date().toISOString());
+
   let event;
 
   try {
@@ -266,6 +299,8 @@ export default async function handler(req, res) {
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
+  console.log("PUFFS WEBHOOK EVENT TYPE:", event.type);
+
   try {
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
@@ -280,6 +315,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ received: true });
   } catch (err) {
+    console.error("PUFFS WEBHOOK PROCESSING ERROR:", err);
     return res.status(500).send(err.message || "Webhook processing failed");
   }
 }
