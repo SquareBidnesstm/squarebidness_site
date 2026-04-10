@@ -503,37 +503,42 @@
     };
   }
 
-  function updateOrderingBanner(state) {
-    if (!orderingBanner) return;
+ function updateOrderingBanner(state) {
+  if (!orderingBanner) return;
 
-    if (state.openNow) {
-      orderingBanner.textContent = `Open now · Ordering available until ${state.closeTime}.`;
-      return;
-    }
-
-    if (state.reason === "outside_service_window") {
-      orderingBanner.textContent = `Ordering opens from ${state.openTime} to ${state.closeTime}.`;
-      return;
-    }
-
-    if (state.reason === "manual_closed") {
-      orderingBanner.textContent = "Ordering is currently paused.";
-      return;
-    }
-
-    if (state.reason === "not_a_service_day") {
-      orderingBanner.textContent = "Closed today. Check the menu for the next active service day.";
-      return;
-    }
-
-    if (state.reason === "sunday_not_scheduled") {
-      orderingBanner.textContent = "Sunday ordering is only available on the 1st and 3rd Sundays.";
-      return;
-    }
-
-    orderingBanner.textContent = "Check today’s menu and ordering status below.";
+  if (orderingStatus?.message) {
+    orderingBanner.textContent = orderingStatus.message;
+    return;
   }
 
+  if (state.openNow) {
+    orderingBanner.textContent = `Open now · Ordering available until ${state.closeTime}.`;
+    return;
+  }
+
+  if (state.reason === "outside_service_window") {
+    orderingBanner.textContent = `Ordering opens from ${state.openTime} to ${state.closeTime}.`;
+    return;
+  }
+
+  if (state.reason === "manual_closed") {
+    orderingBanner.textContent = "Ordering is currently paused.";
+    return;
+  }
+
+  if (state.reason === "not_a_service_day") {
+    orderingBanner.textContent = "Closed today. Check the menu for the next active service day.";
+    return;
+  }
+
+  if (state.reason === "sunday_not_scheduled") {
+    orderingBanner.textContent = "Sunday ordering is only available on the 1st and 3rd Sundays.";
+    return;
+  }
+
+  orderingBanner.textContent = "Check today’s menu and ordering status below.";
+}
+  
   function getExtraSidesForDay(day) {
     return day === "friday"
       ? [...EXTRA_SIDES_BASE, ...EXTRA_SIDES_FRIDAY_ONLY]
