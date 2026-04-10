@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Delish Operator Control</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <style>
+    :root{
+      --bg:#0f0f10;
+      --panel:#17181b;
+      --line:#2a2d33;
+      --text:#f5f7fa;
+      --muted:#a8b0bd;
+      --blue:#2563eb;
+      --green:#15803d;
+      --amber:#b45309;
+      --red:#b91c1c;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:Arial,Helvetica,sans-serif;
+    }
+    .wrap{
+      max-width:920px;
+      margin:0 auto;
+      padding:24px;
+    }
+    h1{
+      margin:0 0 8px;
+      font-size:32px;
+    }
+    .sub{
+      margin:0 0 24px;
+      color:var(--muted);
+    }
+    .card{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:18px;
+      margin-bottom:18px;
+    }
+    .status{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+    }
+    .stat{
+      padding:14px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:#111317;
+    }
+    .label{
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      color:var(--muted);
+      margin-bottom:6px;
+    }
+    .value{
+      font-size:20px;
+      font-weight:700;
+      line-height:1.35;
+      word-break:break-word;
+    }
+    .value--message{
+      font-size:16px;
+      font-weight:600;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+    }
+    button{
+      width:100%;
+      border:0;
+      border-radius:14px;
+      padding:16px;
+      font-size:16px;
+      font-weight:700;
+      cursor:pointer;
+    }
+    .open{background:var(--green);color:#fff}
+    .auto{background:var(--blue);color:#fff}
+    .pause{background:var(--amber);color:#fff}
+    .close{background:var(--red);color:#fff}
+    .secondary{
+      background:#22262d;
+      color:#fff;
+      border:1px solid var(--line);
+    }
+    input, textarea{
+      width:100%;
+      margin-top:8px;
+      padding:12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:#111317;
+      color:var(--text);
+      font:inherit;
+    }
+    .row{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:12px;
+      align-items:end;
+    }
+    .small{
+      color:var(--muted);
+      font-size:14px;
+      margin-top:8px;
+      line-height:1.5;
+    }
+    .link{
+      color:#fff;
+      text-decoration:none;
+      font-weight:700;
+    }
+    .notice{
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:#111317;
+      color:var(--muted);
+      min-height:48px;
+    }
+    @media (max-width:700px){
+      .status,.grid,.row{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>Delish Operator Control</h1>
+    <p class="sub">Pause, reopen, and manage ordering flow without touching code.</p>
+
+    <section class="card">
+      <div class="status">
+        <div class="stat">
+          <div class="label">Current Mode</div>
+          <div class="value" id="modeValue">Loading...</div>
+        </div>
+        <div class="stat">
+          <div class="label">Resume Time</div>
+          <div class="value" id="resumeValue">—</div>
+        </div>
+        <div class="stat">
+          <div class="label">Customer Message</div>
+          <div class="value value--message" id="messageValue">—</div>
+        </div>
+        <div class="stat">
+          <div class="label">Kitchen Orders</div>
+          <div class="value value--message"><a class="link" href="/delish/orders/">Open Kitchen Screen</a></div>
+        </div>
+      </div>
+      <div class="notice" id="notice">Ready.</div>
+    </section>
+
+    <section class="card">
+      <h2 style="margin-top:0">Operator Token</h2>
+      <label for="tokenInput">Enter operator token</label>
+      <input id="tokenInput" type="password" placeholder="Required for control actions" />
+      <div style="margin-top:12px">
+        <button class="secondary" onclick="saveToken()">Save Token In Browser</button>
+      </div>
+      <div class="small">This page can read status without a token, but writing changes requires the token.</div>
+    </section>
+
+    <section class="card">
+      <h2 style="margin-top:0">Quick Controls</h2>
+      <div class="grid">
+        <button class="open" onclick="setMode('open')">Open Now</button>
+        <button class="auto" onclick="setMode('auto')">Auto Mode</button>
+        <button class="pause" onclick="pauseMinutes(30)">Pause 30 Minutes</button>
+        <button class="close" onclick="setMode('closed')">Close For Today</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 style="margin-top:0">Pause Until Specific Time</h2>
+      <div class="row">
+        <div>
+          <label for="resumeAt">Resume at</label>
+          <input id="resumeAt" type="datetime-local" />
+        </div>
+        <button class="pause" onclick="pauseCustom()">Pause Until Time</button>
+      </div>
+      <div class="small">Use Central time on your device.</div>
+    </section>
+
+    <section class="card">
+      <h2 style="margin-top:0">Customer Message</h2>
+      <textarea id="messageInput" rows="3" placeholder="We’re serving current orders now. Online ordering will reopen at 11:30 AM."></textarea>
+      <div style="margin-top:12px">
+        <button class="secondary" onclick="saveMessage()">Save Message</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const tokenKey = "delish_operator_token";
+
+    function getToken() {
+      return localStorage.getItem(tokenKey) || "";
+    }
+
+    function setNotice(text, isError = false) {
+      const el = document.getElementById("notice");
+      el.textContent = text;
+      el.style.color = isError ? "#fca5a5" : "#a8b0bd";
+    }
+
+    function saveToken() {
+      const token = document.getElementById("tokenInput").value.trim();
+      localStorage.setItem(tokenKey, token);
+      setNotice(token ? "Token saved in this browser." : "Token cleared.");
+    }
+
+    async function loadStatus() {
+      try {
+        const res = await fetch("/api/delish/operator-status", { cache: "no-store" });
+        const data = await res.json();
+
+        document.getElementById("modeValue").textContent = data.mode || "—";
+        document.getElementById("resumeValue").textContent = data.resumeAtDisplay || "—";
+        document.getElementById("messageValue").textContent = data.message || "—";
+        document.getElementById("messageInput").value = data.message || "";
+      } catch (err) {
+        console.error(err);
+        setNotice("Could not load status.", true);
+      }
+    }
+
+    async function postControl(payload) {
+      const token = getToken() || document.getElementById("tokenInput").value.trim();
+
+      if (!token) {
+        setNotice("Operator token required for changes.", true);
+        return;
+      }
+
+      try {
+        setNotice("Saving...");
+        const res = await fetch("/api/delish/operator-control", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-operator-token": token
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || "Request failed");
+        }
+
+        setNotice("Saved.");
+        await loadStatus();
+      } catch (err) {
+        console.error(err);
+        setNotice(err.message || "Could not save changes.", true);
+      }
+    }
+
+    async function setMode(mode) {
+      await postControl({ mode });
+    }
+
+    async function pauseMinutes(minutes) {
+      await postControl({ mode: "paused", pauseMinutes: minutes });
+    }
+
+    async function pauseCustom() {
+      const resumeAt = document.getElementById("resumeAt").value;
+      if (!resumeAt) {
+        setNotice("Choose a time first.", true);
+        return;
+      }
+      await postControl({ mode: "paused", resumeAt });
+    }
+
+    async function saveMessage() {
+      const message = document.getElementById("messageInput").value.trim();
+      await postControl({ messageOnly: true, message });
+    }
+
+    window.addEventListener("load", async () => {
+      document.getElementById("tokenInput").value = getToken();
+      await loadStatus();
+    });
+  </script>
+</body>
+</html>
