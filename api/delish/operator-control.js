@@ -58,17 +58,55 @@ export default async function handler(req, res) {
       });
     }
 
-    if (mode === "open" || mode === "auto" || mode === "closed") {
+    if (mode === "open") {
       await Promise.all([
-        redisSet(redisUrl, redisToken, "delish:ordering:mode", mode),
-        redisDel(redisUrl, redisToken, "delish:ordering:resume_at")
+        redisSet(redisUrl, redisToken, "delish:ordering:mode", "open"),
+        redisDel(redisUrl, redisToken, "delish:ordering:resume_at"),
+        redisSet(redisUrl, redisToken, "delish:ordering:message", "")
       ]);
 
       return res.status(200).json({
         ok: true,
         updated: {
-          mode,
-          resumeAt: ""
+          mode: "open",
+          resumeAt: "",
+          message: ""
+        }
+      });
+    }
+
+    if (mode === "auto") {
+      await Promise.all([
+        redisSet(redisUrl, redisToken, "delish:ordering:mode", "auto"),
+        redisDel(redisUrl, redisToken, "delish:ordering:resume_at"),
+        redisSet(redisUrl, redisToken, "delish:ordering:message", "")
+      ]);
+
+      return res.status(200).json({
+        ok: true,
+        updated: {
+          mode: "auto",
+          resumeAt: "",
+          message: ""
+        }
+      });
+    }
+
+    if (mode === "closed") {
+      const closedMessage = "Online ordering is closed for today.";
+
+      await Promise.all([
+        redisSet(redisUrl, redisToken, "delish:ordering:mode", "closed"),
+        redisDel(redisUrl, redisToken, "delish:ordering:resume_at"),
+        redisSet(redisUrl, redisToken, "delish:ordering:message", closedMessage)
+      ]);
+
+      return res.status(200).json({
+        ok: true,
+        updated: {
+          mode: "closed",
+          resumeAt: "",
+          message: closedMessage
         }
       });
     }
@@ -90,16 +128,22 @@ export default async function handler(req, res) {
         resumeAt = future.toISOString();
       }
 
+      const pauseMessage = resumeAt
+        ? `We’re serving current orders now. Online ordering will reopen at ${formatCentral(resumeAt)}.`
+        : "We’re serving current orders now. Online ordering is temporarily paused.";
+
       await Promise.all([
         redisSet(redisUrl, redisToken, "delish:ordering:mode", "paused"),
-        redisSet(redisUrl, redisToken, "delish:ordering:resume_at", resumeAt)
+        redisSet(redisUrl, redisToken, "delish:ordering:resume_at", resumeAt),
+        redisSet(redisUrl, redisToken, "delish:ordering:message", pauseMessage)
       ]);
 
       return res.status(200).json({
         ok: true,
         updated: {
           mode: "paused",
-          resumeAt
+          resumeAt,
+          message: pauseMessage
         }
       });
     }
@@ -131,6 +175,17 @@ function normalizeMode(value) {
   const mode = String(value || "").toLowerCase().trim();
   if (["auto", "open", "paused", "closed"].includes(mode)) return mode;
   return "";
+}
+
+function formatCentral(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Chicago",
+    hour: "numeric",
+    minute: "2-digit"
+  }).format(d);
 }
 
 async function redisSet(redisUrl, redisToken, key, value) {
