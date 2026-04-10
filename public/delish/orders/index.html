@@ -486,6 +486,41 @@
       <div class="pill" id="lastUpdated">Last updated:<strong>Loading...</strong></div>
     </section>
 
+        <section class="ops-panel">
+      <div class="ops-head">
+        <div>
+          <h2 class="ops-title">Operator Controls</h2>
+          <p class="ops-sub">Manage order flow without leaving the kitchen screen.</p>
+        </div>
+      </div>
+
+      <div class="ops-status">
+        <div class="ops-box">
+          <div class="ops-label">Ordering Mode</div>
+          <div class="ops-value" id="opsMode">Loading...</div>
+        </div>
+        <div class="ops-box">
+          <div class="ops-label">Resume Time</div>
+          <div class="ops-value" id="opsResume">—</div>
+        </div>
+        <div class="ops-box">
+          <div class="ops-label">Customer Message</div>
+          <div class="ops-value" id="opsMessage">—</div>
+        </div>
+      </div>
+
+      <div class="ops-actions">
+        <button class="ops-btn ops-btn-open" id="opsOpenBtn">Open Now</button>
+        <button class="ops-btn ops-btn-auto" id="opsAutoBtn">Auto Mode</button>
+        <button class="ops-btn ops-btn-pause" id="opsPause30Btn">Pause 30 Min</button>
+        <button class="ops-btn ops-btn-close" id="opsCloseBtn">Close For Today</button>
+      </div>
+
+      <div class="ops-note" id="opsNotice">
+        Ready.
+      </div>
+    </section>
+
     <div class="cross-links">
       <a href="/delish/orders/" class="cross-link active">
         Kitchen Orders
@@ -666,13 +701,114 @@
       }
     }
 
-    async function refreshAll() {
+        async function refreshAll() {
+      await loadOperatorStatus();
       await loadOrders();
       await loadCateringCount();
     }
 
     window.addEventListener("offline", () => {
       alert("Internet connection lost. Orders may not update.");
+    });
+
+        const opsModeEl = document.getElementById("opsMode");
+    const opsResumeEl = document.getElementById("opsResume");
+    const opsMessageEl = document.getElementById("opsMessage");
+    const opsNoticeEl = document.getElementById("opsNotice");
+
+    function setOpsNotice(text, isError = false) {
+      if (!opsNoticeEl) return;
+      opsNoticeEl.textContent = text;
+      opsNoticeEl.style.color = isError ? "#ffb4b4" : "var(--muted)";
+    }
+
+    async function loadOperatorStatus() {
+      try {
+        const res = await fetch(`/api/delish/operator-status?t=${Date.now()}`, { cache: "no-store" });
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || "Failed to load operator status.");
+        }
+
+        if (opsModeEl) opsModeEl.textContent = data.mode || "—";
+        if (opsResumeEl) opsResumeEl.textContent = data.resumeAtDisplay || "—";
+        if (opsMessageEl) opsMessageEl.textContent = data.message || "—";
+      } catch (err) {
+        console.error("Operator status error:", err);
+        if (opsModeEl) opsModeEl.textContent = "Unavailable";
+        if (opsResumeEl) opsResumeEl.textContent = "—";
+        if (opsMessageEl) opsMessageEl.textContent = "—";
+        setOpsNotice("Unable to load operator status.", true);
+      }
+    }
+
+    async function postOperatorControl(payload, successMessage) {
+      const token = window.prompt("Enter Delish operator token");
+      if (!token) {
+        setOpsNotice("Operator action cancelled.");
+        return;
+      }
+
+      try {
+        setOpsNotice("Saving operator change...");
+
+        const res = await fetch("/api/delish/operator-control", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-operator-token": token
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || "Operator update failed.");
+        }
+
+        setOpsNotice(successMessage || "Operator setting updated.");
+        await loadOperatorStatus();
+      } catch (err) {
+        console.error("Operator control error:", err);
+        setOpsNotice(err.message || "Unable to update operator setting.", true);
+      }
+    }
+
+        document.getElementById("opsOpenBtn")?.addEventListener("click", async () => {
+      await postOperatorControl(
+        { mode: "open" },
+        "Ordering forced open."
+      );
+    });
+
+    document.getElementById("opsAutoBtn")?.addEventListener("click", async () => {
+      await postOperatorControl(
+        { mode: "auto" },
+        "Ordering returned to auto mode."
+      );
+    });
+
+    document.getElementById("opsPause30Btn")?.addEventListener("click", async () => {
+      await postOperatorControl(
+        {
+          mode: "paused",
+          pauseMinutes: 30,
+          messageOnly: false
+        },
+        "Ordering paused for 30 minutes."
+      );
+    });
+
+    document.getElementById("opsCloseBtn")?.addEventListener("click", async () => {
+      const confirmed = window.confirm("Close ordering for the rest of today?");
+      if (!confirmed) return;
+
+      await postOperatorControl(
+        { mode: "closed" },
+        "Ordering closed for today."
+      );
     });
 
     refreshAll();
