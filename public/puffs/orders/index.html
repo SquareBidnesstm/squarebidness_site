@@ -1,4 +1,3 @@
-<!-- FILE: /public/puffs/orders/index.html -->
 <!doctype html>
 <html lang="en" data-sb-brand="puffs" data-sb-tier="ops" data-sb-variant="puffs-orders-screen-v2">
 <head>
@@ -7,15 +6,14 @@
   <title>Puff’s Orders Screen</title>
   <meta name="robots" content="noindex,nofollow" />
   <meta name="theme-color" content="#101012" />
-<link rel="icon" type="image/png" sizes="16x16" href="/puffs/icons/favicon-16.png" />
-<link rel="icon" type="image/png" sizes="32x32" href="/puffs/icons/favicon-32.png" />
-<link rel="apple-touch-icon" sizes="180x180" href="/puffs/icons/icon-180.png" />
-<link rel="icon" type="image/png" sizes="192x192" href="/puffs/icons/icon-192.png" />
-<link rel="icon" type="image/png" sizes="512x512" href="/puffs/icons/icon-512.png" />
-  
+  <link rel="icon" type="image/png" sizes="16x16" href="/puffs/icons/favicon-16.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/puffs/icons/favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/puffs/icons/icon-180.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/puffs/icons/icon-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="/puffs/icons/icon-512.png" />
   <link rel="manifest" href="/puffs/manifest.webmanifest" />
-<meta name="theme-color" content="#0b0b0b" />
-  
+  <meta name="theme-color" content="#0b0b0b" />
+
   <style>
     :root{
       --bg:#101012;
@@ -329,6 +327,180 @@
       font-size:1.05rem;
     }
 
+    .ops-links{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:16px;
+    }
+    .ops-link{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border:1px solid var(--line);
+      background:var(--panel);
+      color:#fff;
+      border-radius:12px;
+      padding:10px 12px;
+      text-decoration:none;
+      font-weight:800;
+    }
+    .ops-link.active{
+      background:rgba(215,174,114,.12);
+      border-color:rgba(215,174,114,.28);
+      color:var(--accent-2);
+    }
+
+    .operator-strip{
+      margin:0 0 22px;
+      padding:18px;
+      border:1px solid rgba(215,174,114,.18);
+      border-radius:22px;
+      background:linear-gradient(180deg, rgba(215,174,114,.08), rgba(255,255,255,.02));
+      box-shadow:var(--shadow);
+    }
+
+    .operator-strip__head{
+      margin-bottom:16px;
+    }
+
+    .operator-kicker{
+      color:#cfb78f;
+      font-size:.78rem;
+      font-weight:800;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      margin-bottom:8px;
+    }
+
+    .operator-title{
+      margin:0;
+      font-size:1.35rem;
+      letter-spacing:-.03em;
+    }
+
+    .operator-sub{
+      margin:8px 0 0;
+      color:var(--muted);
+      line-height:1.6;
+      max-width:760px;
+    }
+
+    .operator-grid{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:12px;
+      margin:16px 0;
+    }
+
+    .operator-card{
+      background:rgba(0,0,0,.18);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:18px;
+      padding:14px;
+    }
+
+    .operator-card--wide{
+      grid-column:span 1;
+    }
+
+    .operator-label{
+      font-size:.76rem;
+      font-weight:800;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:#cdbda3;
+      margin-bottom:8px;
+    }
+
+    .operator-value{
+      font-size:1rem;
+      line-height:1.5;
+      color:var(--text);
+      word-break:break-word;
+    }
+
+    .operator-value--muted{
+      color:var(--muted);
+    }
+
+    .operator-controls{
+      display:grid;
+      gap:12px;
+    }
+
+    .operator-row{
+      display:grid;
+      grid-template-columns:220px 260px;
+      gap:12px;
+    }
+
+    .operator-field{
+      display:grid;
+      gap:6px;
+    }
+
+    .operator-field span{
+      font-size:.82rem;
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:#cdbda3;
+    }
+
+    .operator-field input,
+    .operator-field select{
+      min-height:48px;
+      padding:0 14px;
+      border-radius:14px;
+      border:1px solid #343438;
+      background:#121214;
+      color:#f5f2ea;
+      font:inherit;
+    }
+
+    .operator-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .operator-btn{
+      min-height:46px;
+      padding:0 16px;
+      border-radius:999px;
+      border:1px solid rgba(215,174,114,.22);
+      background:#171718;
+      color:#f5f2ea;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .operator-btn--primary{
+      background:linear-gradient(180deg,#f2d7ad,#d7ae72);
+      color:#181410;
+      border:none;
+    }
+
+    .operator-status-note{
+      color:#cfc7ba;
+      font-size:.94rem;
+    }
+
+    @media (max-width:900px){
+      .operator-grid{
+        grid-template-columns:1fr;
+      }
+
+      .operator-card--wide{
+        grid-column:span 1;
+      }
+
+      .operator-row{
+        grid-template-columns:1fr;
+      }
+    }
+
     @media (max-width:640px){
       body{padding:12px}
       .orders{grid-template-columns:1fr}
@@ -338,30 +510,6 @@
       .brand{align-items:flex-start}
       .brand-logo{width:58px;height:58px;border-radius:16px}
     }
-
-    .ops-links{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-bottom:16px;
-}
-.ops-link{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  border:1px solid var(--line);
-  background:var(--panel);
-  color:#fff;
-  border-radius:12px;
-  padding:10px 12px;
-  text-decoration:none;
-  font-weight:800;
-}
-.ops-link.active{
-  background:rgba(215,174,114,.12);
-  border-color:rgba(215,174,114,.28);
-  color:var(--accent-2);
-}
   </style>
 </head>
 <body>
@@ -393,6 +541,83 @@
       </div>
     </section>
 
+    <section class="operator-strip" aria-label="Operator controls">
+      <div class="operator-strip__head">
+        <div>
+          <div class="operator-kicker">Operator Control</div>
+          <h2 class="operator-title">Puff’s Ordering Status</h2>
+          <p class="operator-sub">
+            Control whether the public ordering page runs on auto hours, pauses ordering, or stays forced open.
+          </p>
+        </div>
+      </div>
+
+      <div class="operator-grid">
+        <div class="operator-card">
+          <div class="operator-label">Current Mode</div>
+          <div id="operatorModeValue" class="operator-value">—</div>
+        </div>
+
+        <div class="operator-card">
+          <div class="operator-label">Resume At</div>
+          <div id="operatorResumeValue" class="operator-value">—</div>
+        </div>
+
+        <div class="operator-card operator-card--wide">
+          <div class="operator-label">Operator Message</div>
+          <div id="operatorMessageValue" class="operator-value operator-value--muted">—</div>
+        </div>
+      </div>
+
+      <div class="operator-controls">
+        <div class="operator-row">
+          <label class="operator-field">
+            <span>Mode</span>
+            <select id="operatorModeInput">
+              <option value="auto">Auto</option>
+              <option value="paused">Paused</option>
+              <option value="force_open">Force Open</option>
+            </select>
+          </label>
+
+          <label class="operator-field">
+            <span>Resume At</span>
+            <input id="operatorResumeInput" type="datetime-local" />
+          </label>
+        </div>
+
+        <label class="operator-field">
+          <span>Message</span>
+          <input
+            id="operatorMessageInput"
+            type="text"
+            maxlength="180"
+            placeholder="Example: We’re serving current orders now. Online ordering will reopen at 2:30 PM."
+          />
+        </label>
+
+        <div class="operator-actions">
+          <button id="saveOperatorBtn" class="operator-btn operator-btn--primary" type="button">
+            Save Operator Status
+          </button>
+
+          <button id="setAutoBtn" class="operator-btn" type="button">
+            Set Auto
+          </button>
+
+          <button id="setPausedBtn" class="operator-btn" type="button">
+            Pause Orders
+          </button>
+
+          <button id="setForceOpenBtn" class="operator-btn" type="button">
+            Force Open
+          </button>
+        </div>
+
+        <div id="operatorStatusNote" class="operator-status-note">Loading operator status...</div>
+      </div>
+    </section>
+
     <section class="toolbar">
       <div class="pill">Status:<strong>Newest on top</strong></div>
       <div class="pill">Device:<strong>Kitchen / Counter</strong></div>
@@ -404,9 +629,9 @@
     </section>
 
     <section class="ops-links" aria-label="Operations navigation">
-  <a class="ops-link active" href="/puffs/orders/">Pickup Orders</a>
-  <a class="ops-link" href="/puffs/catering/orders/">Catering Orders</a>
-</section>
+      <a class="ops-link active" href="/puffs/orders/">Pickup Orders</a>
+      <a class="ops-link" href="/puffs/catering/orders/">Catering Orders</a>
+    </section>
 
     <section id="orders" class="orders">
       <div class="empty">Loading orders...</div>
@@ -616,6 +841,143 @@
     setInterval(loadOrders, 15000);
 
     window.updateOrderStatus = updateOrderStatus;
+  </script>
+
+  <script>
+    function formatOperatorDateTime(value) {
+      if (!value) return "—";
+
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return value;
+
+      return date.toLocaleString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+      });
+    }
+
+    function toLocalDatetimeInputValue(value) {
+      if (!value) return "";
+
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return "";
+
+      const pad = (n) => String(n).padStart(2, "0");
+
+      const year = date.getFullYear();
+      const month = pad(date.getMonth() + 1);
+      const day = pad(date.getDate());
+      const hour = pad(date.getHours());
+      const minute = pad(date.getMinutes());
+
+      return `${year}-${month}-${day}T${hour}:${minute}`;
+    }
+
+    function renderOperatorStatus(data) {
+      document.getElementById("operatorModeValue").textContent = data.mode || "auto";
+      document.getElementById("operatorResumeValue").textContent = formatOperatorDateTime(data.resumeAt || "");
+      document.getElementById("operatorMessageValue").textContent = data.message || "—";
+
+      document.getElementById("operatorModeInput").value = data.mode || "auto";
+      document.getElementById("operatorResumeInput").value = toLocalDatetimeInputValue(data.resumeAt || "");
+      document.getElementById("operatorMessageInput").value = data.message || "";
+
+      document.getElementById("operatorStatusNote").textContent = "Operator status loaded.";
+    }
+
+    async function loadOperatorStatus() {
+      const note = document.getElementById("operatorStatusNote");
+      note.textContent = "Loading operator status...";
+
+      try {
+        const res = await fetch("/api/puffs/operator-status/", {
+          method: "GET",
+          cache: "no-store"
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || "Unable to load operator status.");
+        }
+
+        renderOperatorStatus(data.status || {});
+      } catch (err) {
+        note.textContent = err.message || "Unable to load operator status.";
+      }
+    }
+
+    async function saveOperatorStatus(payload) {
+      const note = document.getElementById("operatorStatusNote");
+      note.textContent = "Saving operator status...";
+
+      try {
+        const res = await fetch("/api/puffs/operator-control/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || "Unable to save operator status.");
+        }
+
+        renderOperatorStatus(data.status || {});
+        note.textContent = "Operator status updated.";
+      } catch (err) {
+        note.textContent = err.message || "Unable to save operator status.";
+      }
+    }
+
+    document.getElementById("saveOperatorBtn").addEventListener("click", async () => {
+      const mode = document.getElementById("operatorModeInput").value;
+      const resumeAt = document.getElementById("operatorResumeInput").value;
+      const message = document.getElementById("operatorMessageInput").value.trim();
+
+      await saveOperatorStatus({
+        mode,
+        resumeAt: resumeAt ? new Date(resumeAt).toISOString() : "",
+        message
+      });
+    });
+
+    document.getElementById("setAutoBtn").addEventListener("click", async () => {
+      await saveOperatorStatus({
+        mode: "auto",
+        resumeAt: "",
+        message: ""
+      });
+    });
+
+    document.getElementById("setPausedBtn").addEventListener("click", async () => {
+      const resumeAt = document.getElementById("operatorResumeInput").value;
+      const message = document.getElementById("operatorMessageInput").value.trim();
+
+      await saveOperatorStatus({
+        mode: "paused",
+        resumeAt: resumeAt ? new Date(resumeAt).toISOString() : "",
+        message
+      });
+    });
+
+    document.getElementById("setForceOpenBtn").addEventListener("click", async () => {
+      const message = document.getElementById("operatorMessageInput").value.trim();
+
+      await saveOperatorStatus({
+        mode: "force_open",
+        resumeAt: "",
+        message
+      });
+    });
+
+    loadOperatorStatus();
   </script>
 </body>
 </html>
