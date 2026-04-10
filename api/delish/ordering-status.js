@@ -4,12 +4,111 @@ import { getDelishOrderingState, DELISH_ORDERING_MODE } from "../_lib/delish-ord
 
 export default async function handler(req, res) {
   try {
-    const state = getDelishOrderingState();
+    const fallbackState = getDelishOrderingState();
 
+    const redisUrl = process.env.DELISH_UPSTASH_REDIS_REST_URL;
+    const redisToken = process.env.DELISH_UPSTASH_REDIS_REST_TOKEN;
+
+    if (!redisUrl || !redisToken) {
+      return res.status(200).json({
+        ok: true,
+        orderingMode: DELISH_ORDERING_MODE,
+        message: "",
+        ...fallbackState
+      });
+    }
+
+    const [modeRes, resumeRes, messageRes] = await Promise.all([
+      redisGet(redisUrl, redisToken, "delish:ordering:mode"),
+      redisGet(redisUrl, redisToken, "delish:ordering:resume_at"),
+      redisGet(redisUrl, redisToken, "delish:ordering:message")
+    ]);
+
+    const redisMode = normalizeMode(modeRes);
+    const resumeAt = typeof resumeRes === "string" ? resumeRes : "";
+    const message = typeof messageRes === "string" ? messageRes : "";
+
+    // If no Redis mode is set, fall back to existing config behavior
+    if (!redisMode) {
+      return res.status(200).json({
+        ok: true,
+        orderingMode: DELISH_ORDERING_MODE,
+        message,
+        ...fallbackState
+      });
+    }
+
+    // Forced open
+    if (redisMode === "open") {
+      return res.status(200).json({
+        ok: true,
+        orderingMode: "open",
+        mode: "open",
+        today: fallbackState.today,
+        now: fallbackState.now,
+        openNow: true,
+        reason: "manual_open",
+        openTime: fallbackState.openTime || "11:00 AM",
+        closeTime: fallbackState.closeTime || "3:00 PM",
+        resumeAt,
+        message
+      });
+    }
+
+    // Forced closed
+    if (redisMode === "closed") {
+      return res.status(200).json({
+        ok: true,
+        orderingMode: "closed",
+        mode: "closed",
+        today: fallbackState.today,
+        now: fallbackState.now,
+        openNow: false,
+        reason: "manual_closed",
+        openTime: fallbackState.openTime || "11:00 AM",
+        closeTime: fallbackState.closeTime || "3:00 PM",
+        resumeAt: "",
+        message: message || "Online ordering is closed for today."
+      });
+    }
+
+    // Paused until time
+    if (redisMode === "paused") {
+      const now = new Date();
+      const resumeDate = resumeAt ? new Date(resumeAt) : null;
+      const resumeValid = resumeDate && !Number.isNaN(resumeDate.getTime());
+
+      // If pause expired, fall back to normal auto logic
+      if (resumeValid && now >= resumeDate) {
+        return res.status(200).json({
+          ok: true,
+          orderingMode: "auto",
+          message: "",
+          ...fallbackState
+        });
+      }
+
+      return res.status(200).json({
+        ok: true,
+        orderingMode: "paused",
+        mode: "paused",
+        today: fallbackState.today,
+        now: fallbackState.now,
+        openNow: false,
+        reason: "manual_closed",
+        openTime: fallbackState.openTime || "11:00 AM",
+        closeTime: fallbackState.closeTime || "3:00 PM",
+        resumeAt,
+        message: message || "We’re serving current orders now. Online ordering is temporarily paused."
+      });
+    }
+
+    // Auto mode uses normal schedule logic
     return res.status(200).json({
       ok: true,
-      orderingMode: DELISH_ORDERING_MODE,
-      ...state
+      orderingMode: "auto",
+      message,
+      ...fallbackState
     });
   } catch (error) {
     console.error("DELISH ORDERING STATUS ERROR:", error);
@@ -18,4 +117,28 @@ export default async function handler(req, res) {
       error: "Failed to load ordering status."
     });
   }
+}
+
+function normalizeMode(value) {
+  const mode = String(value || "").toLowerCase().trim();
+  if (["auto", "open", "paused", "closed"].includes(mode)) return mode;
+  return "";
+}
+
+async function redisGet(redisUrl, redisToken, key) {
+  const url = `${redisUrl.replace(/\/$/, "")}/get/${encodeURIComponent(key)}`;
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${redisToken}`
+    }
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Redis GET failed: ${response.status} ${text}`);
+  }
+
+  const data = await response.json();
+  return data?.result ?? null;
 }
