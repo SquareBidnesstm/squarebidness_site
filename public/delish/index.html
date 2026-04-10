@@ -609,15 +609,39 @@
   ]
 },
     friday: {
-      title: "Delish — Friday Menu",
-      note: "Friday pickup menu. Order online and pick up on arrival.",
-      mains: [
-        { id: "friday_crawfish_etouffee", name: "Crawfish Étouffée Plate", price: 16.99, desc: "Friday feature with 2 sides." },
-        { id: "friday_shrimp_pasta", name: "Shrimp Pasta Plate", price: 16.99, desc: "Featured plate built for pickup demand." },
-        { id: "friday_fried_catfish", name: "Fried Catfish Plate (3 strips)", price: 15.99, desc: "Served with 2 sides." },
-        { id: "friday_baked_catfish", name: "Baked Catfish Plate", price: 16.99, desc: "Friday feature." }
-      ]
+  title: "Delish — Friday Menu",
+  note: "Friday pickup menu. Order online and pick up on arrival.",
+  mains: [
+    {
+      id: "friday_crawfish_etouffee",
+      name: "Crawfish Étouffée Plate",
+      price: 16.99,
+      desc: "Friday feature with 2 sides.",
+      baseOptions: []
     },
+    {
+      id: "friday_shrimp_pasta",
+      name: "Shrimp Pasta Plate",
+      price: 16.99,
+      desc: "Featured plate built for pickup demand.",
+      baseOptions: []
+    },
+    {
+      id: "friday_fried_catfish",
+      name: "Fried Catfish Plate (3 strips)",
+      price: 15.99,
+      desc: "Served with 2 sides.",
+      baseOptions: []
+    },
+    {
+      id: "friday_baked_catfish",
+      name: "Baked Catfish Plate",
+      price: 16.99,
+      desc: "Friday feature.",
+      baseOptions: []
+    }
+  ]
+},
     sunday: {
       title: "Delish — Sunday Menu",
       note: "Sunday featured menu. 1st and 3rd Sundays only.",
@@ -834,6 +858,8 @@ function renderBaseOptions(item) {
   }
 
   function renderMainItem(item, day) {
+  const hasBaseOptions = Array.isArray(item.baseOptions) && item.baseOptions.length > 0;
+
   return `
     <div class="menuItem">
       <div class="menuTop">
@@ -849,10 +875,13 @@ function renderBaseOptions(item) {
       </div>
 
       <div class="plateSides" id="${item.id}SidesWrap">
-        <label class="sideLabel" for="${item.id}Base">${getBaseLabel(item)}</label>
-<select id="${item.id}Base" data-plate-base="${item.id}">
-  ${renderBaseOptions(item)}
-</select>
+        ${hasBaseOptions ? `
+          <label class="sideLabel" for="${item.id}Base">${getBaseLabel(item)}</label>
+          <select id="${item.id}Base" data-plate-base="${item.id}">
+            ${renderBaseOptions(item)}
+          </select>
+        ` : ""}
+
         <label class="sideLabel" for="${item.id}Side1">Side 1</label>
         <select id="${item.id}Side1" data-plate-side="${item.id}">
           ${renderPlateSideOptions(day)}
@@ -1091,7 +1120,17 @@ function renderBaseOptions(item) {
   function selectedPlatesHaveSides() {
   const plates = getPlateSelections().items;
   if (!plates.length) return false;
-  return plates.every(item => item.baseId && item.side1Id && item.side2Id);
+
+  return plates.every(item => {
+    const menuItem = getCurrentMainItems().find(m => m.id === item.id);
+    const requiresBase = Array.isArray(menuItem?.baseOptions) && menuItem.baseOptions.length > 0;
+
+    if (requiresBase) {
+      return item.baseId && item.side1Id && item.side2Id;
+    }
+
+    return item.side1Id && item.side2Id;
+  });
 }
 
   function calc() {
@@ -1169,7 +1208,7 @@ function renderBaseOptions(item) {
     }
 
     if (!selectedPlatesHaveSides()) {
-      showStatus("Each main plate requires a base choice and 2 sides before checkout.");
+     showStatus("Each main plate requires all required selections before checkout.");
       return;
     }
 
