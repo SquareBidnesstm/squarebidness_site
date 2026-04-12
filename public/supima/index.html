@@ -8,23 +8,18 @@
   <meta name="description" content="Square Bidness Supima cotton tees. Clean essentials, men’s + women’s fits. $36. Louisiana rooted, built right." />
   <link rel="canonical" href="https://www.squarebidness.com/supima/" />
 
-  <!-- ✅ Product marker -->
   <meta name="sb:product" content="supima" />
 
-  <!-- Perf: preconnect (only keep if ga.js actually hits these early) -->
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
   <link rel="preconnect" href="https://www.google-analytics.com" crossorigin>
 
-  <!-- CSS -->
   <link rel="stylesheet" href="/styles/style.css" />
 
-  <!-- Icons / PWA -->
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/icon-180.png">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#000000">
 
-  <!-- ✅ Preload hero (stable + responsive) -->
   <link
     rel="preload"
     as="image"
@@ -34,7 +29,6 @@
     fetchpriority="high"
   />
 
-  <!-- Scripts -->
   <script defer src="/scripts/ga.js"></script>
   <script defer src="/scripts/sb-cart.js"></script>
   <script defer src="/scripts/global.js"></script>
@@ -133,7 +127,6 @@
 <body class="theme-dark" id="top">
   <div id="site-header"></div>
 
-  <!-- HERO -->
   <section class="supima-hero">
     <div class="container">
       <div class="supima-hero__grid">
@@ -193,7 +186,6 @@
   </section>
 
   <main>
-    <!-- MEN / WOMEN FIT SPLIT -->
     <section class="section" id="shop">
       <div class="container">
         <h2 class="section__title">Men’s &amp; Women’s Fits</h2>
@@ -225,27 +217,27 @@
             <p class="muted">Amari fit reference: <strong>Ladies Small</strong></p>
             <p style="margin-top:.4rem;"><strong>$36</strong> · Supima cotton · tailored feel · clean and fitted</p>
 
-           <div class="shop-widget" aria-label="Shop Women’s Supima Tee">
-  <label for="ladiesSupimaSize" class="muted" style="font-size:.9rem;">Select size</label>
+            <div class="shop-widget" aria-label="Shop Women’s Supima Tee">
+              <label for="ladiesSupimaColor" class="muted" style="font-size:.9rem;">Select color</label>
+              <select id="ladiesSupimaColor" class="input" style="min-width:180px;">
+                <option value="Black" selected>Black</option>
+                <option value="Natural White">Natural White</option>
+                <option value="Ocean Blue">Ocean Blue</option>
+              </select>
 
-  <select id="ladiesSupimaSize" class="input" style="min-width:160px;">
-    <option value="XS">XS</option>
-    <option value="S" selected>S</option>
-    <option value="M">M</option>
-    <option value="L">L</option>
-    <option value="XL">XL</option>
-  </select>
+              <label for="ladiesSupimaSize" class="muted" style="font-size:.9rem;">Select size</label>
+              <select id="ladiesSupimaSize" class="input" style="min-width:160px;"></select>
 
-  <button
-    class="btn btn--gold"
-    id="ladiesSupimaCheckoutBtn"
-    type="button"
-  >
-    Buy Now
-  </button>
+              <button
+                class="btn btn--gold"
+                id="ladiesSupimaCheckoutBtn"
+                type="button"
+              >
+                Buy Now
+              </button>
 
-  <span class="muted" style="font-size:.85rem;">Natural White · $36</span>
-</div>
+              <span class="muted" id="ladiesSupimaPriceNote" style="font-size:.85rem;">Black · $36</span>
+            </div>
 
             <h4 style="margin-top:.75rem;">Women’s Size Chart</h4>
             <table class="table" aria-label="Women's Supima size chart">
@@ -270,7 +262,6 @@
       </div>
     </section>
 
-    <!-- LIBERTY FEATURE -->
     <section class="section section--band">
       <div class="container">
         <div class="media-grid">
@@ -326,47 +317,77 @@
     style="content-visibility:auto;contain-intrinsic-size:180px;min-height:180px;"
   ></div>
 
- <script>
-(function () {
-  const btn = document.getElementById("ladiesSupimaCheckoutBtn");
-  const sizeSelect = document.getElementById("ladiesSupimaSize");
+  <script>
+    (function () {
+      const btn = document.getElementById("ladiesSupimaCheckoutBtn");
+      const colorSelect = document.getElementById("ladiesSupimaColor");
+      const sizeSelect = document.getElementById("ladiesSupimaSize");
+      const priceNote = document.getElementById("ladiesSupimaPriceNote");
 
-  if (!btn || !sizeSelect) return;
+      if (!btn || !colorSelect || !sizeSelect || !priceNote) return;
 
-  btn.addEventListener("click", async function () {
-    const originalText = btn.textContent;
-    btn.disabled = true;
-    btn.textContent = "Redirecting...";
+      const inventory = {
+        "Black": ["XS", "S", "M", "L", "XL"],
+        "Natural White": ["L"],
+        "Ocean Blue": ["XS", "S", "L"]
+      };
 
-    try {
-      const res = await fetch("/api/supima/create-checkout-session/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          product: "supima-ladies-natural-white",
-          name: "Ladies Supima Tee — Natural White",
-          color: "Natural White",
-          size: sizeSelect.value,
-          unitAmount: 3600,
-          quantity: 1
-        })
-      });
+      function renderSizes() {
+        const color = colorSelect.value;
+        const sizes = inventory[color] || [];
 
-      const data = await res.json();
+        sizeSelect.innerHTML = "";
 
-      if (!res.ok || !data.url) {
-        throw new Error(data.error || "Could not start checkout.");
+        sizes.forEach((size) => {
+          const option = document.createElement("option");
+          option.value = size;
+          option.textContent = size;
+          sizeSelect.appendChild(option);
+        });
+
+        priceNote.textContent = `${color} · $36`;
       }
 
-      window.location.href = data.url;
-    } catch (err) {
-      console.error("Supima ladies checkout error:", err);
-      alert("Could not start checkout. Please try again.");
-      btn.disabled = false;
-      btn.textContent = originalText;
-    }
-  });
-})();
-</script>
+      colorSelect.addEventListener("change", renderSizes);
+      renderSizes();
+
+      btn.addEventListener("click", async function () {
+        const originalText = btn.textContent;
+        const color = colorSelect.value;
+        const size = sizeSelect.value;
+
+        btn.disabled = true;
+        btn.textContent = "Redirecting...";
+
+        try {
+          const res = await fetch("/api/supima/create-checkout-session/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              product: "supima-ladies-tee",
+              name: `Ladies Supima Tee — ${color}`,
+              color,
+              size,
+              unitAmount: 3600,
+              quantity: 1
+            })
+          });
+
+          const data = await res.json();
+
+          if (!res.ok || !data.url) {
+            throw new Error(data.error || "Could not start checkout.");
+          }
+
+          window.location.href = data.url;
+        } catch (err) {
+          console.error("Supima ladies checkout error:", err);
+          alert("Could not start checkout. Please try again.");
+          btn.disabled = false;
+          btn.textContent = originalText;
+        }
+      });
+    })();
+  </script>
 </body>
 </html>
