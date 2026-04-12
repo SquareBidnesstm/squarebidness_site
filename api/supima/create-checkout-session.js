@@ -1,3 +1,7 @@
+return Response.json(
+  { error: "Supima checkout temporarily disabled" },
+  { status: 503 }
+);
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
