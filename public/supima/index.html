@@ -342,19 +342,18 @@
         btn.textContent = "Redirecting...";
 
         try {
-          const res = await fetch("/api/supima/create-checkout-session", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              product: "supima-ladies-natural-white",
-              name: "Ladies Supima Tee — Natural White",
-              color: "Natural White",
-              size: sizeSelect.value,
-              unitAmount: 3600,
-              quantity: 1
-            })
-          });
-
+          const res = await fetch("/api/supima/create-checkout-session/", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    product: "supima-ladies-natural-white",
+    name: "Ladies Supima Tee — Natural White",
+    color: "Natural White",
+    size: sizeSelect.value,
+    unitAmount: 3600,
+    quantity: 1
+  })
+});
           if (!res.ok) {
             throw new Error("Checkout session request failed.");
           }
