@@ -3,6 +3,12 @@ import Stripe from "stripe";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export default async function handler(req, res) {
+  console.log("SUPIMA ROUTE HIT", {
+    method: req.method,
+    hasSecretKey: Boolean(process.env.STRIPE_SECRET_KEY),
+    siteUrl: process.env.SITE_URL || null
+  });
+
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ error: "Method not allowed" });
@@ -17,6 +23,15 @@ export default async function handler(req, res) {
       unitAmount,
       quantity
     } = req.body || {};
+
+    console.log("SUPIMA REQUEST BODY", {
+      product,
+      name,
+      color,
+      size,
+      unitAmount,
+      quantity
+    });
 
     if (!product || !name || !size || !unitAmount) {
       return res.status(400).json({ error: "Missing required fields." });
@@ -62,9 +77,22 @@ export default async function handler(req, res) {
       cancel_url: `${siteUrl}/supima/?canceled=1`
     });
 
+    console.log("SUPIMA SESSION CREATED", {
+      id: session.id,
+      url: session.url
+    });
+
     return res.status(200).json({ url: session.url });
   } catch (error) {
-    console.error("SUPIMA CHECKOUT ERROR:", error);
-    return res.status(500).json({ error: "Unable to create checkout session." });
+    console.error("SUPIMA CHECKOUT ERROR", {
+      message: error.message,
+      type: error.type,
+      raw: error.raw?.message || null
+    });
+
+    return res.status(500).json({
+      error: "Unable to create checkout session.",
+      details: error.message
+    });
   }
 }
