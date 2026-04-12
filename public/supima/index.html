@@ -225,30 +225,27 @@
             <p class="muted">Amari fit reference: <strong>Ladies Small</strong></p>
             <p style="margin-top:.4rem;"><strong>$36</strong> · Supima cotton · tailored feel · clean and fitted</p>
 
-            <div class="shop-widget" aria-label="Shop Women’s Supima Tee">
-              <label for="ladiesSupimaSize" class="muted" style="font-size:.9rem;">Select size</label>
+           <div class="shop-widget" aria-label="Shop Women’s Supima Tee">
+  <label for="ladiesSupimaSize" class="muted" style="font-size:.9rem;">Select size</label>
 
-              <select id="ladiesSupimaSize" class="input" style="min-width:160px;">
-                <option value="XS">XS</option>
-                <option value="S" selected>S</option>
-                <option value="M">M</option>
-                <option value="L">L</option>
-                <option value="XL">XL</option>
-              </select>
+  <select id="ladiesSupimaSize" class="input" style="min-width:160px;">
+    <option value="XS">XS</option>
+    <option value="S" selected>S</option>
+    <option value="M">M</option>
+    <option value="L">L</option>
+    <option value="XL">XL</option>
+  </select>
 
-              <button
-                class="btn btn--gold"
-                id="ladiesSupimaCheckoutBtn"
-                type="button"
-                data-product="supima-ladies-natural-white"
-                data-name="Ladies Supima Tee — Natural White"
-                data-price="36.00"
-              >
-                Buy Now
-              </button>
+  <button
+    class="btn btn--gold"
+    id="ladiesSupimaCheckoutBtn"
+    type="button"
+  >
+    Buy Now
+  </button>
 
-              <span class="muted" style="font-size:.85rem;">Natural White · $36</span>
-            </div>
+  <span class="muted" style="font-size:.85rem;">Natural White · $36</span>
+</div>
 
             <h4 style="margin-top:.75rem;">Women’s Size Chart</h4>
             <table class="table" aria-label="Women's Supima size chart">
@@ -374,5 +371,47 @@
       });
     })();
   </script>
+  <script>
+  (function () {
+    const btn = document.getElementById("ladiesSupimaCheckoutBtn");
+    const sizeSelect = document.getElementById("ladiesSupimaSize");
+
+    if (!btn || !sizeSelect) return;
+
+    btn.addEventListener("click", async function () {
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = "Redirecting...";
+
+      try {
+        const res = await fetch("/api/supima/create-checkout-session/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            product: "supima-ladies-natural-white",
+            name: "Ladies Supima Tee — Natural White",
+            color: "Natural White",
+            size: sizeSelect.value,
+            unitAmount: 3600,
+            quantity: 1
+          })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.url) {
+          throw new Error(data.error || "Could not start checkout.");
+        }
+
+        window.location.href = data.url;
+      } catch (err) {
+        console.error("Supima ladies checkout error:", err);
+        alert("Could not start checkout. Please try again.");
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    });
+  })();
+</script>
 </body>
 </html>
