@@ -43,7 +43,6 @@
   <script defer src="/scripts/partials.js"></script>
 
   <style>
-    /* ✅ CLS guard for injected nav/footer (biggest common shift culprit) */
     #site-header{min-height:80px;}
     #site-footer{min-height:140px;}
 
@@ -51,19 +50,17 @@
     .supima-hero__grid{display:grid;gap:1.25rem;align-items:center;}
     @media(min-width:900px){.supima-hero__grid{grid-template-columns:1.2fr .8fr;}}
 
-    /* ✅ Keep hero image smaller on desktop + reserve space BEFORE load */
     .supima-hero__grid > div:first-child{display:flex;justify-content:center;}
     .supima-hero__media{width:100%;max-width:560px;}
     @media(min-width:900px){.supima-hero__media{max-width:520px;}}
 
-    /* Reserve box space so image decode doesn't move layout */
     .supima-hero__media picture,
     .supima-hero__media img{
       display:block;
       width:100%;
     }
     .supima-hero__media picture{
-      aspect-ratio: 4 / 5; /* matches your 800x1000 */
+      aspect-ratio: 4 / 5;
       border-radius:14px;
       overflow:hidden;
       border:1px solid #1f1f1f;
@@ -96,11 +93,10 @@
     .media{width:100%;max-width:560px;}
     @media(min-width:900px){.media{max-width:520px;}}
 
-    /* ✅ Reserve space for Liberty image too (prevents “unsized img” CLS) */
     .media picture,
     .media img{display:block;width:100%;}
     .media picture{
-      aspect-ratio: 4 / 5; /* matches 800x1000 */
+      aspect-ratio: 4 / 5;
       border-radius:14px;
       overflow:hidden;
       border:1px solid #1f1f1f;
@@ -115,6 +111,22 @@
     .note{border:1px solid #1f1f1f;border-radius:14px;background:#0b0b0b;padding:1rem;}
     .shop-widget{margin-top:.85rem;display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
     .shop-widget .btn{white-space:nowrap}
+
+    .input{
+      appearance:none;
+      background:#111;
+      color:#fff;
+      border:1px solid #2a2a2a;
+      border-radius:10px;
+      padding:.72rem .85rem;
+      min-height:44px;
+      font:inherit;
+    }
+    .input:focus{
+      outline:none;
+      border-color:#FFD700;
+      box-shadow:0 0 0 2px rgba(255,215,0,.15);
+    }
   </style>
 </head>
 
@@ -126,38 +138,38 @@
     <div class="container">
       <div class="supima-hero__grid">
         <div class="supima-hero__media">
-         <picture>
-  <source
-    type="image/webp"
-    srcset="
-      /collections/assets/amari_2_420.webp 420w,
-      /collections/assets/amari_2_640.webp 640w,
-      /collections/assets/amari_2_700.webp 700w,
-      /collections/assets/amari_2_780.webp 780w
-    "
-    sizes="(max-width: 900px) 100vw, 520px"
-  />
-  <source
-    type="image/jpeg"
-    srcset="
-      /collections/assets/amari_2_420.jpg 420w,
-      /collections/assets/amari_2_640.jpg 640w,
-      /collections/assets/amari_2_700.jpg 700w,
-      /collections/assets/amari_2_780.jpg 780w
-    "
-    sizes="(max-width: 900px) 100vw, 520px"
-  />
-  <img
-    src="/collections/assets/amari_2_700.jpg"
-    alt="Supima cotton — Square Bidness"
-    width="780"
-    height="1040"
-    loading="eager"
-    decoding="async"
-    fetchpriority="high"
-    style="width:100%;height:auto;"
-  />
-</picture>
+          <picture>
+            <source
+              type="image/webp"
+              srcset="
+                /collections/assets/amari_2_420.webp 420w,
+                /collections/assets/amari_2_640.webp 640w,
+                /collections/assets/amari_2_700.webp 700w,
+                /collections/assets/amari_2_780.webp 780w
+              "
+              sizes="(max-width: 900px) 100vw, 520px"
+            />
+            <source
+              type="image/jpeg"
+              srcset="
+                /collections/assets/amari_2_420.jpg 420w,
+                /collections/assets/amari_2_640.jpg 640w,
+                /collections/assets/amari_2_700.jpg 700w,
+                /collections/assets/amari_2_780.jpg 780w
+              "
+              sizes="(max-width: 900px) 100vw, 520px"
+            />
+            <img
+              src="/collections/assets/amari_2_700.jpg"
+              alt="Supima cotton — Square Bidness"
+              width="780"
+              height="1040"
+              loading="eager"
+              decoding="async"
+              fetchpriority="high"
+              style="width:100%;height:auto;"
+            />
+          </picture>
         </div>
 
         <div>
@@ -214,8 +226,27 @@
             <p style="margin-top:.4rem;"><strong>$36</strong> · Supima cotton · tailored feel · clean and fitted</p>
 
             <div class="shop-widget" aria-label="Shop Women’s Supima Tee">
-              <a class="btn btn--gold" href="/product-supima-ladies-natural-white/">Shop Ladies Tee</a>
-              <a class="btn btn--ghost" href="/product-supima-ladies-natural-white/">Select size → Checkout</a>
+              <label for="ladiesSupimaSize" class="muted" style="font-size:.9rem;">Select size</label>
+
+              <select id="ladiesSupimaSize" class="input" style="min-width:160px;">
+                <option value="XS">XS</option>
+                <option value="S" selected>S</option>
+                <option value="M">M</option>
+                <option value="L">L</option>
+                <option value="XL">XL</option>
+              </select>
+
+              <button
+                class="btn btn--gold"
+                id="ladiesSupimaCheckoutBtn"
+                type="button"
+                data-product="supima-ladies-natural-white"
+                data-name="Ladies Supima Tee — Natural White"
+                data-price="36.00"
+              >
+                Buy Now
+              </button>
+
               <span class="muted" style="font-size:.85rem;">Natural White · $36</span>
             </div>
 
@@ -249,36 +280,36 @@
           <div class="media-box">
             <div class="media">
               <picture>
-  <source
-    type="image/webp"
-    srcset="
-      /assets/supima/liberty-6_420.webp 420w,
-      /assets/supima/liberty-6_640.webp 640w,
-      /assets/supima/liberty-6_700.webp 700w,
-      /assets/supima/liberty-6_780.webp 780w
-    "
-    sizes="(max-width: 900px) 100vw, 520px"
-  />
-  <source
-    type="image/jpeg"
-    srcset="
-      /assets/supima/liberty-6_420.jpg 420w,
-      /assets/supima/liberty-6_640.jpg 640w,
-      /assets/supima/liberty-6_700.jpg 700w,
-      /assets/supima/liberty-6_780.jpg 780w
-    "
-    sizes="(max-width: 900px) 100vw, 520px"
-  />
-  <img
-    src="/assets/supima/liberty-6_700.jpg"
-    alt="Liberty Collection — Supima Cotton"
-    width="780"
-    height="1040"
-    loading="lazy"
-    decoding="async"
-    style="width:100%;height:auto;"
-  />
-</picture>
+                <source
+                  type="image/webp"
+                  srcset="
+                    /assets/supima/liberty-6_420.webp 420w,
+                    /assets/supima/liberty-6_640.webp 640w,
+                    /assets/supima/liberty-6_700.webp 700w,
+                    /assets/supima/liberty-6_780.webp 780w
+                  "
+                  sizes="(max-width: 900px) 100vw, 520px"
+                />
+                <source
+                  type="image/jpeg"
+                  srcset="
+                    /assets/supima/liberty-6_420.jpg 420w,
+                    /assets/supima/liberty-6_640.jpg 640w,
+                    /assets/supima/liberty-6_700.jpg 700w,
+                    /assets/supima/liberty-6_780.jpg 780w
+                  "
+                  sizes="(max-width: 900px) 100vw, 520px"
+                />
+                <img
+                  src="/assets/supima/liberty-6_700.jpg"
+                  alt="Liberty Collection — Supima Cotton"
+                  width="780"
+                  height="1040"
+                  loading="lazy"
+                  decoding="async"
+                  style="width:100%;height:auto;"
+                />
+              </picture>
             </div>
           </div>
 
@@ -292,11 +323,57 @@
     </section>
   </main>
 
-    <!-- FOOTER injected by /scripts/partials.js -->
   <div
     id="site-footer"
     aria-busy="true"
     style="content-visibility:auto;contain-intrinsic-size:180px;min-height:180px;"
   ></div>
+
+  <script>
+    (function () {
+      const btn = document.getElementById("ladiesSupimaCheckoutBtn");
+      const sizeSelect = document.getElementById("ladiesSupimaSize");
+
+      if (!btn || !sizeSelect) return;
+
+      btn.addEventListener("click", async function () {
+        const originalText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = "Redirecting...";
+
+        try {
+          const res = await fetch("/api/supima/create-checkout-session", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              product: "supima-ladies-natural-white",
+              name: "Ladies Supima Tee — Natural White",
+              color: "Natural White",
+              size: sizeSelect.value,
+              unitAmount: 3600,
+              quantity: 1
+            })
+          });
+
+          if (!res.ok) {
+            throw new Error("Checkout session request failed.");
+          }
+
+          const data = await res.json();
+
+          if (!data || !data.url) {
+            throw new Error("Stripe checkout URL missing.");
+          }
+
+          window.location.href = data.url;
+        } catch (err) {
+          console.error("Supima ladies checkout error:", err);
+          alert("Could not start checkout. Please try again.");
+          btn.disabled = false;
+          btn.textContent = originalText;
+        }
+      });
+    })();
+  </script>
 </body>
 </html>
