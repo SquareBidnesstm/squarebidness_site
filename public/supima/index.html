@@ -326,92 +326,47 @@
     style="content-visibility:auto;contain-intrinsic-size:180px;min-height:180px;"
   ></div>
 
-  <script>
-    (function () {
-      const btn = document.getElementById("ladiesSupimaCheckoutBtn");
-      const sizeSelect = document.getElementById("ladiesSupimaSize");
+ <script>
+(function () {
+  const btn = document.getElementById("ladiesSupimaCheckoutBtn");
+  const sizeSelect = document.getElementById("ladiesSupimaSize");
 
-      if (!btn || !sizeSelect) return;
+  if (!btn || !sizeSelect) return;
 
-      btn.addEventListener("click", async function () {
-        const originalText = btn.textContent;
-        btn.disabled = true;
-        btn.textContent = "Redirecting...";
+  btn.addEventListener("click", async function () {
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "Redirecting...";
 
-        try {
-          const res = await fetch("/api/supima/create-checkout-session/", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    product: "supima-ladies-natural-white",
-    name: "Ladies Supima Tee — Natural White",
-    color: "Natural White",
-    size: sizeSelect.value,
-    unitAmount: 3600,
-    quantity: 1
-  })
-});
-          if (!res.ok) {
-            throw new Error("Checkout session request failed.");
-          }
-
-          const data = await res.json();
-
-          if (!data || !data.url) {
-            throw new Error("Stripe checkout URL missing.");
-          }
-
-          window.location.href = data.url;
-        } catch (err) {
-          console.error("Supima ladies checkout error:", err);
-          alert("Could not start checkout. Please try again.");
-          btn.disabled = false;
-          btn.textContent = originalText;
-        }
+    try {
+      const res = await fetch("/api/supima/create-checkout-session/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          product: "supima-ladies-natural-white",
+          name: "Ladies Supima Tee — Natural White",
+          color: "Natural White",
+          size: sizeSelect.value,
+          unitAmount: 3600,
+          quantity: 1
+        })
       });
-    })();
-  </script>
-  <script>
-  (function () {
-    const btn = document.getElementById("ladiesSupimaCheckoutBtn");
-    const sizeSelect = document.getElementById("ladiesSupimaSize");
 
-    if (!btn || !sizeSelect) return;
+      const data = await res.json();
 
-    btn.addEventListener("click", async function () {
-      const originalText = btn.textContent;
-      btn.disabled = true;
-      btn.textContent = "Redirecting...";
-
-      try {
-        const res = await fetch("/api/supima/create-checkout-session/", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            product: "supima-ladies-natural-white",
-            name: "Ladies Supima Tee — Natural White",
-            color: "Natural White",
-            size: sizeSelect.value,
-            unitAmount: 3600,
-            quantity: 1
-          })
-        });
-
-        const data = await res.json();
-
-        if (!res.ok || !data.url) {
-          throw new Error(data.error || "Could not start checkout.");
-        }
-
-        window.location.href = data.url;
-      } catch (err) {
-        console.error("Supima ladies checkout error:", err);
-        alert("Could not start checkout. Please try again.");
-        btn.disabled = false;
-        btn.textContent = originalText;
+      if (!res.ok || !data.url) {
+        throw new Error(data.error || "Could not start checkout.");
       }
-    });
-  })();
+
+      window.location.href = data.url;
+    } catch (err) {
+      console.error("Supima ladies checkout error:", err);
+      alert("Could not start checkout. Please try again.");
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
+  });
+})();
 </script>
 </body>
 </html>
