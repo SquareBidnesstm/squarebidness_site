@@ -4,13 +4,110 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Order Confirmed — Supima</title>
+  <meta name="robots" content="noindex,nofollow" />
   <link rel="stylesheet" href="/styles/style.css" />
+  <style>
+    body {
+      background: #020617;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      margin: 0;
+    }
+    .wrap {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 4rem 1rem;
+    }
+    .card {
+      border: 1px solid #1f2937;
+      background: #0b1220;
+      border-radius: 18px;
+      padding: 1.25rem;
+    }
+    .btn {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: .9rem 1.2rem;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 700;
+      background: #f4d232;
+      color: #111827;
+    }
+    .muted {
+      color: rgba(255,255,255,.75);
+    }
+    .row {
+      margin: .45rem 0;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
 </head>
-<body class="theme-dark">
-  <div class="container" style="padding:4rem 1rem;max-width:720px;">
-    <h1>Order confirmed.</h1>
-    <p>Your Supima order was received successfully.</p>
-    <p><a class="btn btn--gold" href="/supima/">Back to Supima</a></p>
-  </div>
+<body>
+  <main class="wrap">
+    <div class="card">
+      <h1 id="headline">Checking your order...</h1>
+      <p id="subcopy" class="muted">Please wait while we confirm your Stripe payment.</p>
+
+      <div id="orderDetails" class="hidden">
+        <div class="row"><strong>Product:</strong> <span id="productName"></span></div>
+        <div class="row"><strong>Size:</strong> <span id="size"></span></div>
+        <div class="row"><strong>Color:</strong> <span id="color"></span></div>
+        <div class="row"><strong>Email:</strong> <span id="email"></span></div>
+        <div class="row"><strong>Total:</strong> <span id="total"></span></div>
+      </div>
+
+      <a class="btn" href="/supima/">Back to Supima</a>
+    </div>
+  </main>
+
+  <script>
+    (async function () {
+      const params = new URLSearchParams(window.location.search);
+      const sessionId = params.get("session_id");
+
+      const headline = document.getElementById("headline");
+      const subcopy = document.getElementById("subcopy");
+      const orderDetails = document.getElementById("orderDetails");
+
+      if (!sessionId) {
+        headline.textContent = "Order status unavailable.";
+        subcopy.textContent = "Missing checkout session. Please contact support if your card was charged.";
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/supima/finalize-checkout?session_id=${encodeURIComponent(sessionId)}`);
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || "Unable to verify order.");
+        }
+
+        if (!data.paid) {
+          headline.textContent = "Payment not confirmed yet.";
+          subcopy.textContent = "Your checkout session exists, but payment is not marked paid yet.";
+          return;
+        }
+
+        headline.textContent = "Order confirmed.";
+        subcopy.textContent = "Your Supima order was received successfully.";
+
+        document.getElementById("productName").textContent = data.productName || "Supima order";
+        document.getElementById("size").textContent = data.size || "—";
+        document.getElementById("color").textContent = data.color || "—";
+        document.getElementById("email").textContent = data.customerEmail || "—";
+        document.getElementById("total").textContent = `$${((data.amountTotal || 0) / 100).toFixed(2)}`;
+
+        orderDetails.classList.remove("hidden");
+      } catch (error) {
+        console.error("SUPIMA SUCCESS PAGE ERROR:", error);
+        headline.textContent = "We could not verify this order yet.";
+        subcopy.textContent = "If your card was charged, contact support and we’ll match it from Stripe.";
+      }
+    })();
+  </script>
 </body>
 </html>
