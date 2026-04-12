@@ -22,13 +22,18 @@ export default async function handler(req, res) {
       quantity
     } = req.body || {};
 
-    if (!product || !name || !size || !unitAmount) {
+    const inventory = {
+      "Black": ["XS", "S", "M", "L", "XL"],
+      "Natural White": ["L"],
+      "Ocean Blue": ["XS", "S", "L"]
+    };
+
+    if (!product || !name || !color || !size || !unitAmount) {
       return res.status(400).json({ error: "Missing required fields." });
     }
 
-    const allowedSizes = ["XS", "S", "M", "L", "XL"];
-    if (!allowedSizes.includes(size)) {
-      return res.status(400).json({ error: "Invalid size selected." });
+    if (!inventory[color] || !inventory[color].includes(size)) {
+      return res.status(400).json({ error: "Selected color/size is unavailable." });
     }
 
     const siteUrl = process.env.SITE_URL || "https://www.squarebidness.com";
@@ -50,7 +55,7 @@ export default async function handler(req, res) {
               name,
               metadata: {
                 product,
-                color: color || "",
+                color,
                 size
               }
             }
@@ -59,7 +64,7 @@ export default async function handler(req, res) {
       ],
       metadata: {
         product,
-        color: color || "",
+        color,
         size
       },
       success_url: `${siteUrl}/supima/success/?session_id={CHECKOUT_SESSION_ID}`,
