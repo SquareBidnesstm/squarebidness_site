@@ -188,6 +188,25 @@ function formatCentral(iso) {
   }).format(d);
 }
 
+async function redisSet(redisUrl, redisToken, key, value) {
+  const safeValue = value == null ? "" : String(value);
+  const url = `${redisUrl.replace(/\/$/, "")}/set/${encodeURIComponent(key)}/${encodeURIComponent(safeValue)}`;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${redisToken}`
+    }
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Redis SET failed: ${response.status} ${text}`);
+  }
+
+  return response.json();
+}
+
 
 async function redisDel(redisUrl, redisToken, key) {
   const url = `${redisUrl.replace(/\/$/, "")}/del/${encodeURIComponent(key)}`;
