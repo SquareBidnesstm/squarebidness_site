@@ -59,57 +59,57 @@ export default async function handler(req, res) {
     }
 
     if (mode === "open") {
-      await Promise.all([
-        redisSet(redisUrl, redisToken, "delish:ordering:mode", "open"),
-        redisDel(redisUrl, redisToken, "delish:ordering:resume_at"),
-        redisSet(redisUrl, redisToken, "delish:ordering:message", "")
-      ]);
+  await Promise.all([
+    redisSet(redisUrl, redisToken, "delish:ordering:mode", "open"),
+    redisSet(redisUrl, redisToken, "delish:ordering:resume_at", ""),
+    redisSet(redisUrl, redisToken, "delish:ordering:message", "")
+  ]);
 
-      return res.status(200).json({
-        ok: true,
-        updated: {
-          mode: "open",
-          resumeAt: "",
-          message: ""
-        }
-      });
+  return res.status(200).json({
+    ok: true,
+    updated: {
+      mode: "open",
+      resumeAt: "",
+      message: ""
     }
+  });
+}
 
     if (mode === "auto") {
-      await Promise.all([
-        redisSet(redisUrl, redisToken, "delish:ordering:mode", "auto"),
-        redisDel(redisUrl, redisToken, "delish:ordering:resume_at"),
-        redisSet(redisUrl, redisToken, "delish:ordering:message", "")
-      ]);
+  await Promise.all([
+    redisSet(redisUrl, redisToken, "delish:ordering:mode", "auto"),
+    redisSet(redisUrl, redisToken, "delish:ordering:resume_at", ""),
+    redisSet(redisUrl, redisToken, "delish:ordering:message", "")
+  ]);
 
-      return res.status(200).json({
-        ok: true,
-        updated: {
-          mode: "auto",
-          resumeAt: "",
-          message: ""
-        }
-      });
+  return res.status(200).json({
+    ok: true,
+    updated: {
+      mode: "auto",
+      resumeAt: "",
+      message: ""
     }
+  });
+}
 
     if (mode === "closed") {
-      const closedMessage = "Online ordering is closed for today.";
+  const closedMessage = "Online ordering is closed for today.";
 
-      await Promise.all([
-        redisSet(redisUrl, redisToken, "delish:ordering:mode", "closed"),
-        redisDel(redisUrl, redisToken, "delish:ordering:resume_at"),
-        redisSet(redisUrl, redisToken, "delish:ordering:message", closedMessage)
-      ]);
+  await Promise.all([
+    redisSet(redisUrl, redisToken, "delish:ordering:mode", "closed"),
+    redisSet(redisUrl, redisToken, "delish:ordering:resume_at", ""),
+    redisSet(redisUrl, redisToken, "delish:ordering:message", closedMessage)
+  ]);
 
-      return res.status(200).json({
-        ok: true,
-        updated: {
-          mode: "closed",
-          resumeAt: "",
-          message: closedMessage
-        }
-      });
+  return res.status(200).json({
+    ok: true,
+    updated: {
+      mode: "closed",
+      resumeAt: "",
+      message: closedMessage
     }
+  });
+}
 
     if (mode === "paused") {
       let resumeAt = "";
