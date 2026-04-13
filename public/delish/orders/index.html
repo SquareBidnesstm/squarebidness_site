@@ -449,6 +449,39 @@
       line-height:1.45;
     }
 
+    .ops-token-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin:10px 0 14px;
+  padding:12px 14px;
+  border-radius:14px;
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.08);
+}
+
+.ops-token-label{
+  color:var(--soft);
+  font-size:.82rem;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.ops-token-status{
+  font-weight:900;
+  color:var(--muted);
+}
+
+.ops-token-status.is-saved{
+  color:#9df0b8;
+}
+
+.ops-token-status.is-missing{
+  color:#ffb4b4;
+}
+
     @media (max-width:900px){
       .ops-status{grid-template-columns:1fr}
       .ops-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -494,6 +527,11 @@
         </div>
       </div>
 
+          <div class="ops-token-row">
+  <span class="ops-token-label">Operator Token</span>
+  <span class="ops-token-status" id="opsTokenStatus">Not saved</span>
+</div>
+
       <div class="ops-status">
         <div class="ops-box">
           <div class="ops-label">Ordering Mode</div>
@@ -515,6 +553,16 @@
         <button class="ops-btn ops-btn-pause" id="opsPause30Btn">Pause 30 Min</button>
         <button class="ops-btn ops-btn-close" id="opsCloseBtn">Close For Today</button>
       </div>
+
+          <div style="margin-top:10px;">
+  <button
+    class="ops-btn"
+    id="opsClearTokenBtn"
+    style="background:#2a2a2a;color:#fff;border:1px solid rgba(255,255,255,.12);width:100%;"
+  >
+    Clear Saved Token
+  </button>
+</div>
 
       <div class="ops-note" id="opsNotice">
         Ready.
@@ -539,6 +587,7 @@
   <script>
     const ordersEl = document.getElementById("orders");
     const lastUpdatedEl = document.getElementById("lastUpdated");
+    const OPERATOR_TOKEN_KEY = "delish_operator_token";
 
     function money(n){
       return `$${Number(n || 0).toFixed(2)}`;
@@ -722,6 +771,47 @@
       opsNoticeEl.style.color = isError ? "#ffb4b4" : "var(--muted)";
     }
 
+    function getSavedOperatorToken() {
+  try {
+    return localStorage.getItem(OPERATOR_TOKEN_KEY) || "";
+  } catch {
+    return "";
+  }
+}
+
+function saveOperatorToken(token) {
+  try {
+    if (token) {
+      localStorage.setItem(OPERATOR_TOKEN_KEY, token.trim());
+    }
+  } catch {}
+  updateTokenIndicator();
+}
+
+function clearOperatorToken() {
+  try {
+    localStorage.removeItem(OPERATOR_TOKEN_KEY);
+  } catch {}
+  updateTokenIndicator();
+}
+
+function updateTokenIndicator() {
+  const el = document.getElementById("opsTokenStatus");
+  if (!el) return;
+
+  const token = getSavedOperatorToken();
+
+  if (token) {
+    el.textContent = "Saved ✅";
+    el.classList.add("is-saved");
+    el.classList.remove("is-missing");
+  } else {
+    el.textContent = "Not saved";
+    el.classList.add("is-missing");
+    el.classList.remove("is-saved");
+  }
+}
+
     async function loadOperatorStatus() {
       try {
         const res = await fetch(`/api/delish/operator-status?t=${Date.now()}`, { cache: "no-store" });
@@ -743,38 +833,61 @@
       }
     }
 
+
     async function postOperatorControl(payload, successMessage) {
-      const token = window.prompt("Enter Delish operator token");
-      if (!token) {
-        setOpsNotice("Operator action cancelled.");
-        return;
-      }
+  let token = getSavedOperatorToken();
 
-      try {
-        setOpsNotice("Saving operator change...");
-
-        const res = await fetch("/api/delish/operator-control", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-operator-token": token
-          },
-          body: JSON.stringify(payload)
-        });
-
-        const data = await res.json();
-
-        if (!res.ok || !data.ok) {
-          throw new Error(data.error || "Operator update failed.");
-        }
-
-        setOpsNotice(successMessage || "Operator setting updated.");
-        await loadOperatorStatus();
-      } catch (err) {
-        console.error("Operator control error:", err);
-        setOpsNotice(err.message || "Unable to update operator setting.", true);
-      }
+  if (!token) {
+    token = window.prompt("Enter Delish operator token");
+    if (!token) {
+      setOpsNotice("Operator action cancelled.");
+      return;
     }
+
+    const saveOnDevice = window.confirm("Save this token on this device for faster operator controls?");
+    if (saveOnDevice) {
+      saveOperatorToken(token);
+    }
+  }
+
+  try {
+    setOpsNotice("Saving operator change...");
+
+    const res = await fetch("/api/delish/operator-control", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-operator-token": token.trim()
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || !data.ok) {
+      let msg = data.error || "Operator update failed.";
+
+      if (res.status === 401) {
+        clearOperatorToken();
+        msg = "Unauthorized — wrong operator token. Saved token cleared.";
+      } else if (res.status === 405) {
+        msg = "Method not allowed — operator control route mismatch.";
+      } else if (res.status === 503) {
+        msg = data.error || "Operator control not configured yet.";
+      }
+
+      throw new Error(msg);
+    }
+
+    setOpsNotice(successMessage || "Operator setting updated.");
+    await loadOperatorStatus();
+    updateTokenIndicator();
+  } catch (err) {
+    console.error("Operator control error:", err);
+    setOpsNotice(err.message || "Unable to update operator setting.", true);
+  }
+}
+
 
         document.getElementById("opsOpenBtn")?.addEventListener("click", async () => {
       await postOperatorControl(
@@ -800,6 +913,11 @@
         "Ordering paused for 30 minutes."
       );
     });
+
+    document.getElementById("opsClearTokenBtn")?.addEventListener("click", () => {
+  clearOperatorToken();
+  setOpsNotice("Saved operator token cleared.");
+});
 
     document.getElementById("opsCloseBtn")?.addEventListener("click", async () => {
       const confirmed = window.confirm("Close ordering for the rest of today?");
