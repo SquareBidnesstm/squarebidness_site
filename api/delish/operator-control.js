@@ -208,20 +208,3 @@ async function redisSet(redisUrl, redisToken, key, value) {
 }
 
 
-async function redisDel(redisUrl, redisToken, key) {
-  const url = `${redisUrl.replace(/\/$/, "")}/del/${encodeURIComponent(key)}`;
-
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${redisToken}`
-    }
-  });
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`Redis DEL failed: ${response.status} ${text}`);
-  }
-
-  return response.json();
-}
