@@ -196,38 +196,7 @@
       color:#fff;
       text-decoration:none;
     }
-    .menuBadges{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  margin-top:8px;
-}
-
-.menuBadge{
-  display:inline-flex;
-  align-items:center;
-  min-height:24px;
-  padding:0 10px;
-  border-radius:999px;
-  background:rgba(255,255,255,.08);
-  border:1px solid rgba(255,255,255,.10);
-  color:#ddd;
-  font-size:12px;
-  font-weight:700;
-  line-height:1;
-}
-
-.menuBadge--gold{
-  background:rgba(212,175,55,.14);
-  border-color:rgba(212,175,55,.28);
-  color:#f2d37a;
-}
-
-.menuBadge--soft{
-  background:rgba(255,255,255,.05);
-  border-color:rgba(255,255,255,.08);
-  color:#cfcfcf;
-}
+  
   </style>
 </head>
 
@@ -724,7 +693,6 @@ function renderBaseOptions(item) {
         <div class="menuCopy">
   <span>${item.name} ($${Number(item.price).toFixed(2)})</span>
   ${item.desc ? `<small>${item.desc}</small>` : ""}
-  ${renderMenuBadges(item, day)}
 </div>
         <div class="qtyWrap">
           <button type="button" class="qtyBtn" data-target="${item.id}Qty" data-action="decrease">−</button>
@@ -757,48 +725,7 @@ function renderBaseOptions(item) {
   `;
 }
 
-  function renderMenuBadges(item, day) {
-  const badges = [];
-
-  const hasBaseOptions = Array.isArray(item.baseOptions) && item.baseOptions.length > 0;
-  const needsSides = item.sideSelectionRequired !== false;
-
-  // Base choice badges
-  if (hasBaseOptions) {
-    if (day === "thursday") {
-      badges.push('<span class="menuBadge menuBadge--gold">Choose dressing or rice</span>');
-    } else {
-      badges.push('<span class="menuBadge menuBadge--gold">Choose rice or mashed potatoes</span>');
-    }
-  }
-
-  // Side behavior
-  if (needsSides) {
-    badges.push('<span class="menuBadge menuBadge--soft">Choose 2 sides</span>');
-  } else {
-    badges.push('<span class="menuBadge menuBadge--soft">No side selection</span>');
-  }
-
-  // Monday rules (LOCKED plates)
-  if (day === "monday") {
-    if (item.id === "monday_hamburger_steak") {
-      badges.push('<span class="menuBadge menuBadge--soft">Includes green beans, corn, rolls</span>');
-    }
-
-    if (item.id === "monday_red_beans_fried_chicken") {
-      badges.push('<span class="menuBadge menuBadge--soft">Includes cornbread</span>');
-    }
-  }
-
-  // Friday = no base option
-  if (day === "friday") {
-    badges.push('<span class="menuBadge menuBadge--soft">No base selection</span>');
-  }
-
-  return badges.length
-    ? `<div class="menuBadges">${badges.join("")}</div>`
-    : "";
-}
+  
   function attachQtyButtons() {
     document.querySelectorAll(".qtyBtn").forEach((btn) => {
       btn.onclick = () => {
