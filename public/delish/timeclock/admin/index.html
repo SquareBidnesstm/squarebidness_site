@@ -7,9 +7,8 @@
   <meta name="description" content="Delish time clock admin." />
   <meta name="robots" content="noindex,nofollow" />
   <meta name="theme-color" content="#111111" />
-
   <link rel="stylesheet" href="/styles/global.css" />
-  <meta name="sb:build" content="2026-04-13-02" />
+  <meta name="sb:build" content="2026-04-14-01" />
 
   <style>
     :root{
@@ -22,6 +21,8 @@
       --accent:#d4a24c;
       --accent-2:#f2c879;
       --good:#22c55e;
+      --bad:#ef4444;
+      --warn:#f59e0b;
       --shadow:0 18px 50px rgba(0,0,0,.28);
       --radius:18px;
     }
@@ -38,7 +39,7 @@
     }
 
     .wrap {
-      width:min(1180px, calc(100% - 28px));
+      width:min(1280px, calc(100% - 28px));
       margin:0 auto;
     }
 
@@ -72,7 +73,7 @@
     .sub {
       margin:8px 0 0;
       color:var(--muted);
-      max-width:720px;
+      max-width:760px;
     }
 
     .time-chip {
@@ -88,7 +89,9 @@
       white-space:nowrap;
     }
 
-    .toolbar {
+    .toolbar,
+    .manager-grid,
+    .employee-grid {
       display:flex;
       flex-wrap:wrap;
       gap:12px;
@@ -97,7 +100,12 @@
 
     .toolbar input,
     .toolbar button,
-    .toolbar a {
+    .toolbar a,
+    .manager-grid input,
+    .manager-grid button,
+    .employee-grid input,
+    .employee-grid select,
+    .employee-grid button {
       min-height:48px;
       padding:0 14px;
       border-radius:14px;
@@ -110,20 +118,41 @@
       font-weight:700;
     }
 
-    .toolbar button {
+    .toolbar button,
+    .manager-grid button,
+    .employee-grid button {
       cursor:pointer;
     }
 
-    .toolbar .primary {
-      background:linear-gradient(180deg,#d4a24c,#b78028);
-      color:#111;
-      border:none;
+    .primary {
+      background:linear-gradient(180deg,#d4a24c,#b78028) !important;
+      color:#111 !important;
+      border:none !important;
+    }
+
+    .danger {
+      background:linear-gradient(180deg,#ef4444,#b91c1c) !important;
+      color:#fff !important;
+      border:none !important;
+    }
+
+    .success {
+      background:linear-gradient(180deg,#22c55e,#15803d) !important;
+      color:#fff !important;
+      border:none !important;
     }
 
     .grid {
       display:grid;
-      grid-template-columns:repeat(4, 1fr);
+      grid-template-columns:repeat(6, 1fr);
       gap:14px;
+      margin-bottom:18px;
+    }
+
+    .split {
+      display:grid;
+      grid-template-columns:1.1fr .9fr;
+      gap:18px;
       margin-bottom:18px;
     }
 
@@ -137,6 +166,17 @@
 
     .card__body {
       padding:18px;
+    }
+
+    .card h2 {
+      margin:0 0 10px;
+      font-size:1.12rem;
+      letter-spacing:-0.02em;
+    }
+
+    .lead {
+      margin:0 0 14px;
+      color:var(--muted);
     }
 
     .stat-label {
@@ -162,12 +202,6 @@
 
     .section {
       margin-top:18px;
-    }
-
-    .section h2 {
-      margin:0 0 12px;
-      font-size:1.15rem;
-      letter-spacing:-0.02em;
     }
 
     table {
@@ -216,20 +250,169 @@
       text-align:center;
     }
 
-    @media (max-width: 980px) {
+    .status {
+      margin:0 0 16px;
+      padding:12px 14px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+      color:var(--text);
+      min-height:48px;
+      display:flex;
+      align-items:center;
+    }
+
+    .status.good {
+      border-color:rgba(34,197,94,.35);
+      background:rgba(34,197,94,.08);
+    }
+
+    .status.bad {
+      border-color:rgba(239,68,68,.35);
+      background:rgba(239,68,68,.08);
+    }
+
+    .status.warn {
+      border-color:rgba(245,158,11,.35);
+      background:rgba(245,158,11,.08);
+    }
+
+    .inline-fields {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-top:12px;
+    }
+
+    .inline-fields input,
+    .inline-fields select {
+      width:100%;
+      min-height:46px;
+      padding:0 12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:var(--panel-2);
+      color:var(--text);
+      font-weight:600;
+    }
+
+    .action-row {
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .btn-mini {
+      min-height:38px;
+      padding:0 12px;
+      border-radius:10px;
+      border:1px solid var(--line);
+      background:var(--panel-2);
+      color:var(--text);
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    .btn-mini.danger {
+      background:linear-gradient(180deg,#ef4444,#b91c1c);
+      border:none;
+      color:#fff;
+    }
+
+    .btn-mini.primary {
+      background:linear-gradient(180deg,#d4a24c,#b78028);
+      border:none;
+      color:#111;
+    }
+
+    .pill {
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      background:rgba(212,162,76,.12);
+      border:1px solid rgba(212,162,76,.22);
+      color:var(--accent-2);
+      font-size:.86rem;
+      font-weight:700;
+    }
+
+    .live-list {
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .live-row {
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      padding:14px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+    }
+
+    .tag {
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:88px;
+      padding:8px 10px;
+      border-radius:999px;
+      font-size:.78rem;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      white-space:nowrap;
+    }
+
+    .tag.in {
+      background:rgba(34,197,94,.12);
+      color:#86efac;
+      border:1px solid rgba(34,197,94,.28);
+    }
+
+    .helper {
+      color:var(--muted);
+      font-size:.9rem;
+      margin-top:10px;
+    }
+
+    @media (max-width: 1180px) {
       .grid {
-        grid-template-columns:repeat(2, 1fr);
+        grid-template-columns:repeat(3, 1fr);
+      }
+
+      .split {
+        grid-template-columns:1fr;
       }
     }
 
-    @media (max-width: 640px) {
+    @media (max-width: 760px) {
       .topbar {
         flex-direction:column;
         align-items:flex-start;
       }
 
       .grid {
+        grid-template-columns:1fr 1fr;
+      }
+
+      .inline-fields {
         grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .grid {
+        grid-template-columns:1fr;
+      }
+
+      .live-row {
+        flex-direction:column;
+        align-items:flex-start;
       }
     }
   </style>
@@ -241,16 +424,24 @@
         <div>
           <p class="eyebrow">Delish Workforce System</p>
           <h1>Time Clock Admin</h1>
-          <p class="sub">Daily labor view, completed shifts, and export-ready payroll support.</p>
+          <p class="sub">Daily labor view, manager controls, employee management, completed shifts, and export-ready payroll support.</p>
         </div>
         <div class="time-chip" id="centralNow">Central Time</div>
       </div>
 
+      <div class="status" id="statusBox">Ready.</div>
+
       <div class="toolbar">
         <input id="dateFilter" type="date" />
+        <input id="salesInput" type="number" min="0" step="0.01" placeholder="Daily sales (optional)" />
+        <input id="hourlyRateInput" type="number" min="0" step="0.01" placeholder="Avg hourly labor rate" value="12.00" />
         <button id="loadBtn" class="primary">Load Day</button>
         <a id="csvLink" href="/api/delish/timeclock/?mode=csv" target="_blank" rel="noopener">Export CSV</a>
         <a href="/delish/timeclock/">Open Time Clock</a>
+      </div>
+
+      <div class="manager-grid">
+        <input id="managerPin" type="password" inputmode="numeric" placeholder="Manager PIN" />
       </div>
 
       <div class="grid">
@@ -283,6 +474,64 @@
             <div class="stat-label">Active Now</div>
             <div class="stat-value" id="statActive">0</div>
             <div class="stat-sub">Employees currently clocked in</div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card__body">
+            <div class="stat-label">Labor Dollars</div>
+            <div class="stat-value" id="statLaborDollars">$0.00</div>
+            <div class="stat-sub">Hours × hourly rate</div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card__body">
+            <div class="stat-label">Labor %</div>
+            <div class="stat-value" id="statLaborPct">0%</div>
+            <div class="stat-sub">Labor dollars ÷ sales</div>
+          </div>
+        </section>
+      </div>
+
+      <div class="split">
+        <section class="card">
+          <div class="card__body">
+            <h2>Employee Management</h2>
+            <p class="lead">Add crew members, assign PINs, and remove old staff.</p>
+
+            <div class="employee-grid">
+              <input id="newEmployeeName" type="text" placeholder="Employee name" />
+              <input id="newEmployeePin" type="text" inputmode="numeric" placeholder="Employee PIN" />
+              <button id="addEmployeeBtn" class="success">Add Employee</button>
+            </div>
+
+            <div class="employee-grid">
+              <select id="deleteEmployeeSelect">
+                <option value="">Select employee to remove</option>
+              </select>
+              <button id="deleteEmployeeBtn" class="danger">Remove Employee</button>
+            </div>
+
+            <div class="helper">
+              Manager PIN required for employee changes.
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card__body">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;">
+              <div>
+                <h2>Currently Clocked In</h2>
+                <p class="lead" style="margin-bottom:0;">Live shift visibility for labor control.</p>
+              </div>
+              <div class="pill"><span id="liveCount">0</span> active</div>
+            </div>
+
+            <div class="live-list" id="liveList">
+              <div class="empty">No one is clocked in right now.</div>
+            </div>
           </div>
         </section>
       </div>
@@ -318,10 +567,11 @@
                 <th>Minutes</th>
                 <th>Hours</th>
                 <th>Devices</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody id="shiftsBody">
-              <tr><td colspan="6" class="empty">No completed shifts yet.</td></tr>
+              <tr><td colspan="7" class="empty">No completed shifts yet.</td></tr>
             </tbody>
           </table>
         </div>
@@ -332,17 +582,40 @@
   <script defer src="/scripts/sb-analytics.js"></script>
   <script>
     const API_URL = "/api/delish/timeclock/";
+    const SALES_KEY = "delish_timeclock_admin_sales";
+    const RATE_KEY = "delish_timeclock_admin_hourly_rate";
+
     const els = {
       now: document.getElementById("centralNow"),
+      status: document.getElementById("statusBox"),
       date: document.getElementById("dateFilter"),
+      sales: document.getElementById("salesInput"),
+      hourlyRate: document.getElementById("hourlyRateInput"),
       loadBtn: document.getElementById("loadBtn"),
       csvLink: document.getElementById("csvLink"),
+      managerPin: document.getElementById("managerPin"),
       statDate: document.getElementById("statDate"),
       statHours: document.getElementById("statHours"),
       statShifts: document.getElementById("statShifts"),
       statActive: document.getElementById("statActive"),
+      statLaborDollars: document.getElementById("statLaborDollars"),
+      statLaborPct: document.getElementById("statLaborPct"),
       employeeTotalsBody: document.getElementById("employeeTotalsBody"),
-      shiftsBody: document.getElementById("shiftsBody")
+      shiftsBody: document.getElementById("shiftsBody"),
+      liveList: document.getElementById("liveList"),
+      liveCount: document.getElementById("liveCount"),
+      newEmployeeName: document.getElementById("newEmployeeName"),
+      newEmployeePin: document.getElementById("newEmployeePin"),
+      addEmployeeBtn: document.getElementById("addEmployeeBtn"),
+      deleteEmployeeSelect: document.getElementById("deleteEmployeeSelect"),
+      deleteEmployeeBtn: document.getElementById("deleteEmployeeBtn")
+    };
+
+    let currentData = {
+      employees: [],
+      active: [],
+      shifts: [],
+      summary: { employees: [], totalHours: 0, totalShifts: 0 }
     };
 
     function centralNowLabel() {
@@ -382,11 +655,102 @@
       }).format(new Date(iso));
     }
 
-    async function fetchJson(url) {
-      const res = await fetch(url, { cache: "no-store" });
+    function setStatus(message, tone = "") {
+      els.status.className = "status" + (tone ? ` ${tone}` : "");
+      els.status.textContent = message;
+    }
+
+    function getManagerPin() {
+      return (els.managerPin.value || "").trim();
+    }
+
+    function getSalesValue() {
+      return Number(els.sales.value || 0);
+    }
+
+    function getHourlyRate() {
+      return Number(els.hourlyRate.value || 0);
+    }
+
+    function currency(value) {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD"
+      }).format(Number(value || 0));
+    }
+
+    function pct(value) {
+      return `${Math.round((Number(value || 0) + Number.EPSILON) * 100) / 100}%`;
+    }
+
+    async function fetchJson(url, options = {}) {
+      const res = await fetch(url, {
+        cache: "no-store",
+        headers: {
+          "Content-Type": "application/json",
+          ...(options.headers || {})
+        },
+        ...options
+      });
+
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "Request failed");
       return data;
+    }
+
+    function saveLocalControls() {
+      try {
+        localStorage.setItem(SALES_KEY, els.sales.value || "");
+        localStorage.setItem(RATE_KEY, els.hourlyRate.value || "");
+      } catch {}
+    }
+
+    function restoreLocalControls() {
+      try {
+        const sales = localStorage.getItem(SALES_KEY);
+        const rate = localStorage.getItem(RATE_KEY);
+        if (sales !== null) els.sales.value = sales;
+        if (rate !== null) els.hourlyRate.value = rate;
+      } catch {}
+    }
+
+    function calculateLaborStats(totalHours) {
+      const hourlyRate = getHourlyRate();
+      const sales = getSalesValue();
+      const laborDollars = totalHours * hourlyRate;
+      const laborPct = sales > 0 ? (laborDollars / sales) * 100 : 0;
+
+      els.statLaborDollars.textContent = currency(laborDollars);
+      els.statLaborPct.textContent = pct(laborPct);
+    }
+
+    function renderEmployeeOptions(employees) {
+      const list = employees || [];
+      els.deleteEmployeeSelect.innerHTML = `
+        <option value="">Select employee to remove</option>
+        ${list.map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join("")}
+      `;
+    }
+
+    function renderLive(active) {
+      const rows = active || [];
+      els.liveCount.textContent = String(rows.length);
+
+      if (!rows.length) {
+        els.liveList.innerHTML = '<div class="empty">No one is clocked in right now.</div>';
+        return;
+      }
+
+      els.liveList.innerHTML = rows.map(item => `
+        <div class="live-row">
+          <div>
+            <strong>${escapeHtml(item.name)}</strong><br />
+            <span class="muted">Clocked in ${escapeHtml(formatCentralDateTime(item.clockInAt))}</span><br />
+            <span class="muted">${escapeHtml(item.device || "")}</span>
+          </div>
+          <div class="tag in">Clocked In</div>
+        </div>
+      `).join("");
     }
 
     function renderEmployeeTotals(summary) {
@@ -398,7 +762,7 @@
 
       els.employeeTotalsBody.innerHTML = rows.map(item => `
         <tr>
-          <td>${item.name}</td>
+          <td>${escapeHtml(item.name)}</td>
           <td>${item.shifts}</td>
           <td>${item.minutes}</td>
           <td>${item.hours}</td>
@@ -412,45 +776,256 @@
       });
 
       if (!rows.length) {
-        els.shiftsBody.innerHTML = `<tr><td colspan="6" class="empty">No completed shifts yet.</td></tr>`;
+        els.shiftsBody.innerHTML = `<tr><td colspan="7" class="empty">No completed shifts yet.</td></tr>`;
         return;
       }
 
       els.shiftsBody.innerHTML = rows.map(shift => `
         <tr>
-          <td>${shift.name}</td>
-          <td>${formatCentralDateTime(shift.clockInAt)}</td>
-          <td>${formatCentralDateTime(shift.clockOutAt)}</td>
+          <td>${escapeHtml(shift.name)}</td>
+          <td>
+            <input
+              type="datetime-local"
+              data-edit-in="${escapeHtml(shift.id)}"
+              value="${toLocalDateTimeValue(shift.clockInAt)}"
+              style="min-height:40px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);"
+            />
+          </td>
+          <td>
+            <input
+              type="datetime-local"
+              data-edit-out="${escapeHtml(shift.id)}"
+              value="${toLocalDateTimeValue(shift.clockOutAt)}"
+              style="min-height:40px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);"
+            />
+          </td>
           <td>${shift.durationMinutes}</td>
           <td>${shift.durationHours}</td>
-          <td><span class="muted">${shift.clockInDevice || ""} → ${shift.clockOutDevice || ""}</span></td>
+          <td><span class="muted">${escapeHtml(shift.clockInDevice || "")} → ${escapeHtml(shift.clockOutDevice || "")}</span></td>
+          <td>
+            <div class="action-row">
+              <button class="btn-mini primary" data-save-shift="${escapeHtml(shift.id)}">Save</button>
+              <button class="btn-mini danger" data-delete-shift="${escapeHtml(shift.id)}">Delete</button>
+            </div>
+          </td>
         </tr>
       `).join("");
     }
 
-    async function loadAdmin() {
-      const date = els.date.value;
-      els.now.textContent = centralNowLabel();
+    function renderStats(data, selectedDate) {
+      const totalHours = Number(data.summary?.totalHours ?? 0);
+      const totalShifts = Number(data.summary?.totalShifts ?? 0);
+      const activeCount = (data.active || []).length;
 
-      const qs = new URLSearchParams();
-      if (date) qs.set("date", date);
-      qs.set("t", Date.now());
+      els.statDate.textContent = selectedDate || "All";
+      els.statHours.textContent = String(totalHours);
+      els.statShifts.textContent = String(totalShifts);
+      els.statActive.textContent = String(activeCount);
 
-      const data = await fetchJson(`${API_URL}?${qs.toString()}`);
-
-      els.statDate.textContent = date || "All";
-      els.statHours.textContent = String(data.summary?.totalHours ?? 0);
-      els.statShifts.textContent = String(data.summary?.totalShifts ?? 0);
-      els.statActive.textContent = String((data.active || []).length);
-
-      renderEmployeeTotals(data.summary);
-      renderShifts(data.shifts || [], date);
-
-      els.csvLink.href = `${API_URL}?mode=csv${date ? `&date=${encodeURIComponent(date)}` : ""}`;
+      calculateLaborStats(totalHours);
     }
 
-    els.date.value = centralDateInputValue();
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function toLocalDateTimeValue(iso) {
+      const d = new Date(iso);
+      const pad = n => String(n).padStart(2, "0");
+      const year = d.getFullYear();
+      const month = pad(d.getMonth() + 1);
+      const day = pad(d.getDate());
+      const hours = pad(d.getHours());
+      const mins = pad(d.getMinutes());
+      return `${year}-${month}-${day}T${hours}:${mins}`;
+    }
+
+    function toIsoFromLocal(value) {
+      if (!value) return "";
+      return new Date(value).toISOString();
+    }
+
+    async function loadAdmin() {
+      try {
+        saveLocalControls();
+
+        const date = els.date.value;
+        els.now.textContent = centralNowLabel();
+
+        const qs = new URLSearchParams();
+        if (date) qs.set("date", date);
+        qs.set("t", Date.now());
+
+        const data = await fetchJson(`${API_URL}?${qs.toString()}`);
+        currentData = data;
+
+        renderStats(data, date);
+        renderEmployeeTotals(data.summary);
+        renderShifts(data.shifts || [], date);
+        renderEmployeeOptions(data.employees || []);
+        renderLive(data.active || []);
+
+        els.csvLink.href = `${API_URL}?mode=csv${date ? `&date=${encodeURIComponent(date)}` : ""}`;
+
+        const totalHours = Number(data.summary?.totalHours ?? 0);
+        const activeCount = (data.active || []).length;
+        if (activeCount >= 4) {
+          setStatus(`Heads up: ${activeCount} employees are currently clocked in.`, "warn");
+        } else {
+          setStatus("Admin loaded.", "good");
+        }
+
+        if (window.sbAnalytics?.track) {
+          window.sbAnalytics.track("delish_timeclock_admin_load", {
+            date
+          });
+        }
+      } catch (err) {
+        setStatus(err.message || "Unable to load admin.", "bad");
+      }
+    }
+
+    async function addEmployee() {
+      const managerPin = getManagerPin();
+      const name = (els.newEmployeeName.value || "").trim();
+      const pin = (els.newEmployeePin.value || "").trim();
+
+      if (!managerPin) return setStatus("Manager PIN required.", "warn");
+      if (!name) return setStatus("Enter employee name.", "warn");
+      if (!pin) return setStatus("Enter employee PIN.", "warn");
+
+      try {
+        await fetchJson(API_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "add_employee",
+            managerPin,
+            name,
+            pin
+          })
+        });
+
+        els.newEmployeeName.value = "";
+        els.newEmployeePin.value = "";
+        setStatus(`${name} added.`, "good");
+        await loadAdmin();
+      } catch (err) {
+        setStatus(err.message || "Unable to add employee.", "bad");
+      }
+    }
+
+    async function deleteEmployee() {
+      const managerPin = getManagerPin();
+      const name = (els.deleteEmployeeSelect.value || "").trim();
+
+      if (!managerPin) return setStatus("Manager PIN required.", "warn");
+      if (!name) return setStatus("Select employee to remove.", "warn");
+
+      try {
+        await fetchJson(API_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "delete_employee",
+            managerPin,
+            name
+          })
+        });
+
+        setStatus(`${name} removed.`, "good");
+        await loadAdmin();
+      } catch (err) {
+        setStatus(err.message || "Unable to remove employee.", "bad");
+      }
+    }
+
+    async function saveShift(id) {
+      const managerPin = getManagerPin();
+      if (!managerPin) return setStatus("Manager PIN required.", "warn");
+
+      const inEl = document.querySelector(`[data-edit-in="${CSS.escape(id)}"]`);
+      const outEl = document.querySelector(`[data-edit-out="${CSS.escape(id)}"]`);
+
+      const clockInAt = toIsoFromLocal(inEl?.value || "");
+      const clockOutAt = toIsoFromLocal(outEl?.value || "");
+
+      if (!clockInAt || !clockOutAt) {
+        return setStatus("Clock in and clock out are required.", "warn");
+      }
+
+      try {
+        await fetchJson(API_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "edit_shift",
+            managerPin,
+            id,
+            clockInAt,
+            clockOutAt
+          })
+        });
+
+        setStatus("Shift updated.", "good");
+        await loadAdmin();
+      } catch (err) {
+        setStatus(err.message || "Unable to update shift.", "bad");
+      }
+    }
+
+    async function deleteShift(id) {
+      const managerPin = getManagerPin();
+      if (!managerPin) return setStatus("Manager PIN required.", "warn");
+
+      try {
+        await fetchJson(API_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "delete_shift",
+            managerPin,
+            id
+          })
+        });
+
+        setStatus("Shift deleted.", "good");
+        await loadAdmin();
+      } catch (err) {
+        setStatus(err.message || "Unable to delete shift.", "bad");
+      }
+    }
+
+    document.addEventListener("click", async (e) => {
+      const saveId = e.target?.getAttribute("data-save-shift");
+      const deleteId = e.target?.getAttribute("data-delete-shift");
+
+      if (saveId) {
+        await saveShift(saveId);
+      }
+
+      if (deleteId) {
+        const ok = window.confirm("Delete this shift?");
+        if (!ok) return;
+        await deleteShift(deleteId);
+      }
+    });
+
     els.loadBtn.addEventListener("click", loadAdmin);
+    els.addEmployeeBtn.addEventListener("click", addEmployee);
+    els.deleteEmployeeBtn.addEventListener("click", deleteEmployee);
+    els.sales.addEventListener("input", () => {
+      saveLocalControls();
+      renderStats(currentData, els.date.value);
+    });
+    els.hourlyRate.addEventListener("input", () => {
+      saveLocalControls();
+      renderStats(currentData, els.date.value);
+    });
+
+    restoreLocalControls();
+    els.date.value = centralDateInputValue();
 
     setInterval(() => {
       els.now.textContent = centralNowLabel();
