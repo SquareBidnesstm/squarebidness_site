@@ -127,8 +127,19 @@ function buildAutoMessage(state) {
   }
 
   if (state.reason === "outside_service_window") {
-    const nextDay = getNextServiceDayLabel(state.today);
-    return `Online ordering is closed for tonight. Ordering resumes ${nextDay} at ${state.openTime || "11:00 AM"}.`;
+    const now = state.now || {};
+    const hour = Number(now.hour || 0);
+    const minute = Number(now.minute || 0);
+    const currentMinutes = (hour * 60) + minute;
+
+    const openMinutes = parseTimeToMinutes(state.openTime || "11:00 AM");
+    const isBeforeOpen = Number.isFinite(openMinutes) && currentMinutes < openMinutes;
+
+    const label = isBeforeOpen
+      ? formatDayLabel(state.today)
+      : getNextServiceDayLabel(state.today);
+
+    return `Online ordering is closed for tonight. Ordering resumes ${label} at ${state.openTime || "11:00 AM"}.`;
   }
 
   if (state.reason === "not_a_service_day") {
@@ -141,6 +152,34 @@ function buildAutoMessage(state) {
   }
 
   return "";
+}
+
+function parseTimeToMinutes(value) {
+  const match = String(value || "").trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (!match) return NaN;
+
+  let hour = Number(match[1]);
+  const minute = Number(match[2]);
+  const meridiem = match[3].toUpperCase();
+
+  if (meridiem === "PM" && hour !== 12) hour += 12;
+  if (meridiem === "AM" && hour === 12) hour = 0;
+
+  return (hour * 60) + minute;
+}
+
+function formatDayLabel(day) {
+  const labels = {
+    monday: "Monday",
+    tuesday: "Tuesday",
+    wednesday: "Wednesday",
+    thursday: "Thursday",
+    friday: "Friday",
+    saturday: "Saturday",
+    sunday: "Sunday"
+  };
+
+  return labels[String(day || "").toLowerCase()] || "Monday";
 }
 
 function getNextServiceDayLabel(today) {
