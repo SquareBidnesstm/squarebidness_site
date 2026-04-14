@@ -16,7 +16,7 @@ export default async function handler(req, res) {
       return res.status(200).json({
         ok: true,
         mode: fallbackMode,
-        resumeAt: fallbackResumeAt,
+        resumeAt: "",
         resumeAtDisplay: "",
         message: fallbackMessage,
         source: "env-fallback"
@@ -30,8 +30,10 @@ export default async function handler(req, res) {
     ]);
 
     const mode = normalizeMode(modeRes ?? fallbackMode);
-    const resumeAt = typeof resumeRes === "string" ? resumeRes : "";
+    const rawResumeAt = typeof resumeRes === "string" ? resumeRes : "";
     const message = typeof messageRes === "string" ? messageRes : fallbackMessage;
+
+    const resumeAt = mode === "paused" ? rawResumeAt : "";
 
     return res.status(200).json({
       ok: true,
