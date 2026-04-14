@@ -5,8 +5,6 @@ export const config = {
 const REDIS_URL = process.env.DELISH_UPSTASH_REDIS_REST_URL;
 const REDIS_TOKEN = process.env.DELISH_UPSTASH_REDIS_REST_TOKEN;
 
-// Fastest employee setup for v1.
-// Replace these with real employee names + PINs.
 const EMPLOYEES = [
   { name: "Qwnetta", pin: "1111" },
   { name: "Employee 2", pin: "2222" },
@@ -16,7 +14,9 @@ const EMPLOYEES = [
 const TZ = "America/Chicago";
 const ACTIVE_KEY = "delish:timeclock:active";
 const PUNCHES_KEY = "delish:timeclock:punches";
+const SHIFTS_KEY = "delish:timeclock:shifts";
 const MAX_RECENT = 25;
+const MAX_SHIFTS = 500;
 
 function send(res, status, data) {
   res.status(status).json(data);
@@ -101,6 +101,25 @@ async function pushPunch(entry) {
   await redis("LTRIM", PUNCHES_KEY, 0, MAX_RECENT - 1);
 }
 
+async function getCompletedShifts(limit = 200) {
+  const list = await redis("LRANGE", SHIFTS_KEY, 0, Math.max(0, limit - 1));
+  if (!Array.isArray(list)) return [];
+  return list
+    .map(item => {
+      try {
+        return JSON.parse(item);
+      } catch {
+        return null;
+      }
+    })
+    .filter(Boolean);
+}
+
+async function pushCompletedShift(entry) {
+  await redis("LPUSH", SHIFTS_KEY, JSON.stringify(entry));
+  await redis("LTRIM", SHIFTS_KEY, 0, MAX_SHIFTS - 1);
+}
+
 function activeArrayFromMap(map) {
   return Object.values(map || {}).sort((a, b) => {
     return new Date(b.clockInAt).getTime() - new Date(a.clockInAt).getTime();
@@ -111,18 +130,168 @@ function employeeNames() {
   return EMPLOYEES.map(emp => emp.name);
 }
 
+function diffMinutes(startIso, endIso) {
+  const ms = new Date(endIso).getTime() - new Date(startIso).getTime();
+  return Math.max(0, Math.round(ms / 60000));
+}
+
+function minutesToHours(minutes) {
+  return Math.round((minutes / 60) * 100) / 100;
+}
+
+function pad2(value) {
+  return String(value).padStart(2, "0");
+}
+
+function getCentralDateParts(iso) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: TZ,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(new Date(iso));
+
+  const map = {};
+  for (const part of parts) {
+    if (part.type !== "literal") map[part.type] = part.value;
+  }
+
+  return {
+    year: map.year,
+    month: map.month,
+    day: map.day
+  };
+}
+
+function getCentralDateKey(iso) {
+  const p = getCentralDateParts(iso);
+  return `${p.year}-${p.month}-${p.day}`;
+}
+
+function getCentralTimeLabel(iso) {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: TZ,
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit"
+  }).format(new Date(iso));
+}
+
+function buildSummary(shifts = [], targetDate = "") {
+  const filtered = targetDate
+    ? shifts.filter(shift => getCentralDateKey(shift.clockInAt) === targetDate)
+    : shifts;
+
+  const byEmployee = {};
+
+  for (const shift of filtered) {
+    const name = shift.name || "Unknown";
+    if (!byEmployee[name]) {
+      byEmployee[name] = {
+        name,
+        shifts: 0,
+        minutes: 0,
+        hours: 0
+      };
+    }
+
+    byEmployee[name].shifts += 1;
+    byEmployee[name].minutes += Number(shift.durationMinutes || 0);
+  }
+
+  const employees = Object.values(byEmployee)
+    .map(item => ({
+      ...item,
+      hours: minutesToHours(item.minutes)
+    }))
+    .sort((a, b) => b.minutes - a.minutes);
+
+  const totalMinutes = employees.reduce((sum, item) => sum + item.minutes, 0);
+
+  return {
+    date: targetDate || null,
+    totalShifts: filtered.length,
+    totalMinutes,
+    totalHours: minutesToHours(totalMinutes),
+    employees
+  };
+}
+
+function toCsvValue(value) {
+  const str = String(value ?? "");
+  if (/[",\n]/.test(str)) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+}
+
+function shiftsToCsv(shifts = []) {
+  const header = [
+    "Employee",
+    "Clock In",
+    "Clock Out",
+    "Duration Minutes",
+    "Duration Hours",
+    "Device Clock In",
+    "Device Clock Out",
+    "Date (Central)"
+  ];
+
+  const lines = [header.join(",")];
+
+  for (const shift of shifts) {
+    lines.push([
+      toCsvValue(shift.name),
+      toCsvValue(shift.clockInAt),
+      toCsvValue(shift.clockOutAt),
+      toCsvValue(shift.durationMinutes),
+      toCsvValue(shift.durationHours),
+      toCsvValue(shift.clockInDevice || ""),
+      toCsvValue(shift.clockOutDevice || ""),
+      toCsvValue(getCentralDateKey(shift.clockInAt))
+    ].join(","));
+  }
+
+  return lines.join("\n");
+}
+
 export default async function handler(req, res) {
   if (req.method === "GET") {
     try {
+      const mode = String(req.query.mode || "").trim();
+      const date = String(req.query.date || "").trim();
+      const limit = Math.min(Number(req.query.limit || 200), 500);
+
       const activeMap = await getActiveMap();
       const recent = await getRecentPunches();
+      const shifts = await getCompletedShifts(limit);
+
+      if (mode === "csv") {
+        const filtered = date
+          ? shifts.filter(shift => getCentralDateKey(shift.clockInAt) === date)
+          : shifts;
+
+        const csv = shiftsToCsv(filtered);
+        const filename = date
+          ? `delish-timeclock-${date}.csv`
+          : `delish-timeclock-export.csv`;
+
+        res.setHeader("Content-Type", "text/csv; charset=utf-8");
+        res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+        return res.status(200).send(csv);
+      }
+
+      const summary = buildSummary(shifts, date);
 
       return send(res, 200, {
         ok: true,
         timezone: TZ,
         employees: employeeNames(),
         active: activeArrayFromMap(activeMap),
-        recent
+        recent,
+        shifts,
+        summary
       });
     } catch (err) {
       return send(res, 500, {
@@ -222,6 +391,21 @@ export default async function handler(req, res) {
       });
     }
 
+    const durationMinutes = diffMinutes(current.clockInAt, timestamp);
+    const durationHours = minutesToHours(durationMinutes);
+
+    const completedShift = {
+      id: current.id,
+      name: employee.name,
+      clockInAt: current.clockInAt,
+      clockOutAt: timestamp,
+      clockInDevice: current.device || "",
+      clockOutDevice: device,
+      durationMinutes,
+      durationHours,
+      dateCentral: getCentralDateKey(current.clockInAt)
+    };
+
     const punch = {
       id: current.id,
       name: employee.name,
@@ -235,14 +419,16 @@ export default async function handler(req, res) {
 
     await setActiveMap(activeMap);
     await pushPunch(punch);
+    await pushCompletedShift(completedShift);
 
     const updatedRecent = [punch, ...recent].slice(0, MAX_RECENT);
 
     return send(res, 200, {
       ok: true,
-      message: `${employee.name} clocked out successfully.`,
+      message: `${employee.name} clocked out successfully. Shift recorded: ${durationHours} hrs.`,
       active: activeArrayFromMap(activeMap),
-      recent: updatedRecent
+      recent: updatedRecent,
+      shift: completedShift
     });
   } catch (err) {
     return send(res, 500, {
