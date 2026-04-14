@@ -880,8 +880,10 @@ function updateTokenIndicator() {
     }
 
     setOpsNotice(successMessage || "Operator setting updated.");
-    await loadOperatorStatus();
-    updateTokenIndicator();
+   await loadOperatorStatus();
+await loadOrders();
+await loadCateringCount();
+updateTokenIndicator();
   } catch (err) {
     console.error("Operator control error:", err);
     setOpsNotice(err.message || "Unable to update operator setting.", true);
