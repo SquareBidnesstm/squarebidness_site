@@ -47,7 +47,7 @@
       align-items:flex-start;
       justify-content:space-between;
       gap:16px;
-      margin-bottom:26px;
+      margin-bottom:24px;
     }
 
     .eyebrow{
@@ -73,7 +73,7 @@
 
     h1{
       margin:0;
-      font-size:clamp(2rem,4vw,3.25rem);
+      font-size:clamp(2rem,4vw,3.2rem);
       letter-spacing:-.04em;
       line-height:.98;
     }
@@ -99,6 +99,37 @@
       font-weight:800;
       cursor:pointer;
       white-space:nowrap;
+    }
+
+    .cross-links{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:18px;
+    }
+
+    .cross-link{
+      display:inline-flex;
+      align-items:center;
+      min-height:42px;
+      padding:0 14px;
+      border-radius:999px;
+      background:#171718;
+      border:1px solid #2c2c2f;
+      color:#cfc7ba;
+      font-weight:800;
+      text-decoration:none;
+    }
+
+    .cross-link:hover{
+      color:#fff;
+      border-color:rgba(255,255,255,.2);
+    }
+
+    .cross-link.active{
+      background:rgba(215,174,114,.15);
+      border-color:rgba(215,174,114,.35);
+      color:#f2d7ad;
     }
 
     .summary{
@@ -195,25 +226,19 @@
       min-height:36px;
       padding:6px 12px;
       border-radius:999px;
-      border:1px solid rgba(215,174,114,.2);
-      background:rgba(215,174,114,.08);
-      color:#f1ddba;
       font-size:.82rem;
       font-weight:800;
       letter-spacing:.08em;
       text-transform:uppercase;
+      border:1px solid rgba(215,174,114,.2);
+      background:rgba(215,174,114,.08);
+      color:#f1ddba;
     }
 
-    .status-pill.status-awaiting_sms_confirmation{
+    .status-pill.status-new_request{
       background:rgba(215,174,114,.10);
       border-color:rgba(215,174,114,.24);
       color:#f3dfb8;
-    }
-
-    .status-pill.status-verified{
-      background:rgba(86,180,120,.14);
-      border-color:rgba(86,180,120,.26);
-      color:#d7f3df;
     }
 
     .status-pill.status-deposit_sent{
@@ -276,25 +301,6 @@
       color:var(--muted);
     }
 
-    .footer-meta{
-      margin-top:18px;
-      padding-top:16px;
-      border-top:1px solid rgba(255,255,255,.06);
-      color:#a9a193;
-      font-size:.9rem;
-      line-height:1.6;
-      display:flex;
-      flex-wrap:wrap;
-      gap:12px 18px;
-    }
-
-    .meta-chip{
-      padding:8px 10px;
-      border-radius:999px;
-      background:#121214;
-      border:1px solid #2a2a2d;
-    }
-
     .approve-bar{
       margin-top:16px;
       display:flex;
@@ -335,13 +341,23 @@
       font-size:.94rem;
     }
 
-    .verify-note{
-      padding:12px 14px;
-      border-radius:14px;
-      background:rgba(255,255,255,.03);
-      border:1px solid rgba(255,255,255,.07);
-      color:var(--muted);
-      font-size:.95rem;
+    .footer-meta{
+      margin-top:18px;
+      padding-top:16px;
+      border-top:1px solid rgba(255,255,255,.06);
+      color:#a9a193;
+      font-size:.9rem;
+      line-height:1.6;
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px 18px;
+    }
+
+    .meta-chip{
+      padding:8px 10px;
+      border-radius:999px;
+      background:#121214;
+      border:1px solid #2a2a2d;
     }
 
     @media (max-width:900px){
@@ -359,36 +375,6 @@
       .approve-bar{ display:block; }
       .approve-bar > * + *{ margin-top:10px; }
     }
-
-    .cross-links{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    .cross-link{
-      display:inline-flex;
-      align-items:center;
-      min-height:42px;
-      padding:0 14px;
-      border-radius:999px;
-      background:#171718;
-      border:1px solid #2c2c2f;
-      color:#cfc7ba;
-      font-weight:800;
-      text-decoration:none;
-    }
-
-    .cross-link:hover{
-      color:#fff;
-      border-color:rgba(255,255,255,.2);
-    }
-
-    .cross-link.active{
-      background:rgba(215,174,114,.15);
-      border-color:rgba(215,174,114,.35);
-      color:#f2d7ad;
-    }
   </style>
 </head>
 <body>
@@ -398,13 +384,13 @@
         <div class="eyebrow"><span class="dot"></span>Delish Catering Pipeline</div>
         <h1>Catering Orders</h1>
         <p class="sub">
-          Review incoming catering requests, approve deposits, and manage Delish catering from one place.
+          Review incoming catering requests, send deposits, and manage approved catering from one place.
         </p>
       </div>
       <button id="refreshBtn" class="refresh-btn" type="button">Refresh</button>
     </div>
 
-    <div class="cross-links" style="margin-bottom:18px;">
+    <div class="cross-links">
       <a href="/delish/orders/" class="cross-link">Kitchen Orders</a>
       <a href="/delish/catering/orders/" class="cross-link active">Catering Orders</a>
     </div>
@@ -415,12 +401,12 @@
         <div id="summaryTotal" class="summary-value">—</div>
       </div>
       <div class="summary-card">
-        <div class="summary-label">Awaiting SMS</div>
-        <div id="summaryAwaiting" class="summary-value">—</div>
+        <div class="summary-label">New Requests</div>
+        <div id="summaryNew" class="summary-value">—</div>
       </div>
       <div class="summary-card">
-        <div class="summary-label">Verified</div>
-        <div id="summaryVerified" class="summary-value">—</div>
+        <div class="summary-label">Deposit Sent</div>
+        <div id="summarySent" class="summary-value">—</div>
       </div>
       <div class="summary-card">
         <div class="summary-label">Deposit Paid</div>
@@ -479,10 +465,10 @@
 
     function setSummary(orders) {
       document.getElementById("summaryTotal").textContent = orders.length;
-      document.getElementById("summaryAwaiting").textContent =
-        orders.filter((o) => o.status === "awaiting_sms_confirmation").length;
-      document.getElementById("summaryVerified").textContent =
-        orders.filter((o) => o.status === "verified").length;
+      document.getElementById("summaryNew").textContent =
+        orders.filter((o) => o.status === "new_request").length;
+      document.getElementById("summarySent").textContent =
+        orders.filter((o) => o.status === "deposit_sent").length;
       document.getElementById("summaryPaid").textContent =
         orders.filter((o) => o.status === "deposit_paid").length;
     }
@@ -517,12 +503,7 @@
           throw new Error(data.error || "Failed to approve catering request.");
         }
 
-        if (data.alreadyExists) {
-          status.textContent = "Deposit link already exists.";
-        } else {
-          status.textContent = `Deposit sent: $${data.depositAmount}`;
-        }
-
+        status.textContent = `Deposit sent: $${data.depositAmount}`;
         await loadOrders();
       } catch (error) {
         status.textContent = error.message || "Unable to send deposit.";
@@ -531,116 +512,114 @@
       }
     }
 
-    function renderOrderCard(order) {
-      const canApprove = order.status === "verified";
-      const isAwaiting = order.status === "awaiting_sms_confirmation";
-      const depositAmount = order.depositAmount ? escapeHtml(order.depositAmount) : "";
+   function renderOrderCard(order) {
+  const canApprove =
+    order.status === "new_request" ||
+    order.status === "awaiting_sms_confirmation" ||
+    order.status === "verified";
 
-      return `
-        <article class="order-card">
-          <div class="order-head">
-            <div>
-              <div class="request-number">${escapeHtml(order.requestNumber || "Pending")}</div>
-              <h2 class="customer-name">${escapeHtml(order.customerName || "Unknown customer")}</h2>
-              <div class="customer-meta">
-                ${escapeHtml(order.phone || "Not provided")}<br />
-                ${escapeHtml(order.email || "Not provided")}
-              </div>
-            </div>
-            <div class="status-pill status-${escapeHtml(order.status || "unknown")}">${prettyStatus(order.status)}</div>
+  const depositAmount = order.depositAmount ? escapeHtml(order.depositAmount) : "";
+
+  return `
+    <article class="order-card">
+      <div class="order-head">
+        <div>
+          <div class="request-number">${escapeHtml(order.requestNumber || "Pending")}</div>
+          <h2 class="customer-name">${escapeHtml(order.customerName || "Unknown customer")}</h2>
+          <div class="customer-meta">
+            ${escapeHtml(order.phone || "Not provided")}<br />
+            ${escapeHtml(order.email || "Not provided")}
           </div>
+        </div>
+        <div class="status-pill status-${escapeHtml(order.status || "unknown")}">${prettyStatus(order.status)}</div>
+      </div>
 
-          <div class="grid">
-            <div class="panel">
-              <div class="label">Event Details</div>
-              <div class="value">
-                <strong>Type:</strong> ${escapeHtml(order.eventType || "Not provided")}<br />
-                <strong>Date:</strong> ${escapeHtml(formatDate(order.eventDate))}<br />
-                <strong>Time:</strong> ${escapeHtml(order.eventTime || "Not provided")}<br />
-                <strong>Guests:</strong> ${escapeHtml(order.guestCount || "Not provided")}<br />
-                <strong>Service:</strong> ${escapeHtml(order.serviceType || "Not provided")}
-              </div>
-            </div>
-
-            <div class="panel">
-              <div class="label">Planning Details</div>
-              <div class="value">
-                <strong>Budget:</strong> ${escapeHtml(order.budget || "Not provided")}<br />
-                <strong>Serving Style:</strong> ${escapeHtml(order.servingStyle || "Not provided")}<br />
-                <strong>Event Address:</strong> ${escapeHtml(order.eventAddress || "Not provided")}
-              </div>
-            </div>
+      <div class="grid">
+        <div class="panel">
+          <div class="label">Event Details</div>
+          <div class="value">
+            <strong>Type:</strong> ${escapeHtml(order.eventType || "Not provided")}<br />
+            <strong>Date:</strong> ${escapeHtml(formatDate(order.eventDate))}<br />
+            <strong>Time:</strong> ${escapeHtml(order.eventTime || "Not provided")}<br />
+            <strong>Guests:</strong> ${escapeHtml(order.guestCount || "Not provided")}<br />
+            <strong>Service:</strong> ${escapeHtml(order.serviceType || "Not provided")}
           </div>
+        </div>
 
-          <div class="panel" style="margin-top:14px;">
-            <div class="label">Requested Items</div>
-            <div class="value">${escapeHtml(order.requestedItems || "Not provided").replace(/\n/g, "<br />")}</div>
+        <div class="panel">
+          <div class="label">Planning Details</div>
+          <div class="value">
+            <strong>Budget:</strong> ${escapeHtml(order.budget || "Not provided")}<br />
+            <strong>Serving Style:</strong> ${escapeHtml(order.servingStyle || "Not provided")}<br />
+            <strong>Event Address:</strong> ${escapeHtml(order.eventAddress || "Not provided")}
           </div>
+        </div>
+      </div>
 
-          <div class="panel" style="margin-top:14px;">
-            <div class="label">Notes</div>
-            <div class="value muted">${escapeHtml(order.notes || "No additional details.").replace(/\n/g, "<br />")}</div>
+      <div class="panel" style="margin-top:14px;">
+        <div class="label">Requested Items</div>
+        <div class="value">${escapeHtml(order.requestedItems || "Not provided").replace(/\n/g, "<br />")}</div>
+      </div>
+
+      <div class="panel" style="margin-top:14px;">
+        <div class="label">Notes</div>
+        <div class="value muted">${escapeHtml(order.notes || "No additional details.").replace(/\n/g, "<br />")}</div>
+      </div>
+
+      <div class="grid" style="margin-top:14px;">
+        <div class="panel">
+          <div class="label">Deposit</div>
+          <div class="value">
+            <strong>Amount:</strong> ${escapeHtml(order.depositAmount || "—")}<br />
+            <strong>Sent At:</strong> ${escapeHtml(formatDateTime(order.depositSentAt))}<br />
+            <strong>Paid At:</strong> ${escapeHtml(formatDateTime(order.depositPaidAt))}
           </div>
+        </div>
 
-          <div class="grid" style="margin-top:14px;">
-            <div class="panel">
-              <div class="label">Verification / Deposit</div>
-              <div class="value">
-                <strong>Verified:</strong> ${escapeHtml(order.verified || "no")}<br />
-                <strong>Verified At:</strong> ${escapeHtml(formatDateTime(order.verifiedAt))}<br />
-                <strong>Amount:</strong> ${escapeHtml(order.depositAmount || "—")}<br />
-                <strong>Sent At:</strong> ${escapeHtml(formatDateTime(order.depositSentAt))}<br />
-                <strong>Paid At:</strong> ${escapeHtml(formatDateTime(order.depositPaidAt))}
-              </div>
-            </div>
-
-            <div class="panel">
-              <div class="label">Deposit Link</div>
-              <div class="value">
-                ${order.depositLink ? `<a href="${escapeHtml(order.depositLink)}" target="_blank" rel="noopener noreferrer">Open deposit link</a>` : "—"}
-              </div>
-            </div>
+        <div class="panel">
+          <div class="label">Deposit Link</div>
+          <div class="value">
+            ${order.depositLink ? `<a href="${escapeHtml(order.depositLink)}" target="_blank" rel="noopener noreferrer">Open deposit link</a>` : "—"}
           </div>
+        </div>
+      </div>
 
-          <div class="approve-bar">
-            ${canApprove ? `
-              <input
-                class="deposit-input"
-                type="number"
-                min="1"
-                step="0.01"
-                placeholder="Deposit amount"
-                value="${depositAmount}"
-                data-deposit-input="${escapeHtml(order.id)}"
-              />
-              <button
-                class="approve-btn"
-                type="button"
-                data-approve-btn="${escapeHtml(order.id)}"
-                onclick="approveCatering('${escapeHtml(order.id)}')"
-              >
-                Approve + Send Deposit
-              </button>
-            ` : isAwaiting ? `
-              <div class="verify-note">Awaiting SMS confirmation (customer must reply YES)</div>
-            ` : `
-              <div class="mini-status">
-                ${order.status === "deposit_sent" ? "Deposit sent" : ""}
-                ${order.status === "deposit_paid" ? "Deposit paid" : ""}
-              </div>
-            `}
-            <div class="mini-status" data-approve-status="${escapeHtml(order.id)}"></div>
+      <div class="approve-bar">
+        ${canApprove ? `
+          <input
+            class="deposit-input"
+            type="number"
+            min="1"
+            step="0.01"
+            placeholder="Deposit amount"
+            value="${depositAmount}"
+            data-deposit-input="${escapeHtml(order.id)}"
+          />
+          <button
+            class="approve-btn"
+            type="button"
+            data-approve-btn="${escapeHtml(order.id)}"
+            onclick="approveCatering('${escapeHtml(order.id)}')"
+          >
+            Approve + Send Deposit
+          </button>
+        ` : `
+          <div class="mini-status">
+            ${order.status === "deposit_sent" ? "Deposit sent" : ""}
+            ${order.status === "deposit_paid" ? "Deposit paid" : ""}
           </div>
+        `}
+        <div class="mini-status" data-approve-status="${escapeHtml(order.id)}"></div>
+      </div>
 
-          <div class="footer-meta">
-            <span class="meta-chip"><strong>Created:</strong> ${escapeHtml(formatDateTime(order.createdAt))}</span>
-            <span class="meta-chip"><strong>ID:</strong> ${escapeHtml(order.id || "—")}</span>
-            <span class="meta-chip"><strong>Source:</strong> ${escapeHtml(order.source || "—")}</span>
-          </div>
-        </article>
-      `;
-    }
-
+      <div class="footer-meta">
+        <span class="meta-chip"><strong>Created:</strong> ${escapeHtml(formatDateTime(order.createdAt))}</span>
+        <span class="meta-chip"><strong>ID:</strong> ${escapeHtml(order.id || "—")}</span>
+        <span class="meta-chip"><strong>Source:</strong> ${escapeHtml(order.source || "—")}</span>
+      </div>
+    </article>
+  `;
+}
     async function loadOrders() {
       const ordersEl = document.getElementById("orders");
       const statusBar = document.getElementById("statusBar");
