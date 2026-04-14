@@ -126,21 +126,22 @@ function buildAutoMessage(state) {
     return "";
   }
 
-  if (state.reason === "outside_service_window") {
-    const now = state.now || {};
-    const hour = Number(now.hour || 0);
-    const minute = Number(now.minute || 0);
-    const currentMinutes = (hour * 60) + minute;
+ if (state.reason === "outside_service_window") {
+  const now = state.now || {};
+  const hour = Number(now.hour || 0);
+  const minute = Number(now.minute || 0);
+  const currentMinutes = (hour * 60) + minute;
 
-    const openMinutes = parseTimeToMinutes(state.openTime || "11:00 AM");
-    const isBeforeOpen = Number.isFinite(openMinutes) && currentMinutes < openMinutes;
+  const openTimeText = state.openTime || "11:00 AM";
+  const openMinutes = parseTimeToMinutes(openTimeText);
+  const isBeforeOpen = Number.isFinite(openMinutes) && currentMinutes < openMinutes;
 
-    const label = isBeforeOpen
-      ? formatDayLabel(state.today)
-      : getNextServiceDayLabel(state.today);
-
-    return `Online ordering is closed for tonight. Ordering resumes ${label} at ${state.openTime || "11:00 AM"}.`;
+  if (isBeforeOpen) {
+    return `Online ordering opens ${formatDayLabel(state.today)} at ${openTimeText}.`;
   }
+
+  return `Online ordering is closed for tonight. Ordering resumes ${getNextServiceDayLabel(state.today)} at ${openTimeText}.`;
+}
 
   if (state.reason === "not_a_service_day") {
     const nextDay = getNextServiceDayLabel(state.today);
@@ -155,17 +156,36 @@ function buildAutoMessage(state) {
 }
 
 function parseTimeToMinutes(value) {
-  const match = String(value || "").trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
-  if (!match) return NaN;
+  const raw = String(value || "").trim().toUpperCase();
 
-  let hour = Number(match[1]);
-  const minute = Number(match[2]);
-  const meridiem = match[3].toUpperCase();
+  // Matches "11:00 AM"
+  let match = raw.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/);
+  if (match) {
+    let hour = Number(match[1]);
+    const minute = Number(match[2]);
+    const meridiem = match[3];
 
-  if (meridiem === "PM" && hour !== 12) hour += 12;
-  if (meridiem === "AM" && hour === 12) hour = 0;
+    if (meridiem === "PM" && hour !== 12) hour += 12;
+    if (meridiem === "AM" && hour === 12) hour = 0;
 
-  return (hour * 60) + minute;
+    return (hour * 60) + minute;
+  }
+
+  // Matches "11:00" and assumes daytime service hour
+  match = raw.match(/^(\d{1,2}):(\d{2})$/);
+  if (match) {
+    let hour = Number(match[1]);
+    const minute = Number(match[2]);
+
+    // Delish service hours are daytime, so 11:00 means 11 AM
+    if (hour >= 1 && hour <= 7) {
+      hour += 12;
+    }
+
+    return (hour * 60) + minute;
+  }
+
+  return NaN;
 }
 
 function formatDayLabel(day) {
