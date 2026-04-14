@@ -13,7 +13,7 @@ export default async function handler(req, res) {
       return res.status(200).json({
         ok: true,
         orderingMode: DELISH_ORDERING_MODE,
-        message: "",
+        message: buildAutoMessage(fallbackState),
         ...fallbackState
       });
     }
@@ -32,7 +32,7 @@ export default async function handler(req, res) {
       return res.status(200).json({
         ok: true,
         orderingMode: DELISH_ORDERING_MODE,
-        message: "",
+        message: buildAutoMessage(fallbackState),
         ...fallbackState
       });
     }
@@ -78,7 +78,7 @@ export default async function handler(req, res) {
         return res.status(200).json({
           ok: true,
           orderingMode: "auto",
-          message: "",
+          message: buildAutoMessage(fallbackState),
           ...fallbackState
         });
       }
@@ -94,14 +94,14 @@ export default async function handler(req, res) {
         openTime: fallbackState.openTime || "11:00 AM",
         closeTime: fallbackState.closeTime || "3:00 PM",
         resumeAt,
-        message: message || "We’re serving current orders now. Online ordering is temporarily paused."
+        message: message || "We’re serving current orders now. Online ordering will reopen shortly."
       });
     }
 
     return res.status(200).json({
       ok: true,
       orderingMode: "auto",
-      message: "",
+      message: buildAutoMessage(fallbackState),
       ...fallbackState
     });
   } catch (error) {
@@ -117,6 +117,55 @@ function normalizeMode(value) {
   const mode = String(value || "").toLowerCase().trim();
   if (["auto", "open", "paused", "closed"].includes(mode)) return mode;
   return "";
+}
+
+function buildAutoMessage(state) {
+  if (!state) return "";
+
+  if (state.openNow) {
+    return "";
+  }
+
+  if (state.reason === "outside_service_window") {
+    const nextDay = getNextServiceDayLabel(state.today);
+    return `Online ordering is closed for tonight. Ordering resumes ${nextDay} at ${state.openTime || "11:00 AM"}.`;
+  }
+
+  if (state.reason === "not_a_service_day") {
+    const nextDay = getNextServiceDayLabel(state.today);
+    return `Online ordering is closed today. Ordering resumes ${nextDay} at ${state.openTime || "11:00 AM"}.`;
+  }
+
+  if (state.reason === "sunday_not_scheduled") {
+    return "Sunday ordering is only available on the 1st and 3rd Sundays.";
+  }
+
+  return "";
+}
+
+function getNextServiceDayLabel(today) {
+  const order = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+  const serviceDays = new Set(["monday", "tuesday", "wednesday", "thursday", "friday", "sunday"]);
+  const labels = {
+    monday: "Monday",
+    tuesday: "Tuesday",
+    wednesday: "Wednesday",
+    thursday: "Thursday",
+    friday: "Friday",
+    saturday: "Saturday",
+    sunday: "Sunday"
+  };
+
+  const startIndex = Math.max(order.indexOf(String(today || "").toLowerCase()), 0);
+
+  for (let i = 1; i <= 7; i++) {
+    const day = order[(startIndex + i) % 7];
+    if (serviceDays.has(day)) {
+      return labels[day];
+    }
+  }
+
+  return "Monday";
 }
 
 async function redisGet(redisUrl, redisToken, key) {
