@@ -288,7 +288,7 @@
   }
 
   const MENU_BY_DAY = {
-  monday: {
+ monday: {
   title: "Delish — Monday Menu",
   note: "Monday pickup menu. Order online and pick up on arrival.",
   mains: [
@@ -298,8 +298,8 @@
       price: 13.99,
       desc: "Served with cornbread. No side selection.",
       baseOptions: [],
-      fixedPlate: true,
-      sideSelectionRequired: false
+      sideSelectionRequired: false,
+      extraSideAllowed: false
     },
     {
       id: "monday_okra_fried_chicken",
@@ -307,8 +307,8 @@
       price: 13.99,
       desc: "Served with cornbread. No side selection.",
       baseOptions: [],
-      fixedPlate: true,
-      sideSelectionRequired: false
+      sideSelectionRequired: false,
+      extraSideAllowed: false
     },
     {
       id: "monday_hamburger_steak",
@@ -319,8 +319,8 @@
         { id: "base_rice", name: "Rice" },
         { id: "base_mashed_potatoes", name: "Mashed Potatoes" }
       ],
-      fixedPlate: true,
-      sideSelectionRequired: false
+      sideSelectionRequired: false,
+      extraSideAllowed: false
     }
   ]
 },
@@ -639,11 +639,11 @@ wednesday: {
   orderingBanner.textContent = "Check today’s menu and ordering status below.";
 }
   
-  function getExtraSidesForDay(day) {
-    return day === "friday"
-      ? [...EXTRA_SIDES_BASE, ...EXTRA_SIDES_FRIDAY_ONLY]
-      : [...EXTRA_SIDES_BASE];
-  }
+ function getExtraSidesForDay(day) {
+  return day === "friday" || day === "sunday"
+    ? [...EXTRA_SIDES_BASE, ...EXTRA_SIDES_FRIDAY_ONLY]
+    : [...EXTRA_SIDES_BASE];
+}
 
  function getBaseLabel(item) {
   const bases = item.baseOptions || [
@@ -683,8 +683,9 @@ function renderBaseOptions(item) {
     ].join("");
   }
 
-  function renderMainItem(item, day) {
+ function renderMainItem(item, day) {
   const hasBaseOptions = Array.isArray(item.baseOptions) && item.baseOptions.length > 0;
+  const needsSides = item.sideSelectionRequired !== false;
 
   return `
     <div class="menuItem">
@@ -708,15 +709,17 @@ function renderBaseOptions(item) {
           </select>
         ` : ""}
 
-        <label class="sideLabel" for="${item.id}Side1">Side 1</label>
-        <select id="${item.id}Side1" data-plate-side="${item.id}">
-          ${renderPlateSideOptions(day)}
-        </select>
+        ${needsSides ? `
+          <label class="sideLabel" for="${item.id}Side1">Side 1</label>
+          <select id="${item.id}Side1" data-plate-side="${item.id}">
+            ${renderPlateSideOptions(day)}
+          </select>
 
-        <label class="sideLabel" for="${item.id}Side2">Side 2</label>
-        <select id="${item.id}Side2" data-plate-side="${item.id}">
-          ${renderPlateSideOptions(day)}
-        </select>
+          <label class="sideLabel" for="${item.id}Side2">Side 2</label>
+          <select id="${item.id}Side2" data-plate-side="${item.id}">
+            ${renderPlateSideOptions(day)}
+          </select>
+        ` : ""}
       </div>
     </div>
   `;
@@ -809,7 +812,14 @@ function renderBaseOptions(item) {
       mainMenuNote.textContent = menu.note;
       mainMenuItems.innerHTML = menu.mains.map(item => renderMainItem(item, state.today)).join("");
       renderSelectOptions(drinkSelect, DRINKS, "Drink (optional)");
-      renderSelectOptions(extraSideSelect, getExtraSidesForDay(state.today), "Extra Side (optional)");
+      if (isExtraSideAllowedForDay(state.today)) {
+  renderSelectOptions(extraSideSelect, getExtraSidesForDay(state.today), "Extra Side (optional)");
+  extraSideSelect.disabled = false;
+} else {
+  renderSelectOptions(extraSideSelect, [], "Extra Side unavailable on Monday");
+  extraSideSelect.value = "";
+  extraSideSelect.disabled = true;
+}
       renderSelectOptions(lagniappeSelect, LAGNIAPPE, "Lagniappe (optional)");
       attachQtyButtons();
       attachPlateSideListeners();
@@ -902,13 +912,13 @@ function renderBaseOptions(item) {
       });
 
       const noteParts = [];
-      if (base) noteParts.push(base.name);
-      if (side1) noteParts.push(side1.name);
-      if (side2) noteParts.push(side2.name);
+if (base) noteParts.push(base.name);
+if (side1) noteParts.push(side1.name);
+if (side2) noteParts.push(side2.name);
 
-      if (noteParts.length === 3) {
-        sideNotes.push(`${item.name}: ${noteParts.join(", ")}`);
-      }
+if (noteParts.length > 0) {
+  sideNotes.push(`${item.name}: ${noteParts.join(", ")}`);
+}
     }
   });
 
@@ -933,8 +943,10 @@ function renderBaseOptions(item) {
   const drink = getSelectedOptionalItem(drinkSelect, DRINKS);
   if (drink) items.push({ id: drink.id, name: drink.name, price: drink.price, qty: 1 });
 
+  if (isExtraSideAllowedForDay(currentDay)) {
   const side = getSelectedOptionalItem(extraSideSelect, getExtraSidesForDay(currentDay));
   if (side) items.push({ id: side.id, name: side.name, price: side.price, qty: 1 });
+}
 
   const lagniappe = getSelectedOptionalItem(lagniappeSelect, LAGNIAPPE);
   if (lagniappe) items.push({ id: lagniappe.id, name: lagniappe.name, price: lagniappe.price, qty: 1 });
@@ -943,22 +955,33 @@ function renderBaseOptions(item) {
 }
 
     
-  function selectedPlatesHaveSides() {
+ function selectedPlatesHaveSides() {
   const plates = getPlateSelections().items;
   if (!plates.length) return false;
 
   return plates.every(item => {
     const menuItem = getCurrentMainItems().find(m => m.id === item.id);
     const requiresBase = Array.isArray(menuItem?.baseOptions) && menuItem.baseOptions.length > 0;
+    const requiresSides = menuItem?.sideSelectionRequired !== false;
 
-    if (requiresBase) {
+    if (requiresBase && requiresSides) {
       return item.baseId && item.side1Id && item.side2Id;
     }
 
-    return item.side1Id && item.side2Id;
+    if (requiresBase && !requiresSides) {
+      return item.baseId;
+    }
+
+    if (!requiresBase && requiresSides) {
+      return item.side1Id && item.side2Id;
+    }
+
+    return true;
   });
 }
-
+function isExtraSideAllowedForDay(day) {
+  return day !== "monday";
+}
   function calc() {
   const selected = getSelectedItems();
   const selectedItems = selected.items;
