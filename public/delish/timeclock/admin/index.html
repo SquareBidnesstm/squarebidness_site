@@ -492,6 +492,14 @@
             <div class="stat-sub">Labor dollars ÷ sales</div>
           </div>
         </section>
+
+        <section class="card">
+  <div class="card__body">
+    <div class="stat-label">Orders</div>
+    <div class="stat-value" id="statOrders">0</div>
+    <div class="stat-sub">Paid orders for selected day</div>
+  </div>
+</section>
       </div>
 
       <div class="split">
@@ -600,6 +608,7 @@
       statActive: document.getElementById("statActive"),
       statLaborDollars: document.getElementById("statLaborDollars"),
       statLaborPct: document.getElementById("statLaborPct"),
+      statOrders: document.getElementById("statOrders"),
       employeeTotalsBody: document.getElementById("employeeTotalsBody"),
       shiftsBody: document.getElementById("shiftsBody"),
       liveList: document.getElementById("liveList"),
@@ -693,6 +702,16 @@
         ...options
       });
 
+      async function fetchSales(date) {
+  if (!date) return { grossSales: 0, orderCount: 0 };
+
+  try {
+    return await fetchJson(`/api/delish/sales-summary/?date=${encodeURIComponent(date)}&t=${Date.now()}`);
+  } catch {
+    return { grossSales: 0, orderCount: 0 };
+  }
+}
+
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "Request failed");
       return data;
@@ -714,16 +733,14 @@
       } catch {}
     }
 
-    function calculateLaborStats(totalHours) {
-      const hourlyRate = getHourlyRate();
-      const sales = getSalesValue();
-      const laborDollars = totalHours * hourlyRate;
-      const laborPct = sales > 0 ? (laborDollars / sales) * 100 : 0;
+    function calculateLaborStats(totalHours, sales = 0) {
+  const hourlyRate = getHourlyRate();
+  const laborDollars = totalHours * hourlyRate;
+  const laborPct = sales > 0 ? (laborDollars / sales) * 100 : 0;
 
-      els.statLaborDollars.textContent = currency(laborDollars);
-      els.statLaborPct.textContent = pct(laborPct);
-    }
-
+  els.statLaborDollars.textContent = currency(laborDollars);
+  els.statLaborPct.textContent = pct(laborPct);
+}
     function renderEmployeeOptions(employees) {
       const list = employees || [];
       els.deleteEmployeeSelect.innerHTML = `
@@ -812,18 +829,22 @@
       `).join("");
     }
 
-    function renderStats(data, selectedDate) {
-      const totalHours = Number(data.summary?.totalHours ?? 0);
-      const totalShifts = Number(data.summary?.totalShifts ?? 0);
-      const activeCount = (data.active || []).length;
+    function renderStats(data, selectedDate, salesData = {}) {
+  const totalHours = Number(data.summary?.totalHours ?? 0);
+  const totalShifts = Number(data.summary?.totalShifts ?? 0);
+  const activeCount = (data.active || []).length;
+  const grossSales = Number(salesData.grossSales || 0);
+  const orderCount = Number(salesData.orderCount || 0);
 
-      els.statDate.textContent = selectedDate || "All";
-      els.statHours.textContent = String(totalHours);
-      els.statShifts.textContent = String(totalShifts);
-      els.statActive.textContent = String(activeCount);
+  els.statDate.textContent = selectedDate || "All";
+  els.statHours.textContent = String(totalHours);
+  els.statShifts.textContent = String(totalShifts);
+  els.statActive.textContent = String(activeCount);
+  els.statOrders.textContent = String(orderCount);
 
-      calculateLaborStats(totalHours);
-    }
+  els.sales.value = grossSales ? String(grossSales.toFixed(2)) : "";
+  calculateLaborStats(totalHours, grossSales);
+}
 
     function escapeHtml(str) {
       return String(str ?? "")
@@ -851,44 +872,54 @@
     }
 
     async function loadAdmin() {
-      try {
-        saveLocalControls();
+  try {
+    saveLocalControls();
 
-        const date = els.date.value;
-        els.now.textContent = centralNowLabel();
+    const date = els.date.value;
+    els.now.textContent = centralNowLabel();
 
-        const qs = new URLSearchParams();
-        if (date) qs.set("date", date);
-        qs.set("t", Date.now());
+    const qs = new URLSearchParams();
+    if (date) qs.set("date", date);
+    qs.set("t", Date.now());
 
-        const data = await fetchJson(`${API_URL}?${qs.toString()}`);
-        currentData = data;
+    const [data, salesData] = await Promise.all([
+      fetchJson(`${API_URL}?${qs.toString()}`),
+      fetchSales(date)
+    ]);
 
-        renderStats(data, date);
-        renderEmployeeTotals(data.summary);
-        renderShifts(data.shifts || [], date);
-        renderEmployeeOptions(data.employees || []);
-        renderLive(data.active || []);
+    currentData = data;
 
-        els.csvLink.href = `${API_URL}?mode=csv${date ? `&date=${encodeURIComponent(date)}` : ""}`;
+    renderStats(data, date, salesData);
+    renderEmployeeTotals(data.summary);
+    renderShifts(data.shifts || [], date);
+    renderEmployeeOptions(data.employees || []);
+    renderLive(data.active || []);
 
-        const totalHours = Number(data.summary?.totalHours ?? 0);
-        const activeCount = (data.active || []).length;
-        if (activeCount >= 4) {
-          setStatus(`Heads up: ${activeCount} employees are currently clocked in.`, "warn");
-        } else {
-          setStatus("Admin loaded.", "good");
-        }
+    els.csvLink.href = `${API_URL}?mode=csv${date ? `&date=${encodeURIComponent(date)}` : ""}`;
 
-        if (window.sbAnalytics?.track) {
-          window.sbAnalytics.track("delish_timeclock_admin_load", {
-            date
-          });
-        }
-      } catch (err) {
-        setStatus(err.message || "Unable to load admin.", "bad");
-      }
+    const activeCount = (data.active || []).length;
+    const laborPctText = els.statLaborPct.textContent;
+    const laborPctValue = Number(String(laborPctText).replace("%", "")) || 0;
+
+    if (activeCount >= 4) {
+      setStatus(`Heads up: ${activeCount} employees are currently clocked in.`, "warn");
+    } else if (laborPctValue >= 30) {
+      setStatus(`Labor is elevated at ${laborPctText} for this day.`, "warn");
+    } else {
+      setStatus("Admin loaded.", "good");
     }
+
+    if (window.sbAnalytics?.track) {
+      window.sbAnalytics.track("delish_timeclock_admin_load", {
+        date,
+        grossSales: Number(salesData.grossSales || 0),
+        orderCount: Number(salesData.orderCount || 0)
+      });
+    }
+  } catch (err) {
+    setStatus(err.message || "Unable to load admin.", "bad");
+  }
+}
 
     async function addEmployee() {
       const managerPin = getManagerPin();
@@ -1015,10 +1046,10 @@
     els.loadBtn.addEventListener("click", loadAdmin);
     els.addEmployeeBtn.addEventListener("click", addEmployee);
     els.deleteEmployeeBtn.addEventListener("click", deleteEmployee);
-    els.sales.addEventListener("input", () => {
-      saveLocalControls();
-      renderStats(currentData, els.date.value);
-    });
+    els.sales.setAttribute("readonly", "readonly");
+els.sales.addEventListener("focus", () => {
+  setStatus("Sales is now pulled from Delish order data.", "good");
+});
     els.hourlyRate.addEventListener("input", () => {
       saveLocalControls();
       renderStats(currentData, els.date.value);
