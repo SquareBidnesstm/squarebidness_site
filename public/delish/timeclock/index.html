@@ -1,0 +1,650 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Delish Time Clock</title>
+  <meta name="description" content="Delish workforce time clock." />
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#111111" />
+
+  <link rel="stylesheet" href="/styles/global.css" />
+  <meta name="sb:build" content="2026-04-13-01" />
+
+  <style>
+    :root{
+      --bg:#0f1115;
+      --panel:#171a21;
+      --panel-2:#1f2430;
+      --line:rgba(255,255,255,.08);
+      --text:#f5f7fb;
+      --muted:rgba(255,255,255,.68);
+      --accent:#d4a24c;
+      --accent-2:#f2c879;
+      --good:#22c55e;
+      --bad:#ef4444;
+      --warn:#f59e0b;
+      --shadow:0 18px 50px rgba(0,0,0,.28);
+      --radius:18px;
+    }
+
+    * { box-sizing:border-box; }
+
+    html, body {
+      margin:0;
+      padding:0;
+      background:linear-gradient(180deg,#0f1115 0%, #131722 100%);
+      color:var(--text);
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      min-height:100%;
+    }
+
+    a { color:inherit; }
+
+    .wrap {
+      width:min(1100px, calc(100% - 28px));
+      margin:0 auto;
+    }
+
+    .page {
+      padding:24px 0 48px;
+    }
+
+    .topbar {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:20px;
+    }
+
+    .brand {
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .brand img {
+      width:44px;
+      height:44px;
+      border-radius:12px;
+      object-fit:cover;
+      background:#fff;
+    }
+
+    .eyebrow {
+      font-size:.82rem;
+      color:var(--accent-2);
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      margin:0 0 4px;
+      font-weight:700;
+    }
+
+    h1 {
+      margin:0;
+      font-size:clamp(1.8rem, 2.6vw, 2.7rem);
+      line-height:1.05;
+      letter-spacing:-0.03em;
+    }
+
+    .sub {
+      margin:6px 0 0;
+      color:var(--muted);
+      max-width:700px;
+    }
+
+    .time-chip {
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 14px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      background:rgba(255,255,255,.04);
+      color:var(--muted);
+      font-weight:600;
+      white-space:nowrap;
+    }
+
+    .grid {
+      display:grid;
+      grid-template-columns:1.15fr .85fr;
+      gap:18px;
+    }
+
+    .card {
+      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .card__body {
+      padding:20px;
+    }
+
+    .card h2 {
+      margin:0 0 6px;
+      font-size:1.25rem;
+      letter-spacing:-0.02em;
+    }
+
+    .card p.lead {
+      margin:0 0 18px;
+      color:var(--muted);
+    }
+
+    .form-grid {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+      margin-bottom:14px;
+    }
+
+    .field {
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+
+    .field label {
+      font-size:.92rem;
+      color:var(--muted);
+      font-weight:700;
+    }
+
+    .field select,
+    .field input {
+      width:100%;
+      min-height:52px;
+      padding:0 14px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:var(--panel-2);
+      color:var(--text);
+      font-size:1rem;
+      outline:none;
+    }
+
+    .field input::placeholder {
+      color:rgba(255,255,255,.36);
+    }
+
+    .actions {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-top:10px;
+    }
+
+    button {
+      min-height:56px;
+      border:none;
+      border-radius:14px;
+      font-weight:800;
+      letter-spacing:.01em;
+      font-size:1rem;
+      cursor:pointer;
+      transition:transform .15s ease, opacity .15s ease, filter .15s ease;
+    }
+
+    button:hover { transform:translateY(-1px); }
+    button:disabled { opacity:.55; cursor:not-allowed; transform:none; }
+
+    .btn-in {
+      background:linear-gradient(180deg,#22c55e,#16a34a);
+      color:#fff;
+    }
+
+    .btn-out {
+      background:linear-gradient(180deg,#ef4444,#dc2626);
+      color:#fff;
+    }
+
+    .status-box {
+      margin-top:16px;
+      padding:14px 16px;
+      border-radius:14px;
+      background:rgba(255,255,255,.04);
+      border:1px solid var(--line);
+      min-height:66px;
+      display:flex;
+      align-items:center;
+      color:var(--text);
+      font-weight:600;
+    }
+
+    .status-box.good { border-color:rgba(34,197,94,.35); background:rgba(34,197,94,.08); }
+    .status-box.bad  { border-color:rgba(239,68,68,.35); background:rgba(239,68,68,.08); }
+    .status-box.warn { border-color:rgba(245,158,11,.35); background:rgba(245,158,11,.08); }
+
+    .tiny {
+      margin-top:10px;
+      color:var(--muted);
+      font-size:.88rem;
+    }
+
+    .list-head {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    .pill {
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      background:rgba(212,162,76,.12);
+      border:1px solid rgba(212,162,76,.22);
+      color:var(--accent-2);
+      font-size:.86rem;
+      font-weight:700;
+    }
+
+    .live-list,
+    .recent-list {
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .row {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:14px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+    }
+
+    .row strong {
+      display:block;
+      font-size:1rem;
+    }
+
+    .row small {
+      display:block;
+      color:var(--muted);
+      margin-top:3px;
+    }
+
+    .tag {
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:88px;
+      padding:8px 10px;
+      border-radius:999px;
+      font-size:.78rem;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      white-space:nowrap;
+    }
+
+    .tag.in {
+      background:rgba(34,197,94,.12);
+      color:#86efac;
+      border:1px solid rgba(34,197,94,.28);
+    }
+
+    .tag.out {
+      background:rgba(239,68,68,.12);
+      color:#fca5a5;
+      border:1px solid rgba(239,68,68,.28);
+    }
+
+    .empty {
+      padding:16px;
+      border-radius:14px;
+      border:1px dashed var(--line);
+      color:var(--muted);
+      text-align:center;
+    }
+
+    .footer-note {
+      margin-top:18px;
+      color:var(--muted);
+      font-size:.88rem;
+    }
+
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .topbar {
+        flex-direction:column;
+        align-items:flex-start;
+      }
+
+      .form-grid,
+      .actions {
+        grid-template-columns:1fr;
+      }
+
+      .row {
+        flex-direction:column;
+        align-items:flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="wrap">
+      <div class="topbar">
+        <div class="brand">
+          <img src="/delish/assets/delish-logo-mark-512.png" alt="Delish logo" />
+          <div>
+            <p class="eyebrow">Delish Workforce System</p>
+            <h1>Time Clock</h1>
+            <p class="sub">Clock in. Clock out. Track labor clean. Built for the kitchen tablet.</p>
+          </div>
+        </div>
+
+        <div class="time-chip" id="centralNow">Central Time</div>
+      </div>
+
+      <div class="grid">
+        <section class="card">
+          <div class="card__body">
+            <h2>Employee Punch</h2>
+            <p class="lead">Simple and controlled. PIN required. No double clock-ins.</p>
+
+            <div class="form-grid">
+              <div class="field">
+                <label for="employeeName">Employee</label>
+                <select id="employeeName">
+                  <option value="">Select employee</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="employeePin">PIN</label>
+                <input
+                  id="employeePin"
+                  type="password"
+                  inputmode="numeric"
+                  maxlength="8"
+                  placeholder="Enter PIN"
+                  autocomplete="off"
+                />
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="btn-in" id="clockInBtn">Clock In</button>
+              <button class="btn-out" id="clockOutBtn">Clock Out</button>
+            </div>
+
+            <div class="status-box" id="statusBox">
+              Ready.
+            </div>
+
+            <div class="tiny">
+              Device label: <span id="deviceLabel">kitchen-ipad</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card__body">
+            <div class="list-head">
+              <div>
+                <h2>Currently Clocked In</h2>
+                <p class="lead" style="margin-bottom:0;">Live shift visibility for the kitchen.</p>
+              </div>
+              <div class="pill"><span id="liveCount">0</span> active</div>
+            </div>
+
+            <div class="live-list" id="liveList">
+              <div class="empty">No one is clocked in right now.</div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <section class="card" style="margin-top:18px;">
+        <div class="card__body">
+          <div class="list-head">
+            <div>
+              <h2>Recent Activity</h2>
+              <p class="lead" style="margin-bottom:0;">Latest punches from the time clock.</p>
+            </div>
+          </div>
+
+          <div class="recent-list" id="recentList">
+            <div class="empty">No punches yet.</div>
+          </div>
+
+          <div class="footer-note">
+            Next phase: shift duration, CSV export, labor totals, and manager controls.
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script defer src="/scripts/sb-analytics.js"></script>
+  <script>
+    const API_URL = "/api/delish/timeclock/";
+    const DEVICE_KEY = "delish_timeclock_device";
+    const DEFAULT_DEVICE = "kitchen-ipad";
+
+    const els = {
+      now: document.getElementById("centralNow"),
+      name: document.getElementById("employeeName"),
+      pin: document.getElementById("employeePin"),
+      clockIn: document.getElementById("clockInBtn"),
+      clockOut: document.getElementById("clockOutBtn"),
+      status: document.getElementById("statusBox"),
+      liveList: document.getElementById("liveList"),
+      recentList: document.getElementById("recentList"),
+      liveCount: document.getElementById("liveCount"),
+      deviceLabel: document.getElementById("deviceLabel")
+    };
+
+    function getOrCreateDevice() {
+      try {
+        let device = localStorage.getItem(DEVICE_KEY);
+        if (!device) {
+          device = DEFAULT_DEVICE;
+          localStorage.setItem(DEVICE_KEY, device);
+        }
+        return device;
+      } catch {
+        return DEFAULT_DEVICE;
+      }
+    }
+
+    const device = getOrCreateDevice();
+    els.deviceLabel.textContent = device;
+
+    function formatCentralNow() {
+      const now = new Date();
+      return new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/Chicago",
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+      }).format(now);
+    }
+
+    function formatCentralTime(iso) {
+      if (!iso) return "";
+      return new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/Chicago",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+      }).format(new Date(iso));
+    }
+
+    function setStatus(message, tone = "") {
+      els.status.className = "status-box" + (tone ? ` ${tone}` : "");
+      els.status.textContent = message;
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    async function fetchJson(url, options = {}) {
+      const res = await fetch(url, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          ...(options.headers || {})
+        }
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error || "Request failed");
+      }
+      return data;
+    }
+
+    function renderEmployees(employees) {
+      const options = ['<option value="">Select employee</option>']
+        .concat(
+          (employees || []).map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`)
+        );
+      els.name.innerHTML = options.join("");
+    }
+
+    function renderLive(active) {
+      const rows = active || [];
+      els.liveCount.textContent = String(rows.length);
+
+      if (!rows.length) {
+        els.liveList.innerHTML = '<div class="empty">No one is clocked in right now.</div>';
+        return;
+      }
+
+      els.liveList.innerHTML = rows.map(item => {
+        return `
+          <div class="row">
+            <div>
+              <strong>${escapeHtml(item.name)}</strong>
+              <small>Clocked in ${escapeHtml(formatCentralTime(item.clockInAt))}</small>
+            </div>
+            <div class="tag in">Clocked In</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderRecent(recent) {
+      const rows = recent || [];
+      if (!rows.length) {
+        els.recentList.innerHTML = '<div class="empty">No punches yet.</div>';
+        return;
+      }
+
+      els.recentList.innerHTML = rows.map(item => {
+        const isIn = item.action === "clock_in";
+        return `
+          <div class="row">
+            <div>
+              <strong>${escapeHtml(item.name)}</strong>
+              <small>${escapeHtml(formatCentralTime(item.timestamp))} • ${escapeHtml(item.device || "device")}</small>
+            </div>
+            <div class="tag ${isIn ? "in" : "out"}">${isIn ? "Clock In" : "Clock Out"}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function loadState() {
+      els.now.textContent = formatCentralNow();
+
+      try {
+        const data = await fetchJson(`${API_URL}?t=${Date.now()}`);
+        renderEmployees(data.employees || []);
+        renderLive(data.active || []);
+        renderRecent(data.recent || []);
+      } catch (err) {
+        setStatus(err.message || "Unable to load time clock.", "bad");
+      }
+    }
+
+    async function submitPunch(action) {
+      const name = els.name.value.trim();
+      const pin = els.pin.value.trim();
+
+      if (!name) {
+        setStatus("Select an employee.", "warn");
+        return;
+      }
+
+      if (!pin) {
+        setStatus("Enter PIN.", "warn");
+        return;
+      }
+
+      els.clockIn.disabled = true;
+      els.clockOut.disabled = true;
+
+      try {
+        const data = await fetchJson(API_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            action,
+            name,
+            pin,
+            device
+          })
+        });
+
+        setStatus(data.message || "Saved.", data.ok ? "good" : "warn");
+        els.pin.value = "";
+
+        renderLive(data.active || []);
+        renderRecent(data.recent || []);
+
+        if (window.sbAnalytics?.track) {
+          window.sbAnalytics.track("delish_timeclock_punch", {
+            action,
+            employee: name
+          });
+        }
+      } catch (err) {
+        setStatus(err.message || "Unable to save punch.", "bad");
+      } finally {
+        els.clockIn.disabled = false;
+        els.clockOut.disabled = false;
+      }
+    }
+
+    els.clockIn.addEventListener("click", () => submitPunch("clock_in"));
+    els.clockOut.addEventListener("click", () => submitPunch("clock_out"));
+
+    setInterval(() => {
+      els.now.textContent = formatCentralNow();
+    }, 15000);
+
+    loadState();
+    setInterval(loadState, 30000);
+  </script>
+</body>
+</html>
