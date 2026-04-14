@@ -243,13 +243,11 @@
     <div class="optionNote">Optional</div>
   </div>
 
-  <div class="section">
-    <h3>Extra Side</h3>
-    <select id="extraSideSelect">
-      <option value="">Extra Side (optional)</option>
-    </select>
-    <div class="optionNote">Optional extra side outside of your 2 plate sides.</div>
-  </div>
+ <div class="section">
+  <h3>Drinks</h3>
+  <div id="drinkItems"></div>
+  <div class="optionNote">Add drinks to any order.</div>
+</div>
 
   <div class="section">
   <h3>Lagniappe Menu</h3>
@@ -299,7 +297,7 @@
   const menuDayNote = document.getElementById("menuDayNote");
   const mainMenuNote = document.getElementById("mainMenuNote");
   const mainMenuItems = document.getElementById("mainMenuItems");
-  const drinkSelect = document.getElementById("drinkSelect");
+  const drinkItems = document.getElementById("drinkItems");
   const extraSideSelect = document.getElementById("extraSideSelect");
   const subtotalDisplay = document.getElementById("subtotalDisplay");
   const totalDisplay = document.getElementById("totalDisplay");
@@ -552,6 +550,23 @@
   `;
 }
 
+  function renderDrinkItem(item) {
+  return `
+    <div class="menuItem">
+      <div class="menuTop">
+        <div class="menuCopy">
+          <span>${item.name} ($${Number(item.price).toFixed(2)})</span>
+        </div>
+        <div class="qtyWrap">
+          <button type="button" class="qtyBtn" data-target="${item.id}Qty" data-action="decrease">−</button>
+          <input type="number" min="0" max="20" value="0" id="${item.id}Qty" class="qty" />
+          <button type="button" class="qtyBtn" data-target="${item.id}Qty" data-action="increase">+</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
   function attachQtyButtons() {
   document.querySelectorAll(".qtyBtn").forEach((btn) => {
     btn.onclick = () => {
@@ -641,7 +656,7 @@
       mainMenuNote.textContent = menu.note;
       mainMenuItems.innerHTML = menu.mains.map(item => renderMainItem(item, state.today)).join("");
 
-      renderSelectOptions(drinkSelect, DRINKS, "Drink (optional)");
+      drinkItems.innerHTML = DRINKS.map(renderDrinkItem).join("");
 
       if (isExtraSideAllowedForDay(state.today)) {
         renderSelectOptions(extraSideSelect, getExtraSidesForDay(state.today), "Extra Side (optional)");
@@ -668,7 +683,7 @@
       </div>
     </div>
   `;
-  renderSelectOptions(drinkSelect, [], "Drink (optional)");
+drinkItems.innerHTML = "";
   renderSelectOptions(extraSideSelect, [], "Extra Side (optional)");
   lagniappeItems.innerHTML = "";
     } else {
@@ -683,7 +698,7 @@
       </div>
     </div>
   `;
-  renderSelectOptions(drinkSelect, [], "Drink (optional)");
+  drinkItems.innerHTML = "";
   renderSelectOptions(extraSideSelect, [], "Extra Side (optional)");
   lagniappeItems.innerHTML = "";
 
@@ -770,6 +785,20 @@
       });
     }
 
+    function getDrinkSelections() {
+  return DRINKS.reduce((items, item) => {
+    const qtyEl = document.getElementById(`${item.id}Qty`);
+    const qty = Number(qtyEl?.value || 0);
+
+    if (qty > 0) {
+      items.push({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        qty
+      });
+    }
+
     return items;
   }, []);
 }
@@ -789,8 +818,8 @@
     side2Name: item.side2Name
   }));
 
-  const drink = getSelectedOptionalItem(drinkSelect, DRINKS);
-  if (drink) items.push({ id: drink.id, name: drink.name, price: drink.price, qty: 1 });
+  const drinkItemsSelected = getDrinkSelections();
+  items.push(...drinkItemsSelected);
 
   if (isExtraSideAllowedForDay(currentDay)) {
     const side = getSelectedOptionalItem(extraSideSelect, getExtraSidesForDay(currentDay));
@@ -802,7 +831,6 @@
 
   return { items, sideNotes: plateSelections.sideNotes };
 }
-
   function selectedPlatesHaveSides() {
     const plates = getPlateSelections().items;
     if (!plates.length) return false;
