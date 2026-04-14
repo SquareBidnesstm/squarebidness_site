@@ -879,17 +879,14 @@ function updateTokenIndicator() {
       throw new Error(msg);
     }
 
-    setOpsNotice(successMessage || "Operator setting updated.");
-   await loadOperatorStatus();
-await loadOrders();
-await loadCateringCount();
-updateTokenIndicator();
+        setOpsNotice(successMessage || "Operator setting updated.");
+    await refreshAll();
+    updateTokenIndicator();
   } catch (err) {
     console.error("Operator control error:", err);
     setOpsNotice(err.message || "Unable to update operator setting.", true);
   }
 }
-
 
         document.getElementById("opsOpenBtn")?.addEventListener("click", async () => {
       await postOperatorControl(
