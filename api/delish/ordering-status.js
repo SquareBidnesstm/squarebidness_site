@@ -28,17 +28,15 @@ export default async function handler(req, res) {
     const resumeAt = typeof resumeRes === "string" ? resumeRes : "";
     const message = typeof messageRes === "string" ? messageRes : "";
 
-    // If no Redis mode is set, fall back to existing config behavior
     if (!redisMode) {
       return res.status(200).json({
         ok: true,
         orderingMode: DELISH_ORDERING_MODE,
-        message,
+        message: "",
         ...fallbackState
       });
     }
 
-    // Forced open
     if (redisMode === "open") {
       return res.status(200).json({
         ok: true,
@@ -50,12 +48,11 @@ export default async function handler(req, res) {
         reason: "manual_open",
         openTime: fallbackState.openTime || "11:00 AM",
         closeTime: fallbackState.closeTime || "3:00 PM",
-        resumeAt,
-        message
+        resumeAt: "",
+        message: ""
       });
     }
 
-    // Forced closed
     if (redisMode === "closed") {
       return res.status(200).json({
         ok: true,
@@ -72,13 +69,11 @@ export default async function handler(req, res) {
       });
     }
 
-    // Paused until time
     if (redisMode === "paused") {
       const now = new Date();
       const resumeDate = resumeAt ? new Date(resumeAt) : null;
       const resumeValid = resumeDate && !Number.isNaN(resumeDate.getTime());
 
-      // If pause expired, fall back to normal auto logic
       if (resumeValid && now >= resumeDate) {
         return res.status(200).json({
           ok: true,
@@ -103,11 +98,10 @@ export default async function handler(req, res) {
       });
     }
 
-    // Auto mode uses normal schedule logic
     return res.status(200).json({
       ok: true,
       orderingMode: "auto",
-      message,
+      message: "",
       ...fallbackState
     });
   } catch (error) {
