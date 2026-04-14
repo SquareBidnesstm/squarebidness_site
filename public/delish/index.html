@@ -235,13 +235,6 @@
     <div id="mainMenuItems"></div>
   </div>
 
-  <div class="section">
-    <h3>Drinks</h3>
-    <select id="drinkSelect">
-      <option value="">Drink (optional)</option>
-    </select>
-    <div class="optionNote">Optional</div>
-  </div>
 
  <div class="section">
   <h3>Drinks</h3>
@@ -643,67 +636,68 @@
   }
 
   function applyDailyMenu() {
-    const state = getServiceState();
-    currentMode = state.mode;
-    currentDay = state.today;
+  const state = getServiceState();
+  currentMode = state.mode;
+  currentDay = state.today;
 
-    updateOrderingBanner(state);
+  updateOrderingBanner(state);
 
-    if (state.today && MENU_BY_DAY[state.today]) {
-      const menu = MENU_BY_DAY[state.today];
-      menuDayTitle.textContent = menu.title;
-      menuDayNote.textContent = "Order online, pickup on arrival · Alexandria, Louisiana";
-      mainMenuNote.textContent = menu.note;
-      mainMenuItems.innerHTML = menu.mains.map(item => renderMainItem(item, state.today)).join("");
+  if (state.today && MENU_BY_DAY[state.today]) {
+    const menu = MENU_BY_DAY[state.today];
+    menuDayTitle.textContent = menu.title;
+    menuDayNote.textContent = "Order online, pickup on arrival · Alexandria, Louisiana";
+    mainMenuNote.textContent = menu.note;
+    mainMenuItems.innerHTML = menu.mains.map(item => renderMainItem(item, state.today)).join("");
 
-      drinkItems.innerHTML = DRINKS.map(renderDrinkItem).join("");
+    drinkItems.innerHTML = DRINKS.map(renderDrinkItem).join("");
 
-      if (isExtraSideAllowedForDay(state.today)) {
-        renderSelectOptions(extraSideSelect, getExtraSidesForDay(state.today), "Extra Side (optional)");
-        extraSideSelect.disabled = false;
-      } else {
-        renderSelectOptions(extraSideSelect, [], "Extra Side unavailable on Monday");
-        extraSideSelect.value = "";
-        extraSideSelect.disabled = true;
-      }
-
-      lagniappeItems.innerHTML = LAGNIAPPE.map(renderLagniappeItem).join("");
-      attachQtyButtons();
-      attachPlateSideListeners();
-      syncPlateSides();
-   } else if (state.reason === "not_a_service_day") {
-  menuDayTitle.textContent = "Delish — Closed Today";
-  menuDayNote.textContent = "Pickup Only · Alexandria, Louisiana";
-  mainMenuNote.textContent = "Online ordering is closed today.";
-  mainMenuItems.innerHTML = `
-    <div class="menuItem">
-      <div class="menuCopy">
-        <span>Closed Today</span>
-        <small>Please come back during active ordering days.</small>
-      </div>
-    </div>
-  `;
-drinkItems.innerHTML = "";
-  renderSelectOptions(extraSideSelect, [], "Extra Side (optional)");
-  lagniappeItems.innerHTML = "";
+    if (isExtraSideAllowedForDay(state.today)) {
+      renderSelectOptions(extraSideSelect, getExtraSidesForDay(state.today), "Extra Side (optional)");
+      extraSideSelect.disabled = false;
     } else {
-  menuDayTitle.textContent = "Delish — Temporarily Unavailable";
-  menuDayNote.textContent = "Pickup Only · Alexandria, Louisiana";
-  mainMenuNote.textContent = "Online ordering is currently unavailable.";
-  mainMenuItems.innerHTML = `
-    <div class="menuItem">
-      <div class="menuCopy">
-        <span>Ordering Unavailable</span>
-        <small>Please check back shortly.</small>
-      </div>
-    </div>
-  `;
-  drinkItems.innerHTML = "";
-  renderSelectOptions(extraSideSelect, [], "Extra Side (optional)");
-  lagniappeItems.innerHTML = "";
+      renderSelectOptions(extraSideSelect, [], "Extra Side unavailable on Monday");
+      extraSideSelect.value = "";
+      extraSideSelect.disabled = true;
+    }
 
-    calc();
+    lagniappeItems.innerHTML = LAGNIAPPE.map(renderLagniappeItem).join("");
+    attachQtyButtons();
+    attachPlateSideListeners();
+    syncPlateSides();
+  } else if (state.reason === "not_a_service_day") {
+    menuDayTitle.textContent = "Delish — Closed Today";
+    menuDayNote.textContent = "Pickup Only · Alexandria, Louisiana";
+    mainMenuNote.textContent = "Online ordering is closed today.";
+    mainMenuItems.innerHTML = `
+      <div class="menuItem">
+        <div class="menuCopy">
+          <span>Closed Today</span>
+          <small>Please come back during active ordering days.</small>
+        </div>
+      </div>
+    `;
+    drinkItems.innerHTML = "";
+    renderSelectOptions(extraSideSelect, [], "Extra Side (optional)");
+    lagniappeItems.innerHTML = "";
+  } else {
+    menuDayTitle.textContent = "Delish — Temporarily Unavailable";
+    menuDayNote.textContent = "Pickup Only · Alexandria, Louisiana";
+    mainMenuNote.textContent = "Online ordering is currently unavailable.";
+    mainMenuItems.innerHTML = `
+      <div class="menuItem">
+        <div class="menuCopy">
+          <span>Ordering Unavailable</span>
+          <small>Please check back shortly.</small>
+        </div>
+      </div>
+    `;
+    drinkItems.innerHTML = "";
+    renderSelectOptions(extraSideSelect, [], "Extra Side (optional)");
+    lagniappeItems.innerHTML = "";
   }
+
+  calc();
+}
 
   function getCurrentMainItems() {
     const menu = MENU_BY_DAY[currentDay];
@@ -771,7 +765,7 @@ drinkItems.innerHTML = "";
     return { items, sideNotes };
   }
 
-  function getLagniappeSelections() {
+function getLagniappeSelections() {
   return LAGNIAPPE.reduce((items, item) => {
     const qtyEl = document.getElementById(`${item.id}Qty`);
     const qty = Number(qtyEl?.value || 0);
@@ -785,7 +779,11 @@ drinkItems.innerHTML = "";
       });
     }
 
-    function getDrinkSelections() {
+    return items;
+  }, []);
+}
+
+function getDrinkSelections() {
   return DRINKS.reduce((items, item) => {
     const qtyEl = document.getElementById(`${item.id}Qty`);
     const qty = Number(qtyEl?.value || 0);
@@ -873,7 +871,11 @@ drinkItems.innerHTML = "";
     const pickupOk = pickupWindow.value.trim().length > 0;
 const plateItems = getPlateSelections().items;
 const lagniappeItemsSelected = getLagniappeSelections();
-const hasOrderItem = plateItems.length > 0 || lagniappeItemsSelected.length > 0;
+const drinkItemsSelected = getDrinkSelections();
+const hasOrderItem =
+  plateItems.length > 0 ||
+  lagniappeItemsSelected.length > 0 ||
+  drinkItemsSelected.length > 0;
 const sidesOk = plateItems.length > 0 ? selectedPlatesHaveSides() : true;
 
     if (!state.openNow) {
@@ -927,9 +929,10 @@ const sidesOk = plateItems.length > 0 ? selectedPlatesHaveSides() : true;
     const selectedItems = selected.items;
    const plateSelections = getPlateSelections();
 const lagniappeItemsSelected = getLagniappeSelections();
+const drinkItemsSelected = getDrinkSelections();
 
-if (!plateSelections.items.length && !lagniappeItemsSelected.length) {
-  showStatus("Add at least one main plate or one Lagniappe item first.");
+if (!plateSelections.items.length && !lagniappeItemsSelected.length && !drinkItemsSelected.length) {
+  showStatus("Add at least one main plate, drink, or Lagniappe item first.");
   return;
 }
 
