@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Delish Time Clock Admin</title>
+  <meta name="description" content="Delish time clock admin." />
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#111111" />
+
+  <link rel="stylesheet" href="/styles/global.css" />
+  <meta name="sb:build" content="2026-04-13-02" />
+
+  <style>
+    :root{
+      --bg:#0f1115;
+      --panel:#171a21;
+      --panel-2:#1f2430;
+      --line:rgba(255,255,255,.08);
+      --text:#f5f7fb;
+      --muted:rgba(255,255,255,.68);
+      --accent:#d4a24c;
+      --accent-2:#f2c879;
+      --good:#22c55e;
+      --shadow:0 18px 50px rgba(0,0,0,.28);
+      --radius:18px;
+    }
+
+    * { box-sizing:border-box; }
+
+    html, body {
+      margin:0;
+      padding:0;
+      min-height:100%;
+      background:linear-gradient(180deg,#0f1115 0%, #131722 100%);
+      color:var(--text);
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    }
+
+    .wrap {
+      width:min(1180px, calc(100% - 28px));
+      margin:0 auto;
+    }
+
+    .page {
+      padding:24px 0 48px;
+    }
+
+    .topbar {
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:18px;
+      margin-bottom:18px;
+    }
+
+    .eyebrow {
+      margin:0 0 6px;
+      font-size:.82rem;
+      color:var(--accent-2);
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      font-weight:800;
+    }
+
+    h1 {
+      margin:0;
+      font-size:clamp(1.8rem, 2.5vw, 2.6rem);
+      letter-spacing:-0.03em;
+    }
+
+    .sub {
+      margin:8px 0 0;
+      color:var(--muted);
+      max-width:720px;
+    }
+
+    .time-chip {
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 14px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      background:rgba(255,255,255,.04);
+      color:var(--muted);
+      font-weight:700;
+      white-space:nowrap;
+    }
+
+    .toolbar {
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      margin-bottom:18px;
+    }
+
+    .toolbar input,
+    .toolbar button,
+    .toolbar a {
+      min-height:48px;
+      padding:0 14px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:var(--panel-2);
+      color:var(--text);
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      font-weight:700;
+    }
+
+    .toolbar button {
+      cursor:pointer;
+    }
+
+    .toolbar .primary {
+      background:linear-gradient(180deg,#d4a24c,#b78028);
+      color:#111;
+      border:none;
+    }
+
+    .grid {
+      display:grid;
+      grid-template-columns:repeat(4, 1fr);
+      gap:14px;
+      margin-bottom:18px;
+    }
+
+    .card {
+      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .card__body {
+      padding:18px;
+    }
+
+    .stat-label {
+      color:var(--muted);
+      font-size:.86rem;
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+
+    .stat-value {
+      margin-top:8px;
+      font-size:1.8rem;
+      font-weight:900;
+      letter-spacing:-0.03em;
+    }
+
+    .stat-sub {
+      margin-top:8px;
+      color:var(--muted);
+      font-size:.92rem;
+    }
+
+    .section {
+      margin-top:18px;
+    }
+
+    .section h2 {
+      margin:0 0 12px;
+      font-size:1.15rem;
+      letter-spacing:-0.02em;
+    }
+
+    table {
+      width:100%;
+      border-collapse:collapse;
+    }
+
+    .table-wrap {
+      overflow:auto;
+      border-radius:18px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+    }
+
+    th, td {
+      padding:14px 12px;
+      border-bottom:1px solid var(--line);
+      text-align:left;
+      vertical-align:top;
+      white-space:nowrap;
+    }
+
+    th {
+      font-size:.82rem;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      color:var(--accent-2);
+      background:rgba(255,255,255,.03);
+    }
+
+    td {
+      color:var(--text);
+    }
+
+    tr:last-child td {
+      border-bottom:none;
+    }
+
+    .muted {
+      color:var(--muted);
+    }
+
+    .empty {
+      padding:18px;
+      color:var(--muted);
+      text-align:center;
+    }
+
+    @media (max-width: 980px) {
+      .grid {
+        grid-template-columns:repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .topbar {
+        flex-direction:column;
+        align-items:flex-start;
+      }
+
+      .grid {
+        grid-template-columns:1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="wrap">
+      <div class="topbar">
+        <div>
+          <p class="eyebrow">Delish Workforce System</p>
+          <h1>Time Clock Admin</h1>
+          <p class="sub">Daily labor view, completed shifts, and export-ready payroll support.</p>
+        </div>
+        <div class="time-chip" id="centralNow">Central Time</div>
+      </div>
+
+      <div class="toolbar">
+        <input id="dateFilter" type="date" />
+        <button id="loadBtn" class="primary">Load Day</button>
+        <a id="csvLink" href="/api/delish/timeclock/?mode=csv" target="_blank" rel="noopener">Export CSV</a>
+        <a href="/delish/timeclock/">Open Time Clock</a>
+      </div>
+
+      <div class="grid">
+        <section class="card">
+          <div class="card__body">
+            <div class="stat-label">Date</div>
+            <div class="stat-value" id="statDate">—</div>
+            <div class="stat-sub">Central Time</div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card__body">
+            <div class="stat-label">Total Hours</div>
+            <div class="stat-value" id="statHours">0</div>
+            <div class="stat-sub">Worked hours recorded</div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card__body">
+            <div class="stat-label">Total Shifts</div>
+            <div class="stat-value" id="statShifts">0</div>
+            <div class="stat-sub">Completed shifts</div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card__body">
+            <div class="stat-label">Active Now</div>
+            <div class="stat-value" id="statActive">0</div>
+            <div class="stat-sub">Employees currently clocked in</div>
+          </div>
+        </section>
+      </div>
+
+      <section class="section">
+        <h2>Employee Daily Totals</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Employee</th>
+                <th>Shifts</th>
+                <th>Minutes</th>
+                <th>Hours</th>
+              </tr>
+            </thead>
+            <tbody id="employeeTotalsBody">
+              <tr><td colspan="4" class="empty">No labor data yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Completed Shifts</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Employee</th>
+                <th>Clock In</th>
+                <th>Clock Out</th>
+                <th>Minutes</th>
+                <th>Hours</th>
+                <th>Devices</th>
+              </tr>
+            </thead>
+            <tbody id="shiftsBody">
+              <tr><td colspan="6" class="empty">No completed shifts yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script defer src="/scripts/sb-analytics.js"></script>
+  <script>
+    const API_URL = "/api/delish/timeclock/";
+    const els = {
+      now: document.getElementById("centralNow"),
+      date: document.getElementById("dateFilter"),
+      loadBtn: document.getElementById("loadBtn"),
+      csvLink: document.getElementById("csvLink"),
+      statDate: document.getElementById("statDate"),
+      statHours: document.getElementById("statHours"),
+      statShifts: document.getElementById("statShifts"),
+      statActive: document.getElementById("statActive"),
+      employeeTotalsBody: document.getElementById("employeeTotalsBody"),
+      shiftsBody: document.getElementById("shiftsBody")
+    };
+
+    function centralNowLabel() {
+      return new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/Chicago",
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+      }).format(new Date());
+    }
+
+    function centralDateInputValue(date = new Date()) {
+      const parts = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/Chicago",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+      }).formatToParts(date);
+
+      const map = {};
+      for (const part of parts) {
+        if (part.type !== "literal") map[part.type] = part.value;
+      }
+
+      return `${map.year}-${map.month}-${map.day}`;
+    }
+
+    function formatCentralDateTime(iso) {
+      return new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/Chicago",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+      }).format(new Date(iso));
+    }
+
+    async function fetchJson(url) {
+      const res = await fetch(url, { cache: "no-store" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Request failed");
+      return data;
+    }
+
+    function renderEmployeeTotals(summary) {
+      const rows = summary?.employees || [];
+      if (!rows.length) {
+        els.employeeTotalsBody.innerHTML = `<tr><td colspan="4" class="empty">No labor data yet.</td></tr>`;
+        return;
+      }
+
+      els.employeeTotalsBody.innerHTML = rows.map(item => `
+        <tr>
+          <td>${item.name}</td>
+          <td>${item.shifts}</td>
+          <td>${item.minutes}</td>
+          <td>${item.hours}</td>
+        </tr>
+      `).join("");
+    }
+
+    function renderShifts(shifts, selectedDate) {
+      const rows = (shifts || []).filter(shift => {
+        return !selectedDate || shift.dateCentral === selectedDate;
+      });
+
+      if (!rows.length) {
+        els.shiftsBody.innerHTML = `<tr><td colspan="6" class="empty">No completed shifts yet.</td></tr>`;
+        return;
+      }
+
+      els.shiftsBody.innerHTML = rows.map(shift => `
+        <tr>
+          <td>${shift.name}</td>
+          <td>${formatCentralDateTime(shift.clockInAt)}</td>
+          <td>${formatCentralDateTime(shift.clockOutAt)}</td>
+          <td>${shift.durationMinutes}</td>
+          <td>${shift.durationHours}</td>
+          <td><span class="muted">${shift.clockInDevice || ""} → ${shift.clockOutDevice || ""}</span></td>
+        </tr>
+      `).join("");
+    }
+
+    async function loadAdmin() {
+      const date = els.date.value;
+      els.now.textContent = centralNowLabel();
+
+      const qs = new URLSearchParams();
+      if (date) qs.set("date", date);
+      qs.set("t", Date.now());
+
+      const data = await fetchJson(`${API_URL}?${qs.toString()}`);
+
+      els.statDate.textContent = date || "All";
+      els.statHours.textContent = String(data.summary?.totalHours ?? 0);
+      els.statShifts.textContent = String(data.summary?.totalShifts ?? 0);
+      els.statActive.textContent = String((data.active || []).length);
+
+      renderEmployeeTotals(data.summary);
+      renderShifts(data.shifts || [], date);
+
+      els.csvLink.href = `${API_URL}?mode=csv${date ? `&date=${encodeURIComponent(date)}` : ""}`;
+    }
+
+    els.date.value = centralDateInputValue();
+    els.loadBtn.addEventListener("click", loadAdmin);
+
+    setInterval(() => {
+      els.now.textContent = centralNowLabel();
+    }, 15000);
+
+    loadAdmin();
+  </script>
+</body>
+</html>
