@@ -301,7 +301,6 @@
   const mainMenuItems = document.getElementById("mainMenuItems");
   const drinkSelect = document.getElementById("drinkSelect");
   const extraSideSelect = document.getElementById("extraSideSelect");
-  const lagniappeSelect = document.getElementById("lagniappeSelect");
   const subtotalDisplay = document.getElementById("subtotalDisplay");
   const totalDisplay = document.getElementById("totalDisplay");
   const checkoutBtn = document.getElementById("checkoutBtn");
@@ -655,39 +654,36 @@
       attachQtyButtons();
       attachPlateSideListeners();
       syncPlateSides();
-    } else if (state.reason === "not_a_service_day") {
-      menuDayTitle.textContent = "Delish — Closed Today";
-      menuDayNote.textContent = "Pickup Only · Alexandria, Louisiana";
-      mainMenuNote.textContent = "Online ordering is closed today.";
-      mainMenuItems.innerHTML = `
-      lagniappeItems.innerHTML = "";
-        <div class="menuItem">
-          <div class="menuCopy">
-            <span>Closed Today</span>
-            <small>Please come back during active ordering days.</small>
-          </div>
-        </div>
-      `;
-      renderSelectOptions(drinkSelect, [], "Drink (optional)");
-      renderSelectOptions(extraSideSelect, [], "Extra Side (optional)");
-      renderSelectOptions(lagniappeSelect, [], "Lagniappe unavailable"); 
+   } else if (state.reason === "not_a_service_day") {
+  menuDayTitle.textContent = "Delish — Closed Today";
+  menuDayNote.textContent = "Pickup Only · Alexandria, Louisiana";
+  mainMenuNote.textContent = "Online ordering is closed today.";
+  mainMenuItems.innerHTML = `
+    <div class="menuItem">
+      <div class="menuCopy">
+        <span>Closed Today</span>
+        <small>Please come back during active ordering days.</small>
+      </div>
+    </div>
+  `;
+  renderSelectOptions(drinkSelect, [], "Drink (optional)");
+  renderSelectOptions(extraSideSelect, [], "Extra Side (optional)");
+  lagniappeItems.innerHTML = "";
     } else {
-      menuDayTitle.textContent = "Delish — Temporarily Unavailable";
-      menuDayNote.textContent = "Pickup Only · Alexandria, Louisiana";
-      mainMenuNote.textContent = "Online ordering is currently unavailable.";
-      mainMenuItems.innerHTML = `
-      lagniappeItems.innerHTML = "";
-        <div class="menuItem">
-          <div class="menuCopy">
-            <span>Ordering Unavailable</span>
-            <small>Please check back shortly.</small>
-          </div>
-        </div>
-      `;
-      renderSelectOptions(drinkSelect, [], "Drink (optional)");
-      renderSelectOptions(extraSideSelect, [], "Extra Side (optional)");
-      renderSelectOptions(lagniappeSelect, [], "Lagniappe unavailable");
-    }
+  menuDayTitle.textContent = "Delish — Temporarily Unavailable";
+  menuDayNote.textContent = "Pickup Only · Alexandria, Louisiana";
+  mainMenuNote.textContent = "Online ordering is currently unavailable.";
+  mainMenuItems.innerHTML = `
+    <div class="menuItem">
+      <div class="menuCopy">
+        <span>Ordering Unavailable</span>
+        <small>Please check back shortly.</small>
+      </div>
+    </div>
+  `;
+  renderSelectOptions(drinkSelect, [], "Drink (optional)");
+  renderSelectOptions(extraSideSelect, [], "Extra Side (optional)");
+  lagniappeItems.innerHTML = "";
 
     calc();
   }
