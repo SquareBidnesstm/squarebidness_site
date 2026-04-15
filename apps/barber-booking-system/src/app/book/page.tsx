@@ -1,58 +1,67 @@
 import Link from "next/link";
-import { BARBERS } from "@/lib/config/barbers";
-import { SERVICES } from "@/lib/config/services";
-import { SHOP } from "@/lib/config/shop";
+
+const barbers = [
+  { id: "josh", name: "Josh Watkins", role: "Head Barber" },
+  { id: "jj", name: "Jeramiah (J.J.)", role: "Barber" },
+  { id: "jmike", name: "J-Mike", role: "Barber" },
+];
 
 export default function BookingPage() {
   return (
-    <main className="min-h-screen bg-brand-bg text-white">
-      <section className="container-shell py-16">
-        <div className="mb-8">
-          <p className="text-sm uppercase tracking-[0.2em] text-brand-gold">
-            {SHOP.name}
-          </p>
-          <h1 className="mt-2 text-4xl font-black">Book an Appointment</h1>
-          <p className="mt-3 max-w-2xl text-brand-muted">
-            Shared-account booking model. The client picks a barber, selects a
-            service, then books a time.
+    <main style={{ minHeight: "100vh", background: "#0a0a0a", color: "#fff" }}>
+      <section style={{ maxWidth: 1100, margin: "0 auto", padding: "56px 24px" }}>
+        <div style={{ marginBottom: 28 }}>
+          <div
+            style={{
+              color: "#d4af37",
+              textTransform: "uppercase",
+              letterSpacing: "0.18em",
+              fontSize: 12,
+              marginBottom: 10,
+            }}
+          >
+            Dapper Lounge
+          </div>
+          <h1 style={{ fontSize: 44, margin: 0, fontWeight: 900 }}>
+            Book an Appointment
+          </h1>
+          <p style={{ color: "#a3a3a3", fontSize: 18, lineHeight: 1.6 }}>
+            Choose a barber and enter that barber’s booking lane.
           </p>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
-          <div className="card-dark p-6">
-            <h2 className="text-2xl font-bold">Choose a Barber</h2>
-            <div className="mt-5 space-y-3">
-              {BARBERS.map((barber) => (
-                <Link
-                  key={barber.id}
-                  href={`/book/${barber.id}/`}
-                  className="block rounded-2xl border border-brand-line bg-black/20 px-4 py-4 transition hover:border-brand-gold"
-                >
-                  <p className="font-semibold">{barber.displayName}</p>
-                  <p className="text-sm text-brand-muted">{barber.role}</p>
-                </Link>
-              ))}
-            </div>
-          </div>
+        <div
+          style={{
+            border: "1px solid #232323",
+            background: "#111",
+            borderRadius: 28,
+            padding: 24,
+          }}
+        >
+          <h2 style={{ marginTop: 0, fontSize: 28 }}>Barbers</h2>
 
-          <div className="card-dark p-6">
-            <h2 className="text-2xl font-bold">Starter Service Menu</h2>
-            <div className="mt-5 space-y-3">
-              {SERVICES.map((service) => (
-                <div
-                  key={service.id}
-                  className="flex items-center justify-between rounded-2xl border border-brand-line bg-black/20 px-4 py-4"
-                >
-                  <div>
-                    <p className="font-semibold">{service.name}</p>
-                    <p className="text-sm text-brand-muted">
-                      {service.durationMinutes} min
-                    </p>
-                  </div>
-                  <p className="font-bold">${service.price}</p>
+          <div style={{ display: "grid", gap: 14, marginTop: 18 }}>
+            {barbers.map((barber) => (
+              <Link
+                key={barber.id}
+                href={`/book/${barber.id}`}
+                style={{
+                  display: "block",
+                  textDecoration: "none",
+                  color: "#fff",
+                  border: "1px solid #232323",
+                  borderRadius: 20,
+                  padding: "18px 18px",
+                  background: "#0d0d0d",
+                }}
+              >
+                <div style={{ fontWeight: 800, fontSize: 20 }}>{barber.name}</div>
+                <div style={{ color: "#999", marginTop: 6 }}>{barber.role}</div>
+                <div style={{ color: "#d4af37", marginTop: 8, fontSize: 14 }}>
+                  Open booking lane →
                 </div>
-              ))}
-            </div>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
