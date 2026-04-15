@@ -260,6 +260,16 @@ function isItemAllowedForCurrentDay(itemId, todayDay) {
   return true;
 }
 
+function buildShortOrderSummary(items = []) {
+  return items
+    .map((item) => `${item.qty}x ${item.name}`)
+    .join(", ")
+    .slice(0, 500);
+}
+
+function safeMeta(value, max = 500) {
+  return String(value || "").slice(0, max);
+}
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -408,7 +418,9 @@ if (!orderingState.openNow) {
       });
     }
 
-   const session = await stripe.checkout.sessions.create({
+  const shortOrderSummary = buildShortOrderSummary(cleanItems);
+
+const session = await stripe.checkout.sessions.create({
   mode: "payment",
   payment_method_types: ["card"],
   line_items,
@@ -418,34 +430,34 @@ if (!orderingState.openNow) {
   cancel_url: `https://www.squarebidness.com/delish/order/`,
 
   metadata: {
-    customerName: body.customerName,
-    customerPhone: body.customerPhone,
-    customerEmail: body.customerEmail || "",
-    pickupDate: body.pickupDate,
-    pickupWindow: body.pickupWindow,
-    notes: body.notes || "",
+    customerName: safeMeta(body.customerName, 100),
+    customerPhone: safeMeta(body.customerPhone, 30),
+    customerEmail: safeMeta(body.customerEmail || "", 120),
+    pickupDate: safeMeta(body.pickupDate, 20),
+    pickupWindow: safeMeta(body.pickupWindow, 40),
+    notes: safeMeta(body.notes || "", 300),
 
-    // 🔥 SMS MUST HAVE THIS
     smsConsent: "yes",
 
-    // 🔥 REQUIRED FOR SUCCESS PAGE + TEXT
-    itemsJson: JSON.stringify(cleanItems),
+    orderSummary: shortOrderSummary,
+    itemCount: String(cleanItems.length),
     subtotal: String(submittedSubtotal),
     tax: String(submittedTax),
     total: String(submittedTotal),
 
-    source: body.source || "delish-order-page",
-    activeMenuDay: todayDay,
+    source: safeMeta(body.source || "delish-order-page", 50),
+    activeMenuDay: safeMeta(todayDay, 20),
   },
 
   payment_intent_data: {
     metadata: {
-      customerName: body.customerName,
-      customerPhone: body.customerPhone,
-      pickupDate: body.pickupDate,
-      pickupWindow: body.pickupWindow,
+      customerName: safeMeta(body.customerName, 100),
+      customerPhone: safeMeta(body.customerPhone, 30),
+      pickupDate: safeMeta(body.pickupDate, 20),
+      pickupWindow: safeMeta(body.pickupWindow, 40),
       smsConsent: "yes",
-      itemsJson: JSON.stringify(cleanItems),
+      orderSummary: shortOrderSummary,
+      itemCount: String(cleanItems.length),
       total: String(submittedTotal),
     },
   },
@@ -453,12 +465,13 @@ if (!orderingState.openNow) {
   customer_email: body.customerEmail || undefined,
 });
 
-    return res.status(200).json({
-      ok: true,
-      checkout_url: session.url,
-      session_id: session.id,
-    });
-  } catch (error) {
+return res.status(200).json({
+  ok: true,
+  checkout_url: session.url,
+  session_id: session.id,
+});
+
+      } catch (error) {
     console.error("DELISH CREATE CHECKOUT ERROR:", error);
     return res.status(500).json({
       ok: false,
