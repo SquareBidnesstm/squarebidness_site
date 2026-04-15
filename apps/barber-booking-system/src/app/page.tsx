@@ -1,68 +1,190 @@
 import Link from "next/link";
-import { SHOP } from "@/lib/config/shop";
-import { BARBERS } from "@/lib/config/barbers";
-import { SERVICES } from "@/lib/config/services";
 
-export default function HomePage() {
+const barbers = [
+  { id: "josh", name: "Josh Watkins", role: "Head Barber" },
+  { id: "jj", name: "Jeramiah (J.J.)", role: "Barber" },
+  { id: "jmike", name: "J-Mike", role: "Barber" },
+];
+
+const services = [
+  { id: "haircut", name: "Haircut", price: 35, duration: 45 },
+  { id: "haircut-beard", name: "Haircut + Beard", price: 45, duration: 60 },
+  { id: "kids-cut", name: "Kids Cut", price: 25, duration: 30 },
+  { id: "enhancements", name: "Cut + Enhancements", price: 50, duration: 60 },
+  { id: "vip", name: "VIP Appointment", price: 75, duration: 90 },
+];
+
+export default function Home() {
   return (
-    <main className="min-h-screen bg-brand-bg text-white">
-      <section className="container-shell py-16">
-        <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr]">
-          <div className="space-y-6">
-            <p className="inline-flex rounded-full border border-brand-line bg-brand-card px-4 py-2 text-sm text-brand-gold">
+    <main style={{ minHeight: "100vh", background: "#0a0a0a", color: "#fff" }}>
+      <section
+        style={{
+          maxWidth: 1200,
+          margin: "0 auto",
+          padding: "56px 24px",
+        }}
+      >
+        <div
+          style={{
+            display: "grid",
+            gap: 24,
+            gridTemplateColumns: "1.15fr 0.85fr",
+          }}
+        >
+          <div>
+            <div
+              style={{
+                display: "inline-block",
+                padding: "8px 14px",
+                border: "1px solid #333",
+                borderRadius: 999,
+                color: "#d4af37",
+                marginBottom: 18,
+              }}
+            >
               Duplicatable Barber Booking System
+            </div>
+
+            <h1
+              style={{
+                fontSize: 56,
+                lineHeight: 1.05,
+                margin: "0 0 18px",
+                fontWeight: 900,
+                maxWidth: 760,
+              }}
+            >
+              Dapper Lounge
+            </h1>
+
+            <p
+              style={{
+                fontSize: 20,
+                lineHeight: 1.6,
+                color: "#b3b3b3",
+                maxWidth: 720,
+                margin: "0 0 24px",
+              }}
+            >
+              Shop-owned booking system for a shared-account barber model.
+              Josh runs the shop account, and each barber operates inside the
+              same system.
             </p>
 
-            <div className="space-y-4">
-              <h1 className="max-w-4xl text-5xl font-black leading-tight">
-                Shop-owned booking system for multi-barber operations.
-              </h1>
-              <p className="max-w-2xl text-lg text-brand-muted">
-                Built for barbershops that want one account, multiple barbers,
-                clean booking flow, and real ownership of customer data.
-              </p>
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+              <Link
+                href="/book"
+                style={{
+                  background: "#d4af37",
+                  color: "#0a0a0a",
+                  padding: "14px 18px",
+                  borderRadius: 14,
+                  fontWeight: 700,
+                  textDecoration: "none",
+                }}
+              >
+                Open Booking
+              </Link>
+
+              <Link
+                href="/admin"
+                style={{
+                  border: "1px solid #333",
+                  background: "#111",
+                  color: "#fff",
+                  padding: "14px 18px",
+                  borderRadius: 14,
+                  fontWeight: 700,
+                  textDecoration: "none",
+                }}
+              >
+                Open Admin
+              </Link>
             </div>
 
-            <div className="flex flex-wrap gap-3">
-              <Link href="/book/" className="btn-gold">
-                Open Booking Page
-              </Link>
-              <Link href="/admin/" className="btn-dark">
-                Open Admin Stub
-              </Link>
-            </div>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                gap: 16,
+                marginTop: 28,
+              }}
+            >
+              <div
+                style={{
+                  border: "1px solid #232323",
+                  background: "#111",
+                  borderRadius: 24,
+                  padding: 20,
+                }}
+              >
+                <div style={{ color: "#999", fontSize: 14 }}>Owner</div>
+                <div style={{ fontSize: 28, fontWeight: 800, marginTop: 8 }}>
+                  Josh Watkins
+                </div>
+              </div>
 
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="card-dark p-5">
-                <p className="text-sm text-brand-muted">Shop</p>
-                <p className="mt-2 text-2xl font-bold">{SHOP.name}</p>
+              <div
+                style={{
+                  border: "1px solid #232323",
+                  background: "#111",
+                  borderRadius: 24,
+                  padding: 20,
+                }}
+              >
+                <div style={{ color: "#999", fontSize: 14 }}>Barbers</div>
+                <div style={{ fontSize: 28, fontWeight: 800, marginTop: 8 }}>
+                  {barbers.length}
+                </div>
               </div>
-              <div className="card-dark p-5">
-                <p className="text-sm text-brand-muted">Owner</p>
-                <p className="mt-2 text-2xl font-bold">{SHOP.owner}</p>
-              </div>
-              <div className="card-dark p-5">
-                <p className="text-sm text-brand-muted">Barbers</p>
-                <p className="mt-2 text-2xl font-bold">{BARBERS.length}</p>
+
+              <div
+                style={{
+                  border: "1px solid #232323",
+                  background: "#111",
+                  borderRadius: 24,
+                  padding: 20,
+                }}
+              >
+                <div style={{ color: "#999", fontSize: 14 }}>Model</div>
+                <div style={{ fontSize: 28, fontWeight: 800, marginTop: 8 }}>
+                  Shared
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="card-dark p-6">
-            <h2 className="text-2xl font-bold">Starter Services</h2>
-            <div className="mt-5 space-y-3">
-              {SERVICES.map((service) => (
+          <div
+            style={{
+              border: "1px solid #232323",
+              background: "#111",
+              borderRadius: 28,
+              padding: 24,
+            }}
+          >
+            <h2 style={{ marginTop: 0, fontSize: 28 }}>Starter Services</h2>
+
+            <div style={{ display: "grid", gap: 12, marginTop: 18 }}>
+              {services.map((service) => (
                 <div
                   key={service.id}
-                  className="flex items-center justify-between rounded-2xl border border-brand-line bg-black/20 px-4 py-3"
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    border: "1px solid #232323",
+                    borderRadius: 18,
+                    padding: "14px 16px",
+                    background: "#0d0d0d",
+                  }}
                 >
                   <div>
-                    <p className="font-semibold">{service.name}</p>
-                    <p className="text-sm text-brand-muted">
-                      {service.durationMinutes} min
-                    </p>
+                    <div style={{ fontWeight: 700 }}>{service.name}</div>
+                    <div style={{ fontSize: 14, color: "#999", marginTop: 4 }}>
+                      {service.duration} min
+                    </div>
                   </div>
-                  <p className="font-bold">${service.price}</p>
+                  <div style={{ fontWeight: 800 }}>${service.price}</div>
                 </div>
               ))}
             </div>
