@@ -1,19 +1,25 @@
-import "./globals.css";
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Barber Booking System",
-  description: "Duplicatable booking system for barbershops."
+export const metadata = {
+  title: "Dapper Lounge Booking System",
+  description: "Multi-barber shared-account booking system",
 };
 
 export default function RootLayout({
-  children
-}: Readonly<{
+  children,
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body
+        style={{
+          margin: 0,
+          fontFamily: "Arial, Helvetica, sans-serif",
+          background: "#0a0a0a",
+          color: "#ffffff",
+        }}
+      >
+        {children}
+      </body>
     </html>
   );
 }
