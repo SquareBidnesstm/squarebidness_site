@@ -1,95 +1,47 @@
 <!doctype html>
-<html lang="en" data-sb-brand="delish" data-sb-tier="ops" data-sb-variant="delish-admin-v1">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Delish Admin v1</title>
+  <title>Delish Admin</title>
   <meta name="robots" content="noindex,nofollow" />
-  <meta name="theme-color" content="#101012" />
-
-  <link rel="icon" type="image/png" sizes="16x16" href="/delish/assets/delish-favicon-16.png" />
-  <link rel="icon" type="image/png" sizes="32x32" href="/delish/assets/delish-favicon-32.png" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/delish/assets/delish-logo-mark-180.png" />
-
   <style>
     :root{
-      --bg:#101012;
+      --bg:#0f0f10;
       --panel:#18181b;
-      --panel-2:#202024;
-      --line:#313138;
-      --text:#f5f2ea;
-      --muted:#c8c0b3;
-      --soft:#9e9587;
+      --panel2:#212126;
+      --line:#32323a;
+      --text:#f6f2ea;
+      --muted:#bfb7aa;
       --accent:#d7ae72;
-      --accent-2:#f2d8ae;
-      --good:#153822;
-      --bad:#5b1d1d;
-      --shadow:0 18px 54px rgba(0,0,0,.30);
-      --max:1100px;
+      --good:#204b2d;
+      --bad:#5a2222;
     }
     *{box-sizing:border-box}
-    html,body{
+    body{
       margin:0;
-      background:linear-gradient(180deg,#0f0f10 0%,#0b0b0c 100%);
+      background:linear-gradient(180deg,#0e0e10 0%, #0a0a0b 100%);
       color:var(--text);
       font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
     }
-    body{padding:18px}
-    .wrap{width:min(100%,var(--max));margin:0 auto}
-    .top{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:18px;
-      flex-wrap:wrap;
-      margin-bottom:18px;
+    .wrap{
+      max-width:980px;
+      margin:0 auto;
+      padding:22px;
     }
-    h1{
-      margin:0;
-      font-size:clamp(2rem,4vw,3rem);
-      line-height:1;
-      letter-spacing:-.04em;
-    }
-    .sub{
-      margin:10px 0 0;
-      color:var(--muted);
-      font-size:1rem;
-      line-height:1.45;
-    }
-    .panel{
-      background:linear-gradient(180deg,var(--panel-2),var(--panel));
+    .card{
+      background:var(--panel);
       border:1px solid var(--line);
-      border-radius:24px;
-      padding:20px;
-      box-shadow:var(--shadow);
-      margin-bottom:18px;
+      border-radius:20px;
+      padding:18px;
+      margin-bottom:16px;
     }
-    .panel h2{
-      margin:0 0 8px;
-      font-size:1.2rem;
-      letter-spacing:-.02em;
-    }
-    .panel p{
-      margin:0 0 14px;
-      color:var(--muted);
-      line-height:1.5;
-    }
-    .grid{
+    h1,h2,h3{margin:0 0 10px}
+    p{color:var(--muted)}
+    .row{
       display:grid;
       grid-template-columns:repeat(3,minmax(0,1fr));
       gap:12px;
-    }
-    .box{
-      padding:14px;
-      border-radius:16px;
-      background:rgba(255,255,255,.03);
-      border:1px solid rgba(255,255,255,.08);
-    }
-    .box strong{
-      display:block;
-      margin-bottom:6px;
-      color:var(--accent-2);
-      font-size:.95rem;
     }
     .toggle{
       display:flex;
@@ -97,357 +49,291 @@
       justify-content:space-between;
       gap:12px;
       padding:14px;
-      border-radius:16px;
-      background:rgba(255,255,255,.03);
-      border:1px solid rgba(255,255,255,.08);
-      margin-bottom:10px;
+      border-radius:14px;
+      background:var(--panel2);
+      border:1px solid var(--line);
     }
     .toggle label{
       font-weight:800;
-      color:var(--text);
     }
-    .toggle input[type="checkbox"]{
-      width:22px;
-      height:22px;
-    }
-    textarea{
-      width:100%;
-      min-height:110px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.10);
-      background:#0f0f10;
-      color:#fff;
-      padding:14px;
-      font:inherit;
-      resize:vertical;
-    }
-    .items-grid{
+    .muted{color:var(--muted); font-size:.95rem}
+    .item-list{
       display:grid;
       grid-template-columns:repeat(2,minmax(0,1fr));
       gap:10px;
     }
-    .item-row{
+    .item{
       display:flex;
       align-items:center;
-      justify-content:space-between;
-      gap:12px;
+      gap:10px;
       padding:12px 14px;
       border-radius:14px;
-      background:rgba(255,255,255,.03);
-      border:1px solid rgba(255,255,255,.08);
+      background:var(--panel2);
+      border:1px solid var(--line);
     }
-    .item-name{
-      font-weight:700;
+    textarea{
+      width:100%;
+      min-height:90px;
+      resize:vertical;
+      background:var(--panel2);
       color:var(--text);
-      line-height:1.3;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px;
+      font:inherit;
     }
-    .item-meta{
-      color:var(--soft);
-      font-size:.88rem;
-      margin-top:4px;
+    button{
+      border:none;
+      border-radius:999px;
+      padding:14px 18px;
+      font-weight:900;
+      cursor:pointer;
+    }
+    .btn-primary{
+      background:var(--accent);
+      color:#181410;
+    }
+    .btn-secondary{
+      background:#27272c;
+      color:var(--text);
+      border:1px solid var(--line);
     }
     .actions{
       display:flex;
       gap:10px;
       flex-wrap:wrap;
-      margin-top:16px;
-    }
-    .btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      min-height:46px;
-      padding:0 18px;
-      border-radius:14px;
-      border:1px solid transparent;
-      font-weight:900;
-      cursor:pointer;
-    }
-    .btn-save{
-      background:var(--accent);
-      color:#181410;
-    }
-    .btn-refresh{
-      background:#2a2a2f;
-      color:#fff;
-      border-color:rgba(255,255,255,.12);
-    }
-    .notice{
       margin-top:14px;
+    }
+    .status{
+      margin-top:12px;
       padding:12px 14px;
       border-radius:14px;
-      background:rgba(255,255,255,.03);
-      border:1px solid rgba(255,255,255,.08);
-      color:var(--muted);
-      line-height:1.45;
-    }
-    .notice.error{
-      background:rgba(91,29,29,.35);
-      border-color:rgba(255,120,120,.18);
-      color:#ffd0d0;
-    }
-    .mini{
-      color:var(--soft);
-      font-size:.88rem;
-      margin-top:8px;
-    }
-    .nav{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-bottom:18px;
-    }
-    .nav a{
-      display:inline-flex;
-      align-items:center;
-      min-height:42px;
-      padding:0 14px;
-      border-radius:999px;
-      background:var(--panel);
+      background:#1a1a1f;
       border:1px solid var(--line);
       color:var(--muted);
+    }
+    .status.good{
+      background:rgba(32,75,45,.28);
+      border-color:rgba(74,155,97,.5);
+      color:#d6f5de;
+    }
+    .status.bad{
+      background:rgba(90,34,34,.28);
+      border-color:rgba(196,88,88,.45);
+      color:#ffd3d3;
+    }
+    .topline{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .token-row{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .token-badge{
+      padding:8px 12px;
+      border-radius:999px;
+      background:#27272c;
+      border:1px solid var(--line);
       font-weight:800;
-      text-decoration:none;
     }
-    .nav a.active{
-      background:rgba(215,174,114,.15);
-      border-color:rgba(215,174,114,.35);
-      color:var(--accent-2);
-    }
-    @media (max-width:900px){
-      .grid,.items-grid{grid-template-columns:1fr}
+    @media (max-width: 800px){
+      .row,.item-list{grid-template-columns:1fr}
     }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <section class="top">
-      <div>
-        <h1>Delish Admin v1</h1>
-        <p class="sub">Live section toggles, sold-out item control, and customer message updates for the Delish order page.</p>
+    <div class="card">
+      <div class="topline">
+        <div>
+          <h1>Delish Admin v1</h1>
+          <p>Live menu controls for kitchen-side operators.</p>
+        </div>
+        <div class="token-row">
+          <span class="token-badge" id="tokenStatus">Token not saved</span>
+          <button class="btn-secondary" id="clearTokenBtn">Clear Token</button>
+        </div>
       </div>
-    </section>
-
-    <div class="nav">
-      <a href="/delish/orders/">Kitchen Orders</a>
-      <a href="/delish/catering/orders/">Catering Orders</a>
-      <a href="/delish/admin/" class="active">Admin</a>
     </div>
 
-    <section class="panel">
-      <h2>Operator Token</h2>
-      <p>Uses the same operator token style as the kitchen screen.</p>
-      <div class="actions">
-        <button class="btn btn-refresh" id="saveTokenBtn">Save / Update Token</button>
-        <button class="btn btn-refresh" id="clearTokenBtn">Clear Saved Token</button>
+    <div class="card">
+      <h2>Sections</h2>
+      <div class="row">
+        <div class="toggle">
+          <label for="lagniappeToggle">Lagniappe</label>
+          <input type="checkbox" id="lagniappeToggle" checked />
+        </div>
+        <div class="toggle">
+          <label for="drinksToggle">Drinks</label>
+          <input type="checkbox" id="drinksToggle" checked />
+        </div>
+        <div class="toggle">
+          <label for="extraSidesToggle">Extra Sides</label>
+          <input type="checkbox" id="extraSidesToggle" checked />
+        </div>
       </div>
-      <div class="mini" id="tokenStatus">Token: not saved</div>
-    </section>
+    </div>
 
-    <section class="panel">
-      <h2>Section Toggles</h2>
-      <p>Hide or show full sections live on the Delish order page.</p>
+    <div class="card">
+      <h2>Turn Off Individual Items</h2>
+      <p class="muted">Checked items are hidden from Delish and blocked in checkout.</p>
+      <div class="item-list" id="itemsOffList"></div>
+    </div>
 
-      <div class="toggle">
-        <label for="toggleLagniappe">Lagniappe</label>
-        <input type="checkbox" id="toggleLagniappe" checked />
-      </div>
-
-      <div class="toggle">
-        <label for="toggleDrinks">Drinks</label>
-        <input type="checkbox" id="toggleDrinks" checked />
-      </div>
-
-      <div class="toggle">
-        <label for="toggleExtraSides">Extra Sides</label>
-        <input type="checkbox" id="toggleExtraSides" checked />
-      </div>
-    </section>
-
-    <section class="panel">
+    <div class="card">
       <h2>Customer Banner Message</h2>
-      <p>Optional message shown on the public Delish page.</p>
-      <textarea id="customerMessage" placeholder="Example: Black Eyed Peas sold out for today. Lagniappe available while it lasts."></textarea>
-    </section>
+      <p class="muted">Optional live message shown at the top of the Delish order page.</p>
+      <textarea id="customerMessage" placeholder="Example: Black Eyed Peas sold out for today."></textarea>
 
-    <section class="panel">
-      <h2>Sold-Out Item Control</h2>
-      <p>Check items to hide them from the public page and block them in checkout.</p>
-      <div id="itemsGrid" class="items-grid"></div>
-    </section>
-
-    <section class="panel">
-      <h2>Save Changes</h2>
-      <p>Push live overrides to Delish.</p>
       <div class="actions">
-        <button class="btn btn-save" id="saveBtn">Save Overrides</button>
-        <button class="btn btn-refresh" id="refreshBtn">Reload Current Overrides</button>
+        <button class="btn-primary" id="saveBtn">Save Admin Changes</button>
+        <button class="btn-secondary" id="reloadBtn">Reload Current Overrides</button>
       </div>
-      <div class="notice" id="notice">Ready.</div>
-    </section>
+
+      <div class="status" id="statusBox">Ready.</div>
+    </div>
   </div>
 
   <script>
-    const OPERATOR_TOKEN_KEY = "delish_operator_token";
-    const MENU_URL = "/delish/menu.json";
-    const OVERRIDES_URL = "/api/delish/menu-overrides/";
-    const SAVE_URL = "/api/delish/save-menu-overrides/";
+    const TOKEN_KEY = "delish_operator_token";
+    const statusBox = document.getElementById("statusBox");
+    const tokenStatus = document.getElementById("tokenStatus");
 
-    let MENU_DATA = null;
-    let CURRENT_OVERRIDES = null;
+    const ITEM_CATALOG = [
+      { id: "monday_red_beans_fried_chicken", name: "Monday - Red Beans or Okra with Fried Chicken" },
+      { id: "monday_hamburger_steak", name: "Monday - Hamburger Steak Plate" },
+      { id: "tuesday_beef_tips", name: "Tuesday - Beef Tips Plate" },
+      { id: "tuesday_meatloaf", name: "Tuesday - Meatloaf Plate" },
+      { id: "wednesday_pork_neckbones", name: "Wednesday - Pork Neckbones Plate" },
+      { id: "wednesday_baked_chicken", name: "Wednesday - Baked Chicken Plate" },
+      { id: "wednesday_country_fried_steak", name: "Wednesday - Country Fried Steak Plate" },
+      { id: "thursday_turkey_wings", name: "Thursday - Turkey Wings Plate" },
+      { id: "friday_crawfish_etouffee", name: "Friday - Crawfish Étouffée Plate" },
+      { id: "friday_shrimp_pasta", name: "Friday - Shrimp Pasta Plate" },
+      { id: "friday_fried_catfish", name: "Friday - Fried Catfish Plate" },
+      { id: "friday_baked_catfish", name: "Friday - Baked Catfish Plate" },
+      { id: "sunday_pork_steak_gravy", name: "Sunday - Pork Steak and Gravy Plate" },
+      { id: "sunday_oxtails", name: "Sunday - Oxtails Plate" },
+      { id: "sunday_baked_chicken", name: "Sunday - Baked Chicken Plate" },
 
-    function getSavedOperatorToken() {
+      { id: "drink_tropical_punch_koolaid", name: "Drink - Tropical Punch Kool-Aid" },
+      { id: "drink_lemonade", name: "Drink - Lemonade" },
+      { id: "drink_can_soda", name: "Drink - Can Soda" },
+      { id: "drink_bottle_water", name: "Drink - Bottle Water" },
+
+      { id: "lagniappe_grilled_chicken_salad", name: "Lagniappe - Grilled Chicken Salad" },
+      { id: "lagniappe_grilled_shrimp_salad", name: "Lagniappe - Grilled Shrimp Salad" },
+      { id: "lagniappe_both_meat_salad", name: "Lagniappe - Both Meat Salad" },
+      { id: "lagniappe_chicken_tender_basket_fries", name: "Lagniappe - Chicken Tender Basket with Fries" },
+      { id: "lagniappe_fried_porkchop_sandwich_fries", name: "Lagniappe - Fried Porkchop Sandwich with Fries" },
+      { id: "lagniappe_cheeseburger_basket", name: "Lagniappe - Cheeseburger Basket" },
+
+      { id: "extra_side_mac_and_cheese", name: "Extra Side - Mac and Cheese" },
+      { id: "extra_side_yams", name: "Extra Side - Yams" },
+      { id: "extra_side_corn", name: "Extra Side - Corn" },
+      { id: "extra_side_cabbage", name: "Extra Side - Cabbage" },
+      { id: "extra_side_green_salad", name: "Extra Side - Green Salad" },
+      { id: "extra_side_black_eyed_peas", name: "Extra Side - Black Eyed Peas" },
+      { id: "extra_side_green_beans", name: "Extra Side - Green Beans" },
+      { id: "extra_side_potato_salad", name: "Extra Side - Potato Salad" },
+      { id: "extra_side_rice_dressing", name: "Extra Side - Rice Dressing" }
+    ];
+
+    function setStatus(text, tone = "") {
+      statusBox.textContent = text;
+      statusBox.className = "status" + (tone ? ` ${tone}` : "");
+    }
+
+    function getSavedToken() {
       try {
-        return localStorage.getItem(OPERATOR_TOKEN_KEY) || "";
+        return localStorage.getItem(TOKEN_KEY) || "";
       } catch {
         return "";
       }
     }
 
-    function saveOperatorToken(token) {
+    function saveToken(token) {
       try {
-        localStorage.setItem(OPERATOR_TOKEN_KEY, String(token || "").trim());
+        localStorage.setItem(TOKEN_KEY, token);
       } catch {}
       updateTokenStatus();
     }
 
-    function clearOperatorToken() {
+    function clearToken() {
       try {
-        localStorage.removeItem(OPERATOR_TOKEN_KEY);
+        localStorage.removeItem(TOKEN_KEY);
       } catch {}
       updateTokenStatus();
     }
 
     function updateTokenStatus() {
-      const el = document.getElementById("tokenStatus");
-      const token = getSavedOperatorToken();
-      el.textContent = token ? "Token: saved on this device ✅" : "Token: not saved";
+      tokenStatus.textContent = getSavedToken() ? "Token saved" : "Token not saved";
     }
 
-    function setNotice(message, isError = false) {
-      const el = document.getElementById("notice");
-      el.textContent = message;
-      el.classList.toggle("error", !!isError);
-    }
-
-    function flattenMenuItems(menuData) {
-      const out = [];
-      const days = menuData?.days || {};
-
-      Object.keys(days).forEach((dayKey) => {
-        const mains = Array.isArray(days[dayKey]?.mains) ? days[dayKey].mains : [];
-        mains.forEach((item) => {
-          out.push({
-            id: item.id,
-            name: item.name,
-            group: `Main • ${dayKey}`
-          });
-        });
-      });
-
-      (menuData?.drinks || []).forEach((item) => {
-        out.push({ id: item.id, name: item.name, group: "Drinks" });
-      });
-
-      (menuData?.extraSidesBase || []).forEach((item) => {
-        out.push({ id: item.id, name: item.name, group: "Extra Sides" });
-      });
-
-      (menuData?.extraSidesFridaySunday || []).forEach((item) => {
-        out.push({ id: item.id, name: item.name, group: "Extra Sides Fri/Sun" });
-      });
-
-      (menuData?.lagniappe || []).forEach((item) => {
-        out.push({ id: item.id, name: item.name, group: "Lagniappe" });
-      });
-
-      const seen = new Set();
-      return out.filter((item) => {
-        if (seen.has(item.id)) return false;
-        seen.add(item.id);
-        return true;
-      });
-    }
-
-    function renderItemControls() {
-      const itemsGrid = document.getElementById("itemsGrid");
-      const items = flattenMenuItems(MENU_DATA);
-      const off = new Set(CURRENT_OVERRIDES?.itemsOff || []);
-
-      itemsGrid.innerHTML = items.map((item) => `
-        <label class="item-row">
-          <div>
-            <div class="item-name">${item.name}</div>
-            <div class="item-meta">${item.group} • ${item.id}</div>
-          </div>
-          <input
-            type="checkbox"
-            class="itemToggle"
-            data-item-id="${item.id}"
-            ${off.has(item.id) ? "checked" : ""}
-          />
+    function renderItemList(selected = []) {
+      const selectedSet = new Set(selected);
+      const wrap = document.getElementById("itemsOffList");
+      wrap.innerHTML = ITEM_CATALOG.map(item => `
+        <label class="item">
+          <input type="checkbox" value="${item.id}" ${selectedSet.has(item.id) ? "checked" : ""} />
+          <span>${item.name}</span>
         </label>
       `).join("");
     }
 
-    function applyOverridesToForm(overrides) {
-      document.getElementById("toggleLagniappe").checked = overrides?.sections?.lagniappe !== false;
-      document.getElementById("toggleDrinks").checked = overrides?.sections?.drinks !== false;
-      document.getElementById("toggleExtraSides").checked = overrides?.sections?.extraSides !== false;
-      document.getElementById("customerMessage").value = overrides?.customerMessage || "";
-      renderItemControls();
-    }
-
-    function collectOverridesFromForm() {
-      const itemsOff = Array.from(document.querySelectorAll(".itemToggle:checked"))
-        .map((el) => el.getAttribute("data-item-id"))
-        .filter(Boolean);
-
-      return {
-        sections: {
-          lagniappe: document.getElementById("toggleLagniappe").checked,
-          drinks: document.getElementById("toggleDrinks").checked,
-          extraSides: document.getElementById("toggleExtraSides").checked,
-        },
-        itemsOff,
-        customerMessage: document.getElementById("customerMessage").value.trim(),
-      };
-    }
-
-    async function loadMenuData() {
-      const res = await fetch(MENU_URL, { cache: "no-store" });
-      const data = await res.json();
-      if (!res.ok) throw new Error("Failed to load menu.json");
-      MENU_DATA = data;
-    }
-
     async function loadOverrides() {
-      const res = await fetch(`${OVERRIDES_URL}?t=${Date.now()}`, { cache: "no-store" });
+      setStatus("Loading current overrides...");
+      const res = await fetch("/api/delish/menu-overrides/", { cache: "no-store" });
       const data = await res.json();
-      if (!res.ok || !data.ok) throw new Error(data.error || "Failed to load overrides.");
-      CURRENT_OVERRIDES = data.overrides || null;
-      applyOverridesToForm(CURRENT_OVERRIDES);
+
+      if (!res.ok || !data.ok) {
+        throw new Error(data.error || "Failed to load overrides.");
+      }
+
+      const overrides = data.overrides || {};
+      document.getElementById("lagniappeToggle").checked = overrides?.sections?.lagniappe !== false;
+      document.getElementById("drinksToggle").checked = overrides?.sections?.drinks !== false;
+      document.getElementById("extraSidesToggle").checked = overrides?.sections?.extraSides !== false;
+      document.getElementById("customerMessage").value = overrides.customerMessage || "";
+      renderItemList(Array.isArray(overrides.itemsOff) ? overrides.itemsOff : []);
+      setStatus("Overrides loaded.", "good");
     }
 
     async function saveOverrides() {
-      let token = getSavedOperatorToken();
+      let token = getSavedToken();
 
       if (!token) {
         token = window.prompt("Enter Delish operator token");
         if (!token) {
-          setNotice("Save cancelled.");
+          setStatus("Save cancelled.");
           return;
         }
-
-        const saveOnDevice = window.confirm("Save this token on this device?");
-        if (saveOnDevice) saveOperatorToken(token);
+        if (window.confirm("Save token on this device?")) {
+          saveToken(token.trim());
+        }
       }
 
-      const payload = collectOverridesFromForm();
+      const itemsOff = [...document.querySelectorAll("#itemsOffList input:checked")].map(el => el.value);
 
-      setNotice("Saving overrides...");
+      const payload = {
+        sections: {
+          lagniappe: document.getElementById("lagniappeToggle").checked,
+          drinks: document.getElementById("drinksToggle").checked,
+          extraSides: document.getElementById("extraSidesToggle").checked
+        },
+        itemsOff,
+        customerMessage: document.getElementById("customerMessage").value.trim()
+      };
 
-      const res = await fetch(SAVE_URL, {
+      setStatus("Saving admin changes...");
+
+      const res = await fetch("/api/delish/save-menu-overrides/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -460,59 +346,28 @@
 
       if (!res.ok || !data.ok) {
         if (res.status === 401) {
-          clearOperatorToken();
+          clearToken();
         }
         throw new Error(data.error || "Failed to save overrides.");
       }
 
-      CURRENT_OVERRIDES = data.overrides || payload;
-      applyOverridesToForm(CURRENT_OVERRIDES);
-      setNotice("Overrides saved live.");
+      setStatus("Admin changes saved.", "good");
+      await loadOverrides();
     }
 
-    document.getElementById("saveTokenBtn").addEventListener("click", () => {
-      const token = window.prompt("Enter Delish operator token", getSavedOperatorToken());
-      if (!token) return;
-      saveOperatorToken(token);
-      setNotice("Operator token saved on this device.");
-    });
-
+    document.getElementById("saveBtn").addEventListener("click", saveOverrides);
+    document.getElementById("reloadBtn").addEventListener("click", loadOverrides);
     document.getElementById("clearTokenBtn").addEventListener("click", () => {
-      clearOperatorToken();
-      setNotice("Saved operator token cleared.");
+      clearToken();
+      setStatus("Saved token cleared.");
     });
 
-    document.getElementById("saveBtn").addEventListener("click", async () => {
-      try {
-        await saveOverrides();
-      } catch (error) {
-        console.error(error);
-        setNotice(error.message || "Save failed.", true);
-      }
+    updateTokenStatus();
+    loadOverrides().catch((err) => {
+      console.error(err);
+      setStatus(err.message || "Unable to load admin.", "bad");
+      renderItemList([]);
     });
-
-    document.getElementById("refreshBtn").addEventListener("click", async () => {
-      try {
-        setNotice("Reloading overrides...");
-        await loadOverrides();
-        setNotice("Current overrides loaded.");
-      } catch (error) {
-        console.error(error);
-        setNotice(error.message || "Reload failed.", true);
-      }
-    });
-
-    (async function init() {
-      try {
-        updateTokenStatus();
-        await loadMenuData();
-        await loadOverrides();
-        setNotice("Admin ready.");
-      } catch (error) {
-        console.error(error);
-        setNotice(error.message || "Admin failed to load.", true);
-      }
-    })();
   </script>
 </body>
 </html>
