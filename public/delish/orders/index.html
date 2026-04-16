@@ -588,6 +588,79 @@
     const ordersEl = document.getElementById("orders");
     const lastUpdatedEl = document.getElementById("lastUpdated");
     const OPERATOR_TOKEN_KEY = "delish_operator_token";
+    const LAST_SEEN_ORDER_KEY = "delish_last_seen_order_id";
+    let hasInitializedOrderFeed = false;
+
+    function getLastSeenOrderId() {
+      try {
+        return localStorage.getItem(LAST_SEEN_ORDER_KEY) || "";
+      } catch {
+        return "";
+      }
+    }
+
+    function setLastSeenOrderId(id) {
+      try {
+        if (id) localStorage.setItem(LAST_SEEN_ORDER_KEY, id);
+      } catch {}
+    }
+
+    function playNewOrderAlert() {
+      try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+
+        const ctx = new AudioContextClass();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        gain.gain.setValueAtTime(0.001, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.08, ctx.currentTime + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start();
+        osc.stop(ctx.currentTime + 0.36);
+      } catch (err) {
+        console.error("Audio alert failed:", err);
+      }
+    }
+
+    function flashScreenAlert() {
+      const existing = document.getElementById("newOrderFlash");
+      if (existing) existing.remove();
+
+      const flash = document.createElement("div");
+      flash.id = "newOrderFlash";
+      flash.style.position = "fixed";
+      flash.style.inset = "0";
+      flash.style.background = "rgba(215,174,114,.18)";
+      flash.style.pointerEvents = "none";
+      flash.style.zIndex = "9999";
+      flash.style.opacity = "1";
+      flash.style.transition = "opacity .5s ease";
+      document.body.appendChild(flash);
+
+      setTimeout(() => {
+        flash.style.opacity = "0";
+      }, 80);
+
+      setTimeout(() => {
+        flash.remove();
+      }, 650);
+    }
+
+    function notifyNewOrder(order) {
+      playNewOrderAlert();
+      flashScreenAlert();
+      setOpsNotice(`New order received: ${order.orderNumber || "Delish order"}`);
+    }
+
+    
 
     function money(n){
       return `$${Number(n || 0).toFixed(2)}`;
@@ -731,7 +804,7 @@
       }
     }
 
-    async function loadOrders(){
+        async function loadOrders(){
       try {
         const res = await fetch(`/api/delish/orders/?t=${Date.now()}`, { cache: "no-store" });
         const data = await res.json();
@@ -740,7 +813,23 @@
           throw new Error(data.error || "Failed to load");
         }
 
-        renderOrders(data.orders || []);
+        const orders = data.orders || [];
+        renderOrders(orders);
+
+        if (orders.length > 0) {
+          const newestOrder = orders[0];
+          const lastSeenId = getLastSeenOrderId();
+
+          if (!hasInitializedOrderFeed) {
+            setLastSeenOrderId(newestOrder.id);
+            hasInitializedOrderFeed = true;
+          } else if (newestOrder.id && newestOrder.id !== lastSeenId) {
+            notifyNewOrder(newestOrder);
+            setLastSeenOrderId(newestOrder.id);
+          }
+        } else {
+          hasInitializedOrderFeed = true;
+        }
 
         const now = new Date();
         lastUpdatedEl.innerHTML = `Last updated:<strong>${now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</strong>`;
