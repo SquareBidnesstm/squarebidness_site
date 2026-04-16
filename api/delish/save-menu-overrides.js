@@ -12,6 +12,11 @@ function normalizeItemsOff(itemsOff) {
   return [...new Set(itemsOff.map((x) => String(x || "").trim()).filter(Boolean))];
 }
 
+function normalizeItemsSoldOut(itemsSoldOut) {
+  if (!Array.isArray(itemsSoldOut)) return [];
+  return [...new Set(itemsSoldOut.map((x) => String(x || "").trim()).filter(Boolean))];
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -47,6 +52,7 @@ export default async function handler(req, res) {
         extraSides: body?.sections?.extraSides !== false,
       },
       itemsOff: normalizeItemsOff(body.itemsOff),
+      itemsSoldOut: normalizeItemsSoldOut(body.itemsSoldOut),
       customerMessage: String(body.customerMessage || "").trim().slice(0, 180),
       updatedAt: new Date().toISOString(),
       updatedBy: "operator",
