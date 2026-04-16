@@ -256,11 +256,12 @@
 
   <div id="status" class="status" aria-live="polite"></div>
 
-  <div class="totalBox">
+    <div class="totalBox">
     Subtotal: $<span id="subtotalDisplay">0.00</span><br />
+    Tax: $<span id="taxDisplay">0.00</span><br />
     Total: $<span id="totalDisplay">0.00</span>
   </div>
-
+  
   <button id="checkoutBtn" class="mainBtn" disabled>Loading Menu...</button>
 
   <div class="actions">
@@ -305,6 +306,7 @@
   const statusEl = document.getElementById("status");
   const orderingBanner = document.getElementById("orderingBanner");
   const lagniappeItems = document.getElementById("lagniappeItems");
+  const taxDisplay = document.getElementById("taxDisplay");
 
   let currentDay = null;
   let currentMode = "closed";
@@ -928,14 +930,21 @@ function getDrinkSelections() {
   function calc() {
     const selected = getSelectedItems();
     const selectedItems = selected.items;
-    const subtotal = selectedItems.reduce(
-      (sum, item) => sum + (Number(item.qty || 0) * Number(item.price || 0)),
-      0
+        const subtotal = Number(
+      selectedItems.reduce(
+        (sum, item) => sum + (Number(item.qty || 0) * Number(item.price || 0)),
+        0
+      ).toFixed(2)
     );
 
-    subtotalDisplay.textContent = subtotal.toFixed(2);
-    totalDisplay.textContent = subtotal.toFixed(2);
+    const TAX_RATE = 0.0895;
+    const tax = Number((subtotal * TAX_RATE).toFixed(2));
+    const total = Number((subtotal + tax).toFixed(2));
 
+        subtotalDisplay.textContent = subtotal.toFixed(2);
+    if (taxDisplay) taxDisplay.textContent = tax.toFixed(2);
+    totalDisplay.textContent = total.toFixed(2);
+    
     const state = getServiceState();
     const nameOk = customerName.value.trim().length > 0;
     const phoneOk = customerPhone.value.trim().length > 0;
