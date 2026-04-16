@@ -715,10 +715,12 @@ if (state.today && MENU_BY_DAY[state.today]) {
     : [];
   drinkItems.innerHTML = visibleDrinks.map(renderDrinkItem).join("");
 
-  if (isExtraSideAllowedForDay(state.today) && isSectionEnabled("extraSides")) {
+if (isExtraSideAllowedForDay(state.today) && isSectionEnabled("extraSides")) {
   renderSelectOptions(
     extraSideSelect,
-    getExtraSidesForDay(state.today).filter(item => isItemEnabled(item.id)),
+    getExtraSidesForDay(state.today).filter(
+      item => isItemEnabled(item.id) && !isItemSoldOut(item.id)
+    ),
     "Extra Side (optional)"
   );
   extraSideSelect.disabled = false;
