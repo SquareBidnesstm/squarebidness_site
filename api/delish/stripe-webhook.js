@@ -37,8 +37,30 @@ function money(n) {
   return Number(n || 0).toFixed(2);
 }
 
+function formatPickup(date, window) {
+  if (!date || !window) return "";
+  return `${date} • ${window}`;
+}
 
-  function buildPickupSms(metadata) {
+function formatItems(items = []) {
+  return items.map(item => {
+    const qty = item.qty || 0;
+    const name = item.name || "";
+
+    let extras = [];
+
+    if (item.baseName) extras.push(item.baseName);
+    if (item.side1Name) extras.push(item.side1Name);
+    if (item.side2Name) extras.push(item.side2Name);
+
+    const extraText = extras.length ? ` (${extras.join(", ")})` : "";
+
+    return `${qty}× ${name}${extraText}`;
+  }).join("\n");
+}
+
+
+function buildPickupSms(metadata) {
   const customerName = String(metadata.customerName || "").trim();
   const pickupDate = String(metadata.pickupDate || "").trim();
   const pickupWindow = String(metadata.pickupWindow || "").trim();
@@ -50,13 +72,14 @@ function money(n) {
     if (Array.isArray(items) && items.length) {
       itemLines = items.map((i) => {
         const qty = Number(i.qty || 0);
-        const parts = [];
+        const extras = [];
 
-        if (i.side1Name) parts.push(i.side1Name);
-        if (i.side2Name) parts.push(i.side2Name);
+        if (i.baseName) extras.push(i.baseName);
+        if (i.side1Name) extras.push(i.side1Name);
+        if (i.side2Name) extras.push(i.side2Name);
 
-        const detail = parts.length ? ` — ${parts.join(", ")}` : "";
-        return `- ${qty} x ${i.name}${detail}`;
+        const detail = extras.length ? ` (${extras.join(", ")})` : "";
+        return `${qty}× ${i.name}${detail}`;
       });
     }
   } catch (err) {
@@ -71,42 +94,21 @@ function money(n) {
   }).format(new Date());
 
   const pickupLabel = pickupDate === todayIso ? "Today" : pickupDate;
-  const nameLine = customerName ? `${customerName}, your order is confirmed.` : `Your order is confirmed.`;
+  const nameLine = customerName ? customerName : "Customer";
 
-  return `Delish
+  return `Delish Order Confirmed
 
 ${nameLine}
-
 Pickup: ${pickupLabel}${pickupWindow ? ` • ${pickupWindow}` : ""}
-Items:
+
 ${itemLines.join("\n")}
 
 Total: $${Number(total || 0).toFixed(2)}
 
-Thank you.`;
+Thank you for your order.`;
 }
 
-  const todayIso = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Chicago",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit"
-  }).format(new Date());
-
-  const pickupLabel = pickupDate === todayIso ? "Today" : pickupDate;
-  const greeting = customerName
-    ? `Delish: ${customerName}, your order is confirmed.`
-    : `Delish: Order confirmed.`;
-
-  return `${greeting}
-
-Pickup: ${pickupLabel}${pickupWindow ? ` at ${pickupWindow}` : ""}
-Item: ${itemLine}
-Total: $${Number(total || 0).toFixed(2)}
-
-See you soon.`;
-}
-
+ 
 function buildCateringDepositSms(metadata, existing) {
   const requestNumber =
     metadata.requestNumber ||
