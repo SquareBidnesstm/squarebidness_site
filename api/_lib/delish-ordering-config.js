@@ -5,12 +5,12 @@ export const DELISH_ORDERING_MODE = String(
 ).toLowerCase(); // auto | open | closed
 
 export const DELISH_HOURS = {
-  monday: { open: "11:00", close: "15:00" },
-  tuesday: { open: "11:00", close: "15:00" },
-  wednesday: { open: "11:00", close: "15:00" },
-  thursday: { open: "11:00", close: "15:00" },
-  friday: { open: "11:00", close: "15:00" },
-  sunday: { open: "11:00", close: "15:00", occurrences: [1, 3] }
+  monday: { open: "11:00", close: "14:00" },
+  tuesday: { open: "11:00", close: "14:00" },
+  wednesday: { open: "11:00", close: "14:00" },
+  thursday: { open: "11:00", close: "14:00" },
+  friday: { open: "11:00", close: "14:00" },
+  sunday: { open: "11:00", close: "14:00", occurrences: [1, 3] }
 };
 
 export function getCentralNowParts(date = new Date()) {
