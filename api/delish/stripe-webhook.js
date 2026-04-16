@@ -37,23 +37,54 @@ function money(n) {
   return Number(n || 0).toFixed(2);
 }
 
-function buildPickupSms(metadata) {
+
+  function buildPickupSms(metadata) {
   const customerName = String(metadata.customerName || "").trim();
   const pickupDate = String(metadata.pickupDate || "").trim();
   const pickupWindow = String(metadata.pickupWindow || "").trim();
   const total = metadata.total || metadata.amountTotal || metadata.subtotal || "";
 
-  let itemLine = "Items unavailable";
+  let itemLines = ["Items unavailable"];
   try {
     const items = JSON.parse(metadata.itemsJson || "[]");
     if (Array.isArray(items) && items.length) {
-      itemLine = items
-        .map((i) => `${i.name} (x${Number(i.qty || 0)})`)
-        .join(", ");
+      itemLines = items.map((i) => {
+        const qty = Number(i.qty || 0);
+        const parts = [];
+
+        if (i.side1Name) parts.push(i.side1Name);
+        if (i.side2Name) parts.push(i.side2Name);
+
+        const detail = parts.length ? ` — ${parts.join(", ")}` : "";
+        return `- ${qty} x ${i.name}${detail}`;
+      });
     }
   } catch (err) {
     console.warn("Unable to parse itemsJson for pickup SMS.");
   }
+
+  const todayIso = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Chicago",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(new Date());
+
+  const pickupLabel = pickupDate === todayIso ? "Today" : pickupDate;
+  const nameLine = customerName ? `${customerName}, your order is confirmed.` : `Your order is confirmed.`;
+
+  return `Delish
+
+${nameLine}
+
+Pickup: ${pickupLabel}${pickupWindow ? ` • ${pickupWindow}` : ""}
+Items:
+${itemLines.join("\n")}
+
+Total: $${Number(total || 0).toFixed(2)}
+
+Thank you.`;
+}
 
   const todayIso = new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/Chicago",
