@@ -22,7 +22,7 @@
   <meta name="format-detection" content="telephone=no" />
 
   <!-- Build stamp -->
-  <meta name="sb:build" content="v20260416-richardson-prestripe-ready" />
+  <meta name="sb:build" content="v20260416-richardson-prestripe-one-call-button" />
 
   <!-- CSS -->
   <link rel="stylesheet" href="/styles/style.css" />
@@ -293,13 +293,6 @@
       max-width:44rem;
     }
 
-    .rf-promo-band__actions{
-      display:flex;
-      flex-wrap:wrap;
-      gap:.7rem;
-      align-items:center;
-    }
-
     .btn{
       display:inline-flex;
       align-items:center;
@@ -459,14 +452,6 @@
       max-width:50rem;
     }
 
-    .rf-payment-actions{
-      display:flex;
-      flex-wrap:wrap;
-      gap:.7rem;
-      margin-top:1rem;
-      align-items:center;
-    }
-
     .rf-mini-note{
       margin-top:.75rem;
       font-size:.84rem;
@@ -546,19 +531,6 @@
       align-items:center;
     }
 
-    .rf-badge{
-      display:inline-flex;
-      align-items:center;
-      gap:.3rem;
-      font-size:.75rem;
-      color:#a1a1aa;
-      flex-wrap:wrap;
-    }
-
-    .rf-badge span{
-      font-size:.85rem;
-    }
-
     .rf-contact-block{
       font-size:.92rem;
       color:#a1a1aa;
@@ -574,7 +546,7 @@
     }
 
     .rf-status{
-  margin-top:.9rem;
+      margin-top:.9rem;
       padding:.9rem .95rem;
       border-radius:14px;
       border:1px solid #1a1a1a;
@@ -653,12 +625,11 @@
         </p>
 
         <div class="rf-hero-actions">
-          <a class="btn btn--gold" href="tel:+19855071718">Call About Prom Fits</a>
-          <a class="btn btn--ghost" href="#booking-request">Request Appointment</a>
+          <a class="btn btn--gold" href="tel:+19855071718">Call the Shop</a>
         </div>
 
         <div class="rf-hero-note">
-          Walk in for a fit, or call ahead for prom groups, tuxedos, and wedding parties.
+          Walk in for a fit, or send the form below for prom groups, tuxedos, and wedding parties.
         </div>
       </div>
     </section>
@@ -672,11 +643,6 @@
             Need a clean look for prom? Richardson Fashion has suits, tuxedos, shirts, ties,
             shoes, and finishing touches to get you right.
           </p>
-        </div>
-
-        <div class="rf-promo-band__actions">
-          <a class="btn btn--gold" href="tel:+19855071718">Call the Shop</a>
-          <a class="btn btn--ghost" href="#booking-request">Request Appointment</a>
         </div>
       </div>
     </section>
@@ -809,17 +775,11 @@
         <p class="rf-payment-panel__eyebrow">Pre-Stripe Ready</p>
         <h3 id="rfPaymentHeading">Online deposits coming soon</h3>
         <p id="rfPaymentCopy">
-          We’re getting Richardson Fashion set up to accept approved booking deposits and simple online payments. For now, request your appointment below or call the shop directly.
+          We’re getting Richardson Fashion set up to accept approved booking deposits and simple online payments. For now, use the appointment form below or call the shop directly.
         </p>
 
-        <div class="rf-payment-actions" id="rfPaymentActions">
-          <a class="btn btn--gold btn--disabled" id="rfDepositBtn" href="#booking-request" aria-disabled="true">Pay Booking Deposit Soon</a>
-          <a class="btn btn--ghost" href="#booking-request">Request Appointment</a>
-          <a class="btn btn--ghost" href="tel:+19855071718">Call 985-507-1718</a>
-        </div>
-
         <p class="rf-mini-note" id="rfPaymentNote">
-          Once Stripe is connected, this button can go live for deposits, approved special orders, and booking holds.
+          Once Stripe is connected, booking deposits, approved special orders, and payment holds can be added cleanly.
         </p>
       </div>
     </section>
@@ -912,10 +872,6 @@
 
           <div class="rf-form-actions">
             <button id="rfSubmit" class="btn btn--gold" type="submit">Send Appointment Request</button>
-            <div class="rf-badge">
-              <span>Need immediate help?</span>
-              <a class="btn btn--ghost" href="tel:+19855071718">Call 985-507-1718</a>
-            </div>
           </div>
 
           <p class="rf-note">
@@ -952,46 +908,7 @@
   </footer>
 
   <script>
-    window.RICHARDSON_PAYMENTS = {
-      stripeEnabled: false,
-      depositUrl: "",
-      depositLabel: "Pay Booking Deposit",
-      paymentMode: "soon"
-    };
-  </script>
-
-  <script>
     document.getElementById("year").textContent = new Date().getFullYear();
-  </script>
-
-  <script>
-    (function(){
-      const cfg = window.RICHARDSON_PAYMENTS || {};
-      const depositBtn = document.getElementById("rfDepositBtn");
-      const heading = document.getElementById("rfPaymentHeading");
-      const copy = document.getElementById("rfPaymentCopy");
-      const note = document.getElementById("rfPaymentNote");
-
-      if (!depositBtn || !heading || !copy || !note) return;
-
-      const enabled = Boolean(cfg.stripeEnabled && cfg.depositUrl);
-
-      if (enabled) {
-        depositBtn.href = cfg.depositUrl;
-        depositBtn.textContent = cfg.depositLabel || "Pay Booking Deposit";
-        depositBtn.classList.remove("btn--disabled");
-        depositBtn.removeAttribute("aria-disabled");
-
-        heading.textContent = "Pay your booking deposit online";
-        copy.textContent = "Approved deposits can now be paid online. Use the payment button below if Richardson Fashion has already told you to submit a deposit or booking hold.";
-        note.textContent = "Only use online payment after the shop has confirmed your booking details and amount.";
-      } else {
-        depositBtn.href = "#booking-request";
-        depositBtn.textContent = "Pay Booking Deposit Soon";
-        depositBtn.classList.add("btn--disabled");
-        depositBtn.setAttribute("aria-disabled", "true");
-      }
-    })();
   </script>
 
   <script>
