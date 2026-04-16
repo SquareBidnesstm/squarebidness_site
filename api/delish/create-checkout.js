@@ -1,7 +1,7 @@
 // FILE: /api/delish/create-checkout.js
 import Stripe from "stripe";
 import { getDelishOrderingState } from "../_lib/delish-ordering-config.js";
-import { getDelishMenuOverrides } from "../delish/menu-overrides.js";
+import { getDelishMenuOverrides } from "../_lib/delish-menu-overrides.js";
 
 const stripe = new Stripe(process.env.DELISH_STRIPE_SECRET_KEY, {
   apiVersion: "2025-02-24.acacia",
