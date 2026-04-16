@@ -418,7 +418,15 @@ if (!orderingState.openNow) {
       });
     }
 
-  const shortOrderSummary = buildShortOrderSummary(cleanItems);
+     const shortOrderSummary = buildShortOrderSummary(cleanItems);
+
+  let itemsJson = "[]";
+  try {
+    const rawItemsJson = JSON.stringify(cleanItems);
+    itemsJson = rawItemsJson.length <= 500 ? rawItemsJson : "[]";
+  } catch {
+    itemsJson = "[]";
+  }
 
 const session = await stripe.checkout.sessions.create({
   mode: "payment",
@@ -429,7 +437,7 @@ const session = await stripe.checkout.sessions.create({
   success_url: `https://www.squarebidness.com/delish/order/success/?session_id={CHECKOUT_SESSION_ID}`,
   cancel_url: `https://www.squarebidness.com/delish/order/`,
 
-  metadata: {
+   metadata: {
     customerName: safeMeta(body.customerName, 100),
     customerPhone: safeMeta(body.customerPhone, 30),
     customerEmail: safeMeta(body.customerEmail || "", 120),
@@ -440,6 +448,7 @@ const session = await stripe.checkout.sessions.create({
     smsConsent: "yes",
 
     orderSummary: shortOrderSummary,
+    itemsJson,
     itemCount: String(cleanItems.length),
     subtotal: String(submittedSubtotal),
     tax: String(submittedTax),
@@ -449,7 +458,7 @@ const session = await stripe.checkout.sessions.create({
     activeMenuDay: safeMeta(todayDay, 20),
   },
 
-  payment_intent_data: {
+    payment_intent_data: {
     metadata: {
       customerName: safeMeta(body.customerName, 100),
       customerPhone: safeMeta(body.customerPhone, 30),
@@ -457,6 +466,7 @@ const session = await stripe.checkout.sessions.create({
       pickupWindow: safeMeta(body.pickupWindow, 40),
       smsConsent: "yes",
       orderSummary: shortOrderSummary,
+      itemsJson,
       itemCount: String(cleanItems.length),
       total: String(submittedTotal),
     },
