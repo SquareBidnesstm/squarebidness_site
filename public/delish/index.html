@@ -360,6 +360,18 @@
       hour12: false
     });
 
+      function formatTo12Hour(time24) {
+    const [hourStr, minuteStr] = String(time24 || "00:00").split(":");
+    let hour = Number(hourStr || 0);
+    const minute = String(minuteStr || "00").padStart(2, "0");
+    const suffix = hour >= 12 ? "PM" : "AM";
+
+    hour = hour % 12;
+    if (hour === 0) hour = 12;
+
+    return `${hour}:${minute} ${suffix}`;
+  }
+
     const parts = formatter.formatToParts(new Date());
     const map = {};
 
