@@ -527,13 +527,15 @@
   }
 
   function renderPlateSideOptions(day) {
-    const sides = getExtraSidesForDay(day);
-    return [
-      `<option value="">Choose a side</option>`,
-      ...sides.map(side => `<option value="${side.id}">${side.name}</option>`)
-    ].join("");
-  }
+  const sides = getExtraSidesForDay(day).filter(
+    side => isItemEnabled(side.id) && !isItemSoldOut(side.id)
+  );
 
+  return [
+    `<option value="">Choose a side</option>`,
+    ...sides.map(side => `<option value="${side.id}">${side.name}</option>`)
+  ].join("");
+}
   function renderMainItem(item, day) {
   const hasBaseOptions = Array.isArray(item.baseOptions) && item.baseOptions.length > 0;
   const needsSides = item.sideSelectionRequired !== false;
