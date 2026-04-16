@@ -813,8 +813,11 @@
           throw new Error(data.error || "Failed to load");
         }
 
-        const orders = data.orders || [];
-        renderOrders(orders);
+        const orders = (data.orders || []).sort((a, b) => {
+  return new Date(b.createdAt) - new Date(a.createdAt);
+});
+
+renderOrders(orders);
 
         if (orders.length > 0) {
           const newestOrder = orders[0];
