@@ -291,6 +291,11 @@ function buildShortOrderSummary(items = []) {
     .slice(0, 500);
 }
 
+function isItemSoldOutBackend(itemId, overrides = {}) {
+  const itemsSoldOut = Array.isArray(overrides?.itemsSoldOut) ? overrides.itemsSoldOut : [];
+  return itemsSoldOut.includes(itemId);
+}
+
 function safeMeta(value, max = 500) {
   return String(value || "").slice(0, max);
 }
@@ -369,6 +374,7 @@ if (!orderingState.openNow) {
         if (!isItemAllowedForCurrentDay(id, todayDay)) return null;
         if (!isSectionEnabledBackend(id, MENU_OVERRIDES)) return null;
         if (!isItemEnabledBackend(id, MENU_OVERRIDES)) return null;
+        if (isItemSoldOutBackend(id, MENU_OVERRIDES)) return null;
 
         const allowed = allowedMap.get(id);
 
