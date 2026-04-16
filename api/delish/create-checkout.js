@@ -1,6 +1,7 @@
 // FILE: /api/delish/create-checkout.js
 import Stripe from "stripe";
 import { getDelishOrderingState } from "../_lib/delish-ordering-config.js";
+import { getDelishMenuOverrides } from "../delish/menu-overrides.js";
 
 const stripe = new Stripe(process.env.DELISH_STRIPE_SECRET_KEY, {
   apiVersion: "2025-02-24.acacia",
@@ -260,6 +261,29 @@ function isItemAllowedForCurrentDay(itemId, todayDay) {
   return true;
 }
 
+function isSectionEnabledBackend(itemId, overrides = {}) {
+  const sections = overrides?.sections || {};
+
+  if (String(itemId).startsWith("drink_")) {
+    return sections.drinks !== false;
+  }
+
+  if (String(itemId).startsWith("lagniappe_")) {
+    return sections.lagniappe !== false;
+  }
+
+  if (String(itemId).startsWith("extra_side_")) {
+    return sections.extraSides !== false;
+  }
+
+  return true;
+}
+
+function isItemEnabledBackend(itemId, overrides = {}) {
+  const itemsOff = Array.isArray(overrides?.itemsOff) ? overrides.itemsOff : [];
+  return !itemsOff.includes(itemId);
+}
+
 function buildShortOrderSummary(items = []) {
   return items
     .map((item) => `${item.qty}x ${item.name}`)
@@ -304,6 +328,7 @@ export default async function handler(req, res) {
 const orderingState = getDelishOrderingState();
 const todayIso = orderingState.now.isoDate;
 const todayDay = orderingState.today;
+const MENU_OVERRIDES = await getDelishMenuOverrides();
 
 if (!orderingState.openNow) {
   let message = "Online ordering is closed right now.";
@@ -335,31 +360,32 @@ if (!orderingState.openNow) {
     const allowedItems = getAllowedItemsForToday(todayDay);
     const allowedMap = buildAllowedMap(allowedItems);
 
-   const cleanItems = body.items
-  .map((item) => {
-    const id = String(item.id || "").trim();
-    const qty = Math.max(1, Number(item.qty || 1));
+       const cleanItems = body.items
+      .map((item) => {
+        const id = String(item.id || "").trim();
+        const qty = Math.max(1, Number(item.qty || 1));
 
-    if (!id || !allowedMap.has(id)) return null;
-    if (!isItemAllowedForCurrentDay(id, todayDay)) return null;
+        if (!id || !allowedMap.has(id)) return null;
+        if (!isItemAllowedForCurrentDay(id, todayDay)) return null;
+        if (!isSectionEnabledBackend(id, MENU_OVERRIDES)) return null;
+        if (!isItemEnabledBackend(id, MENU_OVERRIDES)) return null;
 
-    const allowed = allowedMap.get(id);
+        const allowed = allowedMap.get(id);
 
-    return {
-      id: allowed.id,
-      name: allowed.name,
-      qty,
-      price: allowed.price,
-      total: qty * allowed.price,
+        return {
+          id: allowed.id,
+          name: allowed.name,
+          qty,
+          price: allowed.price,
+          total: qty * allowed.price,
 
-      // 🔥 PRESERVE SIDES
-      side1Id: item.side1Id || "",
-      side2Id: item.side2Id || "",
-      side1Name: item.side1Name || "",
-      side2Name: item.side2Name || "",
-    };
-  })
-  .filter(Boolean);
+          side1Id: item.side1Id || "",
+          side2Id: item.side2Id || "",
+          side1Name: item.side1Name || "",
+          side2Name: item.side2Name || "",
+        };
+      })
+      .filter(Boolean);
 
     if (!cleanItems.length) {
       return res.status(400).json({
@@ -369,14 +395,13 @@ if (!orderingState.openNow) {
       });
     }
 
-    if (cleanItems.length !== body.items.length) {
+        if (cleanItems.length !== body.items.length) {
       return res.status(403).json({
         ok: false,
-        error: "ITEM_NOT_AVAILABLE_TODAY",
-        message: `One or more selected items are not available on ${todayDay.charAt(0).toUpperCase() + todayDay.slice(1)}.`,
+        error: "ITEM_NOT_AVAILABLE",
+        message: "One or more selected items are unavailable right now.",
       });
     }
-
        const calculatedSubtotal = Number(
       cleanItems.reduce((sum, item) => sum + item.total, 0).toFixed(2)
     );
