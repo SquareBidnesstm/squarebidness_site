@@ -193,6 +193,12 @@
     </div>
 
     <div class="card">
+      <h2>Mark Individual Items Sold Out</h2>
+      <p class="muted">Checked items stay visible on Delish but show Sold Out and cannot be ordered.</p>
+      <div class="item-list" id="itemsSoldOutList"></div>
+    </div>
+
+    <div class="card">
       <h2>Customer Banner Message</h2>
       <p class="muted">Optional live message shown at the top of the Delish order page.</p>
       <textarea id="customerMessage" placeholder="Example: Black Eyed Peas sold out for today."></textarea>
@@ -293,6 +299,17 @@
       `).join("");
     }
 
+    function renderSoldOutList(selected = []) {
+  const selectedSet = new Set(selected);
+  const wrap = document.getElementById("itemsSoldOutList");
+  wrap.innerHTML = ITEM_CATALOG.map(item => `
+    <label class="item">
+      <input type="checkbox" value="${item.id}" ${selectedSet.has(item.id) ? "checked" : ""} />
+      <span>${item.name}</span>
+    </label>
+  `).join("");
+}
+
     async function loadOverrides() {
       setStatus("Loading current overrides...");
       const res = await fetch("/api/delish/menu-overrides/", { cache: "no-store" });
@@ -308,6 +325,7 @@
       document.getElementById("extraSidesToggle").checked = overrides?.sections?.extraSides !== false;
       document.getElementById("customerMessage").value = overrides.customerMessage || "";
       renderItemList(Array.isArray(overrides.itemsOff) ? overrides.itemsOff : []);
+      renderSoldOutList(Array.isArray(overrides.itemsSoldOut) ? overrides.itemsSoldOut : []);
       setStatus("Overrides loaded.", "good");
     }
 
@@ -326,17 +344,18 @@
       }
 
       const itemsOff = [...document.querySelectorAll("#itemsOffList input:checked")].map(el => el.value);
+      const itemsSoldOut = [...document.querySelectorAll("#itemsSoldOutList input:checked")].map(el => el.value);
 
       const payload = {
-        sections: {
-          lagniappe: document.getElementById("lagniappeToggle").checked,
-          drinks: document.getElementById("drinksToggle").checked,
-          extraSides: document.getElementById("extraSidesToggle").checked
-        },
-        itemsOff,
-        customerMessage: document.getElementById("customerMessage").value.trim()
-      };
-
+  sections: {
+    lagniappe: document.getElementById("lagniappeToggle").checked,
+    drinks: document.getElementById("drinksToggle").checked,
+    extraSides: document.getElementById("extraSidesToggle").checked
+  },
+  itemsOff,
+  itemsSoldOut,
+  customerMessage: document.getElementById("customerMessage").value.trim()
+};
       setStatus("Saving admin changes...");
 
       const res = await fetch("/api/delish/save-menu-overrides/", {
@@ -373,6 +392,7 @@
       console.error(err);
       setStatus(err.message || "Unable to load admin.", "bad");
       renderItemList([]);
+      renderSoldOutList([]);
     });
   </script>
 </body>
