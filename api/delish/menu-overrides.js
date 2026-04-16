@@ -1,22 +1,5 @@
 // FILE: /api/delish/menu-overrides.js
-import { Redis } from "@upstash/redis";
-
-const redis = new Redis({
-  url: process.env.DELISH_UPSTASH_REDIS_REST_URL,
-  token: process.env.DELISH_UPSTASH_REDIS_REST_TOKEN,
-});
-
-const DEFAULT_OVERRIDES = {
-  sections: {
-    lagniappe: true,
-    drinks: true,
-    extraSides: true,
-  },
-  itemsOff: [],
-  customerMessage: "",
-  updatedAt: "",
-  updatedBy: "system",
-};
+import { getDelishMenuOverrides } from "../_lib/delish-menu-overrides.js";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
@@ -25,18 +8,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const saved = await redis.get("delish:menu:overrides");
-    const overrides = saved && typeof saved === "object"
-      ? {
-          ...DEFAULT_OVERRIDES,
-          ...saved,
-          sections: {
-            ...DEFAULT_OVERRIDES.sections,
-            ...(saved.sections || {}),
-          },
-          itemsOff: Array.isArray(saved.itemsOff) ? saved.itemsOff : [],
-        }
-      : DEFAULT_OVERRIDES;
+    const overrides = await getDelishMenuOverrides();
 
     return res.status(200).json({
       ok: true,
