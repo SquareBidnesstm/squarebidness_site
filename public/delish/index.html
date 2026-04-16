@@ -683,17 +683,26 @@ if (state.today && MENU_BY_DAY[state.today]) {
   drinkItems.innerHTML = visibleDrinks.map(renderDrinkItem).join("");
 
   if (isExtraSideAllowedForDay(state.today) && isSectionEnabled("extraSides")) {
-    renderSelectOptions(
-      extraSideSelect,
-      getExtraSidesForDay(state.today).filter(item => isItemEnabled(item.id)),
-      "Extra Side (optional)"
-    );
-    extraSideSelect.disabled = false;
-  } else {
-    renderSelectOptions(extraSideSelect, [], "Extra Side unavailable on Monday");
-    extraSideSelect.value = "";
-    extraSideSelect.disabled = true;
+  renderSelectOptions(
+    extraSideSelect,
+    getExtraSidesForDay(state.today).filter(item => isItemEnabled(item.id)),
+    "Extra Side (optional)"
+  );
+  extraSideSelect.disabled = false;
+} else {
+  let extraSidePlaceholder = "Extra Side unavailable right now";
+
+  if (!isSectionEnabled("extraSides")) {
+    extraSidePlaceholder = "Extra Side turned off for now";
+  } else if (state.today) {
+    const dayLabel = state.today.charAt(0).toUpperCase() + state.today.slice(1);
+    extraSidePlaceholder = `Extra Side unavailable on ${dayLabel}`;
   }
+
+  renderSelectOptions(extraSideSelect, [], extraSidePlaceholder);
+  extraSideSelect.value = "";
+  extraSideSelect.disabled = true;
+}
 
   const visibleLagniappe = isSectionEnabled("lagniappe")
     ? LAGNIAPPE.filter(item => isItemEnabled(item.id))
