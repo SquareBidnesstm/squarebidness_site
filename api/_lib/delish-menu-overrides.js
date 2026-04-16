@@ -12,6 +12,7 @@ export const DEFAULT_DELISH_MENU_OVERRIDES = {
     extraSides: true,
   },
   itemsOff: [],
+  itemsSoldOut: [],
   customerMessage: "",
   updatedAt: "",
   updatedBy: "system",
@@ -32,5 +33,16 @@ export async function getDelishMenuOverrides() {
       ...(saved.sections || {}),
     },
     itemsOff: Array.isArray(saved.itemsOff) ? saved.itemsOff : [],
+  };
+
+    return {
+    ...DEFAULT_DELISH_MENU_OVERRIDES,
+    ...saved,
+    sections: {
+      ...DEFAULT_DELISH_MENU_OVERRIDES.sections,
+      ...(saved.sections || {}),
+    },
+    itemsOff: Array.isArray(saved.itemsOff) ? saved.itemsOff : [],
+    itemsSoldOut: Array.isArray(saved.itemsSoldOut) ? saved.itemsSoldOut : [],
   };
 }
