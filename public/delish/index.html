@@ -202,6 +202,17 @@
       text-transform:uppercase;
     }
 
+    .menuNotice {
+  padding: 14px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  color: #d7ae72;
+  font-weight: 600;
+  text-align: center;
+  margin-top: 10px;
+}
+
     .qtyWrap.is-disabled {
       opacity:.55;
       pointer-events:none;
@@ -741,10 +752,16 @@ if (isExtraSideAllowedForDay(state.today) && isSectionEnabled("extraSides")) {
   extraSideSelect.disabled = true;
 }
 
-  const visibleLagniappe = isSectionEnabled("lagniappe")
-    ? LAGNIAPPE.filter(item => isItemEnabled(item.id))
-    : [];
+  if (!isSectionEnabled("lagniappe")) {
+  lagniappeItems.innerHTML = `
+    <div class="menuNotice">
+      Sorry, Lagniappe items are not available today.
+    </div>
+  `;
+} else {
+  const visibleLagniappe = LAGNIAPPE.filter(item => isItemEnabled(item.id));
   lagniappeItems.innerHTML = visibleLagniappe.map(renderLagniappeItem).join("");
+}
 
   attachQtyButtons();
   attachPlateSideListeners();
