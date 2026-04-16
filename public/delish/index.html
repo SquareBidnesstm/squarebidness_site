@@ -416,43 +416,47 @@
     };
   }
 
-    function updateOrderingBanner(state) {
-    if (!orderingBanner) return;
+   function updateOrderingBanner(state) {
+  if (!orderingBanner) return;
 
-    if (orderingStatus?.message) {
-      orderingBanner.textContent = orderingStatus.message
-        .replace(/\b(\d{1,2}:\d{2})\b/g, (match) => formatTo12Hour(match));
-      return;
-    }
-
-    if (state.openNow) {
-      orderingBanner.textContent = `Open now · Ordering available until ${formatTo12Hour(state.closeTime)}.`;
-      return;
-    }
-
-    if (state.reason === "outside_service_window") {
-      orderingBanner.textContent = `Ordering opens from ${formatTo12Hour(state.openTime)} to ${formatTo12Hour(state.closeTime)}.`;
-      return;
-    }
-
-    if (state.reason === "manual_closed") {
-      orderingBanner.textContent = "Ordering is currently paused.";
-      return;
-    }
-
-    if (state.reason === "not_a_service_day") {
-      orderingBanner.textContent = "Closed today. Check the menu for the next active service day.";
-      return;
-    }
-
-    if (state.reason === "sunday_not_scheduled") {
-      orderingBanner.textContent = "Sunday ordering is only available on the 1st and 3rd Sundays.";
-      return;
-    }
-
-    orderingBanner.textContent = "Check today’s menu and ordering status below.";
+  if (MENU_OVERRIDES?.customerMessage) {
+    orderingBanner.textContent = MENU_OVERRIDES.customerMessage;
+    return;
   }
-  
+
+  if (orderingStatus?.message) {
+    orderingBanner.textContent = orderingStatus.message
+      .replace(/\b(\d{1,2}:\d{2})\b/g, (match) => formatTo12Hour(match));
+    return;
+  }
+
+  if (state.openNow) {
+    orderingBanner.textContent = `Open now · Ordering available until ${formatTo12Hour(state.closeTime)}.`;
+    return;
+  }
+
+  if (state.reason === "outside_service_window") {
+    orderingBanner.textContent = `Ordering opens from ${formatTo12Hour(state.openTime)} to ${formatTo12Hour(state.closeTime)}.`;
+    return;
+  }
+
+  if (state.reason === "manual_closed") {
+    orderingBanner.textContent = "Ordering is currently paused.";
+    return;
+  }
+
+  if (state.reason === "not_a_service_day") {
+    orderingBanner.textContent = "Closed today. Check the menu for the next active service day.";
+    return;
+  }
+
+  if (state.reason === "sunday_not_scheduled") {
+    orderingBanner.textContent = "Sunday ordering is only available on the 1st and 3rd Sundays.";
+    return;
+  }
+
+  orderingBanner.textContent = "Check today’s menu and ordering status below.";
+}
    function getExtraSidesForDay(day) {
     const items = day === "friday" || day === "sunday"
       ? [...EXTRA_SIDES_BASE, ...EXTRA_SIDES_FRIDAY_SUNDAY]
@@ -662,48 +666,44 @@
   currentMode = state.mode;
   currentDay = state.today;
 
-  updateOrderingBanner(state);
+ updateOrderingBanner(state);
 
-  if (state.today && MENU_BY_DAY[state.today]) {
-    const menu = MENU_BY_DAY[state.today];
-    menuDayTitle.textContent = menu.title;
-    menuDayNote.textContent = "Order online, pickup on arrival · Alexandria, Louisiana";
-    mainMenuNote.textContent = menu.note;
-        const visibleMains = (menu.mains || []).filter(item => isItemEnabled(item.id));
-    mainMenuItems.innerHTML = visibleMains.map(item => renderMainItem(item, state.today)).join("");
+if (state.today && MENU_BY_DAY[state.today]) {
+  const menu = MENU_BY_DAY[state.today];
+  menuDayTitle.textContent = menu.title;
+  menuDayNote.textContent = "Order online, pickup on arrival · Alexandria, Louisiana";
+  mainMenuNote.textContent = menu.note;
 
-       const visibleDrinks = isSectionEnabled("drinks")
-      ? DRINKS.filter(item => isItemEnabled(item.id))
-      : [];
-    drinkItems.innerHTML = visibleDrinks.map(renderDrinkItem).join("");
+  const visibleMains = (menu.mains || []).filter(item => isItemEnabled(item.id));
+  mainMenuItems.innerHTML = visibleMains.map(item => renderMainItem(item, state.today)).join("");
 
-        if (MENU_OVERRIDES?.customerMessage) {
-      orderingBanner.textContent = MENU_OVERRIDES.customerMessage;
-      return;
-    }
+  const visibleDrinks = isSectionEnabled("drinks")
+    ? DRINKS.filter(item => isItemEnabled(item.id))
+    : [];
+  drinkItems.innerHTML = visibleDrinks.map(renderDrinkItem).join("");
 
-        if (isExtraSideAllowedForDay(state.today) && isSectionEnabled("extraSides")) {
-      renderSelectOptions(
-        extraSideSelect,
-        getExtraSidesForDay(state.today).filter(item => isItemEnabled(item.id)),
-        "Extra Side (optional)"
-      );
-      extraSideSelect.disabled = false;
-    } else {
-      renderSelectOptions(extraSideSelect, [], "Extra Side unavailable on Monday");
-      extraSideSelect.value = "";
-      extraSideSelect.disabled = true;
-    }
-      
+  if (isExtraSideAllowedForDay(state.today) && isSectionEnabled("extraSides")) {
+    renderSelectOptions(
+      extraSideSelect,
+      getExtraSidesForDay(state.today).filter(item => isItemEnabled(item.id)),
+      "Extra Side (optional)"
+    );
+    extraSideSelect.disabled = false;
+  } else {
+    renderSelectOptions(extraSideSelect, [], "Extra Side unavailable on Monday");
+    extraSideSelect.value = "";
+    extraSideSelect.disabled = true;
+  }
 
-        const visibleLagniappe = isSectionEnabled("lagniappe")
-      ? LAGNIAPPE.filter(item => isItemEnabled(item.id))
-      : [];
-    lagniappeItems.innerHTML = visibleLagniappe.map(renderLagniappeItem).join("");
-    attachQtyButtons();
-    attachPlateSideListeners();
-    syncPlateSides();
-  } else if (state.reason === "not_a_service_day") {
+  const visibleLagniappe = isSectionEnabled("lagniappe")
+    ? LAGNIAPPE.filter(item => isItemEnabled(item.id))
+    : [];
+  lagniappeItems.innerHTML = visibleLagniappe.map(renderLagniappeItem).join("");
+
+  attachQtyButtons();
+  attachPlateSideListeners();
+  syncPlateSides();
+} else if (state.reason === "not_a_service_day") {
     menuDayTitle.textContent = "Delish — Closed Today";
     menuDayNote.textContent = "Pickup Only · Alexandria, Louisiana";
     mainMenuNote.textContent = "Online ordering is closed today.";
