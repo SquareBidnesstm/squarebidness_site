@@ -416,21 +416,22 @@
     };
   }
 
-  function updateOrderingBanner(state) {
+    function updateOrderingBanner(state) {
     if (!orderingBanner) return;
 
     if (orderingStatus?.message) {
-      orderingBanner.textContent = orderingStatus.message;
+      orderingBanner.textContent = orderingStatus.message
+        .replace(/\b(\d{1,2}:\d{2})\b/g, (match) => formatTo12Hour(match));
       return;
     }
 
     if (state.openNow) {
-      orderingBanner.textContent = `Open now · Ordering available until ${state.closeTime}.`;
+      orderingBanner.textContent = `Open now · Ordering available until ${formatTo12Hour(state.closeTime)}.`;
       return;
     }
 
     if (state.reason === "outside_service_window") {
-      orderingBanner.textContent = `Ordering opens from ${state.openTime} to ${state.closeTime}.`;
+      orderingBanner.textContent = `Ordering opens from ${formatTo12Hour(state.openTime)} to ${formatTo12Hour(state.closeTime)}.`;
       return;
     }
 
@@ -451,7 +452,7 @@
 
     orderingBanner.textContent = "Check today’s menu and ordering status below.";
   }
-
+  
   function getExtraSidesForDay(day) {
     return day === "friday" || day === "sunday"
       ? [...EXTRA_SIDES_BASE, ...EXTRA_SIDES_FRIDAY_SUNDAY]
@@ -934,8 +935,8 @@ const sidesOk = plateItems.length > 0 ? selectedPlatesHaveSides() : true;
     if (!state.openNow) {
       if (state.reason === "manual_closed") {
         showStatus("Online ordering is currently paused.");
-      } else if (state.reason === "outside_service_window") {
-        showStatus(`Ordering is available from ${state.openTime} to ${state.closeTime}.`);
+            } else if (state.reason === "outside_service_window") {
+        showStatus(`Ordering is available from ${formatTo12Hour(state.openTime)} to ${formatTo12Hour(state.closeTime)}.`);
       } else if (state.reason === "not_a_service_day") {
         showStatus("Online ordering is closed today.");
       } else {
