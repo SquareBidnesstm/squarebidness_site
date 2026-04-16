@@ -182,6 +182,30 @@
       flex:1;
       min-width:160px;
     }
+        .menuItem.is-soldout {
+      opacity: .58;
+    }
+
+    .soldOutBadge {
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      margin-top:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      background:#5a2222;
+      color:#ffd7d7;
+      border:1px solid rgba(255,255,255,.08);
+      font-size:12px;
+      font-weight:800;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+    }
+
+    .qtyWrap.is-disabled {
+      opacity:.55;
+      pointer-events:none;
+    }
 
     .footer{
       margin-top:28px;
@@ -511,60 +535,64 @@
   }
 
   function renderMainItem(item, day) {
-    const hasBaseOptions = Array.isArray(item.baseOptions) && item.baseOptions.length > 0;
-    const needsSides = item.sideSelectionRequired !== false;
+  const hasBaseOptions = Array.isArray(item.baseOptions) && item.baseOptions.length > 0;
+  const needsSides = item.sideSelectionRequired !== false;
+  const soldOut = isItemSoldOut(item.id);
 
-    return `
-      <div class="menuItem">
-        <div class="menuTop">
-          <div class="menuCopy">
-            <span>${item.name} ($${Number(item.price).toFixed(2)})</span>
-            ${item.desc ? `<small>${item.desc}</small>` : ""}
-          </div>
-          <div class="qtyWrap">
-            <button type="button" class="qtyBtn" data-target="${item.id}Qty" data-action="decrease">−</button>
-            <input type="number" min="0" max="1" value="0" id="${item.id}Qty" class="qty" />
-            <button type="button" class="qtyBtn" data-target="${item.id}Qty" data-action="increase">+</button>
-          </div>
+  return `
+    <div class="menuItem ${soldOut ? "is-soldout" : ""}">
+      <div class="menuTop">
+        <div class="menuCopy">
+          <span>${item.name} ($${Number(item.price).toFixed(2)})</span>
+          ${item.desc ? `<small>${item.desc}</small>` : ""}
+          ${soldOut ? `<div class="soldOutBadge">Sold Out</div>` : ""}
         </div>
-
-        <div class="plateSides" id="${item.id}SidesWrap">
-          ${hasBaseOptions ? `
-            <label class="sideLabel" for="${item.id}Base">${getBaseLabel(item)}</label>
-            <select id="${item.id}Base" data-plate-base="${item.id}">
-              ${renderBaseOptions(item)}
-            </select>
-          ` : ""}
-
-          ${needsSides ? `
-            <label class="sideLabel" for="${item.id}Side1">Side 1</label>
-            <select id="${item.id}Side1" data-plate-side="${item.id}">
-              ${renderPlateSideOptions(day)}
-            </select>
-
-            <label class="sideLabel" for="${item.id}Side2">Side 2</label>
-            <select id="${item.id}Side2" data-plate-side="${item.id}">
-              ${renderPlateSideOptions(day)}
-            </select>
-          ` : ""}
+        <div class="qtyWrap ${soldOut ? "is-disabled" : ""}">
+          <button type="button" class="qtyBtn" data-target="${item.id}Qty" data-action="decrease" ${soldOut ? "disabled" : ""}>−</button>
+          <input type="number" min="0" max="1" value="0" id="${item.id}Qty" class="qty" ${soldOut ? "disabled" : ""} />
+          <button type="button" class="qtyBtn" data-target="${item.id}Qty" data-action="increase" ${soldOut ? "disabled" : ""}>+</button>
         </div>
       </div>
-    `;
-  }
+
+      <div class="plateSides" id="${item.id}SidesWrap">
+        ${hasBaseOptions ? `
+          <label class="sideLabel" for="${item.id}Base">${getBaseLabel(item)}</label>
+          <select id="${item.id}Base" data-plate-base="${item.id}" ${soldOut ? "disabled" : ""}>
+            ${renderBaseOptions(item)}
+          </select>
+        ` : ""}
+
+        ${needsSides ? `
+          <label class="sideLabel" for="${item.id}Side1">Side 1</label>
+          <select id="${item.id}Side1" data-plate-side="${item.id}" ${soldOut ? "disabled" : ""}>
+            ${renderPlateSideOptions(day)}
+          </select>
+
+          <label class="sideLabel" for="${item.id}Side2">Side 2</label>
+          <select id="${item.id}Side2" data-plate-side="${item.id}" ${soldOut ? "disabled" : ""}>
+            ${renderPlateSideOptions(day)}
+          </select>
+        ` : ""}
+      </div>
+    </div>
+  `;
+}
 
   function renderLagniappeItem(item) {
   const cleanName = String(item.name || "").replace(/^Lagniappe\s+/i, "");
+  const soldOut = isItemSoldOut(item.id);
 
   return `
-    <div class="menuItem">
+    <div class="menuItem ${soldOut ? "is-soldout" : ""}">
       <div class="menuTop">
         <div class="menuCopy">
           <span>${cleanName} ($${Number(item.price).toFixed(2)})</span>
+          ${soldOut ? `<div class="soldOutBadge">Sold Out</div>` : ""}
         </div>
-        <div class="qtyWrap">
-          <button type="button" class="qtyBtn" data-target="${item.id}Qty" data-action="decrease">−</button>
-          <input type="number" min="0" max="20" value="0" id="${item.id}Qty" class="qty" />
-          <button type="button" class="qtyBtn" data-target="${item.id}Qty" data-action="increase">+</button>
+        <div class="qtyWrap ${soldOut ? "is-disabled" : ""}">
+          <button type="button" class="qtyBtn" data-target="${item.id}Qty" data-action="decrease" ${soldOut ? "disabled" : ""}>−</button>
+          <input type="number" min="0" max="20" value="0" id="${item.id}Qty" class="qty" ${soldOut ? "disabled" : ""} />
+          <button type="button" class="qtyBtn" data-target="${item.id}Qty" data-action="increase" ${soldOut ? "disabled" : ""}>+</button>
         </div>
       </div>
     </div>
@@ -572,16 +600,19 @@
 }
 
   function renderDrinkItem(item) {
+  const soldOut = isItemSoldOut(item.id);
+
   return `
-    <div class="menuItem">
+    <div class="menuItem ${soldOut ? "is-soldout" : ""}">
       <div class="menuTop">
         <div class="menuCopy">
           <span>${item.name} ($${Number(item.price).toFixed(2)})</span>
+          ${soldOut ? `<div class="soldOutBadge">Sold Out</div>` : ""}
         </div>
-        <div class="qtyWrap">
-          <button type="button" class="qtyBtn" data-target="${item.id}Qty" data-action="decrease">−</button>
-          <input type="number" min="0" max="20" value="0" id="${item.id}Qty" class="qty" />
-          <button type="button" class="qtyBtn" data-target="${item.id}Qty" data-action="increase">+</button>
+        <div class="qtyWrap ${soldOut ? "is-disabled" : ""}">
+          <button type="button" class="qtyBtn" data-target="${item.id}Qty" data-action="decrease" ${soldOut ? "disabled" : ""}>−</button>
+          <input type="number" min="0" max="20" value="0" id="${item.id}Qty" class="qty" ${soldOut ? "disabled" : ""} />
+          <button type="button" class="qtyBtn" data-target="${item.id}Qty" data-action="increase" ${soldOut ? "disabled" : ""}>+</button>
         </div>
       </div>
     </div>
@@ -926,6 +957,11 @@ function getDrinkSelections() {
     const off = Array.isArray(MENU_OVERRIDES?.itemsOff) ? MENU_OVERRIDES.itemsOff : [];
     return !off.includes(itemId);
   }
+
+  function isItemSoldOut(itemId) {
+  const soldOut = Array.isArray(MENU_OVERRIDES?.itemsSoldOut) ? MENU_OVERRIDES.itemsSoldOut : [];
+  return soldOut.includes(itemId);
+}
 
   function calc() {
     const selected = getSelectedItems();
