@@ -377,10 +377,18 @@ if (!orderingState.openNow) {
       });
     }
 
-    const calculatedSubtotal = cleanItems.reduce((sum, item) => sum + item.total, 0);
-    const submittedSubtotal = Number(body.subtotal ?? calculatedSubtotal);
-    const submittedTax = Number(body.tax ?? 0);
-    const submittedTotal = Number(body.total ?? calculatedSubtotal + submittedTax);
+       const calculatedSubtotal = Number(
+      cleanItems.reduce((sum, item) => sum + item.total, 0).toFixed(2)
+    );
+
+    const TAX_RATE = 0.0895;
+
+    const calculatedTax = Number((calculatedSubtotal * TAX_RATE).toFixed(2));
+    const calculatedTotal = Number((calculatedSubtotal + calculatedTax).toFixed(2));
+
+    const submittedSubtotal = calculatedSubtotal;
+    const submittedTax = calculatedTax;
+    const submittedTotal = calculatedTotal;
 
     const line_items = cleanItems.map((item) => ({
       quantity: item.qty,
