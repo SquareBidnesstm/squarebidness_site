@@ -453,10 +453,12 @@
     orderingBanner.textContent = "Check today’s menu and ordering status below.";
   }
   
-  function getExtraSidesForDay(day) {
-    return day === "friday" || day === "sunday"
+   function getExtraSidesForDay(day) {
+    const items = day === "friday" || day === "sunday"
       ? [...EXTRA_SIDES_BASE, ...EXTRA_SIDES_FRIDAY_SUNDAY]
       : [...EXTRA_SIDES_BASE];
+
+    return items.filter(item => isItemEnabled(item.id));
   }
 
   function isExtraSideAllowedForDay(day) {
@@ -667,20 +669,37 @@
     menuDayTitle.textContent = menu.title;
     menuDayNote.textContent = "Order online, pickup on arrival · Alexandria, Louisiana";
     mainMenuNote.textContent = menu.note;
-    mainMenuItems.innerHTML = menu.mains.map(item => renderMainItem(item, state.today)).join("");
+        const visibleMains = (menu.mains || []).filter(item => isItemEnabled(item.id));
+    mainMenuItems.innerHTML = visibleMains.map(item => renderMainItem(item, state.today)).join("");
 
-    drinkItems.innerHTML = DRINKS.map(renderDrinkItem).join("");
+       const visibleDrinks = isSectionEnabled("drinks")
+      ? DRINKS.filter(item => isItemEnabled(item.id))
+      : [];
+    drinkItems.innerHTML = visibleDrinks.map(renderDrinkItem).join("");
 
-    if (isExtraSideAllowedForDay(state.today)) {
-      renderSelectOptions(extraSideSelect, getExtraSidesForDay(state.today), "Extra Side (optional)");
+        if (MENU_OVERRIDES?.customerMessage) {
+      orderingBanner.textContent = MENU_OVERRIDES.customerMessage;
+      return;
+    }
+
+        if (isExtraSideAllowedForDay(state.today) && isSectionEnabled("extraSides")) {
+      renderSelectOptions(
+        extraSideSelect,
+        getExtraSidesForDay(state.today).filter(item => isItemEnabled(item.id)),
+        "Extra Side (optional)"
+      );
       extraSideSelect.disabled = false;
     } else {
       renderSelectOptions(extraSideSelect, [], "Extra Side unavailable on Monday");
       extraSideSelect.value = "";
       extraSideSelect.disabled = true;
     }
+      
 
-    lagniappeItems.innerHTML = LAGNIAPPE.map(renderLagniappeItem).join("");
+        const visibleLagniappe = isSectionEnabled("lagniappe")
+      ? LAGNIAPPE.filter(item => isItemEnabled(item.id))
+      : [];
+    lagniappeItems.innerHTML = visibleLagniappe.map(renderLagniappeItem).join("");
     attachQtyButtons();
     attachPlateSideListeners();
     syncPlateSides();
@@ -874,6 +893,29 @@ function getDrinkSelections() {
     });
   }
 
+    let MENU_OVERRIDES = null;
+
+  async function loadMenuOverrides() {
+    const res = await fetch("/api/delish/menu-overrides/", { cache: "no-store" });
+    const data = await res.json();
+
+    if (!res.ok || !data.ok) {
+      throw new Error(data.error || "Failed to load menu overrides.");
+    }
+
+    MENU_OVERRIDES = data.overrides || null;
+  }
+
+  function isSectionEnabled(sectionKey) {
+    if (!MENU_OVERRIDES?.sections) return true;
+    return MENU_OVERRIDES.sections[sectionKey] !== false;
+  }
+
+  function isItemEnabled(itemId) {
+    const off = Array.isArray(MENU_OVERRIDES?.itemsOff) ? MENU_OVERRIDES.itemsOff : [];
+    return !off.includes(itemId);
+  }
+
   function calc() {
     const selected = getSelectedItems();
     const selectedItems = selected.items;
@@ -1020,6 +1062,7 @@ if (!plateSelections.items.length && !lagniappeItemsSelected.length && !drinkIte
   (async function init() {
     try {
       await loadMenuData();
+      await loadMenuOverrides();
       await loadOrderingStatus();
       applyDailyMenu();
     } catch (error) {
