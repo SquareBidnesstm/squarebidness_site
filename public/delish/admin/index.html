@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="en" data-sb-brand="delish" data-sb-tier="ops" data-sb-variant="delish-admin-v1">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Delish Admin v1</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#101012" />
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/delish/assets/delish-favicon-16.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/delish/assets/delish-favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/delish/assets/delish-logo-mark-180.png" />
+
+  <style>
+    :root{
+      --bg:#101012;
+      --panel:#18181b;
+      --panel-2:#202024;
+      --line:#313138;
+      --text:#f5f2ea;
+      --muted:#c8c0b3;
+      --soft:#9e9587;
+      --accent:#d7ae72;
+      --accent-2:#f2d8ae;
+      --good:#153822;
+      --bad:#5b1d1d;
+      --shadow:0 18px 54px rgba(0,0,0,.30);
+      --max:1100px;
+    }
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;
+      background:linear-gradient(180deg,#0f0f10 0%,#0b0b0c 100%);
+      color:var(--text);
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    }
+    body{padding:18px}
+    .wrap{width:min(100%,var(--max));margin:0 auto}
+    .top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:18px;
+      flex-wrap:wrap;
+      margin-bottom:18px;
+    }
+    h1{
+      margin:0;
+      font-size:clamp(2rem,4vw,3rem);
+      line-height:1;
+      letter-spacing:-.04em;
+    }
+    .sub{
+      margin:10px 0 0;
+      color:var(--muted);
+      font-size:1rem;
+      line-height:1.45;
+    }
+    .panel{
+      background:linear-gradient(180deg,var(--panel-2),var(--panel));
+      border:1px solid var(--line);
+      border-radius:24px;
+      padding:20px;
+      box-shadow:var(--shadow);
+      margin-bottom:18px;
+    }
+    .panel h2{
+      margin:0 0 8px;
+      font-size:1.2rem;
+      letter-spacing:-.02em;
+    }
+    .panel p{
+      margin:0 0 14px;
+      color:var(--muted);
+      line-height:1.5;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:12px;
+    }
+    .box{
+      padding:14px;
+      border-radius:16px;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .box strong{
+      display:block;
+      margin-bottom:6px;
+      color:var(--accent-2);
+      font-size:.95rem;
+    }
+    .toggle{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:14px;
+      border-radius:16px;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.08);
+      margin-bottom:10px;
+    }
+    .toggle label{
+      font-weight:800;
+      color:var(--text);
+    }
+    .toggle input[type="checkbox"]{
+      width:22px;
+      height:22px;
+    }
+    textarea{
+      width:100%;
+      min-height:110px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
+      background:#0f0f10;
+      color:#fff;
+      padding:14px;
+      font:inherit;
+      resize:vertical;
+    }
+    .items-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+    }
+    .item-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:12px 14px;
+      border-radius:14px;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .item-name{
+      font-weight:700;
+      color:var(--text);
+      line-height:1.3;
+    }
+    .item-meta{
+      color:var(--soft);
+      font-size:.88rem;
+      margin-top:4px;
+    }
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:16px;
+    }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:46px;
+      padding:0 18px;
+      border-radius:14px;
+      border:1px solid transparent;
+      font-weight:900;
+      cursor:pointer;
+    }
+    .btn-save{
+      background:var(--accent);
+      color:#181410;
+    }
+    .btn-refresh{
+      background:#2a2a2f;
+      color:#fff;
+      border-color:rgba(255,255,255,.12);
+    }
+    .notice{
+      margin-top:14px;
+      padding:12px 14px;
+      border-radius:14px;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.08);
+      color:var(--muted);
+      line-height:1.45;
+    }
+    .notice.error{
+      background:rgba(91,29,29,.35);
+      border-color:rgba(255,120,120,.18);
+      color:#ffd0d0;
+    }
+    .mini{
+      color:var(--soft);
+      font-size:.88rem;
+      margin-top:8px;
+    }
+    .nav{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:18px;
+    }
+    .nav a{
+      display:inline-flex;
+      align-items:center;
+      min-height:42px;
+      padding:0 14px;
+      border-radius:999px;
+      background:var(--panel);
+      border:1px solid var(--line);
+      color:var(--muted);
+      font-weight:800;
+      text-decoration:none;
+    }
+    .nav a.active{
+      background:rgba(215,174,114,.15);
+      border-color:rgba(215,174,114,.35);
+      color:var(--accent-2);
+    }
+    @media (max-width:900px){
+      .grid,.items-grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="top">
+      <div>
+        <h1>Delish Admin v1</h1>
+        <p class="sub">Live section toggles, sold-out item control, and customer message updates for the Delish order page.</p>
+      </div>
+    </section>
+
+    <div class="nav">
+      <a href="/delish/orders/">Kitchen Orders</a>
+      <a href="/delish/catering/orders/">Catering Orders</a>
+      <a href="/delish/admin/" class="active">Admin</a>
+    </div>
+
+    <section class="panel">
+      <h2>Operator Token</h2>
+      <p>Uses the same operator token style as the kitchen screen.</p>
+      <div class="actions">
+        <button class="btn btn-refresh" id="saveTokenBtn">Save / Update Token</button>
+        <button class="btn btn-refresh" id="clearTokenBtn">Clear Saved Token</button>
+      </div>
+      <div class="mini" id="tokenStatus">Token: not saved</div>
+    </section>
+
+    <section class="panel">
+      <h2>Section Toggles</h2>
+      <p>Hide or show full sections live on the Delish order page.</p>
+
+      <div class="toggle">
+        <label for="toggleLagniappe">Lagniappe</label>
+        <input type="checkbox" id="toggleLagniappe" checked />
+      </div>
+
+      <div class="toggle">
+        <label for="toggleDrinks">Drinks</label>
+        <input type="checkbox" id="toggleDrinks" checked />
+      </div>
+
+      <div class="toggle">
+        <label for="toggleExtraSides">Extra Sides</label>
+        <input type="checkbox" id="toggleExtraSides" checked />
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Customer Banner Message</h2>
+      <p>Optional message shown on the public Delish page.</p>
+      <textarea id="customerMessage" placeholder="Example: Black Eyed Peas sold out for today. Lagniappe available while it lasts."></textarea>
+    </section>
+
+    <section class="panel">
+      <h2>Sold-Out Item Control</h2>
+      <p>Check items to hide them from the public page and block them in checkout.</p>
+      <div id="itemsGrid" class="items-grid"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Save Changes</h2>
+      <p>Push live overrides to Delish.</p>
+      <div class="actions">
+        <button class="btn btn-save" id="saveBtn">Save Overrides</button>
+        <button class="btn btn-refresh" id="refreshBtn">Reload Current Overrides</button>
+      </div>
+      <div class="notice" id="notice">Ready.</div>
+    </section>
+  </div>
+
+  <script>
+    const OPERATOR_TOKEN_KEY = "delish_operator_token";
+    const MENU_URL = "/delish/menu.json";
+    const OVERRIDES_URL = "/api/delish/menu-overrides/";
+    const SAVE_URL = "/api/delish/save-menu-overrides/";
+
+    let MENU_DATA = null;
+    let CURRENT_OVERRIDES = null;
+
+    function getSavedOperatorToken() {
+      try {
+        return localStorage.getItem(OPERATOR_TOKEN_KEY) || "";
+      } catch {
+        return "";
+      }
+    }
+
+    function saveOperatorToken(token) {
+      try {
+        localStorage.setItem(OPERATOR_TOKEN_KEY, String(token || "").trim());
+      } catch {}
+      updateTokenStatus();
+    }
+
+    function clearOperatorToken() {
+      try {
+        localStorage.removeItem(OPERATOR_TOKEN_KEY);
+      } catch {}
+      updateTokenStatus();
+    }
+
+    function updateTokenStatus() {
+      const el = document.getElementById("tokenStatus");
+      const token = getSavedOperatorToken();
+      el.textContent = token ? "Token: saved on this device ✅" : "Token: not saved";
+    }
+
+    function setNotice(message, isError = false) {
+      const el = document.getElementById("notice");
+      el.textContent = message;
+      el.classList.toggle("error", !!isError);
+    }
+
+    function flattenMenuItems(menuData) {
+      const out = [];
+      const days = menuData?.days || {};
+
+      Object.keys(days).forEach((dayKey) => {
+        const mains = Array.isArray(days[dayKey]?.mains) ? days[dayKey].mains : [];
+        mains.forEach((item) => {
+          out.push({
+            id: item.id,
+            name: item.name,
+            group: `Main • ${dayKey}`
+          });
+        });
+      });
+
+      (menuData?.drinks || []).forEach((item) => {
+        out.push({ id: item.id, name: item.name, group: "Drinks" });
+      });
+
+      (menuData?.extraSidesBase || []).forEach((item) => {
+        out.push({ id: item.id, name: item.name, group: "Extra Sides" });
+      });
+
+      (menuData?.extraSidesFridaySunday || []).forEach((item) => {
+        out.push({ id: item.id, name: item.name, group: "Extra Sides Fri/Sun" });
+      });
+
+      (menuData?.lagniappe || []).forEach((item) => {
+        out.push({ id: item.id, name: item.name, group: "Lagniappe" });
+      });
+
+      const seen = new Set();
+      return out.filter((item) => {
+        if (seen.has(item.id)) return false;
+        seen.add(item.id);
+        return true;
+      });
+    }
+
+    function renderItemControls() {
+      const itemsGrid = document.getElementById("itemsGrid");
+      const items = flattenMenuItems(MENU_DATA);
+      const off = new Set(CURRENT_OVERRIDES?.itemsOff || []);
+
+      itemsGrid.innerHTML = items.map((item) => `
+        <label class="item-row">
+          <div>
+            <div class="item-name">${item.name}</div>
+            <div class="item-meta">${item.group} • ${item.id}</div>
+          </div>
+          <input
+            type="checkbox"
+            class="itemToggle"
+            data-item-id="${item.id}"
+            ${off.has(item.id) ? "checked" : ""}
+          />
+        </label>
+      `).join("");
+    }
+
+    function applyOverridesToForm(overrides) {
+      document.getElementById("toggleLagniappe").checked = overrides?.sections?.lagniappe !== false;
+      document.getElementById("toggleDrinks").checked = overrides?.sections?.drinks !== false;
+      document.getElementById("toggleExtraSides").checked = overrides?.sections?.extraSides !== false;
+      document.getElementById("customerMessage").value = overrides?.customerMessage || "";
+      renderItemControls();
+    }
+
+    function collectOverridesFromForm() {
+      const itemsOff = Array.from(document.querySelectorAll(".itemToggle:checked"))
+        .map((el) => el.getAttribute("data-item-id"))
+        .filter(Boolean);
+
+      return {
+        sections: {
+          lagniappe: document.getElementById("toggleLagniappe").checked,
+          drinks: document.getElementById("toggleDrinks").checked,
+          extraSides: document.getElementById("toggleExtraSides").checked,
+        },
+        itemsOff,
+        customerMessage: document.getElementById("customerMessage").value.trim(),
+      };
+    }
+
+    async function loadMenuData() {
+      const res = await fetch(MENU_URL, { cache: "no-store" });
+      const data = await res.json();
+      if (!res.ok) throw new Error("Failed to load menu.json");
+      MENU_DATA = data;
+    }
+
+    async function loadOverrides() {
+      const res = await fetch(`${OVERRIDES_URL}?t=${Date.now()}`, { cache: "no-store" });
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || "Failed to load overrides.");
+      CURRENT_OVERRIDES = data.overrides || null;
+      applyOverridesToForm(CURRENT_OVERRIDES);
+    }
+
+    async function saveOverrides() {
+      let token = getSavedOperatorToken();
+
+      if (!token) {
+        token = window.prompt("Enter Delish operator token");
+        if (!token) {
+          setNotice("Save cancelled.");
+          return;
+        }
+
+        const saveOnDevice = window.confirm("Save this token on this device?");
+        if (saveOnDevice) saveOperatorToken(token);
+      }
+
+      const payload = collectOverridesFromForm();
+
+      setNotice("Saving overrides...");
+
+      const res = await fetch(SAVE_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-operator-token": token.trim()
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok || !data.ok) {
+        if (res.status === 401) {
+          clearOperatorToken();
+        }
+        throw new Error(data.error || "Failed to save overrides.");
+      }
+
+      CURRENT_OVERRIDES = data.overrides || payload;
+      applyOverridesToForm(CURRENT_OVERRIDES);
+      setNotice("Overrides saved live.");
+    }
+
+    document.getElementById("saveTokenBtn").addEventListener("click", () => {
+      const token = window.prompt("Enter Delish operator token", getSavedOperatorToken());
+      if (!token) return;
+      saveOperatorToken(token);
+      setNotice("Operator token saved on this device.");
+    });
+
+    document.getElementById("clearTokenBtn").addEventListener("click", () => {
+      clearOperatorToken();
+      setNotice("Saved operator token cleared.");
+    });
+
+    document.getElementById("saveBtn").addEventListener("click", async () => {
+      try {
+        await saveOverrides();
+      } catch (error) {
+        console.error(error);
+        setNotice(error.message || "Save failed.", true);
+      }
+    });
+
+    document.getElementById("refreshBtn").addEventListener("click", async () => {
+      try {
+        setNotice("Reloading overrides...");
+        await loadOverrides();
+        setNotice("Current overrides loaded.");
+      } catch (error) {
+        console.error(error);
+        setNotice(error.message || "Reload failed.", true);
+      }
+    });
+
+    (async function init() {
+      try {
+        updateTokenStatus();
+        await loadMenuData();
+        await loadOverrides();
+        setNotice("Admin ready.");
+      } catch (error) {
+        console.error(error);
+        setNotice(error.message || "Admin failed to load.", true);
+      }
+    })();
+  </script>
+</body>
+</html>
