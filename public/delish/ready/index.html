@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Delish — Order Ready</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#111111" />
+
+  <link rel="icon" sizes="32x32" href="/delish/assets/delish-favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/delish/assets/delish-logo-mark-180.png" />
+
+  <style>
+    :root{
+      --bg:#0f1012;
+      --panel:#181a1f;
+      --line:rgba(255,255,255,.10);
+      --text:#f5f2ea;
+      --muted:rgba(255,255,255,.70);
+      --accent:#d7ae72;
+      --accent2:#f2d8ae;
+      --good:#1d6b39;
+      --shadow:0 20px 50px rgba(0,0,0,.30);
+    }
+
+    *{box-sizing:border-box}
+
+    html,body{
+      margin:0;
+      min-height:100%;
+      background:
+        radial-gradient(circle at top, rgba(215,174,114,.10), transparent 35%),
+        linear-gradient(180deg,#0d0e10 0%, #111318 100%);
+      color:var(--text);
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    }
+
+    body{
+      padding:24px;
+    }
+
+    .wrap{
+      width:min(1500px, 100%);
+      margin:0 auto;
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:18px;
+      margin-bottom:18px;
+      flex-wrap:wrap;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+
+    .brand img{
+      width:68px;
+      height:68px;
+      border-radius:18px;
+      object-fit:cover;
+      background:#fff;
+      border:1px solid rgba(255,255,255,.08);
+    }
+
+    .eyebrow{
+      margin:0 0 6px;
+      color:var(--accent2);
+      font-size:.9rem;
+      text-transform:uppercase;
+      letter-spacing:.14em;
+      font-weight:900;
+    }
+
+    h1{
+      margin:0;
+      font-size:clamp(2.4rem, 5vw, 4.8rem);
+      line-height:1;
+      letter-spacing:-.04em;
+    }
+
+    .sub{
+      margin:10px 0 0;
+      color:var(--muted);
+      font-size:1.1rem;
+    }
+
+    .meta{
+      display:grid;
+      gap:10px;
+      min-width:280px;
+    }
+
+    .meta-box{
+      padding:14px 16px;
+      border-radius:18px;
+      background:var(--panel);
+      border:1px solid var(--line);
+      box-shadow:var(--shadow);
+    }
+
+    .meta-label{
+      color:var(--muted);
+      font-size:.82rem;
+      text-transform:uppercase;
+      letter-spacing:.10em;
+      font-weight:800;
+    }
+
+    .meta-value{
+      margin-top:8px;
+      font-size:1.25rem;
+      font-weight:900;
+      color:var(--accent2);
+    }
+
+    .hero{
+      margin-bottom:20px;
+      padding:18px 22px;
+      border-radius:24px;
+      background:linear-gradient(180deg, rgba(215,174,114,.12), rgba(215,174,114,.06));
+      border:1px solid rgba(215,174,114,.18);
+      box-shadow:var(--shadow);
+    }
+
+    .hero-title{
+      margin:0;
+      font-size:clamp(2rem, 4vw, 3.4rem);
+      font-weight:900;
+      letter-spacing:-.03em;
+      color:var(--accent2);
+    }
+
+    .hero-copy{
+      margin:8px 0 0;
+      color:var(--muted);
+      font-size:1.05rem;
+    }
+
+    .ready-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+      gap:18px;
+    }
+
+    .ready-card{
+      padding:24px;
+      border-radius:24px;
+      background:linear-gradient(180deg,#1a1d23,#15181d);
+      border:1px solid var(--line);
+      box-shadow:var(--shadow);
+    }
+
+    .ready-badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:40px;
+      padding:0 14px;
+      border-radius:999px;
+      background:rgba(29,107,57,.18);
+      border:1px solid rgba(29,107,57,.32);
+      color:#c7f5d6;
+      font-size:.82rem;
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+
+    .order-number{
+      margin-top:16px;
+      font-size:clamp(2rem, 4vw, 3.3rem);
+      font-weight:900;
+      letter-spacing:-.04em;
+      line-height:1;
+    }
+
+    .customer{
+      margin-top:12px;
+      color:var(--muted);
+      font-size:1.08rem;
+      font-weight:700;
+    }
+
+    .pickup{
+      margin-top:14px;
+      padding-top:14px;
+      border-top:1px solid rgba(255,255,255,.08);
+      color:var(--accent2);
+      font-size:1rem;
+      font-weight:800;
+    }
+
+    .empty{
+      padding:42px 24px;
+      border-radius:24px;
+      background:var(--panel);
+      border:1px solid var(--line);
+      text-align:center;
+      color:var(--muted);
+      box-shadow:var(--shadow);
+    }
+
+    .empty strong{
+      display:block;
+      font-size:2rem;
+      color:var(--text);
+      margin-bottom:10px;
+      letter-spacing:-.03em;
+    }
+
+    @media (max-width:700px){
+      body{padding:14px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <img src="/delish/assets/delish-logo-mark-512.png" alt="Delish logo" />
+        <div>
+          <p class="eyebrow">Delish Pickup Screen</p>
+          <h1>Order Ready</h1>
+          <p class="sub">Please check your order number below.</p>
+        </div>
+      </div>
+
+      <div class="meta">
+        <div class="meta-box">
+          <div class="meta-label">Refresh</div>
+          <div class="meta-value">Every 15 seconds</div>
+        </div>
+        <div class="meta-box">
+          <div class="meta-label">Last Updated</div>
+          <div class="meta-value" id="lastUpdated">Loading...</div>
+        </div>
+      </div>
+    </div>
+
+    <section class="hero">
+      <h2 class="hero-title">Ready for Pickup</h2>
+      <p class="hero-copy">If your order number is shown, please come to the counter.</p>
+    </section>
+
+    <section id="readyGrid" class="ready-grid">
+      <div class="empty">
+        <strong>Loading…</strong>
+        Ready orders will appear here.
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const readyGrid = document.getElementById("readyGrid");
+    const lastUpdated = document.getElementById("lastUpdated");
+
+    function formatTimeLabel(date = new Date()) {
+      return new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/Chicago",
+        hour: "numeric",
+        minute: "2-digit"
+      }).format(date);
+    }
+
+    function firstName(fullName) {
+      const raw = String(fullName || "").trim();
+      if (!raw) return "";
+      return raw.split(/\s+/)[0];
+    }
+
+    function renderReadyOrders(orders) {
+      if (!orders.length) {
+        readyGrid.innerHTML = `
+          <div class="empty">
+            <strong>No ready orders right now</strong>
+            New completed pickup orders will appear here.
+          </div>
+        `;
+        return;
+      }
+
+      readyGrid.innerHTML = orders.map(order => `
+        <article class="ready-card">
+          <div class="ready-badge">Ready</div>
+          <div class="order-number">${escapeHtml(order.orderNumber || "")}</div>
+          <div class="customer">${escapeHtml(firstName(order.customerName || ""))}</div>
+          <div class="pickup">${escapeHtml(order.pickupWindow || "")}</div>
+        </article>
+      `).join("");
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    async function loadReadyOrders() {
+      try {
+        const res = await fetch(`/api/delish/ready-orders/?t=${Date.now()}`, {
+          cache: "no-store"
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || "Failed to load ready orders.");
+        }
+
+        renderReadyOrders(data.readyOrders || []);
+        lastUpdated.textContent = formatTimeLabel(new Date());
+      } catch (error) {
+        console.error("READY SCREEN ERROR:", error);
+        readyGrid.innerHTML = `
+          <div class="empty">
+            <strong>Unable to load ready orders</strong>
+            Please refresh the screen shortly.
+          </div>
+        `;
+        lastUpdated.textContent = "Error";
+      }
+    }
+
+    loadReadyOrders();
+    setInterval(loadReadyOrders, 15000);
+  </script>
+</body>
+</html>
