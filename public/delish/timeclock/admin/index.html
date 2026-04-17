@@ -496,6 +496,22 @@
             <div class="stat-value" id="statLaborPct">0%</div>
             <div class="stat-sub">Labor dollars ÷ sales</div>
           </div>
+
+          <section class="card">
+  <div class="card__body">
+    <div class="stat-label">Gross Sales</div>
+    <div class="stat-value" id="statGrossSales">$0.00</div>
+    <div class="stat-sub">Paid sales for selected day</div>
+  </div>
+</section>
+
+<section class="card">
+  <div class="card__body">
+    <div class="stat-label">Avg Hourly Sales</div>
+    <div class="stat-value" id="statAvgHourlySales">$0.00</div>
+    <div class="stat-sub">Gross sales ÷ total labor hours</div>
+  </div>
+</section>
         </section>
 
         <section class="card">
@@ -525,6 +541,7 @@
               </select>
               <button id="deleteEmployeeBtn" class="danger">Remove Employee</button>
             </div>
+
 
             <div class="helper">
               Manager PIN required for employee changes.
@@ -612,6 +629,8 @@
       statShifts: document.getElementById("statShifts"),
       statActive: document.getElementById("statActive"),
       statLaborDollars: document.getElementById("statLaborDollars"),
+      statGrossSales: document.getElementById("statGrossSales"),
+      statAvgHourlySales: document.getElementById("statAvgHourlySales"),
       statLaborPct: document.getElementById("statLaborPct"),
       statOrders: document.getElementById("statOrders"),
       employeeTotalsBody: document.getElementById("employeeTotalsBody"),
@@ -697,7 +716,7 @@
       return `${Math.round((Number(value || 0) + Number.EPSILON) * 100) / 100}%`;
     }
 
-    async function fetchJson(url, options = {}) {
+       async function fetchJson(url, options = {}) {
       const res = await fetch(url, {
         cache: "no-store",
         headers: {
@@ -707,20 +726,22 @@
         ...options
       });
 
-      async function fetchSales(date) {
-  if (!date) return { grossSales: 0, orderCount: 0 };
-
-  try {
-    return await fetchJson(`/api/delish/sales-summary/?date=${encodeURIComponent(date)}&t=${Date.now()}`);
-  } catch {
-    return { grossSales: 0, orderCount: 0 };
-  }
-}
-
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "Request failed");
       return data;
     }
+
+    async function fetchSales(date) {
+      if (!date) return { grossSales: 0, orderCount: 0 };
+
+      try {
+        return await fetchJson(`/api/delish/sales-summary/?date=${encodeURIComponent(date)}&t=${Date.now()}`);
+      } catch {
+        return { grossSales: 0, orderCount: 0 };
+      }
+    }
+
+     
 
     function saveLocalControls() {
       try {
@@ -737,15 +758,17 @@
         if (rate !== null) els.hourlyRate.value = rate;
       } catch {}
     }
-
     function calculateLaborStats(totalHours, sales = 0) {
-  const hourlyRate = getHourlyRate();
-  const laborDollars = totalHours * hourlyRate;
-  const laborPct = sales > 0 ? (laborDollars / sales) * 100 : 0;
+      const hourlyRate = getHourlyRate();
+      const laborDollars = totalHours * hourlyRate;
+      const laborPct = sales > 0 ? (laborDollars / sales) * 100 : 0;
+      const avgHourlySales = totalHours > 0 ? sales / totalHours : 0;
 
-  els.statLaborDollars.textContent = currency(laborDollars);
-  els.statLaborPct.textContent = pct(laborPct);
-}
+      els.statLaborDollars.textContent = currency(laborDollars);
+      els.statLaborPct.textContent = pct(laborPct);
+      if (els.statGrossSales) els.statGrossSales.textContent = currency(sales);
+      if (els.statAvgHourlySales) els.statAvgHourlySales.textContent = currency(avgHourlySales);
+    }
     function renderEmployeeOptions(employees) {
       const list = employees || [];
       els.deleteEmployeeSelect.innerHTML = `
@@ -1055,11 +1078,11 @@
 els.sales.addEventListener("focus", () => {
   setStatus("Sales is now pulled from Delish order data.", "good");
 });
-    els.hourlyRate.addEventListener("input", () => {
-      saveLocalControls();
-      renderStats(currentData, els.date.value);
-    });
-
+    els.hourlyRate.addEventListener("input", async () => {
+  saveLocalControls();
+  const salesData = await fetchSales(els.date.value);
+  renderStats(currentData, els.date.value, salesData);
+});
     restoreLocalControls();
     els.date.value = centralDateInputValue();
 
