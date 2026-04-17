@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 const barbers = {
   josh: { name: "Josh Watkins", role: "Head Barber" },
@@ -18,34 +18,61 @@ const services = [
 ];
 
 const timeSlots = [
-  "09:00 AM",
-  "09:30 AM",
-  "10:00 AM",
-  "10:30 AM",
-  "11:00 AM",
-  "11:30 AM",
-  "12:00 PM",
-  "12:30 PM",
-  "01:00 PM",
-  "01:30 PM",
-  "02:00 PM",
-  "02:30 PM",
-  "03:00 PM",
-  "03:30 PM",
-  "04:00 PM",
-  "04:30 PM",
+  "09:00",
+  "09:30",
+  "10:00",
+  "10:30",
+  "11:00",
+  "11:30",
+  "12:00",
+  "12:30",
+  "13:00",
+  "13:30",
+  "14:00",
+  "14:30",
+  "15:00",
+  "15:30",
+  "16:00",
+  "16:30",
 ];
+
+function toDisplayTime(time24: string) {
+  const [hourStr, minute] = time24.split(":");
+  let hour = Number(hourStr);
+  const suffix = hour >= 12 ? "PM" : "AM";
+  if (hour === 0) hour = 12;
+  if (hour > 12) hour -= 12;
+  return `${hour}:${minute} ${suffix}`;
+}
+
+function getTodayLocalDate() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
 
 export default function BarberBookingPage() {
   const params = useParams();
   const barberId = params.barberId as string;
-
   const barber = barbers[barberId as keyof typeof barbers];
 
-  const [selectedService, setSelectedService] = useState<string | null>(null);
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [selectedService, setSelectedService] = useState<string>("");
+  const [selectedTime, setSelectedTime] = useState<string>("");
+  const [appointmentDate, setAppointmentDate] = useState<string>(getTodayLocalDate());
   const [clientName, setClientName] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [notes, setNotes] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [serverError, setServerError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+
+  const selectedServiceData = useMemo(
+    () => services.find((s) => s.id === selectedService),
+    [selectedService]
+  );
 
   if (!barber) {
     return (
@@ -55,15 +82,64 @@ export default function BarberBookingPage() {
     );
   }
 
-  const selectedServiceData = services.find(
-    (s) => s.id === selectedService
-  );
+  async function handleSubmit() {
+    setServerError("");
+    setSuccessMessage("");
+
+    if (!selectedService || !selectedTime || !clientName || !phone || !appointmentDate) {
+      setServerError("Please complete all required booking fields.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+
+      const res = await fetch("/api/bookings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          barberSlug: barberId,
+          serviceSlug: selectedService,
+          customerName: clientName,
+          customerPhone: phone,
+          customerEmail: email,
+          appointmentDate,
+          appointmentTime: selectedTime,
+          clientNotes: notes,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.ok) {
+        setServerError(data.error || "Booking failed.");
+        return;
+      }
+
+      setSuccessMessage(
+        `Booking confirmed. Code: ${data.booking.booking_code}`
+      );
+
+      setSelectedService("");
+      setSelectedTime("");
+      setClientName("");
+      setPhone("");
+      setEmail("");
+      setNotes("");
+    } catch (error) {
+      setServerError(
+        error instanceof Error ? error.message : "Unexpected error"
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
     <main style={{ minHeight: "100vh", background: "#0a0a0a", color: "#fff" }}>
       <section style={{ maxWidth: 1100, margin: "0 auto", padding: "56px 24px" }}>
-        
-        {/* HEADER */}
         <div style={{ marginBottom: 28 }}>
           <div style={{ color: "#d4af37", fontSize: 12, marginBottom: 8 }}>
             Dapper Lounge
@@ -74,7 +150,6 @@ export default function BarberBookingPage() {
           <p style={{ color: "#999" }}>{barber.role}</p>
         </div>
 
-        {/* SERVICES */}
         <div style={{ marginBottom: 32 }}>
           <h2>Select Service</h2>
           <div style={{ display: "grid", gap: 10, marginTop: 12 }}>
@@ -102,7 +177,25 @@ export default function BarberBookingPage() {
           </div>
         </div>
 
-        {/* TIME */}
+        <div style={{ marginBottom: 32 }}>
+          <h2>Select Date</h2>
+          <input
+            type="date"
+            value={appointmentDate}
+            min={getTodayLocalDate()}
+            onChange={(e) => setAppointmentDate(e.target.value)}
+            style={{
+              padding: 12,
+              borderRadius: 10,
+              border: "1px solid #333",
+              background: "#111",
+              color: "#fff",
+              width: "100%",
+              maxWidth: 320,
+            }}
+          />
+        </div>
+
         <div style={{ marginBottom: 32 }}>
           <h2>Select Time</h2>
           <div
@@ -116,6 +209,7 @@ export default function BarberBookingPage() {
             {timeSlots.map((time) => (
               <button
                 key={time}
+                type="button"
                 onClick={() => setSelectedTime(time)}
                 style={{
                   padding: 10,
@@ -129,13 +223,12 @@ export default function BarberBookingPage() {
                   cursor: "pointer",
                 }}
               >
-                {time}
+                {toDisplayTime(time)}
               </button>
             ))}
           </div>
         </div>
 
-        {/* CLIENT INFO */}
         <div style={{ marginBottom: 32 }}>
           <h2>Your Info</h2>
           <div style={{ display: "grid", gap: 12, marginTop: 12 }}>
@@ -151,10 +244,22 @@ export default function BarberBookingPage() {
               onChange={(e) => setPhone(e.target.value)}
               style={{ padding: 12, borderRadius: 10, border: "1px solid #333" }}
             />
+            <input
+              placeholder="Email (optional)"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              style={{ padding: 12, borderRadius: 10, border: "1px solid #333" }}
+            />
+            <textarea
+              placeholder="Notes (optional)"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={4}
+              style={{ padding: 12, borderRadius: 10, border: "1px solid #333" }}
+            />
           </div>
         </div>
 
-        {/* SUMMARY */}
         <div
           style={{
             border: "1px solid #333",
@@ -166,13 +271,49 @@ export default function BarberBookingPage() {
           <h3>Summary</h3>
           <p>Barber: {barber.name}</p>
           <p>Service: {selectedServiceData?.name || "-"}</p>
-          <p>Time: {selectedTime || "-"}</p>
+          <p>Price: {selectedServiceData ? `$${selectedServiceData.price}` : "-"}</p>
+          <p>Date: {appointmentDate || "-"}</p>
+          <p>Time: {selectedTime ? toDisplayTime(selectedTime) : "-"}</p>
         </div>
 
-        {/* ACTION */}
+        {serverError ? (
+          <div
+            style={{
+              marginBottom: 16,
+              padding: 12,
+              borderRadius: 10,
+              border: "1px solid #5c1f1f",
+              background: "#2a1212",
+              color: "#ffb3b3",
+            }}
+          >
+            {serverError}
+          </div>
+        ) : null}
+
+        {successMessage ? (
+          <div
+            style={{
+              marginBottom: 16,
+              padding: 12,
+              borderRadius: 10,
+              border: "1px solid #214d2d",
+              background: "#122819",
+              color: "#b9f5c8",
+            }}
+          >
+            {successMessage}
+          </div>
+        ) : null}
+
         <button
           disabled={
-            !selectedService || !selectedTime || !clientName || !phone
+            submitting ||
+            !selectedService ||
+            !selectedTime ||
+            !clientName ||
+            !phone ||
+            !appointmentDate
           }
           style={{
             width: "100%",
@@ -184,15 +325,18 @@ export default function BarberBookingPage() {
             border: "none",
             cursor: "pointer",
             opacity:
-              !selectedService || !selectedTime || !clientName || !phone
+              submitting ||
+              !selectedService ||
+              !selectedTime ||
+              !clientName ||
+              !phone ||
+              !appointmentDate
                 ? 0.5
                 : 1,
           }}
-          onClick={() => {
-            alert("Booking submitted (next step: save to database)");
-          }}
+          onClick={handleSubmit}
         >
-          Confirm Booking
+          {submitting ? "Saving Booking..." : "Confirm Booking"}
         </button>
       </section>
     </main>
