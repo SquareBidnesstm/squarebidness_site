@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 
 const services = [
@@ -22,7 +22,19 @@ const times = [
   "1:00 PM",
   "1:30 PM",
   "2:00 PM",
+  "2:30 PM",
+  "3:00 PM",
+  "3:30 PM",
+  "4:00 PM",
 ];
+
+function getTodayDateString() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
 
 export default function BarberBookingPage() {
   const params = useParams();
@@ -31,7 +43,62 @@ export default function BarberBookingPage() {
   const [name, setName] = useState("");
   const [service, setService] = useState("");
   const [time, setTime] = useState("");
+  const [date, setDate] = useState(getTodayDateString());
   const [loading, setLoading] = useState(false);
+  const [availabilityLoading, setAvailabilityLoading] = useState(false);
+  const [unavailableTimes, setUnavailableTimes] = useState<string[]>([]);
+  const [availabilityError, setAvailabilityError] = useState("");
+
+  const availableTimes = useMemo(() => {
+    return times.filter((slot) => !unavailableTimes.includes(slot));
+  }, [unavailableTimes]);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadAvailability() {
+      try {
+        setAvailabilityLoading(true);
+        setAvailabilityError("");
+        setTime("");
+
+        const res = await fetch(
+          `/api/bookings/availability/?barberSlug=${encodeURIComponent(
+            barberId
+          )}&date=${encodeURIComponent(date)}`,
+          { cache: "no-store" }
+        );
+
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) {
+          if (!active) return;
+          setAvailabilityError(data.error || "Could not load availability");
+          setUnavailableTimes([]);
+          return;
+        }
+
+        if (!active) return;
+        setUnavailableTimes(data.unavailableTimes || []);
+      } catch (error) {
+        if (!active) return;
+        setAvailabilityError(
+          error instanceof Error ? error.message : "Could not load availability"
+        );
+        setUnavailableTimes([]);
+      } finally {
+        if (active) setAvailabilityLoading(false);
+      }
+    }
+
+    if (barberId && date) {
+      loadAvailability();
+    }
+
+    return () => {
+      active = false;
+    };
+  }, [barberId, date]);
 
   async function handleBooking() {
     if (!name || !service || !time) {
@@ -39,27 +106,47 @@ export default function BarberBookingPage() {
       return;
     }
 
+    if (unavailableTimes.includes(time)) {
+      alert("That time is no longer available");
+      return;
+    }
+
     setLoading(true);
 
-    const res = await fetch("/api/bookings/create", {
+    const res = await fetch("/api/bookings/create/", {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
         barber_id: barberId,
         customer_name: name,
         service,
         time,
+        appointment_date: date,
       }),
     });
 
     setLoading(false);
 
     if (res.ok) {
-      alert("Booking confirmed");
+      const data = await res.json().catch(() => null);
+      alert(data?.booking?.booking_code ? `Booking confirmed: ${data.booking.booking_code}` : "Booking confirmed");
       setName("");
       setService("");
       setTime("");
+
+      const refreshRes = await fetch(
+        `/api/bookings/availability/?barberSlug=${encodeURIComponent(
+          barberId
+        )}&date=${encodeURIComponent(date)}`,
+        { cache: "no-store" }
+      );
+      const refreshData = await refreshRes.json().catch(() => null);
+      setUnavailableTimes(refreshData?.unavailableTimes || []);
     } else {
-      alert("Error booking appointment");
+      const data = await res.json().catch(() => null);
+      alert(data?.error || "Error booking appointment");
     }
   }
 
@@ -70,7 +157,6 @@ export default function BarberBookingPage() {
           Booking: {barberId}
         </h1>
 
-        {/* Name */}
         <div style={{ marginTop: 24 }}>
           <label>Name</label>
           <input
@@ -87,7 +173,24 @@ export default function BarberBookingPage() {
           />
         </div>
 
-        {/* Service */}
+        <div style={{ marginTop: 24 }}>
+          <label>Date</label>
+          <input
+            type="date"
+            value={date}
+            min={getTodayDateString()}
+            onChange={(e) => setDate(e.target.value)}
+            style={{
+              width: "100%",
+              padding: 12,
+              marginTop: 6,
+              background: "#111",
+              border: "1px solid #333",
+              color: "#fff",
+            }}
+          />
+        </div>
+
         <div style={{ marginTop: 24 }}>
           <label>Service</label>
           <select
@@ -111,12 +214,12 @@ export default function BarberBookingPage() {
           </select>
         </div>
 
-        {/* Time */}
         <div style={{ marginTop: 24 }}>
           <label>Time</label>
           <select
             value={time}
             onChange={(e) => setTime(e.target.value)}
+            disabled={availabilityLoading}
             style={{
               width: "100%",
               padding: 12,
@@ -126,18 +229,30 @@ export default function BarberBookingPage() {
               color: "#fff",
             }}
           >
-            <option value="">Select time</option>
-            {times.map((t) => (
+            <option value="">
+              {availabilityLoading ? "Loading times..." : "Select time"}
+            </option>
+            {availableTimes.map((t) => (
               <option key={t} value={t}>
                 {t}
               </option>
             ))}
           </select>
+          {availabilityError ? (
+            <div style={{ color: "#ff9f9f", marginTop: 8, fontSize: 14 }}>
+              {availabilityError}
+            </div>
+          ) : null}
+          {unavailableTimes.length > 0 ? (
+            <div style={{ color: "#999", marginTop: 8, fontSize: 14 }}>
+              Unavailable: {unavailableTimes.join(", ")}
+            </div>
+          ) : null}
         </div>
 
         <button
           onClick={handleBooking}
-          disabled={loading}
+          disabled={loading || availabilityLoading}
           style={{
             marginTop: 30,
             width: "100%",
