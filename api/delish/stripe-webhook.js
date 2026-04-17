@@ -129,6 +129,19 @@ function buildCateringDepositSms(metadata, existing) {
   return `Delish Catering: Deposit received for request ${requestNumber}.${eventDate ? ` Event date ${eventDate}.` : ""}${eventTime ? ` Event time ${eventTime}.` : ""}`;
 }
 
+function buildOwnerNewOrderSms(metadata) {
+  const customerName = String(metadata.customerName || "").trim();
+  const pickupDate = String(metadata.pickupDate || "").trim();
+  const pickupWindow = String(metadata.pickupWindow || "").trim();
+  const total = metadata.total || metadata.amountTotal || metadata.subtotal || "";
+
+  return `🚨 Delish New Order
+
+${customerName || "Customer"}
+Pickup: ${pickupDate}${pickupWindow ? ` • ${pickupWindow}` : ""}
+Total: $${Number(total || 0).toFixed(2)}`;
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -228,6 +241,21 @@ export default async function handler(req, res) {
           : "",
     }),
   });
+
+ const ownerSmsTo = normalizeUsPhone(process.env.DELISH_ORDER_ALERT_TO || "");
+
+if (ownerSmsTo) {
+  await sendDelishSms({
+    to: ownerSmsTo,
+    message: buildOwnerNewOrderSms({
+      ...metadata,
+      amountTotal:
+        typeof session.amount_total === "number"
+          ? (session.amount_total / 100).toFixed(2)
+          : "",
+    }),
+  });
+}
 
   console.log("DELISH SMS HELPER RESULT:", smsResult);
   console.log("DELISH PICKUP SMS SENT:", session.id);
