@@ -53,12 +53,15 @@ export default async function handler(req, res) {
       });
     }
 
-    const updated = {
-      ...existing,
-      status: "completed",
-      completedAt: new Date().toISOString(),
-    };
+   if (existing.status === "completed") {
+  return res.status(200).json({ ok: true, duplicate: true });
+}
 
+const updated = {
+  ...existing,
+  status: "completed",
+  completedAt: new Date().toISOString(),
+};
    const smsTo = normalizeUsPhone(updated.customerPhone || "");
 
 if (smsTo && !updated.readySmsSentAt) {
