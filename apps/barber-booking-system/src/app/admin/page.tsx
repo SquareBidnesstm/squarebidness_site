@@ -58,7 +58,7 @@ export default function AdminPage() {
         setLoading(true);
         setError("");
 
-        const res = await fetch("/api/bookings", {
+        const res = await fetch("/api/bookings/", {
           cache: "no-store",
         });
 
