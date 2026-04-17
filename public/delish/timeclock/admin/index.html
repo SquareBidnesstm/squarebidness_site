@@ -960,13 +960,10 @@ function renderStats(data, selectedDate, salesData = {}) {
 
     els.csvLink.href = `${API_URL}?mode=csv${date ? `&date=${encodeURIComponent(date)}` : ""}`;
 
-    const activeCount = (data.active || []).length;
-    if (activeCount >= 4) {
+   const activeCount = (data.active || []).length;
+if (activeCount >= 4) {
   setStatus(`Heads up: ${activeCount} employees are currently clocked in.`, "warn");
-} else {
-  setStatus("Admin loaded.", "good");
 }
-
     if (window.sbAnalytics?.track) {
       window.sbAnalytics.track("delish_timeclock_admin_load", {
         date,
