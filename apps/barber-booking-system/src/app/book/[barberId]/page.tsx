@@ -4,9 +4,11 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 
 const services = [
-  { id: "cut", name: "Haircut", price: 30 },
-  { id: "beard", name: "Beard Trim", price: 15 },
-  { id: "combo", name: "Cut + Beard", price: 40 },
+  { id: "haircut", name: "Haircut", price: 35 },
+  { id: "haircut-beard", name: "Haircut + Beard", price: 45 },
+  { id: "kids-cut", name: "Kids Cut", price: 25 },
+  { id: "enhancements", name: "Cut + Enhancements", price: 50 },
+  { id: "vip", name: "VIP Appointment", price: 75 },
 ];
 
 const times = [
