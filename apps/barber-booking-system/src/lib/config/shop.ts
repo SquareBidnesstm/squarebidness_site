@@ -2,7 +2,7 @@ export const SHOP = {
   slug: "dapper-lounge",
   name: "Dapper Lounge",
   owner: "Josh Watkins",
-  city: "Orlando",
-  state: "FL",
-  timezone: "America/New_York",
+  city: "Hammond",
+  state: "LA",
+  timezone: "America/Chicago",
 } as const;
