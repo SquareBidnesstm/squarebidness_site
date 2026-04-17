@@ -118,10 +118,7 @@ export default function BarberBookingPage() {
         return;
       }
 
-      setSuccessMessage(
-        `Booking confirmed. Code: ${data.booking.booking_code}`
-      );
-
+      setSuccessMessage(`Booking confirmed. Code: ${data.booking.booking_code}`);
       setSelectedService("");
       setSelectedTime("");
       setClientName("");
