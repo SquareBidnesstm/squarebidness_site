@@ -1,339 +1,153 @@
 "use client";
 
+import { useState } from "react";
 import { useParams } from "next/navigation";
-import { useMemo, useState } from "react";
-
-const barbers = {
-  josh: { name: "Josh Watkins", role: "Head Barber" },
-  jj: { name: "Jeramiah (J.J.)", role: "Barber" },
-  jmike: { name: "J-Mike", role: "Barber" },
-};
 
 const services = [
-  { id: "haircut", name: "Haircut", price: 35, duration: 45 },
-  { id: "haircut-beard", name: "Haircut + Beard", price: 45, duration: 60 },
-  { id: "kids-cut", name: "Kids Cut", price: 25, duration: 30 },
-  { id: "enhancements", name: "Cut + Enhancements", price: 50, duration: 60 },
-  { id: "vip", name: "VIP Appointment", price: 75, duration: 90 },
+  { id: "cut", name: "Haircut", price: 30 },
+  { id: "beard", name: "Beard Trim", price: 15 },
+  { id: "combo", name: "Cut + Beard", price: 40 },
 ];
 
-const timeSlots = [
-  "09:00",
-  "09:30",
-  "10:00",
-  "10:30",
-  "11:00",
-  "11:30",
-  "12:00",
-  "12:30",
-  "13:00",
-  "13:30",
-  "14:00",
-  "14:30",
-  "15:00",
-  "15:30",
-  "16:00",
-  "16:30",
+const times = [
+  "9:00 AM",
+  "9:30 AM",
+  "10:00 AM",
+  "10:30 AM",
+  "11:00 AM",
+  "11:30 AM",
+  "12:00 PM",
+  "1:00 PM",
+  "1:30 PM",
+  "2:00 PM",
 ];
-
-function toDisplayTime(time24: string) {
-  const [hourStr, minute] = time24.split(":");
-  let hour = Number(hourStr);
-  const suffix = hour >= 12 ? "PM" : "AM";
-  if (hour === 0) hour = 12;
-  if (hour > 12) hour -= 12;
-  return `${hour}:${minute} ${suffix}`;
-}
-
-function getTodayLocalDate() {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
 
 export default function BarberBookingPage() {
   const params = useParams();
   const barberId = params.barberId as string;
-  const barber = barbers[barberId as keyof typeof barbers];
 
-  const [selectedService, setSelectedService] = useState<string>("");
-  const [selectedTime, setSelectedTime] = useState<string>("");
-  const [appointmentDate, setAppointmentDate] = useState<string>(getTodayLocalDate());
-  const [clientName, setClientName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [notes, setNotes] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [serverError, setServerError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+  const [name, setName] = useState("");
+  const [service, setService] = useState("");
+  const [time, setTime] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const selectedServiceData = useMemo(
-    () => services.find((s) => s.id === selectedService),
-    [selectedService]
-  );
-
-  if (!barber) {
-    return (
-      <main style={{ padding: 40 }}>
-        <h1>Barber not found</h1>
-      </main>
-    );
-  }
-
-  async function handleSubmit() {
-    setServerError("");
-    setSuccessMessage("");
-
-    if (!selectedService || !selectedTime || !clientName || !phone || !appointmentDate) {
-      setServerError("Please complete all required booking fields.");
+  async function handleBooking() {
+    if (!name || !service || !time) {
+      alert("Fill everything out");
       return;
     }
 
-    try {
-      setSubmitting(true);
+    setLoading(true);
 
-      const res = await fetch("/api/bookings", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          barberSlug: barberId,
-          serviceSlug: selectedService,
-          customerName: clientName,
-          customerPhone: phone,
-          customerEmail: email,
-          appointmentDate,
-          appointmentTime: selectedTime,
-          clientNotes: notes,
-        }),
-      });
+    const res = await fetch("/api/bookings/create", {
+      method: "POST",
+      body: JSON.stringify({
+        barber_id: barberId,
+        customer_name: name,
+        service,
+        time,
+      }),
+    });
 
-      const data = await res.json();
+    setLoading(false);
 
-      if (!res.ok || !data.ok) {
-        setServerError(data.error || "Booking failed.");
-        return;
-      }
-
-      setSuccessMessage(`Booking confirmed. Code: ${data.booking.booking_code}`);
-      setSelectedService("");
-      setSelectedTime("");
-      setClientName("");
-      setPhone("");
-      setEmail("");
-      setNotes("");
-    } catch (error) {
-      setServerError(
-        error instanceof Error ? error.message : "Unexpected error"
-      );
-    } finally {
-      setSubmitting(false);
+    if (res.ok) {
+      alert("Booking confirmed");
+      setName("");
+      setService("");
+      setTime("");
+    } else {
+      alert("Error booking appointment");
     }
   }
 
   return (
     <main style={{ minHeight: "100vh", background: "#0a0a0a", color: "#fff" }}>
-      <section style={{ maxWidth: 1100, margin: "0 auto", padding: "56px 24px" }}>
-        <div style={{ marginBottom: 28 }}>
-          <div style={{ color: "#d4af37", fontSize: 12, marginBottom: 8 }}>
-            Dapper Lounge
-          </div>
-          <h1 style={{ fontSize: 40, margin: 0 }}>
-            Book with {barber.name}
-          </h1>
-          <p style={{ color: "#999" }}>{barber.role}</p>
-        </div>
+      <section style={{ maxWidth: 700, margin: "0 auto", padding: "56px 24px" }}>
+        <h1 style={{ fontSize: 36, fontWeight: 900 }}>
+          Booking: {barberId}
+        </h1>
 
-        <div style={{ marginBottom: 32 }}>
-          <h2>Select Service</h2>
-          <div style={{ display: "grid", gap: 10, marginTop: 12 }}>
-            {services.map((service) => (
-              <div
-                key={service.id}
-                onClick={() => setSelectedService(service.id)}
-                style={{
-                  padding: 14,
-                  borderRadius: 12,
-                  cursor: "pointer",
-                  border:
-                    selectedService === service.id
-                      ? "2px solid #d4af37"
-                      : "1px solid #333",
-                  background: "#111",
-                }}
-              >
-                <strong>{service.name}</strong> — ${service.price}
-                <div style={{ fontSize: 12, color: "#888" }}>
-                  {service.duration} min
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div style={{ marginBottom: 32 }}>
-          <h2>Select Date</h2>
+        {/* Name */}
+        <div style={{ marginTop: 24 }}>
+          <label>Name</label>
           <input
-            type="date"
-            value={appointmentDate}
-            min={getTodayLocalDate()}
-            onChange={(e) => setAppointmentDate(e.target.value)}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             style={{
-              padding: 12,
-              borderRadius: 10,
-              border: "1px solid #333",
-              background: "#111",
-              color: "#fff",
               width: "100%",
-              maxWidth: 320,
+              padding: 12,
+              marginTop: 6,
+              background: "#111",
+              border: "1px solid #333",
+              color: "#fff",
             }}
           />
         </div>
 
-        <div style={{ marginBottom: 32 }}>
-          <h2>Select Time</h2>
-          <div
+        {/* Service */}
+        <div style={{ marginTop: 24 }}>
+          <label>Service</label>
+          <select
+            value={service}
+            onChange={(e) => setService(e.target.value)}
             style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(4, 1fr)",
-              gap: 10,
-              marginTop: 12,
+              width: "100%",
+              padding: 12,
+              marginTop: 6,
+              background: "#111",
+              border: "1px solid #333",
+              color: "#fff",
             }}
           >
-            {timeSlots.map((time) => (
-              <button
-                key={time}
-                type="button"
-                onClick={() => setSelectedTime(time)}
-                style={{
-                  padding: 10,
-                  borderRadius: 10,
-                  border:
-                    selectedTime === time
-                      ? "2px solid #d4af37"
-                      : "1px solid #333",
-                  background: "#111",
-                  color: "#fff",
-                  cursor: "pointer",
-                }}
-              >
-                {toDisplayTime(time)}
-              </button>
+            <option value="">Select service</option>
+            {services.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name} - ${s.price}
+              </option>
             ))}
-          </div>
+          </select>
         </div>
 
-        <div style={{ marginBottom: 32 }}>
-          <h2>Your Info</h2>
-          <div style={{ display: "grid", gap: 12, marginTop: 12 }}>
-            <input
-              placeholder="Full Name"
-              value={clientName}
-              onChange={(e) => setClientName(e.target.value)}
-              style={{ padding: 12, borderRadius: 10, border: "1px solid #333" }}
-            />
-            <input
-              placeholder="Phone Number"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              style={{ padding: 12, borderRadius: 10, border: "1px solid #333" }}
-            />
-            <input
-              placeholder="Email (optional)"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              style={{ padding: 12, borderRadius: 10, border: "1px solid #333" }}
-            />
-            <textarea
-              placeholder="Notes (optional)"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={4}
-              style={{ padding: 12, borderRadius: 10, border: "1px solid #333" }}
-            />
-          </div>
-        </div>
-
-        <div
-          style={{
-            border: "1px solid #333",
-            borderRadius: 16,
-            padding: 16,
-            marginBottom: 20,
-          }}
-        >
-          <h3>Summary</h3>
-          <p>Barber: {barber.name}</p>
-          <p>Service: {selectedServiceData?.name || "-"}</p>
-          <p>Price: {selectedServiceData ? `$${selectedServiceData.price}` : "-"}</p>
-          <p>Date: {appointmentDate || "-"}</p>
-          <p>Time: {selectedTime ? toDisplayTime(selectedTime) : "-"}</p>
-        </div>
-
-        {serverError ? (
-          <div
+        {/* Time */}
+        <div style={{ marginTop: 24 }}>
+          <label>Time</label>
+          <select
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
             style={{
-              marginBottom: 16,
+              width: "100%",
               padding: 12,
-              borderRadius: 10,
-              border: "1px solid #5c1f1f",
-              background: "#2a1212",
-              color: "#ffb3b3",
+              marginTop: 6,
+              background: "#111",
+              border: "1px solid #333",
+              color: "#fff",
             }}
           >
-            {serverError}
-          </div>
-        ) : null}
-
-        {successMessage ? (
-          <div
-            style={{
-              marginBottom: 16,
-              padding: 12,
-              borderRadius: 10,
-              border: "1px solid #214d2d",
-              background: "#122819",
-              color: "#b9f5c8",
-            }}
-          >
-            {successMessage}
-          </div>
-        ) : null}
+            <option value="">Select time</option>
+            {times.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
+        </div>
 
         <button
-          disabled={
-            submitting ||
-            !selectedService ||
-            !selectedTime ||
-            !clientName ||
-            !phone ||
-            !appointmentDate
-          }
+          onClick={handleBooking}
+          disabled={loading}
           style={{
+            marginTop: 30,
             width: "100%",
-            padding: 16,
-            borderRadius: 12,
+            padding: 14,
             background: "#d4af37",
             color: "#000",
-            fontWeight: "bold",
+            fontWeight: 700,
             border: "none",
             cursor: "pointer",
-            opacity:
-              submitting ||
-              !selectedService ||
-              !selectedTime ||
-              !clientName ||
-              !phone ||
-              !appointmentDate
-                ? 0.5
-                : 1,
           }}
-          onClick={handleSubmit}
         >
-          {submitting ? "Saving Booking..." : "Confirm Booking"}
+          {loading ? "Booking..." : "Confirm Booking"}
         </button>
       </section>
     </main>
