@@ -65,8 +65,9 @@ function buildPickupSms(metadata) {
   const pickupDate = String(metadata.pickupDate || "").trim();
   const pickupWindow = String(metadata.pickupWindow || "").trim();
   const total = metadata.total || metadata.amountTotal || metadata.subtotal || "";
+  const orderNumber = String(metadata.orderNumber || metadata.recordId || "").trim();
 
-  let itemLines = ["Items unavailable"];
+  let itemLines = [];
   try {
     const items = JSON.parse(metadata.itemsJson || "[]");
     if (Array.isArray(items) && items.length) {
@@ -94,18 +95,22 @@ function buildPickupSms(metadata) {
   }).format(new Date());
 
   const pickupLabel = pickupDate === todayIso ? "Today" : pickupDate;
-  const nameLine = customerName ? customerName : "Customer";
+  const nameLine = customerName || "Customer";
 
-  return `Delish Order Confirmed
+  return `Delish
+
+Order Confirmed
 
 ${nameLine}
-Pickup: ${pickupLabel}${pickupWindow ? ` • ${pickupWindow}` : ""}
+Pickup: ${pickupLabel}${pickupWindow ? ` • ${pickupWindow}` : ""}${orderNumber ? `
 
-${itemLines.join("\n")}
+Order #: ${orderNumber}` : ""}
 
 Total: $${Number(total || 0).toFixed(2)}
 
-Thank you for your order.`;
+We’re preparing your order now.
+
+Reply STOP to opt out.`;
 }
 
  
