@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseServer } from "@/lib/supabase/server";
-import { SHOP } from "@/lib/config/shop";
+import { supabaseServer } from "../../../../lib/supabase/server";
+import { SHOP } from "../../../../lib/config/shop";
 
 type CreateBookingPayload = {
   barber_id?: string;
