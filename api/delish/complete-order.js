@@ -12,15 +12,14 @@ function normalizeUsPhone(phone) {
 function buildReadySms(order) {
   const customerName = String(order.customerName || "").trim();
   const pickupWindow = String(order.pickupWindow || "").trim();
-  const greeting = customerName
-    ? `Delish: ${customerName}, your order is ready for pickup.`
-    : `Delish: Your order is ready for pickup.`;
 
-  return `${greeting}
+  return `Delish Order Ready
 
-${pickupWindow ? `Pickup window: ${pickupWindow}` : "Pickup is ready now."}
+${customerName || "Customer"}
+Your order is ready for pickup${pickupWindow ? ` • ${pickupWindow}` : ""}.
 
-See you soon.`;
+Please come to the counter with your order number:
+${order.orderNumber || ""}`;
 }
 
 const redis = new Redis({
@@ -60,25 +59,25 @@ export default async function handler(req, res) {
       completedAt: new Date().toISOString(),
     };
 
-    const smsTo = normalizeUsPhone(updated.customerPhone || "");
+   const smsTo = normalizeUsPhone(updated.customerPhone || "");
 
-    if (smsTo && !updated.readySmsSentAt) {
-      try {
-        const smsResult = await sendDelishSms({
-          to: smsTo,
-          message: buildReadySms(updated),
-        });
+if (smsTo && !updated.readySmsSentAt) {
+  try {
+    const smsResult = await sendDelishSms({
+      to: smsTo,
+      message: buildReadySms(updated),
+    });
 
-        if (smsResult?.ok) {
-          updated.readySmsSentAt = new Date().toISOString();
-          updated.readySmsSid = smsResult.sid || "";
-        }
-
-        console.log("DELISH READY SMS RESULT:", smsResult);
-      } catch (smsError) {
-        console.error("DELISH READY SMS ERROR:", smsError);
-      }
+    if (smsResult?.ok) {
+      updated.readySmsSentAt = new Date().toISOString();
+      updated.readySmsSid = smsResult.sid || "";
     }
+
+    console.log("DELISH READY SMS RESULT:", smsResult);
+  } catch (smsError) {
+    console.error("DELISH READY SMS ERROR:", smsError);
+  }
+}
 
     await redis.set(key, updated);
 
