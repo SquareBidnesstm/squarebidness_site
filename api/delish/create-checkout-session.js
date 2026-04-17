@@ -182,21 +182,22 @@ export default async function handler(req, res) {
     const recordId = intakeJson.id;
 
     const sharedMetadata = {
-      brand: "Delish",
-      recordId,
-      orderType: "paid_pickup",
-      customerName,
-      customerPhone,
-      customerEmail: customerEmail || "",
-      pickupDate,
-      pickupWindow,
-      activeMenuDay: today,
-      smsConsent: "yes",
-      itemsJson: JSON.stringify(cleanItems),
-      subtotal: String(numericSubtotal),
-      tax: String(numericEstimatedTax),
-      total: String(numericTotal)
-    };
+  brand: "Delish",
+  recordId,
+  orderNumber: recordId,
+  orderType: "paid_pickup",
+  customerName,
+  customerPhone,
+  customerEmail: customerEmail || "",
+  pickupDate,
+  pickupWindow,
+  activeMenuDay: today,
+  smsConsent: "yes",
+  itemsJson: JSON.stringify(cleanItems),
+  subtotal: String(numericSubtotal),
+  tax: String(numericEstimatedTax),
+  total: String(numericTotal)
+};
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
