@@ -7,6 +7,7 @@ type CreateBookingPayload = {
   customer_name?: string;
   service?: string;
   time?: string;
+  appointment_date?: string;
 };
 
 function getTodayDateString() {
@@ -71,7 +72,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const appointmentDate = getTodayDateString();
+    const appointmentDate = body.appointment_date || getTodayDateString();
     const time24 = convertDisplayTimeTo24Hour(body.time);
 
     if (!time24) {
