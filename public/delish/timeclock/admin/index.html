@@ -521,6 +521,14 @@
       <div class="stat-sub">Paid orders for selected day</div>
     </div>
   </section>
+
+        <section class="card">
+  <div class="card__body">
+    <div class="stat-label">Orders / Labor Hour</div>
+    <div class="stat-value" id="statOrdersPerHour">0.00</div>
+    <div class="stat-sub">Order count ÷ total labor hours</div>
+  </div>
+</section>
 </div>
 
       <div class="split">
@@ -633,6 +641,7 @@
       statAvgHourlySales: document.getElementById("statAvgHourlySales"),
       statLaborPct: document.getElementById("statLaborPct"),
       statOrders: document.getElementById("statOrders"),
+      statOrdersPerHour: document.getElementById("statOrdersPerHour"),
       employeeTotalsBody: document.getElementById("employeeTotalsBody"),
       shiftsBody: document.getElementById("shiftsBody"),
       liveList: document.getElementById("liveList"),
@@ -863,12 +872,17 @@
   const activeCount = (data.active || []).length;
   const grossSales = Number(salesData.grossSales || 0);
   const orderCount = Number(salesData.orderCount || 0);
+  const ordersPerLaborHour = totalHours > 0 ? (orderCount / totalHours) : 0;
 
   els.statDate.textContent = selectedDate || "All";
   els.statHours.textContent = String(totalHours);
   els.statShifts.textContent = String(totalShifts);
   els.statActive.textContent = String(activeCount);
   els.statOrders.textContent = String(orderCount);
+     
+      if (els.statOrdersPerHour) {
+  els.statOrdersPerHour.textContent = ordersPerLaborHour.toFixed(2);
+}
 
   els.sales.value = grossSales ? String(grossSales.toFixed(2)) : "";
   calculateLaborStats(totalHours, grossSales);
