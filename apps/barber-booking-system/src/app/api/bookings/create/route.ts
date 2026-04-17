@@ -9,12 +9,6 @@ type CreateBookingPayload = {
   time?: string;
 };
 
-const BARBER_SLUG_TO_NAME: Record<string, string> = {
-  josh: "Josh Watkins",
-  jj: "Jeramiah (J.J.)",
-  jmike: "J-Mike",
-};
-
 function getTodayDateString() {
   const now = new Date();
   const year = now.getFullYear();
@@ -227,7 +221,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       ok: true,
       booking,
-      barber: barber.display_name || barber.name || BARBER_SLUG_TO_NAME[body.barber_id],
+      barber: barber.display_name || barber.name,
       service: service.name,
     });
   } catch (error) {
