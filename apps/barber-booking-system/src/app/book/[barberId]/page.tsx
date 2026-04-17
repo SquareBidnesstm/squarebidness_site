@@ -49,56 +49,75 @@ const [availabilityLoading, setAvailabilityLoading] = useState(false);
 const [unavailableTimes, setUnavailableTimes] = useState<string[]>([]);
 const [availabilityError, setAvailabilityError] = useState("");
 
-  const availableTimes = useMemo(() => {
-    return times.filter((slot) => !unavailableTimes.includes(slot));
-  }, [unavailableTimes]);
+const availableTimes = useMemo(() => {
+  const now = new Date();
+  const today = getTodayDateString();
 
+  return times.filter((slot) => {
+    if (unavailableTimes.includes(slot)) return false;
+
+    // ONLY filter past times if selected date is today
+    if (date !== today) return true;
+
+    const [timeStr, modifier] = slot.split(" ");
+    let [hours, minutes] = timeStr.split(":").map(Number);
+
+    if (modifier === "PM" && hours !== 12) hours += 12;
+    if (modifier === "AM" && hours === 12) hours = 0;
+
+    const slotDate = new Date(date);
+    slotDate.setHours(hours, minutes, 0, 0);
+
+    return slotDate > now;
+  });
+}, [unavailableTimes, date]);
+  
   useEffect(() => {
-    let active = true;
+  let active = true;
 
-    async function loadAvailability() {
-      try {
-        setAvailabilityLoading(true);
-        setAvailabilityError("");
-        setTime("");
+  async function loadAvailability() {
+    try {
+      setAvailabilityLoading(true);
+      setAvailabilityError("");
+      setTime("");
 
-        const res = await fetch(
-          `/api/bookings/availability/?barberSlug=${encodeURIComponent(
-            barberId
-          )}&date=${encodeURIComponent(date)}`,
-          { cache: "no-store" }
-        );
+      const res = await fetch(
+        `/api/bookings/availability/?barberSlug=${encodeURIComponent(
+          barberId
+        )}&date=${encodeURIComponent(date)}`,
+        { cache: "no-store" }
+      );
 
-        const data = await res.json();
+      const data = await res.json();
 
-        if (!res.ok || !data.ok) {
-          if (!active) return;
-          setAvailabilityError(data.error || "Could not load availability");
-          setUnavailableTimes([]);
-          return;
-        }
-
+      if (!res.ok || !data.ok) {
         if (!active) return;
-        setUnavailableTimes(data.unavailableTimes || []);
-      } catch (error) {
-        if (!active) return;
-        setAvailabilityError(
-          error instanceof Error ? error.message : "Could not load availability"
-        );
+        setAvailabilityError(data.error || "Could not load availability");
         setUnavailableTimes([]);
-      } finally {
-        if (active) setAvailabilityLoading(false);
+        return;
       }
-    }
 
-    if (barberId && date) {
-      loadAvailability();
+      if (!active) return;
+      setUnavailableTimes(data.unavailableTimes || []);
+    } catch (error) {
+      if (!active) return;
+      setAvailabilityError(
+        error instanceof Error ? error.message : "Could not load availability"
+      );
+      setUnavailableTimes([]);
+    } finally {
+      if (active) setAvailabilityLoading(false);
     }
+  }
 
-    return () => {
-      active = false;
-    };
-  }, [barberId, date]);
+  if (barberId && date) {
+    loadAvailability();
+  }
+
+  return () => {
+    active = false;
+  };
+}, [barberId, date]);
 
   async function handleBooking() {
     if (!name || !service || !time) {
