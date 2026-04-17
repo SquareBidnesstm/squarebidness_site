@@ -8,8 +8,8 @@ type CreateBookingBody = {
   customerName?: string;
   customerPhone?: string;
   customerEmail?: string;
-  appointmentDate?: string; // YYYY-MM-DD
-  appointmentTime?: string; // HH:MM
+  appointmentDate?: string;
+  appointmentTime?: string;
   clientNotes?: string;
 };
 
@@ -64,45 +64,27 @@ export async function POST(req: NextRequest) {
     const body = (await req.json()) as CreateBookingBody;
 
     if (!body.barberSlug) {
-      return NextResponse.json(
-        { ok: false, error: "Missing barberSlug" },
-        { status: 400 }
-      );
+      return NextResponse.json({ ok: false, error: "Missing barberSlug" }, { status: 400 });
     }
 
     if (!body.serviceSlug) {
-      return NextResponse.json(
-        { ok: false, error: "Missing serviceSlug" },
-        { status: 400 }
-      );
+      return NextResponse.json({ ok: false, error: "Missing serviceSlug" }, { status: 400 });
     }
 
     if (!body.customerName) {
-      return NextResponse.json(
-        { ok: false, error: "Missing customerName" },
-        { status: 400 }
-      );
+      return NextResponse.json({ ok: false, error: "Missing customerName" }, { status: 400 });
     }
 
     if (!body.customerPhone) {
-      return NextResponse.json(
-        { ok: false, error: "Missing customerPhone" },
-        { status: 400 }
-      );
+      return NextResponse.json({ ok: false, error: "Missing customerPhone" }, { status: 400 });
     }
 
     if (!body.appointmentDate) {
-      return NextResponse.json(
-        { ok: false, error: "Missing appointmentDate" },
-        { status: 400 }
-      );
+      return NextResponse.json({ ok: false, error: "Missing appointmentDate" }, { status: 400 });
     }
 
     if (!body.appointmentTime) {
-      return NextResponse.json(
-        { ok: false, error: "Missing appointmentTime" },
-        { status: 400 }
-      );
+      return NextResponse.json({ ok: false, error: "Missing appointmentTime" }, { status: 400 });
     }
 
     const { data: shop, error: shopError } = await supabaseServer
@@ -112,10 +94,7 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (shopError || !shop) {
-      return NextResponse.json(
-        { ok: false, error: "Shop not found" },
-        { status: 500 }
-      );
+      return NextResponse.json({ ok: false, error: "Shop not found" }, { status: 500 });
     }
 
     const { data: barber, error: barberError } = await supabaseServer
@@ -127,10 +106,7 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (barberError || !barber) {
-      return NextResponse.json(
-        { ok: false, error: "Barber not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ ok: false, error: "Barber not found" }, { status: 404 });
     }
 
     const { data: service, error: serviceError } = await supabaseServer
@@ -142,16 +118,10 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (serviceError || !service) {
-      return NextResponse.json(
-        { ok: false, error: "Service not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ ok: false, error: "Service not found" }, { status: 404 });
     }
 
-    const startsAt = combineLocalDateTime(
-      body.appointmentDate,
-      body.appointmentTime
-    );
+    const startsAt = combineLocalDateTime(body.appointmentDate, body.appointmentTime);
 
     if (Number.isNaN(startsAt.getTime())) {
       return NextResponse.json(
@@ -160,9 +130,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const endsAt = new Date(
-      startsAt.getTime() + service.duration_minutes * 60 * 1000
-    );
+    const endsAt = new Date(startsAt.getTime() + service.duration_minutes * 60 * 1000);
 
     const { data: overlapping, error: overlapError } = await supabaseServer
       .from("bookings")
@@ -173,10 +141,7 @@ export async function POST(req: NextRequest) {
       .gt("ends_at", startsAt.toISOString());
 
     if (overlapError) {
-      return NextResponse.json(
-        { ok: false, error: overlapError.message },
-        { status: 500 }
-      );
+      return NextResponse.json({ ok: false, error: overlapError.message }, { status: 500 });
     }
 
     if (overlapping && overlapping.length > 0) {
@@ -263,24 +228,4 @@ export async function POST(req: NextRequest) {
       booking,
       barber: {
         id: barber.id,
-        slug: barber.slug,
-        name: barber.display_name || barber.name,
-      },
-      service: {
-        id: service.id,
-        slug: service.slug,
-        name: service.name,
-        durationMinutes: service.duration_minutes,
-        price: service.price,
-      },
-    });
-  } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Unknown server error";
-
-    return NextResponse.json(
-      { ok: false, error: message },
-      { status: 500 }
-    );
-  }
-}
+       
