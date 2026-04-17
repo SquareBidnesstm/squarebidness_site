@@ -20,7 +20,7 @@ const transporter = nodemailer.createTransport({
 const hasTwilio =
   process.env.TWILIO_ACCOUNT_SID &&
   process.env.TWILIO_AUTH_TOKEN &&
-  process.env.TWILIO_FROM_NUMBER;
+  process.env.DELISH_TWILIO_FROM_NUMBER;
 
 const twilioClient = hasTwilio
   ? twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
@@ -237,7 +237,7 @@ ${line("Submitted At", record.submittedAt)}
       try {
         await twilioClient.messages.create({
           body: `New Delish catering request ${requestNumber} from ${record.customerName} for ${record.eventDate}${record.eventTime ? ` at ${record.eventTime}` : ""}.`,
-          from: process.env.TWILIO_FROM_NUMBER,
+          from: process.env.DELISH_TWILIO_FROM_NUMBER,
           to: process.env.TWILIO_TO_NUMBER,
         });
       } catch (smsError) {
