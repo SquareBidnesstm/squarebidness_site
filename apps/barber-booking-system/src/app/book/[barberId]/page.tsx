@@ -41,13 +41,13 @@ export default function BarberBookingPage() {
   const barberId = params.barberId as string;
 
   const [name, setName] = useState("");
-  const [service, setService] = useState("");
-  const [time, setTime] = useState("");
-  const [date, setDate] = useState(getTodayDateString());
-  const [loading, setLoading] = useState(false);
-  const [availabilityLoading, setAvailabilityLoading] = useState(false);
-  const [unavailableTimes, setUnavailableTimes] = useState<string[]>([]);
-  const [availabilityError, setAvailabilityError] = useState("");
+const [service, setService] = useState("");
+const [time, setTime] = useState("");
+const [date, setDate] = useState(getTodayDateString());
+const [loading, setLoading] = useState(false);
+const [availabilityLoading, setAvailabilityLoading] = useState(false);
+const [unavailableTimes, setUnavailableTimes] = useState<string[]>([]);
+const [availabilityError, setAvailabilityError] = useState("");
 
   const availableTimes = useMemo(() => {
     return times.filter((slot) => !unavailableTimes.includes(slot));
