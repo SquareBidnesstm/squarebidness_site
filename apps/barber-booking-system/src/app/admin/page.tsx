@@ -61,6 +61,9 @@ export default function AdminPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [showTodayOnly, setShowTodayOnly] = useState(false);
 
+  // 👉 ADD IT HERE
+  const today = getTodayDateString();
+
   useEffect(() => {
     async function loadBookings() {
       try {
@@ -75,6 +78,20 @@ export default function AdminPage() {
 
         if (!res.ok || !data.ok) {
           setError(data.error || "Could not load bookings.");
+          const nextUpcomingBookingId = useMemo(() => {
+  const upcoming = filteredBookings
+    .filter(
+      (booking) =>
+        booking.status === "confirmed" &&
+        new Date(booking.starts_at).getTime() > Date.now()
+    )
+    .sort(
+      (a, b) =>
+        new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime()
+    );
+
+  return upcoming[0]?.id || null;
+}, [filteredBookings]);
           return;
         }
 
@@ -129,8 +146,7 @@ export default function AdminPage() {
     return Array.from(map.entries()).map(([slug, name]) => ({ slug, name }));
   }, [bookings]);
 
- const filteredBookings = useMemo(() => {
-  const today = getTodayDateString();
+const filteredBookings = useMemo(() => {
 
   return bookings
     .filter((booking) => {
@@ -162,7 +178,6 @@ export default function AdminPage() {
     });
 }, [bookings, search, barberFilter, statusFilter, showTodayOnly]);
   const stats = useMemo(() => {
-  const today = getTodayDateString();
 
   const total = bookings.length;
 
@@ -306,7 +321,7 @@ export default function AdminPage() {
   </button>
 
   <span style={{ color: "#8f8f8f", fontSize: 14 }}>
-    Today: {formatDate(getTodayDateString())}
+    Today: {formatDate(today)}
   </span>
 </div>
 
@@ -387,64 +402,106 @@ export default function AdminPage() {
             <div style={{ display: "grid", gap: 14 }}>
               {filteredBookings.map((booking) => {
   const barberName =
-    booking.barbers?.display_name || booking.barbers?.name || "Unknown Barber";
-  const serviceName = booking.services?.name || "Unknown Service";
-  const servicePrice = Number(booking.services?.price || 0);
-  const isToday = booking.appointment_date === getTodayDateString();
+  booking.barbers?.display_name || booking.barbers?.name || "Unknown Barber";
+const serviceName = booking.services?.name || "Unknown Service";
+const servicePrice = Number(booking.services?.price || 0);
+const isToday = booking.appointment_date === today;
+const isNextUp = booking.id === nextUpcomingBookingId;
 
-  return (
-                  <div
-  key={booking.id}
-  style={{
-  border: isToday ? "1px solid #5a4717" : "1px solid #232323",
-  background: isToday ? "#120f08" : "#070707",
-  boxShadow: isToday ? "0 0 0 1px rgba(212, 175, 55, 0.18) inset" : "none",
-  borderRadius: 22,
-  padding: 18,
-  display: "grid",
-  gridTemplateColumns: "1fr auto",
-  gap: 18,
-  alignItems: "center",
-}}
->
-  <div>
-    <div
-      style={{
-        display: "flex",
-        gap: 10,
-        flexWrap: "wrap",
-        alignItems: "center",
-        marginBottom: 10,
-      }}
-    >
-      <span
+return (
+  <div
+    key={booking.id}
+    style={{
+      border: isNextUp
+        ? "1px solid #d4af37"
+        : isToday
+        ? "1px solid #5a4717"
+        : "1px solid #232323",
+      background: isNextUp ? "#151006" : isToday ? "#120f08" : "#070707",
+      boxShadow: isNextUp
+        ? "0 0 0 1px rgba(212, 175, 55, 0.28) inset"
+        : isToday
+        ? "0 0 0 1px rgba(212, 175, 55, 0.18) inset"
+        : "none",
+      borderRadius: 22,
+      padding: 18,
+      display: "grid",
+      gridTemplateColumns: "1fr auto",
+      gap: 18,
+      alignItems: "center",
+    }}
+  >
+    <div>
+      <div
         style={{
-          fontSize: 24,
-          fontWeight: 800,
-          lineHeight: 1.1,
+          display: "flex",
+          gap: 10,
+          flexWrap: "wrap",
+          alignItems: "center",
+          marginBottom: 10,
         }}
       >
-        {booking.customer_name}
-      </span>
+        <span
+          style={{
+            fontSize: 24,
+            fontWeight: 800,
+            lineHeight: 1.1,
+          }}
+        >
+          {booking.customer_name}
+        </span>
 
-      <span style={whitePill}>{barberName}</span>
+        <span style={whitePill}>{barberName}</span>
 
-      {isToday && (
+        {isToday && (
+          <span
+            style={{
+              display: "inline-block",
+              padding: "6px 10px",
+              borderRadius: 999,
+              background: "#d4af37",
+              color: "#000000",
+              fontSize: 12,
+              fontWeight: 800,
+            }}
+          >
+            TODAY
+          </span>
+        )}
+
+        {isNextUp && (
   <span
     style={{
       display: "inline-block",
       padding: "6px 10px",
       borderRadius: 999,
-      background: "#d4af37",
+      background: "#ffffff",
       color: "#000000",
       fontSize: 12,
       fontWeight: 800,
     }}
   >
-    TODAY
+    NEXT UP
   </span>
 )}
 
+        {isNextUp && (
+          <span
+            style={{
+              display: "inline-block",
+              padding: "6px 10px",
+              borderRadius: 999,
+              background: "#ffffff",
+              color: "#000000",
+              fontSize: 12,
+              fontWeight: 800,
+            }}
+          >
+            NEXT UP
+          </span>
+        )}
+
+        
       <span
         style={{
           ...darkPill,
