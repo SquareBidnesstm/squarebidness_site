@@ -330,7 +330,38 @@ export default function AdminPage() {
                         </span>
 
                         <span style={whitePill}>{barberName}</span>
-                        <span style={darkPill}>{booking.status}</span>
+                        <span
+  style={{
+    ...darkPill,
+    ...(booking.status === "completed"
+      ? {
+          background: "#122b1d",
+          border: "1px solid #214d2f",
+          color: "#b7f5c6",
+        }
+      : booking.status === "confirmed"
+      ? {
+          background: "#2a2110",
+          border: "1px solid #5a4717",
+          color: "#f5d77a",
+        }
+      : booking.status === "cancelled"
+      ? {
+          background: "#2b1414",
+          border: "1px solid #5a2323",
+          color: "#ffb3b3",
+        }
+      : booking.status === "no_show"
+      ? {
+          background: "#1d1d1d",
+          border: "1px solid #3a3a3a",
+          color: "#c7c7c7",
+        }
+      : {}),
+  }}
+>
+  {booking.status}
+</span>
                         <span style={darkPill}>{booking.payment_status}</span>
                       </div>
 
@@ -375,41 +406,49 @@ export default function AdminPage() {
                       ) : null}
                     </div>
 
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: 10,
-                        flexWrap: "wrap",
-                        justifyContent: "flex-end",
-                      }}
-                    ><div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-  <button
-    style={secondaryButton}
-    onClick={() => updateStatus(booking.id, "confirmed")}
-  >
-    Confirm
-  </button>
+                 <div
+  style={{
+    display: "flex",
+    gap: 8,
+    flexWrap: "wrap",
+    justifyContent: "flex-end",
+  }}
+>
+  {booking.status !== "completed" && (
+    <button
+      style={goldButton}
+      onClick={() => updateStatus(booking.id, "completed")}
+    >
+      Complete
+    </button>
+  )}
 
-  <button
-    style={goldButton}
-    onClick={() => updateStatus(booking.id, "completed")}
-  >
-    Complete
-  </button>
+  {booking.status !== "confirmed" && (
+    <button
+      style={secondaryButton}
+      onClick={() => updateStatus(booking.id, "confirmed")}
+    >
+      Confirm
+    </button>
+  )}
 
-  <button
-    style={secondaryButton}
-    onClick={() => updateStatus(booking.id, "cancelled")}
-  >
-    Cancel
-  </button>
+  {booking.status !== "cancelled" && (
+    <button
+      style={secondaryButton}
+      onClick={() => updateStatus(booking.id, "cancelled")}
+    >
+      Cancel
+    </button>
+  )}
 
-  <button
-    style={secondaryButton}
-    onClick={() => updateStatus(booking.id, "no_show")}
-  >
-    No Show
-  </button>
+  {booking.status !== "no_show" && (
+    <button
+      style={secondaryButton}
+      onClick={() => updateStatus(booking.id, "no_show")}
+    >
+      No Show
+    </button>
+  )}
 </div>
                     </div>
                   </div>
