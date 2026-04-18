@@ -297,161 +297,162 @@ export default function AdminPage() {
 
                 return (
                   <div
-                    key={booking.id}
-                    style={{
-                      border: "1px solid #232323",
-                      background: "#070707",
-                      borderRadius: 22,
-                      padding: 18,
-                      display: "grid",
-                      gridTemplateColumns: "1fr auto",
-                      gap: 18,
-                      alignItems: "center",
-                    }}
-                  >
-                    <div>
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: 10,
-                          flexWrap: "wrap",
-                          alignItems: "center",
-                          marginBottom: 10,
-                        }}
-                      >
-                        <span
-                          style={{
-                            fontSize: 24,
-                            fontWeight: 800,
-                            lineHeight: 1.1,
-                          }}
-                        >
-                          {booking.customer_name}
-                        </span>
-
-                        <span style={whitePill}>{barberName}</span>
-                        <span
+  key={booking.id}
   style={{
-    ...darkPill,
-    ...(booking.status === "completed"
-      ? {
-          background: "#122b1d",
-          border: "1px solid #214d2f",
-          color: "#b7f5c6",
-        }
-      : booking.status === "confirmed"
-      ? {
-          background: "#2a2110",
-          border: "1px solid #5a4717",
-          color: "#f5d77a",
-        }
-      : booking.status === "cancelled"
-      ? {
-          background: "#2b1414",
-          border: "1px solid #5a2323",
-          color: "#ffb3b3",
-        }
-      : booking.status === "no_show"
-      ? {
-          background: "#1d1d1d",
-          border: "1px solid #3a3a3a",
-          color: "#c7c7c7",
-        }
-      : {}),
+    border: "1px solid #232323",
+    background: "#070707",
+    borderRadius: 22,
+    padding: 18,
+    display: "grid",
+    gridTemplateColumns: "1fr auto",
+    gap: 18,
+    alignItems: "center",
   }}
 >
-  {booking.status}
-</span>
-                        <span style={darkPill}>{booking.payment_status}</span>
-                      </div>
-
-                      <div
-                        style={{
-                          color: "#d4af37",
-                          fontWeight: 800,
-                          fontSize: 18,
-                          marginBottom: 10,
-                        }}
-                      >
-                        {serviceName} · {formatMoney(servicePrice)}
-                      </div>
-
-                      <div
-                        style={{
-                          display: "flex",
-                          flexWrap: "wrap",
-                          gap: 16,
-                          color: "#9a9a9a",
-                          fontSize: 14,
-                        }}
-                      >
-                        <span>{booking.booking_code}</span>
-                        <span>{formatDate(booking.appointment_date)}</span>
-                        <span>{formatTime(booking.starts_at)}</span>
-                        <span>{booking.customer_phone || "-"}</span>
-                        <span>{booking.source || "-"}</span>
-                      </div>
-
-                      {booking.client_notes ? (
-                        <div
-                          style={{
-                            marginTop: 12,
-                            color: "#bbbbbb",
-                            fontSize: 14,
-                            lineHeight: 1.6,
-                          }}
-                        >
-                          Notes: {booking.client_notes}
-                        </div>
-                      ) : null}
-                    </div>
-
-                 <div
-  style={{
-    display: "flex",
-    gap: 8,
-    flexWrap: "wrap",
-    justifyContent: "flex-end",
-  }}
->
-  {booking.status !== "completed" && (
-    <button
-      style={goldButton}
-      onClick={() => updateStatus(booking.id, "completed")}
+  <div>
+    <div
+      style={{
+        display: "flex",
+        gap: 10,
+        flexWrap: "wrap",
+        alignItems: "center",
+        marginBottom: 10,
+      }}
     >
-      Complete
-    </button>
-  )}
+      <span
+        style={{
+          fontSize: 24,
+          fontWeight: 800,
+          lineHeight: 1.1,
+        }}
+      >
+        {booking.customer_name}
+      </span>
 
-  {booking.status !== "confirmed" && (
-    <button
-      style={secondaryButton}
-      onClick={() => updateStatus(booking.id, "confirmed")}
-    >
-      Confirm
-    </button>
-  )}
+      <span style={whitePill}>{barberName}</span>
 
-  {booking.status !== "cancelled" && (
-    <button
-      style={secondaryButton}
-      onClick={() => updateStatus(booking.id, "cancelled")}
-    >
-      Cancel
-    </button>
-  )}
+      <span
+        style={{
+          ...darkPill,
+          ...(booking.status === "completed"
+            ? {
+                background: "#122b1d",
+                border: "1px solid #214d2f",
+                color: "#b7f5c6",
+              }
+            : booking.status === "confirmed"
+            ? {
+                background: "#2a2110",
+                border: "1px solid #5a4717",
+                color: "#f5d77a",
+              }
+            : booking.status === "cancelled"
+            ? {
+                background: "#2b1414",
+                border: "1px solid #5a2323",
+                color: "#ffb3b3",
+              }
+            : booking.status === "no_show"
+            ? {
+                background: "#1d1d1d",
+                border: "1px solid #3a3a3a",
+                color: "#c7c7c7",
+              }
+            : {}),
+        }}
+      >
+        {booking.status}
+      </span>
 
-  {booking.status !== "no_show" && (
-    <button
-      style={secondaryButton}
-      onClick={() => updateStatus(booking.id, "no_show")}
+      <span style={darkPill}>{booking.payment_status}</span>
+    </div>
+
+    <div
+      style={{
+        color: "#d4af37",
+        fontWeight: 800,
+        fontSize: 18,
+        marginBottom: 10,
+      }}
     >
-      No Show
-    </button>
-  )}
+      {serviceName} · {formatMoney(servicePrice)}
+    </div>
+
+    <div
+      style={{
+        display: "flex",
+        flexWrap: "wrap",
+        gap: 16,
+        color: "#9a9a9a",
+        fontSize: 14,
+      }}
+    >
+      <span>{booking.booking_code}</span>
+      <span>{formatDate(booking.appointment_date)}</span>
+      <span>{formatTime(booking.starts_at)}</span>
+      <span>{booking.customer_phone || "-"}</span>
+      <span>{booking.source || "-"}</span>
+    </div>
+
+    {booking.client_notes ? (
+      <div
+        style={{
+          marginTop: 12,
+          color: "#bbbbbb",
+          fontSize: 14,
+          lineHeight: 1.6,
+        }}
+      >
+        Notes: {booking.client_notes}
+      </div>
+    ) : null}
+  </div>
+
+  <div
+    style={{
+      display: "flex",
+      gap: 8,
+      flexWrap: "wrap",
+      justifyContent: "flex-end",
+    }}
+  >
+    {booking.status !== "completed" && (
+      <button
+        style={goldButton}
+        onClick={() => updateStatus(booking.id, "completed")}
+      >
+        Complete
+      </button>
+    )}
+
+    {booking.status !== "confirmed" && (
+      <button
+        style={secondaryButton}
+        onClick={() => updateStatus(booking.id, "confirmed")}
+      >
+        Confirm
+      </button>
+    )}
+
+    {booking.status !== "cancelled" && (
+      <button
+        style={secondaryButton}
+        onClick={() => updateStatus(booking.id, "cancelled")}
+      >
+        Cancel
+      </button>
+    )}
+
+    {booking.status !== "no_show" && (
+      <button
+        style={secondaryButton}
+        onClick={() => updateStatus(booking.id, "no_show")}
+      >
+        No Show
+      </button>
+    )}
+  </div>
 </div>
-                    </div>
-                  </div>
                 );
               })}
             </div>
