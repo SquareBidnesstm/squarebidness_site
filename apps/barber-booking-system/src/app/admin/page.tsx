@@ -124,6 +124,7 @@ export default function AdminPage() {
       const name = booking.barbers?.display_name || booking.barbers?.name;
       if (slug && name) map.set(slug, name);
     });
+    
 
     return Array.from(map.entries()).map(([slug, name]) => ({ slug, name }));
   }, [bookings]);
@@ -173,6 +174,10 @@ export default function AdminPage() {
     (b) => b.status === "completed"
   ).length;
 
+  const todayCount = bookings.filter(
+    (b) => b.appointment_date === today
+  ).length;
+
   const bookedRevenue = bookings.reduce(
     (sum, booking) => sum + Number(booking.services?.price || 0),
     0
@@ -205,13 +210,14 @@ export default function AdminPage() {
     total,
     confirmed,
     completed,
+    todayCount,
     bookedRevenue,
     completedRevenue,
     todayBookedRevenue,
     todayCompletedRevenue,
   };
 }, [bookings]);
-
+  
   return (
     <main
       style={{
@@ -257,7 +263,7 @@ export default function AdminPage() {
           </p>
         </div>
 
-        <div
+       <div
   style={{
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
@@ -268,6 +274,7 @@ export default function AdminPage() {
   <StatCard label="Total Bookings" value={stats.total} />
   <StatCard label="Confirmed" value={stats.confirmed} />
   <StatCard label="Completed" value={stats.completed} />
+  <StatCard label="Today Count" value={stats.todayCount} />
   <StatCard label="Booked Revenue" value={formatMoney(stats.bookedRevenue)} />
   <StatCard label="Completed Revenue" value={formatMoney(stats.completedRevenue)} />
   <StatCard label="Today Booked" value={formatMoney(stats.todayBookedRevenue)} />
@@ -379,24 +386,26 @@ export default function AdminPage() {
           ) : (
             <div style={{ display: "grid", gap: 14 }}>
               {filteredBookings.map((booking) => {
-                const barberName =
-                  booking.barbers?.display_name || booking.barbers?.name || "Unknown Barber";
-                const serviceName = booking.services?.name || "Unknown Service";
-                const servicePrice = Number(booking.services?.price || 0);
+  const barberName =
+    booking.barbers?.display_name || booking.barbers?.name || "Unknown Barber";
+  const serviceName = booking.services?.name || "Unknown Service";
+  const servicePrice = Number(booking.services?.price || 0);
+  const isToday = booking.appointment_date === getTodayDateString();
 
-                return (
+  return (
                   <div
   key={booking.id}
   style={{
-    border: "1px solid #232323",
-    background: "#070707",
-    borderRadius: 22,
-    padding: 18,
-    display: "grid",
-    gridTemplateColumns: "1fr auto",
-    gap: 18,
-    alignItems: "center",
-  }}
+  border: isToday ? "1px solid #5a4717" : "1px solid #232323",
+  background: isToday ? "#120f08" : "#070707",
+  boxShadow: isToday ? "0 0 0 1px rgba(212, 175, 55, 0.18) inset" : "none",
+  borderRadius: 22,
+  padding: 18,
+  display: "grid",
+  gridTemplateColumns: "1fr auto",
+  gap: 18,
+  alignItems: "center",
+}}
 >
   <div>
     <div
@@ -419,6 +428,22 @@ export default function AdminPage() {
       </span>
 
       <span style={whitePill}>{barberName}</span>
+
+      {isToday && (
+  <span
+    style={{
+      display: "inline-block",
+      padding: "6px 10px",
+      borderRadius: 999,
+      background: "#d4af37",
+      color: "#000000",
+      fontSize: 12,
+      fontWeight: 800,
+    }}
+  >
+    TODAY
+  </span>
+)}
 
       <span
         style={{
