@@ -80,6 +80,33 @@ export default function AdminPage() {
     loadBookings();
   }, []);
 
+  async function updateStatus(bookingId: string, status: string) {
+  try {
+    const res = await fetch("/api/bookings/update-status/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ bookingId, status }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.ok) {
+      alert(data.error || "Failed to update status");
+      return;
+    }
+
+    // refresh bookings after update
+    const refresh = await fetch("/api/bookings/", { cache: "no-store" });
+    const refreshedData = await refresh.json();
+
+    setBookings(refreshedData.bookings || []);
+  } catch (err) {
+    alert("Error updating booking");
+  }
+}
+
   const uniqueBarbers = useMemo(() => {
     const map = new Map<string, string>();
 
@@ -355,13 +382,35 @@ export default function AdminPage() {
                         flexWrap: "wrap",
                         justifyContent: "flex-end",
                       }}
-                    >
-                      <button style={secondaryButton} type="button">
-                        View
-                      </button>
-                      <button style={goldButton} type="button">
-                        Manage
-                      </button>
+                    ><div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+  <button
+    style={secondaryButton}
+    onClick={() => updateStatus(booking.id, "confirmed")}
+  >
+    Confirm
+  </button>
+
+  <button
+    style={goldButton}
+    onClick={() => updateStatus(booking.id, "completed")}
+  >
+    Complete
+  </button>
+
+  <button
+    style={secondaryButton}
+    onClick={() => updateStatus(booking.id, "cancelled")}
+  >
+    Cancel
+  </button>
+
+  <button
+    style={secondaryButton}
+    onClick={() => updateStatus(booking.id, "no_show")}
+  >
+    No Show
+  </button>
+</div>
                     </div>
                   </div>
                 );
