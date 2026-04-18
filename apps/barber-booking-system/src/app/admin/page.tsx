@@ -144,16 +144,36 @@ export default function AdminPage() {
   }, [bookings, search, barberFilter, statusFilter]);
 
   const stats = useMemo(() => {
-    const total = bookings.length;
-    const confirmed = bookings.filter((b) => b.status === "confirmed").length;
-    const completed = bookings.filter((b) => b.status === "completed").length;
-    const revenue = bookings.reduce(
+  const total = bookings.length;
+
+  const confirmed = bookings.filter(
+    (b) => b.status === "confirmed"
+  ).length;
+
+  const completed = bookings.filter(
+    (b) => b.status === "completed"
+  ).length;
+
+  const bookedRevenue = bookings.reduce(
+    (sum, booking) => sum + Number(booking.services?.price || 0),
+    0
+  );
+
+  const completedRevenue = bookings
+    .filter((b) => b.status === "completed")
+    .reduce(
       (sum, booking) => sum + Number(booking.services?.price || 0),
       0
     );
 
-    return { total, confirmed, completed, revenue };
-  }, [bookings]);
+  return {
+    total,
+    confirmed,
+    completed,
+    bookedRevenue,
+    completedRevenue,
+  };
+}, [bookings]);
 
   return (
     <main
@@ -203,7 +223,7 @@ export default function AdminPage() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+            gridTemplateColumns: "repeat(5, minmax(0, 1fr))",
             gap: 16,
             marginBottom: 24,
           }}
@@ -211,7 +231,8 @@ export default function AdminPage() {
           <StatCard label="Total Bookings" value={stats.total} />
           <StatCard label="Confirmed" value={stats.confirmed} />
           <StatCard label="Completed" value={stats.completed} />
-          <StatCard label="Projected Revenue" value={formatMoney(stats.revenue)} />
+          <StatCard label="Booked Revenue" value={formatMoney(stats.bookedRevenue)} />
+          <StatCard label="Completed Revenue" value={formatMoney(stats.completedRevenue)} />
         </div>
 
         <div
