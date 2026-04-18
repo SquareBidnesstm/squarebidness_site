@@ -160,8 +160,9 @@ export default function AdminPage() {
       return new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime();
     });
 }, [bookings, search, barberFilter, statusFilter, showTodayOnly]);
-  
   const stats = useMemo(() => {
+  const today = getTodayDateString();
+
   const total = bookings.length;
 
   const confirmed = bookings.filter(
@@ -184,12 +185,30 @@ export default function AdminPage() {
       0
     );
 
+  const todayBookedRevenue = bookings
+    .filter((b) => b.appointment_date === today)
+    .reduce(
+      (sum, booking) => sum + Number(booking.services?.price || 0),
+      0
+    );
+
+  const todayCompletedRevenue = bookings
+    .filter(
+      (b) => b.appointment_date === today && b.status === "completed"
+    )
+    .reduce(
+      (sum, booking) => sum + Number(booking.services?.price || 0),
+      0
+    );
+
   return {
     total,
     confirmed,
     completed,
     bookedRevenue,
     completedRevenue,
+    todayBookedRevenue,
+    todayCompletedRevenue,
   };
 }, [bookings]);
 
@@ -239,20 +258,21 @@ export default function AdminPage() {
         </div>
 
         <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(5, minmax(0, 1fr))",
-            gap: 16,
-            marginBottom: 24,
-          }}
-        >
-
-          <StatCard label="Total Bookings" value={stats.total} />
-          <StatCard label="Confirmed" value={stats.confirmed} />
-          <StatCard label="Completed" value={stats.completed} />
-          <StatCard label="Booked Revenue" value={formatMoney(stats.bookedRevenue)} />
-          <StatCard label="Completed Revenue" value={formatMoney(stats.completedRevenue)} />
-        </div>
+  style={{
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
+    gap: 16,
+    marginBottom: 24,
+  }}
+>
+  <StatCard label="Total Bookings" value={stats.total} />
+  <StatCard label="Confirmed" value={stats.confirmed} />
+  <StatCard label="Completed" value={stats.completed} />
+  <StatCard label="Booked Revenue" value={formatMoney(stats.bookedRevenue)} />
+  <StatCard label="Completed Revenue" value={formatMoney(stats.completedRevenue)} />
+  <StatCard label="Today Booked" value={formatMoney(stats.todayBookedRevenue)} />
+  <StatCard label="Today Completed" value={formatMoney(stats.todayCompletedRevenue)} />
+</div>
 
         <div
   style={{
