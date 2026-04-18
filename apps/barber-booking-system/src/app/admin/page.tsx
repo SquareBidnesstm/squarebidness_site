@@ -247,7 +247,14 @@ export default function AdminPage() {
           }}
         >
 
-          <div
+          <StatCard label="Total Bookings" value={stats.total} />
+          <StatCard label="Confirmed" value={stats.confirmed} />
+          <StatCard label="Completed" value={stats.completed} />
+          <StatCard label="Booked Revenue" value={formatMoney(stats.bookedRevenue)} />
+          <StatCard label="Completed Revenue" value={formatMoney(stats.completedRevenue)} />
+        </div>
+
+        <div
   style={{
     display: "flex",
     alignItems: "center",
@@ -275,12 +282,6 @@ export default function AdminPage() {
     Today: {formatDate(getTodayDateString())}
   </span>
 </div>
-          <StatCard label="Total Bookings" value={stats.total} />
-          <StatCard label="Confirmed" value={stats.confirmed} />
-          <StatCard label="Completed" value={stats.completed} />
-          <StatCard label="Booked Revenue" value={formatMoney(stats.bookedRevenue)} />
-          <StatCard label="Completed Revenue" value={formatMoney(stats.completedRevenue)} />
-        </div>
 
         <div
           style={{
