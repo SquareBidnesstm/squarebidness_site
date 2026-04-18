@@ -407,51 +407,54 @@ export default function AdminPage() {
       </div>
     ) : null}
   </div>
+<div
+  style={{
+    display: "flex",
+    gap: 8,
+    flexWrap: "wrap",
+    justifyContent: "flex-end",
+  }}
+>
+  {booking.status !== "completed" && (
+    <button
+      type="button"
+      style={goldButton}
+      onClick={() => updateStatus(booking.id, "completed")}
+    >
+      Complete
+    </button>
+  )}
 
-  <div
-    style={{
-      display: "flex",
-      gap: 8,
-      flexWrap: "wrap",
-      justifyContent: "flex-end",
-    }}
-  >
-    {booking.status !== "completed" && (
-      <button
-        style={goldButton}
-        onClick={() => updateStatus(booking.id, "completed")}
-      >
-        Complete
-      </button>
-    )}
+  {booking.status !== "confirmed" && (
+    <button
+      type="button"
+      style={secondaryButton}
+      onClick={() => updateStatus(booking.id, "confirmed")}
+    >
+      Confirm
+    </button>
+  )}
 
-    {booking.status !== "confirmed" && (
-      <button
-        style={secondaryButton}
-        onClick={() => updateStatus(booking.id, "confirmed")}
-      >
-        Confirm
-      </button>
-    )}
+  {booking.status !== "cancelled" && (
+    <button
+      type="button"
+      style={secondaryButton}
+      onClick={() => updateStatus(booking.id, "cancelled")}
+    >
+      Cancel
+    </button>
+  )}
 
-    {booking.status !== "cancelled" && (
-      <button
-        style={secondaryButton}
-        onClick={() => updateStatus(booking.id, "cancelled")}
-      >
-        Cancel
-      </button>
-    )}
-
-    {booking.status !== "no_show" && (
-      <button
-        style={secondaryButton}
-        onClick={() => updateStatus(booking.id, "no_show")}
-      >
-        No Show
-      </button>
-    )}
-  </div>
+  {booking.status !== "no_show" && (
+    <button
+      type="button"
+      style={secondaryButton}
+      onClick={() => updateStatus(booking.id, "no_show")}
+    >
+      No Show
+    </button>
+  )}
+</div>
 </div>
                 );
               })}
