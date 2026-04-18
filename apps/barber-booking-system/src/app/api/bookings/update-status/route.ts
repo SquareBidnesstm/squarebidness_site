@@ -1,6 +1,14 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "../../../../lib/supabase/server";
 
+const allowedStatuses = [
+  "pending",
+  "confirmed",
+  "completed",
+  "cancelled",
+  "no_show",
+] as const;
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -10,6 +18,13 @@ export async function POST(req: Request) {
     if (!bookingId || !status) {
       return NextResponse.json(
         { ok: false, error: "Missing bookingId or status" },
+        { status: 400 }
+      );
+    }
+
+    if (!allowedStatuses.includes(status)) {
+      return NextResponse.json(
+        { ok: false, error: "Invalid status" },
         { status: 400 }
       );
     }
