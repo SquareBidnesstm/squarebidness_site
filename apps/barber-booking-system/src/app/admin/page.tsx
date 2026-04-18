@@ -44,6 +44,14 @@ function formatTime(dateTime: string) {
   });
 }
 
+function getTodayDateString() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 export default function AdminPage() {
   const [bookings, setBookings] = useState<AdminBooking[]>([]);
   const [loading, setLoading] = useState(true);
@@ -51,6 +59,7 @@ export default function AdminPage() {
   const [search, setSearch] = useState("");
   const [barberFilter, setBarberFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [showTodayOnly, setShowTodayOnly] = useState(false);
 
   useEffect(() => {
     async function loadBookings() {
@@ -119,8 +128,11 @@ export default function AdminPage() {
     return Array.from(map.entries()).map(([slug, name]) => ({ slug, name }));
   }, [bookings]);
 
-  const filteredBookings = useMemo(() => {
-    return bookings.filter((booking) => {
+ const filteredBookings = useMemo(() => {
+  const today = getTodayDateString();
+
+  return bookings
+    .filter((booking) => {
       const q = search.trim().toLowerCase();
 
       const matchesSearch =
@@ -139,10 +151,16 @@ export default function AdminPage() {
       const matchesStatus =
         statusFilter === "all" || booking.status === statusFilter;
 
-      return matchesSearch && matchesBarber && matchesStatus;
-    });
-  }, [bookings, search, barberFilter, statusFilter]);
+      const matchesToday =
+        !showTodayOnly || booking.appointment_date === today;
 
+      return matchesSearch && matchesBarber && matchesStatus && matchesToday;
+    })
+    .sort((a, b) => {
+      return new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime();
+    });
+}, [bookings, search, barberFilter, statusFilter, showTodayOnly]);
+  
   const stats = useMemo(() => {
   const total = bookings.length;
 
@@ -228,6 +246,35 @@ export default function AdminPage() {
             marginBottom: 24,
           }}
         >
+
+          <div
+  style={{
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 20,
+  }}
+>
+  <button
+    type="button"
+    onClick={() => setShowTodayOnly((prev) => !prev)}
+    style={{
+      padding: "10px 14px",
+      borderRadius: 12,
+      border: "1px solid #2d2d2d",
+      background: showTodayOnly ? "#d4af37" : "#111111",
+      color: showTodayOnly ? "#000000" : "#ffffff",
+      fontWeight: 800,
+      cursor: "pointer",
+    }}
+  >
+    {showTodayOnly ? "Showing Today Only" : "Show Today Only"}
+  </button>
+
+  <span style={{ color: "#8f8f8f", fontSize: 14 }}>
+    Today: {formatDate(getTodayDateString())}
+  </span>
+</div>
           <StatCard label="Total Bookings" value={stats.total} />
           <StatCard label="Confirmed" value={stats.confirmed} />
           <StatCard label="Completed" value={stats.completed} />
@@ -296,8 +343,8 @@ export default function AdminPage() {
           >
             <h2 style={{ margin: 0, fontSize: 30, fontWeight: 900 }}>Bookings</h2>
             <div style={{ color: "#8f8f8f", fontSize: 14 }}>
-              {filteredBookings.length} shown
-            </div>
+  {filteredBookings.length} shown {showTodayOnly ? "for today" : ""}
+</div>
           </div>
 
           {loading ? (
