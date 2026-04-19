@@ -134,65 +134,6 @@ export default function AdminPage() {
 }
 
   const uniqueBarbers = useMemo(() => {
-    const map = new Map<string, string>();
-
-    bookings.forEach((booking) => {
-      const slug = booking.barbers?.slug;
-      const name = booking.barbers?.display_name || booking.barbers?.name;
-      if (slug && name) map.set(slug, name);
-    });
-    
-
-    return Array.from(map.entries()).map(([slug, name]) => ({ slug, name }));
-  }, [bookings]);
-
-const filteredBookings = useMemo(() => {
-  return bookings
-    .filter((booking) => {
-      const q = search.trim().toLowerCase();
-
-      const matchesSearch =
-        q.length === 0 ||
-        booking.customer_name.toLowerCase().includes(q) ||
-        booking.booking_code.toLowerCase().includes(q) ||
-        (booking.customer_phone || "").toLowerCase().includes(q) ||
-        (booking.barbers?.display_name || booking.barbers?.name || "")
-          .toLowerCase()
-          .includes(q) ||
-        (booking.services?.name || "").toLowerCase().includes(q);
-
-      const matchesBarber =
-        barberFilter === "all" || booking.barbers?.slug === barberFilter;
-
-      const matchesStatus =
-        statusFilter === "all" || booking.status === statusFilter;
-
-      const matchesToday =
-        !showTodayOnly || booking.appointment_date === today;
-
-      return matchesSearch && matchesBarber && matchesStatus && matchesToday;
-    })
-    .sort((a, b) => {
-      return new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime();
-    });
-}, [bookings, search, barberFilter, statusFilter, showTodayOnly, today]);
-
-const nextUpcomingBookingId = useMemo(() => {
-  const upcoming = filteredBookings
-    .filter(
-      (booking) =>
-        booking.status === "confirmed" &&
-        new Date(booking.starts_at).getTime() > Date.now()
-    )
-    .sort(
-      (a, b) =>
-        new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime()
-    );
-
-  return upcoming[0]?.id || null;
-}, [filteredBookings]);
-
-const uniqueBarbers = useMemo(() => {
   const map = new Map<string, string>();
 
   bookings.forEach((booking) => {
@@ -260,13 +201,8 @@ useEffect(() => {
 const stats = useMemo(() => {
   const total = bookings.length;
 
-  const confirmed = bookings.filter(
-    (b) => b.status === "confirmed"
-  ).length;
-
-  const completed = bookings.filter(
-    (b) => b.status === "completed"
-  ).length;
+  const confirmed = bookings.filter((b) => b.status === "confirmed").length;
+  const completed = bookings.filter((b) => b.status === "completed").length;
 
   const todayCount = bookings.filter(
     (b) => b.appointment_date === today
