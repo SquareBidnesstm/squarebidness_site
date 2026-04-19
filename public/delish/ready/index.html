@@ -460,11 +460,7 @@
           throw new Error(data.error || "Failed to load ready orders.");
         }
 
-        const now = Date.now();
-        const readyOrders = (data.readyOrders || []).filter(order => {
-          const t = new Date(order.completedAt || order.createdAt || 0).getTime();
-          return (now - t) < (1000 * 60 * 15);
-        });
+       const readyOrders = Array.isArray(data.readyOrders) ? data.readyOrders : [];
 
         renderReadyOrders(readyOrders);
         lastIds = readyOrders.map(o => o.id);
