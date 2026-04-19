@@ -147,7 +147,6 @@ export default function AdminPage() {
   }, [bookings]);
 
 const filteredBookings = useMemo(() => {
-
   return bookings
     .filter((booking) => {
       const q = search.trim().toLowerCase();
@@ -176,9 +175,89 @@ const filteredBookings = useMemo(() => {
     .sort((a, b) => {
       return new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime();
     });
-}, [bookings, search, barberFilter, statusFilter, showTodayOnly]);
-  const stats = useMemo(() => {
+}, [bookings, search, barberFilter, statusFilter, showTodayOnly, today]);
 
+const nextUpcomingBookingId = useMemo(() => {
+  const upcoming = filteredBookings
+    .filter(
+      (booking) =>
+        booking.status === "confirmed" &&
+        new Date(booking.starts_at).getTime() > Date.now()
+    )
+    .sort(
+      (a, b) =>
+        new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime()
+    );
+
+  return upcoming[0]?.id || null;
+}, [filteredBookings]);
+
+const uniqueBarbers = useMemo(() => {
+  const map = new Map<string, string>();
+
+  bookings.forEach((booking) => {
+    const slug = booking.barbers?.slug;
+    const name = booking.barbers?.display_name || booking.barbers?.name;
+    if (slug && name) map.set(slug, name);
+  });
+
+  return Array.from(map.entries()).map(([slug, name]) => ({ slug, name }));
+}, [bookings]);
+
+const filteredBookings = useMemo(() => {
+  return bookings
+    .filter((booking) => {
+      const q = search.trim().toLowerCase();
+
+      const matchesSearch =
+        q.length === 0 ||
+        booking.customer_name.toLowerCase().includes(q) ||
+        booking.booking_code.toLowerCase().includes(q) ||
+        (booking.customer_phone || "").toLowerCase().includes(q) ||
+        (booking.barbers?.display_name || booking.barbers?.name || "")
+          .toLowerCase()
+          .includes(q) ||
+        (booking.services?.name || "").toLowerCase().includes(q);
+
+      const matchesBarber =
+        barberFilter === "all" || booking.barbers?.slug === barberFilter;
+
+      const matchesStatus =
+        statusFilter === "all" || booking.status === statusFilter;
+
+      const matchesToday =
+        !showTodayOnly || booking.appointment_date === today;
+
+      return matchesSearch && matchesBarber && matchesStatus && matchesToday;
+    })
+    .sort((a, b) => {
+      return new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime();
+    });
+}, [bookings, search, barberFilter, statusFilter, showTodayOnly, today]);
+
+const nextUpcomingBookingId = useMemo(() => {
+  const upcoming = filteredBookings
+    .filter(
+      (booking) =>
+        booking.status === "confirmed" &&
+        new Date(booking.starts_at).getTime() > Date.now()
+    )
+    .sort(
+      (a, b) =>
+        new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime()
+    );
+
+  return upcoming[0]?.id || null;
+}, [filteredBookings]);
+
+useEffect(() => {
+  if (!nextUpcomingBookingId) return;
+
+  const el = document.getElementById(`booking-${nextUpcomingBookingId}`);
+  if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+}, [nextUpcomingBookingId]);
+
+const stats = useMemo(() => {
   const total = bookings.length;
 
   const confirmed = bookings.filter(
@@ -231,7 +310,7 @@ const filteredBookings = useMemo(() => {
     todayBookedRevenue,
     todayCompletedRevenue,
   };
-}, [bookings]);
+}, [bookings, today]);
   
   return (
     <main
@@ -409,28 +488,30 @@ const isToday = booking.appointment_date === today;
 const isNextUp = booking.id === nextUpcomingBookingId;
 
 return (
-  <div
-    key={booking.id}
-    style={{
-      border: isNextUp
-        ? "1px solid #d4af37"
-        : isToday
-        ? "1px solid #5a4717"
-        : "1px solid #232323",
-      background: isNextUp ? "#151006" : isToday ? "#120f08" : "#070707",
-      boxShadow: isNextUp
-        ? "0 0 0 1px rgba(212, 175, 55, 0.28) inset"
-        : isToday
-        ? "0 0 0 1px rgba(212, 175, 55, 0.18) inset"
-        : "none",
-      borderRadius: 22,
-      padding: 18,
-      display: "grid",
-      gridTemplateColumns: "1fr auto",
-      gap: 18,
-      alignItems: "center",
-    }}
-  >
+ <div
+  id={`booking-${booking.id}`}   // 👈 ADD THIS LINE
+  key={booking.id}
+  style={{
+    border: isNextUp
+      ? "1px solid #d4af37"
+      : isToday
+      ? "1px solid #5a4717"
+      : "1px solid #232323",
+    background: isNextUp ? "#151006" : isToday ? "#120f08" : "#070707",
+    boxShadow: isNextUp
+      ? "0 0 0 1px rgba(212, 175, 55, 0.28) inset"
+      : isToday
+      ? "0 0 0 1px rgba(212, 175, 55, 0.18) inset"
+      : "none",
+    borderRadius: 22,
+    padding: 18,
+    display: "grid",
+    gridTemplateColumns: "1fr auto",
+    gap: 18,
+    alignItems: "center",
+  }}
+>
+  
     <div>
       <div
         style={{
