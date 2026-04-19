@@ -77,18 +77,7 @@ export default function AdminPage() {
         const data = await res.json();
 
         if (!res.ok || !data.ok) {
-          setError(data.error || "Could not load bookings.");
-          const nextUpcomingBookingId = useMemo(() => {
-  const upcoming = filteredBookings
-    .filter(
-      (booking) =>
-        booking.status === "confirmed" &&
-        new Date(booking.starts_at).getTime() > Date.now()
-    )
-    .sort(
-      (a, b) =>
-        new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime()
-    );
+        
 
   return upcoming[0]?.id || null;
 }, [filteredBookings]);
