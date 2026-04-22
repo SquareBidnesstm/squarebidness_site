@@ -1,228 +1,1079 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
 
-<title>Innovate South — Square Bidness</title>
-<meta name="description" content="Square Bidness Innovate South operator playbook." />
-<link rel="canonical" href="https://www.squarebidness.com/innovate-south/" />
-<meta name="robots" content="noindex,nofollow" />
-<meta name="theme-color" content="#000000" />
+  <title>Innovate South — Square Bidness</title>
+  <meta name="description" content="Square Bidness Innovate South operator playbook." />
+  <link rel="canonical" href="https://www.squarebidness.com/innovate-south/" />
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#000000" />
 
-<style>
-:root{
-  --bg:#000;
-  --panel:#0b0b0b;
-  --line:#1f1f1f;
-  --text:#f5f5f5;
-  --muted:#b8bcc6;
-  --gold:#c9a227;
-}
+  <style>
+    :root{
+      --bg:#000000;
+      --panel:#0b0b0b;
+      --panel-2:#111111;
+      --line:#1f1f1f;
+      --text:#f5f5f5;
+      --muted:#b8bcc6;
+      --gold:#c9a227;
+      --gold-soft:rgba(201,162,39,.12);
+      --shadow:0 10px 30px rgba(0,0,0,.3);
+      --radius:16px;
+      --max:1040px;
+    }
 
-body{
-  margin:0;
-  font-family:Inter,system-ui;
-  background:#000;
-  color:#fff;
-}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      background:linear-gradient(180deg,#020202 0%, #000 100%);
+      color:var(--text);
+      line-height:1.55;
+    }
 
-.wrap{
-  max-width:900px;
-  margin:0 auto;
-  padding:16px;
-}
+    a{color:inherit}
+    button,input{font:inherit}
 
-.panel{
-  background:#0b0b0b;
-  border:1px solid #1f1f1f;
-  border-radius:16px;
-  padding:18px;
-  margin-bottom:14px;
-}
+    .wrap{
+      width:min(var(--max), calc(100% - 24px));
+      margin:0 auto;
+    }
 
-h1{
-  font-size:2rem;
-  margin:0 0 8px;
-}
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:50;
+      backdrop-filter:blur(14px);
+      background:rgba(0,0,0,.82);
+      border-bottom:1px solid rgba(255,255,255,.06);
+    }
 
-h2{
-  font-size:1.2rem;
-  margin:0 0 10px;
-  color:var(--gold);
-}
+    .topbar__inner{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:12px 0;
+    }
 
-.muted{
-  color:var(--muted);
-}
+    .brandlock{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
+    }
 
-.tag{
-  display:inline-block;
-  padding:6px 10px;
-  border:1px solid #333;
-  border-radius:999px;
-  margin:4px 6px 0 0;
-  font-size:.8rem;
-}
+    .brandmark{
+      width:38px;
+      height:38px;
+      border-radius:12px;
+      display:grid;
+      place-items:center;
+      border:1px solid rgba(201,162,39,.24);
+      background:linear-gradient(180deg, rgba(201,162,39,.14), rgba(201,162,39,.04));
+      color:var(--gold);
+      font-weight:800;
+      letter-spacing:.06em;
+      flex:0 0 auto;
+    }
 
-.block{
-  margin-bottom:12px;
-}
+    .brandcopy{min-width:0}
+    .eyebrow{
+      margin:0;
+      font-size:.72rem;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:var(--gold);
+    }
 
-ul{
-  padding-left:18px;
-}
+    .brandtitle{
+      margin:0;
+      font-size:.98rem;
+      font-weight:700;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
 
-.btn{
-  display:inline-block;
-  padding:10px 14px;
-  border-radius:999px;
-  border:1px solid #333;
-  margin-top:10px;
-}
+    .top-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
 
-.btn.gold{
-  background:var(--gold);
-  color:#000;
-  font-weight:700;
-}
-</style>
+    .btn{
+      appearance:none;
+      border:1px solid var(--line);
+      background:#111;
+      color:#fff;
+      border-radius:999px;
+      padding:.72rem 1rem;
+      text-decoration:none;
+      cursor:pointer;
+      transition:.18s ease;
+      white-space:nowrap;
+    }
+
+    .btn:hover{transform:translateY(-1px); border-color:#333}
+    .btn--gold{
+      background:var(--gold);
+      color:#000;
+      border-color:rgba(201,162,39,.8);
+      font-weight:700;
+    }
+    .btn--ghost{background:transparent}
+    .btn--small{
+      padding:.55rem .8rem;
+      font-size:.9rem;
+    }
+
+    .hero{padding:28px 0 20px}
+    .hero__grid{
+      display:grid;
+      grid-template-columns:1.2fr .8fr;
+      gap:18px;
+    }
+
+    .panel{
+      background:linear-gradient(180deg,var(--panel), #080808);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+    }
+
+    .hero__main{
+      padding:24px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .hero__main::after{
+      content:"";
+      position:absolute;
+      inset:auto -80px -80px auto;
+      width:220px;
+      height:220px;
+      background:radial-gradient(circle, rgba(201,162,39,.16), rgba(201,162,39,0));
+      pointer-events:none;
+    }
+
+    h1{
+      margin:0 0 8px;
+      font-size:clamp(1.8rem,4.5vw,3rem);
+      line-height:1.02;
+      letter-spacing:-.04em;
+    }
+
+    .lead{
+      margin:0;
+      color:var(--muted);
+      max-width:58ch;
+      font-size:1rem;
+    }
+
+    .hero__tags{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin:18px 0 0;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:.5rem .8rem;
+      border-radius:999px;
+      background:var(--gold-soft);
+      color:#f6df96;
+      border:1px solid rgba(201,162,39,.18);
+      font-size:.85rem;
+    }
+
+    .hero__side{
+      padding:20px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .quick-title{
+      margin:0 0 4px;
+      font-size:1rem;
+      font-weight:700;
+    }
+
+    .muted{color:var(--muted)}
+
+    .quick-card{
+      padding:14px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:var(--panel-2);
+    }
+
+    .toolbar{padding:14px 0 16px}
+    .toolbar__inner{
+      display:grid;
+      grid-template-columns:1fr auto auto;
+      gap:10px;
+      align-items:center;
+    }
+
+    .search{
+      width:100%;
+      background:#0d0d0d;
+      border:1px solid var(--line);
+      color:#fff;
+      border-radius:12px;
+      padding:.86rem .95rem;
+      outline:none;
+    }
+
+    .search:focus{
+      border-color:rgba(201,162,39,.5);
+      box-shadow:0 0 0 3px rgba(201,162,39,.12);
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns:280px 1fr;
+      gap:18px;
+      padding-bottom:44px;
+    }
+
+    .sidebar{
+      position:sticky;
+      top:78px;
+      align-self:start;
+      padding:14px;
+    }
+
+    .sidebar h2{
+      margin:6px 0 10px;
+      font-size:.9rem;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      color:var(--gold);
+    }
+
+    .navlist{
+      display:grid;
+      gap:8px;
+    }
+
+    .navbtn{
+      width:100%;
+      text-align:left;
+      background:#0d0d0d;
+      border:1px solid var(--line);
+      color:#fff;
+      border-radius:12px;
+      padding:.9rem .9rem;
+      cursor:pointer;
+      transition:.18s ease;
+    }
+
+    .navbtn:hover,
+    .navbtn.is-active{
+      border-color:rgba(201,162,39,.45);
+      background:rgba(201,162,39,.08);
+    }
+
+    .navbtn small{
+      display:block;
+      margin-top:4px;
+      color:var(--muted);
+    }
+
+    .progress{
+      margin-top:12px;
+      border-top:1px solid var(--line);
+      padding-top:12px;
+    }
+
+    .progressbar{
+      height:8px;
+      border-radius:999px;
+      background:#111;
+      border:1px solid #1b1b1b;
+      overflow:hidden;
+    }
+
+    .progressbar > span{
+      display:block;
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg, var(--gold), #f4db8a);
+      transition:width .25s ease;
+    }
+
+    .content{
+      display:grid;
+      gap:16px;
+    }
+
+    .level{
+      padding:20px;
+      scroll-margin-top:92px;
+    }
+
+    .level__head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:14px;
+      margin-bottom:12px;
+    }
+
+    .level__eyebrow{
+      margin:0 0 6px;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      color:var(--gold);
+      font-size:.74rem;
+    }
+
+    .level h2{
+      margin:0;
+      font-size:1.5rem;
+      letter-spacing:-.03em;
+    }
+
+    .level__desc{
+      margin:8px 0 0;
+      color:var(--muted);
+      max-width:64ch;
+    }
+
+    .level-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .grid{
+      display:grid;
+      gap:12px;
+    }
+
+    .grid--2{
+      grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+
+    .card{
+      padding:16px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:var(--panel-2);
+    }
+
+    .card h3{
+      margin:0 0 8px;
+      font-size:1rem;
+    }
+
+    .card p{margin:.25rem 0 0}
+
+    .quote{
+      padding:16px;
+      border-radius:14px;
+      border:1px solid rgba(201,162,39,.25);
+      background:linear-gradient(180deg, rgba(201,162,39,.08), rgba(201,162,39,.03));
+    }
+
+    .quote strong{
+      display:block;
+      color:#f3da90;
+      margin-bottom:6px;
+      font-size:.78rem;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+    }
+
+    .quote p{
+      margin:0;
+      font-size:1.02rem;
+      line-height:1.55;
+    }
+
+    .list{
+      margin:0;
+      padding-left:1.15rem;
+      color:#e8e8e8;
+    }
+
+    .list li + li{margin-top:.42rem}
+
+    .chips{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:8px;
+    }
+
+    .chip{
+      border:1px solid var(--line);
+      background:#0d0d0d;
+      border-radius:999px;
+      padding:.45rem .75rem;
+      font-size:.86rem;
+      color:#fff;
+      cursor:pointer;
+    }
+
+    .chip:hover{
+      border-color:rgba(201,162,39,.45);
+      background:rgba(201,162,39,.08);
+    }
+
+    .copy-note{
+      font-size:.83rem;
+      color:var(--muted);
+      min-height:1.1em;
+    }
+
+    .floating{
+      position:fixed;
+      right:14px;
+      bottom:14px;
+      z-index:40;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .fab{
+      border:none;
+      border-radius:999px;
+      padding:.85rem 1rem;
+      background:var(--gold);
+      color:#000;
+      cursor:pointer;
+      font-weight:700;
+      box-shadow:var(--shadow);
+    }
+
+    .fab--dark{
+      background:#111;
+      color:#fff;
+      border:1px solid var(--line);
+    }
+
+    .hidden{display:none !important}
+
+    .empty-state{
+      padding:18px;
+      border:1px dashed #333;
+      border-radius:14px;
+      color:var(--muted);
+      text-align:center;
+      background:#070707;
+    }
+
+    @media (max-width: 980px){
+      .hero__grid,
+      .layout,
+      .toolbar__inner,
+      .grid--2{
+        grid-template-columns:1fr;
+      }
+
+      .sidebar{position:static}
+      .level__head{flex-direction:column}
+      .level-actions{justify-content:flex-start}
+    }
+
+    @media (max-width: 640px){
+      .topbar__inner{
+        align-items:flex-start;
+        flex-direction:column;
+      }
+
+      .top-actions{
+        width:100%;
+        justify-content:flex-start;
+      }
+
+      .hero__main,
+      .hero__side,
+      .level{
+        padding:16px;
+      }
+
+      .wrap{
+        width:min(var(--max), calc(100% - 16px));
+      }
+    }
+  </style>
 </head>
-
 <body>
+  <header class="topbar">
+    <div class="wrap topbar__inner">
+      <div class="brandlock">
+        <div class="brandmark">SB</div>
+        <div class="brandcopy">
+          <p class="eyebrow">Square Bidness Operator Playbook</p>
+          <p class="brandtitle">Innovate South</p>
+        </div>
+      </div>
 
-<div class="wrap">
+      <div class="top-actions">
+        <button class="btn btn--small btn--ghost" type="button" id="expandAllBtn">Expand all</button>
+        <button class="btn btn--small btn--ghost" type="button" id="collapseAllBtn">Collapse all</button>
+        <button class="btn btn--small btn--gold" type="button" id="copyMasterBtn">Copy master pitch</button>
+      </div>
+    </div>
+  </header>
 
-<!-- HERO -->
-<div class="panel">
-  <h1>Innovate South</h1>
-  <p class="muted">
-    Walk in focused. Move intentional. Leave with leverage.
-  </p>
+  <main>
+    <section class="hero">
+      <div class="wrap hero__grid">
+        <div class="panel hero__main">
+          <p class="eyebrow">Live reference page</p>
+          <h1>Walk in focused. Move intentional. Leave with leverage.</h1>
+          <p class="lead">
+            This page is your Innovate South field guide — what sessions matter most, what to say,
+            what to focus on, who to talk to, and how to leave with something real.
+          </p>
 
-  <div>
-    <span class="tag">Networking</span>
-    <span class="tag">Investors</span>
-    <span class="tag">AI + Tech</span>
-    <span class="tag">Positioning</span>
+          <div class="hero__tags">
+            <span class="pill">Networking</span>
+            <span class="pill">Investors</span>
+            <span class="pill">AI + Tech</span>
+            <span class="pill">Operator infrastructure</span>
+          </div>
+        </div>
+
+        <aside class="panel hero__side">
+          <div class="quick-card">
+            <p class="quick-title">Event goal</p>
+            <p class="muted">Position Square Bidness as digital infrastructure for independent operators.</p>
+          </div>
+
+          <div class="quick-card">
+            <p class="quick-title">Daily target</p>
+            <p class="muted">10 conversations · 3 strong connections · 1 real follow-up</p>
+          </div>
+
+          <div class="quick-card">
+            <p class="quick-title">Core line</p>
+            <p class="muted">We don’t replace businesses — we organize their demand.</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="toolbar">
+      <div class="wrap toolbar__inner">
+        <input
+          id="searchInput"
+          class="search"
+          type="search"
+          placeholder="Search pitch, sessions, networking, investors, AI, follow-up..."
+          aria-label="Search the Innovate South playbook"
+        />
+        <button class="btn btn--ghost" type="button" id="clearSearchBtn">Clear</button>
+        <button class="btn btn--gold" type="button" id="jumpDailyBtn">Daily target</button>
+      </div>
+    </section>
+
+    <section class="wrap layout">
+      <aside class="panel sidebar">
+        <h2>Sections</h2>
+        <div class="navlist">
+          <button class="navbtn is-active" type="button" data-scroll="#pitch">
+            Pitch
+            <small>core line · quick intro · opener</small>
+          </button>
+          <button class="navbtn" type="button" data-scroll="#day1">
+            Day 1
+            <small>foundation · presence · community</small>
+          </button>
+          <button class="navbtn" type="button" data-scroll="#day2">
+            Day 2
+            <small>customers · capital · term sheets</small>
+          </button>
+          <button class="navbtn" type="button" data-scroll="#day3">
+            Day 3
+            <small>AI · network effect · pitch study</small>
+          </button>
+          <button class="navbtn" type="button" data-scroll="#strategy">
+            Room strategy
+            <small>who to target · where to stand</small>
+          </button>
+          <button class="navbtn" type="button" data-scroll="#dailyTarget">
+            Daily target
+            <small>what a win looks like</small>
+          </button>
+        </div>
+
+        <div class="progress">
+          <p class="muted" style="margin:0 0 8px;">Sections viewed</p>
+          <div class="progressbar"><span id="progressFill"></span></div>
+          <p class="muted" id="progressText" style="margin:.55rem 0 0;">0 of 6 viewed</p>
+        </div>
+      </aside>
+
+      <div class="content" id="contentArea">
+        <section class="panel level" id="pitch" data-section>
+          <div class="level__head">
+            <div>
+              <p class="level__eyebrow">Positioning</p>
+              <h2>Your pitch</h2>
+              <p class="level__desc">Use this to introduce yourself clean and fast.</p>
+            </div>
+            <div class="level-actions">
+              <button class="btn btn--small btn--ghost copy-btn" type="button" data-copy-target="#pitchLong">Copy long pitch</button>
+              <button class="btn btn--small btn--ghost copy-btn" type="button" data-copy-target="#pitchShort">Copy short pitch</button>
+            </div>
+          </div>
+
+          <div class="grid">
+            <div class="quote">
+              <strong>30-second pitch</strong>
+              <p id="pitchLong">I’m Marcus, founder of Square Bidness. We build digital infrastructure for independent operators — restaurants and service businesses already moving, but losing money in chaos. We don’t replace their business, we organize their demand through ordering, payments, routing, and cleaner operations. We already have live systems running in Louisiana with real orders and real revenue.</p>
+            </div>
+
+            <div class="quote">
+              <strong>Short version</strong>
+              <p id="pitchShort">I build systems for real businesses so they can organize demand, take payments clean, and operate with less chaos.</p>
+            </div>
+
+            <div class="grid grid--2">
+              <div class="card">
+                <h3>Best opener</h3>
+                <p id="opener1">What are you building right now?</p>
+                <div class="chips">
+                  <button class="chip copy-btn" type="button" data-copy-target="#opener1">Copy</button>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3>If it’s an investor</h3>
+                <p id="opener2">What kind of businesses or founders are standing out to you right now?</p>
+                <div class="chips">
+                  <button class="chip copy-btn" type="button" data-copy-target="#opener2">Copy</button>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3>If it’s a founder</h3>
+                <p id="opener3">Are you still in the build phase or already moving live volume?</p>
+                <div class="chips">
+                  <button class="chip copy-btn" type="button" data-copy-target="#opener3">Copy</button>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3>Close line</h3>
+                <p id="closer1">Good meeting you — let’s stay connected. I’m actively building this out right now.</p>
+                <div class="chips">
+                  <button class="chip copy-btn" type="button" data-copy-target="#closer1">Copy</button>
+                </div>
+              </div>
+            </div>
+
+            <p class="copy-note" id="copyNote1" aria-live="polite"></p>
+          </div>
+        </section>
+
+        <section class="panel level" id="day1" data-section>
+          <div class="level__head">
+            <div>
+              <p class="level__eyebrow">Wednesday</p>
+              <h2>Day 1 — foundation + presence</h2>
+              <p class="level__desc">This day is for getting in rhythm and getting visible.</p>
+            </div>
+          </div>
+
+          <div class="grid grid--2">
+            <div class="card">
+              <h3>2:30 – 3:15 PM</h3>
+              <p><strong>The Mindset You Need to Survive (and Thrive) in Tech</strong></p>
+              <p class="muted">Listen for language around resilience, growth, and how tech people frame long games.</p>
+            </div>
+
+            <div class="card">
+              <h3>3:15 – 4:15 PM</h3>
+              <p><strong>Networking Experience</strong></p>
+              <p class="muted">Main goal for Day 1. Get 3–5 real conversations, not just handshakes.</p>
+            </div>
+
+            <div class="card">
+              <h3>4:15 – 5:00 PM</h3>
+              <p><strong>Tech Meetups in Acadiana</strong></p>
+              <p class="muted">Local community and connector panel. Good for future relationships and regional access.</p>
+            </div>
+
+            <div class="card">
+              <h3>5:00 – 5:30 PM</h3>
+              <p><strong>LRTC Data Dashboard Reveal</strong></p>
+              <p class="muted">Watch how they talk about growth, metrics, and future ecosystem development.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel level" id="day2" data-section>
+          <div class="level__head">
+            <div>
+              <p class="level__eyebrow">Thursday</p>
+              <h2>Day 2 — customers + money</h2>
+              <p class="level__desc">This is the most important day for your current positioning.</p>
+            </div>
+          </div>
+
+          <div class="grid grid--2">
+            <div class="card">
+              <h3>1:00 – 2:00 PM</h3>
+              <p><strong>Winning Your First 100 Customers in the AI Era</strong></p>
+              <p class="muted">Directly relevant. You already do real customer acquisition through installs. Listen for phrasing you can reuse.</p>
+            </div>
+
+            <div class="card">
+              <h3>2:00 – 2:40 PM</h3>
+              <p><strong>The Goldilocks Round</strong></p>
+              <p class="muted">Learn how founders should think about capital, not just how much they want.</p>
+            </div>
+
+            <div class="card">
+              <h3>3:20 – 4:00 PM</h3>
+              <p><strong>Idea to MVP in an Afternoon</strong></p>
+              <p class="muted">Good for rapid build thinking and no-code positioning alongside your live systems work.</p>
+            </div>
+
+            <div class="card">
+              <h3>4:00 – 5:00 PM</h3>
+              <p><strong>Decoding the Term Sheet</strong></p>
+              <p class="muted">Critical. Even if you are not raising now, this is where you learn how money really talks.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel level" id="day3" data-section>
+          <div class="level__head">
+            <div>
+              <p class="level__eyebrow">Friday</p>
+              <h2>Day 3 — AI + leverage</h2>
+              <p class="level__desc">Finish strong and study what winning looks like in the room.</p>
+            </div>
+          </div>
+
+          <div class="grid grid--2">
+            <div class="card">
+              <h3>1:00 – 1:45 PM</h3>
+              <p><strong>Building an AI-Native Culture for the Agentic Future</strong></p>
+              <p class="muted">Direct alignment with the systems and infrastructure direction you’re moving toward.</p>
+            </div>
+
+            <div class="card">
+              <h3>1:45 – 2:45 PM</h3>
+              <p><strong>The Network Effect</strong></p>
+              <p class="muted">High value. Learn how to turn relationships into growth instead of random contacts.</p>
+            </div>
+
+            <div class="card">
+              <h3>3:15 – 4:15 PM</h3>
+              <p><strong>Tech Tank Pitch Competition</strong></p>
+              <p class="muted">Study what sounds sharp, what sounds weak, and how winners structure their story.</p>
+            </div>
+
+            <div class="card">
+              <h3>4:15 – 5:15 PM</h3>
+              <p><strong>Networking Happy Hour</strong></p>
+              <p class="muted">Final push. Best time to lock in follow-ups with the strongest people you met.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel level" id="strategy" data-section>
+          <div class="level__head">
+            <div>
+              <p class="level__eyebrow">Execution</p>
+              <h2>Room strategy</h2>
+              <p class="level__desc">Move like a builder with purpose, not like a tourist.</p>
+            </div>
+            <div class="level-actions">
+              <button class="btn btn--small btn--ghost copy-btn" type="button" data-copy-target="#followupMsg">Copy follow-up</button>
+            </div>
+          </div>
+
+          <div class="grid grid--2">
+            <div class="card">
+              <h3>Who to target</h3>
+              <ul class="list">
+                <li>Founders building real things</li>
+                <li>Investors and ecosystem connectors</li>
+                <li>Operators who understand messy real-world businesses</li>
+              </ul>
+            </div>
+
+            <div class="card">
+              <h3>What to avoid</h3>
+              <ul class="list">
+                <li>Idea-only conversations that go nowhere</li>
+                <li>People with no real traction</li>
+                <li>Long conversations with no signal</li>
+              </ul>
+            </div>
+
+            <div class="card">
+              <h3>Where to stand</h3>
+              <ul class="list">
+                <li>Near coffee</li>
+                <li>Near transitions between sessions</li>
+                <li>Near entry and exit paths</li>
+              </ul>
+            </div>
+
+            <div class="card">
+              <h3>Follow-up</h3>
+              <p id="followupMsg">Good meeting you at Innovate South — Marcus from Square Bidness. I build operator systems for businesses already moving live demand. Let’s stay connected.</p>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:12px;">
+            <h3>Power statements</h3>
+            <div class="chips">
+              <button class="chip copy-btn" type="button" data-copy="We don’t replace businesses — we organize their demand.">Copy: organize demand</button>
+              <button class="chip copy-btn" type="button" data-copy="Most small operators don’t need more attention — they need better structure.">Copy: better structure</button>
+              <button class="chip copy-btn" type="button" data-copy="We build systems for real businesses already in motion.">Copy: real businesses</button>
+              <button class="chip copy-btn" type="button" data-copy="I’m not selling theory — I’m already running live systems.">Copy: not theory</button>
+            </div>
+          </div>
+
+          <p class="copy-note" id="copyNote4" aria-live="polite"></p>
+        </section>
+
+        <section class="panel level" id="dailyTarget" data-section>
+          <div class="level__head">
+            <div>
+              <p class="level__eyebrow">Daily target</p>
+              <h2>What a win looks like</h2>
+              <p class="level__desc">Keep the day measurable so you move with intention.</p>
+            </div>
+            <div class="level-actions">
+              <button class="btn btn--small btn--ghost copy-btn" type="button" data-copy="10 conversations. 3 strong connections. 1 real follow-up.">Copy daily target</button>
+            </div>
+          </div>
+
+          <div class="grid grid--2">
+            <div class="card">
+              <h3>Target numbers</h3>
+              <ul class="list">
+                <li>10 conversations</li>
+                <li>3 strong connections</li>
+                <li>1 real follow-up</li>
+              </ul>
+            </div>
+
+            <div class="card">
+              <h3>Mindset</h3>
+              <p>You do not need everybody. You need the right few.</p>
+            </div>
+          </div>
+          <p class="copy-note" id="copyNote5" aria-live="polite"></p>
+        </section>
+
+        <div class="empty-state hidden" id="emptyState">
+          Nothing matched that search. Try terms like <strong>pitch</strong>, <strong>investor</strong>, <strong>AI</strong>, <strong>networking</strong>, or <strong>follow-up</strong>.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="floating">
+    <button class="fab fab--dark" type="button" id="topBtn">Top</button>
+    <button class="fab" type="button" id="quickPitchBtn">Quick pitch</button>
   </div>
-</div>
 
-<!-- CORE MISSION -->
-<div class="panel">
-  <h2>🎯 Your Mission</h2>
-  <ul>
-    <li>Position Square Bidness as infrastructure</li>
-    <li>Build real connections (not small talk)</li>
-    <li>Learn investor + tech language</li>
-  </ul>
+  <script>
+    (() => {
+      const $ = (sel, root = document) => root.querySelector(sel);
+      const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-  <div class="block">
-    <strong>Core Line:</strong><br/>
-    <span class="muted">
-      We don’t replace businesses — we organize their demand.
-    </span>
-  </div>
-</div>
+      const searchInput = $("#searchInput");
+      const clearSearchBtn = $("#clearSearchBtn");
+      const jumpDailyBtn = $("#jumpDailyBtn");
+      const topBtn = $("#topBtn");
+      const quickPitchBtn = $("#quickPitchBtn");
+      const copyMasterBtn = $("#copyMasterBtn");
+      const expandAllBtn = $("#expandAllBtn");
+      const collapseAllBtn = $("#collapseAllBtn");
+      const progressFill = $("#progressFill");
+      const progressText = $("#progressText");
+      const sections = $$("[data-section]");
+      const navBtns = $$("[data-scroll]");
+      const emptyState = $("#emptyState");
 
-<!-- DAY 1 -->
-<div class="panel">
-  <h2>Day 1 — Foundation</h2>
+      async function copyText(text, noteEl) {
+        try {
+          await navigator.clipboard.writeText(text.trim());
+          if (noteEl) {
+            noteEl.textContent = "Copied.";
+            setTimeout(() => {
+              if (noteEl.textContent === "Copied.") noteEl.textContent = "";
+            }, 1500);
+          }
+        } catch {
+          if (noteEl) {
+            noteEl.textContent = "Copy failed on this device.";
+            setTimeout(() => {
+              if (noteEl.textContent === "Copy failed on this device.") noteEl.textContent = "";
+            }, 1800);
+          }
+        }
+      }
 
-  <ul>
-    <li><strong>Mindset Panel</strong> → Learn how they think</li>
-    <li><strong>Networking (MAIN)</strong> → Talk to 3–5 people</li>
-    <li><strong>Tech Community</strong> → Find local connectors</li>
-    <li><strong>Data Panel</strong> → Learn metrics + growth</li>
-  </ul>
+      function getNoteElFor(element) {
+        const level = element.closest(".level");
+        return level ? level.querySelector(".copy-note") : null;
+      }
 
-  <div class="block">
-    <strong>Goal:</strong><br/>
-    Get comfortable speaking your pitch in the room
-  </div>
-</div>
+      $$(".copy-btn").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const direct = btn.getAttribute("data-copy");
+          if (direct) {
+            await copyText(direct, getNoteElFor(btn));
+            return;
+          }
 
-<!-- DAY 2 -->
-<div class="panel">
-  <h2>Day 2 — Money + Customers</h2>
+          const targetSel = btn.getAttribute("data-copy-target");
+          if (!targetSel) return;
 
-  <ul>
-    <li><strong>First 100 Customers</strong> → refine your story</li>
-    <li><strong>Capital Panel</strong> → learn funding language</li>
-    <li><strong>No-Code MVP</strong> → align with your builds</li>
-    <li><strong>Term Sheet (CRITICAL)</strong> → how deals work</li>
-  </ul>
+          const target = $(targetSel);
+          if (!target) return;
 
-  <div class="block">
-    <strong>Goal:</strong><br/>
-    Understand how investors think
-  </div>
-</div>
+          await copyText(target.innerText || target.textContent || "", getNoteElFor(btn));
+        });
+      });
 
-<!-- DAY 3 -->
-<div class="panel">
-  <h2>Day 3 — Positioning</h2>
+      copyMasterBtn.addEventListener("click", () => {
+        const text = ($("#pitchLong")?.innerText || "").trim();
+        copyText(text, $("#copyNote1"));
+      });
 
-  <ul>
-    <li><strong>AI Culture</strong> → future alignment</li>
-    <li><strong>Network Effect</strong> → scale relationships</li>
-    <li><strong>Pitch Competition</strong> → study delivery</li>
-    <li><strong>Happy Hour</strong> → lock in connections</li>
-  </ul>
+      quickPitchBtn.addEventListener("click", () => {
+        const el = $("#pitch");
+        if (!el) return;
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        setTimeout(() => {
+          const text = ($("#pitchShort")?.innerText || "").trim();
+          copyText(text, $("#copyNote1"));
+        }, 300);
+      });
 
-  <div class="block">
-    <strong>Goal:</strong><br/>
-    Leave with real contacts + opportunities
-  </div>
-</div>
+      topBtn.addEventListener("click", () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
 
-<!-- STRATEGY -->
-<div class="panel">
-  <h2>🧠 Room Strategy</h2>
+      jumpDailyBtn.addEventListener("click", () => {
+        $("#dailyTarget")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
 
-  <ul>
-    <li>Talk to builders, not just attendees</li>
-    <li>10–15 min convos, then move</li>
-    <li>Stay near traffic areas</li>
-  </ul>
+      navBtns.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const sel = btn.getAttribute("data-scroll");
+          const target = sel ? $(sel) : null;
+          if (!target) return;
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      });
 
-  <div class="block">
-    <strong>Opener:</strong><br/>
-    <span class="muted">“What are you building right now?”</span>
-  </div>
-</div>
+      function setActiveNav() {
+        let active = sections[0];
+        const threshold = window.innerHeight * 0.28;
 
-<!-- DAILY TARGET -->
-<div class="panel">
-  <h2>📊 Daily Target</h2>
+        sections.forEach((section) => {
+          const rect = section.getBoundingClientRect();
+          if (rect.top <= threshold) active = section;
+        });
 
-  <ul>
-    <li>10 conversations</li>
-    <li>3 solid connections</li>
-    <li>1 real opportunity</li>
-  </ul>
-</div>
+        navBtns.forEach((btn) => {
+          btn.classList.toggle("is-active", btn.getAttribute("data-scroll") === `#${active.id}`);
+        });
+      }
 
-<!-- IDENTITY -->
-<div class="panel">
-  <h2>🗣️ Your Positioning</h2>
+      const viewed = new Set();
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            viewed.add(entry.target.id);
+            updateProgress();
+          }
+        });
+      }, { threshold: 0.45 });
 
-  <div class="block">
-    You are NOT:
-    <ul>
-      <li>just apparel</li>
-    </ul>
-  </div>
+      function updateProgress() {
+        const total = sections.length;
+        const count = viewed.size;
+        const pct = total ? (count / total) * 100 : 0;
+        progressFill.style.width = pct + "%";
+        progressText.textContent = `${count} of ${total} viewed`;
+      }
 
-  <div class="block">
-    You ARE:
-    <ul>
-      <li>digital infrastructure for operators</li>
-      <li>real systems, real payments, real businesses</li>
-    </ul>
-  </div>
-</div>
+      sections.forEach((section) => obs.observe(section));
 
-</div>
+      function runSearch() {
+        const q = searchInput.value.trim().toLowerCase();
+        let visibleCount = 0;
+
+        sections.forEach((section) => {
+          const hay = section.innerText.toLowerCase();
+          const match = !q || hay.includes(q);
+          section.classList.toggle("hidden", !match);
+          if (match) visibleCount++;
+        });
+
+        emptyState.classList.toggle("hidden", visibleCount !== 0);
+
+        navBtns.forEach((btn) => {
+          const sel = btn.getAttribute("data-scroll");
+          const target = sel ? $(sel) : null;
+          const hidden = !target || target.classList.contains("hidden");
+          btn.classList.toggle("hidden", hidden && q !== "");
+        });
+      }
+
+      searchInput.addEventListener("input", runSearch);
+
+      clearSearchBtn.addEventListener("click", () => {
+        searchInput.value = "";
+        runSearch();
+        searchInput.focus();
+      });
+
+      expandAllBtn.addEventListener("click", () => {
+        sections.forEach((s) => s.classList.remove("hidden"));
+        searchInput.value = "";
+        runSearch();
+      });
+
+      collapseAllBtn.addEventListener("click", () => {
+        const first = $("#pitch");
+        sections.forEach((s) => {
+          if (s !== first) s.classList.add("hidden");
+        });
+        searchInput.value = "";
+        emptyState.classList.add("hidden");
+        navBtns.forEach((btn) => {
+          const sel = btn.getAttribute("data-scroll");
+          btn.classList.toggle("hidden", sel !== "#pitch");
+        });
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+
+      document.addEventListener("scroll", setActiveNav, { passive: true });
+      setActiveNav();
+      updateProgress();
+      runSearch();
+    })();
+  </script>
 </body>
 </html>
