@@ -265,15 +265,16 @@
     }
 
     .action-grid{
-      display:grid;
-      gap:.7rem;
-    }
+  display:grid;
+  gap:.7rem;
+  margin-top:1rem;
+}
 
-    @media(min-width:640px){
-      .action-grid{
-        grid-template-columns:repeat(2,minmax(0,1fr));
-      }
-    }
+@media(min-width:640px){
+  .action-grid{
+    grid-template-columns:1fr 1fr;
+  }
+}
 
     .sb-btn{
       display:inline-flex;
@@ -444,6 +445,15 @@
       font-size:.82rem;
       line-height:1.65;
     }
+
+    .sb-btn{
+  transition:transform .08s ease, box-shadow .08s ease, background .12s ease;
+}
+
+.sb-btn:active{
+  transform:scale(.96);
+  box-shadow:0 6px 18px rgba(0,0,0,.35) inset;
+}
   </style>
 </head>
 
@@ -524,32 +534,33 @@
               </div>
             </div>
 
-            <div class="action-grid" style="margin-top:1rem;">
-              <a class="sb-btn sb-btn--primary"
-                 href="/connect/marcus-buckner.vcf"
-                 data-sb-action="cx_connect_save_contact"
-                 data-sb-component="connect"
-                 data-sb-label="Save Contact">Save Contact</a>
+           <div class="action-grid">
 
-              <a class="sb-btn sb-btn--ghost"
-                 href="mailto:marcusbuckner@squarebidness.com?subject=Square%20Bidness%20%7C%20Connect&body=Name%3A%0ACompany%2FOrg%3A%0AWhat%20you%E2%80%99re%20reaching%20out%20about%3A%0ATimeline%3A%0A"
-                 data-sb-action="cx_connect_email_cta"
-                 data-sb-component="connect"
-                 data-sb-label="Email Marcus">Email Marcus</a>
+  <a class="sb-btn sb-btn--primary"
+     href="/connect/marcus-buckner.vcf"
+     data-sb-action="cx_connect_save_contact">
+     Save Contact
+  </a>
 
-              <a class="sb-btn sb-btn--ghost"
-                 href="sms:+19859817001"
-                 data-sb-action="cx_connect_text"
-                 data-sb-component="connect"
-                 data-sb-label="Text Marcus">Text Marcus</a>
+  <a class="sb-btn sb-btn--ghost"
+     href="tel:+19859817001"
+     data-sb-action="cx_connect_call">
+     Call
+  </a>
 
-              <a class="sb-btn sb-btn--outline"
-                 href="tel:+19859817001"
-                 data-sb-action="cx_connect_call_cta"
-                 data-sb-component="connect"
-                 data-sb-label="Call Marcus">Call Marcus</a>
-            </div>
+  <a class="sb-btn sb-btn--ghost"
+     href="sms:+19859817001"
+     data-sb-action="cx_connect_text">
+     Text
+  </a>
 
+  <a class="sb-btn sb-btn--outline"
+     href="mailto:marcusbuckner@squarebidness.com"
+     data-sb-action="cx_connect_email">
+     Email
+  </a>
+
+</div>
             <div class="template-row" aria-label="Quick email templates">
               <a class="template-link"
                  href="mailto:marcusbuckner@squarebidness.com?subject=Square%20Bidness%20%7C%20Wholesale&body=Name%3A%0AStore%2FBrand%3A%0ALocation%3A%0AWhat%20you%E2%80%99re%20interested%20in%3A%0AQuantity%2FRun%20size%3A%0A"
@@ -622,5 +633,17 @@ All roads lead to Square Bidness.
   </main>
 
   <div id="site-footer" aria-busy="true" style="content-visibility:auto;contain-intrinsic-size:140px;"></div>
+  <script>
+document.querySelectorAll('a[href$=".vcf"]').forEach(btn => {
+  btn.addEventListener("click", () => {
+    const original = btn.textContent;
+    btn.textContent = "Opening…";
+
+    setTimeout(() => {
+      btn.textContent = original;
+    }, 2000);
+  });
+});
+</script>
 </body>
 </html>
