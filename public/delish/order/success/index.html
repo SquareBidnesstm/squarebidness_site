@@ -284,20 +284,19 @@
                 ? `<small>Sides: ${escapeHtml(sideBits.join(", "))}</small>`
                 : "";
 
-              return `
-                <li>
-                  <div class="menuTop">
-                    <div class="menuCopy">
-                      <strong>${Number(i.qty || 0)} ×</strong> ${escapeHtml(i.name || "")}
-                      ${sideLine}
-                    </div>
-                    <div class="itemPrice">${money(Number(i.qty || 0) * Number(i.price || 0))}</div>
-                  </div>
-                </li>
-              `;
-            }).join("") : `<li><div class="menuCopy">Order items unavailable.</div></li>`}
-          </ul>
-
+             return `
+  <li>
+    <div class="menuTop">
+      <div class="menuCopy">
+        <strong>${Number(i.qty || 0)} ×</strong> ${escapeHtml(i.name || "")}
+        ${sideLine}
+      </div>
+      <div class="itemPrice">${money(Number(i.qty || 0) * Number(i.price || 0))}</div>
+    </div>
+  </li>
+`;
+}).join("") : `<li><div class="menuCopy">Order details unavailable. Please use your confirmation text at pickup.</div></li>`}
+</ul>
           <div class="totalBox">
             Total Paid: ${money(order.total)}
           </div>
