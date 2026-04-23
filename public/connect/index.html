@@ -1,44 +1,36 @@
-<!-- /public/connect/index.html (PASTE READY — cleaned: external meta-pixel.js + sb-meta-bridge + no duplicate noscript, sb_action ready) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Basics -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Connect — Square Bidness</title>
 
-  <!-- Canonical -->
   <link rel="canonical" href="https://www.squarebidness.com/connect/" />
 
-  <!-- SEO -->
-  <meta name="description" content="Connect with Square Bidness — partnerships, wholesale, media, and community work built on principles, morals, and business done right." />
+  <meta name="description" content="Connect with Square Bidness — save contact, email Marcus, call, text, socials, and direct QR access." />
   <meta name="robots" content="index,follow" />
   <meta name="theme-color" content="#000000" />
   <meta name="color-scheme" content="dark light" />
   <meta name="format-detection" content="telephone=no" />
-
-  <!-- Build stamp -->
-  <meta name="sb:build" content="v20260303-connect-clean-meta-pixel-bridge" />
+  <meta name="sb:build" content="v20260423-connect-sb-direct" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Square Bidness" />
   <meta property="og:locale" content="en_US" />
   <meta property="og:title" content="Connect — Square Bidness" />
-  <meta property="og:description" content="Direct line for partnerships, wholesale, media, and community work with Square Bidness." />
+  <meta property="og:description" content="Direct Square Bidness contact lane — save contact, email, call, text, socials, and QR." />
   <meta property="og:url" content="https://www.squarebidness.com/connect/" />
   <meta property="og:image" content="https://www.squarebidness.com/connect/assets/connect_1200x630.jpg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:image:alt" content="Connect with Square Bidness" />
-
-  <!-- Meta App Association -->
   <meta property="fb:app_id" content="802680062853443" />
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Connect — Square Bidness" />
-  <meta name="twitter:description" content="Partnerships, wholesale, media, and community work with Square Bidness." />
+  <meta name="twitter:description" content="Direct Square Bidness contact lane — save contact, email, call, text, socials, and QR." />
   <meta name="twitter:image" content="https://www.squarebidness.com/connect/assets/connect_1200x630.jpg" />
   <meta name="twitter:image:alt" content="Connect with Square Bidness" />
 
@@ -60,255 +52,569 @@
   <!-- Analytics -->
   <script defer src="/scripts/ga.js"></script>
   <script defer src="/scripts/sb-analytics.js"></script>
-
-  <!-- Meta Pixel + Bridge (SB events -> Meta events) -->
   <script defer src="/scripts/meta-pixel.js"></script>
   <script defer src="/scripts/sb-meta-bridge.js"></script>
-
-  <!-- Nav/Footer loader -->
   <script defer src="/scripts/partials.js"></script>
 
   <style>
-    /* ✅ CLS guard for injected header/footer */
-    #site-header{min-height:72px;}
-    #site-footer{min-height:120px;}
+    #site-header{min-height:72px}
+    #site-footer{min-height:120px}
 
-    .page-hero{
-      background:radial-gradient(circle at top left,#020617,#020617 40%,#020617 100%);
-      border-bottom:1px solid #0b1220;
+    :root{
+      --sb-bg:#000000;
+      --sb-panel:#050505;
+      --sb-panel-2:#0b0b0b;
+      --sb-line:#161616;
+      --sb-line-2:#262626;
+      --sb-text:#f5f5f5;
+      --sb-muted:#9ca3af;
+      --sb-soft:#d1d5db;
+      --sb-accent:#ffffff;
+      --sb-shadow:0 24px 60px rgba(0,0,0,.45);
+      --sb-radius:24px;
+      --sb-radius-sm:18px;
+      --sb-max:780px;
+    }
+
+    .connect-hero{
+      background:
+        radial-gradient(circle at top left, rgba(255,255,255,.06), transparent 25%),
+        radial-gradient(circle at top right, rgba(255,255,255,.04), transparent 20%),
+        #000;
+      border-bottom:1px solid #111;
       padding:2.5rem 0 2rem;
     }
-    .page-hero .page-subtitle{max-width:600px;opacity:.9;}
 
-    .connect-grid{display:grid;gap:1.5rem;}
-    @media(min-width:768px){
-      .connect-grid{
-        grid-template-columns:minmax(0,2.1fr) minmax(0,1.4fr);
-        align-items:flex-start;
+    .connect-shell{
+      max-width:var(--sb-max);
+      margin:0 auto;
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:.45rem;
+      padding:.28rem .7rem;
+      border-radius:999px;
+      border:1px solid #202020;
+      background:#0a0a0a;
+      color:#d4d4d8;
+      font-size:.72rem;
+      font-weight:800;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      margin-bottom:.85rem;
+    }
+
+    .eyebrow-dot{
+      width:.46rem;
+      height:.46rem;
+      border-radius:999px;
+      background:#22c55e;
+    }
+
+    .connect-hero h1{
+      margin:0 0 .65rem;
+      font-size:clamp(2rem,4vw,3.5rem);
+      line-height:1;
+      color:#fff;
+    }
+
+    .connect-hero p{
+      margin:0;
+      max-width:680px;
+      color:#d4d4d8;
+      font-size:1rem;
+      line-height:1.7;
+    }
+
+    .connect-main{
+      padding:2rem 0 3rem;
+    }
+
+    .connect-card{
+      background:linear-gradient(180deg,#050505 0%, #030303 100%);
+      border:1px solid var(--sb-line);
+      border-radius:var(--sb-radius);
+      box-shadow:var(--sb-shadow);
+      overflow:hidden;
+    }
+
+    .connect-card__hero{
+      padding:1.2rem;
+      border-bottom:1px solid var(--sb-line);
+      background:
+        radial-gradient(circle at 50% 0%, rgba(255,255,255,.07), transparent 30%),
+        linear-gradient(180deg,#080808 0%, #050505 100%);
+    }
+
+    .brand-panel{
+      border:1px solid var(--sb-line-2);
+      border-radius:22px;
+      background:#000;
+      padding:2rem 1.25rem 1.3rem;
+      text-align:center;
+    }
+
+    .brand-mark{
+      max-width:230px;
+      margin:0 auto 1rem;
+    }
+
+    .brand-mark img{
+      width:100%;
+      height:auto;
+      display:block;
+    }
+
+    .brand-name{
+      margin:0;
+      font-size:1.8rem;
+      line-height:1.05;
+      color:#fff;
+      font-weight:900;
+      letter-spacing:-.03em;
+    }
+
+    .brand-role{
+      margin:.3rem 0 0;
+      color:#d4d4d8;
+      font-size:1rem;
+      font-weight:700;
+    }
+
+    .brand-sub{
+      margin:.2rem 0 0;
+      color:var(--sb-muted);
+      font-size:.95rem;
+    }
+
+    .brand-quick{
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:center;
+      gap:.45rem;
+      margin-top:.95rem;
+    }
+
+    .brand-chip{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:.35rem .65rem;
+      border-radius:999px;
+      border:1px solid #202020;
+      background:#0a0a0a;
+      color:#e5e7eb;
+      font-size:.74rem;
+      font-weight:800;
+      letter-spacing:.04em;
+    }
+
+    .contact-block{
+      padding:1.2rem;
+      display:grid;
+      gap:1rem;
+    }
+
+    .identity{
+      background:#060606;
+      border:1px solid var(--sb-line);
+      border-radius:20px;
+      padding:1.15rem;
+    }
+
+    .identity h2{
+      margin:0 0 .7rem;
+      font-size:1.25rem;
+      color:#fff;
+    }
+
+    .meta-grid{
+      display:grid;
+      gap:.85rem;
+    }
+
+    .meta-row{
+      display:grid;
+      gap:.15rem;
+    }
+
+    .meta-label{
+      font-size:.72rem;
+      text-transform:uppercase;
+      letter-spacing:.14em;
+      color:#71717a;
+      font-weight:800;
+    }
+
+    .meta-value{
+      color:#f3f4f6;
+      font-size:1rem;
+      line-height:1.5;
+      word-break:break-word;
+    }
+
+    .meta-value a{
+      color:#f3f4f6;
+      text-decoration:none;
+    }
+
+    .meta-value a:hover{
+      text-decoration:underline;
+    }
+
+    .action-grid{
+      display:grid;
+      gap:.7rem;
+    }
+
+    @media(min-width:640px){
+      .action-grid{
+        grid-template-columns:repeat(2,minmax(0,1fr));
       }
     }
 
-    .panel{
-      background:#020617;
-      border-radius:18px;
-      border:1px solid #0f172a;
-      padding:1.25rem 1.4rem 1.4rem;
-      box-shadow:0 18px 45px rgba(15,23,42,.55);
-    }
-    .panel--soft{
-      background:#020617;
-      border-radius:14px;
-      border:1px solid #111827;
-      padding:1.1rem 1.3rem 1.3rem;
-      box-shadow:0 12px 30px rgba(15,23,42,.35);
-    }
-
-    .pill-label{
-      display:inline-flex;align-items:center;gap:.35rem;
-      padding:.18rem .55rem;border-radius:999px;
-      border:1px solid #1d4ed8;
-      font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;
-      color:#bfdbfe;background:radial-gradient(circle at top left,#0b1220,#020617);
-      margin-bottom:.5rem;
-    }
-    .pill-dot{width:.45rem;height:.45rem;border-radius:999px;background:#22c55e;}
-
-    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.35rem;cursor:pointer;text-decoration:none;border-radius:999px;}
-    .btn--ghost{background:#020617;border:1px solid #1f2937;color:#e5e7eb;padding:.55rem .95rem;font-weight:800;font-size:.9rem;}
-    .btn--ghost:hover{background:#0b1220;border-color:#374151;}
-
-    .connect-list{list-style:none;padding:0;margin:.25rem 0 0;font-size:.95rem;}
-    .connect-list li{margin-bottom:.6rem;}
-    .connect-list a{color:#e5e7eb;text-decoration:none;}
-    .connect-list a:hover{text-decoration:underline;}
-
-    .label{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.14em;opacity:.7;margin-bottom:.2rem;}
-    .muted-small{font-size:.8rem;opacity:.8;}
-
-    .connect-section-title{font-size:.9rem;font-weight:600;margin-top:.9rem;margin-bottom:.15rem;}
-    .connect-note{font-size:.8rem;opacity:.75;margin-top:.4rem;}
-
-    .connect-chip-row{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.4rem;}
-    .connect-chip{font-size:.75rem;padding:.18rem .5rem;border-radius:999px;border:1px solid #1f2937;background:#020617;opacity:.9;}
-
-    .connect-cta-row{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.85rem;}
-    .btn--outline-light{border:1px solid #4b5563;background:transparent;color:#e5e7eb;padding:.55rem .95rem;font-weight:800;font-size:.9rem;}
-    .btn--outline-light:hover{border-color:#9ca3af;}
-
-    /* Partner Builds block */
-    .work-card{
-      margin-top:1rem;
+    .sb-btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:.45rem;
+      width:100%;
+      text-decoration:none;
+      border-radius:999px;
+      font-weight:900;
       padding:.9rem 1rem;
-      border-radius:14px;
-      border:1px solid #111827;
-      background:#020617;
+      transition:.14s ease;
+      white-space:nowrap;
     }
-    .work-card .work-title{font-weight:800;margin:0 0 .2rem;}
-    .work-card .work-sub{margin:0 0 .6rem;opacity:.85;font-size:.9rem;}
-    .work-actions{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.35rem;}
 
-    /* Quick email templates */
-    .template-row{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.75rem;}
+    .sb-btn:hover{
+      transform:translateY(-1px);
+    }
+
+    .sb-btn--primary{
+      background:#fff;
+      color:#000;
+      border:1px solid #fff;
+    }
+
+    .sb-btn--primary:hover{
+      background:#f5f5f5;
+    }
+
+    .sb-btn--ghost{
+      background:#090909;
+      color:#f3f4f6;
+      border:1px solid #202020;
+    }
+
+    .sb-btn--ghost:hover{
+      background:#101010;
+      border-color:#323232;
+    }
+
+    .sb-btn--outline{
+      background:transparent;
+      color:#f3f4f6;
+      border:1px solid #3f3f46;
+    }
+
+    .sb-btn--outline:hover{
+      border-color:#a1a1aa;
+    }
+
+    .qr-grid{
+      display:grid;
+      gap:1rem;
+    }
+
+    @media(min-width:640px){
+      .qr-grid{
+        grid-template-columns:1fr 1fr;
+      }
+    }
+
+    .qr-card{
+      background:#060606;
+      border:1px solid var(--sb-line);
+      border-radius:20px;
+      padding:1rem;
+      text-align:center;
+    }
+
+    .qr-card h3{
+      margin:0 0 .35rem;
+      color:#fff;
+      font-size:1rem;
+    }
+
+    .qr-card p{
+      margin:0 0 .9rem;
+      color:var(--sb-muted);
+      font-size:.88rem;
+      line-height:1.55;
+    }
+
+    .qr-frame{
+      background:#fff;
+      border-radius:18px;
+      padding:14px;
+      border:1px solid #d4d4d8;
+      max-width:250px;
+      margin:0 auto;
+      box-shadow:0 14px 28px rgba(0,0,0,.22);
+    }
+
+    .qr-frame img{
+      width:100%;
+      height:auto;
+      display:block;
+      border-radius:10px;
+    }
+
+    .qr-note{
+      margin-top:.8rem;
+      font-size:.78rem;
+      color:#a1a1aa;
+      line-height:1.55;
+    }
+
+    .social-card{
+      background:#060606;
+      border:1px solid var(--sb-line);
+      border-radius:20px;
+      padding:1rem;
+    }
+
+    .social-card h3{
+      margin:0 0 .35rem;
+      color:#fff;
+      font-size:1rem;
+    }
+
+    .social-card p{
+      margin:0 0 .9rem;
+      color:var(--sb-muted);
+      font-size:.88rem;
+      line-height:1.55;
+    }
+
+    .social-actions{
+      display:grid;
+      gap:.7rem;
+    }
+
+    @media(min-width:640px){
+      .social-actions{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+    }
+
+    .template-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:.55rem;
+      margin-top:1rem;
+    }
+
+    .template-link{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:.6rem .9rem;
+      border-radius:999px;
+      border:1px solid #262626;
+      background:#090909;
+      color:#e5e7eb;
+      font-size:.85rem;
+      font-weight:800;
+      text-decoration:none;
+      transition:.14s ease;
+    }
+
+    .template-link:hover{
+      background:#111;
+      transform:translateY(-1px);
+    }
+
+    .connect-note{
+      margin-top:1rem;
+      color:#a1a1aa;
+      font-size:.82rem;
+      line-height:1.65;
+    }
   </style>
 </head>
 
 <body class="theme-dark" id="top">
-  <!-- Meta Pixel noscript (keep in body ONCE) -->
   <noscript>
     <img height="1" width="1" style="display:none"
          src="https://www.facebook.com/tr?id=914123084877133&ev=PageView&noscript=1" />
   </noscript>
 
-  <!-- Header injected by /scripts/partials.js -->
   <div id="site-header" aria-busy="true" style="content-visibility:auto;contain-intrinsic-size:80px;"></div>
 
-  <header class="page-hero">
-    <div class="container">
-      <p class="pill-label"><span class="pill-dot"></span>Direct Line • Square Bidness</p>
-      <h1 class="page-title">Connect with Square Bidness</h1>
-      <p class="page-subtitle">
-        Partnerships, wholesale, media, and community work — one direct lane, built on principles, morals, and business done right.
+  <header class="connect-hero">
+    <div class="container connect-shell">
+      <div class="eyebrow">
+        <span class="eyebrow-dot"></span>
+        Square Bidness Direct
+      </div>
+      <h1>Connect with Marcus.</h1>
+      <p>
+        Built for the phone. Save the contact, send the email, hit socials, or scan the QR.
+        No middleman. No third-party brand in front of the lane. Square Bidness all the way.
       </p>
     </div>
   </header>
 
-  <main class="section" role="main">
-    <div class="container connect-grid">
-      <section class="panel" aria-labelledby="contact-heading">
-        <h2 id="contact-heading">Primary Contact</h2>
-        <p class="muted-small">Founder-direct. Clear subject line, clear request — we’ll route it fast.</p>
+  <main class="section connect-main" role="main">
+    <div class="container connect-shell">
+      <section class="connect-card" aria-labelledby="connect-heading">
+        <div class="connect-card__hero">
+          <div class="brand-panel">
+            <div class="brand-mark">
+              <img src="/connect/assets/square-bidness-mark.png" alt="Square Bidness mark" />
+            </div>
+            <p class="brand-name">Marcus</p>
+            <p class="brand-role">Founder</p>
+            <p class="brand-sub">Square Bidness Apparel</p>
 
-        <ul class="connect-list" style="margin-top:.75rem;">
-          <li>
-            <span class="label">Email</span>
-            <a
-              href="mailto:marcusbuckner@squarebidness.com"
-              data-sb-action="cx_connect_email"
-              data-sb-component="connect"
-              data-sb-label="marcusbuckner@squarebidness.com"
-            >marcusbuckner@squarebidness.com</a>
-            <div class="muted-small">Partnerships • wholesale • media • community.</div>
-          </li>
-
-          <li style="margin-top:.6rem;">
-            <span class="label">Location</span>
-            <div>Hammond, Louisiana</div>
-            <div class="muted-small">Louisiana-rooted. Built to scale.</div>
-          </li>
-        </ul>
-
-        <div class="connect-cta-row">
-          <a class="btn btn--gold"
-             href="mailto:marcusbuckner@squarebidness.com?subject=Square%20Bidness%20%7C%20Connect&body=Name%3A%0ACompany%2FOrg%3A%0AWhat%20you%E2%80%99re%20reaching%20out%20about%3A%0ATimeline%3A%0A"
-             data-sb-action="cx_connect_email_cta"
-             data-sb-component="connect"
-             data-sb-label="Email Marcus">Email Marcus</a>
-
-          <!-- ✅ VCF links (mobile-friendly add-to-contacts) -->
-          <a class="btn btn--outline-light"
-             href="/connect/marcus-buckner.vcf"
-             data-sb-action="cx_connect_save_contact"
-             data-sb-component="connect"
-             data-sb-label="Save Contact">Save Contact</a>
-
-          <a class="btn btn--outline-light"
-             href="/connect/sb-tech-lab.vcf"
-             data-sb-action="cx_connect_save_techlab"
-             data-sb-component="connect"
-             data-sb-label="Save Tech Lab">Save Tech Lab</a>
-
-          <a class="btn btn--outline-light"
-             href="https://lab.squarebidness.com/"
-             target="_blank"
-             rel="noopener"
-             data-sb-action="cx_connect_open_lab"
-             data-sb-component="connect"
-             data-sb-label="Open Tech Lab">Open Tech Lab</a>
-
-          <a class="btn btn--outline-light"
-             href="/social/"
-             data-sb-action="cx_connect_social"
-             data-sb-component="connect"
-             data-sb-label="Socials">Socials</a>
-        </div>
-
-        <p class="muted-small" style="margin-top:.5rem;">
-          Save my contact in one tap (iPhone/Android). Socials are one button away.
-        </p>
-
-        <div class="template-row" aria-label="Quick email templates">
-          <a class="btn btn--ghost"
-             href="mailto:marcusbuckner@squarebidness.com?subject=Square%20Bidness%20%7C%20Wholesale&body=Name%3A%0AStore%2FBrand%3A%0ALocation%3A%0AWhat%20lines%20you%E2%80%99re%20interested%20in%3A%0AQuantity%2FRun%20size%3A%0A"
-             data-sb-action="cx_connect_template_wholesale"
-             data-sb-component="connect"
-             data-sb-label="Wholesale">Wholesale</a>
-
-          <a class="btn btn--ghost"
-             href="mailto:marcusbuckner@squarebidness.com?subject=Square%20Bidness%20%7C%20Media&body=Outlet%3A%0AContact%20Name%3A%0AStory%20angle%3A%0ADeadline%3A%0A"
-             data-sb-action="cx_connect_template_media"
-             data-sb-component="connect"
-             data-sb-label="Media">Media</a>
-
-          <a class="btn btn--ghost"
-             href="mailto:marcusbuckner@squarebidness.com?subject=Square%20Bidness%20%7C%20Partner%20Builds&body=Business%20name%3A%0AWhat%20you%20need%20built%3A%0AWebsite%2FPayments%2FBooking%2FIntake%3A%0ATimeline%3A%0A"
-             data-sb-action="cx_connect_template_partnerbuilds"
-             data-sb-component="connect"
-             data-sb-label="Partner Builds">Partner Builds</a>
-        </div>
-
-        <p class="connect-note">
-          Use <strong>Wholesale</strong>, <strong>Media</strong>, or <strong>Partner Builds</strong> in the subject so it routes clean.
-        </p>
-      </section>
-
-      <section class="panel--soft" aria-labelledby="lanes-heading">
-        <h2 id="lanes-heading">Where you fit in</h2>
-
-        <div class="connect-section">
-          <p class="connect-section-title">Partnerships &amp; Wholesale</p>
-          <p class="muted-small">Boutiques and curated spaces carrying limited runs (VSOP, Winter Games, Supima, select collaborations).</p>
-          <div class="connect-chip-row">
-            <span class="connect-chip">Select wholesale</span>
-            <span class="connect-chip">Small runs</span>
-            <span class="connect-chip">Co-branded stories</span>
+            <div class="brand-quick">
+              <span class="brand-chip">Operator Systems</span>
+              <span class="brand-chip">Partner Builds</span>
+              <span class="brand-chip">Direct Line</span>
+            </div>
           </div>
         </div>
 
-        <div class="connect-section">
-          <p class="connect-section-title">Media &amp; Press</p>
-          <p class="muted-small">Interviews, profiles, and coverage around Square Bidness, Tech Lab, and the Louisiana-to-global build.</p>
-          <div class="connect-chip-row">
-            <span class="connect-chip">Founder story</span>
-            <span class="connect-chip">Brand features</span>
-            <span class="connect-chip">Innovation &amp; tech</span>
+        <div class="contact-block">
+          <div class="identity">
+            <h2 id="connect-heading">Primary contact</h2>
+
+            <div class="meta-grid">
+              <div class="meta-row">
+                <span class="meta-label">Email</span>
+                <div class="meta-value">
+                  <a
+                    href="mailto:marcusbuckner@squarebidness.com"
+                    data-sb-action="cx_connect_email"
+                    data-sb-component="connect"
+                    data-sb-label="marcusbuckner@squarebidness.com"
+                  >marcusbuckner@squarebidness.com</a>
+                </div>
+              </div>
+
+              <div class="meta-row">
+                <span class="meta-label">Phone</span>
+                <div class="meta-value">
+                  <a
+                    href="tel:+19859817001"
+                    data-sb-action="cx_connect_call"
+                    data-sb-component="connect"
+                    data-sb-label="985-981-7001"
+                  >(985) 981-7001</a>
+                </div>
+              </div>
+
+              <div class="meta-row">
+                <span class="meta-label">Location</span>
+                <div class="meta-value">Hammond, Louisiana</div>
+              </div>
+            </div>
+
+            <div class="action-grid" style="margin-top:1rem;">
+              <a class="sb-btn sb-btn--primary"
+                 href="/connect/marcus-buckner.vcf"
+                 data-sb-action="cx_connect_save_contact"
+                 data-sb-component="connect"
+                 data-sb-label="Save Contact">Save Contact</a>
+
+              <a class="sb-btn sb-btn--ghost"
+                 href="mailto:marcusbuckner@squarebidness.com?subject=Square%20Bidness%20%7C%20Connect&body=Name%3A%0ACompany%2FOrg%3A%0AWhat%20you%E2%80%99re%20reaching%20out%20about%3A%0ATimeline%3A%0A"
+                 data-sb-action="cx_connect_email_cta"
+                 data-sb-component="connect"
+                 data-sb-label="Email Marcus">Email Marcus</a>
+
+              <a class="sb-btn sb-btn--ghost"
+                 href="sms:+19859817001"
+                 data-sb-action="cx_connect_text"
+                 data-sb-component="connect"
+                 data-sb-label="Text Marcus">Text Marcus</a>
+
+              <a class="sb-btn sb-btn--outline"
+                 href="tel:+19859817001"
+                 data-sb-action="cx_connect_call_cta"
+                 data-sb-component="connect"
+                 data-sb-label="Call Marcus">Call Marcus</a>
+            </div>
+
+            <div class="template-row" aria-label="Quick email templates">
+              <a class="template-link"
+                 href="mailto:marcusbuckner@squarebidness.com?subject=Square%20Bidness%20%7C%20Wholesale&body=Name%3A%0AStore%2FBrand%3A%0ALocation%3A%0AWhat%20you%E2%80%99re%20interested%20in%3A%0AQuantity%2FRun%20size%3A%0A"
+                 data-sb-action="cx_connect_template_wholesale"
+                 data-sb-component="connect"
+                 data-sb-label="Wholesale">Wholesale</a>
+
+              <a class="template-link"
+                 href="mailto:marcusbuckner@squarebidness.com?subject=Square%20Bidness%20%7C%20Media&body=Outlet%3A%0AContact%20Name%3A%0AStory%20angle%3A%0ADeadline%3A%0A"
+                 data-sb-action="cx_connect_template_media"
+                 data-sb-component="connect"
+                 data-sb-label="Media">Media</a>
+
+              <a class="template-link"
+                 href="mailto:marcusbuckner@squarebidness.com?subject=Square%20Bidness%20%7C%20Partner%20Builds&body=Business%20name%3A%0AWhat%20you%20need%20built%3A%0AWebsite%2FPayments%2FBooking%2FIntake%3A%0ATimeline%3A%0A"
+                 data-sb-action="cx_connect_template_partnerbuilds"
+                 data-sb-component="connect"
+                 data-sb-label="Partner Builds">Partner Builds</a>
+            </div>
           </div>
-        </div>
 
-        <div class="connect-section">
-          <p class="connect-section-title">Community &amp; Speaking</p>
-          <p class="muted-small">Schools, nonprofits, and organizers — talks, panels, alumni events, and practical brand-building workshops.</p>
-          <div class="connect-chip-row">
-            <span class="connect-chip">Louisiana</span>
-            <span class="connect-chip">Entrepreneurship</span>
-            <span class="connect-chip">Creative direction</span>
+         <div class="qr-grid">
+  <div class="qr-card">
+    <h3>Scan to connect</h3>
+    <p>Main QR lane for your Square Bidness connect page.</p>
+    <div class="qr-frame">
+      <img src="/connect/assets/sb_connect_qr.png" alt="QR code for Square Bidness connect page" />
+    </div>
+    <div class="qr-note">Use this on your phone, site, and digital share lane.</div>
+  </div>
+
+  <div class="qr-card">
+    <h3>Scan quick</h3>
+    <p>Backup QR lane for direct contact/card access.</p>
+    <div class="qr-frame">
+      <img src="/connect/assets/connect-qr.svg" alt="QR code for Square Bidness quick contact" />
+    </div>
+    <div class="qr-note">Good for physical card support and quick scan situations.</div>
+  </div>
+</div>
+
+          <div class="social-card">
+            <h3>Socials</h3>
+            <p>One lane for socials. Keep the page clean and route everything from here.</p>
+
+            <div class="social-actions">
+              <a class="sb-btn sb-btn--ghost"
+                 href="/social/"
+                 data-sb-action="cx_connect_social"
+                 data-sb-component="connect"
+                 data-sb-label="Socials">Open Socials</a>
+
+              <a class="sb-btn sb-btn--outline"
+                 href="https://lab.squarebidness.com/"
+                 target="_blank"
+                 rel="noopener"
+                 data-sb-action="cx_connect_open_lab"
+                 data-sb-component="connect"
+                 data-sb-label="Open Tech Lab">Open Tech Lab</a>
+            </div>
           </div>
-        </div>
 
-        <div class="work-card" aria-label="Partner Builds">
-          <p class="work-title">Partner Builds</p>
-          <p class="work-sub">Recent client work and partner pages built through SB Tech Lab.</p>
-
-          <div class="work-actions">
-            <a class="btn btn--ghost" href="/work/" data-sb-action="cx_connect_work" data-sb-component="connect" data-sb-label="View all">View all</a>
-            <a class="btn btn--ghost" href="/start2finish/" data-sb-action="cx_connect_start2finish" data-sb-component="connect" data-sb-label="Start2Finish">Start2Finish</a>
-            <a class="btn btn--ghost" href="/puffs/" data-sb-action="cx_connect_puffs" data-sb-component="connect" data-sb-label="Puff’s">Puff’s</a>
-            <a class="btn btn--ghost" href="/courageaux/" data-sb-action="cx_connect_courageaux" data-sb-component="connect" data-sb-label="Courageaux">Courageaux</a>
-            <a class="btn btn--ghost" href="/phomatic/" data-sb-action="cx_connect_phomatic" data-sb-component="connect" data-sb-label="Pho-Matic">Pho-Matic</a>
-            <a class="btn btn--ghost" href="/richardson/" data-sb-action="cx_connect_richardson" data-sb-component="connect" data-sb-label="Richardson">Richardson</a>
-          </div>
-
-          <p class="connect-note" style="margin-top:.6rem;">
-            Want yours built? Email with subject <strong>Partner Builds</strong>.
+          <p class="connect-note">
+            Digital-first is the move, but both lanes matter: your phone gets the fast share, and your printed card keeps the QR backup in play.
+            The key is that both routes still point back into Square Bidness.
           </p>
         </div>
       </section>
