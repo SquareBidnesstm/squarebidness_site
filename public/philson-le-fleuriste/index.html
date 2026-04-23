@@ -484,63 +484,123 @@
       box-shadow:var(--shadow);
     }
 
-    .spotlight{
-      display:grid;
-      grid-template-columns:1.03fr .97fr;
-      gap:18px;
-      align-items:stretch;
-    }
+   .spotlight{
+  display:grid;
+  grid-template-columns:1.03fr .97fr;
+  gap:22px;
+  align-items:stretch;
+}
 
-    .spotlight-copy{
-      background:#fff;
-      border:1px solid var(--line);
-      border-radius:24px;
-      padding:28px;
-      box-shadow:var(--shadow);
-    }
+.spotlight-copy{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  min-height:420px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,255,255,.99)),
+    radial-gradient(700px 320px at 0% 0%, rgba(184,147,85,.08), transparent 62%);
+  border:1px solid var(--line);
+  border-radius:28px;
+  padding:40px 42px;
+  box-shadow:var(--shadow);
+}
 
-    .spotlight-copy h3{
-      margin:0 0 10px;
-      font-family:Georgia,"Times New Roman",serif;
-      font-size:2rem;
-      line-height:1.05;
-      font-weight:500;
-      letter-spacing:-.03em;
-    }
+.spotlight-copy h3{
+  margin:0 0 16px;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:clamp(2.1rem,3vw,3.2rem);
+  line-height:.98;
+  font-weight:500;
+  letter-spacing:-.045em;
+  color:var(--text);
+}
 
-    .spotlight-copy p{
-      margin:0;
-      color:var(--muted);
-      line-height:1.8;
-    }
+.spotlight-copy p{
+  margin:0;
+  max-width:34ch;
+  color:var(--muted);
+  line-height:1.85;
+  font-size:16px;
+}
 
-    .spotlight-actions{
-      display:flex;
-      flex-wrap:wrap;
-      gap:12px;
-      margin-top:18px;
-    }
+.spotlight-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:14px;
+  margin-top:30px;
+}
 
-    .spotlight-image{
+.spotlight-image{
   display:flex;
   align-items:center;
   justify-content:center;
-  padding:24px;
+  min-height:420px;
+  padding:28px;
   overflow:hidden;
-  min-height:360px;
-  border-radius:24px;
+  border-radius:28px;
   border:1px solid var(--line);
-  background:#efe6db;
+  background:
+    radial-gradient(560px 220px at 100% 100%, rgba(184,147,85,.14), transparent 55%),
+    radial-gradient(420px 180px at 0% 0%, rgba(255,255,255,.34), transparent 50%),
+    #f2ede4;
   box-shadow:var(--shadow);
 }
 
 .spotlight-image img{
   width:auto;
   max-width:100%;
+  max-height:100%;
   height:auto;
   object-fit:contain;
+  object-position:center;
+  border-radius:22px;
+  box-shadow:0 20px 44px rgba(0,0,0,.18);
 }
 
+.spotlight-kicker{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:14px;
+  padding:8px 12px;
+  width:max-content;
+  border-radius:999px;
+  background:var(--soft);
+  border:1px solid var(--line);
+  color:var(--muted);
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+
+.spotlight-note{
+  margin-top:22px;
+  font-size:13px;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:#8a7b68;
+}
+
+@media (max-width: 940px){
+  .spotlight{
+    grid-template-columns:1fr;
+  }
+
+  .spotlight-copy,
+  .spotlight-image{
+    min-height:auto;
+  }
+
+  .spotlight-copy{
+    padding:30px 24px;
+  }
+
+  .spotlight-image{
+    padding:20px;
+  }
+}
     .process{
       display:grid;
       grid-template-columns:repeat(4,minmax(0,1fr));
@@ -883,26 +943,34 @@
         </div>
       </section>
 
-      <section>
-        <div class="spotlight">
-          <div class="spotlight-image">
-            <img src="/philson-le-fleuriste/assets/1200_8.jpg" alt="Custom Louboutin floral tribute by Philson Le Fleuriste" loading="lazy" />
-          </div>
+    <section>
+  <div class="spotlight">
+    <div class="spotlight-copy">
+      <div class="spotlight-kicker">Meet Eddie Philson</div>
 
-          <div class="spotlight-copy">
-            <h3>Custom tribute work that stands apart</h3>
-            <p>
-              Tribute boards, memorial symbols, fashion references, careers, sports, and one-of-one concepts
-              all move through the same clean request lane. This is where Philson separates from generic florist work.
-            </p>
+      <h3>Floral presentation with real presence.</h3>
 
-            <div class="spotlight-actions">
-              <a class="btn primary" href="/philson-le-fleuriste/tributes/" data-sb-action="tribute_gallery" data-sb-component="tribute-spotlight" data-sb-label="tribute-gallery">View Tribute Gallery</a>
-              <a class="btn" href="/philson-le-fleuriste/funeral-floral-tributes/" data-sb-action="tribute_funeral_page" data-sb-component="tribute-spotlight" data-sb-label="funeral-tributes">Funeral Tributes</a>
-            </div>
-          </div>
-        </div>
-      </section>
+      <p>
+        Philson Le Fleuriste is built around premium floral presentation,
+        custom tribute work, and statement pieces that feel personal,
+        elevated, and memorable. From luxury bouquet builds to memorial
+        florals and special event work, the mission is simple:
+        make the flowers land right.
+      </p>
+
+      <div class="spotlight-actions">
+        <a class="btn primary" href="/philson-le-fleuriste/deposit/" data-sb-action="eddie_spotlight_deposit" data-sb-component="spotlight" data-sb-label="deposit">Start Deposit Request</a>
+        <a class="btn" href="sms:+18326520062" data-sb-action="eddie_spotlight_text" data-sb-component="spotlight" data-sb-label="text-eddie">Text Eddie</a>
+      </div>
+
+      <div class="spotlight-note">Luxury bouquets • tribute work • events</div>
+    </div>
+
+    <div class="spotlight-image">
+      <img src="/philson-le-fleuriste/assets/philson_business_card_front.png" alt="Philson Le Fleuriste business card front" loading="lazy" />
+    </div>
+  </div>
+</section>
 
       <section>
         <div class="section-head">
