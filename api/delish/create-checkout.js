@@ -194,10 +194,6 @@ const MENU_BY_DAY = {
   ],
 };
 
-
-
-const SUNDAY_ORDERING_OCCURRENCES = new Set([1, 3]);
-
 const FRIDAY_ONLY_ITEM_IDS = new Set([
   "extra_side_potato_salad",
   "extra_side_rice_dressing",
@@ -264,17 +260,9 @@ function isItemAllowedForCurrentDay(itemId, todayDay) {
 function isSectionEnabledBackend(itemId, overrides = {}) {
   const sections = overrides?.sections || {};
 
-  if (String(itemId).startsWith("drink_")) {
-    return sections.drinks !== false;
-  }
-
-  if (String(itemId).startsWith("lagniappe_")) {
-    return sections.lagniappe !== false;
-  }
-
-  if (String(itemId).startsWith("extra_side_")) {
-    return sections.extraSides !== false;
-  }
+  if (String(itemId).startsWith("drink_")) return sections.drinks !== false;
+  if (String(itemId).startsWith("lagniappe_")) return sections.lagniappe !== false;
+  if (String(itemId).startsWith("extra_side_")) return sections.extraSides !== false;
 
   return true;
 }
@@ -284,6 +272,13 @@ function isItemEnabledBackend(itemId, overrides = {}) {
   return !itemsOff.includes(itemId);
 }
 
+function isItemSoldOutBackend(itemId, overrides = {}) {
+  const itemsSoldOut = Array.isArray(overrides?.itemsSoldOut)
+    ? overrides.itemsSoldOut
+    : [];
+  return itemsSoldOut.includes(itemId);
+}
+
 function buildShortOrderSummary(items = []) {
   return items
     .map((item) => `${item.qty}x ${item.name}`)
@@ -291,14 +286,19 @@ function buildShortOrderSummary(items = []) {
     .slice(0, 500);
 }
 
-function isItemSoldOutBackend(itemId, overrides = {}) {
-  const itemsSoldOut = Array.isArray(overrides?.itemsSoldOut) ? overrides.itemsSoldOut : [];
-  return itemsSoldOut.includes(itemId);
-}
-
 function safeMeta(value, max = 500) {
   return String(value || "").slice(0, max);
 }
+
+function makeRecordId() {
+  const now = new Date();
+  const y = now.getFullYear().toString().slice(-2);
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  const rand = Math.floor(1000 + Math.random() * 9000);
+  return `DL-${y}${m}${d}-${rand}`;
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -313,15 +313,8 @@ export default async function handler(req, res) {
       });
     }
 
-    const successUrl =
-      process.env.DELISH_STRIPE_SUCCESS_URL ||
-      "https://www.squarebidness.com/delish/order/success/";
-
-    const cancelUrl =
-      process.env.DELISH_STRIPE_CANCEL_URL ||
-      "https://www.squarebidness.com/delish/order/";
-
-    const body = req.body;
+    const body =
+      typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
 
     if (!isValidOrder(body)) {
       return res.status(400).json({
@@ -330,30 +323,31 @@ export default async function handler(req, res) {
       });
     }
 
-const orderingState = getDelishOrderingState();
-const todayIso = orderingState.now.isoDate;
-const todayDay = orderingState.today;
-const MENU_OVERRIDES = await getDelishMenuOverrides();
+    const orderingState = getDelishOrderingState();
+    const todayIso = orderingState.now.isoDate;
+    const todayDay = orderingState.today;
+    const menuOverrides = await getDelishMenuOverrides();
 
-if (!orderingState.openNow) {
-  let message = "Online ordering is closed right now.";
+    if (!orderingState.openNow) {
+      let message = "Online ordering is closed right now.";
 
-  if (orderingState.reason === "manual_closed") {
-    message = "Online ordering is currently paused.";
-  } else if (orderingState.reason === "outside_service_window") {
-    message = `Ordering is available from ${orderingState.openTime} to ${orderingState.closeTime}.`;
-  } else if (orderingState.reason === "sunday_not_scheduled") {
-    message = "Sunday ordering is only available on 1st and 3rd Sundays.";
-  } else if (orderingState.reason === "not_a_service_day") {
-    message = "Online ordering is closed today.";
-  }
+      if (orderingState.reason === "manual_closed") {
+        message = "Online ordering is currently paused.";
+      } else if (orderingState.reason === "outside_service_window") {
+        message = `Ordering is available from ${orderingState.openTime} to ${orderingState.closeTime}.`;
+      } else if (orderingState.reason === "sunday_not_scheduled") {
+        message = "Sunday ordering is only available on 1st and 3rd Sundays.";
+      } else if (orderingState.reason === "not_a_service_day") {
+        message = "Online ordering is closed today.";
+      }
 
-  return res.status(403).json({
-    ok: false,
-    error: "ORDERING_CLOSED_NOW",
-    message
-  });
-}
+      return res.status(403).json({
+        ok: false,
+        error: "ORDERING_CLOSED_NOW",
+        message,
+      });
+    }
+
     if (body.pickupDate !== todayIso) {
       return res.status(403).json({
         ok: false,
@@ -365,16 +359,16 @@ if (!orderingState.openNow) {
     const allowedItems = getAllowedItemsForToday(todayDay);
     const allowedMap = buildAllowedMap(allowedItems);
 
-       const cleanItems = body.items
+    const cleanItems = body.items
       .map((item) => {
         const id = String(item.id || "").trim();
         const qty = Math.max(1, Number(item.qty || 1));
 
         if (!id || !allowedMap.has(id)) return null;
         if (!isItemAllowedForCurrentDay(id, todayDay)) return null;
-        if (!isSectionEnabledBackend(id, MENU_OVERRIDES)) return null;
-        if (!isItemEnabledBackend(id, MENU_OVERRIDES)) return null;
-        if (isItemSoldOutBackend(id, MENU_OVERRIDES)) return null;
+        if (!isSectionEnabledBackend(id, menuOverrides)) return null;
+        if (!isItemEnabledBackend(id, menuOverrides)) return null;
+        if (isItemSoldOutBackend(id, menuOverrides)) return null;
 
         const allowed = allowedMap.get(id);
 
@@ -384,7 +378,6 @@ if (!orderingState.openNow) {
           qty,
           price: allowed.price,
           total: qty * allowed.price,
-
           side1Id: item.side1Id || "",
           side2Id: item.side2Id || "",
           side1Name: item.side1Name || "",
@@ -401,34 +394,41 @@ if (!orderingState.openNow) {
       });
     }
 
-        if (cleanItems.length !== body.items.length) {
+    if (cleanItems.length !== body.items.length) {
       return res.status(403).json({
         ok: false,
         error: "ITEM_NOT_AVAILABLE",
         message: "One or more selected items are unavailable right now.",
       });
     }
-       const calculatedSubtotal = Number(
+
+    const calculatedSubtotal = Number(
       cleanItems.reduce((sum, item) => sum + item.total, 0).toFixed(2)
     );
 
     const TAX_RATE = 0.0895;
-
     const calculatedTax = Number((calculatedSubtotal * TAX_RATE).toFixed(2));
     const calculatedTotal = Number((calculatedSubtotal + calculatedTax).toFixed(2));
 
-    const submittedSubtotal = calculatedSubtotal;
-    const submittedTax = calculatedTax;
-    const submittedTotal = calculatedTotal;
+    const recordId = makeRecordId();
+    const shortOrderSummary = buildShortOrderSummary(cleanItems);
 
-    const line_items = cleanItems.map((item) => ({
+    let itemsJson = "[]";
+    try {
+      itemsJson = JSON.stringify(cleanItems);
+    } catch {
+      itemsJson = "[]";
+    }
+
+    const lineItems = cleanItems.map((item) => ({
       quantity: item.qty,
       price_data: {
         currency: "usd",
         product_data: {
-  name: item.side1Name && item.side2Name
-    ? `${item.name} (${item.side1Name}, ${item.side2Name})`
-    : item.name,
+          name:
+            item.side1Name && item.side2Name
+              ? `${item.name} (${item.side1Name}, ${item.side2Name})`
+              : item.name,
           metadata: {
             itemId: item.id,
             activeMenuDay: todayDay,
@@ -439,88 +439,66 @@ if (!orderingState.openNow) {
       },
     }));
 
-    const safeTaxAmountCents = Math.max(
+    const taxAmountCents = Math.max(
       0,
-      Math.round((submittedTotal - submittedSubtotal) * 100)
+      Math.round((calculatedTotal - calculatedSubtotal) * 100)
     );
 
-    if (safeTaxAmountCents > 0) {
-      line_items.push({
+    if (taxAmountCents > 0) {
+      lineItems.push({
         quantity: 1,
         price_data: {
           currency: "usd",
           product_data: {
             name: "Sales Tax",
           },
-          unit_amount: safeTaxAmountCents,
+          unit_amount: taxAmountCents,
         },
       });
     }
 
-     const shortOrderSummary = buildShortOrderSummary(cleanItems);
-
-  let itemsJson = "[]";
-  try {
-    const rawItemsJson = JSON.stringify(cleanItems);
-    itemsJson = rawItemsJson.length <= 500 ? rawItemsJson : "[]";
-  } catch {
-    itemsJson = "[]";
-  }
-
-const session = await stripe.checkout.sessions.create({
-  mode: "payment",
-  payment_method_types: ["card"],
-  line_items,
-
-  // 🔒 HARD LOCK SUCCESS + CANCEL
-  success_url: `https://www.squarebidness.com/delish/order/success/?session_id={CHECKOUT_SESSION_ID}`,
-  cancel_url: `https://www.squarebidness.com/delish/order/`,
-
-   metadata: {
-    customerName: safeMeta(body.customerName, 100),
-    customerPhone: safeMeta(body.customerPhone, 30),
-    customerEmail: safeMeta(body.customerEmail || "", 120),
-    pickupDate: safeMeta(body.pickupDate, 20),
-    pickupWindow: safeMeta(body.pickupWindow, 40),
-    notes: safeMeta(body.notes || "", 300),
-
-    smsConsent: "yes",
-
-    orderSummary: shortOrderSummary,
-    itemsJson,
-    itemCount: String(cleanItems.length),
-    subtotal: String(submittedSubtotal),
-    tax: String(submittedTax),
-    total: String(submittedTotal),
-
-    source: safeMeta(body.source || "delish-order-page", 50),
-    activeMenuDay: safeMeta(todayDay, 20),
-  },
-
-    payment_intent_data: {
-    metadata: {
+    const sharedMetadata = {
+      brand: "Delish",
+      recordId,
+      orderNumber: recordId,
+      orderType: "paid_pickup",
       customerName: safeMeta(body.customerName, 100),
       customerPhone: safeMeta(body.customerPhone, 30),
+      customerEmail: safeMeta(body.customerEmail || "", 120),
       pickupDate: safeMeta(body.pickupDate, 20),
       pickupWindow: safeMeta(body.pickupWindow, 40),
+      notes: safeMeta(body.notes || body.orderNotes || "", 300),
       smsConsent: "yes",
       orderSummary: shortOrderSummary,
       itemsJson,
       itemCount: String(cleanItems.length),
-      total: String(submittedTotal),
-    },
-  },
+      subtotal: String(calculatedSubtotal),
+      tax: String(calculatedTax),
+      total: String(calculatedTotal),
+      source: safeMeta(body.source || "delish-order-page", 50),
+      activeMenuDay: safeMeta(todayDay, 20),
+    };
 
-  customer_email: body.customerEmail || undefined,
-});
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      payment_method_types: ["card"],
+      line_items: lineItems,
+      success_url: "https://www.squarebidness.com/delish/order/success/?session_id={CHECKOUT_SESSION_ID}",
+      cancel_url: "https://www.squarebidness.com/delish/order/",
+      metadata: sharedMetadata,
+      payment_intent_data: {
+        metadata: sharedMetadata,
+      },
+      customer_email: body.customerEmail || undefined,
+    });
 
-return res.status(200).json({
-  ok: true,
-  checkout_url: session.url,
-  session_id: session.id,
-});
-
-      } catch (error) {
+    return res.status(200).json({
+      ok: true,
+      checkout_url: session.url,
+      session_id: session.id,
+      recordId,
+    });
+  } catch (error) {
     console.error("DELISH CREATE CHECKOUT ERROR:", error);
     return res.status(500).json({
       ok: false,
