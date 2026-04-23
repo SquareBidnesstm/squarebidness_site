@@ -2,6 +2,7 @@
 import { Redis } from "@upstash/redis";
 import Stripe from "stripe";
 import { sendDelishSms } from "../_lib/send-delish-sms.js";
+import crypto from "node:crypto";
 
 const redis = new Redis({
   url: process.env.DELISH_UPSTASH_REDIS_REST_URL,
@@ -163,120 +164,192 @@ export default async function handler(req, res) {
       process.env.DELISH_STRIPE_WEBHOOK_SECRET
     );
 
-    if (event.type === "checkout.session.completed") {
-      const session = event.data.object;
-      const metadata = session.metadata || {};
-      console.log("DELISH LIVE METADATA:", metadata);
-      const sessionId = session.id;
+   if (event.type === "checkout.session.completed") {
+  const session = event.data.object;
+  const metadata = session.metadata || {};
+  const sessionId = session.id;
 
-      const alreadyProcessed = await redis.get(`delish:stripe:session:${sessionId}`);
-      if (alreadyProcessed) {
-        return res.status(200).json({ received: true, duplicate: true });
-      }
+  console.log("DELISH LIVE METADATA:", metadata);
 
-      await redis.set(`delish:stripe:session:${sessionId}`, {
-        processedAt: new Date().toISOString(),
-        eventType: event.type,
-      });
+  // idempotency first
+  const alreadyProcessed = await redis.get(`delish:stripe:session:${sessionId}`);
+  if (alreadyProcessed) {
+    return res.status(200).json({ received: true, duplicate: true });
+  }
 
-      const isCateringDeposit =
-        metadata.cateringRequestId &&
-        (
-          metadata.orderType === "catering_deposit" ||
-          (metadata.lane === "catering" && metadata.type === "deposit")
+  // determine type first
+  const isCateringDeposit =
+    metadata.cateringRequestId &&
+    (
+      metadata.orderType === "catering_deposit" ||
+      (metadata.lane === "catering" && metadata.type === "deposit")
+    );
+
+  // catering deposits should NOT enter pickup order pipeline
+  if (isCateringDeposit) {
+    const key = `delish:catering:${metadata.cateringRequestId}`;
+    const existing = await redis.get(key);
+
+    if (existing) {
+      const updated = {
+        ...existing,
+        updatedAt: new Date().toISOString(),
+        status: "deposit_paid",
+        depositPaidAt: new Date().toISOString(),
+        depositSessionId: session.id || existing.depositSessionId || "",
+        depositPaymentIntentId:
+          typeof session.payment_intent === "string"
+            ? session.payment_intent
+            : existing.depositPaymentIntentId || "",
+        depositAmountPaid:
+          typeof session.amount_total === "number"
+            ? (session.amount_total / 100).toFixed(2)
+            : existing.depositAmountPaid || existing.depositAmount || "",
+      };
+
+      await redis.set(key, updated);
+
+      try {
+        const smsTo = normalizeUsPhone(
+          updated.customerPhone || metadata.customerPhone || ""
         );
 
-      if (isCateringDeposit) {
-        const key = `delish:catering:${metadata.cateringRequestId}`;
-        const existing = await redis.get(key);
-
-        if (existing) {
-          const updated = {
-            ...existing,
-            updatedAt: new Date().toISOString(),
-            status: "deposit_paid",
-            depositPaidAt: new Date().toISOString(),
-            depositSessionId: session.id || existing.depositSessionId || "",
-            depositPaymentIntentId:
-              typeof session.payment_intent === "string"
-                ? session.payment_intent
-                : existing.depositPaymentIntentId || "",
-            depositAmountPaid:
-              typeof session.amount_total === "number"
-                ? (session.amount_total / 100).toFixed(2)
-                : existing.depositAmountPaid || existing.depositAmount || "",
-          };
-
-          await redis.set(key, updated);
-
-          try {
-            const smsTo = normalizeUsPhone(
-              updated.customerPhone || metadata.customerPhone || ""
-            );
-
-            if (smsTo) {
-              await sendDelishSms({
-                to: smsTo,
-                message: buildCateringDepositSms(metadata, updated),
-              });
-            }
-          } catch (smsError) {
-            console.error("DELISH CATERING SMS ERROR:", smsError);
-          }
+        if (smsTo) {
+          await sendDelishSms({
+            to: smsTo,
+            message: buildCateringDepositSms(metadata, updated),
+          });
         }
-      } else {
-        try {
-          const smsConsent = metadata.smsConsent === "yes";
-          const smsTo = normalizeUsPhone(metadata.customerPhone || "");
-
-          if (smsConsent && smsTo) {
-  console.log("DELISH ABOUT TO CALL SMS HELPER:", {
-    sessionId: session.id,
-    smsTo,
-    smsConsent
-  });
-
-  const smsResult = await sendDelishSms({
-    to: smsTo,
-    message: buildPickupSms({
-      ...metadata,
-      amountTotal:
-        typeof session.amount_total === "number"
-          ? (session.amount_total / 100).toFixed(2)
-          : "",
-    }),
-  });
-
- const ownerSmsTo = normalizeUsPhone(process.env.DELISH_ORDER_ALERT_TO || "");
-
-if (ownerSmsTo) {
-  await sendDelishSms({
-    to: ownerSmsTo,
-    message: buildOwnerNewOrderSms({
-      ...metadata,
-      amountTotal:
-        typeof session.amount_total === "number"
-          ? (session.amount_total / 100).toFixed(2)
-          : "",
-    }),
-  });
-}
-
-  console.log("DELISH SMS HELPER RESULT:", smsResult);
-  console.log("DELISH PICKUP SMS SENT:", session.id);
-} else {
-  console.log("DELISH PICKUP SMS SKIPPED:", {
-    smsConsent,
-    rawPhone: metadata.customerPhone || "",
-    normalizedPhone: smsTo
-  });
-}
-        } catch (smsError) {
-          console.error("DELISH PICKUP SMS ERROR:", smsError);
-        }
+      } catch (smsError) {
+        console.error("DELISH CATERING SMS ERROR:", smsError);
       }
     }
 
+    await redis.set(`delish:stripe:session:${sessionId}`, {
+      processedAt: new Date().toISOString(),
+      eventType: event.type,
+      cateringDeposit: true,
+      cateringRequestId: metadata.cateringRequestId || "",
+    });
+
+    return res.status(200).json({ received: true, catering: true });
+  }
+
+  // safe items parse for pickup orders
+  let items = [];
+  try {
+    items = JSON.parse(metadata.itemsJson || "[]");
+    if (!Array.isArray(items)) items = [];
+  } catch {
+    items = [];
+  }
+
+  const existingOrderId = await redis.get(`delish:order:by-session:${sessionId}`);
+  if (existingOrderId) {
+    await redis.set(`delish:stripe:session:${sessionId}`, {
+      processedAt: new Date().toISOString(),
+      eventType: event.type,
+      duplicateOrder: true,
+      orderId: existingOrderId,
+    });
+
+    return res.status(200).json({
+      received: true,
+      duplicate: true,
+      orderId: existingOrderId,
+    });
+  }
+
+  const order = {
+    id: crypto.randomUUID(),
+    orderNumber: metadata.orderNumber || metadata.recordId || `DL-${Date.now()}`,
+    createdAt: new Date().toISOString(),
+    completedAt: "",
+    status: "active",
+    smsConsent: metadata.smsConsent === "yes" ? "yes" : "no",
+    customerName: metadata.customerName || "",
+    customerPhone: metadata.customerPhone || "",
+    customerEmail: metadata.customerEmail || "",
+    pickupDate: metadata.pickupDate || "",
+    pickupWindow: metadata.pickupWindow || "",
+    notes: metadata.notes || "",
+    items,
+    subtotal: Number(metadata.subtotal || 0),
+    tax: Number(metadata.tax || 0),
+    total:
+      typeof session.amount_total === "number"
+        ? Number((session.amount_total / 100).toFixed(2))
+        : Number(metadata.total || 0),
+    paymentStatus: "paid",
+    source: metadata.source || "stripe-webhook",
+    stripeSessionId: sessionId,
+  };
+
+  // create order first
+  await redis.set(`delish:order:${order.id}`, order);
+  await redis.lpush("delish:orders:list", order.id);
+  await redis.set(`delish:order:by-session:${sessionId}`, order.id);
+
+  // pickup SMS + owner alert
+  try {
+    const smsConsent = metadata.smsConsent === "yes";
+    const smsTo = normalizeUsPhone(metadata.customerPhone || "");
+
+    if (smsConsent && smsTo) {
+      console.log("DELISH ABOUT TO CALL SMS HELPER:", {
+        sessionId: session.id,
+        smsTo,
+        smsConsent,
+      });
+
+      const smsResult = await sendDelishSms({
+        to: smsTo,
+        message: buildPickupSms({
+          ...metadata,
+          amountTotal:
+            typeof session.amount_total === "number"
+              ? (session.amount_total / 100).toFixed(2)
+              : "",
+        }),
+      });
+
+      const ownerSmsTo = normalizeUsPhone(process.env.DELISH_ORDER_ALERT_TO || "");
+
+      if (ownerSmsTo) {
+        await sendDelishSms({
+          to: ownerSmsTo,
+          message: buildOwnerNewOrderSms({
+            ...metadata,
+            amountTotal:
+              typeof session.amount_total === "number"
+                ? (session.amount_total / 100).toFixed(2)
+                : "",
+          }),
+        });
+      }
+
+      console.log("DELISH SMS HELPER RESULT:", smsResult);
+      console.log("DELISH PICKUP SMS SENT:", session.id);
+    } else {
+      console.log("DELISH PICKUP SMS SKIPPED:", {
+        smsConsent,
+        rawPhone: metadata.customerPhone || "",
+        normalizedPhone: smsTo,
+      });
+    }
+  } catch (smsError) {
+    console.error("DELISH PICKUP SMS ERROR:", smsError);
+  }
+
+  // mark processed LAST
+  await redis.set(`delish:stripe:session:${sessionId}`, {
+    processedAt: new Date().toISOString(),
+    eventType: event.type,
+    orderId: order.id,
+    orderNumber: order.orderNumber,
+  });
+}
+         
     return res.status(200).json({ received: true });
   } catch (error) {
     console.error("DELISH STRIPE WEBHOOK ERROR:", error);
