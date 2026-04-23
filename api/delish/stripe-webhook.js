@@ -147,12 +147,19 @@ ${customerName || "Customer"}
 Pickup: ${pickupDate}${pickupWindow ? ` • ${pickupWindow}` : ""}
 Total: $${Number(total || 0).toFixed(2)}`;
 }
-
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).send("Method not allowed");
   }
+
+  let failureContext = {
+    sessionId: "",
+    customerName: "",
+    customerPhone: "",
+    pickupWindow: "",
+    total: "",
+  };
 
   try {
     const sig = req.headers["stripe-signature"];
@@ -168,6 +175,17 @@ export default async function handler(req, res) {
   const session = event.data.object;
   const metadata = session.metadata || {};
   const sessionId = session.id;
+
+     failureContext = {
+  sessionId: session.id || "",
+  customerName: metadata.customerName || "",
+  customerPhone: metadata.customerPhone || "",
+  pickupWindow: metadata.pickupWindow || "",
+  total:
+    typeof session.amount_total === "number"
+      ? `$${(session.amount_total / 100).toFixed(2)}`
+      : `$${Number(metadata.total || 0).toFixed(2)}`,
+};
 
   console.log("DELISH LIVE METADATA:", metadata);
 
@@ -361,7 +379,13 @@ export default async function handler(req, res) {
         to: alertTo,
         message: `🚨 DELISH WEBHOOK FAILURE
 
-Error: ${String(error?.message || "Unknown error").slice(0, 180)}
+Customer: ${failureContext.customerName || "Unknown"}
+Phone: ${failureContext.customerPhone || "N/A"}
+Pickup: ${failureContext.pickupWindow || "N/A"}
+Total: ${failureContext.total || "N/A"}
+Session: ${failureContext.sessionId || "N/A"}
+
+Error: ${String(error?.message || "Unknown error").slice(0, 160)}
 
 Check system immediately.`,
       });
