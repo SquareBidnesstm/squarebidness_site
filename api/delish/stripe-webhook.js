@@ -348,11 +348,28 @@ export default async function handler(req, res) {
     orderId: order.id,
     orderNumber: order.orderNumber,
   });
-}
-         
-    return res.status(200).json({ received: true });
-  } catch (error) {
-    console.error("DELISH STRIPE WEBHOOK ERROR:", error);
-    return res.status(400).send(`Webhook Error: ${error.message}`);
+
+  return res.status(200).json({ received: true });
+} catch (error) {
+  console.error("DELISH STRIPE WEBHOOK ERROR:", error);
+
+  try {
+    const alertTo = normalizeUsPhone(process.env.DELISH_FAILURE_ALERT_TO || "");
+
+    if (alertTo) {
+      await sendDelishSms({
+        to: alertTo,
+        message: `🚨 DELISH WEBHOOK FAILURE
+
+Error: ${String(error?.message || "Unknown error").slice(0, 180)}
+
+Check system immediately.`,
+      });
+    }
+  } catch (alertError) {
+    console.error("DELISH FAILURE ALERT SMS ERROR:", alertError);
   }
+
+  return res.status(400).send(`Webhook Error: ${error.message}`);
+}
 }
