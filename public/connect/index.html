@@ -12,9 +12,8 @@
   <meta name="theme-color" content="#000000" />
   <meta name="color-scheme" content="dark light" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="sb:build" content="v20260423-connect-sb-direct" />
+  <meta name="sb:build" content="v20260423-connect-sb-direct-hero-save" />
 
-  <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Square Bidness" />
   <meta property="og:locale" content="en_US" />
@@ -27,29 +26,24 @@
   <meta property="og:image:alt" content="Connect with Square Bidness" />
   <meta property="fb:app_id" content="802680062853443" />
 
-  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Connect — Square Bidness" />
   <meta name="twitter:description" content="Direct Square Bidness contact lane — save contact, email, call, text, socials, and QR." />
   <meta name="twitter:image" content="https://www.squarebidness.com/connect/assets/connect_1200x630.jpg" />
   <meta name="twitter:image:alt" content="Connect with Square Bidness" />
 
-  <!-- Perf -->
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
   <link rel="preconnect" href="https://www.google-analytics.com" crossorigin />
 
-  <!-- Styles -->
   <link rel="preload" href="/styles/style.css" as="style" />
   <link rel="stylesheet" href="/styles/style.css" />
 
-  <!-- Icons / PWA -->
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
   <link rel="apple-touch-icon" href="/icon_180.png" />
   <link rel="manifest" href="/manifest.webmanifest" />
 
-  <!-- Analytics -->
   <script defer src="/scripts/ga.js"></script>
   <script defer src="/scripts/sb-analytics.js"></script>
   <script defer src="/scripts/meta-pixel.js"></script>
@@ -114,18 +108,14 @@
     }
 
     .connect-hero h1{
-      margin:0 0 .65rem;
+      margin:0 0 1rem;
       font-size:clamp(2rem,4vw,3.5rem);
       line-height:1;
       color:#fff;
     }
 
-    .connect-hero p{
-      margin:0;
-      max-width:680px;
-      color:#d4d4d8;
-      font-size:1rem;
-      line-height:1.7;
+    .hero-save{
+      max-width:420px;
     }
 
     .connect-main{
@@ -158,7 +148,7 @@
 
     .brand-mark{
       max-width:230px;
-      margin:0 auto 1rem;
+      margin:0 auto 1.15rem;
     }
 
     .brand-mark img{
@@ -181,12 +171,6 @@
       color:#d4d4d8;
       font-size:1rem;
       font-weight:700;
-    }
-
-    .brand-sub{
-      margin:.2rem 0 0;
-      color:var(--sb-muted);
-      font-size:.95rem;
     }
 
     .brand-quick{
@@ -265,17 +249,17 @@
     }
 
     .action-grid{
-  display:grid;
-  gap:.7rem;
-  margin-top:1rem;
-  margin-bottom:.95rem;
-}
+      display:grid;
+      gap:.7rem;
+      margin-top:1rem;
+      margin-bottom:.95rem;
+    }
 
-@media(min-width:640px){
-  .action-grid{
-    grid-template-columns:1fr 1fr;
-  }
-}
+    @media(min-width:640px){
+      .action-grid{
+        grid-template-columns:1fr 1fr;
+      }
+    }
 
     .sb-btn{
       display:inline-flex;
@@ -287,12 +271,17 @@
       border-radius:999px;
       font-weight:900;
       padding:.9rem 1rem;
-      transition:.14s ease;
+      transition:transform .08s ease, box-shadow .08s ease, background .12s ease;
       white-space:nowrap;
     }
 
     .sb-btn:hover{
       transform:translateY(-1px);
+    }
+
+    .sb-btn:active{
+      transform:scale(.96);
+      box-shadow:0 6px 18px rgba(0,0,0,.35) inset;
     }
 
     .sb-btn--primary{
@@ -326,6 +315,33 @@
       border-color:#a1a1aa;
     }
 
+    .template-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:.55rem;
+      margin-top:1rem;
+    }
+
+    .template-link{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:.6rem .9rem;
+      border-radius:999px;
+      border:1px solid #262626;
+      background:#090909;
+      color:#e5e7eb;
+      font-size:.85rem;
+      font-weight:800;
+      text-decoration:none;
+      transition:.14s ease;
+    }
+
+    .template-link:hover{
+      background:#111;
+      transform:translateY(-1px);
+    }
+
     .qr-grid{
       display:grid;
       gap:1rem;
@@ -343,12 +359,23 @@
       border-radius:20px;
       padding:1rem;
       text-align:center;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .qr-card::before{
+      content:"";
+      position:absolute;
+      inset:-1px;
+      background:radial-gradient(circle at 50% 0%, rgba(255,255,255,.10), transparent 45%);
+      pointer-events:none;
     }
 
     .qr-card h3{
       margin:0 0 .35rem;
       color:#fff;
       font-size:1rem;
+      position:relative;
     }
 
     .qr-card p{
@@ -356,6 +383,7 @@
       color:var(--sb-muted);
       font-size:.88rem;
       line-height:1.55;
+      position:relative;
     }
 
     .qr-frame{
@@ -366,6 +394,22 @@
       max-width:250px;
       margin:0 auto;
       box-shadow:0 14px 28px rgba(0,0,0,.22);
+      position:relative;
+    }
+
+    .qr-frame::after{
+      content:"";
+      position:absolute;
+      inset:-6px;
+      border-radius:22px;
+      border:1px solid rgba(255,255,255,.12);
+      animation:qrPulse 2.2s ease-in-out infinite;
+      pointer-events:none;
+    }
+
+    @keyframes qrPulse{
+      0%,100%{opacity:.18; transform:scale(1)}
+      50%{opacity:.42; transform:scale(1.025)}
     }
 
     .qr-frame img{
@@ -380,6 +424,7 @@
       font-size:.78rem;
       color:#a1a1aa;
       line-height:1.55;
+      position:relative;
     }
 
     .social-card{
@@ -413,48 +458,12 @@
       }
     }
 
-    .template-row{
-      display:flex;
-      flex-wrap:wrap;
-      gap:.55rem;
-      margin-top:1rem;
-    }
-
-    .template-link{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:.6rem .9rem;
-      border-radius:999px;
-      border:1px solid #262626;
-      background:#090909;
-      color:#e5e7eb;
-      font-size:.85rem;
-      font-weight:800;
-      text-decoration:none;
-      transition:.14s ease;
-    }
-
-    .template-link:hover{
-      background:#111;
-      transform:translateY(-1px);
-    }
-
     .connect-note{
       margin-top:1rem;
       color:#a1a1aa;
       font-size:.82rem;
       line-height:1.65;
     }
-
-    .sb-btn{
-  transition:transform .08s ease, box-shadow .08s ease, background .12s ease;
-}
-
-.sb-btn:active{
-  transform:scale(.96);
-  box-shadow:0 6px 18px rgba(0,0,0,.35) inset;
-}
   </style>
 </head>
 
@@ -472,12 +481,18 @@
         <span class="eyebrow-dot"></span>
         Square Bidness Direct
       </div>
+
       <h1>Connect with Marcus.</h1>
-      <p>
-        Built for the phone. Save the contact, call, text, email, or scan the QR.
-No middleman. No third-party brand in front of the lane.
-Square Bidness all the way.
-      </p>
+
+      <div class="hero-save">
+        <a class="sb-btn sb-btn--primary"
+           href="/connect/marcus-buckner.vcf"
+           data-sb-action="cx_connect_save_contact_hero"
+           data-sb-component="connect-hero"
+           data-sb-label="Save Contact">
+          Save Contact
+        </a>
+      </div>
     </div>
   </header>
 
@@ -489,9 +504,9 @@ Square Bidness all the way.
             <div class="brand-mark">
               <img src="/connect/assets/square-bidness-mark.png" alt="Square Bidness mark" />
             </div>
+
             <p class="brand-name">Marcus Buckner</p>
-<p class="brand-role">Founder • Square Bidness</p>
-<p class="brand-sub">Tap to connect instantly</p>
+            <p class="brand-role">Founder • Square Bidness</p>
 
             <div class="brand-quick">
               <span class="brand-chip">Operator Systems</span>
@@ -509,24 +524,24 @@ Square Bidness all the way.
               <div class="meta-row">
                 <span class="meta-label">Email</span>
                 <div class="meta-value">
-                  <a
-                    href="mailto:marcusbuckner@squarebidness.com"
-                    data-sb-action="cx_connect_email"
-                    data-sb-component="connect"
-                    data-sb-label="marcusbuckner@squarebidness.com"
-                  >marcusbuckner@squarebidness.com</a>
+                  <a href="mailto:marcusbuckner@squarebidness.com"
+                     data-sb-action="cx_connect_email"
+                     data-sb-component="connect"
+                     data-sb-label="marcusbuckner@squarebidness.com">
+                    marcusbuckner@squarebidness.com
+                  </a>
                 </div>
               </div>
 
               <div class="meta-row">
                 <span class="meta-label">Phone</span>
                 <div class="meta-value">
-                  <a
-                    href="tel:+19859817001"
-                    data-sb-action="cx_connect_call"
-                    data-sb-component="connect"
-                    data-sb-label="985-981-7001"
-                  >(985) 981-7001</a>
+                  <a href="tel:+19859817001"
+                     data-sb-action="cx_connect_call"
+                     data-sb-component="connect"
+                     data-sb-label="985-981-7001">
+                    (985) 981-7001
+                  </a>
                 </div>
               </div>
 
@@ -536,33 +551,13 @@ Square Bidness all the way.
               </div>
             </div>
 
-           <div class="action-grid">
+            <div class="action-grid">
+              <a class="sb-btn sb-btn--ghost" href="tel:+19859817001" data-sb-action="cx_connect_call">Call</a>
+              <a class="sb-btn sb-btn--ghost" href="sms:+19859817001" data-sb-action="cx_connect_text">Text</a>
+              <a class="sb-btn sb-btn--outline" href="mailto:marcusbuckner@squarebidness.com" data-sb-action="cx_connect_email">Email</a>
+              <a class="sb-btn sb-btn--outline" href="/connect/marcus-buckner.vcf" data-sb-action="cx_connect_save_contact_secondary">Save Again</a>
+            </div>
 
-  <a class="sb-btn sb-btn--primary"
-     href="/connect/marcus-buckner.vcf"
-     data-sb-action="cx_connect_save_contact">
-     Save Contact
-  </a>
-
-  <a class="sb-btn sb-btn--ghost"
-     href="tel:+19859817001"
-     data-sb-action="cx_connect_call">
-     Call
-  </a>
-
-  <a class="sb-btn sb-btn--ghost"
-     href="sms:+19859817001"
-     data-sb-action="cx_connect_text">
-     Text
-  </a>
-
-  <a class="sb-btn sb-btn--outline"
-     href="mailto:marcusbuckner@squarebidness.com"
-     data-sb-action="cx_connect_email">
-     Email
-  </a>
-
-</div>
             <div class="template-row" aria-label="Quick email templates">
               <a class="template-link"
                  href="mailto:marcusbuckner@squarebidness.com?subject=Square%20Bidness%20%7C%20Wholesale&body=Name%3A%0AStore%2FBrand%3A%0ALocation%3A%0AWhat%20you%E2%80%99re%20interested%20in%3A%0AQuantity%2FRun%20size%3A%0A"
@@ -584,26 +579,26 @@ Square Bidness all the way.
             </div>
           </div>
 
-         <div class="qr-grid">
-  <div class="qr-card">
-    <h3>Scan to connect</h3>
-    <p>Primary QR. Opens your Square Bidness contact page instantly.</p>
-    <div class="qr-frame">
-      <img src="/connect/assets/sb_connect_qr.png" alt="QR code for Square Bidness connect page" />
-    </div>
-    <div class="qr-note">Use across phone, site, and shared materials.</div>
-  </div>
+          <div class="qr-grid">
+            <div class="qr-card">
+              <h3>Scan to connect</h3>
+              <p>Primary QR. Opens your Square Bidness contact page instantly.</p>
+              <div class="qr-frame">
+                <img src="/connect/assets/sb_connect_qr.png" alt="QR code for Square Bidness connect page" />
+              </div>
+              <div class="qr-note">Use across phone, site, and shared materials.</div>
+            </div>
 
-  <div class="qr-card">
-    <h3>Quick scan</h3>
-    <p>Backup QR for fast contact access.</p>
-    <div class="qr-frame">
-      <img src="/connect/assets/connect-qr.svg" alt="QR code for Square Bidness quick contact" />
-    </div>
-    <div class="qr-note">Best for cards, print, and in-person use.</div>
-  </div>
-</div>
-          
+            <div class="qr-card">
+              <h3>Quick scan</h3>
+              <p>Backup QR for fast contact access.</p>
+              <div class="qr-frame">
+                <img src="/connect/assets/connect-qr.svg" alt="QR code for Square Bidness quick contact" />
+              </div>
+              <div class="qr-note">Best for cards, print, and in-person use.</div>
+            </div>
+          </div>
+
           <div class="social-card">
             <h3>Socials</h3>
             <p>One entry. Everything routes here.</p>
@@ -626,8 +621,7 @@ Square Bidness all the way.
           </div>
 
           <p class="connect-note">
-           Digital first. Physical supported.
-All roads lead to Square Bidness.
+            Digital first. Physical supported. All roads lead to Square Bidness.
           </p>
         </div>
       </section>
@@ -635,17 +629,18 @@ All roads lead to Square Bidness.
   </main>
 
   <div id="site-footer" aria-busy="true" style="content-visibility:auto;contain-intrinsic-size:140px;"></div>
-  <script>
-document.querySelectorAll('a[href$=".vcf"]').forEach(btn => {
-  btn.addEventListener("click", () => {
-    const original = btn.textContent;
-    btn.textContent = "Opening…";
 
-    setTimeout(() => {
-      btn.textContent = original;
-    }, 2000);
-  });
-});
-</script>
+  <script>
+    document.querySelectorAll('a[href$=".vcf"]').forEach(btn => {
+      btn.addEventListener("click", () => {
+        const original = btn.textContent;
+        btn.textContent = "Opening…";
+
+        setTimeout(() => {
+          btn.textContent = original;
+        }, 2000);
+      });
+    });
+  </script>
 </body>
 </html>
