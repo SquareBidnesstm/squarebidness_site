@@ -147,6 +147,23 @@ ${customerName || "Customer"}
 Pickup: ${pickupDate}${pickupWindow ? ` • ${pickupWindow}` : ""}
 Total: $${Number(total || 0).toFixed(2)}`;
 }
+
+async function retryOnce(label, fn) {
+  try {
+    return await fn();
+  } catch (firstError) {
+    console.error(`${label} failed first attempt:`, firstError);
+
+    await new Promise(resolve => setTimeout(resolve, 350));
+
+    try {
+      return await fn();
+    } catch (secondError) {
+      console.error(`${label} failed second attempt:`, secondError);
+      throw secondError;
+    }
+  }
+}
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -283,7 +300,8 @@ export default async function handler(req, res) {
     orderNumber: metadata.orderNumber || metadata.recordId || `DL-${Date.now()}`,
     createdAt: new Date().toISOString(),
     completedAt: "",
-    status: "active",
+    status: "received",
+    orderState: "received",
     smsConsent: metadata.smsConsent === "yes" ? "yes" : "no",
     customerName: metadata.customerName || "",
     customerPhone: metadata.customerPhone || "",
@@ -303,10 +321,13 @@ export default async function handler(req, res) {
     stripeSessionId: sessionId,
   };
 
-  // create order first
+ 
+  // create order first with one retry
+await retryOnce("DELISH ORDER REDIS WRITE", async () => {
   await redis.set(`delish:order:${order.id}`, order);
   await redis.lpush("delish:orders:list", order.id);
   await redis.set(`delish:order:by-session:${sessionId}`, order.id);
+});
 
   // pickup SMS + owner alert
   try {
@@ -359,14 +380,14 @@ export default async function handler(req, res) {
     console.error("DELISH PICKUP SMS ERROR:", smsError);
   }
 
-  // mark processed LAST
-  await redis.set(`delish:stripe:session:${sessionId}`, {
-    processedAt: new Date().toISOString(),
-    eventType: event.type,
-    orderId: order.id,
-    orderNumber: order.orderNumber,
-  });
-
+ // mark processed LAST
+await redis.set(`delish:stripe:session:${sessionId}`, {
+  processedAt: new Date().toISOString(),
+  eventType: event.type,
+  orderId: order.id,
+  orderNumber: order.orderNumber,
+});
+     
   return res.status(200).json({ received: true });
 } catch (error) {
   console.error("DELISH STRIPE WEBHOOK ERROR:", error);
