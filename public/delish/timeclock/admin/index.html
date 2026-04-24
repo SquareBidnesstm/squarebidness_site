@@ -865,48 +865,63 @@
         </tr>
       `).join("");
     }
+
+  
 function renderStats(data, selectedDate, salesData = {}) {
   const totalHours = Number(data.summary?.totalHours ?? 0);
   const totalShifts = Number(data.summary?.totalShifts ?? 0);
   const activeCount = (data.active || []).length;
   const grossSales = Number(salesData.grossSales || 0);
   const orderCount = Number(salesData.orderCount || 0);
-  const ordersPerLaborHour = totalHours > 0 ? (orderCount / totalHours) : 0;
 
   const hourlyRate = getHourlyRate();
   const laborDollars = totalHours * hourlyRate;
   const laborPctValue = grossSales > 0 ? (laborDollars / grossSales) * 100 : 0;
-
-  let performanceTone = "";
-  let performanceMessage = "";
-
-  if (laborPctValue >= 30) {
-    performanceTone = "bad";
-    performanceMessage = `Labor is heavy at ${laborPctValue.toFixed(1)}%.`;
-  } else if (laborPctValue >= 22) {
-    performanceTone = "warn";
-    performanceMessage = `Labor is watch level at ${laborPctValue.toFixed(1)}%.`;
-  } else if (totalHours > 0) {
-    performanceTone = "good";
-    performanceMessage = `Labor is efficient at ${laborPctValue.toFixed(1)}%.`;
-  }
+  const avgHourlySales = totalHours > 0 ? grossSales / totalHours : 0;
+  const ordersPerLaborHour = totalHours > 0 ? orderCount / totalHours : 0;
 
   els.statDate.textContent = selectedDate || "All";
-  els.statHours.textContent = String(totalHours);
+  els.statHours.textContent = totalHours.toFixed(2);
   els.statShifts.textContent = String(totalShifts);
   els.statActive.textContent = String(activeCount);
+  els.statLaborDollars.textContent = currency(laborDollars);
+  els.statGrossSales.textContent = currency(grossSales);
+  els.statAvgHourlySales.textContent = currency(avgHourlySales);
+  els.statLaborPct.textContent = `${laborPctValue.toFixed(1)}%`;
   els.statOrders.textContent = String(orderCount);
-     
-      if (els.statOrdersPerHour) {
-  els.statOrdersPerHour.textContent = ordersPerLaborHour.toFixed(2);
-}
 
-  if (performanceMessage) {
-  setStatus(performanceMessage, performanceTone);
-}
+  if (els.statOrdersPerHour) {
+    els.statOrdersPerHour.textContent = ordersPerLaborHour.toFixed(2);
+  }
 
-  els.sales.value = grossSales ? String(grossSales.toFixed(2)) : "";
-  calculateLaborStats(totalHours, grossSales);
+  els.sales.value = grossSales ? grossSales.toFixed(2) : "";
+
+  if (grossSales <= 0 && totalHours > 0) {
+    setStatus("Labor is tracking, but no paid sales found for this day yet.", "warn");
+    return;
+  }
+
+  if (activeCount >= 4) {
+    setStatus(`Heads up: ${activeCount} employees are currently clocked in. Watch labor.`, "warn");
+    return;
+  }
+
+  if (laborPctValue >= 30) {
+    setStatus(`Labor is high at ${laborPctValue.toFixed(1)}%. Consider adjusting coverage.`, "bad");
+    return;
+  }
+
+  if (laborPctValue >= 22) {
+    setStatus(`Labor is watch level at ${laborPctValue.toFixed(1)}%.`, "warn");
+    return;
+  }
+
+  if (totalHours > 0 && grossSales > 0) {
+    setStatus(`Labor is efficient at ${laborPctValue.toFixed(1)}%.`, "good");
+    return;
+  }
+
+  setStatus("Ready.");
 }
 
     function escapeHtml(str) {
