@@ -18,7 +18,7 @@ const TZ = "America/Chicago";
 
   Start with your real orders key here:
 */
-const ORDER_LIST_KEY = "delish:orders"; 
+const ORDER_LIST_KEY = "delish:orders:list"; 
 
 function send(res, status, data) {
   res.status(status).json(data);
@@ -175,10 +175,19 @@ export default async function handler(req, res) {
       });
     }
 
-    const rawOrders = await redis("LRANGE", ORDER_LIST_KEY, 0, 999);
-    const orders = Array.isArray(rawOrders)
-      ? rawOrders.map(normalizeOrder).filter(Boolean)
-      : [];
+    const ids = await redis("LRANGE", ORDER_LIST_KEY, 0, 999);
+const uniqueIds = [...new Set((ids || []).filter(Boolean))];
+
+let orders = [];
+
+if (uniqueIds.length) {
+  const keys = uniqueIds.map(id => `delish:order:${id}`);
+  const rawOrders = await redis("MGET", ...keys);
+
+  orders = Array.isArray(rawOrders)
+    ? rawOrders.map(normalizeOrder).filter(Boolean)
+    : [];
+}
 
     const filtered = orders.filter(order => {
       if (!isPaidOrder(order)) return false;
