@@ -388,7 +388,12 @@ await redis.set(`delish:stripe:session:${sessionId}`, {
   orderNumber: order.orderNumber,
 });
      
-  return res.status(200).json({ received: true });
+   return res.status(200).json({ received: true });
+}
+
+// handle any other Stripe event safely
+return res.status(200).json({ received: true, ignored: event.type });
+
 } catch (error) {
   console.error("DELISH STRIPE WEBHOOK ERROR:", error);
 
