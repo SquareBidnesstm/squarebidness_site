@@ -367,7 +367,7 @@
 
     .ops-status{
       display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
+      grid-template-columns:repeat(2,minmax(0,1fr));
       gap:12px;
       margin-bottom:14px;
     }
@@ -543,10 +543,6 @@
         <div class="ops-box">
           <div class="ops-label">Resume Time</div>
           <div class="ops-value" id="opsResume">—</div>
-        </div>
-        <div class="ops-box">
-          <div class="ops-label">Customer Message</div>
-          <div class="ops-value" id="opsMessage">—</div>
         </div>
       </div>
 
@@ -888,7 +884,6 @@ renderOrders(orders);
 
         const opsModeEl = document.getElementById("opsMode");
     const opsResumeEl = document.getElementById("opsResume");
-    const opsMessageEl = document.getElementById("opsMessage");
     const opsNoticeEl = document.getElementById("opsNotice");
 
     function setOpsNotice(text, isError = false) {
@@ -949,12 +944,11 @@ function updateTokenIndicator() {
 
         if (opsModeEl) opsModeEl.textContent = data.mode || "—";
         if (opsResumeEl) opsResumeEl.textContent = data.resumeAtDisplay || "—";
-        if (opsMessageEl) opsMessageEl.textContent = data.message || "—";
+        
       } catch (err) {
         console.error("Operator status error:", err);
         if (opsModeEl) opsModeEl.textContent = "Unavailable";
         if (opsResumeEl) opsResumeEl.textContent = "—";
-        if (opsMessageEl) opsMessageEl.textContent = "—";
         setOpsNotice("Unable to load operator status.", true);
       }
     }
