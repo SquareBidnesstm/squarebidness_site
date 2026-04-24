@@ -175,7 +175,7 @@ export default async function handler(req, res) {
       });
     }
 
-    const ids = await redis("LRANGE", ORDER_LIST_KEY, 0, 999);
+    const ids = await redis("LRANGE", ORDER_LIST_KEY, 0, 199);
 const uniqueIds = [...new Set((ids || []).filter(Boolean))];
 
 let orders = [];
