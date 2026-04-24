@@ -362,7 +362,7 @@ export default async function handler(req, res) {
     const cleanItems = body.items
       .map((item) => {
         const id = String(item.id || "").trim();
-        const qty = Math.max(1, Number(item.qty || 1));
+        const qty = Math.min(3, Math.max(1, Number(item.qty || 1)));
 
         if (!id || !allowedMap.has(id)) return null;
         if (!isItemAllowedForCurrentDay(id, todayDay)) return null;
