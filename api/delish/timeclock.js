@@ -1,4 +1,3 @@
-```js
 export const config = {
   runtime: "nodejs"
 };
