@@ -941,6 +941,8 @@
               <textarea name="details" required></textarea>
             </div>
 
+            <div id="formStatus" class="status" aria-live="polite"></div>
+
             <div class="actions">
   <button class="btn primary"
           data-sb-action="deposit_submit"
@@ -980,5 +982,70 @@
 
     </div>
   </main>
+  <script>
+  document.getElementById("y").textContent = new Date().getFullYear();
+
+  const form = document.getElementById("philsonDepositForm");
+  const statusEl = document.getElementById("formStatus");
+
+  function showStatus(type, message) {
+    statusEl.className = "status show " + type;
+    statusEl.innerHTML = message;
+  }
+
+  function buildSmsBody(data) {
+    return [
+      "Philson Deposit Request",
+      "",
+      "Name: " + data.fullName,
+      "Phone: " + data.phone,
+      "Project Type: " + data.projectType,
+      "Needed Date: " + data.eventDate,
+      "Budget Range: " + data.budget,
+      "Pickup / Delivery / Setup: " + (data.deliveryType || "Not specified"),
+      "",
+      "Project Details:",
+      data.details
+    ].join("\n");
+  }
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const data = {
+      fullName: form.fullName.value.trim(),
+      phone: form.phone.value.trim(),
+      projectType: form.projectType.value,
+      eventDate: form.eventDate.value,
+      budget: form.budget.value,
+      deliveryType: form.deliveryType.value,
+      details: form.details.value.trim()
+    };
+
+    if (!data.fullName || !data.phone || !data.projectType || !data.eventDate || !data.budget || !data.details) {
+      showStatus("err", "Please complete all required fields before submitting your deposit request.");
+      return;
+    }
+
+    const smsBody = buildSmsBody(data);
+    const smsHref = "sms:+18326520062?body=" + encodeURIComponent(smsBody);
+
+    showStatus(
+      "ok",
+      `
+      <strong>Request ready.</strong><br>
+      Your deposit request has been prepared for review. Your messaging app will open next so the details can be sent into Philson’s booking lane.<br><br>
+      <strong>What happens next:</strong><br>
+      1. The request is reviewed for date, scope, and fit.<br>
+      2. If approved, deposit/payment instructions are confirmed.<br>
+      3. Once deposit is handled, the project moves into production.
+      `
+    );
+
+    window.setTimeout(function () {
+      window.location.href = smsHref;
+    }, 500);
+  });
+</script>
 </body>
 </html>
