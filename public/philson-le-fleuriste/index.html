@@ -456,7 +456,7 @@
       backdrop-filter:blur(10px);
     }
 
-    .lightbox{
+   .lightbox{
   position:fixed;
   inset:0;
   z-index:999;
@@ -490,20 +490,41 @@
   background:#fff;
 }
 
-.lightbox-close{
+.lightbox-close,
+.lightbox-arrow{
   position:absolute;
-  top:-14px;
-  right:-14px;
-  width:44px;
-  height:44px;
   border-radius:999px;
   border:1px solid rgba(255,255,255,.28);
   background:rgba(255,255,255,.92);
   color:#111;
-  font-size:24px;
   font-weight:900;
   cursor:pointer;
   box-shadow:0 14px 34px rgba(0,0,0,.25);
+  z-index:3;
+}
+
+.lightbox-close{
+  top:-14px;
+  right:-14px;
+  width:44px;
+  height:44px;
+  font-size:24px;
+}
+
+.lightbox-arrow{
+  top:50%;
+  transform:translateY(-50%);
+  width:52px;
+  height:52px;
+  font-size:30px;
+}
+
+.lightbox-prev{
+  left:-18px;
+}
+
+.lightbox-next{
+  right:-18px;
 }
 
 .lightbox-caption{
@@ -529,6 +550,20 @@
     right:10px;
   }
 
+  .lightbox-arrow{
+    width:46px;
+    height:46px;
+    font-size:26px;
+  }
+
+  .lightbox-prev{
+    left:10px;
+  }
+
+  .lightbox-next{
+    right:10px;
+  }
+
   .lightbox-caption{
     left:12px;
     right:12px;
@@ -536,7 +571,6 @@
     text-align:center;
   }
 }
-
     .spotlight{
       display:grid;
       grid-template-columns:1.03fr .97fr;
@@ -1053,7 +1087,13 @@
   <div class="lightbox" id="lightbox" aria-hidden="true">
   <div class="lightbox-inner">
     <button class="lightbox-close" id="lightboxClose" type="button" aria-label="Close image">×</button>
+
+    <button class="lightbox-arrow lightbox-prev" id="lightboxPrev" type="button" aria-label="Previous image">‹</button>
+
     <img id="lightboxImg" src="" alt="" />
+
+    <button class="lightbox-arrow lightbox-next" id="lightboxNext" type="button" aria-label="Next image">›</button>
+
     <div class="lightbox-caption" id="lightboxCaption"></div>
   </div>
 </div>
@@ -1065,23 +1105,28 @@
   const lightboxImg = document.getElementById("lightboxImg");
   const lightboxCaption = document.getElementById("lightboxCaption");
   const lightboxClose = document.getElementById("lightboxClose");
+  const lightboxPrev = document.getElementById("lightboxPrev");
+  const lightboxNext = document.getElementById("lightboxNext");
 
-  document.querySelectorAll(".gallery-item").forEach(function(item){
-    item.addEventListener("click", function(e){
-      e.preventDefault();
+  const galleryItems = Array.from(document.querySelectorAll(".gallery-item"));
+  let currentGalleryIndex = 0;
+  let touchStartX = 0;
+  let touchEndX = 0;
 
-      const img = item.querySelector("img");
-      const fullSrc = item.getAttribute("href");
-      const title = item.getAttribute("data-lightbox-title") || img.alt || "Philson Le Fleuriste";
+  function openLightbox(index){
+    const item = galleryItems[index];
+    const img = item.querySelector("img");
+    const fullSrc = item.getAttribute("href");
+    const title = item.getAttribute("data-lightbox-title") || img.alt || "Philson Le Fleuriste";
 
-      lightboxImg.src = fullSrc;
-      lightboxImg.alt = img.alt || title;
-      lightboxCaption.textContent = title;
-      lightbox.classList.add("show");
-      lightbox.setAttribute("aria-hidden", "false");
-      document.body.style.overflow = "hidden";
-    });
-  });
+    currentGalleryIndex = index;
+    lightboxImg.src = fullSrc;
+    lightboxImg.alt = img.alt || title;
+    lightboxCaption.textContent = title;
+    lightbox.classList.add("show");
+    lightbox.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
 
   function closeLightbox(){
     lightbox.classList.remove("show");
@@ -1090,7 +1135,26 @@
     document.body.style.overflow = "";
   }
 
+  function showNextImage(){
+    const nextIndex = (currentGalleryIndex + 1) % galleryItems.length;
+    openLightbox(nextIndex);
+  }
+
+  function showPrevImage(){
+    const prevIndex = (currentGalleryIndex - 1 + galleryItems.length) % galleryItems.length;
+    openLightbox(prevIndex);
+  }
+
+  galleryItems.forEach(function(item, index){
+    item.addEventListener("click", function(e){
+      e.preventDefault();
+      openLightbox(index);
+    });
+  });
+
   lightboxClose.addEventListener("click", closeLightbox);
+  lightboxNext.addEventListener("click", showNextImage);
+  lightboxPrev.addEventListener("click", showPrevImage);
 
   lightbox.addEventListener("click", function(e){
     if(e.target === lightbox){
@@ -1098,9 +1162,36 @@
     }
   });
 
+  lightboxImg.addEventListener("touchstart", function(e){
+    touchStartX = e.changedTouches[0].screenX;
+  }, { passive:true });
+
+  lightboxImg.addEventListener("touchend", function(e){
+    touchEndX = e.changedTouches[0].screenX;
+    const swipeDistance = touchEndX - touchStartX;
+
+    if(Math.abs(swipeDistance) > 50){
+      if(swipeDistance < 0){
+        showNextImage();
+      } else {
+        showPrevImage();
+      }
+    }
+  }, { passive:true });
+
   document.addEventListener("keydown", function(e){
-    if(e.key === "Escape" && lightbox.classList.contains("show")){
+    if(!lightbox.classList.contains("show")) return;
+
+    if(e.key === "Escape"){
       closeLightbox();
+    }
+
+    if(e.key === "ArrowRight"){
+      showNextImage();
+    }
+
+    if(e.key === "ArrowLeft"){
+      showPrevImage();
     }
   });
 
