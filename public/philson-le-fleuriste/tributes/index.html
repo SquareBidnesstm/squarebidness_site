@@ -566,9 +566,7 @@
         else showPrevImage();
       }
     }, { passive:true });
-   
-    document.getElementById("y").textContent = new Date().getFullYear();
-
+  
     document.addEventListener("keydown", function(e){
       if(!lightbox.classList.contains("show")) return;
       if(e.key === "Escape") closeLightbox();
@@ -588,5 +586,20 @@
       });
     }
   </script>
+  <script>
+  document.getElementById("y").textContent = new Date().getFullYear();
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("/philson-le-fleuriste/sw.js")
+        .then(function (registration) {
+          console.log("Philson service worker registered:", registration.scope);
+        })
+        .catch(function (error) {
+          console.log("Philson service worker registration failed:", error);
+        });
+    });
+  }
+</script>
 </body>
 </html>
