@@ -251,6 +251,9 @@
   <div class="section">
     <input id="customerName" placeholder="Full Name" />
     <input id="customerPhone" placeholder="Phone Number" />
+<div id="phoneHint" style="display:none;color:#ffd6d6;font-size:13px;margin-top:4px;padding:0 2px;">
+  Please enter a valid 10-digit US phone number.
+</div>
     <select id="pickupWindow">
       <option value="">Select Pickup Time</option>
       <option value="11:00 AM - 11:30 AM">11:00 AM - 11:30 AM</option>
@@ -383,6 +386,11 @@
   function clearStatus() {
     statusEl.textContent = "";
     statusEl.classList.remove("is-visible");
+  }
+
+  function isValidPhone(raw) {
+    const digits = String(raw || "").replace(/\D/g, "");
+    return digits.length === 10 || (digits.length === 11 && digits.startsWith("1"));
   }
 
    function getCentralNowParts() {
@@ -1006,7 +1014,12 @@ function getDrinkSelections() {
     
     const state = getServiceState();
     const nameOk = customerName.value.trim().length > 0;
-    const phoneOk = customerPhone.value.trim().length > 0;
+    const rawPhone = customerPhone.value.trim();
+  const phoneOk = isValidPhone(rawPhone);
+    const phoneHint = document.getElementById("phoneHint");
+  if (phoneHint) {
+    phoneHint.style.display = rawPhone && !phoneOk ? "block" : "none";
+  }
     const pickupOk = pickupWindow.value.trim().length > 0;
 const plateItems = getPlateSelections().items;
 const lagniappeItemsSelected = getLagniappeSelections();
@@ -1063,6 +1076,10 @@ const sidesOk = plateItems.length > 0 ? selectedPlatesHaveSides() : true;
       }
       return;
     }
+    if (!isValidPhone(customerPhone.value.trim())) {
+    showStatus("Please enter a valid 10-digit US phone number.");
+    return;
+  }
 
     const selected = getSelectedItems();
     const selectedItems = selected.items;
@@ -1084,9 +1101,13 @@ if (!plateSelections.items.length && !lagniappeItemsSelected.length && !drinkIte
     checkoutBtn.textContent = "Processing...";
 
     try {
+      const TAX_RATE = 0.0895;
+
       const subtotal = Number(
         selectedItems.reduce((sum, item) => sum + (item.qty * item.price), 0).toFixed(2)
       );
+      const tax = Number((subtotal * TAX_RATE).toFixed(2));
+      const total = Number((subtotal + tax).toFixed(2));
 
       const plateNotes = selected.sideNotes.length
         ? `Plate selections: ${selected.sideNotes.join(" | ")}`
@@ -1111,8 +1132,8 @@ if (!plateSelections.items.length && !lagniappeItemsSelected.length && !drinkIte
           side2Name: item.side2Name || ""
         })),
         subtotal,
-        tax: 0,
-        total: subtotal,
+        tax,
+        total,
         source: "delish-web"
       };
 
