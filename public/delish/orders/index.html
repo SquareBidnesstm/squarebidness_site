@@ -717,26 +717,40 @@ async function enableSoundAlerts() {
 
     async function completeOrder(id, button) {
       if (!id) return;
-
+ 
+      // Require a saved token — the same one used for operator controls
+      const token = getSavedOperatorToken();
+      if (!token) {
+        alert(
+          "No operator token saved. Tap any Operator Controls button first to save your token, then try again."
+        );
+        return;
+      }
+ 
       const originalText = button.textContent;
       button.disabled = true;
       button.textContent = "Completing...";
-
+ 
       try {
         const res = await fetch("/api/delish/complete-order/", {
           method: "POST",
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "x-operator-token": token.trim(),
           },
-          body: JSON.stringify({ id })
+          body: JSON.stringify({ id }),
         });
-
+ 
         const data = await res.json();
-
+ 
         if (!res.ok || !data.ok) {
+          if (res.status === 401) {
+            clearOperatorToken();
+            throw new Error("Unauthorized — wrong operator token. Saved token cleared.");
+          }
           throw new Error(data.error || "Failed to complete order.");
         }
-
+ 
         await loadOrders();
         await loadCateringCount();
       } catch (error) {
@@ -746,20 +760,31 @@ async function enableSoundAlerts() {
       }
     }
 
-    function renderOrders(orders){
+    function renderOrders(orders) {
       if (!orders.length) {
         ordersEl.innerHTML = `<div class="empty">No active paid orders right now.</div>`;
         return;
       }
-
+ 
       ordersEl.innerHTML = orders.map(order => {
-        const itemsHtml = (order.items || []).map(item => `
-          <li>
-            <span><strong>${item.qty} ×</strong> ${escapeHtml(item.name)}</span>
-            <strong>${money((item.qty || 0) * (item.price || 0))}</strong>
-          </li>
-        `).join("");
-
+        const itemsHtml = (order.items || []).map(item => {
+          // Collect base + side selections for display under the item name
+          const extras = [item.baseName, item.side1Name, item.side2Name].filter(Boolean);
+          const extrasLine = extras.length
+            ? `<div style="font-size:.82rem;color:var(--soft);margin-top:3px;line-height:1.3;">${extras.map(escapeHtml).join(" \u00B7 ")}</div>`
+            : "";
+ 
+          return `
+            <li>
+              <div>
+                <span><strong>${item.qty} \u00D7</strong> ${escapeHtml(item.name)}</span>
+                ${extrasLine}
+              </div>
+              <strong style="flex-shrink:0;">${money((item.qty || 0) * (item.price || 0))}</strong>
+            </li>
+          `;
+        }).join("");
+ 
         const noteBlock = order.notes
           ? `
             <div class="note">
@@ -768,7 +793,7 @@ async function enableSoundAlerts() {
             </div>
           `
           : "";
-
+ 
         return `
           <article class="order-card">
             <div class="order-top">
@@ -778,41 +803,40 @@ async function enableSoundAlerts() {
               </div>
               <div class="paid">Paid</div>
             </div>
-
+ 
             <div class="pickup">
               <div class="pickup-label">Pickup</div>
-              <div class="pickup-value">${escapeHtml(order.pickupDate)} • ${escapeHtml(order.pickupWindow)}</div>
+              <div class="pickup-value">${escapeHtml(order.pickupDate)} \u2022 ${escapeHtml(order.pickupWindow)}</div>
             </div>
-
+ 
             <div class="customer">
               <div class="customer-row"><strong>Customer:</strong> ${escapeHtml(order.customerName)}</div>
               <div class="customer-row"><strong>Phone:</strong> ${escapeHtml(order.customerPhone)}</div>
               ${order.customerEmail ? `<div class="customer-row"><strong>Email:</strong> ${escapeHtml(order.customerEmail)}</div>` : ""}
             </div>
-
+ 
             <ul class="items">${itemsHtml}</ul>
-
+ 
             ${noteBlock}
-
+ 
             <div class="total">
               <div class="total-label">Total Paid</div>
               <div class="total-value">${money(order.total)}</div>
             </div>
-
+ 
             <div class="card-actions">
               <button class="btn" data-complete-id="${escapeHtml(order.id)}">Mark Ready</button>
             </div>
           </article>
         `;
       }).join("");
-
+ 
       document.querySelectorAll("[data-complete-id]").forEach((button) => {
         button.addEventListener("click", () => {
           completeOrder(button.getAttribute("data-complete-id"), button);
         });
       });
     }
-
     async function loadCateringCount(){
       try {
         const res = await fetch(`/api/delish/catering-orders/?t=${Date.now()}`, { cache: "no-store" });
