@@ -1009,6 +1009,24 @@
 
     const form = document.getElementById("philsonDepositForm");
     const statusEl = document.getElementById("formStatus");
+    const params = new URLSearchParams(window.location.search);
+
+const params = new URLSearchParams(window.location.search);
+
+const incomingProjectType = params.get("projectType");
+const incomingDesign = params.get("design");
+const incomingPrice = params.get("price");
+
+if (incomingProjectType && form.projectType) {
+  form.projectType.value = incomingProjectType;
+}
+
+if (incomingDesign && form.details) {
+  form.details.value =
+    "Selected Design: " + incomingDesign + "\n" +
+    "Listed Price: " + (incomingPrice || "Not listed") + "\n\n" +
+    "Please include service date, city, delivery location, color preferences, and any family notes.";
+}
 
     function showStatus(type, message) {
       statusEl.className = "status show " + type;
