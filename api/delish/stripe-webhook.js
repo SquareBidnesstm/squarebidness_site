@@ -34,31 +34,6 @@ function normalizeUsPhone(phone) {
   return null;
 }
 
-function money(n) {
-  return Number(n || 0).toFixed(2);
-}
-
-function formatPickup(date, window) {
-  if (!date || !window) return "";
-  return `${date} • ${window}`;
-}
-
-function formatItems(items = []) {
-  return items.map(item => {
-    const qty = item.qty || 0;
-    const name = item.name || "";
-
-    let extras = [];
-
-    if (item.baseName) extras.push(item.baseName);
-    if (item.side1Name) extras.push(item.side1Name);
-    if (item.side2Name) extras.push(item.side2Name);
-
-    const extraText = extras.length ? ` (${extras.join(", ")})` : "";
-
-    return `${qty}× ${name}${extraText}`;
-  }).join("\n");
-}
 
 
 function buildPickupSms(metadata) {
@@ -225,6 +200,11 @@ export default async function handler(req, res) {
     const key = `delish:catering:${metadata.cateringRequestId}`;
     const existing = await redis.get(key);
 
+    // ------------------------------------------------------------
+// FIX 2 — Catering deposit: alert when no matching Redis record
+// Replace the `if (existing) { ... }` block inside isCateringDeposit
+// ------------------------------------------------------------
+ 
     if (existing) {
       const updated = {
         ...existing,
@@ -241,14 +221,14 @@ export default async function handler(req, res) {
             ? (session.amount_total / 100).toFixed(2)
             : existing.depositAmountPaid || existing.depositAmount || "",
       };
-
+ 
       await redis.set(key, updated);
-
+ 
       try {
         const smsTo = normalizeUsPhone(
           updated.customerPhone || metadata.customerPhone || ""
         );
-
+ 
         if (smsTo) {
           await sendDelishSms({
             to: smsTo,
@@ -258,8 +238,31 @@ export default async function handler(req, res) {
       } catch (smsError) {
         console.error("DELISH CATERING SMS ERROR:", smsError);
       }
+    } else {
+      // No catering record found — payment received but can't link it
+      console.error(
+        "DELISH CATERING DEPOSIT: No Redis record found for cateringRequestId:",
+        metadata.cateringRequestId,
+        "Session:", session.id
+      );
+ 
+      const alertTo = normalizeUsPhone(process.env.DELISH_FAILURE_ALERT_TO || "");
+      if (alertTo) {
+        await sendDelishSms({
+          to: alertTo,
+          message: `\uD83D\uDEA8 DELISH CATERING DEPOSIT UNMATCHED
+ 
+Request ID: ${metadata.cateringRequestId || "N/A"}
+Session: ${session.id}
+Amount: $${typeof session.amount_total === "number" ? (session.amount_total / 100).toFixed(2) : "N/A"}
+Customer: ${metadata.customerName || "Unknown"}
+ 
+No catering record found in Redis. Reconcile manually.`,
+        });
+      }
     }
-
+     
+    // Always runs regardless of if/else above
     await redis.set(`delish:stripe:session:${sessionId}`, {
       processedAt: new Date().toISOString(),
       eventType: event.type,
@@ -321,26 +324,38 @@ export default async function handler(req, res) {
     stripeSessionId: sessionId,
   };
 
- 
-  // create order first with one retry
-await retryOnce("DELISH ORDER REDIS WRITE", async () => {
-  await redis.set(`delish:order:${order.id}`, order);
-  await redis.lpush("delish:orders:list", order.id);
-  await redis.set(`delish:order:by-session:${sessionId}`, order.id);
-});
+     
+ // ------------------------------------------------------------
+// FIX 3 — Partial Redis write: each operation gets its own retry
+// Replace the single retryOnce("DELISH ORDER REDIS WRITE", ...) call
+// ------------------------------------------------------------
+  await retryOnce("DELISH ORDER WRITE — set order", () =>
+    redis.set(`delish:order:${order.id}`, order)
+  );
+  await retryOnce("DELISH ORDER WRITE — lpush list", () =>
+    redis.lpush("delish:orders:list", order.id)
+  );
+  await retryOnce("DELISH ORDER WRITE — set by-session", () =>
+    redis.set(`delish:order:by-session:${sessionId}`, order.id)
+  );
 
-  // pickup SMS + owner alert
+ // ------------------------------------------------------------
+// FIX 1 — Owner SMS fires unconditionally (was gated by smsConsent)
+// Replace the entire "pickup SMS + owner alert" try/catch block
+// ------------------------------------------------------------
+ 
   try {
     const smsConsent = metadata.smsConsent === "yes";
     const smsTo = normalizeUsPhone(metadata.customerPhone || "");
-
+ 
+    // Customer confirmation SMS (only with consent + valid phone)
     if (smsConsent && smsTo) {
       console.log("DELISH ABOUT TO CALL SMS HELPER:", {
         sessionId: session.id,
         smsTo,
         smsConsent,
       });
-
+ 
       const smsResult = await sendDelishSms({
         to: smsTo,
         message: buildPickupSms({
@@ -351,22 +366,7 @@ await retryOnce("DELISH ORDER REDIS WRITE", async () => {
               : "",
         }),
       });
-
-      const ownerSmsTo = normalizeUsPhone(process.env.DELISH_ORDER_ALERT_TO || "");
-
-      if (ownerSmsTo) {
-        await sendDelishSms({
-          to: ownerSmsTo,
-          message: buildOwnerNewOrderSms({
-            ...metadata,
-            amountTotal:
-              typeof session.amount_total === "number"
-                ? (session.amount_total / 100).toFixed(2)
-                : "",
-          }),
-        });
-      }
-
+ 
       console.log("DELISH SMS HELPER RESULT:", smsResult);
       console.log("DELISH PICKUP SMS SENT:", session.id);
     } else {
@@ -376,9 +376,25 @@ await retryOnce("DELISH ORDER REDIS WRITE", async () => {
         normalizedPhone: smsTo,
       });
     }
+ 
+    // Owner alert fires regardless of customer consent
+    const ownerSmsTo = normalizeUsPhone(process.env.DELISH_ORDER_ALERT_TO || "");
+    if (ownerSmsTo) {
+      await sendDelishSms({
+        to: ownerSmsTo,
+        message: buildOwnerNewOrderSms({
+          ...metadata,
+          amountTotal:
+            typeof session.amount_total === "number"
+              ? (session.amount_total / 100).toFixed(2)
+              : "",
+        }),
+      });
+    }
   } catch (smsError) {
     console.error("DELISH PICKUP SMS ERROR:", smsError);
   }
+ 
 
  // mark processed LAST
 await redis.set(`delish:stripe:session:${sessionId}`, {
