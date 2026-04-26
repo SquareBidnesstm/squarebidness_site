@@ -310,6 +310,21 @@
   `).join("");
 }
 
+    function bindMutualExclusion() {
+  document.getElementById("itemsOffList").addEventListener("change", (e) => {
+    if (e.target.type !== "checkbox" || !e.target.checked) return;
+    const id = e.target.value;
+    const match = document.querySelector(`#itemsSoldOutList input[value="${id}"]`);
+    if (match) match.checked = false;
+  });
+
+  document.getElementById("itemsSoldOutList").addEventListener("change", (e) => {
+    if (e.target.type !== "checkbox" || !e.target.checked) return;
+    const id = e.target.value;
+    const match = document.querySelector(`#itemsOffList input[value="${id}"]`);
+    if (match) match.checked = false;
+  });
+}
     async function loadOverrides() {
       setStatus("Loading current overrides...");
       const res = await fetch("/api/delish/menu-overrides/", { cache: "no-store" });
@@ -380,14 +395,19 @@
       await loadOverrides();
     }
 
-    document.getElementById("saveBtn").addEventListener("click", saveOverrides);
-    document.getElementById("reloadBtn").addEventListener("click", loadOverrides);
+    document.getElementById("saveBtn").addEventListener("click", () => {
+  saveOverrides().catch(err => setStatus(err.message || "Save failed.", "bad"));
+});
+document.getElementById("reloadBtn").addEventListener("click", () => {
+  loadOverrides().catch(err => setStatus(err.message || "Reload failed.", "bad"));
+});
     document.getElementById("clearTokenBtn").addEventListener("click", () => {
       clearToken();
       setStatus("Saved token cleared.");
     });
 
     updateTokenStatus();
+    bindMutualExclusion();
     loadOverrides().catch((err) => {
       console.error(err);
       setStatus(err.message || "Unable to load admin.", "bad");
