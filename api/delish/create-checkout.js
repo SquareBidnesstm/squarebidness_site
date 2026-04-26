@@ -290,14 +290,32 @@ function safeMeta(value, max = 500) {
   return String(value || "").slice(0, max);
 }
 
+// ------------------------------------------------------------
+// FIX 6 — makeRecordId: use Central Time, not server local time
+// Replace the entire makeRecordId function
+// ------------------------------------------------------------
+ 
 function makeRecordId() {
-  const now = new Date();
-  const y = now.getFullYear().toString().slice(-2);
-  const m = String(now.getMonth() + 1).padStart(2, "0");
-  const d = String(now.getDate()).padStart(2, "0");
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Chicago",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+ 
+  const map = {};
+  for (const part of parts) {
+    if (part.type !== "literal") map[part.type] = part.value;
+  }
+ 
+  const y = String(map.year || "").slice(-2);
+  const m = map.month || "00";
+  const d = map.day || "00";
   const rand = Math.floor(1000 + Math.random() * 9000);
+ 
   return `DL-${y}${m}${d}-${rand}`;
 }
+
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -359,25 +377,32 @@ export default async function handler(req, res) {
     const allowedItems = getAllowedItemsForToday(todayDay);
     const allowedMap = buildAllowedMap(allowedItems);
 
+    // ------------------------------------------------------------
+// FIX 5 — Add baseId and baseName to cleanItems
+// Replace the return block inside the .map() in cleanItems
+// ------------------------------------------------------------
+ 
     const cleanItems = body.items
       .map((item) => {
         const id = String(item.id || "").trim();
         const qty = Math.min(3, Math.max(1, Number(item.qty || 1)));
-
+ 
         if (!id || !allowedMap.has(id)) return null;
         if (!isItemAllowedForCurrentDay(id, todayDay)) return null;
         if (!isSectionEnabledBackend(id, menuOverrides)) return null;
         if (!isItemEnabledBackend(id, menuOverrides)) return null;
         if (isItemSoldOutBackend(id, menuOverrides)) return null;
-
+ 
         const allowed = allowedMap.get(id);
-
+ 
         return {
           id: allowed.id,
           name: allowed.name,
           qty,
           price: allowed.price,
           total: qty * allowed.price,
+          baseId: item.baseId || "",       // FIX: was missing
+          baseName: item.baseName || "",   // FIX: was missing
           side1Id: item.side1Id || "",
           side2Id: item.side2Id || "",
           side1Name: item.side1Name || "",
@@ -425,10 +450,19 @@ export default async function handler(req, res) {
       price_data: {
         currency: "usd",
         product_data: {
-          name:
-            item.side1Name && item.side2Name
-              ? `${item.name} (${item.side1Name}, ${item.side2Name})`
-              : item.name,
+          name: (() => {
+            const parts = [item.baseName, item.side1Name, item.side2Name].filter(Boolean);
+            return parts.length ? `${item.name} (${parts.join(", ")})` : item.name;
+          })(),
+          metadata: {
+            itemId: item.id,
+            activeMenuDay: todayDay,
+            brand: "Delish",
+          },
+        },
+        unit_amount: Math.round(Number(item.price) * 100),
+      },
+    }));
           metadata: {
             itemId: item.id,
             activeMenuDay: todayDay,
