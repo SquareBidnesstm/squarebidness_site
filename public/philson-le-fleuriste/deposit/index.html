@@ -35,6 +35,7 @@
   <meta name="twitter:title" content="Philson Le Fleuriste — Deposit Requests | Reserve Your Date" />
   <meta name="twitter:description" content="Submit your floral project details to reserve your date. Deposit requests are reviewed before payment is collected." />
   <meta name="twitter:image" content="https://www.squarebidness.com/philson-le-fleuriste/assets/135-roses_800.jpg" />
+  <meta name="mobile-web-app-capable" content="yes">
 
   <!-- Icons -->
   <link rel="icon" href="/philson-le-fleuriste/assets/favicon_ico/favicon.ico" />
@@ -1004,106 +1005,104 @@
     </div>
   </footer>
 
-  <script>
-    document.getElementById("y").textContent = new Date().getFullYear();
+ <script>
+  document.getElementById("y").textContent = new Date().getFullYear();
 
-    const form = document.getElementById("philsonDepositForm");
-    const statusEl = document.getElementById("formStatus");
-    const params = new URLSearchParams(window.location.search);
+  const form = document.getElementById("philsonDepositForm");
+  const statusEl = document.getElementById("formStatus");
+  const depositParams = new URLSearchParams(window.location.search);
 
-const params = new URLSearchParams(window.location.search);
+  const incomingProjectType = depositParams.get("projectType");
+  const incomingDesign = depositParams.get("design");
+  const incomingPrice = depositParams.get("price");
 
-const incomingProjectType = params.get("projectType");
-const incomingDesign = params.get("design");
-const incomingPrice = params.get("price");
+  function showStatus(type, message) {
+    statusEl.className = "status show " + type;
+    statusEl.innerHTML = message;
+  }
 
-if (incomingProjectType && form.projectType) {
-  form.projectType.value = incomingProjectType;
-}
+  if (incomingProjectType && form.projectType) {
+    form.projectType.value = incomingProjectType;
+  }
 
-if (incomingDesign && form.details) {
-  form.details.value =
-    "Selected Design: " + incomingDesign + "\n" +
-    "Listed Price: " + (incomingPrice || "Not listed") + "\n\n" +
-    "Please include service date, city, delivery location, color preferences, and any family notes.";
-}
+  if (incomingDesign && form.details) {
+    form.details.value =
+      "Selected Design: " + incomingDesign + "\n" +
+      "Listed Price: " + (incomingPrice || "Not listed") + "\n\n" +
+      "Please include service date, city, delivery location, color preferences, and any family notes.";
 
-    function showStatus(type, message) {
-      statusEl.className = "status show " + type;
-      statusEl.innerHTML = message;
+    showStatus(
+      "ok",
+      "<strong>" + incomingDesign + " selected.</strong><br>Continue filling out your request below."
+    );
+  }
+
+  form.addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const submitBtn = form.querySelector('button[type="submit"]');
+
+    const data = {
+      fullName: form.fullName.value.trim(),
+      phone: form.phone.value.trim(),
+      projectType: form.projectType.value,
+      eventDate: form.eventDate.value,
+      budget: form.budget.value,
+      deliveryType: form.deliveryType.value,
+      details: form.details.value.trim(),
+      source: "philson-deposit-page"
+    };
+
+    if (!data.fullName || !data.phone || !data.projectType || !data.eventDate || !data.budget || !data.details) {
+      showStatus("err", "Please complete all required fields before submitting your deposit request.");
+      return;
     }
 
-    form.addEventListener("submit", async function (e) {
-      e.preventDefault();
-
-      const submitBtn = form.querySelector('button[type="submit"]');
-
-      const data = {
-        fullName: form.fullName.value.trim(),
-        phone: form.phone.value.trim(),
-        projectType: form.projectType.value,
-        eventDate: form.eventDate.value,
-        budget: form.budget.value,
-        deliveryType: form.deliveryType.value,
-        details: form.details.value.trim(),
-        source: "philson-deposit-page"
-      };
-
-      if (!data.fullName || !data.phone || !data.projectType || !data.eventDate || !data.budget || !data.details) {
-        showStatus("err", "Please complete all required fields before submitting your deposit request.");
-        return;
+    try {
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Submitting...";
       }
 
-      try {
-        if (submitBtn) {
-          submitBtn.disabled = true;
-          submitBtn.textContent = "Submitting...";
-        }
+      showStatus("ok", "Submitting your request...");
 
-        showStatus("ok", "Submitting your request...");
+      const response = await fetch("/api/philson/deposit-request", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(data)
+      });
 
-        const response = await fetch("/api/philson/deposit-request", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(data)
-        });
+      const result = await response.json();
 
-        const result = await response.json();
-
-        if (!response.ok || !result.ok) {
-          throw new Error(result.error || "Request failed");
-        }
-
-        showStatus(
-          "ok",
-          `
-          <strong>Request received.</strong><br>
-          Your deposit request has been sent into Philson’s booking lane.<br><br>
-          <strong>Request ID:</strong> ${result.requestId || "Pending"}<br><br>
-          <strong>What happens next:</strong><br>
-          1. The request is reviewed for date, scope, and fit.<br>
-          2. If approved, deposit/payment instructions are confirmed.<br>
-          3. Once deposit is handled, the project moves into production.
-          `
-        );
-
-        form.reset();
-
-      } catch (error) {
-        showStatus(
-          "err",
-          "Something went wrong submitting the request. Please try again or use the Contact / Socials page."
-        );
-        console.error("Philson deposit submit error:", error);
-      } finally {
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.textContent = "Submit Request";
-        }
+      if (!response.ok || !result.ok) {
+        throw new Error(result.error || "Request failed");
       }
-    });
-  </script>
+
+      showStatus(
+        "ok",
+        `
+        <strong>Request received.</strong><br>
+        Your deposit request has been sent into Philson’s booking lane.<br><br>
+        <strong>Request ID:</strong> ${result.requestId || "Pending"}<br><br>
+        <strong>What happens next:</strong><br>
+        1. The request is reviewed for date, scope, and fit.<br>
+        2. If approved, deposit/payment instructions are confirmed.<br>
+        3. Once deposit is handled, the project moves into production.
+        `
+      );
+
+      form.reset();
+
+    } catch (error) {
+      showStatus("err", "Something went wrong submitting the request. Please try again or use the Contact / Socials page.");
+      console.error("Philson deposit submit error:", error);
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit Request";
+      }
+    }
+  });
+</script>
 </body>
 </html>
