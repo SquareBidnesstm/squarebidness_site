@@ -200,6 +200,11 @@
       min-width: 160px;
       box-sizing: border-box;
     }
+
+    .orderNumberRow {
+  font-size: 16px;
+  margin-bottom: 14px;
+}
   </style>
 </head>
 <body>
@@ -271,37 +276,44 @@
         pickupValueEl.textContent = `${order.pickupDate || ""} • ${order.pickupWindow || ""}`;
 
         metaEl.innerHTML = `
-          <div class="detailRow"><strong>Order #:</strong> ${escapeHtml(order.orderNumber || sessionId)}</div>
-          <div class="detailRow"><strong>Name:</strong> ${escapeHtml(order.customerName || "")}</div>
+  <div class="detailRow orderNumberRow">
+    <strong>Pickup Order #:</strong> ${escapeHtml(order.orderNumber || sessionId)}
+  </div>
 
-          <div class="sectionLabel">Items</div>
-          <ul class="items">
-            ${items.length ? items.map(i => {
-              const sideBits = [];
-if (i.baseName) sideBits.push(i.baseName);
-if (i.side1Name) sideBits.push(i.side1Name);
-if (i.side2Name) sideBits.push(i.side2Name);
-const sideLine = sideBits.length
-  ? `<small>Sides: ${escapeHtml(sideBits.join(", "))}</small>`
-  : "";
+  <div class="detailRow">
+    <strong>Name:</strong> ${escapeHtml(order.customerName || "")}
+  </div>
 
-             return `
-  <li>
-    <div class="menuTop">
-      <div class="menuCopy">
-        <strong>${Number(i.qty || 0)} ×</strong> ${escapeHtml(i.name || "")}
-        ${sideLine}
-      </div>
-      <div class="itemPrice">${money(Number(i.qty || 0) * Number(i.price || 0))}</div>
-    </div>
-  </li>
-`;
-}).join("") : `<li><div class="menuCopy">Order details unavailable. Please use your confirmation text at pickup.</div></li>`}
-</ul>
-          <div class="totalBox">
-            Total Paid: ${money(order.total)}
+  <div class="sectionLabel">Items</div>
+  <ul class="items">
+    ${items.length ? items.map(i => {
+      const sideBits = [];
+      if (i.baseName) sideBits.push(i.baseName);
+      if (i.side1Name) sideBits.push(i.side1Name);
+      if (i.side2Name) sideBits.push(i.side2Name);
+
+      const sideLine = sideBits.length
+        ? `<small>Sides: ${escapeHtml(sideBits.join(", "))}</small>`
+        : "";
+
+      return `
+        <li>
+          <div class="menuTop">
+            <div class="menuCopy">
+              <strong>${Number(i.qty || 0)} ×</strong> ${escapeHtml(i.name || "")}
+              ${sideLine}
+            </div>
+            <div class="itemPrice">${money(Number(i.qty || 0) * Number(i.price || 0))}</div>
           </div>
-        `;
+        </li>
+      `;
+    }).join("") : `<li><div class="menuCopy">Order details unavailable. Please use your confirmation text at pickup.</div></li>`}
+  </ul>
+
+  <div class="totalBox">
+    Total Paid: ${money(order.total)}
+  </div>
+`;
       } catch (err) {
         pickupValueEl.textContent = "Pickup details unavailable";
         metaEl.innerHTML = `<div class="statusMeta">Confirmation ID: ${escapeHtml(sessionId)}</div>`;
