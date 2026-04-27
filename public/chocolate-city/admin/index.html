@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Chocolate City Admin</title>
+
+  <style>
+    :root{
+      --bg:#080504;
+      --panel:#150c09;
+      --gold:#d7a84f;
+      --text:#fff7ea;
+      --muted:#c7a983;
+      --line:rgba(245,213,138,.22);
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      font-family:Arial,Helvetica,sans-serif;
+      background:linear-gradient(180deg,#090504,#170b07);
+      color:var(--text);
+      min-height:100vh;
+      padding:20px;
+    }
+
+    .wrap{
+      max-width:760px;
+      margin:0 auto;
+    }
+
+    .card{
+      background:rgba(21,12,9,.92);
+      border:1px solid var(--line);
+      border-radius:28px;
+      padding:24px;
+      box-shadow:0 25px 70px rgba(0,0,0,.45);
+    }
+
+    h1{
+      margin:0 0 8px;
+      font-size:34px;
+      letter-spacing:-.04em;
+    }
+
+    p{
+      margin:0 0 20px;
+      color:var(--muted);
+      line-height:1.5;
+    }
+
+    label{
+      display:block;
+      margin:16px 0 7px;
+      font-weight:800;
+      color:var(--gold);
+    }
+
+    input, textarea, select{
+      width:100%;
+      padding:13px 14px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:#090504;
+      color:var(--text);
+      font-size:15px;
+    }
+
+    textarea{
+      min-height:96px;
+      resize:vertical;
+    }
+
+    .row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    button{
+      margin-top:20px;
+      width:100%;
+      border:0;
+      border-radius:999px;
+      min-height:52px;
+      font-weight:900;
+      font-size:16px;
+      background:linear-gradient(135deg,#d7a84f,#f5d58a);
+      color:#180b05;
+      cursor:pointer;
+    }
+
+    .status{
+      margin-top:14px;
+      color:var(--muted);
+      font-weight:800;
+    }
+
+    @media(max-width:700px){
+      .row{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+
+<body>
+  <main class="wrap">
+    <div class="card">
+      <h1>Chocolate City Admin</h1>
+      <p>Control Friday status, weekend message, VIP notice, and front page announcement.</p>
+
+      <label>Admin Token</label>
+      <input id="token" type="password" placeholder="Enter admin token" />
+
+      <div class="row">
+        <div>
+          <label>Friday Open?</label>
+          <select id="fridayOpen">
+            <option value="false">No — Select Fridays Only</option>
+            <option value="true">Yes — Open This Friday</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Weekend Status</label>
+          <input id="weekendStatus" value="Open this weekend" />
+        </div>
+      </div>
+
+      <label>Main Headline</label>
+      <input id="eventTitle" value="All Roads Lead to Chocolate City" />
+
+      <label>Friday Message</label>
+      <input id="fridayText" value="Friday — select nights only." />
+
+      <label>Event Note</label>
+      <textarea id="eventNote">Saturdays move the city. Sundays belong to it.</textarea>
+
+      <label>VIP Status</label>
+      <textarea id="vipStatus">VIP booth reservations coming soon.</textarea>
+
+      <label>Announcement</label>
+      <textarea id="announcement">Stay tuned for updates, event nights, and VIP sections.</textarea>
+
+      <button onclick="saveStatus()">Save Chocolate City Updates</button>
+
+      <div class="status" id="status">Ready.</div>
+    </div>
+  </main>
+
+  <script>
+    const API = "/api/chocolate-city/status/";
+
+    async function loadCurrent(){
+      try{
+        const res = await fetch(API, { cache:"no-store" });
+        const data = await res.json();
+
+        if(!data.ok || !data.state) return;
+
+        const s = data.state;
+
+        document.getElementById("fridayOpen").value = String(!!s.fridayOpen);
+        document.getElementById("weekendStatus").value = s.weekendStatus || "";
+        document.getElementById("eventTitle").value = s.eventTitle || "";
+        document.getElementById("fridayText").value = s.fridayText || "";
+        document.getElementById("eventNote").value = s.eventNote || "";
+        document.getElementById("vipStatus").value = s.vipStatus || "";
+        document.getElementById("announcement").value = s.announcement || "";
+      }catch(err){
+        document.getElementById("status").textContent = "Could not load current status.";
+      }
+    }
+
+    async function saveStatus(){
+      const status = document.getElementById("status");
+      const token = document.getElementById("token").value.trim();
+
+      if(!token){
+        status.textContent = "Enter admin token first.";
+        return;
+      }
+
+      const payload = {
+        fridayOpen: document.getElementById("fridayOpen").value === "true",
+        weekendStatus: document.getElementById("weekendStatus").value.trim(),
+        eventTitle: document.getElementById("eventTitle").value.trim(),
+        fridayText: document.getElementById("fridayText").value.trim(),
+        eventNote: document.getElementById("eventNote").value.trim(),
+        vipStatus: document.getElementById("vipStatus").value.trim(),
+        announcement: document.getElementById("announcement").value.trim()
+      };
+
+      status.textContent = "Saving...";
+
+      try{
+        const res = await fetch(API, {
+          method:"POST",
+          headers:{
+            "Content-Type":"application/json",
+            "X-Admin-Token":token
+          },
+          body:JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if(!data.ok){
+          status.textContent = data.error || "Save failed.";
+          return;
+        }
+
+        status.textContent = "Saved. Public page updated.";
+      }catch(err){
+        status.textContent = "Save failed. Check API/env vars.";
+      }
+    }
+
+    loadCurrent();
+  </script>
+</body>
+</html>
