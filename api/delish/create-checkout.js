@@ -463,15 +463,7 @@ export default async function handler(req, res) {
         unit_amount: Math.round(Number(item.price) * 100),
       },
     }));
-          metadata: {
-            itemId: item.id,
-            activeMenuDay: todayDay,
-            brand: "Delish",
-          },
-        },
-        unit_amount: Math.round(Number(item.price) * 100),
-      },
-    }));
+         
 
     const taxAmountCents = Math.max(
       0,
