@@ -207,6 +207,93 @@
       .grid{grid-template-columns:1fr}
       .section{padding:24px}
     }
+
+    .vip-alert{
+  margin:18px 0;
+  padding:14px 16px;
+  border-radius:18px;
+  border:1px solid var(--line);
+  background:rgba(215,168,79,.10);
+  color:var(--gold2);
+  font-weight:900;
+}
+
+.vip-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
+  margin-top:18px;
+}
+
+.vip-card{
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.045);
+  border-radius:26px;
+  padding:22px;
+}
+
+.vip-card.featured{
+  background:linear-gradient(180deg,rgba(215,168,79,.16),rgba(255,255,255,.045));
+}
+
+.vip-label{
+  color:var(--gold2);
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+}
+
+.vip-card h3{
+  margin:10px 0 8px;
+  font-size:26px;
+}
+
+.vip-price{
+  font-size:38px;
+  font-weight:900;
+  letter-spacing:-.05em;
+}
+
+.vip-deposit{
+  color:var(--gold2) !important;
+  font-weight:900;
+  margin:4px 0 14px !important;
+}
+
+.vip-card ul{
+  margin:0 0 18px;
+  padding-left:18px;
+  color:var(--muted);
+  line-height:1.55;
+}
+
+.vip-btn{
+  width:100%;
+  min-height:48px;
+  border:0;
+  border-radius:999px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:#170b05;
+  font-weight:900;
+  cursor:pointer;
+}
+
+.vip-btn[disabled]{
+  opacity:.45;
+  cursor:not-allowed;
+}
+
+.vip-note{
+  margin-top:18px !important;
+  font-size:14px !important;
+}
+
+@media(max-width:900px){
+  .vip-grid{
+    grid-template-columns:1fr;
+  }
+}
   </style>
 </head>
 
@@ -271,15 +358,68 @@
     </section>
 
     <section id="vip" class="section">
-      <h2>VIP Sections</h2>
-      <p id="vipStatus">
-        VIP booth reservations coming soon.
-      </p>
-      <div class="cta-row">
-        <a class="btn primary" href="#">Stripe Deposit Coming Soon</a>
-      </div>
-    </section>
+  <h2>VIP Sections</h2>
+  <p id="vipStatus">
+    Only 2 VIP sections available per night. First come. Locked once deposit is paid.
+  </p>
 
+  <div class="vip-alert" id="vipAvailability">Checking VIP availability...</div>
+
+  <div class="vip-grid">
+    <div class="vip-card">
+      <div class="vip-label">Package 1</div>
+      <h3>Section One</h3>
+      <div class="vip-price">$300</div>
+      <p class="vip-deposit">$100 deposit today</p>
+      <ul>
+        <li>6 Bands</li>
+        <li>10 Vegas Bomb Shots</li>
+        <li>4 Bottles of Water</li>
+        <li>VIP Parking</li>
+        <li>No Wait in Line</li>
+      </ul>
+      <button class="vip-btn" data-package="section_one">Reserve Section One</button>
+    </div>
+
+    <div class="vip-card">
+      <div class="vip-label">Package 2</div>
+      <h3>Section Two</h3>
+      <div class="vip-price">$400</div>
+      <p class="vip-deposit">$150 deposit today</p>
+      <ul>
+        <li>6 Bands</li>
+        <li>10 Vegas Bomb Shots</li>
+        <li>4 Bottles of Water</li>
+        <li>VIP Parking</li>
+        <li>No Wait in Line</li>
+        <li>1 Premium Bottle of Choice</li>
+      </ul>
+      <button class="vip-btn" data-package="section_two">Reserve Section Two</button>
+    </div>
+
+    <div class="vip-card featured">
+      <div class="vip-label">Package 3</div>
+      <h3>The City Section</h3>
+      <div class="vip-price">$650</div>
+      <p class="vip-deposit">$200 deposit today</p>
+      <ul>
+        <li>10 Bands</li>
+        <li>10 Vegas Bomb Shots</li>
+        <li>4 Bottles of Water</li>
+        <li>VIP Parking</li>
+        <li>No Wait in Line</li>
+        <li>2 Premium Bottles of Choice</li>
+        <li>5-Bottle Beer Bucket of Choice</li>
+        <li>Hurricane Bottle — Serves 4</li>
+      </ul>
+      <button class="vip-btn" data-package="city_section">Reserve City Section</button>
+    </div>
+  </div>
+
+  <p class="vip-note">
+    Deposit reserves the section. Remaining balance is due at Chocolate City Lounge.
+  </p>
+</section>
     <section class="section">
       <h2 id="announcementTitle">Stay Tuned</h2>
       <p id="announcement">
@@ -317,5 +457,68 @@
 
     loadStatus();
   </script>
+  <script>
+  async function loadVipAvailability(){
+    const box = document.getElementById("vipAvailability");
+    const buttons = document.querySelectorAll(".vip-btn");
+
+    try{
+      const res = await fetch("/api/chocolate-city/vip-availability/", { cache:"no-store" });
+      const data = await res.json();
+
+      if(!data.ok) throw new Error("Availability unavailable");
+
+      if(data.soldOut){
+        box.textContent = "VIP sections are sold out for this night.";
+        buttons.forEach(btn => {
+          btn.disabled = true;
+          btn.textContent = "Sold Out";
+        });
+        return;
+      }
+
+      box.textContent = `${data.remaining} of 2 VIP sections available.`;
+    }catch(err){
+      box.textContent = "VIP availability will be confirmed before deposit.";
+    }
+  }
+
+  async function reserveVip(packageId, button){
+    const originalText = button.textContent;
+    button.disabled = true;
+    button.textContent = "Opening checkout...";
+
+    try{
+      const res = await fetch("/api/chocolate-city/vip-checkout/", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify({ packageId })
+      });
+
+      const data = await res.json();
+
+      if(!data.ok){
+        alert(data.error || "Could not start checkout.");
+        button.disabled = false;
+        button.textContent = originalText;
+        return;
+      }
+
+      window.location.href = data.url;
+    }catch(err){
+      alert("Checkout unavailable. Please try again.");
+      button.disabled = false;
+      button.textContent = originalText;
+    }
+  }
+
+  document.querySelectorAll(".vip-btn").forEach(button => {
+    button.addEventListener("click", () => {
+      reserveVip(button.dataset.package, button);
+    });
+  });
+
+  loadVipAvailability();
+</script>
 </body>
 </html>
