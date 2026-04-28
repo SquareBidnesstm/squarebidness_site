@@ -29,6 +29,31 @@ export default async function handler(req, res) {
 
     const subject = `New Loan Review Lead: ${leadId}`;
 
+    const sheetWebhook = process.env.LOAN_SHEET_WEBHOOK;
+
+if (sheetWebhook) {
+  try {
+    await fetch(sheetWebhook, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        leadId,
+        fullName,
+        phone,
+        email,
+        city,
+        state,
+        requestedAmount,
+        incomeStatus,
+        bestTime,
+        notes
+      })
+    });
+  } catch (err) {
+    console.error("Loan sheet write failed:", err);
+  }
+}
+
     const text = `
 New loan review lead received.
 
