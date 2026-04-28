@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>VIP Reservation Confirmed | Chocolate City</title>
+
+  <style>
+    body{
+      margin:0;
+      font-family:system-ui;
+      background:#080504;
+      color:#fff7ea;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:100vh;
+    }
+
+    .card{
+      width:100%;
+      max-width:520px;
+      background:#130c0a;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:24px;
+      padding:28px;
+      text-align:center;
+    }
+
+    h1{
+      color:#f5d58a;
+      margin-bottom:10px;
+    }
+
+    .section{
+      margin-top:20px;
+      text-align:left;
+    }
+
+    .label{
+      font-size:12px;
+      color:#c7a983;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+    }
+
+    .value{
+      font-size:18px;
+      font-weight:700;
+      margin-top:4px;
+    }
+
+    .gold{
+      color:#d7a84f;
+    }
+
+    .note{
+      margin-top:22px;
+      font-size:14px;
+      color:#c7a983;
+    }
+
+    .cta{
+      margin-top:20px;
+      display:inline-block;
+      padding:12px 18px;
+      border-radius:999px;
+      background:#d7a84f;
+      color:#080504;
+      font-weight:800;
+      text-decoration:none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h1>VIP Reserved</h1>
+  <p>Your section is locked in.</p>
+
+  <div class="section">
+    <div class="label">Section</div>
+    <div class="value gold" id="sectionName">Loading...</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Deposit Paid</div>
+    <div class="value" id="deposit">—</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Remaining Balance</div>
+    <div class="value" id="remaining">—</div>
+  </div>
+
+  <div class="note">
+    Please arrive before 11PM to secure your section.<br/>
+    Remaining balance is due at Chocolate City Lounge.
+  </div>
+
+  <a class="cta" href="/chocolate-city/">Back to Lounge</a>
+</div>
+
+<script>
+  async function loadSession(){
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get("session_id");
+    if(!sessionId) return;
+
+    const res = await fetch(`/api/chocolate-city/finalize-vip/?session_id=${sessionId}`);
+    const data = await res.json();
+
+    if(!data.ok) return;
+
+    document.getElementById("sectionName").textContent = data.packageName;
+    document.getElementById("deposit").textContent = `$${data.deposit}`;
+    document.getElementById("remaining").textContent = `$${data.remaining}`;
+  }
+
+  loadSession();
+</script>
+
+</body>
+</html>
