@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="sb:build" content="loan-options-v1" />
+
+  <title>Need a Loan? | Local Loan Review</title>
+  <meta name="description" content="Submit your information for review. You may qualify for up to $2,500 through a local lending office." />
+
+  <meta property="og:title" content="Need a Loan?" />
+  <meta property="og:description" content="You may qualify for up to $2,500. Submit your information for review." />
+  <meta property="og:type" content="website" />
+
+  <script defer src="/scripts/sb-analytics.js"></script>
+
+  <style>
+    :root{
+      --bg:#0f1115;
+      --card:#171a21;
+      --card2:#101319;
+      --text:#f5f3ec;
+      --muted:#b9b4a8;
+      --gold:#d8b15f;
+      --gold2:#f0d58a;
+      --line:rgba(255,255,255,.12);
+      --good:#59d38c;
+      --bad:#ff6b6b;
+      --shadow:0 24px 80px rgba(0,0,0,.42);
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(216,177,95,.18), transparent 34%),
+        linear-gradient(180deg,#10131a,#08090d);
+      color:var(--text);
+      min-height:100vh;
+    }
+
+    a{color:inherit}
+
+    .wrap{
+      width:min(1080px,92vw);
+      margin:0 auto;
+      padding:34px 0 44px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:40px;
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .brand{
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      font-weight:800;
+      color:var(--gold2);
+      font-size:12px;
+    }
+
+    .pill{
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:9px 12px;
+      background:rgba(255,255,255,.04);
+    }
+
+    .hero{
+      display:grid;
+      grid-template-columns:1.05fr .95fr;
+      gap:24px;
+      align-items:stretch;
+    }
+
+    .panel{
+      border:1px solid var(--line);
+      background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.03));
+      border-radius:30px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .copy{
+      padding:42px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      min-height:620px;
+    }
+
+    .kicker{
+      color:var(--gold2);
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.16em;
+      font-size:12px;
+      margin-bottom:18px;
+    }
+
+    h1{
+      font-size:clamp(44px,7vw,82px);
+      line-height:.92;
+      letter-spacing:-.06em;
+      margin:0 0 20px;
+    }
+
+    .lead{
+      color:var(--muted);
+      font-size:20px;
+      line-height:1.55;
+      max-width:620px;
+      margin:0 0 24px;
+    }
+
+    .amount{
+      display:inline-flex;
+      width:max-content;
+      align-items:center;
+      gap:10px;
+      padding:13px 16px;
+      border-radius:999px;
+      background:rgba(216,177,95,.13);
+      border:1px solid rgba(216,177,95,.3);
+      color:var(--gold2);
+      font-weight:900;
+      margin-bottom:26px;
+    }
+
+    .steps{
+      display:grid;
+      gap:12px;
+      margin-top:8px;
+    }
+
+    .step{
+      display:flex;
+      gap:12px;
+      color:var(--muted);
+      line-height:1.45;
+      font-size:15px;
+    }
+
+    .num{
+      flex:0 0 28px;
+      height:28px;
+      border-radius:999px;
+      display:grid;
+      place-items:center;
+      background:rgba(255,255,255,.08);
+      color:var(--gold2);
+      font-weight:900;
+      font-size:13px;
+    }
+
+    .form-panel{
+      padding:28px;
+      background:linear-gradient(180deg,#191d25,#11141b);
+    }
+
+    .form-head{
+      margin-bottom:20px;
+    }
+
+    .form-head h2{
+      margin:0 0 8px;
+      font-size:28px;
+      letter-spacing:-.03em;
+    }
+
+    .form-head p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.5;
+      font-size:15px;
+    }
+
+    form{
+      display:grid;
+      gap:14px;
+    }
+
+    label{
+      display:grid;
+      gap:7px;
+      color:#ddd8ca;
+      font-weight:750;
+      font-size:13px;
+    }
+
+    input,select,textarea{
+      width:100%;
+      border:1px solid var(--line);
+      background:rgba(0,0,0,.24);
+      color:var(--text);
+      border-radius:16px;
+      padding:14px 14px;
+      font:inherit;
+      outline:none;
+    }
+
+    textarea{
+      min-height:96px;
+      resize:vertical;
+    }
+
+    input:focus,select:focus,textarea:focus{
+      border-color:rgba(216,177,95,.65);
+      box-shadow:0 0 0 4px rgba(216,177,95,.12);
+    }
+
+    .grid2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+    }
+
+    .btn{
+      border:0;
+      border-radius:18px;
+      padding:16px 18px;
+      font-weight:950;
+      cursor:pointer;
+      color:#111;
+      background:linear-gradient(180deg,var(--gold2),var(--gold));
+      box-shadow:0 14px 34px rgba(216,177,95,.22);
+      margin-top:6px;
+      font-size:16px;
+    }
+
+    .btn:disabled{
+      opacity:.65;
+      cursor:not-allowed;
+    }
+
+    .fine{
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.5;
+      margin-top:10px;
+    }
+
+    .status{
+      display:none;
+      border-radius:16px;
+      padding:13px 14px;
+      font-size:14px;
+      line-height:1.45;
+      border:1px solid var(--line);
+    }
+
+    .status.show{display:block}
+    .status.good{
+      color:#dfffe9;
+      border-color:rgba(89,211,140,.35);
+      background:rgba(89,211,140,.12);
+    }
+    .status.bad{
+      color:#ffe1e1;
+      border-color:rgba(255,107,107,.35);
+      background:rgba(255,107,107,.12);
+    }
+
+    footer{
+      margin-top:26px;
+      color:var(--muted);
+      font-size:12px;
+      text-align:center;
+      line-height:1.5;
+    }
+
+    @media (max-width:900px){
+      .hero{grid-template-columns:1fr}
+      .copy{min-height:auto;padding:32px}
+    }
+
+    @media (max-width:620px){
+      .wrap{padding-top:22px}
+      .topbar{align-items:flex-start;flex-direction:column}
+      .copy,.form-panel{padding:22px}
+      .grid2{grid-template-columns:1fr}
+      h1{font-size:46px}
+      .lead{font-size:17px}
+    }
+  </style>
+</head>
+
+<body>
+  <main class="wrap">
+    <div class="topbar">
+      <div class="brand">Local Loan Intake</div>
+      <div class="pill">Review request • Local follow-up</div>
+    </div>
+
+    <section class="hero">
+      <div class="panel copy">
+        <div class="kicker">Need a loan?</div>
+        <h1>You may qualify for up to $2,500.</h1>
+        <p class="lead">
+          Submit your information for review. If your request is approved, a local lending office will follow up with next steps.
+        </p>
+
+        <div class="amount">Loan review up to $2,500</div>
+
+        <div class="steps">
+          <div class="step"><span class="num">1</span><span>Fill out the short review form.</span></div>
+          <div class="step"><span class="num">2</span><span>Your information is forwarded for local review.</span></div>
+          <div class="step"><span class="num">3</span><span>If approved, you’ll be contacted about next steps.</span></div>
+        </div>
+      </div>
+
+      <div class="panel form-panel">
+        <div class="form-head">
+          <h2>Start your review</h2>
+          <p>Use accurate contact info so the office can follow up quickly.</p>
+        </div>
+
+        <form id="loanForm">
+          <label>
+            Full Name
+            <input name="fullName" autocomplete="name" required />
+          </label>
+
+          <div class="grid2">
+            <label>
+              Phone Number
+              <input name="phone" autocomplete="tel" required />
+            </label>
+
+            <label>
+              Email
+              <input type="email" name="email" autocomplete="email" />
+            </label>
+          </div>
+
+          <div class="grid2">
+            <label>
+              City
+              <input name="city" autocomplete="address-level2" required />
+            </label>
+
+            <label>
+              State
+              <input name="state" value="Louisiana" required />
+            </label>
+          </div>
+
+          <label>
+            How much are you looking for?
+            <select name="requestedAmount" required>
+              <option value="">Select one</option>
+              <option>Under $500</option>
+              <option>$500 - $1,000</option>
+              <option>$1,000 - $1,500</option>
+              <option>$1,500 - $2,500</option>
+            </select>
+          </label>
+
+          <div class="grid2">
+            <label>
+              Employment / Income Status
+              <select name="incomeStatus" required>
+                <option value="">Select one</option>
+                <option>Employed</option>
+                <option>Self-employed</option>
+                <option>Fixed income</option>
+                <option>Other</option>
+              </select>
+            </label>
+
+            <label>
+              Best Time to Call
+              <select name="bestTime" required>
+                <option value="">Select one</option>
+                <option>Morning</option>
+                <option>Afternoon</option>
+                <option>Evening</option>
+                <option>Anytime</option>
+              </select>
+            </label>
+          </div>
+
+          <label>
+            Notes
+            <textarea name="notes" placeholder="Anything you want the review office to know?"></textarea>
+          </label>
+
+          <div id="status" class="status"></div>
+
+          <button class="btn" type="submit">Check My Loan Options</button>
+
+          <div class="fine">
+            This form does not guarantee approval. Loan eligibility, approval amount, and terms are determined by the lending office after review. Information submitted may be forwarded to a local lending office for review.
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <footer>
+      Referral intake powered by Square Bidness.
+    </footer>
+  </main>
+
+  <script>
+    const form = document.getElementById("loanForm");
+    const statusBox = document.getElementById("status");
+
+    function showStatus(type, msg){
+      statusBox.className = "status show " + type;
+      statusBox.textContent = msg;
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const btn = form.querySelector("button");
+      btn.disabled = true;
+      btn.textContent = "Submitting...";
+
+      const data = Object.fromEntries(new FormData(form).entries());
+
+      try{
+        const res = await fetch("/api/loan-options/intake/", {
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body:JSON.stringify(data)
+        });
+
+        const json = await res.json().catch(() => ({}));
+
+        if(!res.ok){
+          throw new Error(json.error || "Submission failed");
+        }
+
+        showStatus("good", "Request received. Your review ID is " + json.leadId + ". A local office may follow up soon.");
+        form.reset();
+      }catch(err){
+        showStatus("bad", "Something went wrong. Please try again.");
+      }finally{
+        btn.disabled = false;
+        btn.textContent = "Check My Loan Options";
+      }
+    });
+  </script>
+</body>
+</html>
