@@ -1,5 +1,3 @@
-const Stripe = require("stripe");
-
 const KEY = "chocolate-city:vip:bookings";
 
 const PACKAGES = {
@@ -48,11 +46,11 @@ export default async function handler(req, res) {
       return res.status(500).json({ ok: false, error: "Stripe key missing" });
     }
 
+    const Stripe = (await import("stripe")).default;
     const stripe = Stripe(stripeKey);
 
     const body = req.body || {};
-    const packageId = body.packageId;
-    const selectedPackage = PACKAGES[packageId];
+    const selectedPackage = PACKAGES[body.packageId];
 
     if (!selectedPackage) {
       return res.status(400).json({ ok: false, error: "Invalid VIP package" });
@@ -62,7 +60,10 @@ export default async function handler(req, res) {
     const bookings = data?.result ? JSON.parse(data.result) : [];
 
     if (bookings.length >= 2) {
-      return res.status(409).json({ ok: false, error: "VIP sections are sold out for this night." });
+      return res.status(409).json({
+        ok: false,
+        error: "VIP sections are sold out for this night."
+      });
     }
 
     const successUrl =
@@ -93,7 +94,7 @@ export default async function handler(req, res) {
       ],
       metadata: {
         business: "Chocolate City Lounge LLC",
-        packageId,
+        packageId: body.packageId,
         packageName: selectedPackage.name,
         fullPrice: String(selectedPackage.fullPrice),
         deposit: String(selectedPackage.deposit),
