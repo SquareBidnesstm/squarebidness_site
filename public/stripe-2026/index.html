@@ -537,6 +537,23 @@
       background:#070707;
     }
 
+    body.stripe-mode {
+  background: linear-gradient(180deg,#020617 0%, #000 100%);
+}
+
+body.stripe-mode .hero__main {
+  border: 1px solid rgba(99,102,241,.25);
+}
+
+body.stripe-mode .pill {
+  background: rgba(99,102,241,.12);
+  color: #c7d2fe;
+}
+
+    #deckTrack {
+  -webkit-overflow-scrolling: touch;
+}
+
     @media (max-width: 980px){
       .hero__grid,
       .layout,
@@ -596,6 +613,9 @@
         <button class="btn btn--small btn--ghost" type="button" id="expandAllBtn">Expand all</button>
         <button class="btn btn--small btn--ghost" type="button" id="collapseAllBtn">Collapse all</button>
         <button class="btn btn--small btn--gold" type="button" id="copyMasterBtn">Copy master pitch</button>
+        <button class="btn btn--small btn--ghost" id="stripeModeBtn">
+  Stripe Mode: OFF
+</button>
       </div>
     </div>
   </header>
@@ -616,6 +636,7 @@
             <span class="pill">Operator infrastructure</span>
             <span class="pill">Stripe-ready positioning</span>
             <span class="pill">Phone-friendly reference</span>
+            <span class="pill">Built on Stripe</span>
           </div>
         </div>
 
@@ -637,6 +658,54 @@
         </aside>
       </div>
     </section>
+
+    <section class="wrap" style="margin-top:10px;">
+  <div class="panel" style="padding:16px; overflow:hidden;">
+    
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+      <strong>Investor Mode</strong>
+      <button class="btn btn--small btn--gold" id="toggleDeckBtn">Open Deck</button>
+    </div>
+
+    <div id="deckContainer" class="hidden" style="overflow:hidden;">
+      
+      <div id="deckTrack" style="display:flex; gap:12px; overflow-x:auto; scroll-snap-type:x mandatory; padding-bottom:8px;">
+        
+        <!-- SLIDE 1 -->
+        <div class="card" style="min-width:260px; scroll-snap-align:start;">
+          <h3>Square Bidness</h3>
+          <p>We install revenue infrastructure for independent operators.</p>
+        </div>
+
+        <!-- SLIDE 2 -->
+        <div class="card" style="min-width:260px; scroll-snap-align:start;">
+          <h3>Problem</h3>
+          <p>Operators lose money in chaos — no structure, missed orders, no payment flow.</p>
+        </div>
+
+        <!-- SLIDE 3 -->
+        <div class="card" style="min-width:260px; scroll-snap-align:start;">
+          <h3>Install</h3>
+          <p>Stripe-powered checkout, ordering, routing, intake. Paid before pickup.</p>
+        </div>
+
+        <!-- SLIDE 4 -->
+        <div class="card" style="min-width:260px; scroll-snap-align:start;">
+          <h3>Proof</h3>
+          <p>Live systems. Real orders. Real payments. Already in production.</p>
+        </div>
+
+        <!-- SLIDE 5 -->
+        <div class="card" style="min-width:260px; scroll-snap-align:start;">
+          <h3>Scale</h3>
+          <p>Repeatable installs. Every operator with demand is a candidate.</p>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</section>
 
     <section class="toolbar">
       <div class="wrap toolbar__inner">
@@ -705,9 +774,16 @@
 
           <div class="grid">
             <div class="quote">
-              <strong>30-second pitch</strong>
-              <p id="pitchLong">I’m Marcus, founder of Square Bidness. We install digital payment and ordering systems for independent operators — restaurants and service businesses already moving but dealing with chaos. We don’t replace their business, we organize their demand — checkout, routing, payments, all structured. We’ve got live systems running right now in Louisiana — real orders, real revenue.</p>
-            </div>
+  <strong>30-second pitch</strong>
+
+  <p id="pitchOperator">
+    I’m Marcus, founder of Square Bidness. We install digital payment and ordering systems for independent operators — restaurants and service businesses already moving but dealing with chaos. We don’t replace their business, we organize their demand — checkout, routing, payments, all structured. We’ve got live systems running right now — real orders, real revenue.
+  </p>
+
+  <p id="pitchStripe" class="hidden">
+    I’m Marcus, founder of Square Bidness. We install revenue infrastructure for independent operators — built on Stripe. Payments, ordering, routing, and cash flow, all structured into one system. We don’t replace their business — we organize their demand. These are live systems handling real volume.
+  </p>
+</div>
 
             <div class="quote">
               <strong>Short version</strong>
@@ -1162,6 +1238,50 @@
           btn.classList.toggle("hidden", hidden && q !== "");
         });
       }
+
+    // STRIPE MODE
+let stripeMode = false;
+const stripeBtn = document.getElementById("stripeModeBtn");
+
+function toggleStripeMode(){
+  stripeMode = !stripeMode;
+
+  stripeBtn.textContent = stripeMode ? "Stripe Mode: ON" : "Stripe Mode: OFF";
+
+  const pairs = [
+    ["pitchOperator","pitchStripe"]
+  ];
+
+  pairs.forEach(([op, st]) => {
+    const opEl = document.getElementById(op);
+    const stEl = document.getElementById(st);
+
+    if (!opEl || !stEl) return;
+
+    opEl.classList.toggle("hidden", stripeMode);
+    stEl.classList.toggle("hidden", !stripeMode);
+  });
+
+  // 🔥 ADD THIS — global tone shift
+  document.body.classList.toggle("stripe-mode", stripeMode);
+}
+
+if (stripeBtn){
+  stripeBtn.addEventListener("click", toggleStripeMode);
+}
+
+// INVESTOR DECK
+const toggleDeckBtn = document.getElementById("toggleDeckBtn");
+const deckContainer = document.getElementById("deckContainer");
+
+if (toggleDeckBtn){
+  toggleDeckBtn.addEventListener("click", () => {
+    deckContainer.classList.toggle("hidden");
+    toggleDeckBtn.textContent = deckContainer.classList.contains("hidden")
+      ? "Open Deck"
+      : "Close Deck";
+  });
+}
 
       searchInput.addEventListener("input", runSearch);
 
