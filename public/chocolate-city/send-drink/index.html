@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Send a Drink | Chocolate City Lounge</title>
+  <style>
+    body{margin:0;font-family:Arial,sans-serif;background:#080504;color:#fff7ea;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:18px}
+    .card{width:100%;max-width:560px;background:#130c0a;border:1px solid rgba(245,213,138,.22);border-radius:28px;padding:26px}
+    h1{margin:0 0 8px;color:#f5d58a;font-size:38px;letter-spacing:-.05em}
+    p{color:#c7a983;line-height:1.5}
+    label{display:block;margin:16px 0 7px;color:#d7a84f;font-weight:900}
+    input,textarea,select{width:100%;padding:14px;border-radius:14px;border:1px solid rgba(245,213,138,.22);background:#080504;color:#fff7ea;font-size:16px}
+    textarea{min-height:90px}
+    button{margin-top:18px;width:100%;min-height:52px;border:0;border-radius:999px;background:linear-gradient(135deg,#d7a84f,#f5d58a);color:#080504;font-weight:900;font-size:16px}
+    .note{font-size:13px;margin-top:14px}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Send a Drink</h1>
+    <p>Send a drink credit to someone at Chocolate City. Staff verifies redemption at the venue.</p>
+
+    <label>Amount</label>
+    <select id="optionId">
+      <option value="drink_10">$10 Drink Credit</option>
+      <option value="drink_25">$25 Premium Drink Credit</option>
+      <option value="drink_50">$50 Bottle Contribution</option>
+    </select>
+
+    <label>Recipient Name</label>
+    <input id="recipientName" placeholder="Who is this for?" />
+
+    <label>Your Name</label>
+    <input id="senderName" placeholder="Who is sending it?" />
+
+    <label>Message Optional</label>
+    <textarea id="message" placeholder="Example: Happy birthday — enjoy one on me."></textarea>
+
+    <button id="sendBtn">Send Drink Credit</button>
+
+    <p class="note">Drink credits are redeemed in person. Must meet venue age and entry requirements.</p>
+  </main>
+
+  <script>
+    document.getElementById("sendBtn").addEventListener("click", async () => {
+      const btn = document.getElementById("sendBtn");
+      btn.disabled = true;
+      btn.textContent = "Opening checkout...";
+
+      const payload = {
+        optionId: document.getElementById("optionId").value,
+        recipientName: document.getElementById("recipientName").value.trim(),
+        senderName: document.getElementById("senderName").value.trim(),
+        message: document.getElementById("message").value.trim()
+      };
+
+      try {
+        const res = await fetch("/api/chocolate-city/send-drink-checkout/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (!data.ok) {
+          alert(data.error || "Checkout unavailable.");
+          btn.disabled = false;
+          btn.textContent = "Send Drink Credit";
+          return;
+        }
+
+        window.location.href = data.url;
+      } catch {
+        alert("Checkout unavailable.");
+        btn.disabled = false;
+        btn.textContent = "Send Drink Credit";
+      }
+    });
+  </script>
+</body>
+</html>
