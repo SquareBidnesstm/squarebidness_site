@@ -84,9 +84,7 @@
       flex:0 0 auto;
     }
 
-    .brandcopy{
-      min-width:0;
-    }
+    .brandcopy{ min-width:0; }
 
     .eyebrow{
       margin:0;
@@ -126,28 +124,38 @@
     }
 
     .btn:hover{transform:translateY(-1px); border-color:#333}
+
     .btn--gold{
       background:var(--gold);
       color:#000;
       border-color:rgba(201,162,39,.8);
       font-weight:700;
     }
+
     .btn--ghost{
       background:transparent;
       color:#fff;
     }
+
     .btn--small{
       padding:.55rem .8rem;
       font-size:.9rem;
     }
+
     .btn--block{
       width:100%;
       justify-content:center;
     }
 
-    .hero{
-      padding:28px 0 20px;
+    /* FIX 7 — Stripe Mode button gets a distinct active state */
+    .btn--stripe-on{
+      background:rgba(99,102,241,.18);
+      color:#c7d2fe;
+      border-color:rgba(99,102,241,.5);
+      font-weight:700;
     }
+
+    .hero{ padding:28px 0 20px; }
 
     .hero__grid{
       display:grid;
@@ -224,14 +232,7 @@
       font-weight:700;
     }
 
-    .muted{
-      color:var(--muted);
-    }
-
-    .quick-grid{
-      display:grid;
-      gap:10px;
-    }
+    .muted{ color:var(--muted); }
 
     .quick-card{
       padding:14px;
@@ -245,9 +246,7 @@
       margin-bottom:4px;
     }
 
-    .toolbar{
-      padding:14px 0 16px;
-    }
+    .toolbar{ padding:14px 0 16px; }
 
     .toolbar__inner{
       display:grid;
@@ -264,6 +263,8 @@
       border-radius:12px;
       padding:.86rem .95rem;
       outline:none;
+      /* FIX 6 — subtle ring makes it feel interactive before focus */
+      box-shadow:0 0 0 1px rgba(201,162,39,.08);
     }
 
     .search:focus{
@@ -293,10 +294,7 @@
       color:var(--gold);
     }
 
-    .navlist{
-      display:grid;
-      gap:8px;
-    }
+    .navlist{ display:grid; gap:8px; }
 
     .navbtn{
       width:100%;
@@ -344,10 +342,7 @@
       transition:width .25s ease;
     }
 
-    .content{
-      display:grid;
-      gap:16px;
-    }
+    .content{ display:grid; gap:16px; }
 
     .level{
       padding:20px;
@@ -389,14 +384,8 @@
       justify-content:flex-end;
     }
 
-    .grid{
-      display:grid;
-      gap:12px;
-    }
-
-    .grid--2{
-      grid-template-columns:repeat(2,minmax(0,1fr));
-    }
+    .grid{ display:grid; gap:12px; }
+    .grid--2{ grid-template-columns:repeat(2,minmax(0,1fr)); }
 
     .card{
       padding:16px;
@@ -405,21 +394,31 @@
       background:var(--panel-2);
     }
 
-    .card h3{
-      margin:0 0 8px;
-      font-size:1rem;
-    }
-
-    .card p{
-      margin:.25rem 0 0;
-      color:#e7e7e7;
-    }
+    .card h3{ margin:0 0 8px; font-size:1rem; }
+    .card p{ margin:.25rem 0 0; color:#e7e7e7; }
 
     .quote{
       padding:16px;
       border-radius:14px;
       border:1px solid rgba(201,162,39,.25);
       background:linear-gradient(180deg, rgba(201,162,39,.08), rgba(201,162,39,.03));
+      transition:border-color .2s ease, background .2s ease;
+    }
+
+    /* FIX 7 — pitch card glows when Stripe Mode is active */
+    .quote.stripe-active{
+      border-color:rgba(99,102,241,.55);
+      background:linear-gradient(180deg, rgba(99,102,241,.1), rgba(99,102,241,.03));
+    }
+
+    .quote.stripe-active::before{
+      content:"● STRIPE MODE ACTIVE";
+      display:block;
+      font-size:.68rem;
+      letter-spacing:.14em;
+      color:#818cf8;
+      font-weight:700;
+      margin-bottom:10px;
     }
 
     .quote strong{
@@ -443,9 +442,7 @@
       color:#e8e8e8;
     }
 
-    .list li + li{
-      margin-top:.42rem;
-    }
+    .list li + li{ margin-top:.42rem; }
 
     .chips{
       display:flex;
@@ -469,10 +466,7 @@
       background:rgba(201,162,39,.08);
     }
 
-    .demo-links{
-      display:grid;
-      gap:8px;
-    }
+    .demo-links{ display:grid; gap:8px; }
 
     .demo-link{
       display:flex;
@@ -489,6 +483,31 @@
     .demo-link:hover{
       border-color:rgba(201,162,39,.45);
       background:rgba(201,162,39,.06);
+    }
+
+    /* FIX 5 — contact card */
+    .contact-card{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
+      padding:16px;
+      border-radius:14px;
+      border:1px solid rgba(201,162,39,.3);
+      background:linear-gradient(180deg, rgba(201,162,39,.08), rgba(201,162,39,.03));
+      margin-top:12px;
+    }
+
+    .contact-card__text strong{
+      display:block;
+      font-size:1rem;
+      margin-bottom:3px;
+    }
+
+    .contact-card__text span{
+      font-size:.88rem;
+      color:var(--muted);
     }
 
     .copy-note{
@@ -524,9 +543,7 @@
       border:1px solid var(--line);
     }
 
-    .hidden{
-      display:none !important;
-    }
+    .hidden{ display:none !important; }
 
     .empty-state{
       padding:18px;
@@ -537,45 +554,35 @@
       background:#070707;
     }
 
-    body.stripe-mode {
-  background: linear-gradient(180deg,#020617 0%, #000 100%);
-}
+    body.stripe-mode{
+      background:linear-gradient(180deg,#020617 0%, #000 100%);
+    }
 
-body.stripe-mode .hero__main {
-  border: 1px solid rgba(99,102,241,.25);
-}
+    body.stripe-mode .hero__main{
+      border:1px solid rgba(99,102,241,.25);
+    }
 
-body.stripe-mode .pill {
-  background: rgba(99,102,241,.12);
-  color: #c7d2fe;
-}
+    body.stripe-mode .pill{
+      background:rgba(99,102,241,.12);
+      color:#c7d2fe;
+    }
 
-    #deckTrack {
-  -webkit-overflow-scrolling: touch;
-}
+    #deckTrack{ -webkit-overflow-scrolling:touch; }
 
-    @media (max-width: 980px){
+    @media(max-width:980px){
       .hero__grid,
       .layout,
       .toolbar__inner,
-      .grid--2{
-        grid-template-columns:1fr;
-      }
+      .grid--2{ grid-template-columns:1fr; }
 
-      .sidebar{
-        position:static;
-      }
+      .sidebar{ position:static; }
 
-      .level__head{
-        flex-direction:column;
-      }
+      .level__head{ flex-direction:column; }
 
-      .level-actions{
-        justify-content:flex-start;
-      }
+      .level-actions{ justify-content:flex-start; }
     }
 
-    @media (max-width: 640px){
+    @media(max-width:640px){
       .topbar__inner{
         align-items:flex-start;
         flex-direction:column;
@@ -588,13 +595,9 @@ body.stripe-mode .pill {
 
       .hero__main,
       .hero__side,
-      .level{
-        padding:16px;
-      }
+      .level{ padding:16px; }
 
-      .wrap{
-        width:min(var(--max), calc(100% - 16px));
-      }
+      .wrap{ width:min(var(--max), calc(100% - 16px)); }
     }
   </style>
 </head>
@@ -613,9 +616,7 @@ body.stripe-mode .pill {
         <button class="btn btn--small btn--ghost" type="button" id="expandAllBtn">Expand all</button>
         <button class="btn btn--small btn--ghost" type="button" id="collapseAllBtn">Collapse all</button>
         <button class="btn btn--small btn--gold" type="button" id="copyMasterBtn">Copy master pitch</button>
-        <button class="btn btn--small btn--ghost" id="stripeModeBtn">
-  Stripe Mode: OFF
-</button>
+        <button class="btn btn--small btn--ghost" id="stripeModeBtn">Stripe Mode: OFF</button>
       </div>
     </div>
   </header>
@@ -649,9 +650,9 @@ body.stripe-mode .pill {
           <div class="quick-card">
             <p class="quick-title">Daily target</p>
             <p class="muted">
-10 conversations · 3 solid connections · 1 real opportunity<br>
-<span style="color:#c9a227;">Every session must produce: a decision, a connection, or a shift.</span>
-</p>
+              10 conversations · 3 solid connections · 1 real opportunity<br>
+              <span style="color:#c9a227;">Every session must produce: a decision, a connection, or a shift.</span>
+            </p>
           </div>
 
           <div class="quick-card">
@@ -663,60 +664,53 @@ body.stripe-mode .pill {
     </section>
 
     <section class="wrap" style="margin-top:10px;">
-  <div class="panel" style="padding:16px; overflow:hidden;">
-    
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-      <strong>Investor Mode</strong>
-      <button class="btn btn--small btn--gold" id="toggleDeckBtn">Open Deck</button>
-    </div>
-
-    <div id="deckContainer" class="hidden" style="overflow:hidden;">
-      
-      <div id="deckTrack" style="display:flex; gap:12px; overflow-x:auto; scroll-snap-type:x mandatory; padding-bottom:8px;">
-        
-        <!-- SLIDE 1 -->
-        <div class="card" style="min-width:260px; scroll-snap-align:start;">
-          <h3>Square Bidness</h3>
-          <p>We install revenue infrastructure for independent operators.</p>
+      <div class="panel" style="padding:16px; overflow:hidden;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <strong>Investor Mode</strong>
+          <button class="btn btn--small btn--gold" id="toggleDeckBtn">Open Deck</button>
         </div>
 
-        <!-- SLIDE 2 -->
-        <div class="card" style="min-width:260px; scroll-snap-align:start;">
-          <h3>Problem</h3>
-          <p>Operators lose money in chaos — no structure, missed orders, no payment flow.</p>
-        </div>
+        <div id="deckContainer" class="hidden" style="overflow:hidden;">
+          <div id="deckTrack" style="display:flex; gap:12px; overflow-x:auto; scroll-snap-type:x mandatory; padding-bottom:8px;">
 
-        <!-- SLIDE 3 -->
-        <div class="card" style="min-width:260px; scroll-snap-align:start;">
-          <h3>Install</h3>
-          <p>Stripe-powered checkout, ordering, routing, intake. Paid before pickup.</p>
-        </div>
+            <div class="card" style="min-width:260px; scroll-snap-align:start;">
+              <h3>Square Bidness</h3>
+              <p>We install revenue infrastructure for independent operators.</p>
+            </div>
 
-        <!-- SLIDE 4 -->
-        <div class="card" style="min-width:260px; scroll-snap-align:start;">
-          <h3>Proof</h3>
-          <p>Live systems. Real orders. Real payments. Already in production.</p>
-        </div>
+            <div class="card" style="min-width:260px; scroll-snap-align:start;">
+              <h3>Problem</h3>
+              <p>Operators lose money in chaos — no structure, missed orders, no payment flow.</p>
+            </div>
 
-        <!-- SLIDE 5 -->
-        <div class="card" style="min-width:260px; scroll-snap-align:start;">
-          <h3>Scale</h3>
-          <p>Repeatable installs. Every operator with demand is a candidate.</p>
-        </div>
+            <div class="card" style="min-width:260px; scroll-snap-align:start;">
+              <h3>Install</h3>
+              <p>Stripe-powered checkout, ordering, routing, intake. Paid before pickup.</p>
+            </div>
 
+            <div class="card" style="min-width:260px; scroll-snap-align:start;">
+              <h3>Proof</h3>
+              <p>Live systems. Real orders. Real payments. Already in production.</p>
+            </div>
+
+            <div class="card" style="min-width:260px; scroll-snap-align:start;">
+              <h3>Scale</h3>
+              <p>Repeatable installs. Every operator with demand is a candidate.</p>
+            </div>
+
+          </div>
+        </div>
       </div>
-
-    </div>
-  </div>
-</section>
+    </section>
 
     <section class="toolbar">
       <div class="wrap toolbar__inner">
+        <!-- FIX 6 — ⌕ hint in placeholder; desktop autofocus via JS -->
         <input
           id="searchInput"
           class="search"
           type="search"
-          placeholder="Search pitch, questions, answers, Stripe, operators, follow-up..."
+          placeholder="⌕  Search pitch, Stripe, operators, money, follow-up..."
           aria-label="Search the Sessions playbook"
         />
         <button class="btn btn--ghost" type="button" id="clearSearchBtn">Clear</button>
@@ -761,11 +755,13 @@ body.stripe-mode .pill {
         <div class="progress">
           <p class="muted" style="margin:0 0 8px;">Sections viewed</p>
           <div class="progressbar" aria-hidden="true"><span id="progressFill"></span></div>
-          <p class="muted" id="progressText" style="margin:.55rem 0 0;">0 of 7 viewed</p>
+          <p class="muted" id="progressText" style="margin:.55rem 0 0;">1 of 7 viewed</p>
         </div>
       </aside>
 
       <div class="content" id="contentArea">
+
+        <!-- ═══ LEVEL 1 ═══ -->
         <section class="panel level" id="level1" data-section>
           <div class="level__head">
             <div>
@@ -774,25 +770,24 @@ body.stripe-mode .pill {
               <p class="level__desc">Use this when you need to introduce yourself clean and fast.</p>
             </div>
             <div class="level-actions">
-              <!-- FIX 1: was data-copy-target="#pitchLong" — no such element existed, button was dead -->
               <button class="btn btn--small btn--ghost copy-btn" type="button" data-copy-target="#pitchOperator">Copy 30-sec pitch</button>
               <button class="btn btn--small btn--ghost copy-btn" type="button" data-copy-target="#pitchShort">Copy short pitch</button>
             </div>
           </div>
 
           <div class="grid">
-            <div class="quote">
-  <strong>30-second pitch</strong>
+            <!-- FIX 7 — id="pitchCard" targeted by JS to add stripe-active class -->
+            <div class="quote" id="pitchCard">
+              <strong>30-second pitch</strong>
 
-  <!-- FIX 3: "We install revenue infrastructure..." replaces "We install digital payment and ordering systems..." -->
-  <p id="pitchOperator">
-    I'm Marcus, founder of Square Bidness. We install revenue infrastructure for independent operators — restaurants and service businesses already moving but dealing with chaos. We don't replace their business, we organize their demand — checkout, routing, payments, all structured. We've got live systems running right now — real orders, real revenue.
-  </p>
+              <p id="pitchOperator">
+                I'm Marcus, founder of Square Bidness. We install revenue infrastructure for independent operators — restaurants and service businesses already moving but dealing with chaos. We don't replace their business, we organize their demand — checkout, routing, payments, all structured. We've got live systems running right now — real orders, real revenue.
+              </p>
 
-  <p id="pitchStripe" class="hidden">
-    I'm Marcus, founder of Square Bidness. We install revenue infrastructure for independent operators — built on Stripe. Payments, ordering, routing, and cash flow, all structured into one system. We don't replace their business — we organize their demand. These are live systems handling real volume.
-  </p>
-</div>
+              <p id="pitchStripe" class="hidden">
+                I'm Marcus, founder of Square Bidness. We install revenue infrastructure for independent operators — built on Stripe. Payments, ordering, routing, and cash flow, all structured into one system. We don't replace their business — we organize their demand. These are live systems handling real volume.
+              </p>
+            </div>
 
             <div class="quote">
               <strong>Short version</strong>
@@ -833,20 +828,21 @@ body.stripe-mode .pill {
               </div>
 
               <div class="card">
-  <h3>Scaling signal (use sparingly)</h3>
-  <p id="fundingLine">
-    We're starting to look at scaling this — infrastructure, installs, and distribution. Still early, but tightening the model now.
-  </p>
-  <div class="chips">
-    <button class="chip copy-btn" type="button" data-copy-target="#fundingLine">Copy</button>
-  </div>
-</div>
+                <h3>Scaling signal (use sparingly)</h3>
+                <p id="fundingLine">
+                  We're starting to look at scaling this — infrastructure, installs, and distribution. Still early, but tightening the model now.
+                </p>
+                <div class="chips">
+                  <button class="chip copy-btn" type="button" data-copy-target="#fundingLine">Copy</button>
+                </div>
+              </div>
             </div>
 
             <p class="copy-note" id="copyNote1" aria-live="polite"></p>
           </div>
         </section>
 
+        <!-- ═══ LEVEL 2 ═══ -->
         <section class="panel level" id="level2" data-section>
           <div class="level__head">
             <div>
@@ -899,6 +895,7 @@ body.stripe-mode .pill {
           <p class="copy-note" id="copyNote2" aria-live="polite"></p>
         </section>
 
+        <!-- ═══ LEVEL 3 ═══ -->
         <section class="panel level" id="level3" data-section>
           <div class="level__head">
             <div>
@@ -956,6 +953,7 @@ body.stripe-mode .pill {
           <p class="copy-note" id="copyNote3" aria-live="polite"></p>
         </section>
 
+        <!-- ═══ LEVEL 4 ═══ -->
         <section class="panel level" id="level4" data-section>
           <div class="level__head">
             <div>
@@ -964,18 +962,20 @@ body.stripe-mode .pill {
               <p class="level__desc">Move like a sniper, not a tourist.</p>
             </div>
             <div class="level-actions">
-              <button class="btn btn--small btn--ghost copy-btn" type="button" data-copy-target="#followupMsg">Copy follow-up</button>
+              <!-- FIX 4 — two follow-up buttons for the two scenarios -->
+              <button class="btn btn--small btn--ghost copy-btn" type="button" data-copy-target="#followupMsg">Copy follow-up (demoed)</button>
+              <button class="btn btn--small btn--ghost copy-btn" type="button" data-copy-target="#followupMsgNoDemo">Copy follow-up (talked only)</button>
             </div>
           </div>
 
           <div class="card">
-  <h3>Room filter</h3>
-  <ul class="list">
-    <li>If they not building or operating → exit</li>
-    <li>If no payment flow involved → low priority</li>
-    <li>If no traction → 2 min max</li>
-  </ul>
-</div>
+            <h3>Room filter</h3>
+            <ul class="list">
+              <li>If they not building or operating → exit</li>
+              <li>If no payment flow involved → low priority</li>
+              <li>If no traction → 2 min max</li>
+            </ul>
+          </div>
 
           <div class="grid grid--2">
             <div class="card">
@@ -1003,13 +1003,13 @@ body.stripe-mode .pill {
             </div>
 
             <div class="card">
-  <h3>Live Session Mode</h3>
-  <ul class="list">
-    <li>What are they REALLY saying?</li>
-    <li>Where does this fit in my system? (checkout / payouts / automation / pricing)</li>
-    <li>Write ONE line: "We need to ______ at Square Bidness."</li>
-  </ul>
-</div>
+              <h3>Live Session Mode</h3>
+              <ul class="list">
+                <li>What are they REALLY saying?</li>
+                <li>Where does this fit in my system? (checkout / payouts / automation / pricing)</li>
+                <li>Write ONE line: "We need to ______ at Square Bidness."</li>
+              </ul>
+            </div>
 
             <div class="card">
               <h3>Room positioning</h3>
@@ -1022,14 +1022,14 @@ body.stripe-mode .pill {
             </div>
 
             <div class="card">
-  <h3>Post-session move</h3>
-  <ul class="list">
-    <li>Turn to ONE person — not the room</li>
-    <li>Ask: "What are you building right now?"</li>
-    <li>Then: "We're organizing demand for real-world operators."</li>
-    <li>Ask: "How are you handling payments today?"</li>
-  </ul>
-</div>
+              <h3>Post-session move</h3>
+              <ul class="list">
+                <li>Turn to ONE person — not the room</li>
+                <li>Ask: "What are you building right now?"</li>
+                <li>Then: "We're organizing demand for real-world operators."</li>
+                <li>Ask: "How are you handling payments today?"</li>
+              </ul>
+            </div>
 
             <div class="card">
               <h3>Decision-maker check</h3>
@@ -1037,13 +1037,20 @@ body.stripe-mode .pill {
             </div>
 
             <div class="card">
-              <h3>Strong follow-up</h3>
+              <h3>Follow-up — showed the demo</h3>
               <p id="followupMsg">Good meeting you at Stripe Sessions — Marcus from Square Bidness. We install operator systems like I showed you. Let's stay connected.</p>
+            </div>
+
+            <!-- FIX 4 — second follow-up for no-demo conversations -->
+            <div class="card">
+              <h3>Follow-up — talked, no demo</h3>
+              <p id="followupMsgNoDemo">Good meeting you at Stripe Sessions — Marcus from Square Bidness. We build revenue infrastructure for independent operators — checkout, ordering, routing, all structured. Worth a quick look when you have 5 minutes: squarebidness.com</p>
             </div>
           </div>
           <p class="copy-note" id="copyNote4" aria-live="polite"></p>
         </section>
 
+        <!-- ═══ DAILY TARGET ═══ -->
         <section class="panel level" id="dailyTarget" data-section>
           <div class="level__head">
             <div>
@@ -1074,6 +1081,7 @@ body.stripe-mode .pill {
           <p class="copy-note" id="copyNote5" aria-live="polite"></p>
         </section>
 
+        <!-- ═══ LIVE DEMOS ═══ -->
         <section class="panel level" id="demoLinks" data-section>
           <div class="level__head">
             <div>
@@ -1093,12 +1101,12 @@ body.stripe-mode .pill {
             </a>
 
             <a class="demo-link" href="/stripe-2026/delish/" target="_blank" rel="noopener">
-  <span>
-    <strong>Delish System (Case Study)</strong><br />
-    <span class="muted">Full operator system breakdown</span>
-  </span>
-  <span>→</span>
-</a>
+              <span>
+                <strong>Delish System (Case Study)</strong><br />
+                <span class="muted">Full operator system breakdown</span>
+              </span>
+              <span>→</span>
+            </a>
 
             <a class="demo-link" href="/puffs/" target="_blank" rel="noopener">
               <span>
@@ -1124,6 +1132,18 @@ body.stripe-mode .pill {
               <span>→</span>
             </a>
           </div>
+
+          <!-- FIX 5 — contact capture so someone holding your phone can tap to connect -->
+          <div class="contact-card">
+            <div class="contact-card__text">
+              <strong>Connect with Marcus</strong>
+              <span>Square Bidness · Founder · squarebidness.com</span>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <a class="btn btn--small btn--gold" href="https://www.linkedin.com/in/marcus-buckner-sb" target="_blank" rel="noopener">LinkedIn →</a>
+              <a class="btn btn--small btn--ghost" href="https://www.squarebidness.com" target="_blank" rel="noopener">Site →</a>
+            </div>
+          </div>
         </section>
 
         <div class="empty-state hidden" id="emptyState">
@@ -1132,32 +1152,34 @@ body.stripe-mode .pill {
       </div>
     </section>
 
-    <!-- FIX 2: added id="endOfDay" data-section so this counts toward progress and tracks in sidebar -->
+    <!-- ═══ END OF DAY ═══ -->
     <section class="panel level" id="endOfDay" data-section style="margin:0 auto 44px; width:min(1040px, calc(100% - 24px));">
-  <div class="level__head">
-    <div>
-      <p class="level__eyebrow">End of day</p>
-      <h2>Lock it in</h2>
-    </div>
-  </div>
+      <div class="level__head">
+        <div>
+          <p class="level__eyebrow">End of day</p>
+          <h2>Lock it in</h2>
+        </div>
+      </div>
 
-  <div class="grid grid--2">
-    <div class="card">
-      <h3>What changed?</h3>
-      <p>What did I learn that changes how I build?</p>
-    </div>
+      <div class="grid grid--2">
+        <div class="card">
+          <h3>What changed?</h3>
+          <p>What did I learn that changes how I build?</p>
+        </div>
 
-    <div class="card">
-      <h3>What was confirmed?</h3>
-      <p>What did Stripe validate that I already believed?</p>
-    </div>
+        <div class="card">
+          <h3>What was confirmed?</h3>
+          <p>What did Stripe validate that I already believed?</p>
+        </div>
 
-    <div class="card">
-      <h3>What's unclear?</h3>
-      <p>Where do I need deeper answers tomorrow?</p>
-    </div>
-  </div>
-</section>
+        <div class="card">
+          <h3>What's unclear?</h3>
+          <p>Where do I need deeper answers tomorrow?</p>
+        </div>
+      </div>
+      <!-- FIX 3 — copy-note added so future copy buttons here have a feedback target -->
+      <p class="copy-note" id="copyNote6" aria-live="polite"></p>
+    </section>
   </main>
 
   <div class="floating">
@@ -1170,191 +1192,116 @@ body.stripe-mode .pill {
       const $ = (sel, root = document) => root.querySelector(sel);
       const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-      const searchInput = $("#searchInput");
+      const searchInput   = $("#searchInput");
       const clearSearchBtn = $("#clearSearchBtn");
-      const jumpDailyBtn = $("#jumpDailyBtn");
-      const topBtn = $("#topBtn");
+      const jumpDailyBtn  = $("#jumpDailyBtn");
+      const topBtn        = $("#topBtn");
       const quickPitchBtn = $("#quickPitchBtn");
       const copyMasterBtn = $("#copyMasterBtn");
-      const expandAllBtn = $("#expandAllBtn");
+      const expandAllBtn  = $("#expandAllBtn");
       const collapseAllBtn = $("#collapseAllBtn");
-      const progressFill = $("#progressFill");
-      const progressText = $("#progressText");
-      const sections = $$("[data-section]");
-      const navBtns = $$("[data-scroll]");
-      const emptyState = $("#emptyState");
+      const progressFill  = $("#progressFill");
+      const progressText  = $("#progressText");
+      const sections      = $$("[data-section]");
+      const navBtns       = $$("[data-scroll]");
+      const emptyState    = $("#emptyState");
 
+      // ── Copy helper ──────────────────────────────────────────────
       async function copyText(text, noteEl) {
         try {
           await navigator.clipboard.writeText(text.trim());
           if (noteEl) {
             noteEl.textContent = "Copied.";
-            setTimeout(() => {
-              if (noteEl.textContent === "Copied.") noteEl.textContent = "";
-            }, 1500);
+            setTimeout(() => { if (noteEl.textContent === "Copied.") noteEl.textContent = ""; }, 1500);
           }
         } catch {
           if (noteEl) {
             noteEl.textContent = "Copy failed on this device.";
-            setTimeout(() => {
-              if (noteEl.textContent === "Copy failed on this device.") noteEl.textContent = "";
-            }, 1800);
+            setTimeout(() => { if (noteEl.textContent === "Copy failed on this device.") noteEl.textContent = ""; }, 1800);
           }
         }
       }
 
-      function getNoteElFor(element) {
-        const level = element.closest(".level");
-        return level ? level.querySelector(".copy-note") : null;
+      function getNoteElFor(el) {
+        const lvl = el.closest(".level");
+        return lvl ? lvl.querySelector(".copy-note") : null;
       }
 
       $$(".copy-btn").forEach((btn) => {
         btn.addEventListener("click", async () => {
           const direct = btn.getAttribute("data-copy");
-          if (direct) {
-            await copyText(direct, getNoteElFor(btn));
-            return;
-          }
-
-          const targetSel = btn.getAttribute("data-copy-target");
-          if (!targetSel) return;
-
-          const target = $(targetSel);
+          if (direct) { await copyText(direct, getNoteElFor(btn)); return; }
+          const sel = btn.getAttribute("data-copy-target");
+          if (!sel) return;
+          const target = $(sel);
           if (!target) return;
-
           await copyText(target.innerText || target.textContent || "", getNoteElFor(btn));
         });
       });
 
+      // Copy master pitch respects current mode
       copyMasterBtn.addEventListener("click", () => {
-        const text = ($("#pitchOperator")?.innerText || "").trim();
-        copyText(text, $("#copyNote1"));
+        const pitchEl = stripeMode ? $("#pitchStripe") : $("#pitchOperator");
+        copyText((pitchEl?.innerText || "").trim(), $("#copyNote1"));
       });
 
       quickPitchBtn.addEventListener("click", () => {
         const el = $("#level1");
         if (!el) return;
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
-        setTimeout(() => {
-          const text = ($("#pitchShort")?.innerText || "").trim();
-          copyText(text, $("#copyNote1"));
-        }, 300);
+        el.scrollIntoView({ behavior:"smooth", block:"start" });
+        setTimeout(() => copyText(($("#pitchShort")?.innerText || "").trim(), $("#copyNote1")), 300);
       });
 
-      topBtn.addEventListener("click", () => {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      });
-
-      jumpDailyBtn.addEventListener("click", () => {
-        $("#dailyTarget")?.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
+      topBtn.addEventListener("click", () => window.scrollTo({ top:0, behavior:"smooth" }));
+      jumpDailyBtn.addEventListener("click", () => $("#dailyTarget")?.scrollIntoView({ behavior:"smooth", block:"start" }));
 
       navBtns.forEach((btn) => {
         btn.addEventListener("click", () => {
-          const sel = btn.getAttribute("data-scroll");
-          const target = sel ? $(sel) : null;
-          if (!target) return;
-          target.scrollIntoView({ behavior: "smooth", block: "start" });
+          const target = $(btn.getAttribute("data-scroll") || "");
+          if (target) target.scrollIntoView({ behavior:"smooth", block:"start" });
         });
       });
 
+      // ── Active nav tracking ───────────────────────────────────────
       function setActiveNav() {
         let active = sections[0];
         const threshold = window.innerHeight * 0.28;
-
-        sections.forEach((section) => {
-          const rect = section.getBoundingClientRect();
-          if (rect.top <= threshold) active = section;
-        });
-
-        navBtns.forEach((btn) => {
-          btn.classList.toggle("is-active", btn.getAttribute("data-scroll") === `#${active.id}`);
-        });
+        sections.forEach((s) => { if (s.getBoundingClientRect().top <= threshold) active = s; });
+        navBtns.forEach((btn) => btn.classList.toggle("is-active", btn.getAttribute("data-scroll") === `#${active.id}`));
       }
 
-      const viewed = new Set();
+      // ── Progress tracking ─────────────────────────────────────────
+      // FIX 2 — seed level1 as already-viewed so progress starts at 1/7 not 0/7
+      const viewed = new Set(["level1"]);
+
       const obs = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            viewed.add(entry.target.id);
-            updateProgress();
-          }
-        });
+        entries.forEach((e) => { if (e.isIntersecting) { viewed.add(e.target.id); updateProgress(); } });
       }, { threshold: 0.45 });
 
       function updateProgress() {
         const total = sections.length;
         const count = viewed.size;
-        const pct = total ? (count / total) * 100 : 0;
-        progressFill.style.width = pct + "%";
+        progressFill.style.width = (total ? (count / total) * 100 : 0) + "%";
         progressText.textContent = `${count} of ${total} viewed`;
       }
 
-      sections.forEach((section) => obs.observe(section));
+      sections.forEach((s) => obs.observe(s));
 
+      // ── Search ────────────────────────────────────────────────────
       function runSearch() {
         const q = searchInput.value.trim().toLowerCase();
-        let visibleCount = 0;
-
-        sections.forEach((section) => {
-          const hay = section.innerText.toLowerCase();
-          const match = !q || hay.includes(q);
-          section.classList.toggle("hidden", !match);
-          if (match) visibleCount++;
+        let visible = 0;
+        sections.forEach((s) => {
+          const match = !q || s.innerText.toLowerCase().includes(q);
+          s.classList.toggle("hidden", !match);
+          if (match) visible++;
         });
-
-        emptyState.classList.toggle("hidden", visibleCount !== 0);
-
+        emptyState.classList.toggle("hidden", visible !== 0);
         navBtns.forEach((btn) => {
-          const sel = btn.getAttribute("data-scroll");
-          const target = sel ? $(sel) : null;
-          const hidden = !target || target.classList.contains("hidden");
-          btn.classList.toggle("hidden", hidden && q !== "");
+          const target = $(btn.getAttribute("data-scroll") || "");
+          btn.classList.toggle("hidden", !!q && (!target || target.classList.contains("hidden")));
         });
       }
-
-    // STRIPE MODE
-let stripeMode = false;
-const stripeBtn = document.getElementById("stripeModeBtn");
-
-function toggleStripeMode(){
-  stripeMode = !stripeMode;
-
-  stripeBtn.textContent = stripeMode ? "Stripe Mode: ON" : "Stripe Mode: OFF";
-
-  const pairs = [
-    ["pitchOperator","pitchStripe"]
-  ];
-
-  pairs.forEach(([op, st]) => {
-    const opEl = document.getElementById(op);
-    const stEl = document.getElementById(st);
-
-    if (!opEl || !stEl) return;
-
-    opEl.classList.toggle("hidden", stripeMode);
-    stEl.classList.toggle("hidden", !stripeMode);
-  });
-
-  document.body.classList.toggle("stripe-mode", stripeMode);
-}
-
-if (stripeBtn){
-  stripeBtn.addEventListener("click", toggleStripeMode);
-}
-
-// INVESTOR DECK
-const toggleDeckBtn = document.getElementById("toggleDeckBtn");
-const deckContainer = document.getElementById("deckContainer");
-
-if (toggleDeckBtn){
-  toggleDeckBtn.addEventListener("click", () => {
-    deckContainer.classList.toggle("hidden");
-    toggleDeckBtn.textContent = deckContainer.classList.contains("hidden")
-      ? "Open Deck"
-      : "Close Deck";
-  });
-}
 
       searchInput.addEventListener("input", runSearch);
 
@@ -1370,21 +1317,54 @@ if (toggleDeckBtn){
         runSearch();
       });
 
+      // FIX 1 — collapse all resets nav buttons to all visible (not just level1)
       collapseAllBtn.addEventListener("click", () => {
         const first = $("#level1");
-        sections.forEach((s) => {
-          if (s !== first) s.classList.add("hidden");
-        });
+        sections.forEach((s) => { if (s !== first) s.classList.add("hidden"); });
         searchInput.value = "";
         emptyState.classList.add("hidden");
-        navBtns.forEach((btn) => {
-          const sel = btn.getAttribute("data-scroll");
-          btn.classList.toggle("hidden", sel !== "#level1");
-        });
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        navBtns.forEach((btn) => btn.classList.remove("hidden")); // all nav stays visible
+        window.scrollTo({ top:0, behavior:"smooth" });
       });
 
-      document.addEventListener("scroll", setActiveNav, { passive: true });
+      // ── Stripe Mode ───────────────────────────────────────────────
+      let stripeMode = false;
+      const stripeBtn  = document.getElementById("stripeModeBtn");
+      const pitchCard  = document.getElementById("pitchCard");
+
+      function toggleStripeMode() {
+        stripeMode = !stripeMode;
+
+        // FIX 7 — button changes color + pitch card gets visible glow
+        stripeBtn.textContent = stripeMode ? "Stripe Mode: ON" : "Stripe Mode: OFF";
+        stripeBtn.classList.toggle("btn--stripe-on", stripeMode);
+        stripeBtn.classList.toggle("btn--ghost", !stripeMode);
+        if (pitchCard) pitchCard.classList.toggle("stripe-active", stripeMode);
+
+        document.getElementById("pitchOperator")?.classList.toggle("hidden",  stripeMode);
+        document.getElementById("pitchStripe")?.classList.toggle("hidden", !stripeMode);
+        document.body.classList.toggle("stripe-mode", stripeMode);
+      }
+
+      if (stripeBtn) stripeBtn.addEventListener("click", toggleStripeMode);
+
+      // ── Investor Deck ─────────────────────────────────────────────
+      const toggleDeckBtn  = document.getElementById("toggleDeckBtn");
+      const deckContainer  = document.getElementById("deckContainer");
+
+      if (toggleDeckBtn) {
+        toggleDeckBtn.addEventListener("click", () => {
+          deckContainer.classList.toggle("hidden");
+          toggleDeckBtn.textContent = deckContainer.classList.contains("hidden") ? "Open Deck" : "Close Deck";
+        });
+      }
+
+      // FIX 6 — autofocus search on desktop only; skip mobile to avoid keyboard popup
+      if (window.matchMedia("(hover:hover) and (pointer:fine)").matches) {
+        searchInput.focus();
+      }
+
+      document.addEventListener("scroll", setActiveNav, { passive:true });
       setActiveNav();
       updateProgress();
       runSearch();
