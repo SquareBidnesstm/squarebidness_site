@@ -1,31 +1,22 @@
 const KEY = "chocolate-city:vip:bookings";
 
 const PACKAGES = {
-  test_section: {
-    name: "System Test Reservation",
-    fullPrice: 1,
-    deposit: 1,
-    description: "Internal Stripe test for Chocolate City."
-  },
-
   section_one: {
     name: "Section One",
     fullPrice: 300,
-    deposit: 100,
+    price: 300,
     description: "6 bands, 10 Vegas Bomb shots, 4 waters, VIP parking, no wait in line."
   },
-
   section_two: {
     name: "Section Two",
     fullPrice: 400,
-    deposit: 150,
+    price: 400,
     description: "6 bands, 10 Vegas Bomb shots, 4 waters, VIP parking, no wait in line, 1 premium bottle of choice."
   },
-
   city_section: {
     name: "The City Section",
     fullPrice: 650,
-    deposit: 200,
+    price: 650,
     description: "10 bands, 10 Vegas Bomb shots, 4 waters, 2 premium bottles, 5-beer bucket, hurricane bottle, VIP parking, no wait in line."
   }
 };
@@ -107,9 +98,9 @@ export default async function handler(req, res) {
           quantity: 1,
           price_data: {
             currency: "usd",
-            unit_amount: selectedPackage.deposit * 100,
+            unit_amount: selectedPackage.price * 100,
             product_data: {
-              name: `Chocolate City VIP Deposit — ${selectedPackage.name}`,
+              name: `Chocolate City VIP Section — ${selectedPackage.name}`,
               description: selectedPackage.description
             }
           }
@@ -119,11 +110,11 @@ export default async function handler(req, res) {
         business: "Chocolate City Lounge LLC",
         packageId: body.packageId,
         packageName: selectedPackage.name,
-        fullPrice: String(selectedPackage.fullPrice),
-        deposit: String(selectedPackage.deposit),
-        remainingBalance: String(selectedPackage.fullPrice - selectedPackage.deposit),
-        customerName,
-        type: "vip_deposit"
+        ffullPrice: String(selectedPackage.fullPrice),
+deposit: String(selectedPackage.price),
+remainingBalance: "0",
+customerName,
+type: "vip_deposit"
       }
     });
 
