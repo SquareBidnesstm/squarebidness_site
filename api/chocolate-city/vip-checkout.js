@@ -2,11 +2,11 @@ const KEY = "chocolate-city:vip:bookings";
 
 const PACKAGES = {
   test_section: {
-  name: "System Test Reservation",
-  fullPrice: 1,
-  deposit: 1,
-  description: "Internal Stripe test for Chocolate City."
-},
+    name: "System Test Reservation",
+    fullPrice: 1,
+    deposit: 1,
+    description: "Internal Stripe test for Chocolate City."
+  },
 
   section_one: {
     name: "Section One",
@@ -14,12 +14,14 @@ const PACKAGES = {
     deposit: 100,
     description: "6 bands, 10 Vegas Bomb shots, 4 waters, VIP parking, no wait in line."
   },
+
   section_two: {
     name: "Section Two",
     fullPrice: 400,
     deposit: 150,
     description: "6 bands, 10 Vegas Bomb shots, 4 waters, VIP parking, no wait in line, 1 premium bottle of choice."
   },
+
   city_section: {
     name: "The City Section",
     fullPrice: 650,
@@ -27,16 +29,6 @@ const PACKAGES = {
     description: "10 bands, 10 Vegas Bomb shots, 4 waters, 2 premium bottles, 5-beer bucket, hurricane bottle, VIP parking, no wait in line."
   }
 };
-
-const body = req.body || {};
-
-const customerName = String(body.customerName || "").trim();
-
-if (!customerName) {
-  return res.status(400).json({ ok: false, error: "Section owner name required" });
-}
-
-const selectedPackage = PACKAGES[body.packageId];
 
 async function redis(command, ...args) {
   const url = process.env.UPSTASH_REDIS_REST_URL;
@@ -59,6 +51,7 @@ export default async function handler(req, res) {
     }
 
     const stripeKey = process.env.CHOCOLATE_CITY_STRIPE_SECRET_KEY;
+
     if (!stripeKey) {
       return res.status(500).json({ ok: false, error: "Stripe key missing" });
     }
@@ -66,10 +59,24 @@ export default async function handler(req, res) {
     const Stripe = (await import("stripe")).default;
     const stripe = Stripe(stripeKey);
 
+    const body = req.body || {};
+
+    const customerName = String(body.customerName || "").trim();
+
+    if (!customerName) {
+      return res.status(400).json({
+        ok: false,
+        error: "Section owner name required"
+      });
+    }
+
     const selectedPackage = PACKAGES[body.packageId];
 
     if (!selectedPackage) {
-      return res.status(400).json({ ok: false, error: "Invalid VIP package" });
+      return res.status(400).json({
+        ok: false,
+        error: "Invalid VIP package"
+      });
     }
 
     const data = await redis("GET", KEY);
