@@ -28,11 +28,15 @@ const PACKAGES = {
   }
 };
 
+const body = req.body || {};
+
 const customerName = String(body.customerName || "").trim();
 
 if (!customerName) {
   return res.status(400).json({ ok: false, error: "Section owner name required" });
 }
+
+const selectedPackage = PACKAGES[body.packageId];
 
 async function redis(command, ...args) {
   const url = process.env.UPSTASH_REDIS_REST_URL;
@@ -62,7 +66,6 @@ export default async function handler(req, res) {
     const Stripe = (await import("stripe")).default;
     const stripe = Stripe(stripeKey);
 
-    const body = req.body || {};
     const selectedPackage = PACKAGES[body.packageId];
 
     if (!selectedPackage) {
