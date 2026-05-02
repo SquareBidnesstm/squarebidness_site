@@ -1,6 +1,13 @@
 const KEY = "chocolate-city:vip:bookings";
 
 const PACKAGES = {
+  test_section: {
+  name: "System Test Reservation",
+  fullPrice: 1,
+  deposit: 1,
+  description: "Internal Stripe test for Chocolate City."
+},
+
   section_one: {
     name: "Section One",
     fullPrice: 300,
