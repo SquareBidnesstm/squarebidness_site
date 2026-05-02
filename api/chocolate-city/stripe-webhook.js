@@ -3,6 +3,12 @@ import Stripe from "stripe";
 const BOOKING_KEY = "chocolate-city:vip:bookings";
 const SESSION_KEY_PREFIX = "chocolate-city:stripe:session:";
 
+export const config = {
+  api: {
+    bodyParser: false
+  }
+};
+
 async function redis(command, ...args) {
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
@@ -17,17 +23,13 @@ async function redis(command, ...args) {
   return res.json();
 }
 
-export const config = {
-  api: {
-    bodyParser: false
-  }
-};
-
 async function buffer(readable) {
   const chunks = [];
+
   for await (const chunk of readable) {
     chunks.push(typeof chunk === "string" ? Buffer.from(chunk) : chunk);
   }
+
   return Buffer.concat(chunks);
 }
 
@@ -37,60 +39,76 @@ export default async function handler(req, res) {
   }
 
   try {
-    const stripe = Stripe(process.env.CHOCOLATE_CITY_STRIPE_SECRET_KEY);
+    const stripeKey = process.env.CHOCOLATE_CITY_STRIPE_SECRET_KEY;
+    const webhookSecret = process.env.CHOCOLATE_CITY_STRIPE_WEBHOOK_SECRET;
+
+    if (!stripeKey) {
+      return res.status(500).json({ ok: false, error: "Stripe key missing" });
+    }
+
+    if (!webhookSecret) {
+      return res.status(500).json({ ok: false, error: "Webhook secret missing" });
+    }
+
+    const stripe = new Stripe(stripeKey);
     const sig = req.headers["stripe-signature"];
     const rawBody = await buffer(req);
 
     let event;
 
     try {
-      event = stripe.webhooks.constructEvent(
-        rawBody,
-        sig,
-        process.env.CHOCOLATE_CITY_STRIPE_WEBHOOK_SECRET
-      );
+      event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
     } catch (err) {
       return res.status(400).send(`Webhook signature failed: ${err.message}`);
     }
 
-    if (event.type === "checkout.session.completed") {
-      const session = event.data.object;
-
-      if (session?.metadata?.type !== "vip_deposit") {
-        return res.status(200).json({ received: true, ignored: true });
-      }
-
-      const sessionLockKey = `${SESSION_KEY_PREFIX}${session.id}`;
-      const existing = await redis("GET", sessionLockKey);
-
-      if (existing?.result) {
-        return res.status(200).json({ received: true, duplicate: true });
-      }
-
-      const data = await redis("GET", BOOKING_KEY);
-      const bookings = data?.result ? JSON.parse(data.result) : [];
-
-      const booking = {
-        sessionId: session.id,
-        paidAt: new Date().toISOString(),
-        customerName: session.customer_details?.name || "",
-        customerEmail: session.customer_details?.email || "",
-        customerPhone: session.customer_details?.phone || "",
-        packageId: session.metadata.packageId,
-        packageName: session.metadata.packageName,
-        fullPrice: Number(session.metadata.fullPrice || 0),
-        deposit: Number(session.metadata.deposit || 0),
-        remainingBalance: Number(session.metadata.remainingBalance || 0),
-        paymentStatus: session.payment_status || "paid"
-      };
-
-      bookings.push(booking);
-
-      await redis("SET", BOOKING_KEY, JSON.stringify(bookings));
-      await redis("SET", sessionLockKey, JSON.stringify({ processed: true, at: new Date().toISOString() }));
+    if (event.type !== "checkout.session.completed") {
+      return res.status(200).json({ received: true, ignored: true });
     }
 
-    return res.status(200).json({ received: true });
+    const session = event.data.object;
+
+    if (session?.metadata?.type !== "vip_deposit") {
+      return res.status(200).json({ received: true, ignored: true });
+    }
+
+    const sessionLockKey = `${SESSION_KEY_PREFIX}${session.id}`;
+    const existing = await redis("GET", sessionLockKey);
+
+    if (existing?.result) {
+      return res.status(200).json({ received: true, duplicate: true });
+    }
+
+    const data = await redis("GET", BOOKING_KEY);
+    const bookings = data?.result ? JSON.parse(data.result) : [];
+
+    const booking = {
+      sessionId: session.id,
+      paidAt: new Date().toISOString(),
+      customerName:
+        session.metadata?.customerName ||
+        session.customer_details?.name ||
+        "",
+      customerEmail: session.customer_details?.email || "",
+      customerPhone: session.customer_details?.phone || "",
+      packageId: session.metadata?.packageId || "",
+      packageName: session.metadata?.packageName || "",
+      fullPrice: Number(session.metadata?.fullPrice || 0),
+      deposit: Number(session.metadata?.deposit || 0),
+      remainingBalance: Number(session.metadata?.remainingBalance || 0),
+      paymentStatus: session.payment_status || "paid"
+    };
+
+    bookings.push(booking);
+
+    await redis("SET", BOOKING_KEY, JSON.stringify(bookings));
+    await redis(
+      "SET",
+      sessionLockKey,
+      JSON.stringify({ processed: true, at: new Date().toISOString() })
+    );
+
+    return res.status(200).json({ received: true, booking });
   } catch (err) {
     return res.status(500).json({ ok: false, error: err.message });
   }
