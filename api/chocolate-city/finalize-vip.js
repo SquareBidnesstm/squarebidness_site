@@ -15,6 +15,7 @@ export default async function handler(req, res) {
     return res.status(200).json({
       ok: true,
       packageName: session.metadata?.packageName || "VIP Section",
+      customerName: session.metadata?.customerName || session.customer_details?.name || "",
       deposit: session.metadata?.deposit || "",
       remaining: session.metadata?.remainingBalance || "",
       customerName: session.customer_details?.name || "",
