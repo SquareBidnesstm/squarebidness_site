@@ -251,6 +251,25 @@
   font-size:26px;
 }
 
+    .vip-field-label{
+  display:block;
+  margin:14px 0 7px;
+  color:var(--gold2);
+  font-weight:900;
+  font-size:13px;
+}
+
+.vip-input{
+  width:100%;
+  padding:13px 14px;
+  margin-bottom:14px;
+  border-radius:14px;
+  border:1px solid var(--line);
+  background:#080504;
+  color:var(--text);
+  font-size:15px;
+}
+
 .vip-price{
   font-size:38px;
   font-weight:900;
@@ -383,10 +402,9 @@
     <li>Webhook verification</li>
     <li>VIP inventory system</li>
   </ul>
-
-  <button class="vip-btn" data-package="test_section">
-    Run $1 Test
-  </button>
+      <label class="vip-field-label">Section Owner Name</label>
+<input class="vip-input" data-owner-input placeholder="Name for reservation" />
+<button class="vip-btn" data-package="test_section">Run $1 Test</button>
 </div>
 
   <div class="vip-grid">
@@ -402,7 +420,9 @@
         <li>VIP Parking</li>
         <li>No Wait in Line</li>
       </ul>
-      <button class="vip-btn" data-package="section_one">Reserve Section One</button>
+      <label class="vip-field-label">Section Owner Name</label>
+<input class="vip-input" data-owner-input placeholder="Name for reservation" />
+<button class="vip-btn" data-package="section_one">Reserve Section One</button>
     </div>
 
     <div class="vip-card">
@@ -418,7 +438,9 @@
         <li>No Wait in Line</li>
         <li>1 Premium Bottle of Choice</li>
       </ul>
-      <button class="vip-btn" data-package="section_two">Reserve Section Two</button>
+      <label class="vip-field-label">Section Owner Name</label>
+<input class="vip-input" data-owner-input placeholder="Name for reservation" />
+<button class="vip-btn" data-package="section_one">Reserve Section One</button>
     </div>
 
     <div class="vip-card featured">
@@ -436,7 +458,9 @@
         <li>5-Bottle Beer Bucket of Choice</li>
         <li>Hurricane Bottle — Serves 4</li>
       </ul>
-      <button class="vip-btn" data-package="city_section">Reserve City Section</button>
+      <label class="vip-field-label">Section Owner Name</label>
+<input class="vip-input" data-owner-input placeholder="Name for reservation" />
+<button class="vip-btn" data-package="section_one">Reserve Section One</button>
     </div>
   </div>
 
@@ -456,31 +480,6 @@
     </footer>
   </main>
 
-  <script>
-    async function loadStatus(){
-      try{
-        const res = await fetch("/api/chocolate-city/status/", { cache:"no-store" });
-        const data = await res.json();
-        if(!data.ok || !data.state) return;
-
-        const s = data.state;
-
-        document.getElementById("eventTitle").textContent = s.eventTitle || "All Roads Lead to Chocolate City";
-        document.getElementById("weekendStatus").textContent = s.weekendStatus || "Open this weekend";
-        document.getElementById("fridayText").textContent = s.fridayText || "Friday — select nights only.";
-        document.getElementById("vipStatus").textContent = s.vipStatus || "VIP booth reservations coming soon.";
-        document.getElementById("announcement").textContent = s.announcement || "Stay tuned for updates, event nights, and VIP sections.";
-
-        document.getElementById("fridayPill").textContent = s.fridayOpen
-          ? "Friday Open This Week"
-          : "Friday — select nights only";
-      }catch(err){
-        console.warn("Chocolate City status unavailable", err);
-      }
-    }
-
-    loadStatus();
-  </script>
   <script>
   async function loadVipAvailability(){
     const box = document.getElementById("vipAvailability");
@@ -508,6 +507,16 @@
   }
 
   async function reserveVip(packageId, button){
+    const card = button.closest(".vip-card");
+    const ownerInput = card ? card.querySelector("[data-owner-input]") : null;
+    const customerName = ownerInput ? ownerInput.value.trim() : "";
+
+    if(!customerName){
+      alert("Enter the section owner name first.");
+      if(ownerInput) ownerInput.focus();
+      return;
+    }
+
     const originalText = button.textContent;
     button.disabled = true;
     button.textContent = "Opening checkout...";
@@ -516,7 +525,10 @@
       const res = await fetch("/api/chocolate-city/vip-checkout/", {
         method:"POST",
         headers:{ "Content-Type":"application/json" },
-        body:JSON.stringify({ packageId })
+        body:JSON.stringify({
+          packageId,
+          customerName
+        })
       });
 
       const data = await res.json();
