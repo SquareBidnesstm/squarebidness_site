@@ -1,4 +1,4 @@
-const Stripe = require("stripe");
+import Stripe from "stripe";
 
 const BOOKING_KEY = "chocolate-city:vip:bookings";
 const SESSION_KEY_PREFIX = "chocolate-city:stripe:session:";
