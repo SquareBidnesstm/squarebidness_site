@@ -28,6 +28,12 @@ const PACKAGES = {
   }
 };
 
+const customerName = String(body.customerName || "").trim();
+
+if (!customerName) {
+  return res.status(400).json({ ok: false, error: "Section owner name required" });
+}
+
 async function redis(command, ...args) {
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
@@ -106,6 +112,7 @@ export default async function handler(req, res) {
         fullPrice: String(selectedPackage.fullPrice),
         deposit: String(selectedPackage.deposit),
         remainingBalance: String(selectedPackage.fullPrice - selectedPackage.deposit),
+        customerName,
         type: "vip_deposit"
       }
     });
