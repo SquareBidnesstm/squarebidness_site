@@ -103,6 +103,28 @@
       font-weight:800;
     }
 
+    .booking-list{
+  margin-top:18px;
+  display:grid;
+  gap:12px;
+}
+
+.booking-card{
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:14px;
+  background:#090504;
+}
+
+.booking-card strong{
+  color:var(--gold);
+}
+
+.booking-card div{
+  margin-top:5px;
+  color:var(--muted);
+}
+
     @media(max-width:700px){
       .row{grid-template-columns:1fr}
     }
@@ -149,6 +171,8 @@
       <textarea id="announcement">Stay tuned for updates, event nights, and VIP sections.</textarea>
 
       <button onclick="saveStatus()">Save Chocolate City Updates</button>
+      <button type="button" onclick="loadBookings()">Load VIP Bookings</button>
+      <div id="bookingList" class="booking-list"></div>
 
       <div class="status" id="status">Ready.</div>
     </div>
@@ -224,5 +248,61 @@
 
     loadCurrent();
   </script>
+  <script>
+  async function loadBookings(){
+    const token = document.getElementById("token").value.trim();
+    const box = document.getElementById("bookingList");
+
+    if(!token){
+      box.innerHTML = "<p>Enter admin token first.</p>";
+      return;
+    }
+
+    box.innerHTML = "<p>Loading bookings...</p>";
+
+    try{
+      const res = await fetch("/api/chocolate-city/vip-bookings/", {
+        headers:{ "X-Admin-Token": token },
+        cache:"no-store"
+      });
+
+      const data = await res.json();
+
+      if(!data.ok){
+        box.innerHTML = `<p>${data.error || "Could not load bookings."}</p>`;
+        return;
+      }
+
+      if(!data.bookings.length){
+        box.innerHTML = "<p>No VIP bookings yet.</p>";
+        return;
+      }
+
+      box.innerHTML = data.bookings.map(b => `
+        <div class="booking-card">
+          <strong>${escapeHtml(b.packageName || "VIP Section")}</strong>
+          <div>Owner: ${escapeHtml(b.customerName || "—")}</div>
+          <div>Phone: ${escapeHtml(b.customerPhone || "—")}</div>
+          <div>Paid: $${escapeHtml(String(b.deposit || b.fullPrice || 0))}</div>
+          <div>Remaining: $${escapeHtml(String(b.remainingBalance || 0))}</div>
+          <div>Status: ${escapeHtml(b.paymentStatus || "paid")}</div>
+          <div>Paid At: ${escapeHtml(b.paidAt || "—")}</div>
+        </div>
+      `).join("");
+    }catch(err){
+      box.innerHTML = "<p>Could not load bookings.</p>";
+    }
+  }
+
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, m => ({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#039;"
+    }[m]));
+  }
+</script>
 </body>
 </html>
