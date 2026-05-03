@@ -143,10 +143,10 @@
       <div class="row">
         <div>
           <label>Friday Open?</label>
-          <select id="fridayOpen">
-            <option value="false">No — Select Fridays Only</option>
-            <option value="true">Yes — Open This Friday</option>
-          </select>
+         <select id="fridayOpen">
+  <option value="false">Friday Closed / Select Fridays Only</option>
+  <option value="true">Friday Open This Week</option>
+</select>
         </div>
 
         <div>
@@ -214,7 +214,10 @@
         fridayOpen: document.getElementById("fridayOpen").value === "true",
         weekendStatus: document.getElementById("weekendStatus").value.trim(),
         eventTitle: document.getElementById("eventTitle").value.trim(),
-        fridayText: document.getElementById("fridayText").value.trim(),
+        fridayText:
+  document.getElementById("fridayOpen").value === "true"
+    ? "Friday is open this week from 7PM – 2AM."
+    : document.getElementById("fridayText").value.trim(),
         eventNote: document.getElementById("eventNote").value.trim(),
         vipStatus: document.getElementById("vipStatus").value.trim(),
         announcement: document.getElementById("announcement").value.trim()
