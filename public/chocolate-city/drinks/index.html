@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Chocolate City — Drink Credits</title>
+
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#080504" />
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/chocolate-city/assets/cc-icon-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/chocolate-city/assets/cc-icon-180.png">
+
+  <style>
+    :root{
+      --bg:#080504;
+      --panel:#130c0a;
+      --gold:#d7a84f;
+      --gold2:#f5d58a;
+      --text:#fff7ea;
+      --muted:#c7a983;
+      --line:rgba(245,213,138,.20);
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      min-height:100vh;
+      padding:24px;
+      font-family:Arial,Helvetica,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top,rgba(215,168,79,.18),transparent 34%),
+        linear-gradient(180deg,#080504,#160b07);
+    }
+
+    .wrap{
+      max-width:1600px;
+      margin:0 auto;
+    }
+
+    .top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:18px;
+      margin-bottom:20px;
+      flex-wrap:wrap;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:16px;
+    }
+
+    .logo{
+      width:78px;
+      height:78px;
+      border-radius:50%;
+      object-fit:cover;
+    }
+
+    h1{
+      margin:0;
+      font-size:clamp(2.8rem,6vw,5rem);
+      line-height:.9;
+      letter-spacing:-.06em;
+      color:var(--gold2);
+      text-transform:uppercase;
+    }
+
+    .sub{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:1.15rem;
+      font-weight:800;
+    }
+
+    .time{
+      text-align:right;
+      color:var(--gold2);
+      font-size:2rem;
+      font-weight:900;
+    }
+
+    .banner{
+      margin-bottom:20px;
+      padding:16px 18px;
+      border-radius:20px;
+      border:1px solid var(--line);
+      background:rgba(215,168,79,.10);
+      color:var(--gold2);
+      font-size:1.15rem;
+      font-weight:900;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(360px,1fr));
+      gap:18px;
+    }
+
+    .card{
+      border:1px solid var(--line);
+      border-radius:30px;
+      background:linear-gradient(180deg,#1b100b,#0d0604);
+      padding:24px;
+      min-height:260px;
+      box-shadow:0 28px 80px rgba(0,0,0,.35);
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:38px;
+      padding:0 14px;
+      border-radius:999px;
+      background:rgba(215,168,79,.16);
+      border:1px solid rgba(215,168,79,.25);
+      color:var(--gold2);
+      font-size:.82rem;
+      font-weight:900;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+    }
+
+    .recipient{
+      margin-top:18px;
+      font-size:3rem;
+      font-weight:900;
+      letter-spacing:-.06em;
+      line-height:.95;
+    }
+
+    .amount{
+      margin-top:14px;
+      font-size:2.4rem;
+      font-weight:900;
+      color:var(--gold);
+    }
+
+    .meta{
+      margin-top:18px;
+      display:grid;
+      gap:10px;
+      color:var(--muted);
+      font-size:1.08rem;
+      font-weight:800;
+    }
+
+    .message{
+      margin-top:18px;
+      padding:16px;
+      border-radius:18px;
+      background:rgba(255,255,255,.04);
+      border:1px solid var(--line);
+      color:var(--text);
+      font-size:1.05rem;
+      line-height:1.45;
+      min-height:84px;
+    }
+
+    .empty{
+      padding:70px 24px;
+      border-radius:30px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.035);
+      text-align:center;
+      color:var(--muted);
+      font-size:1.4rem;
+      font-weight:900;
+    }
+
+    .empty strong{
+      display:block;
+      font-size:3rem;
+      color:var(--gold2);
+      margin-bottom:12px;
+      letter-spacing:-.05em;
+    }
+
+    @media(max-width:760px){
+      body{padding:14px}
+      .top{flex-direction:column}
+      .time{text-align:left}
+    }
+  </style>
+</head>
+
+<body>
+  <main class="wrap">
+    <div class="top">
+      <div class="brand">
+        <img class="logo" src="/chocolate-city/assets/cc-icon-192.png" alt="Chocolate City Lounge logo">
+
+        <div>
+          <h1>Drink Credits</h1>
+          <div class="sub">
+            Active drink credits waiting for redemption
+          </div>
+        </div>
+      </div>
+
+      <div class="time" id="timeNow">--:--</div>
+    </div>
+
+    <div class="banner" id="statusBanner">
+      Loading active drink credits...
+    </div>
+
+    <section class="grid" id="creditsGrid">
+      <div class="empty">
+        <strong>Loading…</strong>
+        Drink credits will appear here.
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const grid = document.getElementById("creditsGrid");
+    const banner = document.getElementById("statusBanner");
+
+    function escapeHtml(str){
+      return String(str || "").replace(/[&<>"']/g, m => ({
+        "&":"&amp;",
+        "<":"&lt;",
+        ">":"&gt;",
+        '"':"&quot;",
+        "'":"&#039;"
+      }[m]));
+    }
+
+    function updateTime(){
+      document.getElementById("timeNow").textContent =
+        new Intl.DateTimeFormat("en-US",{
+          timeZone:"America/Chicago",
+          hour:"numeric",
+          minute:"2-digit"
+        }).format(new Date());
+    }
+
+    function renderCredits(credits){
+      if(!credits.length){
+        grid.innerHTML = `
+          <div class="empty">
+            <strong>No Active Credits</strong>
+            Drink credits will appear here tonight.
+          </div>
+        `;
+
+        banner.textContent = "No active drink credits.";
+        return;
+      }
+
+      banner.textContent =
+        `${credits.length} active drink credit${credits.length === 1 ? "" : "s"} tonight`;
+
+      grid.innerHTML = credits.map(c => `
+        <article class="card">
+          <div class="badge">Drink Credit</div>
+
+          <div class="recipient">
+            ${escapeHtml(c.recipientName || "Guest")}
+          </div>
+
+          <div class="amount">
+            $${escapeHtml(String(c.amount || 0))}
+          </div>
+
+          <div class="meta">
+            <div>From: ${escapeHtml(c.senderName || "Anonymous")}</div>
+            <div>Status: Active</div>
+          </div>
+
+          <div class="message">
+            ${escapeHtml(c.message || "Enjoy your drink at Chocolate City.")}
+          </div>
+        </article>
+      `).join("");
+    }
+
+    async function loadCredits(){
+      try{
+        const res = await fetch(`/api/chocolate-city/drink-credits/?t=${Date.now()}`, {
+          cache:"no-store"
+        });
+
+        const data = await res.json();
+
+        if(!data.ok) throw new Error(data.error || "Unable to load");
+
+        renderCredits(Array.isArray(data.credits) ? data.credits : []);
+      }catch(err){
+        banner.textContent = "Unable to load drink credits.";
+
+        grid.innerHTML = `
+          <div class="empty">
+            <strong>Connection Error</strong>
+            Drink credits unavailable right now.
+          </div>
+        `;
+      }
+    }
+
+    updateTime();
+    loadCredits();
+
+    setInterval(updateTime, 10000);
+    setInterval(loadCredits, 10000);
+  </script>
+</body>
+</html>
