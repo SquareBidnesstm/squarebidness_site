@@ -483,10 +483,63 @@
     </footer>
   </main>
 
-  <script>
+ <script>
+  async function loadStatus(){
+    try{
+      const res = await fetch("/api/chocolate-city/status/", { cache:"no-store" });
+      const data = await res.json();
+
+      if(!data.ok || !data.state) return;
+
+      const s = data.state;
+      const fridayOpen = !!s.fridayOpen;
+
+      const eventTitle = document.getElementById("eventTitle");
+      const weekendStatus = document.getElementById("weekendStatus");
+      const vipStatus = document.getElementById("vipStatus");
+      const announcement = document.getElementById("announcement");
+      const fridayPill = document.getElementById("fridayPill");
+      const fridayText = document.getElementById("fridayText");
+
+      if(eventTitle) {
+        eventTitle.textContent = s.eventTitle || "All Roads Lead to Chocolate City";
+      }
+
+      if(weekendStatus) {
+        weekendStatus.textContent = s.weekendStatus || "Open this weekend";
+      }
+
+      if(vipStatus) {
+        vipStatus.textContent =
+          s.vipStatus || "Only 2 VIP sections available per night. First come. Paid in full online.";
+      }
+
+      if(announcement) {
+        announcement.textContent =
+          s.announcement || "Stay tuned for updates, event nights, and VIP sections.";
+      }
+
+      if(fridayPill) {
+        fridayPill.textContent = fridayOpen
+          ? "Friday Open This Week • 7PM – 2AM"
+          : "Friday — Select Nights Only";
+      }
+
+      if(fridayText) {
+        fridayText.textContent = fridayOpen
+          ? "Friday is open this week from 7PM – 2AM."
+          : (s.fridayText || "Friday — select nights only.");
+      }
+    }catch(err){
+      console.warn("Chocolate City status unavailable", err);
+    }
+  }
+
   async function loadVipAvailability(){
     const box = document.getElementById("vipAvailability");
     const buttons = document.querySelectorAll(".vip-btn");
+
+    if(!box) return;
 
     try{
       const res = await fetch("/api/chocolate-city/vip-availability/", { cache:"no-store" });
@@ -505,7 +558,7 @@
 
       box.textContent = `${data.remaining} of 2 VIP sections available.`;
     }catch(err){
-      box.textContent = "VIP availability will be confirmed before deposit.";
+      box.textContent = "VIP availability will be confirmed before checkout.";
     }
   }
 
@@ -557,6 +610,7 @@
     });
   });
 
+  loadStatus();
   loadVipAvailability();
 </script>
 </body>
