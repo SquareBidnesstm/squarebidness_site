@@ -22,7 +22,7 @@ const DEFAULT_STATE = {
   weekendStatus: "Open this weekend",
   eventTitle: "All Roads Lead to Chocolate City",
   eventNote: "Saturdays move the city. Sundays belong to it.",
-  vipStatus: "VIP booth reservations coming soon.",
+  vipStatus: "Only 2 VIP sections available per night. First come. Paid in full online.",
   announcement: "Stay tuned for updates, event nights, and VIP sections.",
   updatedAt: new Date().toISOString()
 };
@@ -49,15 +49,15 @@ export default async function handler(req, res) {
 
       const body = req.body || {};
       const state = {
-        fridayOpen: !!body.fridayOpen,
-        fridayText: String(body.fridayText || DEFAULT_STATE.fridayText),
-        weekendStatus: String(body.weekendStatus || DEFAULT_STATE.weekendStatus),
-        eventTitle: String(body.eventTitle || DEFAULT_STATE.eventTitle),
-        eventNote: String(body.eventNote || DEFAULT_STATE.eventNote),
-        vipStatus: String(body.vipStatus || DEFAULT_STATE.vipStatus),
-        announcement: String(body.announcement || DEFAULT_STATE.announcement),
-        updatedAt: new Date().toISOString()
-      };
+  fridayOpen: body.fridayOpen === true || body.fridayOpen === "true",
+  fridayText: String(body.fridayText || DEFAULT_STATE.fridayText),
+  weekendStatus: String(body.weekendStatus || DEFAULT_STATE.weekendStatus),
+  eventTitle: String(body.eventTitle || DEFAULT_STATE.eventTitle),
+  eventNote: String(body.eventNote || DEFAULT_STATE.eventNote),
+  vipStatus: String(body.vipStatus || DEFAULT_STATE.vipStatus),
+  announcement: String(body.announcement || DEFAULT_STATE.announcement),
+  updatedAt: new Date().toISOString()
+};
 
       await redis("SET", KEY, JSON.stringify(state));
 
