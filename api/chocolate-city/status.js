@@ -17,7 +17,7 @@ async function redis(command, ...args) {
 }
 
 const DEFAULT_STATE = {
-  fridayOpen: true,
+  fridayOpen: false,
   fridayText: "Friday — select nights only.",
   weekendStatus: "Open this weekend",
   eventTitle: "All Roads Lead to Chocolate City",
