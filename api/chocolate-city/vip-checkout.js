@@ -48,7 +48,7 @@ export default async function handler(req, res) {
     }
 
     const Stripe = (await import("stripe")).default;
-    const stripe = Stripe(stripeKey);
+    const stripe = new Stripe(stripeKey);
 
     const body = req.body || {};
 
@@ -110,7 +110,7 @@ export default async function handler(req, res) {
         business: "Chocolate City Lounge LLC",
         packageId: body.packageId,
         packageName: selectedPackage.name,
-        ffullPrice: String(selectedPackage.fullPrice),
+        fullPrice: String(selectedPackage.fullPrice),
 deposit: String(selectedPackage.price),
 remainingBalance: "0",
 customerName,
