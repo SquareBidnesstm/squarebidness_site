@@ -220,96 +220,125 @@
   </main>
 
   <script>
-    const grid = document.getElementById("creditsGrid");
-    const banner = document.getElementById("statusBanner");
+  const grid = document.getElementById("creditsGrid");
+  const banner = document.getElementById("statusBanner");
 
-    function escapeHtml(str){
-      return String(str || "").replace(/[&<>"']/g, m => ({
-        "&":"&amp;",
-        "<":"&lt;",
-        ">":"&gt;",
-        '"':"&quot;",
-        "'":"&#039;"
-      }[m]));
+  const emptyMessages = [
+    "No active drink credits.",
+    "Send a drink to someone in the room.",
+    "VIP sections available now.",
+    "All Roads Lead to Chocolate City."
+  ];
+
+  let emptyMessageIndex = 0;
+  let currentCreditsCount = 0;
+
+  function escapeHtml(str){
+    return String(str || "").replace(/[&<>"']/g, m => ({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#039;"
+    }[m]));
+  }
+
+  function updateTime(){
+    document.getElementById("timeNow").textContent =
+      new Intl.DateTimeFormat("en-US",{
+        timeZone:"America/Chicago",
+        hour:"numeric",
+        minute:"2-digit"
+      }).format(new Date());
+  }
+
+  function renderEmptyState(){
+    const message = emptyMessages[emptyMessageIndex % emptyMessages.length];
+
+    grid.innerHTML = `
+      <div class="empty">
+        <strong>No Active Credits</strong>
+        ${escapeHtml(message)}
+      </div>
+    `;
+
+    banner.textContent = message;
+  }
+
+  function rotateEmptyMessage(){
+    if(currentCreditsCount > 0) return;
+
+    emptyMessageIndex += 1;
+    renderEmptyState();
+  }
+
+  function renderCredits(credits){
+    currentCreditsCount = credits.length;
+
+    if(!credits.length){
+      renderEmptyState();
+      return;
     }
 
-    function updateTime(){
-      document.getElementById("timeNow").textContent =
-        new Intl.DateTimeFormat("en-US",{
-          timeZone:"America/Chicago",
-          hour:"numeric",
-          minute:"2-digit"
-        }).format(new Date());
+    banner.textContent =
+      credits.length === 1
+        ? "1 drink waiting at the bar"
+        : `${credits.length} drinks waiting at the bar`;
+
+    grid.innerHTML = credits.map(c => `
+      <article class="card">
+        <div class="badge">Drink Credit</div>
+
+        <div class="recipient">
+          ${escapeHtml(c.recipientName || "Guest")}
+        </div>
+
+        <div class="amount">
+          $${escapeHtml(String(c.amount || 0))}
+        </div>
+
+        <div class="meta">
+          <div>From: ${escapeHtml(c.senderName || "Anonymous")}</div>
+          <div>Status: Active</div>
+        </div>
+
+        <div class="message">
+          ${escapeHtml(c.message || "Enjoy your drink at Chocolate City.")}
+        </div>
+      </article>
+    `).join("");
+  }
+
+  async function loadCredits(){
+    try{
+      const res = await fetch(`/api/chocolate-city/drink-credits/?t=${Date.now()}`, {
+        cache:"no-store"
+      });
+
+      const data = await res.json();
+
+      if(!data.ok) throw new Error(data.error || "Unable to load");
+
+      renderCredits(Array.isArray(data.credits) ? data.credits : []);
+    }catch(err){
+      currentCreditsCount = 0;
+      banner.textContent = "Unable to load drink credits.";
+
+      grid.innerHTML = `
+        <div class="empty">
+          <strong>Connection Error</strong>
+          Drink credits unavailable right now.
+        </div>
+      `;
     }
+  }
 
-    function renderCredits(credits){
-      if(!credits.length){
-        grid.innerHTML = `
-          <div class="empty">
-            <strong>No Active Credits</strong>
-            Drink credits will appear here tonight.
-          </div>
-        `;
+  updateTime();
+  loadCredits();
 
-        banner.textContent = "No active drink credits.";
-        return;
-      }
-
-      banner.textContent =
-        `${credits.length} active drink credit${credits.length === 1 ? "" : "s"} tonight`;
-
-      grid.innerHTML = credits.map(c => `
-        <article class="card">
-          <div class="badge">Drink Credit</div>
-
-          <div class="recipient">
-            ${escapeHtml(c.recipientName || "Guest")}
-          </div>
-
-          <div class="amount">
-            $${escapeHtml(String(c.amount || 0))}
-          </div>
-
-          <div class="meta">
-            <div>From: ${escapeHtml(c.senderName || "Anonymous")}</div>
-            <div>Status: Active</div>
-          </div>
-
-          <div class="message">
-            ${escapeHtml(c.message || "Enjoy your drink at Chocolate City.")}
-          </div>
-        </article>
-      `).join("");
-    }
-
-    async function loadCredits(){
-      try{
-        const res = await fetch(`/api/chocolate-city/drink-credits/?t=${Date.now()}`, {
-          cache:"no-store"
-        });
-
-        const data = await res.json();
-
-        if(!data.ok) throw new Error(data.error || "Unable to load");
-
-        renderCredits(Array.isArray(data.credits) ? data.credits : []);
-      }catch(err){
-        banner.textContent = "Unable to load drink credits.";
-
-        grid.innerHTML = `
-          <div class="empty">
-            <strong>Connection Error</strong>
-            Drink credits unavailable right now.
-          </div>
-        `;
-      }
-    }
-
-    updateTime();
-    loadCredits();
-
-    setInterval(updateTime, 10000);
-    setInterval(loadCredits, 10000);
-  </script>
+  setInterval(updateTime, 10000);
+  setInterval(loadCredits, 10000);
+  setInterval(rotateEmptyMessage, 5000);
+</script>
 </body>
 </html>
