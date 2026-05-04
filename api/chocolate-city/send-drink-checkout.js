@@ -1,9 +1,21 @@
-const Stripe = require("stripe");
+import Stripe from "stripe";
 
 const OPTIONS = {
-  drink_10: { name: "Send a Drink Credit", amount: 10 },
-  drink_25: { name: "Send a Premium Drink Credit", amount: 25 },
-  drink_50: { name: "Send a Bottle Contribution", amount: 50 }
+  drink_10: {
+    name: "$10 Drink Credit",
+    amount: 10,
+    description: "Drink credit redeemed in person at Chocolate City Lounge."
+  },
+  drink_25: {
+    name: "$25 Premium Drink Credit",
+    amount: 25,
+    description: "Premium drink credit redeemed in person at Chocolate City Lounge."
+  },
+  drink_50: {
+    name: "$50 Bottle / VIP Contribution",
+    amount: 50,
+    description: "Bottle or VIP contribution redeemed in person at Chocolate City Lounge."
+  }
 };
 
 export default async function handler(req, res) {
@@ -12,11 +24,19 @@ export default async function handler(req, res) {
       return res.status(405).json({ ok: false, error: "Method not allowed" });
     }
 
-    const stripe = Stripe(process.env.CHOCOLATE_CITY_STRIPE_SECRET_KEY);
-    const body = req.body || {};
-    const item = OPTIONS[body.optionId];
+    const stripeKey = process.env.CHOCOLATE_CITY_STRIPE_SECRET_KEY;
 
-    if (!item) {
+    if (!stripeKey) {
+      return res.status(500).json({ ok: false, error: "Stripe key missing" });
+    }
+
+    const stripe = new Stripe(stripeKey);
+    const body = req.body || {};
+
+    const optionId = String(body.optionId || "").trim();
+    const selectedOption = OPTIONS[optionId];
+
+    if (!selectedOption) {
       return res.status(400).json({ ok: false, error: "Invalid drink option" });
     }
 
@@ -46,10 +66,10 @@ export default async function handler(req, res) {
           quantity: 1,
           price_data: {
             currency: "usd",
-            unit_amount: item.amount * 100,
+            unit_amount: selectedOption.amount * 100,
             product_data: {
-              name: `Chocolate City — ${item.name}`,
-              description: `Drink credit for ${recipientName}`
+              name: `Chocolate City — ${selectedOption.name}`,
+              description: selectedOption.description
             }
           }
         }
@@ -57,8 +77,9 @@ export default async function handler(req, res) {
       metadata: {
         type: "send_drink",
         business: "Chocolate City Lounge LLC",
-        optionId: body.optionId,
-        amount: String(item.amount),
+        optionId,
+        amount: String(selectedOption.amount),
+        label: selectedOption.name,
         recipientName,
         senderName,
         message
