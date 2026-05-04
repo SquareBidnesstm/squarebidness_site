@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 
 const BOOKING_KEY = "chocolate-city:vip:bookings";
+const DRINK_KEY = "chocolate-city:drink:credits";
 const SESSION_KEY_PREFIX = "chocolate-city:stripe:session:";
 
 export const config = {
@@ -67,8 +68,9 @@ export default async function handler(req, res) {
     }
 
     const session = event.data.object;
+    const type = session?.metadata?.type || "";
 
-    if (session?.metadata?.type !== "vip_deposit") {
+    if (type !== "vip_deposit" && type !== "send_drink") {
       return res.status(200).json({ received: true, ignored: true });
     }
 
@@ -79,36 +81,72 @@ export default async function handler(req, res) {
       return res.status(200).json({ received: true, duplicate: true });
     }
 
-    const data = await redis("GET", BOOKING_KEY);
-    const bookings = data?.result ? JSON.parse(data.result) : [];
+    if (type === "vip_deposit") {
+      const data = await redis("GET", BOOKING_KEY);
+      const bookings = data?.result ? JSON.parse(data.result) : [];
 
-    const booking = {
-      sessionId: session.id,
-      paidAt: new Date().toISOString(),
-      customerName:
-        session.metadata?.customerName ||
-        session.customer_details?.name ||
-        "",
-      customerEmail: session.customer_details?.email || "",
-      customerPhone: session.customer_details?.phone || "",
-      packageId: session.metadata?.packageId || "",
-      packageName: session.metadata?.packageName || "",
-      fullPrice: Number(session.metadata?.fullPrice || 0),
-      deposit: Number(session.metadata?.deposit || 0),
-      remainingBalance: Number(session.metadata?.remainingBalance || 0),
-      paymentStatus: session.payment_status || "paid"
-    };
+      const booking = {
+        sessionId: session.id,
+        paidAt: new Date().toISOString(),
+        customerName:
+          session.metadata?.customerName ||
+          session.customer_details?.name ||
+          "",
+        customerEmail: session.customer_details?.email || "",
+        customerPhone: session.customer_details?.phone || "",
+        packageId: session.metadata?.packageId || "",
+        packageName: session.metadata?.packageName || "",
+        fullPrice: Number(session.metadata?.fullPrice || 0),
+        deposit: Number(session.metadata?.deposit || 0),
+        remainingBalance: Number(session.metadata?.remainingBalance || 0),
+        paymentStatus: session.payment_status || "paid"
+      };
 
-    bookings.push(booking);
+      bookings.push(booking);
 
-    await redis("SET", BOOKING_KEY, JSON.stringify(bookings));
-    await redis(
-      "SET",
-      sessionLockKey,
-      JSON.stringify({ processed: true, at: new Date().toISOString() })
-    );
+      await redis("SET", BOOKING_KEY, JSON.stringify(bookings));
+      await redis(
+        "SET",
+        sessionLockKey,
+        JSON.stringify({ processed: true, at: new Date().toISOString(), type })
+      );
 
-    return res.status(200).json({ received: true, booking });
+      return res.status(200).json({ received: true, booking });
+    }
+
+    if (type === "send_drink") {
+      const data = await redis("GET", DRINK_KEY);
+      const credits = data?.result ? JSON.parse(data.result) : [];
+
+      const credit = {
+        sessionId: session.id,
+        paidAt: new Date().toISOString(),
+        recipientName: session.metadata?.recipientName || "Guest",
+        senderName: session.metadata?.senderName || "Anonymous",
+        message: session.metadata?.message || "",
+        optionId: session.metadata?.optionId || "",
+        label: session.metadata?.label || "Drink Credit",
+        amount: Number(session.metadata?.amount || 0),
+        customerEmail: session.customer_details?.email || "",
+        customerPhone: session.customer_details?.phone || "",
+        paymentStatus: session.payment_status || "paid",
+        redeemed: false,
+        redeemedAt: ""
+      };
+
+      credits.push(credit);
+
+      await redis("SET", DRINK_KEY, JSON.stringify(credits));
+      await redis(
+        "SET",
+        sessionLockKey,
+        JSON.stringify({ processed: true, at: new Date().toISOString(), type })
+      );
+
+      return res.status(200).json({ received: true, credit });
+    }
+
+    return res.status(200).json({ received: true });
   } catch (err) {
     return res.status(500).json({ ok: false, error: err.message });
   }
