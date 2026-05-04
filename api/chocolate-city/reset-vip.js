@@ -37,13 +37,21 @@ function getCentralParts() {
 
 export default async function handler(req, res) {
   try {
-    const token = req.headers["x-reset-token"] || req.query.token;
+   const resetToken = req.headers["x-reset-token"] || req.query.token;
+const adminToken = req.headers["x-admin-token"];
 
-    if (!process.env.CHOCOLATE_CITY_CRON_SECRET || token !== process.env.CHOCOLATE_CITY_CRON_SECRET) {
-      return res.status(401).json({ ok: false, error: "Unauthorized" });
-    }
+const resetAllowed =
+  process.env.CHOCOLATE_CITY_CRON_SECRET &&
+  resetToken === process.env.CHOCOLATE_CITY_CRON_SECRET;
 
-    const force = req.query.force === "true";
+const adminAllowed =
+  process.env.CHOCOLATE_CITY_ADMIN_TOKEN &&
+  adminToken === process.env.CHOCOLATE_CITY_ADMIN_TOKEN;
+
+if (!resetAllowed && !adminAllowed) {
+  return res.status(401).json({ ok: false, error: "Unauthorized" });
+}
+    const force = req.query.force === "true" || req.body?.force === true;
     const central = getCentralParts();
 
     if (!force && central.hour !== 2) {
