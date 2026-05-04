@@ -182,6 +182,11 @@
   color:var(--muted);
 }
 
+    .danger-btn{
+  background:linear-gradient(135deg,#7a1e1e,#d94a4a);
+  color:#fff7ea;
+}
+
     @media(max-width:700px){
       .row{grid-template-columns:1fr}
     }
@@ -237,6 +242,9 @@
 
       <button onclick="saveStatus()">Save Chocolate City Updates</button>
       <button type="button" onclick="loadBookings()">Load VIP Bookings</button>
+      <button type="button" class="danger-btn" onclick="resetVipBookings()">
+  Reset VIP Inventory
+</button>
       <div id="bookingList" class="booking-list"></div>
 
       <div class="status" id="status">Ready.</div>
@@ -244,80 +252,93 @@
   </main>
 
   <script>
-    const API = "/api/chocolate-city/status/";
+  const API = "/api/chocolate-city/status/";
 
-    async function loadCurrent(){
-      try{
-        const res = await fetch(API, { cache:"no-store" });
-        const data = await res.json();
+  function escapeHtml(str){
+    return String(str || "").replace(/[&<>"']/g, m => ({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#039;"
+    }[m]));
+  }
 
-        if(!data.ok || !data.state) return;
+  function syncFridayText(){
+    const isOpen = document.getElementById("fridayOpen").value === "true";
+    document.getElementById("fridayText").value = isOpen
+      ? "Friday is open this week from 7PM – 2AM."
+      : "Friday — select nights only.";
+  }
 
-        const s = data.state;
+  async function loadCurrent(){
+    try{
+      const res = await fetch(API, { cache:"no-store" });
+      const data = await res.json();
 
-        document.getElementById("fridayOpen").value = String(!!s.fridayOpen);
-        document.getElementById("weekendStatus").value = s.weekendStatus || "";
-        document.getElementById("eventTitle").value = s.eventTitle || "";
-        document.getElementById("fridayText").value = s.fridayText || "";
-        document.getElementById("eventNote").value = s.eventNote || "";
-        document.getElementById("vipStatus").value = s.vipStatus || "";
-        document.getElementById("announcement").value = s.announcement || "";
-      }catch(err){
-        document.getElementById("status").textContent = "Could not load current status.";
-      }
+      if(!data.ok || !data.state) return;
+
+      const s = data.state;
+
+      document.getElementById("fridayOpen").value = String(!!s.fridayOpen);
+      document.getElementById("weekendStatus").value = s.weekendStatus || "";
+      document.getElementById("eventTitle").value = s.eventTitle || "";
+      document.getElementById("fridayText").value = s.fridayText || "";
+      document.getElementById("eventNote").value = s.eventNote || "";
+      document.getElementById("vipStatus").value = s.vipStatus || "";
+      document.getElementById("announcement").value = s.announcement || "";
+    }catch(err){
+      document.getElementById("status").textContent = "Could not load current status.";
+    }
+  }
+
+  async function saveStatus(){
+    const status = document.getElementById("status");
+    const token = document.getElementById("token").value.trim();
+    const fridayOpen = document.getElementById("fridayOpen").value === "true";
+
+    if(!token){
+      status.textContent = "Enter admin token first.";
+      return;
     }
 
-    async function saveStatus(){
-      const status = document.getElementById("status");
-      const token = document.getElementById("token").value.trim();
+    const payload = {
+      fridayOpen,
+      weekendStatus: document.getElementById("weekendStatus").value.trim(),
+      eventTitle: document.getElementById("eventTitle").value.trim(),
+      fridayText: fridayOpen
+        ? "Friday is open this week from 7PM – 2AM."
+        : "Friday — select nights only.",
+      eventNote: document.getElementById("eventNote").value.trim(),
+      vipStatus: document.getElementById("vipStatus").value.trim(),
+      announcement: document.getElementById("announcement").value.trim()
+    };
 
-      if(!token){
-        status.textContent = "Enter admin token first.";
+    status.textContent = "Saving...";
+
+    try{
+      const res = await fetch(API, {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          "X-Admin-Token":token
+        },
+        body:JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+
+      if(!data.ok){
+        status.textContent = data.error || "Save failed.";
         return;
       }
 
-      const payload = {
-        fridayOpen: document.getElementById("fridayOpen").value === "true",
-        weekendStatus: document.getElementById("weekendStatus").value.trim(),
-        eventTitle: document.getElementById("eventTitle").value.trim(),
-        fridayText:
-  fridayText:
-  document.getElementById("fridayOpen").value === "true"
-    ? "Friday is open this week from 7PM – 2AM."
-    : "Friday — select nights only.",
-        eventNote: document.getElementById("eventNote").value.trim(),
-        vipStatus: document.getElementById("vipStatus").value.trim(),
-        announcement: document.getElementById("announcement").value.trim()
-      };
-
-      status.textContent = "Saving...";
-
-      try{
-        const res = await fetch(API, {
-          method:"POST",
-          headers:{
-            "Content-Type":"application/json",
-            "X-Admin-Token":token
-          },
-          body:JSON.stringify(payload)
-        });
-
-        const data = await res.json();
-
-        if(!data.ok){
-          status.textContent = data.error || "Save failed.";
-          return;
-        }
-
-        status.textContent = "Saved. Public page updated.";
-      }catch(err){
-        status.textContent = "Save failed. Check API/env vars.";
-      }
+      status.textContent = "Saved. Public page updated.";
+    }catch(err){
+      status.textContent = "Save failed. Check API/env vars.";
     }
+  }
 
-    loadCurrent();
-  </script>
-  <script>
   async function loadBookings(){
     const token = document.getElementById("token").value.trim();
     const box = document.getElementById("bookingList");
@@ -338,7 +359,7 @@
       const data = await res.json();
 
       if(!data.ok){
-        box.innerHTML = `<p>${data.error || "Could not load bookings."}</p>`;
+        box.innerHTML = `<p>${escapeHtml(data.error || "Could not load bookings.")}</p>`;
         return;
       }
 
@@ -352,10 +373,9 @@
           <strong>${escapeHtml(b.packageName || "VIP Section")}</strong>
           <div>Owner: ${escapeHtml(b.customerName || "—")}</div>
           <div>Phone: ${escapeHtml(b.customerPhone || "—")}</div>
-          <div>Paid: $${escapeHtml(String(b.deposit || b.fullPrice || 0))}</div>
-          <div>Remaining: $${escapeHtml(String(b.remainingBalance || 0))}</div>
-          <div>Status: ${escapeHtml(b.paymentStatus || "paid")}</div>
-          <div>Paid At: ${escapeHtml(b.paidAt || "—")}</div>
+          <div>Paid Amount: $${escapeHtml(String(b.deposit || b.fullPrice || 0))}</div>
+          <div>Timestamp: ${escapeHtml(b.paidAt || "—")}</div>
+          <div>Paid Status: ${escapeHtml(b.paymentStatus || "paid")}</div>
         </div>
       `).join("");
     }catch(err){
@@ -363,15 +383,48 @@
     }
   }
 
-  function escapeHtml(str){
-    return String(str).replace(/[&<>"']/g, m => ({
-      "&":"&amp;",
-      "<":"&lt;",
-      ">":"&gt;",
-      '"':"&quot;",
-      "'":"&#039;"
-    }[m]));
+  async function resetVipBookings(){
+    const token = document.getElementById("token").value.trim();
+    const box = document.getElementById("bookingList");
+    const status = document.getElementById("status");
+
+    if(!token){
+      status.textContent = "Enter admin token first.";
+      return;
+    }
+
+    const confirmed = confirm("Reset VIP inventory? This clears all current VIP bookings from availability.");
+    if(!confirmed) return;
+
+    status.textContent = "Resetting VIP inventory...";
+
+    try{
+      const res = await fetch("/api/chocolate-city/reset-vip/", {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          "X-Admin-Token":token
+        },
+        body:JSON.stringify({ force:true })
+      });
+
+      const data = await res.json();
+
+      if(!data.ok){
+        status.textContent = data.error || "Reset failed.";
+        return;
+      }
+
+      status.textContent = "VIP inventory reset. Sections are available again.";
+      box.innerHTML = "<p>VIP inventory cleared.</p>";
+    }catch(err){
+      status.textContent = "Reset failed. Check API/env vars.";
+    }
   }
+
+  document.getElementById("fridayOpen").addEventListener("change", syncFridayText);
+
+  loadCurrent();
 </script>
 </body>
 </html>
