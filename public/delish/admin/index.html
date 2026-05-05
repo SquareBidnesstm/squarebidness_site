@@ -216,6 +216,41 @@
       border:1px solid var(--line);
       font-weight:800;
     }
+
+    .pickup-window-list{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  margin-top:12px;
+}
+
+.pickup-window-item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px 14px;
+  border-radius:14px;
+  background:var(--panel2);
+  border:1px solid var(--line);
+}
+
+.pickup-window-item span{
+  font-weight:900;
+}
+
+.pickup-window-item small{
+  display:block;
+  color:var(--muted);
+  font-size:.78rem;
+  margin-top:3px;
+}
+
+@media (max-width: 800px){
+  .pickup-window-list{
+    grid-template-columns:1fr;
+  }
+}
     @media (max-width: 800px){
       .row,.item-list,.window-grid{grid-template-columns:1fr}
     }
@@ -247,6 +282,24 @@
           <a class="button-link btn-secondary" href="/delish/operator/">Operator Controls</a>
         </div>
       </div>
+
+      <div class="card">
+  <h2>Pickup Window Controls</h2>
+  <p class="muted">
+    Checked windows are available to customers. Unchecked windows are hidden from checkout and blocked on the backend.
+  </p>
+
+  <div class="pickup-window-list" id="pickupWindowList">
+    <div class="muted">Loading pickup windows...</div>
+  </div>
+
+  <div class="actions">
+    <button class="btn-primary" id="savePickupWindowsBtn">Save Pickup Windows</button>
+    <button class="btn-secondary" id="reloadPickupWindowsBtn">Reload Pickup Windows</button>
+  </div>
+
+  <div class="status" id="pickupWindowStatusBox">Ready.</div>
+</div>
 
       <div class="window-grid">
         <div class="window-panel">
@@ -323,6 +376,10 @@
     const windowMode = document.getElementById("windowMode");
     const windowNow = document.getElementById("windowNow");
     const windowHours = document.getElementById("windowHours");
+    const pickupWindowList = document.getElementById("pickupWindowList");
+const pickupWindowStatusBox = document.getElementById("pickupWindowStatusBox");
+const savePickupWindowsBtn = document.getElementById("savePickupWindowsBtn");
+const reloadPickupWindowsBtn = document.getElementById("reloadPickupWindowsBtn");
 
     const ITEM_CATALOG = [
       { id: "monday_red_beans_fried_chicken", name: "Monday - Red Beans or Okra with Fried Chicken" },
@@ -374,6 +431,92 @@
       windowStatusBox.textContent = text;
       windowStatusBox.className = "status" + (tone ? ` ${tone}` : "");
     }
+
+    function setPickupWindowStatus(text, tone = "") {
+  if (!pickupWindowStatusBox) return;
+  pickupWindowStatusBox.textContent = text;
+  pickupWindowStatusBox.className = "status" + (tone ? ` ${tone}` : "");
+}
+
+function renderPickupWindows(windows = [], disabledWindows = []) {
+  if (!pickupWindowList) return;
+
+  const disabledSet = new Set(disabledWindows || []);
+
+  pickupWindowList.innerHTML = windows.map(windowValue => {
+    const isAvailable = !disabledSet.has(windowValue);
+
+    return `
+      <label class="pickup-window-item">
+        <span>
+          ${windowValue}
+          <small>${isAvailable ? "Available" : "Disabled"}</small>
+        </span>
+        <input type="checkbox" value="${windowValue}" ${isAvailable ? "checked" : ""} />
+      </label>
+    `;
+  }).join("");
+}
+
+async function loadPickupWindows() {
+  setPickupWindowStatus("Loading pickup windows...");
+
+  const res = await fetch(`/api/delish/pickup-windows/?t=${Date.now()}`, {
+    cache: "no-store"
+  });
+
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok || !data.ok) {
+    throw new Error(data.error || "Failed to load pickup windows.");
+  }
+
+  renderPickupWindows(data.windows || [], data.disabledWindows || []);
+  setPickupWindowStatus("Pickup windows loaded.", "good");
+}
+
+async function savePickupWindows() {
+  let token = getSavedToken();
+
+  if (!token) {
+    token = window.prompt("Enter Delish operator token");
+    if (!token) {
+      setPickupWindowStatus("Save cancelled.");
+      return;
+    }
+
+    if (window.confirm("Save token on this device?")) {
+      saveToken(token.trim());
+    }
+  }
+
+  const allInputs = [...document.querySelectorAll("#pickupWindowList input[type='checkbox']")];
+
+  const disabledWindows = allInputs
+    .filter(input => !input.checked)
+    .map(input => input.value);
+
+  setPickupWindowStatus("Saving pickup windows...");
+
+  const res = await fetch("/api/delish/save-pickup-windows/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-operator-token": token.trim()
+    },
+    body: JSON.stringify({ disabledWindows })
+  });
+
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok || !data.ok) {
+    if (res.status === 401) clearToken();
+    throw new Error(data.error || "Failed to save pickup windows.");
+  }
+
+  setPickupWindowStatus("Pickup windows saved.", "good");
+  await loadPickupWindows();
+}
 
     function titleCase(value) {
       return String(value || "")
@@ -603,6 +746,17 @@
 document.getElementById("reloadBtn").addEventListener("click", () => {
   loadOverrides().catch(err => setStatus(err.message || "Reload failed.", "bad"));
 });
+    savePickupWindowsBtn?.addEventListener("click", () => {
+  savePickupWindows().catch(err =>
+    setPickupWindowStatus(err.message || "Save failed.", "bad")
+  );
+});
+
+reloadPickupWindowsBtn?.addEventListener("click", () => {
+  loadPickupWindows().catch(err =>
+    setPickupWindowStatus(err.message || "Reload failed.", "bad")
+  );
+});
     document.getElementById("refreshWindowBtn").addEventListener("click", () => {
       loadOrderingWindow().catch(err => setWindowStatus(err.message || "Window check failed.", "bad"));
     });
@@ -622,6 +776,10 @@ document.getElementById("reloadBtn").addEventListener("click", () => {
     }, 30000);
     loadOverrides().catch((err) => {
       console.error(err);
+      loadPickupWindows().catch((err) => {
+  console.error(err);
+  setPickupWindowStatus(err.message || "Unable to load pickup windows.", "bad");
+});
       setStatus(err.message || "Unable to load admin.", "bad");
       renderItemList([]);
       renderSoldOutList([]);
