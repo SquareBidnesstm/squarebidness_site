@@ -23,7 +23,7 @@ values (
   'Head Barber In Charge',
   'Orlando',
   'FL',
-  'America/New_York',
+  'America/Chicago',
   '/book',
   false,
   true

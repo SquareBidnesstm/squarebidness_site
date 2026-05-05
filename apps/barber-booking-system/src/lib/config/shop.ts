@@ -4,5 +4,5 @@ export const SHOP = {
   owner: "Josh Watkins",
   city: "Orlando",
   state: "FL",
-  timezone: "America/New_York",
+  timezone: "America/Chicago",
 } as const;
