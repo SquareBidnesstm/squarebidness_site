@@ -386,112 +386,123 @@
       Chocolate City Lounge LLC · Albany, Louisiana
     </footer>
   </main>
+<script>
+async function loadVipAvailability(){
+  const box = document.getElementById("vipAvailability");
+  const buttons = document.querySelectorAll(".vip-btn");
+  const countPill = document.getElementById("vipCountPill");
 
-  <script>
-  async function loadVipAvailability(){
-    const box = document.getElementById("vipAvailability");
-    const buttons = document.querySelectorAll(".vip-btn");
-    const countPill = document.getElementById("vipCountPill");
+  try{
+    const res = await fetch("/api/chocolate-city/vip-availability/", { cache:"no-store" });
+    const data = await res.json();
 
-    try{
-      const res = await fetch("/api/chocolate-city/vip-availability/", { cache:"no-store" });
-      const data = await res.json();
+    if(!data.ok) throw new Error("Availability unavailable");
 
-      if(!data.ok) throw new Error("Availability unavailable");
+    // SOLD OUT STATE
+    if(data.soldOut || data.remaining <= 0){
+      box.textContent = "VIP sections are sold out for this night.";
+      if(countPill) countPill.textContent = "VIP Sold Out";
 
-      if(data.soldOut){
-        box.textContent = "VIP sections are sold out for this night.";
-        if(countPill) countPill.textContent = "VIP Sold Out";
+      buttons.forEach(btn => {
+        btn.disabled = true;
+        btn.textContent = "Sold Out";
 
-        buttons.forEach(btn => {
-          btn.disabled = true;
-          btn.textContent = "Sold Out";
+        const card = btn.closest(".vip-card");
+        if(card) card.classList.add("sold");
+      });
 
-          const card = btn.closest(".vip-card");
-          if(card){
-            card.classList.add("sold");
-          }
-        });
-
-        return;
-      }
-
-      box.textContent = `${data.remaining} of 2 VIP sections available.`;
-      if(countPill) countPill.textContent = `${data.remaining} Sections Available`;
-
-    }catch(err){
-      box.textContent = "VIP availability will be confirmed before checkout.";
-      if(countPill) countPill.textContent = "Availability Pending";
-    }
-  }
-
-  async function reserveVip(packageId, button){
-    const card = button.closest(".vip-card");
-    const ownerInput = card ? card.querySelector("[data-owner-input]") : null;
-    const customerName = ownerInput ? ownerInput.value.trim() : "";
-
-    if(!customerName){
-      alert("Enter the section owner name first.");
-      if(ownerInput) ownerInput.focus();
       return;
     }
 
-    const originalText = button.textContent;
-    button.disabled = true;
-    button.textContent = "Opening checkout...";
+    // LAST SECTION PRESSURE
+    if(data.remaining === 1){
+      box.textContent = "1 VIP section remaining — last section available.";
+      if(countPill) countPill.textContent = "1 Section Left";
+    } else {
+      box.textContent = `${data.remaining} of 2 VIP sections available.`;
+      if(countPill) countPill.textContent = `${data.remaining} Sections Available`;
+    }
 
-    try{
-      const res = await fetch("/api/chocolate-city/vip-checkout/", {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body:JSON.stringify({ packageId, customerName })
-      });
+  }catch(err){
+    box.textContent = "VIP availability will be confirmed before checkout.";
+    if(countPill) countPill.textContent = "Availability Pending";
+  }
+}
 
-      const data = await res.json();
+async function reserveVip(packageId, button){
+  const card = button.closest(".vip-card");
+  const ownerInput = card ? card.querySelector("[data-owner-input]") : null;
+  const customerName = ownerInput ? ownerInput.value.trim() : "";
 
-      if(!data.ok){
-        alert(data.error || "Could not start checkout.");
-        button.disabled = false;
-        button.textContent = originalText;
-        return;
-      }
+  if(!customerName){
+    alert("Enter the section owner name.");
+    if(ownerInput) ownerInput.focus();
+    return;
+  }
 
-      window.location.href = data.url;
-    }catch(err){
-      alert("Checkout unavailable. Please try again.");
+  const originalText = button.textContent;
+  button.disabled = true;
+  button.textContent = "Opening checkout...";
+
+  try{
+    const res = await fetch("/api/chocolate-city/vip-checkout/", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({ packageId, customerName })
+    });
+
+    const data = await res.json();
+
+    if(!data.ok){
+      alert(data.error || "Checkout unavailable.");
       button.disabled = false;
       button.textContent = originalText;
+      return;
     }
+
+    window.location.href = data.url;
+
+  }catch(err){
+    alert("Checkout unavailable. Try again.");
+    button.disabled = false;
+    button.textContent = originalText;
   }
+}
 
-  async function loadStatus(){
-    try{
-      const res = await fetch("/api/chocolate-city/status/", { cache:"no-store" });
-      const data = await res.json();
+async function loadStatus(){
+  try{
+    const res = await fetch("/api/chocolate-city/status/", { cache:"no-store" });
+    const data = await res.json();
 
-      if(!data.ok || !data.state) return;
+    if(!data.ok || !data.state) return;
 
-      const fridayOpen = !!data.state.fridayOpen;
-      const fridayPill = document.getElementById("fridayPill");
+    const fridayOpen = !!data.state.fridayOpen;
+    const fridayPill = document.getElementById("fridayPill");
 
-      if(fridayPill){
-        fridayPill.textContent = fridayOpen
-          ? "Friday Open This Week • 7PM – 2AM"
-          : "Friday — Select Nights Only";
-      }
-    }catch(err){
-      console.warn("Chocolate City status unavailable", err);
+    if(fridayPill){
+      fridayPill.textContent = fridayOpen
+        ? "Friday Open This Week • 7PM – 2AM"
+        : "Friday — Select Nights Only";
     }
-  }
 
-  document.querySelectorAll(".vip-btn").forEach(button => {
-    button.addEventListener("click", () => {
-      reserveVip(button.dataset.package, button);
-    });
+  }catch(err){
+    console.warn("Chocolate City status unavailable", err);
+  }
+}
+
+// EVENTS
+document.querySelectorAll(".vip-btn").forEach(button => {
+  button.addEventListener("click", () => {
+    reserveVip(button.dataset.package, button);
   });
+});
 
-  loadStatus();
-  loadVipAvailability();
+// INIT
+loadStatus();
+loadVipAvailability();
+
+// 🔥 OPTIONAL (REAL-TIME PRESSURE)
+setInterval(loadVipAvailability, 15000);
 </script>
 </body>
 </html>
