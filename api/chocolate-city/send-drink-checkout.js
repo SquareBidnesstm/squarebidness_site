@@ -41,6 +41,7 @@ export default async function handler(req, res) {
     }
 
     const recipientName = String(body.recipientName || "").trim();
+    const recipientPhone = String(body.recipientPhone || "").trim();
     const senderName = String(body.senderName || "").trim();
     const message = String(body.message || "").trim();
 
@@ -81,6 +82,7 @@ export default async function handler(req, res) {
         amount: String(selectedOption.amount),
         label: selectedOption.name,
         recipientName,
+        recipientPhone,
         senderName,
         message
       }
