@@ -122,6 +122,7 @@ export default async function handler(req, res) {
         sessionId: session.id,
         paidAt: new Date().toISOString(),
         recipientName: session.metadata?.recipientName || "Guest",
+        recipientPhone: session.metadata?.recipientPhone || "",
         senderName: session.metadata?.senderName || "Anonymous",
         message: session.metadata?.message || "",
         optionId: session.metadata?.optionId || "",
