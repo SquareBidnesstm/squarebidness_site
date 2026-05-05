@@ -2,7 +2,6 @@
 import { Redis } from "@upstash/redis";
 import crypto from "node:crypto";
 import nodemailer from "nodemailer";
-import twilio from "twilio";
 
 const redis = new Redis({
   url: process.env.DELISH_UPSTASH_REDIS_REST_URL,
@@ -16,11 +15,6 @@ const transporter = nodemailer.createTransport({
     pass: process.env.DELISH_SMTP_PASS,
   },
 });
-
-const twilioClient = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
 
 function makeOrderNumber() {
   const now = new Date();
@@ -60,6 +54,11 @@ export default async function handler(req, res) {
   try {
     const body = req.body;
 
+    // Prevent catering deposits from entering order pipeline
+    if (body?.lane === "catering") {
+      return res.status(200).json({ ok: true, ignored: "catering flow" });
+    }
+
     if (!isValidOrder(body)) {
       return res.status(400).json({ ok: false, error: "Invalid payload" });
     }
@@ -73,6 +72,7 @@ export default async function handler(req, res) {
       createdAt: new Date().toISOString(),
       completedAt: "",
       status: "active",
+      smsConsent: body.smsConsent === "yes" ? "yes" : "no",
       ...body,
     };
 
@@ -98,18 +98,11 @@ Total: $${body.total}
 
 Notes:
 ${body.notes || "None"}
+
+SMS Consent:
+${body.smsConsent === "yes" ? "Yes" : "No"}
       `,
     });
-
-    try {
-      await twilioClient.messages.create({
-        body: `New Delish order ${orderNumber} - Pickup ${body.pickupWindow}`,
-        from: process.env.TWILIO_FROM_NUMBER,
-        to: process.env.TWILIO_TO_NUMBER,
-      });
-    } catch (smsError) {
-      console.error("TWILIO SMS ERROR:", smsError);
-    }
 
     return res.status(200).json({ ok: true, orderNumber });
   } catch (err) {

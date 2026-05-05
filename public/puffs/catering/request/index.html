@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <title>Puff’s Smokehouse — Catering Request</title>
+  <meta
+    name="description"
+    content="Send a catering request to Puff’s Smokehouse. Share your event details and Puff’s will review it and follow up with a deposit link."
+  />
+  <meta name="robots" content="index,follow" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="theme-color" content="#0b0b0b" />
+  <meta name="color-scheme" content="dark light" />
+
+  <link rel="canonical" href="https://www.squarebidness.com/puffs/catering/request/" />
+
+  <meta property="og:title" content="Puff’s Smokehouse — Catering Request" />
+  <meta
+    property="og:description"
+    content="Submit your Puff’s Smokehouse catering request online. Puff’s reviews the request and sends a deposit link after approval."
+  />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://www.squarebidness.com/puffs/catering/request/" />
+
+  <meta name="sb:build" content="v20260330-puffs-catering-request-form" />
+
+  <link rel="icon" href="/puffs/icons/icon-192.png" type="image/png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/puffs/icons/icon-180.png" />
+
+  <style>
+    :root{
+      --bg:#0b0b0b;
+      --card:#121212;
+      --text:#f3f3f3;
+      --muted:#b8b8b8;
+      --line:rgba(255,255,255,.10);
+      --field:#151515;
+      --btn:#ffffff;
+      --btnText:#0b0b0b;
+      --btnGhost:rgba(255,255,255,.10);
+      --danger:#ff7b7b;
+      --ok:#8ee0b0;
+      --shadow:0 12px 40px rgba(0,0,0,.45);
+      --r:18px;
+      --max:980px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:
+        radial-gradient(1200px 600px at 30% -10%, rgba(255,255,255,.08), transparent 55%),
+        radial-gradient(800px 500px at 90% 20%, rgba(255,255,255,.06), transparent 55%),
+        var(--bg);
+      color:var(--text);
+      font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    }
+    a{color:inherit}
+    .wrap{max-width:var(--max);margin:0 auto;padding:28px 18px 40px}
+
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;
+      gap:12px;margin-bottom:18px;flex-wrap:wrap;
+    }
+    .brandRow{display:flex;align-items:center;gap:12px;min-width:0}
+    .logoLink{
+      display:inline-flex;align-items:center;justify-content:center;
+      width:42px;height:42px;border-radius:14px;border:1px solid var(--line);
+      background:rgba(255,255,255,.04);overflow:hidden;text-decoration:none;
+      flex:0 0 auto;box-shadow:0 10px 24px rgba(0,0,0,.25);
+    }
+    .logoLink img{width:100%;height:100%;object-fit:cover;display:block}
+    .brand{display:flex;flex-direction:column;gap:2px;min-width:0}
+    .brand b{
+      font-size:14px;letter-spacing:.06em;text-transform:uppercase;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+    }
+    .brand span{font-size:12px;color:var(--muted)}
+    .pill{
+      border:1px solid var(--line);
+      padding:8px 10px;border-radius:999px;font-size:12px;color:var(--muted);
+      background:rgba(255,255,255,.04);white-space:nowrap;
+    }
+
+    .hero{
+      border:1px solid var(--line);
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border-radius:calc(var(--r) + 6px);
+      padding:22px 18px;
+      box-shadow:var(--shadow);
+      margin-bottom:16px;
+    }
+    .hero h1{margin:0 0 6px;font-size:22px}
+    .hero p{margin:0;color:var(--muted)}
+    .rule{
+      margin-top:12px;
+      padding:12px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.02);
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .shell{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+      border-radius:var(--r);
+      padding:18px;
+      box-shadow:var(--shadow);
+    }
+
+    form{
+      display:grid;
+      grid-template-columns:repeat(12,1fr);
+      gap:12px;
+    }
+
+    .field{
+      grid-column:span 12;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .field.half{grid-column:span 12}
+    @media (min-width:860px){
+      .field.half{grid-column:span 6}
+    }
+
+    label{
+      font-size:13px;
+      color:var(--muted);
+      font-weight:600;
+    }
+
+    input, select, textarea{
+      width:100%;
+      border:1px solid var(--line);
+      background:var(--field);
+      color:var(--text);
+      border-radius:14px;
+      padding:13px 14px;
+      font:inherit;
+      outline:none;
+    }
+    textarea{min-height:130px;resize:vertical}
+    input::placeholder, textarea::placeholder{color:#8e8e8e}
+
+    .actions{
+      grid-column:span 12;
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:4px;
+    }
+
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:12px 14px;border-radius:14px;border:1px solid transparent;
+      text-decoration:none;font-weight:700;letter-spacing:.01em;
+      transition:transform .06s ease, opacity .15s ease, background .15s ease;
+      user-select:none; cursor:pointer;
+    }
+    .btn:active{transform:translateY(1px)}
+    .btn.primary{background:var(--btn);color:var(--btnText)}
+    .btn.ghost{background:var(--btnGhost);color:var(--text);border-color:var(--line)}
+    .btn[disabled]{opacity:.6;cursor:not-allowed}
+
+    .fineprint,
+    .status{
+      grid-column:span 12;
+      font-size:13px;
+      color:var(--muted);
+    }
+    .status{display:none}
+    .status.show{display:block}
+    .status.error{color:var(--danger)}
+    .status.success{color:var(--ok)}
+
+    footer{
+      margin-top:18px;padding-top:14px;border-top:1px solid var(--line);
+      display:flex;flex-direction:column;gap:8px;color:var(--muted);font-size:12px;
+    }
+    footer a{color:var(--muted)}
+  </style>
+
+  <script defer src="/scripts/sb-analytics.js"></script>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brandRow">
+        <a class="logoLink" href="/puffs/catering/" aria-label="Back to Puff’s catering">
+          <img src="/puffs/icons/icon-192.png" alt="Puff’s Smokehouse" loading="eager" decoding="async" />
+        </a>
+
+        <div class="brand">
+          <b>Puff’s Smokehouse</b>
+          <span>Catering Request</span>
+        </div>
+      </div>
+
+      <div class="pill">Request first • Deposit sent after review</div>
+    </div>
+
+    <section class="hero">
+      <h1>Request Puff’s Catering</h1>
+      <p>
+        Fill out the details below and Puff’s will review your request, confirm availability,
+        and follow up with pricing and a deposit link.
+      </p>
+
+      <div class="rule">
+        <b>Important:</b> Submitting this form does not confirm the booking. Your date is locked in only after Puff’s reviews the request and the deposit is paid.
+      </div>
+    </section>
+
+    <section class="shell">
+      <form id="cateringRequestForm" novalidate>
+        <input type="hidden" name="form_name" value="puffs_catering_request" />
+        <input type="hidden" name="lane" value="catering" />
+        <input type="hidden" name="partner" value="puffs" />
+        <input type="hidden" name="_source" value="puffs_catering_request" />
+        <input type="hidden" name="source_page" value="/puffs/catering/request/" />
+
+        <div class="field half">
+          <label for="name">Full name</label>
+          <input id="name" name="name" type="text" placeholder="Your name" required />
+        </div>
+
+        <div class="field half">
+          <label for="phone">Phone</label>
+          <input id="phone" name="phone" type="tel" placeholder="Best number to reach you" required />
+        </div>
+
+        <div class="field half">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" placeholder="you@example.com" />
+        </div>
+
+        <div class="field half">
+          <label for="eventDate">Event date</label>
+          <input id="eventDate" name="event_date" type="date" required />
+        </div>
+
+        <div class="field half">
+          <label for="eventTime">Event time</label>
+          <input id="eventTime" name="event_time" type="text" placeholder="Example: 2:00 PM" />
+        </div>
+
+        <div class="field half">
+          <label for="guestCount">Estimated guest count</label>
+          <input id="guestCount" name="guest_count" type="number" min="1" step="1" placeholder="How many people?" required />
+        </div>
+
+        <div class="field half">
+          <label for="serviceType">Service type</label>
+          <select id="serviceType" name="service_type" required>
+            <option value="">Select one</option>
+            <option value="pickup">Pickup</option>
+            <option value="delivery">Delivery</option>
+            <option value="full_service">Full service / setup</option>
+          </select>
+        </div>
+
+        <div class="field half">
+          <label for="location">Event location</label>
+          <input id="location" name="event_location" type="text" placeholder="City or event address" />
+        </div>
+
+        <div class="field">
+          <label for="orderDetails">What do you need catered?</label>
+          <textarea
+            id="orderDetails"
+            name="order_details"
+            placeholder="Tell Puff’s what food you want, serving style, any sides, and anything important about the event."
+            required
+          ></textarea>
+        </div>
+
+        <div class="field">
+          <label for="notes">Extra notes</label>
+          <textarea
+            id="notes"
+            name="notes"
+            placeholder="Budget, delivery instructions, setup notes, special requests, or anything else."
+          ></textarea>
+        </div>
+
+        <div id="formStatus" class="status" aria-live="polite"></div>
+
+        <div class="actions">
+          <button id="submitBtn" class="btn primary" type="submit">Send Catering Request</button>
+          <a class="btn ghost" href="/puffs/catering/">Back to Catering</a>
+        </div>
+
+        <div class="fineprint">
+          Puff’s will review your request before sending a deposit link. Submission does not guarantee availability.
+        </div>
+      </form>
+    </section>
+
+    <footer>
+      <div>Daily food orders: <a href="/puffs/">/puffs/</a></div>
+      <div>Main catering page: <a href="/puffs/catering/">/puffs/catering/</a></div>
+      <div>Quietly powered by Square Bidness infrastructure.</div>
+    </footer>
+  </div>
+
+  <script>
+    const form = document.getElementById('cateringRequestForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const formStatus = document.getElementById('formStatus');
+
+    function showStatus(message, type){
+      formStatus.className = 'status show ' + type;
+      formStatus.textContent = message;
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (!form.reportValidity()) return;
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending...';
+      showStatus('Sending your request...', 'success');
+
+      const payload = Object.fromEntries(new FormData(form).entries());
+
+      try {
+        const res = await fetch('/api/puffs/catering-request/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Unable to submit request right now.');
+        }
+
+        showStatus('Request sent. Puff’s will review it and follow up soon.', 'success');
+        form.reset();
+      } catch (err) {
+        showStatus(err.message || 'Something went wrong. Please try again.', 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Send Catering Request';
+      }
+    });
+  </script>
+</body>
+</html>

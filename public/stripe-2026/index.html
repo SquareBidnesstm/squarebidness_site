@@ -1,0 +1,1374 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <title>Stripe Sessions 2026 — Square Bidness</title>
+  <meta name="description" content="Square Bidness Stripe Sessions 2026 operator playbook." />
+  <link rel="canonical" href="https://www.squarebidness.com/stripe-2026/" />
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#000000" />
+
+  <style>
+    :root{
+      --bg:#000000;
+      --panel:#0b0b0b;
+      --panel-2:#111111;
+      --line:#1f1f1f;
+      --text:#f5f5f5;
+      --muted:#b8bcc6;
+      --gold:#c9a227;
+      --gold-soft:rgba(201,162,39,.12);
+      --ok:#0f9d58;
+      --danger:#b42318;
+      --shadow:0 10px 30px rgba(0,0,0,.3);
+      --radius:16px;
+      --radius-sm:12px;
+      --max:1040px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      background:linear-gradient(180deg,#020202 0%, #000 100%);
+      color:var(--text);
+      line-height:1.55;
+    }
+
+    a{color:inherit}
+    button,input,textarea{font:inherit}
+
+    .wrap{
+      width:min(var(--max), calc(100% - 24px));
+      margin:0 auto;
+    }
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:50;
+      backdrop-filter:blur(14px);
+      background:rgba(0,0,0,.82);
+      border-bottom:1px solid rgba(255,255,255,.06);
+    }
+
+    .topbar__inner{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:12px 0;
+    }
+
+    .brandlock{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
+    }
+
+    .brandmark{
+      width:38px;
+      height:38px;
+      border-radius:12px;
+      display:grid;
+      place-items:center;
+      border:1px solid rgba(201,162,39,.24);
+      background:linear-gradient(180deg, rgba(201,162,39,.14), rgba(201,162,39,.04));
+      color:var(--gold);
+      font-weight:800;
+      letter-spacing:.06em;
+      flex:0 0 auto;
+    }
+
+    .brandcopy{ min-width:0; }
+
+    .eyebrow{
+      margin:0;
+      font-size:.72rem;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:var(--gold);
+    }
+
+    .brandtitle{
+      margin:0;
+      font-size:.98rem;
+      font-weight:700;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .top-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .btn{
+      appearance:none;
+      border:1px solid var(--line);
+      background:#111;
+      color:#fff;
+      border-radius:999px;
+      padding:.72rem 1rem;
+      text-decoration:none;
+      cursor:pointer;
+      transition:.18s ease;
+      white-space:nowrap;
+    }
+
+    .btn:hover{transform:translateY(-1px); border-color:#333}
+
+    .btn--gold{
+      background:var(--gold);
+      color:#000;
+      border-color:rgba(201,162,39,.8);
+      font-weight:700;
+    }
+
+    .btn--ghost{
+      background:transparent;
+      color:#fff;
+    }
+
+    .btn--small{
+      padding:.55rem .8rem;
+      font-size:.9rem;
+    }
+
+    .btn--block{
+      width:100%;
+      justify-content:center;
+    }
+
+    /* FIX 7 — Stripe Mode button gets a distinct active state */
+    .btn--stripe-on{
+      background:rgba(99,102,241,.18);
+      color:#c7d2fe;
+      border-color:rgba(99,102,241,.5);
+      font-weight:700;
+    }
+
+    .hero{ padding:28px 0 20px; }
+
+    .hero__grid{
+      display:grid;
+      grid-template-columns:1.2fr .8fr;
+      gap:18px;
+    }
+
+    .panel{
+      background:linear-gradient(180deg,var(--panel), #080808);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+    }
+
+    .hero__main{
+      padding:24px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .hero__main::after{
+      content:"";
+      position:absolute;
+      inset:auto -80px -80px auto;
+      width:220px;
+      height:220px;
+      background:radial-gradient(circle, rgba(201,162,39,.16), rgba(201,162,39,0));
+      pointer-events:none;
+    }
+
+    h1{
+      margin:0 0 8px;
+      font-size:clamp(1.8rem,4.5vw,3rem);
+      line-height:1.02;
+      letter-spacing:-.04em;
+    }
+
+    .lead{
+      margin:0;
+      color:var(--muted);
+      max-width:58ch;
+      font-size:1rem;
+    }
+
+    .hero__tags{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin:18px 0 0;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:.5rem .8rem;
+      border-radius:999px;
+      background:var(--gold-soft);
+      color:#f6df96;
+      border:1px solid rgba(201,162,39,.18);
+      font-size:.85rem;
+    }
+
+    .hero__side{
+      padding:20px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .quick-title{
+      margin:0 0 4px;
+      font-size:1rem;
+      font-weight:700;
+    }
+
+    .muted{ color:var(--muted); }
+
+    .quick-card{
+      padding:14px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:var(--panel-2);
+    }
+
+    .quick-card strong{
+      display:block;
+      margin-bottom:4px;
+    }
+
+    .toolbar{ padding:14px 0 16px; }
+
+    .toolbar__inner{
+      display:grid;
+      grid-template-columns:1fr auto auto;
+      gap:10px;
+      align-items:center;
+    }
+
+    .search{
+      width:100%;
+      background:#0d0d0d;
+      border:1px solid var(--line);
+      color:#fff;
+      border-radius:12px;
+      padding:.86rem .95rem;
+      outline:none;
+      /* FIX 6 — subtle ring makes it feel interactive before focus */
+      box-shadow:0 0 0 1px rgba(201,162,39,.08);
+    }
+
+    .search:focus{
+      border-color:rgba(201,162,39,.5);
+      box-shadow:0 0 0 3px rgba(201,162,39,.12);
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns:280px 1fr;
+      gap:18px;
+      padding-bottom:44px;
+    }
+
+    .sidebar{
+      position:sticky;
+      top:78px;
+      align-self:start;
+      padding:14px;
+    }
+
+    .sidebar h2{
+      margin:6px 0 10px;
+      font-size:.9rem;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      color:var(--gold);
+    }
+
+    .navlist{ display:grid; gap:8px; }
+
+    .navbtn{
+      width:100%;
+      text-align:left;
+      background:#0d0d0d;
+      border:1px solid var(--line);
+      color:#fff;
+      border-radius:12px;
+      padding:.9rem .9rem;
+      cursor:pointer;
+      transition:.18s ease;
+    }
+
+    .navbtn:hover,
+    .navbtn.is-active{
+      border-color:rgba(201,162,39,.45);
+      background:rgba(201,162,39,.08);
+    }
+
+    .navbtn small{
+      display:block;
+      margin-top:4px;
+      color:var(--muted);
+    }
+
+    .progress{
+      margin-top:12px;
+      border-top:1px solid var(--line);
+      padding-top:12px;
+    }
+
+    .progressbar{
+      height:8px;
+      border-radius:999px;
+      background:#111;
+      border:1px solid #1b1b1b;
+      overflow:hidden;
+    }
+
+    .progressbar > span{
+      display:block;
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg, var(--gold), #f4db8a);
+      transition:width .25s ease;
+    }
+
+    .content{ display:grid; gap:16px; }
+
+    .level{
+      padding:20px;
+      scroll-margin-top:92px;
+    }
+
+    .level__head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:14px;
+      margin-bottom:12px;
+    }
+
+    .level__eyebrow{
+      margin:0 0 6px;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      color:var(--gold);
+      font-size:.74rem;
+    }
+
+    .level h2{
+      margin:0;
+      font-size:1.5rem;
+      letter-spacing:-.03em;
+    }
+
+    .level__desc{
+      margin:8px 0 0;
+      color:var(--muted);
+      max-width:64ch;
+    }
+
+    .level-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .grid{ display:grid; gap:12px; }
+    .grid--2{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+
+    .card{
+      padding:16px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:var(--panel-2);
+    }
+
+    .card h3{ margin:0 0 8px; font-size:1rem; }
+    .card p{ margin:.25rem 0 0; color:#e7e7e7; }
+
+    .quote{
+      padding:16px;
+      border-radius:14px;
+      border:1px solid rgba(201,162,39,.25);
+      background:linear-gradient(180deg, rgba(201,162,39,.08), rgba(201,162,39,.03));
+      transition:border-color .2s ease, background .2s ease;
+    }
+
+    /* FIX 7 — pitch card glows when Stripe Mode is active */
+    .quote.stripe-active{
+      border-color:rgba(99,102,241,.55);
+      background:linear-gradient(180deg, rgba(99,102,241,.1), rgba(99,102,241,.03));
+    }
+
+    .quote.stripe-active::before{
+      content:"● STRIPE MODE ACTIVE";
+      display:block;
+      font-size:.68rem;
+      letter-spacing:.14em;
+      color:#818cf8;
+      font-weight:700;
+      margin-bottom:10px;
+    }
+
+    .quote strong{
+      display:block;
+      color:#f3da90;
+      margin-bottom:6px;
+      font-size:.78rem;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+    }
+
+    .quote p{
+      margin:0;
+      font-size:1.02rem;
+      line-height:1.55;
+    }
+
+    .list{
+      margin:0;
+      padding-left:1.15rem;
+      color:#e8e8e8;
+    }
+
+    .list li + li{ margin-top:.42rem; }
+
+    .chips{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:8px;
+    }
+
+    .chip{
+      border:1px solid var(--line);
+      background:#0d0d0d;
+      border-radius:999px;
+      padding:.45rem .75rem;
+      font-size:.86rem;
+      color:#fff;
+      cursor:pointer;
+    }
+
+    .chip:hover{
+      border-color:rgba(201,162,39,.45);
+      background:rgba(201,162,39,.08);
+    }
+
+    .demo-links{ display:grid; gap:8px; }
+
+    .demo-link{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:.9rem 1rem;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:#0d0d0d;
+      text-decoration:none;
+    }
+
+    .demo-link:hover{
+      border-color:rgba(201,162,39,.45);
+      background:rgba(201,162,39,.06);
+    }
+
+    /* FIX 5 — contact card */
+    .contact-card{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
+      padding:16px;
+      border-radius:14px;
+      border:1px solid rgba(201,162,39,.3);
+      background:linear-gradient(180deg, rgba(201,162,39,.08), rgba(201,162,39,.03));
+      margin-top:12px;
+    }
+
+    .contact-card__text strong{
+      display:block;
+      font-size:1rem;
+      margin-bottom:3px;
+    }
+
+    .contact-card__text span{
+      font-size:.88rem;
+      color:var(--muted);
+    }
+
+    .copy-note{
+      font-size:.83rem;
+      color:var(--muted);
+      min-height:1.1em;
+    }
+
+    .floating{
+      position:fixed;
+      right:14px;
+      bottom:14px;
+      z-index:40;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .fab{
+      border:none;
+      border-radius:999px;
+      padding:.85rem 1rem;
+      background:var(--gold);
+      color:#000;
+      cursor:pointer;
+      font-weight:700;
+      box-shadow:var(--shadow);
+    }
+
+    .fab--dark{
+      background:#111;
+      color:#fff;
+      border:1px solid var(--line);
+    }
+
+    .hidden{ display:none !important; }
+
+    .empty-state{
+      padding:18px;
+      border:1px dashed #333;
+      border-radius:14px;
+      color:var(--muted);
+      text-align:center;
+      background:#070707;
+    }
+
+    body.stripe-mode{
+      background:linear-gradient(180deg,#020617 0%, #000 100%);
+    }
+
+    body.stripe-mode .hero__main{
+      border:1px solid rgba(99,102,241,.25);
+    }
+
+    body.stripe-mode .pill{
+      background:rgba(99,102,241,.12);
+      color:#c7d2fe;
+    }
+
+    #deckTrack{ -webkit-overflow-scrolling:touch; }
+
+    @media(max-width:980px){
+      .hero__grid,
+      .layout,
+      .toolbar__inner,
+      .grid--2{ grid-template-columns:1fr; }
+
+      .sidebar{ position:static; }
+
+      .level__head{ flex-direction:column; }
+
+      .level-actions{ justify-content:flex-start; }
+    }
+
+    @media(max-width:640px){
+      .topbar__inner{
+        align-items:flex-start;
+        flex-direction:column;
+      }
+
+      .top-actions{
+        width:100%;
+        justify-content:flex-start;
+      }
+
+      .hero__main,
+      .hero__side,
+      .level{ padding:16px; }
+
+      .wrap{ width:min(var(--max), calc(100% - 16px)); }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar__inner">
+      <div class="brandlock">
+        <div class="brandmark">SB</div>
+        <div class="brandcopy">
+          <p class="eyebrow">Square Bidness Operator Playbook</p>
+          <p class="brandtitle">Stripe Sessions 2026</p>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <button class="btn btn--small btn--ghost" type="button" id="expandAllBtn">Expand all</button>
+        <button class="btn btn--small btn--ghost" type="button" id="collapseAllBtn">Collapse all</button>
+        <button class="btn btn--small btn--gold" type="button" id="copyMasterBtn">Copy master pitch</button>
+        <button class="btn btn--small btn--ghost" id="stripeModeBtn">Stripe Mode: OFF</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap hero__grid">
+        <div class="panel hero__main">
+          <p class="eyebrow">Live reference page</p>
+          <h1>Walk in ready. Reference fast. Execute clean.</h1>
+          <p class="lead">
+            This page is your Stripe Sessions field guide — pitch, answers, targets, demo links,
+            execution flow, and follow-up moves, all in one place.
+          </p>
+
+          <div class="hero__tags">
+            <span class="pill">Live systems</span>
+            <span class="pill">Operator infrastructure</span>
+            <span class="pill">Stripe-ready positioning</span>
+            <span class="pill">Phone-friendly reference</span>
+            <span class="pill">Built on Stripe</span>
+          </div>
+        </div>
+
+        <aside class="panel hero__side">
+          <div class="quick-card">
+            <p class="quick-title">Event goal</p>
+            <p class="muted">Position Square Bidness as real infrastructure for independent operators.</p>
+          </div>
+
+          <div class="quick-card">
+            <p class="quick-title">Daily target</p>
+            <p class="muted">
+              10 conversations · 3 solid connections · 1 real opportunity<br>
+              <span style="color:#c9a227;">Every session must produce: a decision, a connection, or a shift.</span>
+            </p>
+          </div>
+
+          <div class="quick-card">
+            <p class="quick-title">Core line</p>
+            <p class="muted">We don't replace businesses — we organize their demand.</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="wrap" style="margin-top:10px;">
+      <div class="panel" style="padding:16px; overflow:hidden;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <strong>Investor Mode</strong>
+          <button class="btn btn--small btn--gold" id="toggleDeckBtn">Open Deck</button>
+        </div>
+
+        <div id="deckContainer" class="hidden" style="overflow:hidden;">
+          <div id="deckTrack" style="display:flex; gap:12px; overflow-x:auto; scroll-snap-type:x mandatory; padding-bottom:8px;">
+
+            <div class="card" style="min-width:260px; scroll-snap-align:start;">
+              <h3>Square Bidness</h3>
+              <p>We install revenue infrastructure for independent operators.</p>
+            </div>
+
+            <div class="card" style="min-width:260px; scroll-snap-align:start;">
+              <h3>Problem</h3>
+              <p>Operators lose money in chaos — no structure, missed orders, no payment flow.</p>
+            </div>
+
+            <div class="card" style="min-width:260px; scroll-snap-align:start;">
+              <h3>Install</h3>
+              <p>Stripe-powered checkout, ordering, routing, intake. Paid before pickup.</p>
+            </div>
+
+            <div class="card" style="min-width:260px; scroll-snap-align:start;">
+              <h3>Proof</h3>
+              <p>Live systems. Real orders. Real payments. Already in production.</p>
+            </div>
+
+            <div class="card" style="min-width:260px; scroll-snap-align:start;">
+              <h3>Scale</h3>
+              <p>Repeatable installs. Every operator with demand is a candidate.</p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="toolbar">
+      <div class="wrap toolbar__inner">
+        <!-- FIX 6 — ⌕ hint in placeholder; desktop autofocus via JS -->
+        <input
+          id="searchInput"
+          class="search"
+          type="search"
+          placeholder="⌕  Search pitch, Stripe, operators, money, follow-up..."
+          aria-label="Search the Sessions playbook"
+        />
+        <button class="btn btn--ghost" type="button" id="clearSearchBtn">Clear</button>
+        <button class="btn btn--gold" type="button" id="jumpDailyBtn">Daily target</button>
+      </div>
+    </section>
+
+    <section class="wrap layout">
+      <aside class="panel sidebar">
+        <h2>Levels</h2>
+        <div class="navlist">
+          <button class="navbtn is-active" type="button" data-scroll="#level1">
+            Level 1 — Pitch
+            <small>30-sec pitch · short version · openers</small>
+          </button>
+          <button class="navbtn" type="button" data-scroll="#level2">
+            Level 2 — System
+            <small>phone deck · targets · conversion flow</small>
+          </button>
+          <button class="navbtn" type="button" data-scroll="#level3">
+            Level 3 — Answers
+            <small>how you make money · why you · why not Shopify</small>
+          </button>
+          <button class="navbtn" type="button" data-scroll="#level4">
+            Level 4 — Execution
+            <small>who to target · room strategy · follow-up</small>
+          </button>
+          <button class="navbtn" type="button" data-scroll="#dailyTarget">
+            Daily target
+            <small>what a win looks like</small>
+          </button>
+          <button class="navbtn" type="button" data-scroll="#demoLinks">
+            Live demos
+            <small>links to show on your phone</small>
+          </button>
+          <button class="navbtn" type="button" data-scroll="#endOfDay">
+            End of day
+            <small>lock it in</small>
+          </button>
+        </div>
+
+        <div class="progress">
+          <p class="muted" style="margin:0 0 8px;">Sections viewed</p>
+          <div class="progressbar" aria-hidden="true"><span id="progressFill"></span></div>
+          <p class="muted" id="progressText" style="margin:.55rem 0 0;">1 of 7 viewed</p>
+        </div>
+      </aside>
+
+      <div class="content" id="contentArea">
+
+        <!-- ═══ LEVEL 1 ═══ -->
+        <section class="panel level" id="level1" data-section>
+          <div class="level__head">
+            <div>
+              <p class="level__eyebrow">Level 1</p>
+              <h2>Pitch + walk-up opener</h2>
+              <p class="level__desc">Use this when you need to introduce yourself clean and fast.</p>
+            </div>
+            <div class="level-actions">
+              <button class="btn btn--small btn--ghost copy-btn" type="button" data-copy-target="#pitchOperator">Copy 30-sec pitch</button>
+              <button class="btn btn--small btn--ghost copy-btn" type="button" data-copy-target="#pitchShort">Copy short pitch</button>
+            </div>
+          </div>
+
+          <div class="grid">
+            <!-- FIX 7 — id="pitchCard" targeted by JS to add stripe-active class -->
+            <div class="quote" id="pitchCard">
+              <strong>30-second pitch</strong>
+
+              <p id="pitchOperator">
+                I'm Marcus, founder of Square Bidness. We install revenue infrastructure for independent operators — restaurants and service businesses already moving but dealing with chaos. We don't replace their business, we organize their demand — checkout, routing, payments, all structured. We've got live systems running right now — real orders, real revenue.
+              </p>
+
+              <p id="pitchStripe" class="hidden">
+                I'm Marcus, founder of Square Bidness. We install revenue infrastructure for independent operators — built on Stripe. Payments, ordering, routing, and cash flow, all structured into one system. We don't replace their business — we organize their demand. These are live systems handling real volume.
+              </p>
+            </div>
+
+            <div class="quote">
+              <strong>Short version</strong>
+              <p id="pitchShort">We install payment and ordering systems for real-world operators already in motion.</p>
+            </div>
+
+            <div class="grid grid--2">
+              <div class="card">
+                <h3>Best walk-up opener</h3>
+                <p id="opener1">What are you building with Stripe right now?</p>
+                <div class="chips">
+                  <button class="chip copy-btn" type="button" data-copy-target="#opener1">Copy</button>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3>If it's a Stripe employee</h3>
+                <p id="opener2">What kind of real-world businesses are you seeing use Stripe in interesting ways?</p>
+                <div class="chips">
+                  <button class="chip copy-btn" type="button" data-copy-target="#opener2">Copy</button>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3>If it's a founder</h3>
+                <p id="opener3">Are you more on the product side or actually running live volume yet?</p>
+                <div class="chips">
+                  <button class="chip copy-btn" type="button" data-copy-target="#opener3">Copy</button>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3>Close line</h3>
+                <p id="closer1">Let's stay connected — we're actively building this out.</p>
+                <div class="chips">
+                  <button class="chip copy-btn" type="button" data-copy-target="#closer1">Copy</button>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3>Scaling signal (use sparingly)</h3>
+                <p id="fundingLine">
+                  We're starting to look at scaling this — infrastructure, installs, and distribution. Still early, but tightening the model now.
+                </p>
+                <div class="chips">
+                  <button class="chip copy-btn" type="button" data-copy-target="#fundingLine">Copy</button>
+                </div>
+              </div>
+            </div>
+
+            <p class="copy-note" id="copyNote1" aria-live="polite"></p>
+          </div>
+        </section>
+
+        <!-- ═══ LEVEL 2 ═══ -->
+        <section class="panel level" id="level2" data-section>
+          <div class="level__head">
+            <div>
+              <p class="level__eyebrow">Level 2</p>
+              <h2>System + 5-slide phone deck</h2>
+              <p class="level__desc">This is how you show, not just tell.</p>
+            </div>
+            <div class="level-actions">
+              <button class="btn btn--small btn--ghost copy-btn" type="button" data-copy-target="#deckFlow">Copy deck flow</button>
+            </div>
+          </div>
+
+          <div class="grid grid--2">
+            <div class="card">
+              <h3>5-slide deck</h3>
+              <ul class="list" id="deckFlow">
+                <li>Identity → Square Bidness installs systems for independent operators.</li>
+                <li>Problem → operators lose money in chaos: text orders, missed calls, no structure.</li>
+                <li>Install → online ordering, checkout, routing, intake, paid before pickup.</li>
+                <li>Proof → Delish and Puff's live with real orders and real payment flow.</li>
+                <li>Scale → restaurants, service businesses, operators nationwide.</li>
+              </ul>
+            </div>
+
+            <div class="card">
+              <h3>Who to target</h3>
+              <ul class="list">
+                <li>Stripe employees in product, partnerships, growth.</li>
+                <li>SaaS founders with traction, not just ideas.</li>
+                <li>Real operators and business owners already moving volume.</li>
+              </ul>
+            </div>
+
+            <div class="card">
+              <h3>Conversation flow</h3>
+              <ul class="list">
+                <li>Open.</li>
+                <li>Let them talk first.</li>
+                <li>Drop your pitch.</li>
+                <li>Show the live system on your phone.</li>
+                <li>Transition: We're looking to scale this through partnerships or more operators.</li>
+              </ul>
+            </div>
+
+            <div class="card">
+              <h3>Money slide reminder</h3>
+              <p>Proof wins. Delish order page, Puff's flow, Checkout → success page. People believe what they see.</p>
+            </div>
+          </div>
+          <p class="copy-note" id="copyNote2" aria-live="polite"></p>
+        </section>
+
+        <!-- ═══ LEVEL 3 ═══ -->
+        <section class="panel level" id="level3" data-section>
+          <div class="level__head">
+            <div>
+              <p class="level__eyebrow">Level 3</p>
+              <h2>Answers that close rooms</h2>
+              <p class="level__desc">These are the questions that test whether you are real.</p>
+            </div>
+            <div class="level-actions">
+              <button class="btn btn--small btn--ghost copy-btn" type="button" data-copy-target="#moneyAnswer">Copy money answer</button>
+              <button class="btn btn--small btn--ghost copy-btn" type="button" data-copy-target="#whyUsAnswer">Copy why you</button>
+            </div>
+          </div>
+
+          <div class="grid grid--2">
+            <div class="card">
+              <h3>How do you make money?</h3>
+              <p id="moneyAnswer">We charge for the install and ongoing system support — and in some cases we layer in subscription tools like FleetLog. The goal is long-term operator relationships, not one-off builds.</p>
+            </div>
+
+            <div class="card">
+              <h3>Is this custom every time?</h3>
+              <p>No — we've standardized the system. It's repeatable installs with small adjustments depending on the operator.</p>
+            </div>
+
+            <div class="card">
+              <h3>Why not just use Shopify or Square?</h3>
+              <p>Those tools exist, but most operators don't implement them properly. We don't just give tools — we install a working system that fits how they actually operate.</p>
+            </div>
+
+            <div class="card">
+              <h3>Who is your customer?</h3>
+              <p>Operators already in motion — restaurants, service businesses — people with real demand but no structure.</p>
+            </div>
+
+            <div class="card">
+              <h3>How big can this get?</h3>
+              <p>Every independent operator needs structure. We're starting with food and local services, but the system applies anywhere demand needs to be organized.</p>
+            </div>
+
+            <div class="card">
+              <h3>Why you?</h3>
+              <p id="whyUsAnswer">Because we're already doing it in the real world — not testing ideas. We're installing systems where people are taking real orders and processing real payments.</p>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:12px;">
+            <h3>Power statements</h3>
+            <div class="chips">
+              <button class="chip copy-btn" type="button" data-copy="We don't replace businesses — we organize their demand.">Copy: organize demand</button>
+              <button class="chip copy-btn" type="button" data-copy="Paid before pickup changes everything.">Copy: paid before pickup</button>
+              <button class="chip copy-btn" type="button" data-copy="Most operators don't need more customers — they need structure.">Copy: need structure</button>
+              <button class="chip copy-btn" type="button" data-copy="We install, not advise.">Copy: install, not advise</button>
+            </div>
+          </div>
+          <p class="copy-note" id="copyNote3" aria-live="polite"></p>
+        </section>
+
+        <!-- ═══ LEVEL 4 ═══ -->
+        <section class="panel level" id="level4" data-section>
+          <div class="level__head">
+            <div>
+              <p class="level__eyebrow">Level 4</p>
+              <h2>Execution + room strategy</h2>
+              <p class="level__desc">Move like a sniper, not a tourist.</p>
+            </div>
+            <div class="level-actions">
+              <!-- FIX 4 — two follow-up buttons for the two scenarios -->
+              <button class="btn btn--small btn--ghost copy-btn" type="button" data-copy-target="#followupMsg">Copy follow-up (demoed)</button>
+              <button class="btn btn--small btn--ghost copy-btn" type="button" data-copy-target="#followupMsgNoDemo">Copy follow-up (talked only)</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Room filter</h3>
+            <ul class="list">
+              <li>If they not building or operating → exit</li>
+              <li>If no payment flow involved → low priority</li>
+              <li>If no traction → 2 min max</li>
+            </ul>
+          </div>
+
+          <div class="grid grid--2">
+            <div class="card">
+              <h3>Tier 1 targets</h3>
+              <ul class="list">
+                <li>Stripe employees</li>
+                <li>Real operators</li>
+              </ul>
+            </div>
+
+            <div class="card">
+              <h3>Tier 2 targets</h3>
+              <ul class="list">
+                <li>SaaS founders with traction</li>
+              </ul>
+            </div>
+
+            <div class="card">
+              <h3>Avoid getting stuck</h3>
+              <ul class="list">
+                <li>Idea-only founders</li>
+                <li>People just exploring</li>
+                <li>Low-signal conversations with no traction</li>
+              </ul>
+            </div>
+
+            <div class="card">
+              <h3>Live Session Mode</h3>
+              <ul class="list">
+                <li>What are they REALLY saying?</li>
+                <li>Where does this fit in my system? (checkout / payouts / automation / pricing)</li>
+                <li>Write ONE line: "We need to ______ at Square Bidness."</li>
+              </ul>
+            </div>
+
+            <div class="card">
+              <h3>Room positioning</h3>
+              <ul class="list">
+                <li>Near coffee</li>
+                <li>Near transitions</li>
+                <li>Near entrances</li>
+                <li>10–15 minutes per convo, then move</li>
+              </ul>
+            </div>
+
+            <div class="card">
+              <h3>Post-session move</h3>
+              <ul class="list">
+                <li>Turn to ONE person — not the room</li>
+                <li>Ask: "What are you building right now?"</li>
+                <li>Then: "We're organizing demand for real-world operators."</li>
+                <li>Ask: "How are you handling payments today?"</li>
+              </ul>
+            </div>
+
+            <div class="card">
+              <h3>Decision-maker check</h3>
+              <p>Ask: Are you building it or running it?</p>
+            </div>
+
+            <div class="card">
+              <h3>Follow-up — showed the demo</h3>
+              <p id="followupMsg">Good meeting you at Stripe Sessions — Marcus from Square Bidness. We install operator systems like I showed you. Let's stay connected.</p>
+            </div>
+
+            <!-- FIX 4 — second follow-up for no-demo conversations -->
+            <div class="card">
+              <h3>Follow-up — talked, no demo</h3>
+              <p id="followupMsgNoDemo">Good meeting you at Stripe Sessions — Marcus from Square Bidness. We build revenue infrastructure for independent operators — checkout, ordering, routing, all structured. Worth a quick look when you have 5 minutes: squarebidness.com</p>
+            </div>
+          </div>
+          <p class="copy-note" id="copyNote4" aria-live="polite"></p>
+        </section>
+
+        <!-- ═══ DAILY TARGET ═══ -->
+        <section class="panel level" id="dailyTarget" data-section>
+          <div class="level__head">
+            <div>
+              <p class="level__eyebrow">Daily target</p>
+              <h2>What a win looks like</h2>
+              <p class="level__desc">Keep the day measurable so you move intentional.</p>
+            </div>
+            <div class="level-actions">
+              <button class="btn btn--small btn--ghost copy-btn" type="button" data-copy="10 conversations. 3 solid connections. 1 real opportunity.">Copy daily target</button>
+            </div>
+          </div>
+
+          <div class="grid grid--2">
+            <div class="card">
+              <h3>Target numbers</h3>
+              <ul class="list">
+                <li>10 conversations</li>
+                <li>3 solid connections</li>
+                <li>1 real opportunity</li>
+              </ul>
+            </div>
+
+            <div class="card">
+              <h3>Mindset</h3>
+              <p>You do not need everybody. You need the right few.</p>
+            </div>
+          </div>
+          <p class="copy-note" id="copyNote5" aria-live="polite"></p>
+        </section>
+
+        <!-- ═══ LIVE DEMOS ═══ -->
+        <section class="panel level" id="demoLinks" data-section>
+          <div class="level__head">
+            <div>
+              <p class="level__eyebrow">Live demos</p>
+              <h2>What to show on your phone</h2>
+              <p class="level__desc">Swap these links if you want tighter demos, but this gives you a clean reference lane.</p>
+            </div>
+          </div>
+
+          <div class="demo-links">
+            <a class="demo-link" href="/delish/" target="_blank" rel="noopener">
+              <span>
+                <strong>Delish</strong><br />
+                <span class="muted">Live restaurant order system</span>
+              </span>
+              <span>→</span>
+            </a>
+
+            <a class="demo-link" href="/stripe-2026/delish/" target="_blank" rel="noopener">
+              <span>
+                <strong>Delish System (Case Study)</strong><br />
+                <span class="muted">Full operator system breakdown</span>
+              </span>
+              <span>→</span>
+            </a>
+
+            <a class="demo-link" href="/puffs/" target="_blank" rel="noopener">
+              <span>
+                <strong>Puff's Smokehouse</strong><br />
+                <span class="muted">Live ordering lane</span>
+              </span>
+              <span>→</span>
+            </a>
+
+            <a class="demo-link" href="/work/" target="_blank" rel="noopener">
+              <span>
+                <strong>Systems</strong><br />
+                <span class="muted">Square Bidness install framing</span>
+              </span>
+              <span>→</span>
+            </a>
+
+            <a class="demo-link" href="/" target="_blank" rel="noopener">
+              <span>
+                <strong>Square Bidness</strong><br />
+                <span class="muted">Main brand reference</span>
+              </span>
+              <span>→</span>
+            </a>
+          </div>
+
+          <!-- FIX 5 — contact capture so someone holding your phone can tap to connect -->
+          <div class="contact-card">
+            <div class="contact-card__text">
+              <strong>Connect with Marcus</strong>
+              <span>Square Bidness · Founder · squarebidness.com</span>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <a class="btn btn--small btn--gold" href="https://www.linkedin.com/in/marcus-buckner-sb" target="_blank" rel="noopener">LinkedIn →</a>
+              <a class="btn btn--small btn--ghost" href="https://www.squarebidness.com" target="_blank" rel="noopener">Site →</a>
+            </div>
+          </div>
+        </section>
+
+        <div class="empty-state hidden" id="emptyState">
+          Nothing matched that search. Try terms like <strong>pitch</strong>, <strong>money</strong>, <strong>Stripe</strong>, <strong>operators</strong>, or <strong>follow-up</strong>.
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ END OF DAY ═══ -->
+    <section class="panel level" id="endOfDay" data-section style="margin:0 auto 44px; width:min(1040px, calc(100% - 24px));">
+      <div class="level__head">
+        <div>
+          <p class="level__eyebrow">End of day</p>
+          <h2>Lock it in</h2>
+        </div>
+      </div>
+
+      <div class="grid grid--2">
+        <div class="card">
+          <h3>What changed?</h3>
+          <p>What did I learn that changes how I build?</p>
+        </div>
+
+        <div class="card">
+          <h3>What was confirmed?</h3>
+          <p>What did Stripe validate that I already believed?</p>
+        </div>
+
+        <div class="card">
+          <h3>What's unclear?</h3>
+          <p>Where do I need deeper answers tomorrow?</p>
+        </div>
+      </div>
+      <!-- FIX 3 — copy-note added so future copy buttons here have a feedback target -->
+      <p class="copy-note" id="copyNote6" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <div class="floating">
+    <button class="fab fab--dark" type="button" id="topBtn">Top</button>
+    <button class="fab" type="button" id="quickPitchBtn">Quick pitch</button>
+  </div>
+
+  <script>
+    (() => {
+      const $ = (sel, root = document) => root.querySelector(sel);
+      const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+      const searchInput   = $("#searchInput");
+      const clearSearchBtn = $("#clearSearchBtn");
+      const jumpDailyBtn  = $("#jumpDailyBtn");
+      const topBtn        = $("#topBtn");
+      const quickPitchBtn = $("#quickPitchBtn");
+      const copyMasterBtn = $("#copyMasterBtn");
+      const expandAllBtn  = $("#expandAllBtn");
+      const collapseAllBtn = $("#collapseAllBtn");
+      const progressFill  = $("#progressFill");
+      const progressText  = $("#progressText");
+      const sections      = $$("[data-section]");
+      const navBtns       = $$("[data-scroll]");
+      const emptyState    = $("#emptyState");
+
+      // ── Copy helper ──────────────────────────────────────────────
+      async function copyText(text, noteEl) {
+        try {
+          await navigator.clipboard.writeText(text.trim());
+          if (noteEl) {
+            noteEl.textContent = "Copied.";
+            setTimeout(() => { if (noteEl.textContent === "Copied.") noteEl.textContent = ""; }, 1500);
+          }
+        } catch {
+          if (noteEl) {
+            noteEl.textContent = "Copy failed on this device.";
+            setTimeout(() => { if (noteEl.textContent === "Copy failed on this device.") noteEl.textContent = ""; }, 1800);
+          }
+        }
+      }
+
+      function getNoteElFor(el) {
+        const lvl = el.closest(".level");
+        return lvl ? lvl.querySelector(".copy-note") : null;
+      }
+
+      $$(".copy-btn").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const direct = btn.getAttribute("data-copy");
+          if (direct) { await copyText(direct, getNoteElFor(btn)); return; }
+          const sel = btn.getAttribute("data-copy-target");
+          if (!sel) return;
+          const target = $(sel);
+          if (!target) return;
+          await copyText(target.innerText || target.textContent || "", getNoteElFor(btn));
+        });
+      });
+
+      // Copy master pitch respects current mode
+      copyMasterBtn.addEventListener("click", () => {
+        const pitchEl = stripeMode ? $("#pitchStripe") : $("#pitchOperator");
+        copyText((pitchEl?.innerText || "").trim(), $("#copyNote1"));
+      });
+
+      quickPitchBtn.addEventListener("click", () => {
+        const el = $("#level1");
+        if (!el) return;
+        el.scrollIntoView({ behavior:"smooth", block:"start" });
+        setTimeout(() => copyText(($("#pitchShort")?.innerText || "").trim(), $("#copyNote1")), 300);
+      });
+
+      topBtn.addEventListener("click", () => window.scrollTo({ top:0, behavior:"smooth" }));
+      jumpDailyBtn.addEventListener("click", () => $("#dailyTarget")?.scrollIntoView({ behavior:"smooth", block:"start" }));
+
+      navBtns.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const target = $(btn.getAttribute("data-scroll") || "");
+          if (target) target.scrollIntoView({ behavior:"smooth", block:"start" });
+        });
+      });
+
+      // ── Active nav tracking ───────────────────────────────────────
+      function setActiveNav() {
+        let active = sections[0];
+        const threshold = window.innerHeight * 0.28;
+        sections.forEach((s) => { if (s.getBoundingClientRect().top <= threshold) active = s; });
+        navBtns.forEach((btn) => btn.classList.toggle("is-active", btn.getAttribute("data-scroll") === `#${active.id}`));
+      }
+
+      // ── Progress tracking ─────────────────────────────────────────
+      // FIX 2 — seed level1 as already-viewed so progress starts at 1/7 not 0/7
+      const viewed = new Set(["level1"]);
+
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach((e) => { if (e.isIntersecting) { viewed.add(e.target.id); updateProgress(); } });
+      }, { threshold: 0.45 });
+
+      function updateProgress() {
+        const total = sections.length;
+        const count = viewed.size;
+        progressFill.style.width = (total ? (count / total) * 100 : 0) + "%";
+        progressText.textContent = `${count} of ${total} viewed`;
+      }
+
+      sections.forEach((s) => obs.observe(s));
+
+      // ── Search ────────────────────────────────────────────────────
+      function runSearch() {
+        const q = searchInput.value.trim().toLowerCase();
+        let visible = 0;
+        sections.forEach((s) => {
+          const match = !q || s.innerText.toLowerCase().includes(q);
+          s.classList.toggle("hidden", !match);
+          if (match) visible++;
+        });
+        emptyState.classList.toggle("hidden", visible !== 0);
+        navBtns.forEach((btn) => {
+          const target = $(btn.getAttribute("data-scroll") || "");
+          btn.classList.toggle("hidden", !!q && (!target || target.classList.contains("hidden")));
+        });
+      }
+
+      searchInput.addEventListener("input", runSearch);
+
+      clearSearchBtn.addEventListener("click", () => {
+        searchInput.value = "";
+        runSearch();
+        searchInput.focus();
+      });
+
+      expandAllBtn.addEventListener("click", () => {
+        sections.forEach((s) => s.classList.remove("hidden"));
+        searchInput.value = "";
+        runSearch();
+      });
+
+      // FIX 1 — collapse all resets nav buttons to all visible (not just level1)
+      collapseAllBtn.addEventListener("click", () => {
+        const first = $("#level1");
+        sections.forEach((s) => { if (s !== first) s.classList.add("hidden"); });
+        searchInput.value = "";
+        emptyState.classList.add("hidden");
+        navBtns.forEach((btn) => btn.classList.remove("hidden")); // all nav stays visible
+        window.scrollTo({ top:0, behavior:"smooth" });
+      });
+
+      // ── Stripe Mode ───────────────────────────────────────────────
+      let stripeMode = false;
+      const stripeBtn  = document.getElementById("stripeModeBtn");
+      const pitchCard  = document.getElementById("pitchCard");
+
+      function toggleStripeMode() {
+        stripeMode = !stripeMode;
+
+        // FIX 7 — button changes color + pitch card gets visible glow
+        stripeBtn.textContent = stripeMode ? "Stripe Mode: ON" : "Stripe Mode: OFF";
+        stripeBtn.classList.toggle("btn--stripe-on", stripeMode);
+        stripeBtn.classList.toggle("btn--ghost", !stripeMode);
+        if (pitchCard) pitchCard.classList.toggle("stripe-active", stripeMode);
+
+        document.getElementById("pitchOperator")?.classList.toggle("hidden",  stripeMode);
+        document.getElementById("pitchStripe")?.classList.toggle("hidden", !stripeMode);
+        document.body.classList.toggle("stripe-mode", stripeMode);
+      }
+
+      if (stripeBtn) stripeBtn.addEventListener("click", toggleStripeMode);
+
+      // ── Investor Deck ─────────────────────────────────────────────
+      const toggleDeckBtn  = document.getElementById("toggleDeckBtn");
+      const deckContainer  = document.getElementById("deckContainer");
+
+      if (toggleDeckBtn) {
+        toggleDeckBtn.addEventListener("click", () => {
+          deckContainer.classList.toggle("hidden");
+          toggleDeckBtn.textContent = deckContainer.classList.contains("hidden") ? "Open Deck" : "Close Deck";
+        });
+      }
+
+      // FIX 6 — autofocus search on desktop only; skip mobile to avoid keyboard popup
+      if (window.matchMedia("(hover:hover) and (pointer:fine)").matches) {
+        searchInput.focus();
+      }
+
+      document.addEventListener("scroll", setActiveNav, { passive:true });
+      setActiveNav();
+      updateProgress();
+      runSearch();
+    })();
+  </script>
+</body>
+</html>

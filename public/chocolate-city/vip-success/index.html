@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>VIP Reservation Confirmed | Chocolate City</title>
+
+  
+<link rel="icon" type="image/png" sizes="32x32" href="/chocolate-city/assets/cc-icon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/chocolate-city/assets/cc-icon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/chocolate-city/assets/cc-icon-180.png">
+<link rel="manifest" href="/chocolate-city/manifest.json">
+
+  <style>
+    body{
+      margin:0;
+      font-family:system-ui;
+      background:#080504;
+      color:#fff7ea;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:100vh;
+    }
+
+    .card{
+      width:100%;
+      max-width:520px;
+      background:#130c0a;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:24px;
+      padding:28px;
+      text-align:center;
+    }
+
+    h1{
+      color:#f5d58a;
+      margin-bottom:10px;
+    }
+
+    .section{
+      margin-top:20px;
+      text-align:left;
+    }
+
+    .label{
+      font-size:12px;
+      color:#c7a983;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+    }
+
+    .value{
+      font-size:18px;
+      font-weight:700;
+      margin-top:4px;
+    }
+
+    .gold{
+      color:#d7a84f;
+    }
+
+    .qr-wrap{
+      margin:24px auto 0;
+      padding:16px;
+      max-width:280px;
+      border-radius:18px;
+      background:#fff7ea;
+      border:1px solid rgba(215,168,79,.45);
+    }
+
+    .qr-wrap img{
+      display:block;
+      width:100%;
+      height:auto;
+    }
+
+    .vip-code{
+      margin-top:10px;
+      font-size:14px;
+      font-weight:800;
+      color:#f5d58a;
+      word-break:break-all;
+    }
+
+    .note{
+      margin-top:22px;
+      font-size:14px;
+      color:#c7a983;
+    }
+
+    .cta{
+      margin-top:20px;
+      display:inline-block;
+      padding:12px 18px;
+      border-radius:999px;
+      background:#d7a84f;
+      color:#080504;
+      font-weight:800;
+      text-decoration:none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h1>VIP Reserved</h1>
+ <p class="note">
+  Please screenshot this confirmation and show it at the door.<br>
+Your VIP section is paid in full online.
+</p>
+
+  <div class="section">
+  <div class="label">Section Owner</div>
+  <div class="value" id="customerName">—</div>
+</div>
+  
+  <div class="section">
+    <div class="label">Section</div>
+    <div class="value gold" id="sectionName">Loading...</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Paid Online</div>
+    <div class="value" id="deposit">—</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Remaining Balance</div>
+    <div class="value" id="remaining">—</div>
+  </div>
+
+  <div class="qr-wrap" id="qrWrap" hidden>
+    <img id="vipQr" alt="VIP entry QR code" />
+  </div>
+  <div class="vip-code" id="vipCode"></div>
+
+  <a class="cta" href="/chocolate-city/">Back to Lounge</a>
+</div>
+
+<script>
+  async function loadSession(){
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get("session_id");
+    if(!sessionId) return;
+
+    const res = await fetch(`/api/chocolate-city/finalize-vip/?session_id=${sessionId}`);
+    const data = await res.json();
+
+    if(!data.ok) return;
+
+    document.getElementById("customerName").textContent = data.customerName || "—";
+    document.getElementById("sectionName").textContent = data.packageName;
+    document.getElementById("deposit").textContent = `$${data.deposit}`;
+    document.getElementById("remaining").textContent = `$${data.remaining}`;
+
+    const qrWrap = document.getElementById("qrWrap");
+    const vipQr = document.getElementById("vipQr");
+    const vipCode = document.getElementById("vipCode");
+
+    vipQr.src = `/api/chocolate-city/vip-qr/?session_id=${encodeURIComponent(sessionId)}`;
+    qrWrap.hidden = false;
+    vipCode.textContent = data.vipCode || `VIP-${sessionId}`;
+  }
+
+  loadSession();
+</script>
+</body>
+</html>

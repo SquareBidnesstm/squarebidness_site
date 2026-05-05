@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Delish Pickup Clear Screen</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#111111" />
+
+  <link rel="icon" sizes="32x32" href="/delish/assets/delish-favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/delish/assets/delish-logo-mark-180.png" />
+
+  <style>
+    :root{
+      --bg:#0f1012;
+      --panel:#181a1f;
+      --panel-2:#13151a;
+      --line:rgba(255,255,255,.10);
+      --text:#f5f2ea;
+      --muted:rgba(255,255,255,.70);
+      --accent:#d7ae72;
+      --accent-2:#f2d8ae;
+      --good:#1d6b39;
+      --danger:#a12626;
+      --shadow:0 20px 50px rgba(0,0,0,.30);
+    }
+
+    *{box-sizing:border-box}
+
+    html,body{
+      margin:0;
+      min-height:100%;
+      background:
+        radial-gradient(circle at top, rgba(215,174,114,.10), transparent 35%),
+        linear-gradient(180deg,#0d0e10 0%, #111318 100%);
+      color:var(--text);
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    }
+
+    body{padding:20px}
+
+    .wrap{
+      width:min(1400px, 100%);
+      margin:0 auto;
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:18px;
+      margin-bottom:18px;
+      flex-wrap:wrap;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+
+    .logo{
+      width:64px;
+      height:64px;
+      border-radius:16px;
+      object-fit:cover;
+      background:#fff;
+      border:1px solid rgba(255,255,255,.08);
+    }
+
+    h1{
+      margin:0;
+      font-size:clamp(2rem, 4vw, 3.2rem);
+      line-height:1;
+      font-weight:900;
+      letter-spacing:-.04em;
+    }
+
+    .sub{
+      margin:8px 0 0;
+      color:var(--muted);
+      font-size:1rem;
+    }
+
+    .meta{
+      display:grid;
+      gap:10px;
+      min-width:240px;
+      text-align:right;
+    }
+
+    .meta-box{
+      padding:14px 16px;
+      border-radius:18px;
+      background:var(--panel);
+      border:1px solid var(--line);
+      box-shadow:var(--shadow);
+    }
+
+    .meta-label{
+      color:var(--muted);
+      font-size:.82rem;
+      text-transform:uppercase;
+      letter-spacing:.10em;
+      font-weight:800;
+    }
+
+    .meta-value{
+      margin-top:8px;
+      font-size:1.15rem;
+      font-weight:900;
+      color:var(--accent-2);
+    }
+
+    .notice{
+      margin-bottom:18px;
+      padding:14px 18px;
+      border-radius:18px;
+      background:linear-gradient(180deg, rgba(215,174,114,.14), rgba(215,174,114,.08));
+      border:1px solid rgba(215,174,114,.20);
+      color:var(--accent-2);
+      font-size:1rem;
+      font-weight:800;
+      box-shadow:var(--shadow);
+    }
+
+    .status{
+      margin-bottom:18px;
+      padding:14px 16px;
+      border-radius:16px;
+      background:rgba(255,255,255,.04);
+      border:1px solid var(--line);
+      color:var(--muted);
+      font-size:.98rem;
+      min-height:56px;
+      display:flex;
+      align-items:center;
+    }
+
+    .status.good{
+      border-color:rgba(29,107,57,.35);
+      background:rgba(29,107,57,.10);
+      color:#d7f3df;
+    }
+
+    .status.bad{
+      border-color:rgba(161,38,38,.35);
+      background:rgba(161,38,38,.10);
+      color:#ffd1d1;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+      gap:16px;
+    }
+
+    .card{
+      padding:20px;
+      border-radius:24px;
+      background:linear-gradient(180deg,var(--panel),var(--panel-2));
+      border:1px solid var(--line);
+      box-shadow:var(--shadow);
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:36px;
+      padding:0 12px;
+      border-radius:999px;
+      background:rgba(29,107,57,.18);
+      border:1px solid rgba(29,107,57,.30);
+      color:#d7f3df;
+      font-size:.82rem;
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+
+    .order-number{
+      margin-top:16px;
+      font-size:2.2rem;
+      font-weight:900;
+      letter-spacing:-.04em;
+      line-height:1;
+    }
+
+    .customer{
+      margin-top:12px;
+      font-size:1.15rem;
+      color:var(--accent-2);
+      font-weight:800;
+    }
+
+    .pickup{
+      margin-top:10px;
+      color:var(--muted);
+      font-weight:700;
+    }
+
+    .action{
+      margin-top:18px;
+    }
+
+    .btn{
+      width:100%;
+      min-height:48px;
+      border:none;
+      border-radius:999px;
+      background:var(--accent);
+      color:#181410;
+      font-weight:900;
+      cursor:pointer;
+      font-size:1rem;
+    }
+
+    .btn:hover{
+      filter:brightness(1.03);
+    }
+
+    .btn[disabled]{
+      opacity:.6;
+      cursor:not-allowed;
+    }
+
+    .empty{
+      padding:40px 24px;
+      border-radius:24px;
+      background:var(--panel);
+      border:1px solid var(--line);
+      text-align:center;
+      color:var(--muted);
+      box-shadow:var(--shadow);
+    }
+
+    .empty strong{
+      display:block;
+      font-size:2rem;
+      color:var(--text);
+      margin-bottom:10px;
+      letter-spacing:-.03em;
+    }
+
+    @media (max-width:700px){
+      body{padding:12px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <img src="/delish/assets/delish-logo-mark-512.png" alt="Delish logo" class="logo" />
+        <div>
+          <h1>Pickup Clear Screen</h1>
+          <p class="sub">Front counter staff can clear ready orders after customer pickup.</p>
+        </div>
+      </div>
+
+      <div class="meta">
+        <div class="meta-box">
+          <div class="meta-label">Refresh</div>
+          <div class="meta-value">Every 10 seconds</div>
+        </div>
+        <div class="meta-box">
+          <div class="meta-label">Ready Orders</div>
+          <div class="meta-value" id="readyCount">0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notice">
+      Tap <strong>Picked Up</strong> after the customer receives their order. This will clear it from the lobby ready screen.
+    </div>
+
+    <div class="status" id="statusBox">Loading ready orders...</div>
+
+    <section class="grid" id="ordersGrid">
+      <div class="empty">
+        <strong>Loading…</strong>
+        Ready orders will appear here.
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const ordersGrid = document.getElementById("ordersGrid");
+    const statusBox = document.getElementById("statusBox");
+    const readyCount = document.getElementById("readyCount");
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function firstName(fullName) {
+      const raw = String(fullName || "").trim();
+      if (!raw) return "";
+      return raw.split(/\s+/)[0];
+    }
+
+    function setStatus(message, tone = "") {
+      statusBox.className = "status" + (tone ? ` ${tone}` : "");
+      statusBox.textContent = message;
+    }
+
+    function renderOrders(orders) {
+      readyCount.textContent = String(orders.length);
+
+      if (!orders.length) {
+        ordersGrid.innerHTML = `
+          <div class="empty">
+            <strong>No ready orders</strong>
+            Nothing needs to be cleared right now.
+          </div>
+        `;
+        return;
+      }
+
+      ordersGrid.innerHTML = orders.map(order => `
+        <article class="card">
+          <div class="badge">Ready</div>
+          <div class="order-number">${escapeHtml(order.orderNumber || "")}</div>
+          <div class="customer">${escapeHtml(firstName(order.customerName || ""))}</div>
+          <div class="pickup">${escapeHtml(order.pickupWindow || "")}</div>
+
+          <div class="action">
+            <button class="btn" data-pickup-id="${escapeHtml(order.id)}">
+              Picked Up
+            </button>
+          </div>
+        </article>
+      `).join("");
+
+      document.querySelectorAll("[data-pickup-id]").forEach((button) => {
+        button.addEventListener("click", () => {
+          markPickedUp(button.getAttribute("data-pickup-id"), button);
+        });
+      });
+    }
+
+    async function loadReadyOrders() {
+      try {
+        const res = await fetch(`/api/delish/ready-orders/?t=${Date.now()}`, {
+          cache: "no-store"
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || "Failed to load ready orders.");
+        }
+
+        const orders = Array.isArray(data.readyOrders) ? data.readyOrders : [];
+        renderOrders(orders);
+        setStatus(`${orders.length} ready order${orders.length === 1 ? "" : "s"} loaded.`, "good");
+      } catch (error) {
+        console.error("READY COMPLETE SCREEN ERROR:", error);
+        ordersGrid.innerHTML = `
+          <div class="empty">
+            <strong>Unable to load ready orders</strong>
+            Please refresh shortly.
+          </div>
+        `;
+        setStatus("Unable to load ready orders right now.", "bad");
+      }
+    }
+
+    async function markPickedUp(id, button) {
+      if (!id) return;
+
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.textContent = "Clearing...";
+
+      try {
+        const res = await fetch("/api/delish/pickup-order/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ id })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || "Failed to mark picked up.");
+        }
+
+        setStatus(`Order cleared from ready screen.`, "good");
+        await loadReadyOrders();
+      } catch (error) {
+        console.error("PICKUP ORDER ERROR:", error);
+        button.disabled = false;
+        button.textContent = originalText;
+        setStatus(error.message || "Unable to clear order.", "bad");
+      }
+    }
+
+    loadReadyOrders();
+    setInterval(loadReadyOrders, 10000);
+  </script>
+</body>
+</html>

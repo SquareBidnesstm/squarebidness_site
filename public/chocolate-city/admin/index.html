@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Chocolate City Admin</title>
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/chocolate-city/assets/cc-icon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/chocolate-city/assets/cc-icon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/chocolate-city/assets/cc-icon-180.png">
+<link rel="manifest" href="/chocolate-city/manifest.json">
+
+  <style>
+    :root{
+      --bg:#080504;
+      --panel:#150c09;
+      --gold:#d7a84f;
+      --text:#fff7ea;
+      --muted:#c7a983;
+      --line:rgba(245,213,138,.22);
+    }
+
+    .topbar{
+  max-width:1120px;
+  margin:0 auto 18px;
+  padding:18px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+}
+
+.brand-link{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  color:var(--gold2);
+  font-weight:900;
+  font-size:18px;
+  text-decoration:none;
+}
+
+.brand-link img{
+  width:54px;
+  height:54px;
+  border-radius:50%;
+  object-fit:cover;
+}
+
+.back-link{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:44px;
+  padding:0 16px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  color:var(--muted);
+  font-weight:900;
+  text-decoration:none;
+  background:rgba(255,255,255,.04);
+}
+
+@media(max-width:700px){
+  .topbar{
+    padding:14px;
+    align-items:flex-start;
+  }
+
+  .brand-link span{
+    font-size:16px;
+  }
+
+  .brand-link img{
+    width:46px;
+    height:46px;
+  }
+}
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      font-family:Arial,Helvetica,sans-serif;
+      background:linear-gradient(180deg,#090504,#170b07);
+      color:var(--text);
+      min-height:100vh;
+      padding:20px;
+    }
+
+    .wrap{
+      max-width:760px;
+      margin:0 auto;
+    }
+
+    .card{
+      background:rgba(21,12,9,.92);
+      border:1px solid var(--line);
+      border-radius:28px;
+      padding:24px;
+      box-shadow:0 25px 70px rgba(0,0,0,.45);
+    }
+
+    h1{
+      margin:0 0 8px;
+      font-size:34px;
+      letter-spacing:-.04em;
+    }
+
+    p{
+      margin:0 0 20px;
+      color:var(--muted);
+      line-height:1.5;
+    }
+
+    label{
+      display:block;
+      margin:16px 0 7px;
+      font-weight:800;
+      color:var(--gold);
+    }
+
+    input, textarea, select{
+      width:100%;
+      padding:13px 14px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:#090504;
+      color:var(--text);
+      font-size:15px;
+    }
+
+    textarea{
+      min-height:96px;
+      resize:vertical;
+    }
+
+    .row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    button{
+      margin-top:20px;
+      width:100%;
+      border:0;
+      border-radius:999px;
+      min-height:52px;
+      font-weight:900;
+      font-size:16px;
+      background:linear-gradient(135deg,#d7a84f,#f5d58a);
+      color:#180b05;
+      cursor:pointer;
+    }
+
+    .status{
+      margin-top:14px;
+      color:var(--muted);
+      font-weight:800;
+    }
+
+    .booking-list{
+  margin-top:18px;
+  display:grid;
+  gap:12px;
+}
+
+.booking-card{
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:14px;
+  background:#090504;
+}
+
+.booking-card strong{
+  color:var(--gold);
+}
+
+.booking-card div{
+  margin-top:5px;
+  color:var(--muted);
+}
+
+    .danger-btn{
+  background:linear-gradient(135deg,#7a1e1e,#d94a4a);
+  color:#fff7ea;
+}
+
+    @media(max-width:700px){
+      .row{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+
+<body>
+  <header class="topbar">
+  <a class="brand-link" href="/chocolate-city/">
+    <img src="/chocolate-city/assets/cc-icon-192.png" alt="Chocolate City Lounge logo">
+    <span>Chocolate City Lounge LLC</span>
+  </a>
+
+  <a class="back-link" href="/chocolate-city/">Back to Lounge</a>
+</header>
+  
+  <main class="wrap">
+    <div class="card">
+      <h1>Chocolate City Admin</h1>
+      <p>Control Friday status, weekend message, VIP notice, and front page announcement.</p>
+
+      <label>Admin Token</label>
+      <input id="token" type="password" placeholder="Enter admin token" />
+
+      <div class="row">
+        <div>
+          <label>Friday Open?</label>
+         <select id="fridayOpen">
+  <option value="false">Friday Closed / Select Fridays Only</option>
+  <option value="true">Friday Open This Week</option>
+</select>
+        </div>
+
+        <div>
+          <label>Weekend Status</label>
+          <input id="weekendStatus" value="Open this weekend" />
+        </div>
+      </div>
+
+      <label>Main Headline</label>
+      <input id="eventTitle" value="All Roads Lead to Chocolate City" />
+
+      <label>Friday Message</label>
+      <input id="fridayText" value="Friday — select nights only." />
+
+      <label>Event Note</label>
+      <textarea id="eventNote">Saturdays move the city. Sundays belong to it.</textarea>
+
+      <label>VIP Status</label>
+      <textarea id="vipStatus">Only 2 VIP sections available per night. First come. Paid in full online.</textarea>
+      <label>Announcement</label>
+      <textarea id="announcement">Stay tuned for updates, event nights, and VIP sections.</textarea>
+
+      <button onclick="saveStatus()">Save Chocolate City Updates</button>
+      <button type="button" onclick="loadBookings()">Load VIP Bookings</button>
+      <button type="button" class="danger-btn" onclick="resetVipBookings()">
+  Reset VIP Inventory
+</button>
+      <div id="bookingList" class="booking-list"></div>
+
+      <div class="status" id="status">Ready.</div>
+    </div>
+  </main>
+
+  <script>
+  const API = "/api/chocolate-city/status/";
+
+  function escapeHtml(str){
+    return String(str || "").replace(/[&<>"']/g, m => ({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#039;"
+    }[m]));
+  }
+
+  function syncFridayText(){
+    const isOpen = document.getElementById("fridayOpen").value === "true";
+    document.getElementById("fridayText").value = isOpen
+      ? "Friday is open this week from 7PM – 2AM."
+      : "Friday — select nights only.";
+  }
+
+  async function loadCurrent(){
+    try{
+      const res = await fetch(API, { cache:"no-store" });
+      const data = await res.json();
+
+      if(!data.ok || !data.state) return;
+
+      const s = data.state;
+
+      document.getElementById("fridayOpen").value = String(!!s.fridayOpen);
+      document.getElementById("weekendStatus").value = s.weekendStatus || "";
+      document.getElementById("eventTitle").value = s.eventTitle || "";
+      document.getElementById("fridayText").value = s.fridayText || "";
+      document.getElementById("eventNote").value = s.eventNote || "";
+      document.getElementById("vipStatus").value = s.vipStatus || "";
+      document.getElementById("announcement").value = s.announcement || "";
+    }catch(err){
+      document.getElementById("status").textContent = "Could not load current status.";
+    }
+  }
+
+  async function saveStatus(){
+    const status = document.getElementById("status");
+    const token = document.getElementById("token").value.trim();
+    const fridayOpen = document.getElementById("fridayOpen").value === "true";
+
+    if(!token){
+      status.textContent = "Enter admin token first.";
+      return;
+    }
+
+    const payload = {
+      fridayOpen,
+      weekendStatus: document.getElementById("weekendStatus").value.trim(),
+      eventTitle: document.getElementById("eventTitle").value.trim(),
+      fridayText: fridayOpen
+        ? "Friday is open this week from 7PM – 2AM."
+        : "Friday — select nights only.",
+      eventNote: document.getElementById("eventNote").value.trim(),
+      vipStatus: document.getElementById("vipStatus").value.trim(),
+      announcement: document.getElementById("announcement").value.trim()
+    };
+
+    status.textContent = "Saving...";
+
+    try{
+      const res = await fetch(API, {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          "X-Admin-Token":token
+        },
+        body:JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+
+      if(!data.ok){
+        status.textContent = data.error || "Save failed.";
+        return;
+      }
+
+      status.textContent = "Saved. Public page updated.";
+    }catch(err){
+      status.textContent = "Save failed. Check API/env vars.";
+    }
+  }
+
+  async function loadBookings(){
+    const token = document.getElementById("token").value.trim();
+    const box = document.getElementById("bookingList");
+
+    if(!token){
+      box.innerHTML = "<p>Enter admin token first.</p>";
+      return;
+    }
+
+    box.innerHTML = "<p>Loading bookings...</p>";
+
+    try{
+      const res = await fetch("/api/chocolate-city/vip-bookings/", {
+        headers:{ "X-Admin-Token": token },
+        cache:"no-store"
+      });
+
+      const data = await res.json();
+
+      if(!data.ok){
+        box.innerHTML = `<p>${escapeHtml(data.error || "Could not load bookings.")}</p>`;
+        return;
+      }
+
+      if(!data.bookings.length){
+        box.innerHTML = "<p>No VIP bookings yet.</p>";
+        return;
+      }
+
+      box.innerHTML = data.bookings.map(b => `
+        <div class="booking-card">
+          <strong>${escapeHtml(b.packageName || "VIP Section")}</strong>
+          <div>Owner: ${escapeHtml(b.customerName || "—")}</div>
+          <div>Phone: ${escapeHtml(b.customerPhone || "—")}</div>
+          <div>Paid Amount: $${escapeHtml(String(b.deposit || b.fullPrice || 0))}</div>
+          <div>Timestamp: ${escapeHtml(b.paidAt || "—")}</div>
+          <div>Paid Status: ${escapeHtml(b.paymentStatus || "paid")}</div>
+        </div>
+      `).join("");
+    }catch(err){
+      box.innerHTML = "<p>Could not load bookings.</p>";
+    }
+  }
+
+  async function resetVipBookings(){
+    const token = document.getElementById("token").value.trim();
+    const box = document.getElementById("bookingList");
+    const status = document.getElementById("status");
+
+    if(!token){
+      status.textContent = "Enter admin token first.";
+      return;
+    }
+
+    const confirmed = confirm("Reset VIP inventory? This clears all current VIP bookings from availability.");
+    if(!confirmed) return;
+
+    status.textContent = "Resetting VIP inventory...";
+
+    try{
+      const res = await fetch("/api/chocolate-city/reset-vip/", {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          "X-Admin-Token":token
+        },
+        body:JSON.stringify({ force:true })
+      });
+
+      const data = await res.json();
+
+      if(!data.ok){
+        status.textContent = data.error || "Reset failed.";
+        return;
+      }
+
+      status.textContent = "VIP inventory reset. Sections are available again.";
+      box.innerHTML = "<p>VIP inventory cleared.</p>";
+    }catch(err){
+      status.textContent = "Reset failed. Check API/env vars.";
+    }
+  }
+
+  document.getElementById("fridayOpen").addEventListener("change", syncFridayText);
+
+  loadCurrent();
+</script>
+</body>
+</html>

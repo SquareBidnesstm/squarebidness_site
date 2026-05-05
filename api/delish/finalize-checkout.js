@@ -29,47 +29,35 @@ export default async function handler(req, res) {
 
     const metadata = session.metadata || {};
 
-    const payload = {
-      customerName: metadata.customerName || "",
-      customerPhone: metadata.customerPhone || "",
-      customerEmail: metadata.customerEmail || "",
-      pickupDate: metadata.pickupDate || "",
-      pickupWindow: metadata.pickupWindow || "",
-      notes: metadata.notes || "",
-      items: JSON.parse(metadata.itemsJson || "[]"),
-      subtotal: Number(metadata.subtotal || 0),
-      tax: Number(metadata.tax || 0),
-      total: Number(metadata.total || 0),
-      paymentStatus: "paid",
-      source: metadata.source || "delish-order-page",
-      stripeSessionId: session.id,
-    };
-
-    const base =
-      process.env.VERCEL_PROJECT_PRODUCTION_URL
-        ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-        : "https://www.squarebidness.com";
-
-    const webhookRes = await fetch(`${base}/api/delish/order-webhook/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
-
-    const webhookData = await webhookRes.json();
-
-    if (!webhookRes.ok || !webhookData.ok) {
-      return res.status(500).json({
-        ok: false,
-        error: webhookData.error || "Failed to store finalized order.",
-      });
+    let items = [];
+    try {
+      items = JSON.parse(metadata.itemsJson || "[]");
+      if (!Array.isArray(items)) items = [];
+    } catch {
+      items = [];
     }
 
     return res.status(200).json({
       ok: true,
-      orderNumber: webhookData.orderNumber,
+      order: {
+        orderNumber: metadata.orderNumber || metadata.recordId || session.id,
+        customerName: metadata.customerName || "",
+        customerPhone: metadata.customerPhone || "",
+        customerEmail: metadata.customerEmail || "",
+        pickupDate: metadata.pickupDate || "",
+        pickupWindow: metadata.pickupWindow || "",
+        notes: metadata.notes || metadata.orderNotes || "",
+        smsConsent: metadata.smsConsent === "yes" ? "yes" : "no",
+        items,
+        subtotal: Number(metadata.subtotal || 0),
+        tax: Number(metadata.tax || 0),
+        total:
+          typeof session.amount_total === "number"
+            ? Number((session.amount_total / 100).toFixed(2))
+            : Number(metadata.total || 0),
+        paymentStatus: "paid",
+        stripeSessionId: session.id,
+      },
     });
   } catch (error) {
     console.error("DELISH FINALIZE CHECKOUT ERROR:", error);

@@ -1,110 +1,326 @@
- <!-- FILE: /public/delish/order/success/index.html -->
+<!-- FILE: /public/delish/order/success/index.html -->
 <!doctype html>
-<html lang="en">
+<html lang="en" data-sb-brand="delish" data-sb-tier="success" data-sb-build="v20260402-delish-success-simple-match">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Order Confirmed — Delish</title>
-  <meta name="robots" content="noindex,nofollow" />
-  <meta name="theme-color" content="#0f0f0f" />
 
-   
-  <link rel="icon" type="image/png" sizes="16x16" href="/delish/assets/delish-favicon-16.png" />
-  <link rel="icon" type="image/png" sizes="32x32" href="/delish/assets/delish-favicon-32.png" />
+  <title>Order Confirmed — Delish</title>
+  <meta name="description" content="Your Delish order was received and paid successfully." />
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#0b0b0b" />
+
+  <link rel="icon" sizes="16x16" href="/delish/assets/delish-favicon-16.png" />
+  <link rel="icon" sizes="32x32" href="/delish/assets/delish-favicon-32.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/delish/assets/delish-logo-mark-180.png" />
 
+  <script defer src="/scripts/ga.js"></script>
+  <script defer src="/scripts/sb-analytics.js"></script>
+  <script defer src="/scripts/meta-pixel.js"></script>
+  <script defer src="/scripts/sb-meta-bridge.js"></script>
+
   <style>
-    body{
-      margin:0;
-      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-      background:#0f0f10;
-      color:#f5f2ea;
+    body {
+      margin: 0;
+      font-family: system-ui;
+      background: #0b0b0b;
+      color: #fff;
     }
-    .wrap{
-      width:min(760px,92%);
-      margin:0 auto;
-      padding:64px 0;
+
+    .wrap {
+      max-width: 700px;
+      margin: auto;
+      padding: 20px;
     }
-    .card{
-      border:1px solid #2c2c2f;
-      border-radius:24px;
-      padding:28px;
-      background:#171718;
+
+    h1 {
+      font-size: 28px;
+      margin: 0;
     }
-    h1{
-      margin:0;
-      font-size:clamp(2rem,4vw,3rem);
-      letter-spacing:-.03em;
+
+    h2 {
+      margin: 0 0 8px;
     }
-    p{
-      color:#cfc7ba;
-      line-height:1.6;
+
+    h3 {
+      margin: 0 0 8px;
     }
-    .status{
-      margin-top:16px;
-      padding:14px 16px;
-      border-radius:16px;
-      background:rgba(215,174,114,.1);
-      border:1px solid rgba(215,174,114,.2);
-      color:#f4ead8;
+
+    .section {
+      margin-top: 24px;
     }
-    .btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      min-height:48px;
-      padding:0 18px;
-      border-radius:999px;
-      background:linear-gradient(180deg,#f2d7ad,#d7ae72);
-      color:#181410;
-      font-weight:800;
-      text-decoration:none;
-      margin-top:18px;
+
+    .headerNote {
+      font-size: 14px;
+      color: #ccc;
+      margin-top: 6px;
+      line-height: 1.45;
     }
+
+    .cardBlock {
+      margin-top: 24px;
+      padding: 18px;
+      border-radius: 12px;
+      background: #121212;
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .pickupBox {
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: 12px;
+      background: rgba(212,175,55,.08);
+      border: 1px solid rgba(212,175,55,.25);
+    }
+
+    .pickupLabel {
+      font-size: 13px;
+      color: #d4d4d4;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      font-weight: 700;
+    }
+
+    .pickupValue {
+      font-size: 22px;
+      font-weight: 800;
+      color: #D4AF37;
+      line-height: 1.25;
+    }
+
+    .detailRow {
+      color: #ddd;
+      margin-bottom: 10px;
+      line-height: 1.45;
+    }
+
+    .detailRow strong {
+      color: #fff;
+    }
+
+    .sectionLabel {
+      margin: 18px 0 10px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    .items {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .items li {
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+
+    .items li:last-child {
+      border-bottom: none;
+    }
+
+    .menuTop {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .menuCopy {
+      flex: 1;
+      color: #fff;
+    }
+
+    .menuCopy small {
+      display: block;
+      color: #bbb;
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    .itemPrice {
+      white-space: nowrap;
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .totalBox {
+      margin-top: 20px;
+      font-size: 20px;
+      font-weight: bold;
+      line-height: 1.5;
+    }
+
+    .statusMeta {
+      font-size: 13px;
+      color: #bbb;
+      margin-top: 4px;
+      line-height: 1.45;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .mainBtn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      background: #D4AF37;
+      color: #000;
+      font-size: 18px;
+      font-weight: bold;
+      text-decoration: none;
+      box-sizing: border-box;
+    }
+
+    .linkBtn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 16px;
+      border-radius: 12px;
+      text-decoration: none;
+      background: #1a1a1a;
+      color: #fff;
+      font-weight: 600;
+      border: 1px solid rgba(255,255,255,.08);
+      flex: 1;
+      min-width: 160px;
+      box-sizing: border-box;
+    }
+
+    .orderNumberRow {
+  font-size: 16px;
+  margin-bottom: 14px;
+}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="card">
-      <h1>Order received.</h1>
-      <p>
-        Your payment was completed successfully. Delish is now processing your pickup order.
-      </p>
-      <div id="status" class="status">Finalizing your order record...</div>
-      <a class="btn" href="/delish/">Back to Delish</a>
+    <h1>Delish — Order Confirmed</h1>
+    <div class="headerNote">
+      Pickup Only · Alexandria, Louisiana · Your payment was successful
+    </div>
+
+    <div class="cardBlock">
+      <h2>You’re all set.</h2>
+      <div class="headerNote">
+        Your order has been confirmed and Delish has received your payment.
+      </div>
+
+      <div class="pickupBox">
+        <div class="pickupLabel">Pickup</div>
+        <div class="pickupValue" id="pickupValue">Loading pickup details...</div>
+      </div>
+
+      <div class="headerNote" style="margin-top:14px;">
+        Please arrive during your pickup window. We’ll have your order ready when you get here.
+      </div>
+
+      <div class="cardBlock" id="sessionMeta" style="margin-top:20px;">
+        <div class="statusMeta">Loading your order details...</div>
+      </div>
+
+      <div class="actions">
+        <a class="mainBtn" href="/delish/">Back to Delish</a>
+        <a class="linkBtn" href="/delish/catering/">Need Catering?</a>
+      </div>
     </div>
   </div>
 
   <script>
-    async function finalizeOrder() {
-      const statusEl = document.getElementById("status");
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function money(n) {
+      return `$${Number(n || 0).toFixed(2)}`;
+    }
+
+    async function loadOrder() {
       const params = new URLSearchParams(window.location.search);
       const sessionId = params.get("session_id");
+      const metaEl = document.getElementById("sessionMeta");
+      const pickupValueEl = document.getElementById("pickupValue");
 
-      if (!sessionId) {
-        statusEl.textContent = "Missing session information.";
-        return;
-      }
+      if (!sessionId || !metaEl || !pickupValueEl) return;
 
       try {
-        const res = await fetch(`/api/delish/finalize-checkout/?session_id=${encodeURIComponent(sessionId)}`, {
-          method: "GET",
-          cache: "no-store"
-        });
-
+        const res = await fetch(`/api/delish/finalize-checkout/?session_id=${encodeURIComponent(sessionId)}`);
         const data = await res.json();
 
-        if (!data.ok) {
-          throw new Error(data.error || "Unable to finalize order.");
+        if (!res.ok || !data.ok || !data.order) {
+          throw new Error("Unable to load order");
         }
 
-        statusEl.textContent = `Order confirmed: ${data.orderNumber}`;
-      } catch (error) {
-        statusEl.textContent = "Payment completed, but final order confirmation is still being processed.";
+        const order = data.order;
+        const items = Array.isArray(order.items) ? order.items : [];
+
+        pickupValueEl.textContent = `${order.pickupDate || ""} • ${order.pickupWindow || ""}`;
+
+        metaEl.innerHTML = `
+  <div class="detailRow orderNumberRow">
+    <strong>Pickup Order #:</strong> ${escapeHtml(order.orderNumber || sessionId)}
+  </div>
+
+  <div class="detailRow">
+    <strong>Name:</strong> ${escapeHtml(order.customerName || "")}
+  </div>
+
+  <div class="sectionLabel">Items</div>
+  <ul class="items">
+    ${items.length ? items.map(i => {
+      const sideBits = [];
+      if (i.baseName) sideBits.push(i.baseName);
+      if (i.side1Name) sideBits.push(i.side1Name);
+      if (i.side2Name) sideBits.push(i.side2Name);
+
+      const sideLine = sideBits.length
+        ? `<small>Sides: ${escapeHtml(sideBits.join(", "))}</small>`
+        : "";
+
+      return `
+        <li>
+          <div class="menuTop">
+            <div class="menuCopy">
+              <strong>${Number(i.qty || 0)} ×</strong> ${escapeHtml(i.name || "")}
+              ${sideLine}
+            </div>
+            <div class="itemPrice">${money(Number(i.qty || 0) * Number(i.price || 0))}</div>
+          </div>
+        </li>
+      `;
+    }).join("") : `<li><div class="menuCopy">Order details unavailable. Please use your confirmation text at pickup.</div></li>`}
+  </ul>
+
+  <div class="totalBox">
+    Total Paid: ${money(order.total)}
+  </div>
+`;
+      } catch (err) {
+        pickupValueEl.textContent = "Pickup details unavailable";
+        metaEl.innerHTML = `<div class="statusMeta">Confirmation ID: ${escapeHtml(sessionId)}</div>`;
       }
     }
 
-    finalizeOrder();
+    loadOrder();
   </script>
 </body>
 </html>

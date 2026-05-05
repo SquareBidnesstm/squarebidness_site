@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Send a Drink | Chocolate City Lounge LLC</title>
+  <meta name="description" content="Send a drink credit to someone at Chocolate City Lounge LLC in Albany, Louisiana." />
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/chocolate-city/assets/cc-icon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/chocolate-city/assets/cc-icon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/chocolate-city/assets/cc-icon-180.png">
+  <link rel="manifest" href="/chocolate-city/manifest.json">
+
+  <style>
+    :root{
+      --bg:#080504;
+      --panel:#130c0a;
+      --gold:#d7a84f;
+      --gold2:#f5d58a;
+      --text:#fff7ea;
+      --muted:#c7a983;
+      --line:rgba(245,213,138,.22);
+      --shadow:0 30px 80px rgba(0,0,0,.55);
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:Arial,Helvetica,sans-serif;
+      background:
+        radial-gradient(circle at 20% 10%,rgba(215,168,79,.18),transparent 30%),
+        linear-gradient(180deg,#080504,#160b07);
+      color:var(--text);
+      padding:20px;
+    }
+
+    a{text-decoration:none;color:inherit}
+
+    .top{
+      max-width:760px;
+      margin:0 auto 18px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:14px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      color:var(--gold2);
+      font-weight:900;
+    }
+
+    .brand img{
+      width:54px;
+      height:54px;
+      border-radius:50%;
+    }
+
+    .back{
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:11px 15px;
+      color:var(--muted);
+      font-weight:900;
+      background:rgba(255,255,255,.04);
+    }
+
+    .card{
+      width:100%;
+      max-width:760px;
+      margin:0 auto;
+      background:linear-gradient(180deg,rgba(28,16,12,.96),rgba(9,5,4,.97));
+      border:1px solid var(--line);
+      border-radius:32px;
+      padding:30px;
+      box-shadow:var(--shadow);
+    }
+
+    .kicker{
+      color:var(--gold2);
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      font-size:12px;
+      font-weight:900;
+      margin-bottom:10px;
+    }
+
+    h1{
+      margin:0;
+      font-size:clamp(44px,8vw,76px);
+      line-height:.9;
+      letter-spacing:-.07em;
+      color:var(--gold2);
+      text-transform:uppercase;
+    }
+
+    .sub{
+      margin-top:16px;
+      color:var(--muted);
+      font-size:18px;
+      line-height:1.45;
+    }
+
+    .options{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+      margin-top:22px;
+    }
+
+    .option{
+      position:relative;
+    }
+
+    .option input{
+      position:absolute;
+      opacity:0;
+      pointer-events:none;
+    }
+
+    .option span{
+      display:block;
+      border:1px solid var(--line);
+      border-radius:20px;
+      padding:18px;
+      background:rgba(255,255,255,.04);
+      cursor:pointer;
+      font-weight:900;
+      color:var(--text);
+      min-height:112px;
+    }
+
+    .option strong{
+      display:block;
+      font-size:30px;
+      color:var(--gold2);
+      margin-bottom:6px;
+    }
+
+    .option small{
+      color:var(--muted);
+      font-weight:800;
+      line-height:1.35;
+    }
+
+    .option input:checked + span{
+      background:rgba(215,168,79,.16);
+      border-color:rgba(245,213,138,.55);
+      box-shadow:0 0 0 1px rgba(245,213,138,.20) inset;
+    }
+
+    label{
+      display:block;
+      margin:18px 0 7px;
+      color:var(--gold2);
+      font-weight:900;
+      font-size:13px;
+    }
+
+    input, textarea{
+      width:100%;
+      padding:14px;
+      border-radius:15px;
+      border:1px solid var(--line);
+      background:#080504;
+      color:var(--text);
+      font-size:16px;
+    }
+
+    textarea{
+      min-height:92px;
+      resize:vertical;
+    }
+
+    .btn{
+      width:100%;
+      min-height:54px;
+      margin-top:22px;
+      border:0;
+      border-radius:999px;
+      background:linear-gradient(135deg,var(--gold),var(--gold2));
+      color:#160905;
+      font-weight:900;
+      font-size:16px;
+      cursor:pointer;
+    }
+
+    .btn[disabled]{
+      opacity:.6;
+      cursor:not-allowed;
+    }
+
+    .note{
+      margin-top:18px;
+      padding:14px;
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:rgba(215,168,79,.10);
+      color:var(--gold2);
+      font-size:14px;
+      line-height:1.45;
+      font-weight:800;
+    }
+
+    footer{
+      text-align:center;
+      color:var(--muted);
+      font-size:14px;
+      padding-top:24px;
+    }
+
+    @media(max-width:760px){
+      .options{grid-template-columns:1fr}
+      .card{padding:24px}
+      .top{align-items:flex-start}
+    }
+  </style>
+</head>
+
+<body>
+  <header class="top">
+    <a class="brand" href="/chocolate-city/">
+      <img src="/chocolate-city/assets/cc-icon-192.png" alt="Chocolate City Lounge logo">
+      <span>Chocolate City Lounge LLC</span>
+    </a>
+
+    <a class="back" href="/chocolate-city/">Back to Lounge</a>
+  </header>
+
+  <main class="card">
+    <div class="kicker">Remote Drink Credit</div>
+    <h1>Send a Drink</h1>
+
+    <p class="sub">
+      Send a drink credit to someone at Chocolate City. Staff verifies age,
+      entry, and redemption at the venue.
+    </p>
+
+    <div class="options">
+      <label class="option">
+        <input type="radio" name="drinkOption" value="drink_10" checked>
+        <span>
+          <strong>$10</strong>
+          <small>Drink Credit</small>
+        </span>
+      </label>
+
+      <label class="option">
+        <input type="radio" name="drinkOption" value="drink_25">
+        <span>
+          <strong>$25</strong>
+          <small>Premium Drink Credit</small>
+        </span>
+      </label>
+
+      <label class="option">
+        <input type="radio" name="drinkOption" value="drink_50">
+        <span>
+          <strong>$50</strong>
+          <small>Bottle / VIP Contribution</small>
+        </span>
+      </label>
+    </div>
+
+    <label>Recipient Name</label>
+    <input id="recipientName" placeholder="Who is this drink for?" autocomplete="name" />
+
+    <label>Recipient Phone Optional</label>
+<input id="recipientPhone" placeholder="Recipient phone for text confirmation" autocomplete="tel" />
+
+    
+    <label>Your Name Optional</label>
+<input id="senderName" placeholder="Leave blank to send anonymously" autocomplete="name" />
+
+    <label>Message Optional</label>
+    <textarea id="message" placeholder="Example: Happy Mother’s Day — enjoy one on me."></textarea>
+
+    <button class="btn" id="sendBtn">Send Drink Credit</button>
+
+    <div class="note">
+      Drink credits are redeemed in person only. Recipient must meet Chocolate City age and entry requirements.
+    </div>
+  </main>
+
+  <footer>
+    Chocolate City Lounge LLC · Albany, Louisiana
+  </footer>
+
+  <script>
+    const OPTIONS = {
+      drink_10: { amount: 10, label: "$10 Drink Credit" },
+      drink_25: { amount: 25, label: "$25 Premium Drink Credit" },
+      drink_50: { amount: 50, label: "$50 Bottle / VIP Contribution" }
+    };
+
+    function selectedOption(){
+      const checked = document.querySelector('input[name="drinkOption"]:checked');
+      return checked ? checked.value : "drink_10";
+    }
+
+    document.getElementById("sendBtn").addEventListener("click", async () => {
+      const btn = document.getElementById("sendBtn");
+      const optionId = selectedOption();
+      const option = OPTIONS[optionId];
+
+      const payload = {
+        optionId,
+        amount: option.amount,
+        label: option.label,
+        recipientName: document.getElementById("recipientName").value.trim(),
+        recipientPhone: document.getElementById("recipientPhone").value.trim(),
+        senderName: document.getElementById("senderName").value.trim(),
+        message: document.getElementById("message").value.trim()
+      };
+
+      if(!payload.recipientName){
+        alert("Enter the recipient name first.");
+        document.getElementById("recipientName").focus();
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "Opening checkout...";
+
+      try{
+        const res = await fetch("/api/chocolate-city/send-drink-checkout/", {
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body:JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if(!data.ok){
+          alert(data.error || "Checkout unavailable.");
+          btn.disabled = false;
+          btn.textContent = "Send Drink Credit";
+          return;
+        }
+
+        window.location.href = data.url;
+      }catch(err){
+        alert("Checkout unavailable.");
+        btn.disabled = false;
+        btn.textContent = "Send Drink Credit";
+      }
+    });
+  </script>
+</body>
+</html>

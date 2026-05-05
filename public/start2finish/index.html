@@ -1,6 +1,6 @@
 <!-- /public/start2finish/index.html (PASTE READY — Unified Leads + clean _source + correct Apps Script endpoint) -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-sb-brand="start2finish" data-sb-tier="public" data-sb-variant="v20260303-start2finish-unified-leads">
 <head>
   <!-- Basics -->
   <meta charset="utf-8" />
@@ -48,6 +48,8 @@
   <!-- Analytics -->
   <script defer src="/scripts/ga.js"></script>
   <script defer src="/scripts/sb-analytics.js"></script>
+  <script defer src="/scripts/meta-pixel.js"></script>
+  <script defer src="/scripts/sb-meta-bridge.js"></script>
 
   <style>
     :root{
@@ -251,7 +253,13 @@
 
     <!-- INQUIRY FORM -->
     <section id="inquiry" class="grid" style="margin-top:26px;grid-template-columns:1fr .9fr;" aria-label="Inquiry">
-      <form class="form" method="post" action="https://script.google.com/macros/s/AKfycbxtNBPIjg8rVnAf5JYQKkhjQC-YhYFqI4ilXamWP-C_J4mSEmdYqIN5uLXwrPR_zVVo/exec" novalidate>
+      <form
+        id="start2finishForm"
+        class="form"
+        method="post"
+        action="https://script.google.com/macros/s/AKfycbxtNBPIjg8rVnAf5JYQKkhjQC-YhYFqI4ilXamWP-C_J4mSEmdYqIN5uLXwrPR_zVVo/exec"
+        novalidate
+      >
         <h2>Start an Inquiry</h2>
         <p class="note">Choose your inquiry type and we’ll route it clean.</p>
 
@@ -273,6 +281,16 @@
         <!-- IMPORTANT: we do NOT persist _source across pages anymore -->
         <input id="source" type="hidden" name="_source" value="start2finish_main" />
         <input id="sourcePage" type="hidden" name="source_page" value="" />
+        <input id="leadId" type="hidden" name="lead_id" value="" />
+        <input id="submittedAt" type="hidden" name="submitted_at" value="" />
+        <input id="referrer" type="hidden" name="referrer" value="" />
+        <input id="utmSource" type="hidden" name="utm_source" value="" />
+        <input id="utmMedium" type="hidden" name="utm_medium" value="" />
+        <input id="utmCampaign" type="hidden" name="utm_campaign" value="" />
+        <input id="utmContent" type="hidden" name="utm_content" value="" />
+        <input id="utmTerm" type="hidden" name="utm_term" value="" />
+        <input id="gclid" type="hidden" name="gclid" value="" />
+        <input id="fbclid" type="hidden" name="fbclid" value="" />
 
         <div class="row">
           <div>
@@ -436,13 +454,24 @@
     document.getElementById("year").textContent = new Date().getFullYear();
 
     (function () {
-      const form = document.querySelector("#inquiry form.form");
+      const form = document.getElementById("start2finishForm");
       if (!form) return;
 
       const sourceEl = document.getElementById("source");
       const sourcePageEl = document.getElementById("sourcePage");
+      const leadIdEl = document.getElementById("leadId");
+      const submittedAtEl = document.getElementById("submittedAt");
+      const referrerEl = document.getElementById("referrer");
 
       // URL-only _source (NO carryover) to prevent lilmaine_qr "bleeding" into other pages
+      function urlParam(name){
+        try{
+          return new URL(window.location.href).searchParams.get(name) || "";
+        } catch(e){
+          return "";
+        }
+      }
+
       function getSourceFromUrlOnly(){
         try{
           const url = new URL(window.location.href);
@@ -456,6 +485,14 @@
         }
       }
 
+      function buildLeadId(){
+        return [
+          "s2f",
+          Date.now().toString(36),
+          Math.random().toString(36).slice(2, 8)
+        ].join("_");
+      }
+
       function setSourcePage(){
         try{
           // keep full URL incl ?_source=
@@ -466,8 +503,29 @@
         }
       }
 
+      function setTrackingFields(){
+        const fieldMap = {
+          utmSource: "utm_source",
+          utmMedium: "utm_medium",
+          utmCampaign: "utm_campaign",
+          utmContent: "utm_content",
+          utmTerm: "utm_term",
+          gclid: "gclid",
+          fbclid: "fbclid"
+        };
+
+        Object.keys(fieldMap).forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) el.value = urlParam(fieldMap[id]);
+        });
+
+        if (referrerEl) referrerEl.value = document.referrer || "";
+      }
+
       // ✅ initialize hidden fields
       if (sourceEl) sourceEl.value = getSourceFromUrlOnly();
+      if (leadIdEl && !leadIdEl.value) leadIdEl.value = buildLeadId();
+      setTrackingFields();
       setSourcePage();
 
       const inquiry = document.getElementById("inquiryType");
@@ -524,6 +582,9 @@
 
         // re-assert just before submit
         if (sourceEl) sourceEl.value = getSourceFromUrlOnly();
+        if (leadIdEl && !leadIdEl.value) leadIdEl.value = buildLeadId();
+        if (submittedAtEl) submittedAtEl.value = new Date().toISOString();
+        setTrackingFields();
         setSourcePage();
 
         const required = form.querySelectorAll("[required]");
@@ -536,8 +597,63 @@
             return;
           }
         }
+
+        try {
+          if (typeof window.sbTrack === "function") {
+            window.sbTrack("sb_form_submit", {
+              sb_brand: "start2finish",
+              sb_tier: "public",
+              sb_variant: document.documentElement.getAttribute("data-sb-variant") || "",
+              page_path: "/start2finish/",
+              page_title: document.title || "",
+              form_name: "start2finish",
+              form_step: "submit",
+              valid: true,
+              action: "start2finish_inquiry",
+              component: "form",
+              label: "Start2Finish Inquiry",
+              link_url: "",
+              source: sourceEl ? sourceEl.value : "",
+              inquiry_type: inquiry ? inquiry.value : "",
+              lead_id: leadIdEl ? leadIdEl.value : ""
+            });
+          }
+        } catch (_) {}
       });
     })();
   </script>
+
+  <script>
+    (function(){
+      document.addEventListener("click", function(e){
+        var a = e.target && e.target.closest && e.target.closest("a");
+        if (!a || typeof window.sbTrack !== "function") return;
+
+        var href = a.getAttribute("href") || "";
+        var action = a.getAttribute("data-sb-action") || "click";
+        var isExternal = /^https?:\/\//i.test(href);
+        if (isExternal && (action === "open" || action === "click")) action = "outbound";
+
+        try {
+          window.sbTrack("sb_click", {
+            sb_brand: "start2finish",
+            sb_tier: "public",
+            sb_variant: document.documentElement.getAttribute("data-sb-variant") || "",
+            page_path: "/start2finish/",
+            page_title: document.title || "",
+            component: a.getAttribute("data-sb-component") || "link",
+            action: action,
+            label: a.getAttribute("data-sb-label") || (a.textContent || "").trim() || href,
+            link_url: href
+          });
+        } catch (_) {}
+      }, { passive:true });
+    })();
+  </script>
+
+  <noscript>
+    <img height="1" width="1" style="display:none"
+         src="https://www.facebook.com/tr?id=914123084877133&ev=PageView&noscript=1"/>
+  </noscript>
 </body>
 </html>

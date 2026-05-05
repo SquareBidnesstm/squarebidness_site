@@ -288,6 +288,208 @@
       .pickup-value{font-size:1.15rem}
       .total-value{font-size:1.28rem}
     }
+
+    .cross-links{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+
+    .cross-link{
+      display:inline-flex;
+      align-items:center;
+      min-height:42px;
+      padding:0 14px;
+      border-radius:999px;
+      background:var(--panel);
+      border:1px solid var(--line);
+      color:var(--muted);
+      font-weight:800;
+      text-decoration:none;
+    }
+
+    .cross-link:hover{
+      color:var(--text);
+      border-color:rgba(255,255,255,.2);
+    }
+
+    .cross-link.active{
+      background:rgba(215,174,114,.15);
+      border-color:rgba(215,174,114,.35);
+      color:var(--accent-2);
+    }
+
+    .badge{
+      margin-left:8px;
+      min-width:22px;
+      height:22px;
+      padding:0 6px;
+      border-radius:999px;
+      background:#d7ae72;
+      color:#181410;
+      font-size:.75rem;
+      font-weight:900;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+    }
+        .ops-panel{
+      margin-bottom:18px;
+      padding:16px;
+      border-radius:22px;
+      background:linear-gradient(180deg,var(--panel-2),var(--panel));
+      border:1px solid var(--line);
+      box-shadow:var(--shadow);
+    }
+
+    .ops-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:14px;
+      flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+
+    .ops-title{
+      margin:0;
+      font-size:1.1rem;
+      font-weight:900;
+      letter-spacing:-.02em;
+    }
+
+    .ops-sub{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:.95rem;
+    }
+
+    .ops-status{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    .ops-box{
+      padding:12px 14px;
+      border-radius:16px;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.08);
+    }
+
+    .ops-label{
+      color:var(--soft);
+      font-size:.78rem;
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+
+    .ops-value{
+      margin-top:6px;
+      color:var(--accent-2);
+      font-size:1rem;
+      font-weight:900;
+      line-height:1.35;
+      word-break:break-word;
+    }
+
+    .ops-actions{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:10px;
+    }
+
+    .ops-btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:46px;
+      padding:0 14px;
+      border-radius:14px;
+      border:1px solid transparent;
+      font-weight:900;
+      cursor:pointer;
+      transition:transform .14s ease, opacity .18s ease;
+    }
+
+    .ops-btn:hover{transform:translateY(-1px)}
+    .ops-btn[disabled]{opacity:.6;cursor:not-allowed;transform:none}
+
+    .ops-btn-open{
+      background:#1f7a3f;
+      color:#fff;
+    }
+
+    .ops-btn-auto{
+      background:#285cc7;
+      color:#fff;
+    }
+
+    .ops-btn-pause{
+      background:#a96512;
+      color:#fff;
+    }
+
+    .ops-btn-close{
+      background:#a12626;
+      color:#fff;
+    }
+
+    .ops-note{
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:14px;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.08);
+      color:var(--muted);
+      font-size:.95rem;
+      line-height:1.45;
+    }
+
+    .ops-token-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin:10px 0 14px;
+  padding:12px 14px;
+  border-radius:14px;
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.08);
+}
+
+.ops-token-label{
+  color:var(--soft);
+  font-size:.82rem;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.ops-token-status{
+  font-weight:900;
+  color:var(--muted);
+}
+
+.ops-token-status.is-saved{
+  color:#9df0b8;
+}
+
+.ops-token-status.is-missing{
+  color:#ffb4b4;
+}
+
+    @media (max-width:900px){
+      .ops-status{grid-template-columns:1fr}
+      .ops-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+    }
+
+    @media (max-width:640px){
+      .ops-actions{grid-template-columns:1fr}
+    }
   </style>
 </head>
 <body>
@@ -314,8 +516,67 @@
       <div class="pill">Status:<strong>Active paid orders</strong></div>
       <div class="pill">Device:<strong>Kitchen tablet</strong></div>
       <div class="pill">Newest:<strong>On top</strong></div>
+      <button class="pill" id="enableSoundBtn" type="button" style="cursor:pointer;">
+  Sound:<strong>Enable Alerts</strong>
+</button>
       <div class="pill" id="lastUpdated">Last updated:<strong>Loading...</strong></div>
     </section>
+
+        <section class="ops-panel">
+      <div class="ops-head">
+        <div>
+          <h2 class="ops-title">Operator Controls</h2>
+          <p class="ops-sub">Manage order flow without leaving the kitchen screen.</p>
+        </div>
+      </div>
+
+          <div class="ops-token-row">
+  <span class="ops-token-label">Operator Token</span>
+  <span class="ops-token-status" id="opsTokenStatus">Not saved</span>
+</div>
+
+      <div class="ops-status">
+        <div class="ops-box">
+          <div class="ops-label">Ordering Mode</div>
+          <div class="ops-value" id="opsMode">Loading...</div>
+        </div>
+        <div class="ops-box">
+          <div class="ops-label">Resume Time</div>
+          <div class="ops-value" id="opsResume">—</div>
+        </div>
+      </div>
+
+      <div class="ops-actions">
+        <button class="ops-btn ops-btn-open" id="opsOpenBtn">Open Now</button>
+        <button class="ops-btn ops-btn-auto" id="opsAutoBtn">Auto Mode</button>
+        <button class="ops-btn ops-btn-pause" id="opsPause30Btn">Pause 30 Min</button>
+        <button class="ops-btn ops-btn-close" id="opsCloseBtn">Close For Today</button>
+      </div>
+
+          <div style="margin-top:10px;">
+  <button
+    class="ops-btn"
+    id="opsClearTokenBtn"
+    style="background:#2a2a2a;color:#fff;border:1px solid rgba(255,255,255,.12);width:100%;"
+  >
+    Clear Saved Token
+  </button>
+</div>
+
+      <div class="ops-note" id="opsNotice">
+        Ready.
+      </div>
+    </section>
+
+    <div class="cross-links">
+      <a href="/delish/orders/" class="cross-link active">
+        Kitchen Orders
+      </a>
+      <a href="/delish/catering/orders/" class="cross-link" id="cateringLink">
+        Catering Orders
+        <span id="cateringBadge" class="badge" style="display:none;">0</span>
+      </a>
+    </div>
 
     <section id="orders" class="orders">
       <div class="empty">Loading active paid orders...</div>
@@ -325,6 +586,111 @@
   <script>
     const ordersEl = document.getElementById("orders");
     const lastUpdatedEl = document.getElementById("lastUpdated");
+    const OPERATOR_TOKEN_KEY = "delish_operator_token";
+    const LAST_SEEN_ORDER_KEY = "delish_last_seen_order_id";
+    let hasInitializedOrderFeed = false;
+
+    function getLastSeenOrderId() {
+      try {
+        return localStorage.getItem(LAST_SEEN_ORDER_KEY) || "";
+      } catch {
+        return "";
+      }
+    }
+
+    function setLastSeenOrderId(id) {
+      try {
+        if (id) localStorage.setItem(LAST_SEEN_ORDER_KEY, id);
+      } catch {}
+    }
+    let soundAlertsEnabled = false;
+let sharedAudioContext = null;
+
+async function enableSoundAlerts() {
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+
+    sharedAudioContext = sharedAudioContext || new AudioContextClass();
+
+    if (sharedAudioContext.state === "suspended") {
+      await sharedAudioContext.resume();
+    }
+
+    soundAlertsEnabled = true;
+
+    const btn = document.getElementById("enableSoundBtn");
+    if (btn) {
+      btn.innerHTML = `Sound:<strong>Alerts On ✅</strong>`;
+    }
+
+    playNewOrderAlert();
+    setOpsNotice("Kitchen sound alerts enabled.");
+  } catch (err) {
+    console.error("Enable sound alerts failed:", err);
+    setOpsNotice("Unable to enable sound alerts on this device.", true);
+  }
+}
+    function playNewOrderAlert() {
+  try {
+    if (!soundAlertsEnabled && !sharedAudioContext) return;
+
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+
+    const ctx = sharedAudioContext || new AudioContextClass();
+    sharedAudioContext = ctx;
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    gain.gain.setValueAtTime(0.001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.08, ctx.currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.36);
+  } catch (err) {
+    console.error("Audio alert failed:", err);
+  }
+}
+
+    function flashScreenAlert() {
+      const existing = document.getElementById("newOrderFlash");
+      if (existing) existing.remove();
+      
+      const flash = document.createElement("div");
+      flash.id = "newOrderFlash";
+      flash.style.position = "fixed";
+      flash.style.inset = "0";
+      flash.style.background = "rgba(215,174,114,.18)";
+      flash.style.pointerEvents = "none";
+      flash.style.zIndex = "9999";
+      flash.style.opacity = "1";
+      flash.style.transition = "opacity .5s ease";
+      document.body.appendChild(flash);
+
+      setTimeout(() => {
+        flash.style.opacity = "0";
+      }, 80);
+
+      setTimeout(() => {
+        flash.remove();
+      }, 650);
+    }
+
+    function notifyNewOrder(order) {
+      playNewOrderAlert();
+      flashScreenAlert();
+      setOpsNotice(`New order received: ${order.orderNumber || "Delish order"}`);
+    }
+
+    
 
     function money(n){
       return `$${Number(n || 0).toFixed(2)}`;
@@ -351,27 +717,42 @@
 
     async function completeOrder(id, button) {
       if (!id) return;
-
+ 
+      // Require a saved token — the same one used for operator controls
+      const token = getSavedOperatorToken();
+      if (!token) {
+        alert(
+          "No operator token saved. Tap any Operator Controls button first to save your token, then try again."
+        );
+        return;
+      }
+ 
       const originalText = button.textContent;
       button.disabled = true;
       button.textContent = "Completing...";
-
+ 
       try {
         const res = await fetch("/api/delish/complete-order/", {
           method: "POST",
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "x-operator-token": token.trim(),
           },
-          body: JSON.stringify({ id })
+          body: JSON.stringify({ id }),
         });
-
+ 
         const data = await res.json();
-
+ 
         if (!res.ok || !data.ok) {
+          if (res.status === 401) {
+            clearOperatorToken();
+            throw new Error("Unauthorized — wrong operator token. Saved token cleared.");
+          }
           throw new Error(data.error || "Failed to complete order.");
         }
-
+ 
         await loadOrders();
+        await loadCateringCount();
       } catch (error) {
         button.disabled = false;
         button.textContent = originalText;
@@ -379,20 +760,31 @@
       }
     }
 
-    function renderOrders(orders){
+    function renderOrders(orders) {
       if (!orders.length) {
         ordersEl.innerHTML = `<div class="empty">No active paid orders right now.</div>`;
         return;
       }
-
+ 
       ordersEl.innerHTML = orders.map(order => {
-        const itemsHtml = (order.items || []).map(item => `
-          <li>
-            <span><strong>${item.qty} ×</strong> ${escapeHtml(item.name)}</span>
-            <strong>${money((item.qty || 0) * (item.price || 0))}</strong>
-          </li>
-        `).join("");
-
+        const itemsHtml = (order.items || []).map(item => {
+          // Collect base + side selections for display under the item name
+          const extras = [item.baseName, item.side1Name, item.side2Name].filter(Boolean);
+          const extrasLine = extras.length
+            ? `<div style="font-size:.82rem;color:var(--soft);margin-top:3px;line-height:1.3;">${extras.map(escapeHtml).join(" \u00B7 ")}</div>`
+            : "";
+ 
+          return `
+            <li>
+              <div>
+                <span><strong>${item.qty} \u00D7</strong> ${escapeHtml(item.name)}</span>
+                ${extrasLine}
+              </div>
+              <strong style="flex-shrink:0;">${money((item.qty || 0) * (item.price || 0))}</strong>
+            </li>
+          `;
+        }).join("");
+ 
         const noteBlock = order.notes
           ? `
             <div class="note">
@@ -401,7 +793,7 @@
             </div>
           `
           : "";
-
+ 
         return `
           <article class="order-card">
             <div class="order-top">
@@ -411,51 +803,90 @@
               </div>
               <div class="paid">Paid</div>
             </div>
-
+ 
             <div class="pickup">
               <div class="pickup-label">Pickup</div>
-              <div class="pickup-value">${escapeHtml(order.pickupDate)} • ${escapeHtml(order.pickupWindow)}</div>
+              <div class="pickup-value">${escapeHtml(order.pickupDate)} \u2022 ${escapeHtml(order.pickupWindow)}</div>
             </div>
-
+ 
             <div class="customer">
               <div class="customer-row"><strong>Customer:</strong> ${escapeHtml(order.customerName)}</div>
               <div class="customer-row"><strong>Phone:</strong> ${escapeHtml(order.customerPhone)}</div>
               ${order.customerEmail ? `<div class="customer-row"><strong>Email:</strong> ${escapeHtml(order.customerEmail)}</div>` : ""}
             </div>
-
+ 
             <ul class="items">${itemsHtml}</ul>
-
+ 
             ${noteBlock}
-
+ 
             <div class="total">
               <div class="total-label">Total Paid</div>
               <div class="total-value">${money(order.total)}</div>
             </div>
-
+ 
             <div class="card-actions">
-              <button class="btn" data-complete-id="${escapeHtml(order.id)}">Mark Complete</button>
+              <button class="btn" data-complete-id="${escapeHtml(order.id)}">Mark Ready</button>
             </div>
           </article>
         `;
       }).join("");
-
+ 
       document.querySelectorAll("[data-complete-id]").forEach((button) => {
         button.addEventListener("click", () => {
           completeOrder(button.getAttribute("data-complete-id"), button);
         });
       });
     }
-
-    async function loadOrders(){
+    async function loadCateringCount(){
       try {
-        const res = await fetch("/api/delish/orders/", { cache: "no-store" });
+        const res = await fetch(`/api/delish/catering-orders/?t=${Date.now()}`, { cache: "no-store" });
+        const data = await res.json();
+
+        if (!data.ok) return;
+
+        const count = (data.orders || []).length;
+        const badge = document.getElementById("cateringBadge");
+
+        if (count > 0) {
+          badge.style.display = "inline-flex";
+          badge.textContent = count;
+        } else {
+          badge.style.display = "none";
+        }
+      } catch (e) {
+        console.error("Catering badge error:", e);
+      }
+    }
+
+        async function loadOrders(){
+      try {
+        const res = await fetch(`/api/delish/orders/?t=${Date.now()}`, { cache: "no-store" });
         const data = await res.json();
 
         if (!data.ok) {
           throw new Error(data.error || "Failed to load");
         }
 
-        renderOrders(data.orders || []);
+        const orders = (data.orders || []).sort((a, b) => {
+  return new Date(b.createdAt) - new Date(a.createdAt);
+});
+
+renderOrders(orders);
+
+        if (orders.length > 0) {
+          const newestOrder = orders[0];
+          const lastSeenId = getLastSeenOrderId();
+
+          if (!hasInitializedOrderFeed) {
+            setLastSeenOrderId(newestOrder.id);
+            hasInitializedOrderFeed = true;
+          } else if (newestOrder.id && newestOrder.id !== lastSeenId) {
+            notifyNewOrder(newestOrder);
+            setLastSeenOrderId(newestOrder.id);
+          }
+        } else {
+          hasInitializedOrderFeed = true;
+        }
 
         const now = new Date();
         lastUpdatedEl.innerHTML = `Last updated:<strong>${now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</strong>`;
@@ -465,8 +896,187 @@
       }
     }
 
-    loadOrders();
-    setInterval(loadOrders, 15000);
+        async function refreshAll() {
+      await loadOperatorStatus();
+      await loadOrders();
+      await loadCateringCount();
+    }
+
+    window.addEventListener("offline", () => {
+      alert("Internet connection lost. Orders may not update.");
+    });
+
+        const opsModeEl = document.getElementById("opsMode");
+    const opsResumeEl = document.getElementById("opsResume");
+    const opsNoticeEl = document.getElementById("opsNotice");
+
+    function setOpsNotice(text, isError = false) {
+      if (!opsNoticeEl) return;
+      opsNoticeEl.textContent = text;
+      opsNoticeEl.style.color = isError ? "#ffb4b4" : "var(--muted)";
+    }
+
+    function getSavedOperatorToken() {
+  try {
+    return localStorage.getItem(OPERATOR_TOKEN_KEY) || "";
+  } catch {
+    return "";
+  }
+}
+
+function saveOperatorToken(token) {
+  try {
+    if (token) {
+      localStorage.setItem(OPERATOR_TOKEN_KEY, token.trim());
+    }
+  } catch {}
+  updateTokenIndicator();
+}
+
+function clearOperatorToken() {
+  try {
+    localStorage.removeItem(OPERATOR_TOKEN_KEY);
+  } catch {}
+  updateTokenIndicator();
+}
+
+function updateTokenIndicator() {
+  const el = document.getElementById("opsTokenStatus");
+  if (!el) return;
+
+  const token = getSavedOperatorToken();
+
+  if (token) {
+    el.textContent = "Saved ✅";
+    el.classList.add("is-saved");
+    el.classList.remove("is-missing");
+  } else {
+    el.textContent = "Not saved";
+    el.classList.add("is-missing");
+    el.classList.remove("is-saved");
+  }
+}
+
+    async function loadOperatorStatus() {
+      try {
+        const res = await fetch(`/api/delish/operator-status/?t=${Date.now()}`, { cache: "no-store" });
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || "Failed to load operator status.");
+        }
+
+        if (opsModeEl) opsModeEl.textContent = data.mode || "—";
+        if (opsResumeEl) opsResumeEl.textContent = data.resumeAtDisplay || "—";
+        
+      } catch (err) {
+        console.error("Operator status error:", err);
+        if (opsModeEl) opsModeEl.textContent = "Unavailable";
+        if (opsResumeEl) opsResumeEl.textContent = "—";
+        setOpsNotice("Unable to load operator status.", true);
+      }
+    }
+
+
+    async function postOperatorControl(payload, successMessage) {
+  let token = getSavedOperatorToken();
+
+  if (!token) {
+    token = window.prompt("Enter Delish operator token");
+    if (!token) {
+      setOpsNotice("Operator action cancelled.");
+      return;
+    }
+
+    const saveOnDevice = window.confirm("Save this token on this device for faster operator controls?");
+    if (saveOnDevice) {
+      saveOperatorToken(token);
+    }
+  }
+
+  try {
+    setOpsNotice("Saving operator change...");
+
+    const res = await fetch("/api/delish/operator-control/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-operator-token": token.trim()
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || !data.ok) {
+      let msg = data.error || "Operator update failed.";
+
+      if (res.status === 401) {
+        clearOperatorToken();
+        msg = "Unauthorized — wrong operator token. Saved token cleared.";
+      } else if (res.status === 405) {
+        msg = "Method not allowed — operator control route mismatch.";
+      } else if (res.status === 503) {
+        msg = data.error || "Operator control not configured yet.";
+      }
+
+      throw new Error(msg);
+    }
+
+        setOpsNotice(successMessage || "Operator setting updated.");
+    await refreshAll();
+    updateTokenIndicator();
+  } catch (err) {
+    console.error("Operator control error:", err);
+    setOpsNotice(err.message || "Unable to update operator setting.", true);
+  }
+}
+
+       document.getElementById("opsOpenBtn")?.addEventListener("click", async () => {
+  await postOperatorControl(
+    { mode: "open" },
+    "Ordering forced open."
+  );
+});
+
+document.getElementById("enableSoundBtn")?.addEventListener("click", enableSoundAlerts);
+
+    document.getElementById("opsAutoBtn")?.addEventListener("click", async () => {
+      await postOperatorControl(
+        { mode: "auto" },
+        "Ordering returned to auto mode."
+      );
+    });
+
+    document.getElementById("opsPause30Btn")?.addEventListener("click", async () => {
+      await postOperatorControl(
+        {
+          mode: "paused",
+          pauseMinutes: 30,
+          messageOnly: false
+        },
+        "Ordering paused for 30 minutes."
+      );
+    });
+
+    document.getElementById("opsClearTokenBtn")?.addEventListener("click", () => {
+  clearOperatorToken();
+  setOpsNotice("Saved operator token cleared.");
+});
+
+    document.getElementById("opsCloseBtn")?.addEventListener("click", async () => {
+      const confirmed = window.confirm("Close ordering for the rest of today?");
+      if (!confirmed) return;
+
+      await postOperatorControl(
+        { mode: "closed" },
+        "Ordering closed for today."
+      );
+    });
+
+   updateTokenIndicator();
+refreshAll();
+setInterval(refreshAll, 15000);
   </script>
 </body>
 </html>

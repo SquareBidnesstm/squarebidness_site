@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Chocolate City — VIP Ready</title>
+  <meta name="robots" content="noindex,nofollow" />
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/chocolate-city/assets/cc-icon-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/chocolate-city/assets/cc-icon-180.png">
+
+  <style>
+    :root{
+      --bg:#080504;
+      --panel:#130c0a;
+      --gold:#d7a84f;
+      --gold2:#f5d58a;
+      --text:#fff7ea;
+      --muted:#c7a983;
+      --line:rgba(245,213,138,.22);
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      min-height:100vh;
+      padding:22px;
+      font-family:Arial,Helvetica,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 20% 10%,rgba(215,168,79,.18),transparent 30%),
+        linear-gradient(180deg,#080504,#160b07);
+    }
+
+    .wrap{max-width:1500px;margin:0 auto}
+
+    .header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:18px;
+      margin-bottom:18px;
+    }
+
+    .brand{display:flex;align-items:center;gap:14px}
+    .logo{width:74px;height:74px;border-radius:50%;object-fit:cover}
+    h1{margin:0;font-size:clamp(2.4rem,5vw,4.8rem);line-height:.95;letter-spacing:-.06em}
+    .sub{color:var(--muted);font-size:1.1rem;margin-top:8px;font-weight:800}
+
+    .time{text-align:right;color:var(--gold2);font-size:2rem;font-weight:900}
+
+    .token{
+      margin-bottom:18px;
+      display:flex;
+      gap:10px;
+    }
+
+    .token input{
+      flex:1;
+      padding:14px;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background:#050302;
+      color:var(--text);
+      font-size:16px;
+    }
+
+    button{
+      border:0;
+      border-radius:999px;
+      padding:0 20px;
+      background:linear-gradient(135deg,var(--gold),var(--gold2));
+      color:#100603;
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    .banner{
+      padding:16px 18px;
+      border-radius:20px;
+      border:1px solid var(--line);
+      background:rgba(215,168,79,.10);
+      color:var(--gold2);
+      font-size:1.15rem;
+      font-weight:900;
+      margin-bottom:18px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:18px;
+    }
+
+    .card{
+      border:1px solid var(--line);
+      border-radius:28px;
+      background:linear-gradient(180deg,#1b100b,#0e0705);
+      padding:24px;
+      min-height:260px;
+    }
+
+    .card h2{
+      margin:0 0 8px;
+      font-size:2.5rem;
+      letter-spacing:-.05em;
+      color:var(--gold2);
+    }
+
+    .owner{
+      font-size:3rem;
+      font-weight:900;
+      margin:16px 0;
+      letter-spacing:-.05em;
+    }
+
+    .meta{
+      display:grid;
+      gap:8px;
+      font-size:1.2rem;
+      color:var(--muted);
+      font-weight:800;
+    }
+
+    .meta strong{color:var(--text)}
+
+    .empty{
+      grid-column:1/-1;
+      text-align:center;
+      padding:60px 20px;
+      border:1px solid var(--line);
+      border-radius:30px;
+      color:var(--muted);
+      background:rgba(255,255,255,.035);
+      font-size:1.4rem;
+      font-weight:900;
+    }
+
+    @media(max-width:850px){
+      .grid{grid-template-columns:1fr}
+      .header{align-items:flex-start;flex-direction:column}
+      .time{text-align:left}
+    }
+  </style>
+</head>
+
+<body>
+  <main class="wrap">
+    <div class="header">
+      <div class="brand">
+        <img class="logo" src="/chocolate-city/assets/cc-icon-192.png" alt="Chocolate City logo">
+        <div>
+          <h1>VIP Ready</h1>
+          <div class="sub">Tonight’s paid VIP sections</div>
+        </div>
+      </div>
+
+      <div class="time" id="timeNow">--:--</div>
+    </div>
+
+    <div class="token">
+      <input id="token" type="password" placeholder="Admin token">
+      <button onclick="saveToken()">Load Screen</button>
+    </div>
+
+    <div class="banner" id="count">Loading VIP bookings...</div>
+
+    <section class="grid" id="bookings"></section>
+  </main>
+
+  <script>
+    function escapeHtml(str){
+      return String(str || "").replace(/[&<>"']/g, m => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+      }[m]));
+    }
+
+    function updateTime(){
+      document.getElementById("timeNow").textContent = new Intl.DateTimeFormat("en-US",{
+        timeZone:"America/Chicago",
+        hour:"numeric",
+        minute:"2-digit"
+      }).format(new Date());
+    }
+
+    function saveToken(){
+      const token = document.getElementById("token").value.trim();
+      if(token) localStorage.setItem("cc_admin_token", token);
+      loadBookings();
+    }
+
+    async function loadBookings(){
+      const token = localStorage.getItem("cc_admin_token") || document.getElementById("token").value.trim();
+      const box = document.getElementById("bookings");
+      const count = document.getElementById("count");
+
+      if(!token){
+        count.textContent = "Enter admin token to load VIP screen.";
+        box.innerHTML = "";
+        return;
+      }
+
+      try{
+        const res = await fetch("/api/chocolate-city/vip-bookings/", {
+          headers:{ "X-Admin-Token": token },
+          cache:"no-store"
+        });
+
+        const data = await res.json();
+        if(!data.ok) throw new Error(data.error || "Unable to load");
+
+        const bookings = data.bookings || [];
+        count.textContent = `${bookings.length} VIP ${bookings.length === 1 ? "section" : "sections"} booked`;
+
+        if(!bookings.length){
+          box.innerHTML = `<div class="empty">No VIP sections booked yet.</div>`;
+          return;
+        }
+
+        box.innerHTML = bookings.map(b => `
+          <article class="card">
+            <h2>${escapeHtml(b.packageName || "VIP Section")}</h2>
+            <div class="owner">${escapeHtml(b.customerName || "—")}</div>
+            <div class="meta">
+              <div>Phone: <strong>${escapeHtml(b.customerPhone || "—")}</strong></div>
+              <div>Paid Online: <strong>$${escapeHtml(String(b.deposit || b.fullPrice || 0))}</strong></div>
+              <div>Remaining: <strong>$${escapeHtml(String(b.remainingBalance || 0))}</strong></div>
+              <div>Status: <strong>${escapeHtml(b.paymentStatus || "paid")}</strong></div>
+            </div>
+          </article>
+        `).join("");
+      }catch(err){
+        count.textContent = "Unable to load VIP bookings.";
+        box.innerHTML = `<div class="empty">Check token, API, or connection.</div>`;
+      }
+    }
+
+    document.getElementById("token").value = localStorage.getItem("cc_admin_token") || "";
+    updateTime();
+    loadBookings();
+    setInterval(updateTime, 10000);
+    setInterval(loadBookings, 15000);
+  </script>
+</body>
+</html>
