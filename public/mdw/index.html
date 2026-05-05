@@ -258,9 +258,6 @@
             method="post"
             action="https://script.google.com/macros/s/AKfycbxtNBPIjg8rVnAf5JYQKkhjQC-YhYFqI4ilXamWP-C_J4mSEmdYqIN5uLXwrPR_zVVo/exec"
             novalidate
-            data-sb-action="mdw_form_submit"
-            data-sb-component="form"
-            data-sb-label="Commercial Inquiry"
           >
             <!-- Routing / system -->
             <input type="hidden" name="form_name" value="mdw" />
@@ -271,6 +268,16 @@
             <!-- URL-only source (NO carryover) -->
             <input type="hidden" id="source" name="_source" value="mdw_site" />
             <input type="hidden" id="sourcePage" name="source_page" value="" />
+            <input type="hidden" id="leadId" name="lead_id" value="" />
+            <input type="hidden" id="submittedAt" name="submitted_at" value="" />
+            <input type="hidden" id="referrer" name="referrer" value="" />
+            <input type="hidden" id="utmSource" name="utm_source" value="" />
+            <input type="hidden" id="utmMedium" name="utm_medium" value="" />
+            <input type="hidden" id="utmCampaign" name="utm_campaign" value="" />
+            <input type="hidden" id="utmContent" name="utm_content" value="" />
+            <input type="hidden" id="utmTerm" name="utm_term" value="" />
+            <input type="hidden" id="gclid" name="gclid" value="" />
+            <input type="hidden" id="fbclid" name="fbclid" value="" />
 
             <div class="row">
               <div>
@@ -442,8 +449,27 @@
       var sourcePageEl = document.getElementById("sourcePage");
       var sourceStamp = document.getElementById("sourceStamp");
       var form = document.getElementById("mdwForm");
+      var leadIdEl = document.getElementById("leadId");
+      var submittedAtEl = document.getElementById("submittedAt");
+      var referrerEl = document.getElementById("referrer");
 
       // URL-only _source (NO carryover)
+      function urlParam(name){
+        try{
+          return new URL(window.location.href).searchParams.get(name) || "";
+        }catch(e){
+          return "";
+        }
+      }
+
+      function buildLeadId(){
+        return [
+          "mdw",
+          Date.now().toString(36),
+          Math.random().toString(36).slice(2, 8)
+        ].join("_");
+      }
+
       function getSourceFromUrlOnly(){
         try{
           var url = new URL(window.location.href);
@@ -465,6 +491,25 @@
         }
       }
 
+      function setTrackingFields(){
+        var fieldMap = {
+          utmSource: "utm_source",
+          utmMedium: "utm_medium",
+          utmCampaign: "utm_campaign",
+          utmContent: "utm_content",
+          utmTerm: "utm_term",
+          gclid: "gclid",
+          fbclid: "fbclid"
+        };
+
+        Object.keys(fieldMap).forEach(function(id){
+          var el = document.getElementById(id);
+          if (el) el.value = urlParam(fieldMap[id]);
+        });
+
+        if (referrerEl) referrerEl.value = document.referrer || "";
+      }
+
       function setSource(){
         var s = getSourceFromUrlOnly();
         if (sourceEl) sourceEl.value = s;
@@ -475,12 +520,17 @@
       // init
       setSourcePage();
       setSource();
+      setTrackingFields();
+      if (leadIdEl && !leadIdEl.value) leadIdEl.value = buildLeadId();
 
       // Submit validation + tracking
       if (form){
         form.addEventListener("submit", function(ev){
           setSourcePage();
           var src = setSource();
+          setTrackingFields();
+          if (leadIdEl && !leadIdEl.value) leadIdEl.value = buildLeadId();
+          if (submittedAtEl) submittedAtEl.value = new Date().toISOString();
 
           // basic required validation
           var required = form.querySelectorAll("[required]");
@@ -510,12 +560,40 @@
                 component: "form",
                 label: "Commercial Inquiry",
                 link_url: "",
-                source: src
+                source: src,
+                lead_id: leadIdEl ? leadIdEl.value : "",
+                commercial_type: document.getElementById("commercialType")?.value || "",
+                asset_type: document.getElementById("assetType")?.value || ""
               });
             }
           }catch(_){}
         });
       }
+
+      document.addEventListener("click", function(e){
+        var a = e.target && e.target.closest && e.target.closest("a");
+        if (!a || typeof window.sbTrack !== "function") return;
+
+        var href = a.getAttribute("href") || "";
+        var action = a.getAttribute("data-sb-action") || "click";
+        var isExternal = /^https?:\/\//i.test(href);
+        if (isExternal && (action === "open" || action === "click")) action = "outbound";
+
+        try{
+          window.sbTrack("sb_click", {
+            sb_brand: "mdw",
+            sb_tier: "hub",
+            sb_variant: document.documentElement.getAttribute("data-sb-variant") || "v1",
+            page_path: "/mdw/",
+            page_title: document.title || "",
+            component: a.getAttribute("data-sb-component") || "link",
+            action: action,
+            label: a.getAttribute("data-sb-label") || (a.textContent || "").trim() || href,
+            link_url: href,
+            source: sourceEl ? sourceEl.value : ""
+          });
+        }catch(_){}
+      }, { passive:true });
     })();
   </script>
 

@@ -411,6 +411,16 @@
           <!-- ✅ URL-only _source + source_page -->
           <input id="source" type="hidden" name="_source" value="mdw_site_madison_square" />
           <input id="sourcePage" type="hidden" name="source_page" value="" />
+          <input id="leadId" type="hidden" name="lead_id" value="" />
+          <input id="submittedAt" type="hidden" name="submitted_at" value="" />
+          <input id="referrer" type="hidden" name="referrer" value="" />
+          <input id="utmSource" type="hidden" name="utm_source" value="" />
+          <input id="utmMedium" type="hidden" name="utm_medium" value="" />
+          <input id="utmCampaign" type="hidden" name="utm_campaign" value="" />
+          <input id="utmContent" type="hidden" name="utm_content" value="" />
+          <input id="utmTerm" type="hidden" name="utm_term" value="" />
+          <input id="gclid" type="hidden" name="gclid" value="" />
+          <input id="fbclid" type="hidden" name="fbclid" value="" />
 
           <div class="row">
             <div>
@@ -571,8 +581,27 @@
 
       var sourceEl = document.getElementById("source");
       var sourcePageEl = document.getElementById("sourcePage");
+      var leadIdEl = document.getElementById("leadId");
+      var submittedAtEl = document.getElementById("submittedAt");
+      var referrerEl = document.getElementById("referrer");
 
       // URL-only _source (NO carryover)
+      function urlParam(name){
+        try{
+          return new URL(window.location.href).searchParams.get(name) || "";
+        }catch(e){
+          return "";
+        }
+      }
+
+      function buildLeadId(){
+        return [
+          "msq",
+          Date.now().toString(36),
+          Math.random().toString(36).slice(2, 8)
+        ].join("_");
+      }
+
       function getSourceUrlOnly(){
         try{
           var u = new URL(window.location.href);
@@ -600,14 +629,38 @@
         return s;
       }
 
+      function setTrackingFields(){
+        var fieldMap = {
+          utmSource: "utm_source",
+          utmMedium: "utm_medium",
+          utmCampaign: "utm_campaign",
+          utmContent: "utm_content",
+          utmTerm: "utm_term",
+          gclid: "gclid",
+          fbclid: "fbclid"
+        };
+
+        Object.keys(fieldMap).forEach(function(id){
+          var el = document.getElementById(id);
+          if (el) el.value = urlParam(fieldMap[id]);
+        });
+
+        if (referrerEl) referrerEl.value = document.referrer || "";
+      }
+
       // init
       setSourcePage();
       setSource();
+      setTrackingFields();
+      if (leadIdEl && !leadIdEl.value) leadIdEl.value = buildLeadId();
 
       // Required validation + conversion tracking
       form.addEventListener("submit", function(e){
         setSourcePage();
         var src = setSource();
+        setTrackingFields();
+        if (leadIdEl && !leadIdEl.value) leadIdEl.value = buildLeadId();
+        if (submittedAtEl) submittedAtEl.value = new Date().toISOString();
 
         var required = form.querySelectorAll("[required]");
         for (var i=0; i<required.length; i++){
@@ -638,11 +691,40 @@
               label: "Madison Square — Availability Request",
               link_url: "",
               source: src,
-              property: "madison_square"
+              property: "madison_square",
+              lead_id: leadIdEl ? leadIdEl.value : "",
+              commercial_type: document.getElementById("intent")?.value || "",
+              asset_type: document.getElementById("asset_type")?.value || ""
             });
           }
         }catch(_){}
       });
+
+      document.addEventListener("click", function(e){
+        var a = e.target && e.target.closest && e.target.closest("a");
+        if (!a || typeof window.sbTrack !== "function") return;
+
+        var href = a.getAttribute("href") || "";
+        var action = a.getAttribute("data-sb-action") || "click";
+        var isExternal = /^https?:\/\//i.test(href);
+        if (isExternal && (action === "open" || action === "click")) action = "outbound";
+
+        try{
+          window.sbTrack("sb_click", {
+            sb_brand: "mdw",
+            sb_tier: "listing",
+            sb_variant: document.documentElement.getAttribute("data-sb-variant") || "v1",
+            page_path: "/madison-square/",
+            page_title: document.title || "",
+            component: a.getAttribute("data-sb-component") || "link",
+            action: action,
+            label: a.getAttribute("data-sb-label") || (a.textContent || "").trim() || href,
+            link_url: href,
+            source: sourceEl ? sourceEl.value : "",
+            property: "madison_square"
+          });
+        }catch(_){}
+      }, { passive:true });
     })();
   </script>
 
