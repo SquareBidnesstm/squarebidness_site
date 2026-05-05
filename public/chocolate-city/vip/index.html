@@ -289,22 +289,26 @@
 
     <section class="hero">
       <div class="kicker">VIP Reservations</div>
-      <h1>Reserve Your Section</h1>
+
+      <h1>Reserve VIP</h1>
+
       <p class="sub">
-        Only 2 VIP sections are available per night. Sections are paid in full online.
+        Only 2 VIP sections available per night. Paid in full online.
         Buy-now-pay-later options may appear through Stripe/Link when available.
       </p>
-    
+
       <div class="status">
-  <div class="pill" id="fridayPill">Friday — Select Nights Only</div>
-</div>
+        <div class="pill" id="fridayPill">Friday — Select Nights Only</div>
+        <div class="pill" id="vipCountPill">Checking sections...</div>
+      </div>
 
       <div class="notice" id="vipAvailability">Checking VIP availability...</div>
+
       <div style="margin-top:14px;">
-  <a class="btn" href="/chocolate-city/send-drink/">
-    Send a Drink
-  </a>
-</div>
+        <a class="btn" href="/chocolate-city/send-drink/">
+          Send a Drink
+        </a>
+      </div>
     </section>
 
     <section class="vip-grid">
@@ -374,8 +378,8 @@
     </section>
 
     <p class="fineprint">
-      Please screenshot your confirmation after checkout and show it at the door.
-      Chocolate City staff verifies all reservations on arrival.
+      Screenshot your confirmation after checkout and show it at the door.
+      Staff verifies all paid VIP reservations on arrival.
     </p>
 
     <footer>
@@ -384,103 +388,110 @@
   </main>
 
   <script>
-    async function loadVipAvailability(){
-      const box = document.getElementById("vipAvailability");
-      const buttons = document.querySelectorAll(".vip-btn");
+  async function loadVipAvailability(){
+    const box = document.getElementById("vipAvailability");
+    const buttons = document.querySelectorAll(".vip-btn");
+    const countPill = document.getElementById("vipCountPill");
 
-      try{
-        const res = await fetch("/api/chocolate-city/vip-availability/", { cache:"no-store" });
-        const data = await res.json();
+    try{
+      const res = await fetch("/api/chocolate-city/vip-availability/", { cache:"no-store" });
+      const data = await res.json();
 
-        if(!data.ok) throw new Error("Availability unavailable");
+      if(!data.ok) throw new Error("Availability unavailable");
 
-        if(data.soldOut){
-          box.textContent = "VIP sections are sold out for this night.";
-          buttons.forEach(btn => {
-  btn.disabled = true;
-  btn.textContent = "Sold Out";
+      if(data.soldOut){
+        box.textContent = "VIP sections are sold out for this night.";
+        if(countPill) countPill.textContent = "VIP Sold Out";
 
-  const card = btn.closest(".vip-card");
-  if(card){
-    card.classList.add("sold");
-  }
-});
-          return;
-        }
+        buttons.forEach(btn => {
+          btn.disabled = true;
+          btn.textContent = "Sold Out";
 
-        box.textContent = `${data.remaining} of 2 VIP sections available.`;
-      }catch(err){
-        box.textContent = "VIP availability will be confirmed before checkout.";
-      }
-    }
+          const card = btn.closest(".vip-card");
+          if(card){
+            card.classList.add("sold");
+          }
+        });
 
-    async function reserveVip(packageId, button){
-      const card = button.closest(".vip-card");
-      const ownerInput = card ? card.querySelector("[data-owner-input]") : null;
-      const customerName = ownerInput ? ownerInput.value.trim() : "";
-
-      if(!customerName){
-        alert("Enter the section owner name first.");
-        if(ownerInput) ownerInput.focus();
         return;
       }
 
-      const originalText = button.textContent;
-      button.disabled = true;
-      button.textContent = "Opening checkout...";
+      box.textContent = `${data.remaining} of 2 VIP sections available.`;
+      if(countPill) countPill.textContent = `${data.remaining} Sections Available`;
 
-      try{
-        const res = await fetch("/api/chocolate-city/vip-checkout/", {
-          method:"POST",
-          headers:{ "Content-Type":"application/json" },
-          body:JSON.stringify({ packageId, customerName })
-        });
+    }catch(err){
+      box.textContent = "VIP availability will be confirmed before checkout.";
+      if(countPill) countPill.textContent = "Availability Pending";
+    }
+  }
 
-        const data = await res.json();
+  async function reserveVip(packageId, button){
+    const card = button.closest(".vip-card");
+    const ownerInput = card ? card.querySelector("[data-owner-input]") : null;
+    const customerName = ownerInput ? ownerInput.value.trim() : "";
 
-        if(!data.ok){
-          alert(data.error || "Could not start checkout.");
-          button.disabled = false;
-          button.textContent = originalText;
-          return;
-        }
+    if(!customerName){
+      alert("Enter the section owner name first.");
+      if(ownerInput) ownerInput.focus();
+      return;
+    }
 
-        window.location.href = data.url;
-      }catch(err){
-        alert("Checkout unavailable. Please try again.");
+    const originalText = button.textContent;
+    button.disabled = true;
+    button.textContent = "Opening checkout...";
+
+    try{
+      const res = await fetch("/api/chocolate-city/vip-checkout/", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify({ packageId, customerName })
+      });
+
+      const data = await res.json();
+
+      if(!data.ok){
+        alert(data.error || "Could not start checkout.");
         button.disabled = false;
         button.textContent = originalText;
+        return;
       }
+
+      window.location.href = data.url;
+    }catch(err){
+      alert("Checkout unavailable. Please try again.");
+      button.disabled = false;
+      button.textContent = originalText;
     }
-
-    async function loadStatus(){
-  try{
-    const res = await fetch("/api/chocolate-city/status/", { cache:"no-store" });
-    const data = await res.json();
-
-    if(!data.ok || !data.state) return;
-
-    const fridayOpen = !!data.state.fridayOpen;
-    const fridayPill = document.getElementById("fridayPill");
-
-    if(fridayPill){
-      fridayPill.textContent = fridayOpen
-        ? "Friday Open This Week • 7PM – 2AM"
-        : "Friday — Select Nights Only";
-    }
-  }catch(err){
-    console.warn("Chocolate City status unavailable", err);
   }
-}
 
-    document.querySelectorAll(".vip-btn").forEach(button => {
-      button.addEventListener("click", () => {
-        reserveVip(button.dataset.package, button);
-      });
+  async function loadStatus(){
+    try{
+      const res = await fetch("/api/chocolate-city/status/", { cache:"no-store" });
+      const data = await res.json();
+
+      if(!data.ok || !data.state) return;
+
+      const fridayOpen = !!data.state.fridayOpen;
+      const fridayPill = document.getElementById("fridayPill");
+
+      if(fridayPill){
+        fridayPill.textContent = fridayOpen
+          ? "Friday Open This Week • 7PM – 2AM"
+          : "Friday — Select Nights Only";
+      }
+    }catch(err){
+      console.warn("Chocolate City status unavailable", err);
+    }
+  }
+
+  document.querySelectorAll(".vip-btn").forEach(button => {
+    button.addEventListener("click", () => {
+      reserveVip(button.dataset.package, button);
     });
+  });
 
-   loadStatus();
-loadVipAvailability();
-  </script>
+  loadStatus();
+  loadVipAvailability();
+</script>
 </body>
 </html>
