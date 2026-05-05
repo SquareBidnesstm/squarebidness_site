@@ -1,9 +1,14 @@
+import { Redis } from "@upstash/redis";
+
 export const config = {
   runtime: "nodejs"
 };
 
 const REDIS_URL = process.env.DELISH_UPSTASH_REDIS_REST_URL;
 const REDIS_TOKEN = process.env.DELISH_UPSTASH_REDIS_REST_TOKEN;
+const redisClient = REDIS_URL && REDIS_TOKEN
+  ? new Redis({ url: REDIS_URL, token: REDIS_TOKEN })
+  : null;
 
 const TZ = "America/Chicago";
 const MANAGER_PIN = process.env.DELISH_TIMECLOCK_MANAGER_PIN || "9999";
@@ -72,6 +77,7 @@ function normalizeDevice(device) {
 
 function parseJson(value, fallback) {
   if (!value) return fallback;
+  if (typeof value === "object") return value;
   try {
     return JSON.parse(value);
   } catch {
@@ -95,21 +101,33 @@ function ensureRedisConfig() {
 
 async function redis(command, ...args) {
   ensureRedisConfig();
+  const op = String(command || "").toUpperCase();
 
-  const res = await fetch(REDIS_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${REDIS_TOKEN}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ command: [command, ...args] })
-  });
-
-  const data = await res.json();
-  if (!res.ok || data.error) {
-    throw new Error(data.error || `Redis ${command} failed.`);
+  if (!redisClient) {
+    throw new Error("Time clock storage is not configured.");
   }
-  return data.result;
+
+  if (op === "GET") return redisClient.get(args[0]);
+  if (op === "SET") return redisClient.set(args[0], args[1]);
+  if (op === "DEL") return redisClient.del(args[0]);
+  if (op === "LRANGE") return redisClient.lrange(args[0], args[1], args[2]);
+  if (op === "LPUSH") return redisClient.lpush(args[0], ...args.slice(1));
+  if (op === "RPUSH") return redisClient.rpush(args[0], ...args.slice(1));
+  if (op === "LTRIM") return redisClient.ltrim(args[0], args[1], args[2]);
+
+  const err = new Error(`Unsupported Redis command: ${op}`);
+  err.status = 500;
+  throw err;
+}
+
+function publicError(err) {
+  const status = Number(err.status || 500);
+
+  if (status >= 500) {
+    return "Time clock is temporarily unavailable.";
+  }
+
+  return err.message || "Error";
 }
 
 async function getEmployees() {
@@ -499,9 +517,10 @@ export default async function handler(req, res) {
 
     return send(res, 400, { ok: false, error: "Invalid action." });
   } catch (err) {
+    console.error("DELISH TIMECLOCK ERROR:", err);
     return send(res, err.status || 500, {
       ok: false,
-      error: err.message || "Error"
+      error: publicError(err)
     });
   }
 }
