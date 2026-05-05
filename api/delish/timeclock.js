@@ -62,7 +62,40 @@ function getCentralDateKey(iso) {
   return `${map.year}-${map.month}-${map.day}`;
 }
 
+function normalizeEmployeeName(name) {
+  return String(name || "").trim().replace(/\s+/g, " ");
+}
+
+function normalizeDevice(device) {
+  return String(device || "device").trim().replace(/\s+/g, " ").slice(0, 80) || "device";
+}
+
+function parseJson(value, fallback) {
+  if (!value) return fallback;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return fallback;
+  }
+}
+
+function parseList(values) {
+  return (Array.isArray(values) ? values : [])
+    .map(value => parseJson(value, null))
+    .filter(Boolean);
+}
+
+function ensureRedisConfig() {
+  if (!REDIS_URL || !REDIS_TOKEN) {
+    const err = new Error("Time clock storage is not configured.");
+    err.status = 500;
+    throw err;
+  }
+}
+
 async function redis(command, ...args) {
+  ensureRedisConfig();
+
   const res = await fetch(REDIS_URL, {
     method: "POST",
     headers: {
@@ -87,30 +120,51 @@ async function getEmployees() {
     return [];
   }
 
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
+  const parsed = parseJson(raw, []);
+  return Array.isArray(parsed) ? parsed : [];
 }
 
 async function setEmployees(list) {
   await redis("SET", EMP_KEY, JSON.stringify(list));
 }
 
+function employeeNames(employees) {
+  return (employees || [])
+    .map(emp => normalizeEmployeeName(emp?.name || emp))
+    .filter(Boolean)
+    .sort((a, b) => a.localeCompare(b));
+}
+
+function findEmployeeByName(employees, name) {
+  const target = normalizeEmployeeName(name).toLowerCase();
+  return employees.find(emp =>
+    String(emp?.name || emp || "").trim().toLowerCase() === target
+  );
+}
+
 async function getActiveMap() {
   const raw = await redis("GET", ACTIVE_KEY);
-  if (!raw) return {};
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return {};
-  }
+  return parseJson(raw, {});
 }
 
 async function setActiveMap(map) {
-  await redis("SET", ACTIVE_KEY, JSON.stringify(map));
+  await redis("SET", ACTIVE_KEY, JSON.stringify(map || {}));
+}
+
+async function getRecentPunches() {
+  return parseList(await redis("LRANGE", PUNCHES_KEY, 0, MAX_RECENT - 1));
+}
+
+async function getShifts() {
+  return parseList(await redis("LRANGE", SHIFTS_KEY, 0, MAX_SHIFTS - 1));
+}
+
+async function setShifts(shifts) {
+  await redis("DEL", SHIFTS_KEY);
+  const rows = (shifts || []).map(shift => JSON.stringify(shift));
+  if (rows.length) {
+    await redis("RPUSH", SHIFTS_KEY, ...rows.slice(0, MAX_SHIFTS));
+  }
 }
 
 async function pushPunch(entry) {
@@ -129,6 +183,74 @@ function activeArrayFromMap(map) {
   );
 }
 
+function filterShiftsByDate(shifts, date) {
+  if (!date) return shifts || [];
+  return (shifts || []).filter(shift => shift.dateCentral === date);
+}
+
+function summarizeShifts(shifts) {
+  const byEmployee = new Map();
+
+  for (const shift of shifts || []) {
+    const name = normalizeEmployeeName(shift.name);
+    if (!name) continue;
+
+    const current = byEmployee.get(name) || { name, shifts: 0, minutes: 0 };
+    current.shifts += 1;
+    current.minutes += Number(shift.durationMinutes || 0);
+    byEmployee.set(name, current);
+  }
+
+  const employees = Array.from(byEmployee.values())
+    .map(item => ({
+      ...item,
+      hours: minutesToHours(item.minutes)
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  const totalMinutes = employees.reduce((sum, item) => sum + item.minutes, 0);
+
+  return {
+    employees,
+    totalMinutes,
+    totalHours: minutesToHours(totalMinutes),
+    totalShifts: (shifts || []).length
+  };
+}
+
+function buildShiftUpdate(shift, clockInAt, clockOutAt) {
+  const minutes = diffMinutes(clockInAt, clockOutAt);
+
+  return {
+    ...shift,
+    clockInAt,
+    clockOutAt,
+    durationMinutes: minutes,
+    durationHours: minutesToHours(minutes),
+    dateCentral: getCentralDateKey(clockInAt)
+  };
+}
+
+async function buildState(date) {
+  const [employees, activeMap, recent, shifts] = await Promise.all([
+    getEmployees(),
+    getActiveMap(),
+    getRecentPunches(),
+    getShifts()
+  ]);
+
+  const filteredShifts = filterShiftsByDate(shifts, date);
+
+  return {
+    ok: true,
+    employees: employeeNames(employees),
+    active: activeArrayFromMap(activeMap),
+    recent,
+    shifts: filteredShifts,
+    summary: summarizeShifts(filteredShifts)
+  };
+}
+
 function requireManager(pin) {
   if (String(pin || "").trim() !== MANAGER_PIN) {
     const err = new Error("Manager PIN required.");
@@ -137,20 +259,60 @@ function requireManager(pin) {
   }
 }
 
-function normalizeEmployeeName(name) {
-  return String(name || "").trim().replace(/\s+/g, " ");
+function csvCell(value) {
+  const text = String(value ?? "");
+  return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 }
 
-function findEmployeeByName(employees, name) {
-  const target = normalizeEmployeeName(name).toLowerCase();
-  return employees.find(emp =>
-    String(emp.name || "").trim().toLowerCase() === target
-  );
+function shiftsToCsv(shifts) {
+  const header = [
+    "Employee",
+    "Date",
+    "Clock In",
+    "Clock Out",
+    "Minutes",
+    "Hours",
+    "Clock In Device",
+    "Clock Out Device"
+  ];
+
+  const rows = (shifts || []).map(shift => [
+    shift.name,
+    shift.dateCentral,
+    shift.clockInAt,
+    shift.clockOutAt,
+    shift.durationMinutes,
+    shift.durationHours,
+    shift.clockInDevice,
+    shift.clockOutDevice
+  ]);
+
+  return [header, ...rows].map(row => row.map(csvCell).join(",")).join("\n");
+}
+
+async function sendCsv(req, res) {
+  const date = String(req.query?.date || "").trim();
+  const shifts = filterShiftsByDate(await getShifts(), date);
+  const csv = shiftsToCsv(shifts);
+  const suffix = date || "all";
+
+  res.setHeader("Content-Type", "text/csv; charset=utf-8");
+  res.setHeader("Content-Disposition", `attachment; filename="delish-timeclock-${suffix}.csv"`);
+  return res.status(200).send(csv);
 }
 
 export default async function handler(req, res) {
   try {
+    if (req.method === "GET") {
+      if (String(req.query?.mode || "") === "csv") {
+        return sendCsv(req, res);
+      }
+
+      return send(res, 200, await buildState(String(req.query?.date || "").trim()));
+    }
+
     if (req.method !== "POST") {
+      res.setHeader("Allow", "GET,POST");
       return send(res, 405, { ok: false, error: "Method not allowed." });
     }
 
@@ -160,6 +322,7 @@ export default async function handler(req, res) {
     if (action === "clock_in") {
       const name = normalizeEmployeeName(body.name);
       const pin = String(body.pin || "").trim();
+      const device = normalizeDevice(body.device);
 
       if (!name || !pin) {
         return send(res, 400, { ok: false, error: "Name and PIN required." });
@@ -168,7 +331,7 @@ export default async function handler(req, res) {
       const employees = await getEmployees();
       const employee = findEmployeeByName(employees, name);
 
-      if (!employee || employee.pin !== pin) {
+      if (!employee || String(employee.pin || "") !== pin) {
         return send(res, 401, { ok: false, error: "Invalid PIN." });
       }
 
@@ -188,28 +351,32 @@ export default async function handler(req, res) {
       }
 
       const timestamp = nowIso();
-
       const shift = {
         id: shiftId(name, timestamp),
         name,
-        clockInAt: timestamp
+        clockInAt: timestamp,
+        clockInDevice: device
       };
 
       activeMap[name] = shift;
       await setActiveMap(activeMap);
-      await pushPunch({ name, action: "clock_in", timestamp });
+      await pushPunch({ name, action: "clock_in", timestamp, device });
 
-      return send(res, 200, { ok: true });
+      return send(res, 200, {
+        ...(await buildState()),
+        message: `${name} clocked in.`
+      });
     }
 
     if (action === "clock_out") {
       const name = normalizeEmployeeName(body.name);
       const pin = String(body.pin || "").trim();
+      const device = normalizeDevice(body.device);
 
       const employees = await getEmployees();
       const employee = findEmployeeByName(employees, name);
 
-      if (!employee || employee.pin !== pin) {
+      if (!employee || String(employee.pin || "") !== pin) {
         return send(res, 401, { ok: false, error: "Invalid PIN." });
       }
 
@@ -221,24 +388,22 @@ export default async function handler(req, res) {
       }
 
       const timestamp = nowIso();
-
-      const minutes = diffMinutes(current.clockInAt, timestamp);
-
       const completed = {
-        ...current,
-        clockOutAt: timestamp,
-        durationMinutes: minutes,
-        durationHours: minutesToHours(minutes),
-        dateCentral: getCentralDateKey(current.clockInAt)
+        ...buildShiftUpdate(current, current.clockInAt, timestamp),
+        clockOutDevice: device
       };
 
       delete activeMap[name];
 
       await setActiveMap(activeMap);
-      await pushPunch({ name, action: "clock_out", timestamp });
+      await pushPunch({ name, action: "clock_out", timestamp, device });
       await pushCompletedShift(completed);
 
-      return send(res, 200, { ok: true, shift: completed });
+      return send(res, 200, {
+        ...(await buildState()),
+        message: `${name} clocked out.`,
+        shift: completed
+      });
     }
 
     if (action === "add_employee") {
@@ -247,8 +412,12 @@ export default async function handler(req, res) {
       const name = normalizeEmployeeName(body.name);
       const pin = String(body.pin || "").trim();
 
+      if (!name) {
+        return send(res, 400, { ok: false, error: "Employee name required." });
+      }
+
       if (!/^\d{4,8}$/.test(pin)) {
-        return send(res, 400, { ok: false, error: "PIN must be 4–8 digits." });
+        return send(res, 400, { ok: false, error: "PIN must be 4-8 digits." });
       }
 
       const employees = await getEmployees();
@@ -257,14 +426,13 @@ export default async function handler(req, res) {
         return send(res, 409, { ok: false, error: "Employee exists." });
       }
 
-      if (employees.some(e => e.pin === pin)) {
+      if (employees.some(e => String(e.pin || "") === pin)) {
         return send(res, 409, { ok: false, error: "PIN in use." });
       }
 
-      const updated = [...employees, { name, pin }];
-      await setEmployees(updated);
+      await setEmployees([...employees, { name, pin }]);
 
-      return send(res, 200, { ok: true });
+      return send(res, 200, await buildState());
     }
 
     if (action === "delete_employee") {
@@ -272,11 +440,61 @@ export default async function handler(req, res) {
 
       const name = normalizeEmployeeName(body.name);
       const employees = await getEmployees();
+      const activeMap = await getActiveMap();
 
-      const updated = employees.filter(e => e.name !== name);
-      await setEmployees(updated);
+      if (activeMap[name]) {
+        return send(res, 409, { ok: false, error: "Employee is currently clocked in." });
+      }
 
-      return send(res, 200, { ok: true });
+      await setEmployees(employees.filter(e =>
+        normalizeEmployeeName(e?.name || e).toLowerCase() !== name.toLowerCase()
+      ));
+
+      return send(res, 200, await buildState());
+    }
+
+    if (action === "edit_shift") {
+      requireManager(body.managerPin);
+
+      const id = String(body.id || "").trim();
+      const clockInAt = String(body.clockInAt || "").trim();
+      const clockOutAt = String(body.clockOutAt || "").trim();
+
+      if (!id || !clockInAt || !clockOutAt) {
+        return send(res, 400, { ok: false, error: "Shift, clock in, and clock out are required." });
+      }
+
+      if (new Date(clockOutAt).getTime() < new Date(clockInAt).getTime()) {
+        return send(res, 400, { ok: false, error: "Clock out must be after clock in." });
+      }
+
+      const shifts = await getShifts();
+      const index = shifts.findIndex(shift => shift.id === id);
+
+      if (index === -1) {
+        return send(res, 404, { ok: false, error: "Shift not found." });
+      }
+
+      shifts[index] = buildShiftUpdate(shifts[index], clockInAt, clockOutAt);
+      await setShifts(shifts);
+
+      return send(res, 200, await buildState(String(body.date || "").trim()));
+    }
+
+    if (action === "delete_shift") {
+      requireManager(body.managerPin);
+
+      const id = String(body.id || "").trim();
+      const shifts = await getShifts();
+      const updated = shifts.filter(shift => shift.id !== id);
+
+      if (updated.length === shifts.length) {
+        return send(res, 404, { ok: false, error: "Shift not found." });
+      }
+
+      await setShifts(updated);
+
+      return send(res, 200, await buildState(String(body.date || "").trim()));
     }
 
     return send(res, 400, { ok: false, error: "Invalid action." });
@@ -287,4 +505,3 @@ export default async function handler(req, res) {
     });
   }
 }
-```
