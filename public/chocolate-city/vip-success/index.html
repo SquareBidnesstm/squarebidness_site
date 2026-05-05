@@ -3,167 +3,272 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>VIP Reservation Confirmed | Chocolate City</title>
+  <title>VIP Reserved | Chocolate City Lounge LLC</title>
 
-  
-<link rel="icon" type="image/png" sizes="32x32" href="/chocolate-city/assets/cc-icon-32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/chocolate-city/assets/cc-icon-16.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/chocolate-city/assets/cc-icon-180.png">
-<link rel="manifest" href="/chocolate-city/manifest.json">
+  <link rel="icon" type="image/png" sizes="32x32" href="/chocolate-city/assets/cc-icon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/chocolate-city/assets/cc-icon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/chocolate-city/assets/cc-icon-180.png">
+  <link rel="manifest" href="/chocolate-city/manifest.json">
 
   <style>
+    :root{
+      --bg:#080504;
+      --panel:#130c0a;
+      --gold:#d7a84f;
+      --gold2:#f5d58a;
+      --text:#fff7ea;
+      --muted:#c7a983;
+      --line:rgba(245,213,138,.24);
+    }
+
+    *{box-sizing:border-box}
+
     body{
       margin:0;
-      font-family:system-ui;
-      background:#080504;
-      color:#fff7ea;
+      min-height:100vh;
+      font-family:Arial,Helvetica,sans-serif;
+      background:
+        radial-gradient(circle at 50% 10%,rgba(215,168,79,.18),transparent 30%),
+        linear-gradient(180deg,#080504,#160b07);
+      color:var(--text);
       display:flex;
       align-items:center;
       justify-content:center;
-      min-height:100vh;
+      padding:20px;
     }
 
     .card{
       width:100%;
-      max-width:520px;
-      background:#130c0a;
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:24px;
-      padding:28px;
+      max-width:620px;
+      background:linear-gradient(180deg,rgba(28,16,12,.96),rgba(9,5,4,.97));
+      border:1px solid var(--line);
+      border-radius:32px;
+      padding:30px;
       text-align:center;
+      box-shadow:0 30px 80px rgba(0,0,0,.55);
     }
 
-    h1{
-      color:#f5d58a;
+    .logo{
+      width:76px;
+      height:76px;
+      border-radius:50%;
+      margin:0 auto 16px;
+      display:block;
+    }
+
+    .kicker{
+      color:var(--gold2);
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      font-size:12px;
+      font-weight:900;
       margin-bottom:10px;
     }
 
-    .section{
-      margin-top:20px;
+    h1{
+      margin:0;
+      color:var(--gold2);
+      font-size:clamp(44px,8vw,72px);
+      line-height:.9;
+      letter-spacing:-.06em;
+      text-transform:uppercase;
+    }
+
+    .note{
+      margin:18px auto 0;
+      max-width:470px;
+      color:var(--muted);
+      font-size:16px;
+      line-height:1.45;
+      font-weight:800;
+    }
+
+    .details{
+      margin-top:24px;
+      display:grid;
+      gap:12px;
       text-align:left;
     }
 
+    .row{
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:14px 16px;
+      background:rgba(255,255,255,.04);
+    }
+
     .label{
-      font-size:12px;
-      color:#c7a983;
+      font-size:11px;
+      color:var(--gold2);
       text-transform:uppercase;
-      letter-spacing:.12em;
+      letter-spacing:.16em;
+      font-weight:900;
+      margin-bottom:5px;
     }
 
     .value{
-      font-size:18px;
-      font-weight:700;
-      margin-top:4px;
+      font-size:20px;
+      font-weight:900;
+      color:var(--text);
     }
 
     .gold{
-      color:#d7a84f;
+      color:var(--gold2);
     }
 
     .qr-wrap{
       margin:24px auto 0;
-      padding:16px;
+      padding:14px;
+      width:100%;
       max-width:280px;
-      border-radius:18px;
+      border-radius:22px;
       background:#fff7ea;
-      border:1px solid rgba(215,168,79,.45);
+      border:2px solid rgba(215,168,79,.75);
+      box-shadow:0 0 36px rgba(215,168,79,.25);
     }
 
     .qr-wrap img{
       display:block;
       width:100%;
       height:auto;
+      border-radius:10px;
     }
 
     .vip-code{
-      margin-top:10px;
-      font-size:14px;
-      font-weight:800;
-      color:#f5d58a;
+      margin-top:12px;
+      font-size:13px;
+      font-weight:900;
+      color:var(--gold2);
       word-break:break-all;
     }
 
-    .note{
+    .verify-note{
+      margin-top:14px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.4;
+      font-weight:800;
+    }
+
+    .cta-row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:center;
       margin-top:22px;
-      font-size:14px;
-      color:#c7a983;
     }
 
     .cta{
-      margin-top:20px;
-      display:inline-block;
-      padding:12px 18px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:48px;
+      padding:0 18px;
       border-radius:999px;
-      background:#d7a84f;
+      background:linear-gradient(135deg,var(--gold),var(--gold2));
       color:#080504;
-      font-weight:800;
+      font-weight:900;
       text-decoration:none;
+    }
+
+    .cta.secondary{
+      background:rgba(255,255,255,.05);
+      border:1px solid var(--line);
+      color:var(--gold2);
     }
   </style>
 </head>
+
 <body>
+  <main class="card">
+    <img class="logo" src="/chocolate-city/assets/cc-icon-192.png" alt="Chocolate City Lounge logo">
 
-<div class="card">
-  <h1>VIP Reserved</h1>
- <p class="note">
-  Please screenshot this confirmation and show it at the door.<br>
-Your VIP section is paid in full online.
-</p>
+    <div class="kicker">Paid VIP Confirmation</div>
+    <h1>VIP Reserved</h1>
 
-  <div class="section">
-  <div class="label">Section Owner</div>
-  <div class="value" id="customerName">—</div>
-</div>
-  
-  <div class="section">
-    <div class="label">Section</div>
-    <div class="value gold" id="sectionName">Loading...</div>
-  </div>
+    <p class="note">
+      Screenshot this confirmation. Show this page or QR code at the door.
+      Your VIP section is paid in full online.
+    </p>
 
-  <div class="section">
-    <div class="label">Paid Online</div>
-    <div class="value" id="deposit">—</div>
-  </div>
+    <section class="details">
+      <div class="row">
+        <div class="label">Section Owner</div>
+        <div class="value" id="customerName">—</div>
+      </div>
 
-  <div class="section">
-    <div class="label">Remaining Balance</div>
-    <div class="value" id="remaining">—</div>
-  </div>
+      <div class="row">
+        <div class="label">Section</div>
+        <div class="value gold" id="sectionName">Loading...</div>
+      </div>
 
-  <div class="qr-wrap" id="qrWrap" hidden>
-    <img id="vipQr" alt="VIP entry QR code" />
-  </div>
-  <div class="vip-code" id="vipCode"></div>
+      <div class="row">
+        <div class="label">Paid Online</div>
+        <div class="value" id="deposit">—</div>
+      </div>
 
-  <a class="cta" href="/chocolate-city/">Back to Lounge</a>
-</div>
+      <div class="row">
+        <div class="label">Remaining Balance</div>
+        <div class="value" id="remaining">$0</div>
+      </div>
+    </section>
 
-<script>
-  async function loadSession(){
-    const params = new URLSearchParams(window.location.search);
-    const sessionId = params.get("session_id");
-    if(!sessionId) return;
+    <div class="qr-wrap" id="qrWrap" hidden>
+      <img id="vipQr" alt="VIP entry QR code" />
+    </div>
 
-    const res = await fetch(`/api/chocolate-city/finalize-vip/?session_id=${sessionId}`);
-    const data = await res.json();
+    <div class="vip-code" id="vipCode"></div>
 
-    if(!data.ok) return;
+    <div class="verify-note">
+      Door staff may verify this reservation by name or QR code.
+    </div>
 
-    document.getElementById("customerName").textContent = data.customerName || "—";
-    document.getElementById("sectionName").textContent = data.packageName;
-    document.getElementById("deposit").textContent = `$${data.deposit}`;
-    document.getElementById("remaining").textContent = `$${data.remaining}`;
+    <div class="cta-row">
+      <a class="cta" href="/chocolate-city/">Back to Lounge</a>
+      <a class="cta secondary" href="/chocolate-city/send-drink/">Send a Drink</a>
+    </div>
+  </main>
 
-    const qrWrap = document.getElementById("qrWrap");
-    const vipQr = document.getElementById("vipQr");
-    const vipCode = document.getElementById("vipCode");
+  <script>
+    async function loadSession(){
+      const params = new URLSearchParams(window.location.search);
+      const sessionId = params.get("session_id");
 
-    vipQr.src = `/api/chocolate-city/vip-qr/?session_id=${encodeURIComponent(sessionId)}`;
-    qrWrap.hidden = false;
-    vipCode.textContent = data.vipCode || `VIP-${sessionId}`;
-  }
+      if(!sessionId){
+        document.getElementById("sectionName").textContent = "Missing confirmation";
+        return;
+      }
 
-  loadSession();
-</script>
+      try{
+        const res = await fetch(`/api/chocolate-city/finalize-vip/?session_id=${encodeURIComponent(sessionId)}`, {
+          cache:"no-store"
+        });
+
+        const data = await res.json();
+
+        if(!data.ok){
+          document.getElementById("sectionName").textContent = "Could not load confirmation";
+          return;
+        }
+
+        document.getElementById("customerName").textContent = data.customerName || "—";
+        document.getElementById("sectionName").textContent = data.packageName || "VIP Section";
+        document.getElementById("deposit").textContent = `$${data.deposit || data.fullPrice || "0"}`;
+        document.getElementById("remaining").textContent = `$${data.remaining || "0"}`;
+
+        const qrWrap = document.getElementById("qrWrap");
+        const vipQr = document.getElementById("vipQr");
+        const vipCode = document.getElementById("vipCode");
+
+        vipQr.src = `/api/chocolate-city/vip-qr/?session_id=${encodeURIComponent(sessionId)}`;
+        qrWrap.hidden = false;
+        vipCode.textContent = data.vipCode || `VIP-${sessionId}`;
+      }catch(err){
+        document.getElementById("sectionName").textContent = "Confirmation unavailable";
+      }
+    }
+
+    loadSession();
+  </script>
 </body>
 </html>
