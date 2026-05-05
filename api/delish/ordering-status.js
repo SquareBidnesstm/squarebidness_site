@@ -54,6 +54,15 @@ export default async function handler(req, res) {
     }
 
     if (redisMode === "closed") {
+      if (isBeforeServiceOpen(fallbackState)) {
+        return res.status(200).json({
+          ok: true,
+          orderingMode: "auto",
+          message: buildAutoMessage(fallbackState),
+          ...fallbackState
+        });
+      }
+
       return res.status(200).json({
         ok: true,
         orderingMode: "closed",
@@ -153,6 +162,16 @@ function buildAutoMessage(state) {
   }
 
   return "";
+}
+
+function isBeforeServiceOpen(state) {
+  if (!state || state.reason !== "outside_service_window") return false;
+
+  const now = state.now || {};
+  const currentMinutes = (Number(now.hour || 0) * 60) + Number(now.minute || 0);
+  const openMinutes = parseTimeToMinutes(state.openTime);
+
+  return Number.isFinite(openMinutes) && currentMinutes < openMinutes;
 }
 
 function parseTimeToMinutes(value) {

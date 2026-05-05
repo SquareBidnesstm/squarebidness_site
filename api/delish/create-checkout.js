@@ -350,6 +350,10 @@ async function getEffectiveOrderingState() {
   }
 
   if (redisMode === "closed") {
+    if (isBeforeServiceOpen(fallbackState)) {
+      return fallbackState;
+    }
+
     return {
       ...fallbackState,
       mode: "closed",
@@ -382,6 +386,39 @@ async function getEffectiveOrderingState() {
   }
 
   return fallbackState;
+}
+
+function isBeforeServiceOpen(state) {
+  if (!state || state.reason !== "outside_service_window") return false;
+
+  const now = state.now || {};
+  const currentMinutes = (Number(now.hour || 0) * 60) + Number(now.minute || 0);
+  const openMinutes = parsePickupTimeToMinutes(state.openTime);
+
+  return Number.isFinite(openMinutes) && currentMinutes < openMinutes;
+}
+
+function parsePickupTimeToMinutes(value) {
+  const raw = String(value || "").trim().toUpperCase();
+
+  let match = raw.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/);
+  if (match) {
+    let hour = Number(match[1]);
+    const minute = Number(match[2]);
+    const meridiem = match[3];
+
+    if (meridiem === "PM" && hour !== 12) hour += 12;
+    if (meridiem === "AM" && hour === 12) hour = 0;
+
+    return (hour * 60) + minute;
+  }
+
+  match = raw.match(/^(\d{1,2}):(\d{2})$/);
+  if (match) {
+    return (Number(match[1]) * 60) + Number(match[2]);
+  }
+
+  return NaN;
 }
 
 // ------------------------------------------------------------
