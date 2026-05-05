@@ -204,6 +204,12 @@ async function handleFoodOrderCompleted(session) {
   const pendingKey = `puffs:checkout:${session.id}`;
   const pending = await redisGet(pendingKey);
 
+  if (!pending) {
+    console.error("PUFFS WEBHOOK: No pending checkout found for session", session.id);
+    await sendInternalAlert(`⚠️ PUFFS: Ghost order warning — no pending checkout for session ${session.id}. Check Stripe dashboard.`);
+    return;
+  }
+
   console.log("PUFFS FOOD ORDER COMPLETED:", {
     sessionId: session.id,
     paymentStatus: session.payment_status,
@@ -212,7 +218,7 @@ async function handleFoodOrderCompleted(session) {
   });
 
   const paidOrder = {
-    ...(pending || {}),
+    ...pending,
     stripeSessionId: session.id,
     stripePaymentIntent: session.payment_intent || "",
     stripeCustomerDetails: session.customer_details || null,
@@ -301,6 +307,8 @@ export default async function handler(req, res) {
 
   console.log("PUFFS WEBHOOK EVENT TYPE:", event.type);
 
+  res.status(200).json({ received: true });
+
   try {
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
@@ -312,10 +320,8 @@ export default async function handler(req, res) {
         await handleFoodOrderCompleted(session);
       }
     }
-
-    return res.status(200).json({ received: true });
   } catch (err) {
     console.error("PUFFS WEBHOOK PROCESSING ERROR:", err);
-    return res.status(500).send(err.message || "Webhook processing failed");
+    await sendInternalAlert(`⚠️ PUFFS WEBHOOK ERROR: ${err.message}`).catch(() => {});
   }
 }

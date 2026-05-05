@@ -54,6 +54,32 @@ async function redisLTrim(key, start, stop) {
   return redisPost(`/ltrim/${encodeURIComponent(key)}/${start}/${stop}`);
 }
 
+async function sendCateringAlert(record) {
+  const sid = process.env.TWILIO_ACCOUNT_SID;
+  const token = process.env.TWILIO_AUTH_TOKEN;
+  const msgSid = process.env.PUFFS_TWILIO_MESSAGING_SERVICE_SID;
+  const alertNumber = process.env.PUFFS_ALERT_NUMBER;
+
+  if (!sid || !token || !msgSid || !alertNumber) return;
+
+  const { default: twilio } = await import("twilio");
+  const client = twilio(sid, token);
+
+  const body = [
+    "📋 NEW PUFF'S CATERING REQUEST",
+    record.requestNumber,
+    `Name: ${record.customerName}`,
+    `Event: ${record.eventDate} — ${record.eventType || "N/A"}`,
+    `Guests: ${record.guestCount}`,
+    `Phone: ${record.phone || "N/A"}`,
+    `Email: ${record.email || "N/A"}`
+  ].filter(Boolean).join("\n");
+
+  await client.messages.create({ body, messagingServiceSid: msgSid, to: alertNumber }).catch(err => {
+    console.error("PUFFS CATERING ALERT SMS ERROR:", err.message);
+  });
+}
+
 export default async function handler(req, res) {
   cors(res);
   res.setHeader("Content-Type", "application/json");
@@ -161,6 +187,8 @@ export default async function handler(req, res) {
     await redisSet(`puffs:catering:request:${id}`, requestRecord);
     await redisLPush("puffs:catering:requests", id);
     await redisLTrim("puffs:catering:requests", 0, 199);
+
+    sendCateringAlert(requestRecord).catch(() => {});
 
     return res.status(200).json({
       ok: true,

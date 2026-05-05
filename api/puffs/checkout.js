@@ -1,5 +1,5 @@
 // /api/puffs/checkout.js
-import fs from "fs";
+import fs from "fs/promises";
 import path from "path";
 import Stripe from "stripe";
 
@@ -28,9 +28,9 @@ function makeOrderNumber() {
   return `PUFF-${y}${m}${d}-${rand}`;
 }
 
-function readMenuFile() {
+async function readMenuFile() {
   const menuPath = path.join(process.cwd(), "public", "puffs", "menu.json");
-  const raw = fs.readFileSync(menuPath, "utf8");
+  const raw = await fs.readFile(menuPath, "utf8");
   return JSON.parse(raw);
 }
 
@@ -133,7 +133,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ ok: false, error: "At least one item is required." });
     }
 
-    const menu = readMenuFile();
+    const menu = await readMenuFile();
 
     if (menu.open === false) {
       return res.status(400).json({ ok: false, error: "Orders are currently closed." });
@@ -216,8 +216,8 @@ export default async function handler(req, res) {
       mode: "payment",
       payment_method_types: ["card"],
       line_items,
-      success_url: "https://www.squarebidness.com/puffs/thank-you/",
-      cancel_url: "https://www.squarebidness.com/puffs/?canceled=1",
+      success_url: process.env.PUFFS_SUCCESS_URL || "https://www.squarebidness.com/puffs/thank-you/",
+      cancel_url: process.env.PUFFS_CANCEL_URL || "https://www.squarebidness.com/puffs/?canceled=1",
       billing_address_collection: "auto",
       phone_number_collection: {
         enabled: true

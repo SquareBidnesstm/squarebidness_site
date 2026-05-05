@@ -48,6 +48,16 @@ export default async function handler(req, res) {
     });
   }
 
+  const expectedToken = process.env.PUFFS_OPERATOR_TOKEN || "";
+  if (!expectedToken) {
+    return res.status(500).json({ ok: false, error: "Operator token not configured." });
+  }
+
+  const providedToken = String(req.headers["x-puffs-operator-token"] || "").trim();
+  if (providedToken !== expectedToken) {
+    return res.status(401).json({ ok: false, error: "Unauthorized." });
+  }
+
   try {
     const body =
       typeof req.body === "string"
