@@ -776,13 +776,13 @@ reloadPickupWindowsBtn?.addEventListener("click", () => {
     }, 30000);
     loadOverrides().catch((err) => {
       console.error(err);
-      loadPickupWindows().catch((err) => {
-  console.error(err);
-  setPickupWindowStatus(err.message || "Unable to load pickup windows.", "bad");
-});
       setStatus(err.message || "Unable to load admin.", "bad");
       renderItemList([]);
       renderSoldOutList([]);
+    });
+    loadPickupWindows().catch((err) => {
+      console.error(err);
+      setPickupWindowStatus(err.message || "Unable to load pickup windows.", "bad");
     });
   </script>
 </body>

@@ -2,6 +2,10 @@
 import Stripe from "stripe";
 import { getDelishOrderingState } from "../_lib/delish-ordering-config.js";
 import { getDelishMenuOverrides } from "../_lib/delish-menu-overrides.js";
+import {
+  getDisabledPickupWindows,
+  isAllowedPickupWindow,
+} from "../_lib/delish-pickup-windows.js";
 
 const stripe = new Stripe(process.env.DELISH_STRIPE_SECRET_KEY, {
   apiVersion: "2025-02-24.acacia",
@@ -290,6 +294,96 @@ function safeMeta(value, max = 500) {
   return String(value || "").slice(0, max);
 }
 
+function normalizeOrderingMode(value) {
+  const mode = String(value || "").toLowerCase().trim();
+  if (["auto", "open", "paused", "closed"].includes(mode)) return mode;
+  return "";
+}
+
+async function redisGet(redisUrl, redisToken, key) {
+  const url = `${redisUrl.replace(/\/$/, "")}/get/${encodeURIComponent(key)}`;
+
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${redisToken}`,
+    },
+  });
+
+  if (!response.ok) return null;
+
+  const data = await response.json().catch(() => null);
+  return data?.result ?? null;
+}
+
+async function getEffectiveOrderingState() {
+  const fallbackState = getDelishOrderingState();
+  const redisUrl = process.env.DELISH_UPSTASH_REDIS_REST_URL;
+  const redisToken = process.env.DELISH_UPSTASH_REDIS_REST_TOKEN;
+
+  if (!redisUrl || !redisToken) {
+    return fallbackState;
+  }
+
+  const [modeRes, resumeRes, messageRes] = await Promise.all([
+    redisGet(redisUrl, redisToken, "delish:ordering:mode"),
+    redisGet(redisUrl, redisToken, "delish:ordering:resume_at"),
+    redisGet(redisUrl, redisToken, "delish:ordering:message"),
+  ]);
+
+  const redisMode = normalizeOrderingMode(modeRes);
+  const resumeAt = typeof resumeRes === "string" ? resumeRes : "";
+  const message = typeof messageRes === "string" ? messageRes : "";
+
+  if (!redisMode || redisMode === "auto") {
+    return fallbackState;
+  }
+
+  if (redisMode === "open") {
+    return {
+      ...fallbackState,
+      mode: "open",
+      orderingMode: "open",
+      openNow: true,
+      reason: "manual_open",
+      message: "",
+    };
+  }
+
+  if (redisMode === "closed") {
+    return {
+      ...fallbackState,
+      mode: "closed",
+      orderingMode: "closed",
+      openNow: false,
+      reason: "manual_closed",
+      message: message || "Online ordering is closed for today.",
+    };
+  }
+
+  if (redisMode === "paused") {
+    const resumeDate = resumeAt ? new Date(resumeAt) : null;
+    const resumeValid = resumeDate && !Number.isNaN(resumeDate.getTime());
+
+    if (resumeValid && Date.now() >= resumeDate.getTime()) {
+      return fallbackState;
+    }
+
+    return {
+      ...fallbackState,
+      mode: "paused",
+      orderingMode: "paused",
+      openNow: false,
+      reason: "manual_closed",
+      resumeAt,
+      message:
+        message ||
+        "We’re serving current orders now. Online ordering will reopen shortly.",
+    };
+  }
+
+  return fallbackState;
+}
+
 // ------------------------------------------------------------
 // FIX 6 — makeRecordId: use Central Time, not server local time
 // Replace the entire makeRecordId function
@@ -341,13 +435,13 @@ export default async function handler(req, res) {
       });
     }
 
-    const orderingState = getDelishOrderingState();
+    const orderingState = await getEffectiveOrderingState();
     const todayIso = orderingState.now.isoDate;
     const todayDay = orderingState.today;
     const menuOverrides = await getDelishMenuOverrides();
 
     if (!orderingState.openNow) {
-      let message = "Online ordering is closed right now.";
+      let message = orderingState.message || "Online ordering is closed right now.";
 
       if (orderingState.reason === "manual_closed") {
         message = "Online ordering is currently paused.";
@@ -371,6 +465,25 @@ export default async function handler(req, res) {
         ok: false,
         error: "PICKUP_DATE_NOT_ALLOWED",
         message: `Pickup date must be ${todayIso} for the active ${todayDay} menu.`,
+      });
+    }
+
+    const requestedPickupWindow = String(body.pickupWindow || "").trim();
+    const disabledPickupWindows = await getDisabledPickupWindows();
+
+    if (!isAllowedPickupWindow(requestedPickupWindow)) {
+      return res.status(400).json({
+        ok: false,
+        error: "PICKUP_WINDOW_NOT_ALLOWED",
+        message: "Please choose a valid pickup window.",
+      });
+    }
+
+    if (disabledPickupWindows.includes(requestedPickupWindow)) {
+      return res.status(403).json({
+        ok: false,
+        error: "PICKUP_WINDOW_DISABLED",
+        message: "That pickup window is no longer available. Please choose another time.",
       });
     }
 

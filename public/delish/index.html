@@ -349,6 +349,10 @@
   let currentDay = null;
   let currentMode = "closed";
   let orderingStatus = null;
+  let pickupWindowsState = {
+    windows: [],
+    disabledWindows: []
+  };
 
   async function loadMenuData() {
     const res = await fetch("/delish/menu.json", { cache: "no-store" });
@@ -376,6 +380,40 @@
 
     orderingStatus = data;
     return data;
+  }
+
+  async function loadPickupWindows() {
+    const res = await fetch(`/api/delish/pickup-windows/?t=${Date.now()}`, { cache: "no-store" });
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || !data.ok) {
+      throw new Error(data.error || "Failed to load pickup windows.");
+    }
+
+    pickupWindowsState = {
+      windows: Array.isArray(data.windows) ? data.windows : [],
+      disabledWindows: Array.isArray(data.disabledWindows) ? data.disabledWindows : []
+    };
+
+    renderPickupWindows();
+    return pickupWindowsState;
+  }
+
+  function renderPickupWindows() {
+    if (!pickupWindow) return;
+
+    const currentValue = pickupWindow.value;
+    const disabledSet = new Set(pickupWindowsState.disabledWindows || []);
+    const availableWindows = (pickupWindowsState.windows || []).filter(windowLabel => !disabledSet.has(windowLabel));
+
+    pickupWindow.innerHTML = [
+      `<option value="">Select Pickup Time</option>`,
+      ...availableWindows.map(windowLabel => `<option value="${windowLabel}">${windowLabel}</option>`)
+    ].join("");
+
+    if (availableWindows.includes(currentValue)) {
+      pickupWindow.value = currentValue;
+    }
   }
 
   function showStatus(message) {
@@ -1150,6 +1188,7 @@ if (!plateSelections.items.length && !lagniappeItemsSelected.length && !drinkIte
       await loadMenuData();
       await loadMenuOverrides();
       await loadOrderingStatus();
+      await loadPickupWindows();
       applyDailyMenu();
     } catch (error) {
       console.error("DELISH INIT ERROR:", error);
