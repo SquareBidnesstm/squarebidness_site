@@ -1,4 +1,5 @@
 import Stripe from "stripe";
+import { buildVipCode } from "../_lib/chocolate-city-vip.js";
 
 export default async function handler(req, res) {
   try {
@@ -19,7 +20,8 @@ export default async function handler(req, res) {
   deposit: session.metadata?.deposit || "",
   remaining: session.metadata?.remainingBalance || "",
   customerPhone: session.customer_details?.phone || "",
-  paymentStatus: session.payment_status || ""
+  paymentStatus: session.payment_status || "",
+  vipCode: buildVipCode(sessionId)
 });
   } catch (err) {
     return res.status(500).json({ ok: false, error: err.message });

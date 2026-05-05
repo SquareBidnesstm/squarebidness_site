@@ -44,7 +44,8 @@ export default async function handler(req, res) {
 
     const header = csvRow([
       "Session ID", "Paid At", "Customer Name", "Phone", "Email",
-      "Package", "Full Price", "Deposit Paid", "Remaining Balance", "Payment Status"
+      "Package", "Full Price", "Deposit Paid", "Remaining Balance", "Payment Status",
+      "VIP Code", "Used", "Used At"
     ]);
 
     const rows = bookings.map(b => csvRow([
@@ -57,7 +58,10 @@ export default async function handler(req, res) {
       Number(b.fullPrice || 0).toFixed(2),
       Number(b.deposit || 0).toFixed(2),
       Number(b.remainingBalance || 0).toFixed(2),
-      b.paymentStatus || ""
+      b.paymentStatus || "",
+      b.sessionId ? `VIP-${b.sessionId}` : "",
+      b.used ? "yes" : "no",
+      b.usedAt || ""
     ]));
 
     const csv = [header, ...rows].join("\r\n");

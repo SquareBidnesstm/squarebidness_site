@@ -99,7 +99,9 @@ export default async function handler(req, res) {
         fullPrice: Number(session.metadata?.fullPrice || 0),
         deposit: Number(session.metadata?.deposit || 0),
         remainingBalance: Number(session.metadata?.remainingBalance || 0),
-        paymentStatus: session.payment_status || "paid"
+        paymentStatus: session.payment_status || "paid",
+        used: false,
+        usedAt: ""
       };
 
       bookings.push(booking);

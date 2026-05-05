@@ -60,6 +60,29 @@
       color:#d7a84f;
     }
 
+    .qr-wrap{
+      margin:24px auto 0;
+      padding:16px;
+      max-width:280px;
+      border-radius:18px;
+      background:#fff7ea;
+      border:1px solid rgba(215,168,79,.45);
+    }
+
+    .qr-wrap img{
+      display:block;
+      width:100%;
+      height:auto;
+    }
+
+    .vip-code{
+      margin-top:10px;
+      font-size:14px;
+      font-weight:800;
+      color:#f5d58a;
+      word-break:break-all;
+    }
+
     .note{
       margin-top:22px;
       font-size:14px;
@@ -107,6 +130,11 @@ Your VIP section is paid in full online.
     <div class="value" id="remaining">—</div>
   </div>
 
+  <div class="qr-wrap" id="qrWrap" hidden>
+    <img id="vipQr" alt="VIP entry QR code" />
+  </div>
+  <div class="vip-code" id="vipCode"></div>
+
   <a class="cta" href="/chocolate-city/">Back to Lounge</a>
 </div>
 
@@ -125,6 +153,14 @@ Your VIP section is paid in full online.
     document.getElementById("sectionName").textContent = data.packageName;
     document.getElementById("deposit").textContent = `$${data.deposit}`;
     document.getElementById("remaining").textContent = `$${data.remaining}`;
+
+    const qrWrap = document.getElementById("qrWrap");
+    const vipQr = document.getElementById("vipQr");
+    const vipCode = document.getElementById("vipCode");
+
+    vipQr.src = `/api/chocolate-city/vip-qr/?session_id=${encodeURIComponent(sessionId)}`;
+    qrWrap.hidden = false;
+    vipCode.textContent = data.vipCode || `VIP-${sessionId}`;
   }
 
   loadSession();
