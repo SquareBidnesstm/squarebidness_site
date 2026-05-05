@@ -657,12 +657,16 @@ export default async function handler(req, res) {
     };
 
     const connectClient = getStripeConnectClient("delish");
+    const paymentIntentData = {
+      metadata: sharedMetadata,
+    };
 
-    if (!connectClient || !connectClient.ready) {
-      return res.status(400).json({
-        ok: false,
-        error: "DELISH_STRIPE_NOT_READY",
-      });
+    if (connectClient?.ready) {
+      paymentIntentData.application_fee_amount = connectClient.feeCents;
+      paymentIntentData.transfer_data = {
+        destination: connectClient.connectedAccountId,
+      };
+      paymentIntentData.on_behalf_of = connectClient.connectedAccountId;
     }
 
     const session = await stripe.checkout.sessions.create({
@@ -672,17 +676,7 @@ export default async function handler(req, res) {
       success_url: "https://www.squarebidness.com/delish/order/success/?session_id={CHECKOUT_SESSION_ID}",
       cancel_url: "https://www.squarebidness.com/delish/order/",
       metadata: sharedMetadata,
-      payment_intent_data: {
-        metadata: sharedMetadata,
-
-        application_fee_amount: connectClient.feeCents,
-
-        transfer_data: {
-          destination: connectClient.connectedAccountId,
-        },
-
-        on_behalf_of: connectClient.connectedAccountId,
-      },
+      payment_intent_data: paymentIntentData,
       customer_email: body.customerEmail || undefined,
     });
 
