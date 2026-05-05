@@ -2,6 +2,7 @@
 import Stripe from "stripe";
 import { getDelishOrderingState } from "../_lib/delish-ordering-config.js";
 import { getDelishMenuOverrides } from "../_lib/delish-menu-overrides.js";
+import { getStripeConnectClient } from "../stripe-connect/client-config.js";
 import {
   getDisabledPickupWindows,
   isAllowedPickupWindow,
@@ -655,6 +656,15 @@ export default async function handler(req, res) {
       activeMenuDay: safeMeta(todayDay, 20),
     };
 
+    const connectClient = getStripeConnectClient("delish");
+
+    if (!connectClient || !connectClient.ready) {
+      return res.status(400).json({
+        ok: false,
+        error: "DELISH_STRIPE_NOT_READY",
+      });
+    }
+
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       payment_method_types: ["card"],
@@ -664,6 +674,14 @@ export default async function handler(req, res) {
       metadata: sharedMetadata,
       payment_intent_data: {
         metadata: sharedMetadata,
+
+        application_fee_amount: connectClient.feeCents,
+
+        transfer_data: {
+          destination: connectClient.connectedAccountId,
+        },
+
+        on_behalf_of: connectClient.connectedAccountId,
       },
       customer_email: body.customerEmail || undefined,
     });
