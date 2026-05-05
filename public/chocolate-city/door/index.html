@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Chocolate City — Door VIP Check</title>
+  <meta name="robots" content="noindex,nofollow" />
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/chocolate-city/assets/cc-icon-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/chocolate-city/assets/cc-icon-180.png">
+
+  <style>
+    :root{
+      --bg:#080504;
+      --panel:#130c0a;
+      --panel2:#1b100b;
+      --gold:#d7a84f;
+      --gold2:#f5d58a;
+      --text:#fff7ea;
+      --muted:#c7a983;
+      --line:rgba(245,213,138,.22);
+      --good:#1d6b39;
+      --bad:#a12626;
+      --warn:#815d14;
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      min-height:100vh;
+      padding:20px;
+      font-family:Arial,Helvetica,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 20% 8%,rgba(215,168,79,.18),transparent 32%),
+        linear-gradient(180deg,#080504,#160b07);
+    }
+
+    .wrap{
+      max-width:980px;
+      margin:0 auto;
+    }
+
+    .top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+      flex-wrap:wrap;
+      margin-bottom:18px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+
+    .logo{
+      width:72px;
+      height:72px;
+      border-radius:50%;
+      object-fit:cover;
+    }
+
+    h1{
+      margin:0;
+      color:var(--gold2);
+      font-size:clamp(2.2rem,7vw,4.6rem);
+      line-height:.92;
+      letter-spacing:-.06em;
+      text-transform:uppercase;
+    }
+
+    .sub{
+      margin-top:8px;
+      color:var(--muted);
+      font-size:1rem;
+      font-weight:900;
+    }
+
+    .time{
+      color:var(--gold2);
+      font-size:1.6rem;
+      font-weight:900;
+    }
+
+    .panel{
+      border:1px solid var(--line);
+      border-radius:28px;
+      background:linear-gradient(180deg,var(--panel2),var(--panel));
+      padding:20px;
+      margin-bottom:16px;
+    }
+
+    .token-row,
+    .lookup-row{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:10px;
+    }
+
+    .lookup-row{
+      grid-template-columns:1fr 1fr auto;
+    }
+
+    input{
+      width:100%;
+      min-height:54px;
+      padding:14px 16px;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background:#050302;
+      color:var(--text);
+      font-size:16px;
+      font-weight:800;
+    }
+
+    button{
+      min-height:54px;
+      border:0;
+      border-radius:999px;
+      padding:0 20px;
+      background:linear-gradient(135deg,var(--gold),var(--gold2));
+      color:#100603;
+      font-weight:900;
+      cursor:pointer;
+      font-size:1rem;
+      white-space:nowrap;
+    }
+
+    button.secondary{
+      background:#27160e;
+      color:var(--gold2);
+      border:1px solid var(--line);
+    }
+
+    button.danger{
+      background:linear-gradient(135deg,#b73939,#ffd0d0);
+    }
+
+    button[disabled]{
+      opacity:.55;
+      cursor:not-allowed;
+    }
+
+    .scanner-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:12px;
+    }
+
+    .video-wrap{
+      margin-top:14px;
+      overflow:hidden;
+      border-radius:22px;
+      border:1px solid var(--line);
+      background:#050302;
+      display:none;
+    }
+
+    .video-wrap.is-visible{display:block}
+
+    video{
+      display:block;
+      width:100%;
+      max-height:420px;
+      object-fit:cover;
+      background:#050302;
+    }
+
+    .status{
+      min-height:58px;
+      display:flex;
+      align-items:center;
+      padding:14px 16px;
+      border-radius:18px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.04);
+      color:var(--muted);
+      font-weight:900;
+      line-height:1.35;
+    }
+
+    .status.good{
+      border-color:rgba(29,107,57,.48);
+      background:rgba(29,107,57,.18);
+      color:#d7f3df;
+    }
+
+    .status.bad{
+      border-color:rgba(161,38,38,.48);
+      background:rgba(161,38,38,.18);
+      color:#ffd1d1;
+    }
+
+    .status.warn{
+      border-color:rgba(215,168,79,.42);
+      background:rgba(129,93,20,.20);
+      color:#ffe7b0;
+    }
+
+    .result{
+      display:none;
+    }
+
+    .result.is-visible{
+      display:block;
+    }
+
+    .result-card{
+      border:1px solid var(--line);
+      border-radius:28px;
+      background:rgba(255,255,255,.04);
+      padding:22px;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      min-height:34px;
+      padding:0 12px;
+      border-radius:999px;
+      background:rgba(215,168,79,.12);
+      color:var(--gold2);
+      border:1px solid rgba(215,168,79,.26);
+      font-size:.78rem;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      font-weight:900;
+    }
+
+    .badge.used{
+      background:rgba(161,38,38,.20);
+      color:#ffd1d1;
+      border-color:rgba(161,38,38,.45);
+    }
+
+    .guest{
+      margin-top:14px;
+      font-size:clamp(2.3rem,8vw,4.6rem);
+      line-height:.92;
+      letter-spacing:-.06em;
+      font-weight:900;
+      color:var(--gold2);
+    }
+
+    .package{
+      margin-top:10px;
+      font-size:1.45rem;
+      font-weight:900;
+    }
+
+    .meta{
+      margin-top:16px;
+      display:grid;
+      gap:8px;
+      color:var(--muted);
+      font-weight:800;
+    }
+
+    .meta strong{
+      color:var(--text);
+    }
+
+    .result-actions{
+      margin-top:20px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .result-actions button{
+      flex:1;
+      min-width:180px;
+    }
+
+    @media(max-width:760px){
+      body{padding:14px}
+      .token-row,.lookup-row{grid-template-columns:1fr}
+      .top{align-items:flex-start}
+      .time{width:100%}
+    }
+  </style>
+</head>
+
+<body>
+  <main class="wrap">
+    <header class="top">
+      <div class="brand">
+        <img class="logo" src="/chocolate-city/assets/cc-icon-192.png" alt="Chocolate City logo">
+        <div>
+          <h1>Door VIP</h1>
+          <div class="sub">Scan QR or verify by name</div>
+        </div>
+      </div>
+      <div class="time" id="timeNow">--:--</div>
+    </header>
+
+    <section class="panel">
+      <div class="token-row">
+        <input id="token" type="password" placeholder="Admin token">
+        <button type="button" id="saveTokenBtn">Save Token</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="lookup-row">
+        <input id="vipCodeInput" autocomplete="off" placeholder="VIP code or scanned QR">
+        <input id="nameInput" autocomplete="off" placeholder="Guest name">
+        <button type="button" id="verifyBtn">Verify</button>
+      </div>
+
+      <div class="scanner-actions">
+        <button type="button" class="secondary" id="startScanBtn">Start Camera Scan</button>
+        <button type="button" class="secondary" id="stopScanBtn" disabled>Stop Camera</button>
+      </div>
+
+      <div class="video-wrap" id="videoWrap">
+        <video id="scannerVideo" muted playsinline></video>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="status" id="statusBox">Enter the admin token, then scan a VIP QR or search by guest name.</div>
+    </section>
+
+    <section class="result" id="resultWrap">
+      <div class="result-card">
+        <div class="badge" id="resultBadge">VIP Valid</div>
+        <div class="guest" id="guestName">Guest</div>
+        <div class="package" id="packageName">VIP Section</div>
+        <div class="meta">
+          <div>VIP Code: <strong id="vipCode">—</strong></div>
+          <div>Payment: <strong id="paymentStatus">—</strong></div>
+          <div>Used: <strong id="usedStatus">—</strong></div>
+        </div>
+        <div class="result-actions">
+          <button type="button" id="markUsedBtn">Mark Entry Used</button>
+          <button type="button" class="secondary" id="clearBtn">Clear</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const TOKEN_KEY = "cc_admin_token";
+    const tokenInput = document.getElementById("token");
+    const vipCodeInput = document.getElementById("vipCodeInput");
+    const nameInput = document.getElementById("nameInput");
+    const statusBox = document.getElementById("statusBox");
+    const resultWrap = document.getElementById("resultWrap");
+    const resultBadge = document.getElementById("resultBadge");
+    const guestName = document.getElementById("guestName");
+    const packageName = document.getElementById("packageName");
+    const vipCode = document.getElementById("vipCode");
+    const paymentStatus = document.getElementById("paymentStatus");
+    const usedStatus = document.getElementById("usedStatus");
+    const markUsedBtn = document.getElementById("markUsedBtn");
+    const videoWrap = document.getElementById("videoWrap");
+    const scannerVideo = document.getElementById("scannerVideo");
+    const startScanBtn = document.getElementById("startScanBtn");
+    const stopScanBtn = document.getElementById("stopScanBtn");
+
+    let currentBooking = null;
+    let scannerStream = null;
+    let scannerTimer = null;
+    let barcodeDetector = null;
+
+    function setStatus(message, tone = ""){
+      statusBox.className = "status" + (tone ? ` ${tone}` : "");
+      statusBox.textContent = message;
+    }
+
+    function saveToken(){
+      const token = tokenInput.value.trim();
+      if(token) localStorage.setItem(TOKEN_KEY, token);
+      setStatus(token ? "Token saved. Ready to verify VIP guests." : "Enter admin token first.", token ? "good" : "bad");
+    }
+
+    function getToken(){
+      return localStorage.getItem(TOKEN_KEY) || tokenInput.value.trim();
+    }
+
+    function updateTime(){
+      document.getElementById("timeNow").textContent = new Intl.DateTimeFormat("en-US", {
+        timeZone:"America/Chicago",
+        hour:"numeric",
+        minute:"2-digit"
+      }).format(new Date());
+    }
+
+    function renderResult(booking, used){
+      currentBooking = booking || null;
+
+      if(!booking){
+        resultWrap.classList.remove("is-visible");
+        return;
+      }
+
+      const alreadyUsed = !!used;
+
+      resultBadge.textContent = alreadyUsed ? "Already Used" : "VIP Valid";
+      resultBadge.className = "badge" + (alreadyUsed ? " used" : "");
+      guestName.textContent = booking.customerName || "Guest";
+      packageName.textContent = booking.packageName || "VIP Section";
+      vipCode.textContent = booking.vipCode || "";
+      paymentStatus.textContent = booking.paymentStatus || "paid";
+      usedStatus.textContent = alreadyUsed ? (booking.usedAt || "yes") : "no";
+      markUsedBtn.disabled = alreadyUsed;
+      markUsedBtn.textContent = alreadyUsed ? "Entry Already Used" : "Mark Entry Used";
+      resultWrap.classList.add("is-visible");
+    }
+
+    async function verifyVip({ markUsed = false } = {}){
+      const token = getToken();
+      const code = vipCodeInput.value.trim();
+      const name = nameInput.value.trim();
+
+      if(!token){
+        setStatus("Enter admin token first.", "bad");
+        return;
+      }
+
+      if(!code && !name){
+        setStatus("Scan a VIP QR or enter a guest name.", "bad");
+        return;
+      }
+
+      setStatus(markUsed ? "Marking entry used..." : "Checking VIP reservation...");
+
+      const res = await fetch("/api/chocolate-city/verify-vip/", {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          "X-Admin-Token": token
+        },
+        body:JSON.stringify({
+          vipCode: code,
+          name,
+          markUsed
+        })
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if(!res.ok || !data.valid){
+        renderResult(null, false);
+        throw new Error(data.error || "VIP reservation not found.");
+      }
+
+      renderResult(data.booking, data.used);
+
+      if(data.used && !data.markedUsed){
+        setStatus("Valid reservation, but it has already been used.", "warn");
+      }else if(data.markedUsed){
+        setStatus("Entry marked used. Guest is cleared for VIP.", "good");
+      }else{
+        setStatus("Valid VIP reservation. Confirm entry when guest goes in.", "good");
+      }
+    }
+
+    async function startScanner(){
+      if(!("BarcodeDetector" in window)){
+        setStatus("Camera QR scanning is not supported on this browser. Enter the VIP code or guest name.", "warn");
+        return;
+      }
+
+      try{
+        barcodeDetector = new BarcodeDetector({ formats:["qr_code"] });
+        scannerStream = await navigator.mediaDevices.getUserMedia({
+          video:{ facingMode:"environment" },
+          audio:false
+        });
+
+        scannerVideo.srcObject = scannerStream;
+        await scannerVideo.play();
+        videoWrap.classList.add("is-visible");
+        startScanBtn.disabled = true;
+        stopScanBtn.disabled = false;
+        setStatus("Camera active. Point it at the VIP QR code.");
+
+        scannerTimer = window.setInterval(scanFrame, 650);
+      }catch(err){
+        stopScanner();
+        setStatus(err.message || "Unable to start camera scan.", "bad");
+      }
+    }
+
+    async function scanFrame(){
+      if(!barcodeDetector || !scannerVideo.videoWidth) return;
+
+      try{
+        const codes = await barcodeDetector.detect(scannerVideo);
+        const rawValue = codes?.[0]?.rawValue || "";
+
+        if(rawValue){
+          vipCodeInput.value = rawValue.trim();
+          nameInput.value = "";
+          stopScanner();
+          await verifyVip();
+        }
+      }catch(err){
+        stopScanner();
+        setStatus(err.message || "Unable to scan QR code.", "bad");
+      }
+    }
+
+    function stopScanner(){
+      if(scannerTimer){
+        window.clearInterval(scannerTimer);
+        scannerTimer = null;
+      }
+
+      if(scannerStream){
+        scannerStream.getTracks().forEach(track => track.stop());
+        scannerStream = null;
+      }
+
+      scannerVideo.srcObject = null;
+      videoWrap.classList.remove("is-visible");
+      startScanBtn.disabled = false;
+      stopScanBtn.disabled = true;
+    }
+
+    document.getElementById("saveTokenBtn").addEventListener("click", saveToken);
+    document.getElementById("verifyBtn").addEventListener("click", () => {
+      verifyVip().catch(err => setStatus(err.message || "Unable to verify VIP.", "bad"));
+    });
+    markUsedBtn.addEventListener("click", () => {
+      verifyVip({ markUsed:true }).catch(err => setStatus(err.message || "Unable to mark entry used.", "bad"));
+    });
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      vipCodeInput.value = "";
+      nameInput.value = "";
+      renderResult(null, false);
+      setStatus("Ready for the next VIP guest.");
+    });
+    startScanBtn.addEventListener("click", startScanner);
+    stopScanBtn.addEventListener("click", () => {
+      stopScanner();
+      setStatus("Camera stopped.");
+    });
+    vipCodeInput.addEventListener("keydown", (event) => {
+      if(event.key === "Enter"){
+        verifyVip().catch(err => setStatus(err.message || "Unable to verify VIP.", "bad"));
+      }
+    });
+    nameInput.addEventListener("keydown", (event) => {
+      if(event.key === "Enter"){
+        verifyVip().catch(err => setStatus(err.message || "Unable to verify VIP.", "bad"));
+      }
+    });
+    window.addEventListener("pagehide", stopScanner);
+
+    tokenInput.value = localStorage.getItem(TOKEN_KEY) || "";
+    updateTime();
+    setInterval(updateTime, 10000);
+  </script>
+</body>
+</html>
