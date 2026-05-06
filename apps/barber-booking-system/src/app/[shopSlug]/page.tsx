@@ -1,6 +1,61 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { supabaseServer } from "../../lib/supabase/server";
+
+const SHOP_TYPE_LABELS: Record<string, string> = {
+  barbershop: "Barbershop",
+  beauty_salon: "Beauty Salon",
+  nail_salon: "Nail Salon",
+  spa: "Spa",
+  lash_studio: "Lash Studio",
+  other: "Appointment Booking",
+};
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ shopSlug: string }>;
+}): Promise<Metadata> {
+  const { shopSlug } = await params;
+
+  const { data: shop } = await supabaseServer
+    .from("shops")
+    .select("id, name, city, state")
+    .eq("slug", shopSlug)
+    .eq("active", true)
+    .single();
+
+  if (!shop) return { title: "Book an Appointment" };
+
+  const { data: typeSetting } = await supabaseServer
+    .from("shop_settings")
+    .select("value_json")
+    .eq("shop_id", shop.id)
+    .eq("key", "shop_type")
+    .single();
+
+  const shopType = (typeSetting?.value_json as { type?: string } | null)?.type ?? "barbershop";
+  const typeLabel = SHOP_TYPE_LABELS[shopType] ?? "Appointment Booking";
+  const url = `https://booking.squarebidness.com/${shopSlug}`;
+
+  return {
+    title: `${shop.name} — Book an Appointment`,
+    description: `Book your appointment at ${shop.name} in ${shop.city}, ${shop.state}. ${typeLabel} powered by SquareBidness.`,
+    openGraph: {
+      title: shop.name,
+      description: `Book your appointment at ${shop.name} — ${shop.city}, ${shop.state}`,
+      url,
+      siteName: "SquareBidness",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: shop.name,
+      description: `Book your appointment at ${shop.name} — ${shop.city}, ${shop.state}`,
+    },
+  };
+}
 
 export default async function ShopLanding({
   params,
