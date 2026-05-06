@@ -2,7 +2,6 @@
 import Stripe from "stripe";
 import { getDelishOrderingState } from "../_lib/delish-ordering-config.js";
 import { getDelishMenuOverrides } from "../_lib/delish-menu-overrides.js";
-import { getStripeConnectClient } from "../stripe-connect/client-config.js";
 import {
   getDisabledPickupWindows,
   isAllowedPickupWindow,
@@ -656,19 +655,6 @@ export default async function handler(req, res) {
       activeMenuDay: safeMeta(todayDay, 20),
     };
 
-    const connectClient = getStripeConnectClient("delish");
-    const paymentIntentData = {
-      metadata: sharedMetadata,
-    };
-
-    if (connectClient?.ready) {
-      paymentIntentData.application_fee_amount = connectClient.feeCents;
-      paymentIntentData.transfer_data = {
-        destination: connectClient.connectedAccountId,
-      };
-      paymentIntentData.on_behalf_of = connectClient.connectedAccountId;
-    }
-
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       payment_method_types: ["card"],
@@ -676,7 +662,9 @@ export default async function handler(req, res) {
       success_url: "https://www.squarebidness.com/delish/order/success/?session_id={CHECKOUT_SESSION_ID}",
       cancel_url: "https://www.squarebidness.com/delish/order/",
       metadata: sharedMetadata,
-      payment_intent_data: paymentIntentData,
+      payment_intent_data: {
+        metadata: sharedMetadata,
+      },
       customer_email: body.customerEmail || undefined,
     });
 
