@@ -1,22 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-
-const times = [
-  "9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM",
-  "11:00 AM", "11:30 AM", "12:00 PM", "12:30 PM",
-  "1:00 PM", "1:30 PM", "2:00 PM", "2:30 PM",
-  "3:00 PM", "3:30 PM", "4:00 PM", "4:30 PM",
-  "5:00 PM", "5:30 PM",
-];
+import { useEffect, useState } from "react";
 
 function getTodayDateString() {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 }
 
-type ServiceOption = { id: string; name: string; price: number };
+type ServiceOption = { id: string; name: string; price: number; duration_minutes: number };
+
+type TimeSlot = { time: string; label: string };
 
 type Props = {
   shopSlug: string;
@@ -37,6 +31,48 @@ export default function BookingForm({ shopSlug, shopName, barberSlug, barberName
   const [error, setError] = useState("");
   const [confirmed, setConfirmed] = useState<{ code: string } | null>(null);
 
+  const [slots, setSlots] = useState<TimeSlot[]>([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
+  const [shopClosed, setShopClosed] = useState(false);
+
+  const selectedService = services.find((s) => s.id === service);
+
+  // Fetch available slots whenever date or service changes
+  useEffect(() => {
+    if (!date || !selectedService) {
+      setSlots([]);
+      setTime("");
+      return;
+    }
+
+    let cancelled = false;
+    setSlotsLoading(true);
+    setShopClosed(false);
+    setTime("");
+
+    fetch(
+      `/api/${shopSlug}/availability?barber=${barberSlug}&date=${date}&duration=${selectedService.duration_minutes}`
+    )
+      .then((r) => r.json())
+      .then((data) => {
+        if (cancelled) return;
+        if (data.ok) {
+          setSlots(data.slots ?? []);
+          setShopClosed(data.closed ?? false);
+        } else {
+          setSlots([]);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setSlots([]);
+      })
+      .finally(() => {
+        if (!cancelled) setSlotsLoading(false);
+      });
+
+    return () => { cancelled = true; };
+  }, [date, service, selectedService, shopSlug, barberSlug]);
+
   async function handleBooking() {
     if (!name || !phone || !date || !service || !time) {
       setError("Name, phone, date, service, and time are required.");
@@ -55,7 +91,7 @@ export default function BookingForm({ shopSlug, shopName, barberSlug, barberName
         customer_phone: phone,
         customer_email: email || null,
         service,
-        time,
+        time: slots.find((s) => s.time === time)?.label ?? time,
         date,
       }),
     });
@@ -206,6 +242,21 @@ export default function BookingForm({ shopSlug, shopName, barberSlug, barberName
             />
           </Field>
 
+          <Field label="Service" required>
+            <select
+              value={service}
+              onChange={(e) => setService(e.target.value)}
+              style={fieldStyle}
+            >
+              <option value="">Select service</option>
+              {services.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name} — ${s.price} ({s.duration_minutes} min)
+                </option>
+              ))}
+            </select>
+          </Field>
+
           <Field label="Date" required>
             <input
               type="date"
@@ -216,40 +267,61 @@ export default function BookingForm({ shopSlug, shopName, barberSlug, barberName
             />
           </Field>
 
-          <Field label="Service" required>
-            <select
-              value={service}
-              onChange={(e) => setService(e.target.value)}
-              style={fieldStyle}
-            >
-              <option value="">Select service</option>
-              {services.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name} — ${s.price}
-                </option>
-              ))}
-            </select>
-          </Field>
-
           <Field label="Time" required>
-            <select
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-              style={fieldStyle}
-            >
-              <option value="">Select time</option>
-              {times.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
+            {!selectedService ? (
+              <div style={{ ...fieldStyle, color: "#555", display: "flex", alignItems: "center" }}>
+                Select a service first
+              </div>
+            ) : slotsLoading ? (
+              <div style={{ ...fieldStyle, color: "#666", display: "flex", alignItems: "center" }}>
+                Checking availability...
+              </div>
+            ) : shopClosed ? (
+              <div
+                style={{
+                  ...fieldStyle,
+                  color: "#ff7070",
+                  display: "flex",
+                  alignItems: "center",
+                  background: "#1a0a0a",
+                  borderColor: "#440000",
+                }}
+              >
+                Shop is closed on this day
+              </div>
+            ) : slots.length === 0 ? (
+              <div
+                style={{
+                  ...fieldStyle,
+                  color: "#ff9955",
+                  display: "flex",
+                  alignItems: "center",
+                  background: "#1a0800",
+                  borderColor: "#3a2000",
+                }}
+              >
+                No available times — try another date
+              </div>
+            ) : (
+              <select
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                style={fieldStyle}
+              >
+                <option value="">Select time</option>
+                {slots.map((s) => (
+                  <option key={s.time} value={s.time}>
+                    {s.label}
+                  </option>
+                ))}
+              </select>
+            )}
           </Field>
         </div>
 
         <button
           onClick={handleBooking}
-          disabled={loading}
+          disabled={loading || slotsLoading || slots.length === 0 || !time}
           style={{
             marginTop: 30,
             width: "100%",
@@ -258,9 +330,10 @@ export default function BookingForm({ shopSlug, shopName, barberSlug, barberName
             color: "#000",
             fontWeight: 800,
             border: "none",
-            cursor: loading ? "not-allowed" : "pointer",
+            cursor: loading || slotsLoading || slots.length === 0 || !time ? "not-allowed" : "pointer",
             borderRadius: 10,
             fontSize: 16,
+            opacity: slotsLoading || (selectedService && slots.length === 0 && !shopClosed && !slotsLoading) ? 0.5 : 1,
           }}
         >
           {loading ? "Booking..." : "Confirm Booking"}

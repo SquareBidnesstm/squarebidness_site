@@ -45,6 +45,7 @@ export default async function BookingPage({
         id: s.slug,
         name: s.name,
         price: Number(s.price),
+        duration_minutes: s.duration_minutes,
       }))}
     />
   );
