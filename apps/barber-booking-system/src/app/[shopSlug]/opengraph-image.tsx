@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { supabaseServer } from "../../lib/supabase/server";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 export const alt = "Book your appointment";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
@@ -24,19 +24,19 @@ export default async function Image({
 
   const { data: shop } = await supabaseServer
     .from("shops")
-    .select("name, city, state, owner_name")
+    .select("id, name, city, state, owner_name")
     .eq("slug", shopSlug)
     .eq("active", true)
     .single();
 
-  const { data: typeSetting } = await supabaseServer
-    .from("shop_settings")
-    .select("value_json")
-    .eq("shop_id", (
-      await supabaseServer.from("shops").select("id").eq("slug", shopSlug).single()
-    ).data?.id ?? "")
-    .eq("key", "shop_type")
-    .single();
+  const { data: typeSetting } = shop
+    ? await supabaseServer
+        .from("shop_settings")
+        .select("value_json")
+        .eq("shop_id", shop.id)
+        .eq("key", "shop_type")
+        .single()
+    : { data: null };
 
   const shopType = (typeSetting?.value_json as { type?: string } | null)?.type ?? "barbershop";
   const typeLabel = SHOP_TYPE_LABELS[shopType] ?? "Appointment Booking";
