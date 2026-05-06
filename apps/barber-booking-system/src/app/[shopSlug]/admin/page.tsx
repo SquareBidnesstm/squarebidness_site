@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import ServicesTab from "./ServicesTab";
 import BarbersTab from "./BarbersTab";
+import HoursTab from "./HoursTab";
 import BillingTab from "./BillingTab";
 
 type BookingStatus =
@@ -77,7 +78,7 @@ export default function AdminPage() {
   const shopSlug = params.shopSlug as string;
   const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<"bookings" | "barbers" | "services" | "billing">("bookings");
+  const [activeTab, setActiveTab] = useState<"bookings" | "barbers" | "services" | "hours" | "billing">("bookings");
   const [shopName, setShopName] = useState("");
   const [bookings, setBookings] = useState<AdminBooking[]>([]);
   const [loading, setLoading] = useState(true);
@@ -279,7 +280,7 @@ export default function AdminPage() {
 
         {/* Tab nav */}
         <div style={{ display: "flex", gap: 8, marginBottom: 28 }}>
-          {(["bookings", "barbers", "services", "billing"] as const).map((tab) => (
+          {(["bookings", "barbers", "services", "hours", "billing"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -304,6 +305,8 @@ export default function AdminPage() {
           <BarbersTab shopSlug={shopSlug} />
         ) : activeTab === "services" ? (
           <ServicesTab shopSlug={shopSlug} />
+        ) : activeTab === "hours" ? (
+          <HoursTab shopSlug={shopSlug} />
         ) : activeTab === "billing" ? (
           <BillingTab shopSlug={shopSlug} />
         ) : (
