@@ -11,6 +11,12 @@ const services = [
   { id: "vip", name: "VIP Appointment", price: 75 },
 ];
 
+const barberNames: Record<string, string> = {
+  josh: "Josh Watkins",
+  jj: "Jeramiah (J.J.)",
+  jmike: "J-Mike",
+};
+
 const times = [
   "9:00 AM",
   "9:30 AM",
@@ -23,6 +29,13 @@ const times = [
   "1:00 PM",
   "1:30 PM",
   "2:00 PM",
+  "2:30 PM",
+  "3:00 PM",
+  "3:30 PM",
+  "4:00 PM",
+  "4:30 PM",
+  "5:00 PM",
+  "5:30 PM",
 ];
 
 function getTodayDateString() {
@@ -33,6 +46,7 @@ function getTodayDateString() {
 export default function BarberBookingPage() {
   const params = useParams();
   const barberId = params.barberId as string;
+  const barberName = barberNames[barberId] || barberId;
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -41,14 +55,17 @@ export default function BarberBookingPage() {
   const [service, setService] = useState("");
   const [time, setTime] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [confirmed, setConfirmed] = useState<{ code: string } | null>(null);
 
   async function handleBooking() {
     if (!name || !phone || !date || !service || !time) {
-      alert("Name, phone, date, service, and time are required.");
+      setError("Name, phone, date, service, and time are required.");
       return;
     }
 
     setLoading(true);
+    setError("");
 
     const res = await fetch("/api/bookings/create", {
       method: "POST",
@@ -68,28 +85,104 @@ export default function BarberBookingPage() {
 
     if (res.ok) {
       const data = await res.json();
-      alert(
-        `Booking confirmed! Code: ${data.booking?.booking_code || "—"}\nCheck your phone for a confirmation text.`
-      );
-      setName("");
-      setPhone("");
-      setEmail("");
-      setDate(getTodayDateString());
-      setService("");
-      setTime("");
+      setConfirmed({ code: data.booking?.booking_code || "—" });
     } else {
       const data = await res.json().catch(() => null);
-      alert(data?.error || "Error booking appointment");
+      setError(data?.error || "Error booking appointment. Try again.");
     }
   }
 
+  if (confirmed) {
+    return (
+      <main
+        style={{
+          minHeight: "100vh",
+          background: "#050505",
+          color: "#fff",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 24,
+        }}
+      >
+        <div style={{ textAlign: "center", maxWidth: 440 }}>
+          <div style={{ fontSize: 48, marginBottom: 20 }}>✂️</div>
+          <h2 style={{ fontSize: 28, fontWeight: 900, marginBottom: 8 }}>
+            You&apos;re Confirmed!
+          </h2>
+          <p style={{ color: "#888", marginBottom: 24 }}>
+            Check your phone — a confirmation text is on its way.
+          </p>
+          <div
+            style={{
+              background: "#0d0d0d",
+              border: "1px solid #1f1f1f",
+              borderRadius: 12,
+              padding: "20px 28px",
+              marginBottom: 28,
+            }}
+          >
+            <div style={{ color: "#555", fontSize: 12, marginBottom: 4 }}>
+              Booking Code
+            </div>
+            <div
+              style={{
+                color: "#d4af37",
+                fontSize: 24,
+                fontWeight: 800,
+                letterSpacing: "0.1em",
+              }}
+            >
+              {confirmed.code}
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              setConfirmed(null);
+              setName("");
+              setPhone("");
+              setEmail("");
+              setDate(getTodayDateString());
+              setService("");
+              setTime("");
+            }}
+            style={{
+              padding: "12px 24px",
+              borderRadius: 10,
+              border: "1px solid #2a2a2a",
+              background: "transparent",
+              color: "#888",
+              fontSize: 14,
+              cursor: "pointer",
+            }}
+          >
+            Book Another
+          </button>
+        </div>
+      </main>
+    );
+  }
+
   return (
-    <main style={{ minHeight: "100vh", background: "#0a0a0a", color: "#fff" }}>
-      <section style={{ maxWidth: 700, margin: "0 auto", padding: "56px 24px" }}>
-        <h1 style={{ fontSize: 36, fontWeight: 900, marginBottom: 4 }}>
-          Book Your Appointment
+    <main style={{ minHeight: "100vh", background: "#050505", color: "#fff" }}>
+      <section style={{ maxWidth: 560, margin: "0 auto", padding: "56px 24px" }}>
+        <div
+          style={{
+            color: "#d4af37",
+            fontSize: 12,
+            letterSpacing: "0.18em",
+            textTransform: "uppercase",
+            marginBottom: 8,
+          }}
+        >
+          Dapper Lounge
+        </div>
+        <h1 style={{ fontSize: 32, fontWeight: 900, marginBottom: 4 }}>
+          Book with {barberName}
         </h1>
-        <p style={{ color: "#888", marginBottom: 32 }}>{barberId}</p>
+        <p style={{ color: "#555", marginBottom: 36, fontSize: 14 }}>
+          Fill out the form below to request your appointment.
+        </p>
 
         <div style={{ display: "grid", gap: 20 }}>
           <Field label="Full Name" required>
@@ -181,8 +274,25 @@ export default function BarberBookingPage() {
           {loading ? "Booking..." : "Confirm Booking"}
         </button>
 
+        {error && (
+          <div
+            style={{
+              marginTop: 16,
+              padding: "12px 16px",
+              background: "#1a0a0a",
+              border: "1px solid #440000",
+              borderRadius: 8,
+              color: "#ff7070",
+              fontSize: 14,
+              textAlign: "center",
+            }}
+          >
+            {error}
+          </div>
+        )}
+
         <p style={{ color: "#555", fontSize: 13, marginTop: 14, textAlign: "center" }}>
-          You'll receive a text confirmation after booking.
+          You&apos;ll receive a text confirmation after booking.
         </p>
       </section>
     </main>
