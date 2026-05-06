@@ -41,7 +41,7 @@ export default function HomePage() {
             marginBottom: 12,
           }}
         >
-          Orlando, FL
+          Hammond, LA
         </div>
         <h1 style={{ fontSize: 44, fontWeight: 900, margin: "0 0 12px" }}>
           Dapper Lounge
