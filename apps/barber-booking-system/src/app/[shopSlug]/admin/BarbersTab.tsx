@@ -1,6 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const DAY_FULL = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+const TIME_OPTIONS: { value: string; label: string }[] = [];
+for (let h = 0; h < 24; h++) {
+  for (const m of [0, 30]) {
+    const v = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+    const suf = h >= 12 ? "PM" : "AM";
+    const dh = h % 12 === 0 ? 12 : h % 12;
+    TIME_OPTIONS.push({ value: v, label: `${dh}:${String(m).padStart(2, "0")} ${suf}` });
+  }
+}
+
+type HourRow = { day_of_week: number; is_closed: boolean; open_time: string | null; close_time: string | null };
+
+const DEFAULT_SHOP_HOURS: HourRow[] = [
+  { day_of_week: 0, is_closed: true, open_time: null, close_time: null },
+  { day_of_week: 1, is_closed: false, open_time: "09:00", close_time: "18:00" },
+  { day_of_week: 2, is_closed: false, open_time: "09:00", close_time: "18:00" },
+  { day_of_week: 3, is_closed: false, open_time: "09:00", close_time: "18:00" },
+  { day_of_week: 4, is_closed: false, open_time: "09:00", close_time: "18:00" },
+  { day_of_week: 5, is_closed: false, open_time: "09:00", close_time: "19:00" },
+  { day_of_week: 6, is_closed: false, open_time: "08:00", close_time: "16:00" },
+];
 
 type Barber = {
   id: string;
@@ -37,6 +63,10 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
   const [addingNew, setAddingNew] = useState(false);
   const [newBarber, setNewBarber] = useState<EditState>({ name: "", display_name: "", role: "Barber" });
   const [addingSaving, setAddingSaving] = useState(false);
+  const [hoursOpen, setHoursOpen] = useState<string | null>(null);
+  const [barberHours, setBarberHours] = useState<Record<string, HourRow[]>>({});
+  const [hoursSaving, setHoursSaving] = useState(false);
+  const [hoursSaved, setHoursSaved] = useState<string | null>(null);
 
   useEffect(() => {
     load();
@@ -56,6 +86,47 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
     } finally {
       setLoading(false);
     }
+  }
+
+  const loadBarberHours = useCallback(async (barberId: string) => {
+    if (barberHours[barberId]) return; // already loaded
+    const res = await fetch(`/api/${shopSlug}/admin/barbers/${barberId}/hours`);
+    const data = await res.json();
+    if (data.ok) {
+      const loaded: HourRow[] = data.hours;
+      const merged = DEFAULT_SHOP_HOURS.map((def) => loaded.find((h) => h.day_of_week === def.day_of_week) ?? def);
+      setBarberHours((prev) => ({ ...prev, [barberId]: merged }));
+    }
+  }, [shopSlug, barberHours]);
+
+  function updateBarberHourDay(barberId: string, dayIndex: number, field: keyof HourRow, value: string | boolean | null) {
+    setBarberHours((prev) => ({
+      ...prev,
+      [barberId]: (prev[barberId] ?? DEFAULT_SHOP_HOURS).map((h) =>
+        h.day_of_week === dayIndex ? { ...h, [field]: value } : h
+      ),
+    }));
+    setHoursSaved(null);
+  }
+
+  async function saveBarberHours(barberId: string) {
+    const hours = barberHours[barberId];
+    if (!hours) return;
+    setHoursSaving(true);
+    const res = await fetch(`/api/${shopSlug}/admin/barbers/${barberId}/hours`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ hours }),
+    });
+    const data = await res.json();
+    if (data.ok) { setHoursSaved(barberId); setTimeout(() => setHoursSaved(null), 3000); }
+    setHoursSaving(false);
+  }
+
+  async function clearBarberHours(barberId: string) {
+    await fetch(`/api/${shopSlug}/admin/barbers/${barberId}/hours`, { method: "DELETE" });
+    setBarberHours((prev) => { const n = { ...prev }; delete n[barberId]; return n; });
+    setHoursOpen(null);
   }
 
   function startEdit(b: Barber) {
@@ -275,6 +346,20 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
                       Edit
                     </button>
                     <button
+                      onClick={() => {
+                        const next = hoursOpen === b.id ? null : b.id;
+                        setHoursOpen(next);
+                        if (next) loadBarberHours(b.id);
+                      }}
+                      style={{
+                        ...secondaryButton,
+                        color: hoursOpen === b.id ? "#d4af37" : "#fff",
+                        borderColor: hoursOpen === b.id ? "#3a2a00" : "#2d2d2d",
+                      }}
+                    >
+                      Hours
+                    </button>
+                    <button
                       onClick={() => toggleActive(b)}
                       style={{
                         ...secondaryButton,
@@ -284,6 +369,68 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
                     >
                       {b.active ? "Deactivate" : "Activate"}
                     </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Barber hours editor */}
+              {hoursOpen === b.id && !isEditing && (
+                <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px solid #1a1a1a" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: "#d4af37" }}>Custom Hours for {b.display_name || b.name}</div>
+                      <div style={{ fontSize: 12, color: "#555", marginTop: 2 }}>Overrides shop hours. Leave default to use shop hours.</div>
+                    </div>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <button onClick={() => clearBarberHours(b.id)} style={{ ...secondaryButton, fontSize: 12, padding: "6px 12px", color: "#ff7070", borderColor: "#440000" }}>
+                        Reset to shop hours
+                      </button>
+                      <button
+                        onClick={() => saveBarberHours(b.id)}
+                        disabled={hoursSaving}
+                        style={{ ...goldButton, fontSize: 12, padding: "6px 14px" }}
+                      >
+                        {hoursSaving ? "Saving..." : hoursSaved === b.id ? "✓ Saved" : "Save"}
+                      </button>
+                    </div>
+                  </div>
+                  <div style={{ display: "grid", gap: 8 }}>
+                    {(barberHours[b.id] ?? DEFAULT_SHOP_HOURS).map((h) => (
+                      <div key={h.day_of_week} style={{ display: "grid", gridTemplateColumns: "100px 1fr", gap: 12, alignItems: "center" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <button
+                            type="button"
+                            onClick={() => updateBarberHourDay(b.id, h.day_of_week, "is_closed", !h.is_closed)}
+                            style={{
+                              width: 34, height: 18, borderRadius: 999, border: "none",
+                              background: !h.is_closed ? "#d4af37" : "#333", position: "relative", cursor: "pointer", flexShrink: 0,
+                            }}
+                          >
+                            <span style={{
+                              position: "absolute", top: 2,
+                              left: !h.is_closed ? 18 : 2, width: 14, height: 14,
+                              borderRadius: "50%", background: "#fff", transition: "left 0.15s",
+                            }} />
+                          </button>
+                          <span style={{ fontSize: 13, color: h.is_closed ? "#555" : "#fff", fontWeight: 600 }}>
+                            {DAY_FULL[h.day_of_week].slice(0, 3)}
+                          </span>
+                        </div>
+                        {h.is_closed ? (
+                          <span style={{ fontSize: 12, color: "#555" }}>Closed</span>
+                        ) : (
+                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <select value={h.open_time ?? "09:00"} onChange={(e) => updateBarberHourDay(b.id, h.day_of_week, "open_time", e.target.value)} style={smallSelect}>
+                              {TIME_OPTIONS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                            </select>
+                            <span style={{ color: "#555", fontSize: 12 }}>–</span>
+                            <select value={h.close_time ?? "18:00"} onChange={(e) => updateBarberHourDay(b.id, h.day_of_week, "close_time", e.target.value)} style={smallSelect}>
+                              {TIME_OPTIONS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                            </select>
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
@@ -343,6 +490,17 @@ const goldButton: React.CSSProperties = {
   cursor: "pointer",
   fontSize: 14,
   whiteSpace: "nowrap",
+};
+
+const smallSelect: React.CSSProperties = {
+  padding: "6px 10px",
+  background: "#111",
+  border: "1px solid #2a2a2a",
+  color: "#fff",
+  borderRadius: 6,
+  fontSize: 13,
+  outline: "none",
+  cursor: "pointer",
 };
 
 const secondaryButton: React.CSSProperties = {

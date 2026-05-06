@@ -34,6 +34,7 @@ export default function BookingForm({ shopSlug, shopName, barberSlug, barberName
   const [slots, setSlots] = useState<TimeSlot[]>([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [shopClosed, setShopClosed] = useState(false);
+  const [depositAmount, setDepositAmount] = useState<number | null>(null);
 
   const selectedService = services.find((s) => s.id === service);
 
@@ -81,6 +82,29 @@ export default function BookingForm({ shopSlug, shopName, barberSlug, barberName
 
     setLoading(true);
     setError("");
+
+    // Check if deposit is required
+    const depositRes = await fetch(`/api/${shopSlug}/admin/deposit-settings`).catch(() => null);
+    if (depositRes?.ok) {
+      const depositData = await depositRes.json().catch(() => null);
+      if (depositData?.settings?.enabled) {
+        const dep = await fetch(`/api/${shopSlug}/booking/deposit`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            barber_id: barberSlug, customer_name: name, customer_phone: phone,
+            customer_email: email || null, service,
+            time: slots.find((s) => s.time === time)?.label ?? time, date,
+          }),
+        });
+        const depData = await dep.json().catch(() => null);
+        if (dep.ok && depData?.url) {
+          setDepositAmount(depData.depositAmount);
+          window.location.href = depData.url;
+          return;
+        }
+      }
+    }
 
     const res = await fetch(`/api/${shopSlug}/bookings/create`, {
       method: "POST",

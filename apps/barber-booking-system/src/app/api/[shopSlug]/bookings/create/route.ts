@@ -40,6 +40,8 @@ async function sendConfirmationSMS({
   to,
   customerName,
   barberName,
+  barberSlug,
+  shopSlug,
   serviceName,
   appointmentDate,
   startsAt,
@@ -49,6 +51,8 @@ async function sendConfirmationSMS({
   to: string;
   customerName: string;
   barberName: string;
+  barberSlug: string;
+  shopSlug: string;
   serviceName: string;
   appointmentDate: string;
   startsAt: string;
@@ -73,6 +77,7 @@ async function sendConfirmationSMS({
     timeZone: timezone,
   });
 
+  const rebookUrl = `https://booking.squarebidness.com/${shopSlug}/book/${barberSlug}`;
   const body = [
     `You're confirmed! ✂️`,
     ``,
@@ -81,6 +86,8 @@ async function sendConfirmationSMS({
     `${date} at ${time}`,
     `Barber: ${barberName}`,
     `Code: ${bookingCode}`,
+    ``,
+    `Book again: ${rebookUrl}`,
   ].join("\n");
 
   const msgParams = new URLSearchParams({ To: to, Body: body });
@@ -233,6 +240,8 @@ export async function POST(
         to: normalizedPhone,
         customerName: body.customer_name,
         barberName: barber.display_name || barber.name,
+        barberSlug: barber.slug,
+        shopSlug,
         serviceName: service.name,
         appointmentDate,
         startsAt: booking.starts_at,

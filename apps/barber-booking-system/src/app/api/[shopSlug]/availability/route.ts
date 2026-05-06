@@ -75,13 +75,29 @@ export async function GET(
   const [year, month, day] = date.split("-").map(Number);
   const dayOfWeek = new Date(year, month - 1, day).getDay();
 
-  // Get shop hours for this day
-  const { data: hoursRow } = await supabaseServer
-    .from("shop_hours")
+  // Check barber-specific hours first, fall back to shop hours
+  const { data: barberHoursRow } = await supabaseServer
+    .from("barber_hours")
     .select("is_closed, open_time, close_time")
-    .eq("shop_id", shop.id)
+    .eq("barber_id", barber.id)
     .eq("day_of_week", dayOfWeek)
     .single();
+
+  let hoursRow: { is_closed: boolean; open_time: string | null; close_time: string | null } | null = null;
+
+  if (barberHoursRow) {
+    // Barber has custom hours set for this day — use them
+    hoursRow = barberHoursRow;
+  } else {
+    // Fall back to shop hours
+    const { data: shopHoursRow } = await supabaseServer
+      .from("shop_hours")
+      .select("is_closed, open_time, close_time")
+      .eq("shop_id", shop.id)
+      .eq("day_of_week", dayOfWeek)
+      .single();
+    hoursRow = shopHoursRow;
+  }
 
   if (!hoursRow || hoursRow.is_closed || !hoursRow.open_time || !hoursRow.close_time) {
     return NextResponse.json({ ok: true, slots: [], closed: true });
