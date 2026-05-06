@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 type BookingStatus =
   | "pending"
@@ -24,11 +24,7 @@ type AdminBooking = {
   source: string | null;
   client_notes: string | null;
   created_at: string;
-  barbers: {
-    slug: string;
-    name: string;
-    display_name: string | null;
-  } | null;
+  barbers: { slug: string; name: string; display_name: string | null } | null;
   services: {
     slug: string;
     name: string;
@@ -74,6 +70,11 @@ const STATUS_COLORS: Record<BookingStatus, React.CSSProperties> = {
 };
 
 export default function AdminPage() {
+  const params = useParams();
+  const shopSlug = params.shopSlug as string;
+  const router = useRouter();
+
+  const [shopName, setShopName] = useState("");
   const [bookings, setBookings] = useState<AdminBooking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -86,7 +87,6 @@ export default function AdminPage() {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [loggingOut, setLoggingOut] = useState(false);
 
-  const router = useRouter();
   const today = useMemo(() => getTodayString(), []);
 
   useEffect(() => {
@@ -94,12 +94,15 @@ export default function AdminPage() {
       try {
         setLoading(true);
         setError("");
-        const res = await fetch("/api/bookings/", { cache: "no-store" });
+        const res = await fetch(`/api/${shopSlug}/admin/bookings`, {
+          cache: "no-store",
+        });
         const data = await res.json();
         if (!res.ok || !data.ok) {
           setError(data.error || "Could not load bookings.");
           return;
         }
+        if (data.shop?.name) setShopName(data.shop.name);
         setBookings(data.bookings || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unexpected error");
@@ -108,19 +111,19 @@ export default function AdminPage() {
       }
     }
     loadBookings();
-  }, []);
+  }, [shopSlug]);
 
   async function handleLogout() {
     setLoggingOut(true);
-    await fetch("/api/admin/logout", { method: "POST" });
-    router.push("/admin/login");
+    await fetch(`/api/${shopSlug}/admin/logout`, { method: "POST" });
+    router.push(`/${shopSlug}/admin/login`);
   }
 
   const updateStatus = useCallback(
     async (bookingId: string, newStatus: BookingStatus) => {
       setUpdatingId(bookingId);
       try {
-        const res = await fetch(`/api/bookings/${bookingId}`, {
+        const res = await fetch(`/api/${shopSlug}/bookings/${bookingId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ status: newStatus }),
@@ -138,7 +141,7 @@ export default function AdminPage() {
         setUpdatingId(null);
       }
     },
-    []
+    [shopSlug]
   );
 
   const uniqueBarbers = useMemo(() => {
@@ -155,7 +158,6 @@ export default function AdminPage() {
     return bookings
       .filter((booking) => {
         const q = search.trim().toLowerCase();
-
         const matchesSearch =
           q.length === 0 ||
           booking.customer_name.toLowerCase().includes(q) ||
@@ -165,16 +167,12 @@ export default function AdminPage() {
             .toLowerCase()
             .includes(q) ||
           (booking.services?.name || "").toLowerCase().includes(q);
-
         const matchesBarber =
           barberFilter === "all" || booking.barbers?.slug === barberFilter;
-
         const matchesStatus =
           statusFilter === "all" || booking.status === statusFilter;
-
         const matchesToday =
           !showTodayOnly || booking.appointment_date === today;
-
         return matchesSearch && matchesBarber && matchesStatus && matchesToday;
       })
       .sort(
@@ -210,7 +208,6 @@ export default function AdminPage() {
     const todayCount = bookings.filter(
       (b) => b.appointment_date === today
     ).length;
-
     const bookedRevenue = bookings.reduce(
       (sum, b) => sum + Number(b.services?.price || 0),
       0
@@ -224,16 +221,9 @@ export default function AdminPage() {
     const todayCompletedRevenue = bookings
       .filter((b) => b.appointment_date === today && b.status === "completed")
       .reduce((sum, b) => sum + Number(b.services?.price || 0), 0);
-
     return {
-      total,
-      confirmed,
-      completed,
-      todayCount,
-      bookedRevenue,
-      completedRevenue,
-      todayBookedRevenue,
-      todayCompletedRevenue,
+      total, confirmed, completed, todayCount,
+      bookedRevenue, completedRevenue, todayBookedRevenue, todayCompletedRevenue,
     };
   }, [bookings, today]);
 
@@ -247,7 +237,6 @@ export default function AdminPage() {
       }}
     >
       <section style={{ maxWidth: 1280, margin: "0 auto" }}>
-        {/* Header */}
         <div style={{ marginBottom: 28 }}>
           <div
             style={{
@@ -265,45 +254,25 @@ export default function AdminPage() {
                 marginBottom: 10,
               }}
             >
-              Dapper Lounge
+              {shopName || shopSlug}
             </div>
             <button
               type="button"
               onClick={handleLogout}
               disabled={loggingOut}
-              style={{
-                padding: "8px 14px",
-                borderRadius: 10,
-                border: "1px solid #2d2d2d",
-                background: "#111",
-                color: "#888",
-                fontWeight: 700,
-                fontSize: 13,
-                cursor: "pointer",
-              }}
+              style={secondaryButton}
             >
               {loggingOut ? "Signing out..." : "Sign out"}
             </button>
           </div>
-          <h1
-            style={{ fontSize: 52, lineHeight: 1.05, fontWeight: 900, margin: 0 }}
-          >
+          <h1 style={{ fontSize: 52, lineHeight: 1.05, fontWeight: 900, margin: 0 }}>
             Admin Dashboard
           </h1>
-          <p
-            style={{
-              color: "#9a9a9a",
-              fontSize: 18,
-              lineHeight: 1.6,
-              marginTop: 14,
-              maxWidth: 760,
-            }}
-          >
+          <p style={{ color: "#9a9a9a", fontSize: 18, marginTop: 14, maxWidth: 760 }}>
             Live shop view for bookings coming into the system.
           </p>
         </div>
 
-        {/* Stats row 1 */}
         <div
           style={{
             display: "grid",
@@ -312,11 +281,7 @@ export default function AdminPage() {
             marginBottom: 16,
           }}
         >
-          <StatCard
-            label="Total Bookings"
-            value={stats.total}
-            sub={`${stats.todayCount} today`}
-          />
+          <StatCard label="Total Bookings" value={stats.total} sub={`${stats.todayCount} today`} />
           <StatCard label="Confirmed" value={stats.confirmed} />
           <StatCard label="Completed" value={stats.completed} />
           <StatCard
@@ -326,7 +291,6 @@ export default function AdminPage() {
           />
         </div>
 
-        {/* Stats row 2 */}
         <div
           style={{
             display: "grid",
@@ -335,27 +299,12 @@ export default function AdminPage() {
             marginBottom: 24,
           }}
         >
-          <StatCard
-            label="Total Booked"
-            value={formatMoney(stats.bookedRevenue)}
-          />
-          <StatCard
-            label="Earned (Completed)"
-            value={formatMoney(stats.completedRevenue)}
-            gold
-          />
-          <StatCard
-            label="Today Booked"
-            value={formatMoney(stats.todayBookedRevenue)}
-          />
-          <StatCard
-            label="Today Earned"
-            value={formatMoney(stats.todayCompletedRevenue)}
-            gold
-          />
+          <StatCard label="Total Booked" value={formatMoney(stats.bookedRevenue)} />
+          <StatCard label="Earned (Completed)" value={formatMoney(stats.completedRevenue)} gold />
+          <StatCard label="Today Booked" value={formatMoney(stats.todayBookedRevenue)} />
+          <StatCard label="Today Earned" value={formatMoney(stats.todayCompletedRevenue)} gold />
         </div>
 
-        {/* Bookings panel */}
         <div
           style={{
             border: "1px solid #232323",
@@ -364,7 +313,6 @@ export default function AdminPage() {
             padding: 24,
           }}
         >
-          {/* Filters */}
           <div
             style={{
               display: "grid",
@@ -380,7 +328,6 @@ export default function AdminPage() {
               placeholder="Search name, code, barber, service, phone"
               style={inputStyle}
             />
-
             <select
               value={barberFilter}
               onChange={(e) => setBarberFilter(e.target.value)}
@@ -393,7 +340,6 @@ export default function AdminPage() {
                 </option>
               ))}
             </select>
-
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
@@ -406,7 +352,6 @@ export default function AdminPage() {
               <option value="cancelled">Cancelled</option>
               <option value="no_show">No Show</option>
             </select>
-
             <button
               type="button"
               onClick={() => setShowTodayOnly((v) => !v)}
@@ -425,9 +370,7 @@ export default function AdminPage() {
               marginBottom: 18,
             }}
           >
-            <h2 style={{ margin: 0, fontSize: 30, fontWeight: 900 }}>
-              Bookings
-            </h2>
+            <h2 style={{ margin: 0, fontSize: 30, fontWeight: 900 }}>Bookings</h2>
             <div style={{ color: "#8f8f8f", fontSize: 14 }}>
               {filteredBookings.length} shown
             </div>
@@ -445,11 +388,8 @@ export default function AdminPage() {
             <div style={{ display: "grid", gap: 14 }}>
               {filteredBookings.map((booking) => {
                 const barberName =
-                  booking.barbers?.display_name ||
-                  booking.barbers?.name ||
-                  "Unknown Barber";
-                const serviceName =
-                  booking.services?.name || "Unknown Service";
+                  booking.barbers?.display_name || booking.barbers?.name || "—";
+                const serviceName = booking.services?.name || "—";
                 const servicePrice = Number(booking.services?.price || 0);
                 const isExpanded = expandedId === booking.id;
                 const isManaging = managingId === booking.id;
@@ -467,7 +407,6 @@ export default function AdminPage() {
                       padding: 18,
                     }}
                   >
-                    {/* Main row */}
                     <div
                       style={{
                         display: "grid",
@@ -486,22 +425,11 @@ export default function AdminPage() {
                             marginBottom: 10,
                           }}
                         >
-                          <span
-                            style={{
-                              fontSize: 24,
-                              fontWeight: 800,
-                              lineHeight: 1.1,
-                            }}
-                          >
+                          <span style={{ fontSize: 24, fontWeight: 800 }}>
                             {booking.customer_name}
                           </span>
                           <span style={whitePill}>{barberName}</span>
-                          <span
-                            style={{
-                              ...darkPill,
-                              ...statusStyle,
-                            }}
-                          >
+                          <span style={{ ...darkPill, ...statusStyle }}>
                             {STATUS_LABELS[booking.status]}
                           </span>
                           <span style={darkPill}>{booking.payment_status}</span>
@@ -534,18 +462,17 @@ export default function AdminPage() {
                           <span>{booking.source || "—"}</span>
                         </div>
 
-                        {booking.client_notes ? (
+                        {booking.client_notes && (
                           <div
                             style={{
                               marginTop: 12,
                               color: "#bbbbbb",
                               fontSize: 14,
-                              lineHeight: 1.6,
                             }}
                           >
                             Notes: {booking.client_notes}
                           </div>
-                        ) : null}
+                        )}
                       </div>
 
                       <div
@@ -583,7 +510,6 @@ export default function AdminPage() {
                       </div>
                     </div>
 
-                    {/* Expanded detail */}
                     {isExpanded && (
                       <div
                         style={{
@@ -615,7 +541,6 @@ export default function AdminPage() {
                       </div>
                     )}
 
-                    {/* Manage panel */}
                     {isManaging && (
                       <div
                         style={{
@@ -625,11 +550,7 @@ export default function AdminPage() {
                         }}
                       >
                         <div
-                          style={{
-                            color: "#666",
-                            fontSize: 13,
-                            marginBottom: 10,
-                          }}
+                          style={{ color: "#666", fontSize: 13, marginBottom: 10 }}
                         >
                           Set status:
                         </div>
@@ -654,8 +575,7 @@ export default function AdminPage() {
                                   padding: "10px 14px",
                                   borderRadius: 10,
                                   border: `1px solid ${STATUS_COLORS[s].borderColor as string}`,
-                                  background: STATUS_COLORS[s]
-                                    .background as string,
+                                  background: STATUS_COLORS[s].background as string,
                                   color: STATUS_COLORS[s].color as string,
                                   fontWeight: 700,
                                   fontSize: 13,

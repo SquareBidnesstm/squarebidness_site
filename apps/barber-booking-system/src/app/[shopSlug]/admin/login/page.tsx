@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 export default function AdminLoginPage() {
+  const params = useParams();
+  const shopSlug = params.shopSlug as string;
   const router = useRouter();
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
@@ -17,7 +19,7 @@ export default function AdminLoginPage() {
     setError("");
 
     try {
-      const res = await fetch("/api/admin/login", {
+      const res = await fetch(`/api/${shopSlug}/admin/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ pin }),
@@ -26,7 +28,7 @@ export default function AdminLoginPage() {
       const data = await res.json();
 
       if (res.ok && data.ok) {
-        router.push("/admin");
+        router.push(`/${shopSlug}/admin`);
         router.refresh();
       } else {
         setError(data.error || "Incorrect PIN.");
@@ -62,7 +64,7 @@ export default function AdminLoginPage() {
             textAlign: "center",
           }}
         >
-          Dapper Lounge
+          Admin Access
         </div>
 
         <h1
@@ -73,7 +75,7 @@ export default function AdminLoginPage() {
             margin: "0 0 8px",
           }}
         >
-          Admin Access
+          Sign In
         </h1>
 
         <p
@@ -110,13 +112,7 @@ export default function AdminLoginPage() {
           />
 
           {error && (
-            <div
-              style={{
-                color: "#ff7070",
-                fontSize: 14,
-                textAlign: "center",
-              }}
-            >
+            <div style={{ color: "#ff7070", fontSize: 14, textAlign: "center" }}>
               {error}
             </div>
           )}

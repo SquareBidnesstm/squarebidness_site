@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseServer } from "../../../../lib/supabase/server";
-import { SHOP } from "../../../../lib/config/shop";
+import { supabaseServer } from "../../../../../lib/supabase/server";
 
 type CreateBookingPayload = {
   barber_id?: string;
@@ -14,31 +13,20 @@ type CreateBookingPayload = {
 
 function getTodayDateString() {
   const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 }
 
 function convertDisplayTimeTo24Hour(time: string) {
   const [clock, suffix] = time.trim().split(" ");
   if (!clock || !suffix) return null;
-
   const [rawHour, rawMinute] = clock.split(":");
   let hour = Number(rawHour);
   const minute = Number(rawMinute);
-
   if (Number.isNaN(hour) || Number.isNaN(minute)) return null;
-
-  const upperSuffix = suffix.toUpperCase();
-  if (upperSuffix === "PM" && hour !== 12) hour += 12;
-  if (upperSuffix === "AM" && hour === 12) hour = 0;
-
+  const upper = suffix.toUpperCase();
+  if (upper === "PM" && hour !== 12) hour += 12;
+  if (upper === "AM" && hour === 12) hour = 0;
   return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
-}
-
-function combineDateAndTime(dateStr: string, time24: string) {
-  return new Date(`${dateStr}T${time24}:00`);
 }
 
 function normalizePhone(raw: string): string | null {
@@ -56,6 +44,7 @@ async function sendConfirmationSMS({
   appointmentDate,
   startsAt,
   bookingCode,
+  timezone,
 }: {
   to: string;
   customerName: string;
@@ -64,6 +53,7 @@ async function sendConfirmationSMS({
   appointmentDate: string;
   startsAt: string;
   bookingCode: string;
+  timezone: string;
 }) {
   const sid = process.env.TWILIO_ACCOUNT_SID;
   const token = process.env.TWILIO_AUTH_TOKEN;
@@ -72,18 +62,19 @@ async function sendConfirmationSMS({
 
   if (!sid || !token || (!messagingSid && !fromNumber)) return;
 
-  const date = new Date(`${appointmentDate}T12:00:00`).toLocaleDateString(
-    "en-US",
-    { weekday: "long", month: "long", day: "numeric" }
-  );
+  const date = new Date(`${appointmentDate}T12:00:00`).toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
   const time = new Date(startsAt).toLocaleTimeString("en-US", {
     hour: "numeric",
     minute: "2-digit",
-    timeZone: SHOP.timezone,
+    timeZone: timezone,
   });
 
   const body = [
-    `Dapper Lounge — You're confirmed! ✂️`,
+    `You're confirmed! ✂️`,
     ``,
     `${customerName}`,
     `${serviceName}`,
@@ -92,16 +83,16 @@ async function sendConfirmationSMS({
     `Code: ${bookingCode}`,
   ].join("\n");
 
-  const params = new URLSearchParams({ To: to, Body: body });
+  const msgParams = new URLSearchParams({ To: to, Body: body });
   if (messagingSid) {
-    params.set("MessagingServiceSid", messagingSid);
+    msgParams.set("MessagingServiceSid", messagingSid);
   } else {
-    params.set("From", fromNumber!);
+    msgParams.set("From", fromNumber!);
   }
 
   const credentials = Buffer.from(`${sid}:${token}`).toString("base64");
 
-  const res = await fetch(
+  await fetch(
     `https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`,
     {
       method: "POST",
@@ -109,56 +100,24 @@ async function sendConfirmationSMS({
         Authorization: `Basic ${credentials}`,
         "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: params.toString(),
+      body: msgParams.toString(),
     }
   );
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(
-      (err as { message?: string }).message || `Twilio ${res.status}`
-    );
-  }
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(
+  req: NextRequest,
+  { params }: { params: Promise<{ shopSlug: string }> }
+) {
   try {
+    const { shopSlug } = await params;
     const body = (await req.json()) as CreateBookingPayload;
 
-    if (!body.barber_id) {
-      return NextResponse.json(
-        { ok: false, error: "Missing barber_id" },
-        { status: 400 }
-      );
-    }
-
-    if (!body.customer_name) {
-      return NextResponse.json(
-        { ok: false, error: "Missing customer_name" },
-        { status: 400 }
-      );
-    }
-
-    if (!body.customer_phone) {
-      return NextResponse.json(
-        { ok: false, error: "Phone number is required" },
-        { status: 400 }
-      );
-    }
-
-    if (!body.service) {
-      return NextResponse.json(
-        { ok: false, error: "Missing service" },
-        { status: 400 }
-      );
-    }
-
-    if (!body.time) {
-      return NextResponse.json(
-        { ok: false, error: "Missing time" },
-        { status: 400 }
-      );
-    }
+    if (!body.barber_id) return NextResponse.json({ ok: false, error: "Missing barber_id" }, { status: 400 });
+    if (!body.customer_name) return NextResponse.json({ ok: false, error: "Missing customer_name" }, { status: 400 });
+    if (!body.customer_phone) return NextResponse.json({ ok: false, error: "Phone number is required" }, { status: 400 });
+    if (!body.service) return NextResponse.json({ ok: false, error: "Missing service" }, { status: 400 });
+    if (!body.time) return NextResponse.json({ ok: false, error: "Missing time" }, { status: 400 });
 
     const appointmentDate =
       body.date && /^\d{4}-\d{2}-\d{2}$/.test(body.date)
@@ -166,25 +125,17 @@ export async function POST(req: NextRequest) {
         : getTodayDateString();
 
     const time24 = convertDisplayTimeTo24Hour(body.time);
-
-    if (!time24) {
-      return NextResponse.json(
-        { ok: false, error: "Invalid time format" },
-        { status: 400 }
-      );
-    }
+    if (!time24) return NextResponse.json({ ok: false, error: "Invalid time format" }, { status: 400 });
 
     const { data: shop, error: shopError } = await supabaseServer
       .from("shops")
-      .select("id, slug")
-      .eq("slug", SHOP.slug)
+      .select("id, slug, timezone")
+      .eq("slug", shopSlug)
+      .eq("active", true)
       .single();
 
     if (shopError || !shop) {
-      return NextResponse.json(
-        { ok: false, error: "Shop not found" },
-        { status: 500 }
-      );
+      return NextResponse.json({ ok: false, error: "Shop not found" }, { status: 404 });
     }
 
     const { data: barber, error: barberError } = await supabaseServer
@@ -196,10 +147,7 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (barberError || !barber) {
-      return NextResponse.json(
-        { ok: false, error: "Barber not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ ok: false, error: "Barber not found" }, { status: 404 });
     }
 
     const { data: service, error: serviceError } = await supabaseServer
@@ -211,26 +159,17 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (serviceError || !service) {
-      return NextResponse.json(
-        { ok: false, error: "Service not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ ok: false, error: "Service not found" }, { status: 404 });
     }
 
-    const startsAt = combineDateAndTime(appointmentDate, time24);
-
+    const startsAt = new Date(`${appointmentDate}T${time24}:00`);
     if (Number.isNaN(startsAt.getTime())) {
-      return NextResponse.json(
-        { ok: false, error: "Invalid appointment time" },
-        { status: 400 }
-      );
+      return NextResponse.json({ ok: false, error: "Invalid appointment time" }, { status: 400 });
     }
 
-    const endsAt = new Date(
-      startsAt.getTime() + service.duration_minutes * 60 * 1000
-    );
+    const endsAt = new Date(startsAt.getTime() + service.duration_minutes * 60 * 1000);
 
-    const { data: overlaps, error: overlapError } = await supabaseServer
+    const { data: overlaps } = await supabaseServer
       .from("bookings")
       .select("id")
       .eq("barber_id", barber.id)
@@ -238,50 +177,24 @@ export async function POST(req: NextRequest) {
       .lt("starts_at", endsAt.toISOString())
       .gt("ends_at", startsAt.toISOString());
 
-    if (overlapError) {
-      return NextResponse.json(
-        { ok: false, error: overlapError.message },
-        { status: 500 }
-      );
-    }
-
     if (overlaps && overlaps.length > 0) {
-      return NextResponse.json(
-        { ok: false, error: "That time is already booked" },
-        { status: 409 }
-      );
+      return NextResponse.json({ ok: false, error: "That time is already booked" }, { status: 409 });
     }
 
-    const { data: bookingCode, error: bookingCodeError } =
-      await supabaseServer.rpc("generate_booking_code", {
-        shop_slug: shop.slug,
-      });
+    const { data: bookingCode, error: bookingCodeError } = await supabaseServer.rpc(
+      "generate_booking_code",
+      { shop_slug: shop.slug }
+    );
 
     if (bookingCodeError || !bookingCode) {
-      return NextResponse.json(
-        { ok: false, error: "Could not generate booking code" },
-        { status: 500 }
-      );
+      return NextResponse.json({ ok: false, error: "Could not generate booking code" }, { status: 500 });
     }
 
-    const { data: customer, error: customerError } = await supabaseServer
+    const { data: customer } = await supabaseServer
       .from("customers")
-      .insert({
-        shop_id: shop.id,
-        full_name: body.customer_name,
-      })
+      .insert({ shop_id: shop.id, full_name: body.customer_name })
       .select("id")
       .single();
-
-    if (customerError || !customer) {
-      return NextResponse.json(
-        {
-          ok: false,
-          error: customerError?.message || "Could not create customer",
-        },
-        { status: 500 }
-      );
-    }
 
     const { data: booking, error: bookingError } = await supabaseServer
       .from("bookings")
@@ -290,7 +203,7 @@ export async function POST(req: NextRequest) {
         shop_id: shop.id,
         barber_id: barber.id,
         service_id: service.id,
-        customer_id: customer.id,
+        customer_id: customer?.id ?? null,
         customer_name: body.customer_name,
         customer_phone: body.customer_phone,
         customer_email: body.customer_email || null,
@@ -309,15 +222,11 @@ export async function POST(req: NextRequest) {
 
     if (bookingError || !booking) {
       return NextResponse.json(
-        {
-          ok: false,
-          error: bookingError?.message || "Could not create booking",
-        },
+        { ok: false, error: bookingError?.message || "Could not create booking" },
         { status: 500 }
       );
     }
 
-    // Non-blocking SMS — booking already confirmed, don't fail over it
     const normalizedPhone = normalizePhone(body.customer_phone);
     if (normalizedPhone) {
       sendConfirmationSMS({
@@ -328,23 +237,16 @@ export async function POST(req: NextRequest) {
         appointmentDate,
         startsAt: booking.starts_at,
         bookingCode: booking.booking_code,
+        timezone: shop.timezone,
       }).catch((err) =>
-        console.error("DAPPER SMS ERROR:", err instanceof Error ? err.message : err)
+        console.error("SMS ERROR:", err instanceof Error ? err.message : err)
       );
     }
 
-    return NextResponse.json({
-      ok: true,
-      booking,
-      barber: barber.display_name || barber.name,
-      service: service.name,
-    });
+    return NextResponse.json({ ok: true, booking, barber: barber.display_name || barber.name, service: service.name });
   } catch (error) {
     return NextResponse.json(
-      {
-        ok: false,
-        error: error instanceof Error ? error.message : "Unknown error",
-      },
+      { ok: false, error: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     );
   }

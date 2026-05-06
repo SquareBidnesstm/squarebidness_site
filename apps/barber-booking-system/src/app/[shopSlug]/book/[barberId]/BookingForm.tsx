@@ -1,7 +1,7 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
-import { useParams } from "next/navigation";
 
 const services = [
   { id: "haircut", name: "Haircut", price: 35 },
@@ -11,31 +11,12 @@ const services = [
   { id: "vip", name: "VIP Appointment", price: 75 },
 ];
 
-const barberNames: Record<string, string> = {
-  josh: "Josh Watkins",
-  jj: "Jeramiah (J.J.)",
-  jmike: "J-Mike",
-};
-
 const times = [
-  "9:00 AM",
-  "9:30 AM",
-  "10:00 AM",
-  "10:30 AM",
-  "11:00 AM",
-  "11:30 AM",
-  "12:00 PM",
-  "12:30 PM",
-  "1:00 PM",
-  "1:30 PM",
-  "2:00 PM",
-  "2:30 PM",
-  "3:00 PM",
-  "3:30 PM",
-  "4:00 PM",
-  "4:30 PM",
-  "5:00 PM",
-  "5:30 PM",
+  "9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM",
+  "11:00 AM", "11:30 AM", "12:00 PM", "12:30 PM",
+  "1:00 PM", "1:30 PM", "2:00 PM", "2:30 PM",
+  "3:00 PM", "3:30 PM", "4:00 PM", "4:30 PM",
+  "5:00 PM", "5:30 PM",
 ];
 
 function getTodayDateString() {
@@ -43,11 +24,14 @@ function getTodayDateString() {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 }
 
-export default function BarberBookingPage() {
-  const params = useParams();
-  const barberId = params.barberId as string;
-  const barberName = barberNames[barberId] || barberId;
+type Props = {
+  shopSlug: string;
+  shopName: string;
+  barberSlug: string;
+  barberName: string;
+};
 
+export default function BookingForm({ shopSlug, shopName, barberSlug, barberName }: Props) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -67,11 +51,11 @@ export default function BarberBookingPage() {
     setLoading(true);
     setError("");
 
-    const res = await fetch("/api/bookings/create", {
+    const res = await fetch(`/api/${shopSlug}/bookings/create`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        barber_id: barberId,
+        barber_id: barberSlug,
         customer_name: name,
         customer_phone: phone,
         customer_email: email || null,
@@ -166,6 +150,19 @@ export default function BarberBookingPage() {
   return (
     <main style={{ minHeight: "100vh", background: "#050505", color: "#fff" }}>
       <section style={{ maxWidth: 560, margin: "0 auto", padding: "56px 24px" }}>
+        <Link
+          href={`/${shopSlug}`}
+          style={{
+            color: "#555",
+            fontSize: 13,
+            textDecoration: "none",
+            display: "inline-block",
+            marginBottom: 28,
+          }}
+        >
+          ← Back
+        </Link>
+
         <div
           style={{
             color: "#d4af37",
@@ -175,7 +172,7 @@ export default function BarberBookingPage() {
             marginBottom: 8,
           }}
         >
-          Dapper Lounge
+          {shopName}
         </div>
         <h1 style={{ fontSize: 32, fontWeight: 900, marginBottom: 4 }}>
           Book with {barberName}

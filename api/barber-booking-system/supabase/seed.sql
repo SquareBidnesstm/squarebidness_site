@@ -17,7 +17,7 @@ insert into public.shops (
   active
 )
 values (
-  'dapper-lounge',
+  'dapper',
   'Dapper Lounge',
   'Josh Watkins',
   'Head Barber In Charge',
@@ -44,7 +44,7 @@ set
 insert into public.barbers (shop_id, slug, name, display_name, role, active, sort_order)
 select s.id, 'josh', 'Josh Watkins', 'Josh Watkins', 'Head Barber', true, 1
 from public.shops s
-where s.slug = 'dapper-lounge'
+where s.slug = 'dapper'
 on conflict (shop_id, slug) do update
 set
   name = excluded.name,
@@ -56,7 +56,7 @@ set
 insert into public.barbers (shop_id, slug, name, display_name, role, active, sort_order)
 select s.id, 'jj', 'Jeramiah', 'Jeramiah (J.J.)', 'Barber', true, 2
 from public.shops s
-where s.slug = 'dapper-lounge'
+where s.slug = 'dapper'
 on conflict (shop_id, slug) do update
 set
   name = excluded.name,
@@ -68,7 +68,7 @@ set
 insert into public.barbers (shop_id, slug, name, display_name, role, active, sort_order)
 select s.id, 'jmike', 'J-Mike', 'J-Mike', 'Barber', true, 3
 from public.shops s
-where s.slug = 'dapper-lounge'
+where s.slug = 'dapper'
 on conflict (shop_id, slug) do update
 set
   name = excluded.name,
@@ -81,7 +81,7 @@ set
 insert into public.services (shop_id, slug, name, duration_minutes, price, deposit_eligible, active, sort_order)
 select s.id, 'haircut', 'Haircut', 45, 35.00, false, true, 1
 from public.shops s
-where s.slug = 'dapper-lounge'
+where s.slug = 'dapper'
 on conflict (shop_id, slug) do update
 set
   name = excluded.name,
@@ -94,7 +94,7 @@ set
 insert into public.services (shop_id, slug, name, duration_minutes, price, deposit_eligible, active, sort_order)
 select s.id, 'haircut-beard', 'Haircut + Beard', 60, 45.00, false, true, 2
 from public.shops s
-where s.slug = 'dapper-lounge'
+where s.slug = 'dapper'
 on conflict (shop_id, slug) do update
 set
   name = excluded.name,
@@ -107,7 +107,7 @@ set
 insert into public.services (shop_id, slug, name, duration_minutes, price, deposit_eligible, active, sort_order)
 select s.id, 'kids-cut', 'Kids Cut', 30, 25.00, false, true, 3
 from public.shops s
-where s.slug = 'dapper-lounge'
+where s.slug = 'dapper'
 on conflict (shop_id, slug) do update
 set
   name = excluded.name,
@@ -120,7 +120,7 @@ set
 insert into public.services (shop_id, slug, name, duration_minutes, price, deposit_eligible, active, sort_order)
 select s.id, 'enhancements', 'Cut + Enhancements', 60, 50.00, false, true, 4
 from public.shops s
-where s.slug = 'dapper-lounge'
+where s.slug = 'dapper'
 on conflict (shop_id, slug) do update
 set
   name = excluded.name,
@@ -133,7 +133,7 @@ set
 insert into public.services (shop_id, slug, name, duration_minutes, price, deposit_eligible, deposit_amount, active, sort_order)
 select s.id, 'vip', 'VIP Appointment', 90, 75.00, true, 25.00, true, 5
 from public.shops s
-where s.slug = 'dapper-lounge'
+where s.slug = 'dapper'
 on conflict (shop_id, slug) do update
 set
   name = excluded.name,
@@ -154,14 +154,14 @@ select
 from public.barbers b
 join public.services sv on sv.shop_id = b.shop_id
 join public.shops s on s.id = b.shop_id
-where s.slug = 'dapper-lounge'
+where s.slug = 'dapper'
 on conflict (barber_id, service_id) do nothing;
 
 -- SHOP HOURS
 insert into public.shop_hours (shop_id, day_of_week, is_closed, open_time, close_time)
 select s.id, 0, true, null, null
 from public.shops s
-where s.slug = 'dapper-lounge'
+where s.slug = 'dapper'
 on conflict (shop_id, day_of_week) do update
 set
   is_closed = excluded.is_closed,
@@ -171,7 +171,7 @@ set
 insert into public.shop_hours (shop_id, day_of_week, is_closed, open_time, close_time)
 select s.id, 1, false, '09:00', '18:00'
 from public.shops s
-where s.slug = 'dapper-lounge'
+where s.slug = 'dapper'
 on conflict (shop_id, day_of_week) do update
 set
   is_closed = excluded.is_closed,
@@ -181,7 +181,7 @@ set
 insert into public.shop_hours (shop_id, day_of_week, is_closed, open_time, close_time)
 select s.id, 2, false, '09:00', '18:00'
 from public.shops s
-where s.slug = 'dapper-lounge'
+where s.slug = 'dapper'
 on conflict (shop_id, day_of_week) do update
 set
   is_closed = excluded.is_closed,
@@ -191,7 +191,7 @@ set
 insert into public.shop_hours (shop_id, day_of_week, is_closed, open_time, close_time)
 select s.id, 3, false, '09:00', '18:00'
 from public.shops s
-where s.slug = 'dapper-lounge'
+where s.slug = 'dapper'
 on conflict (shop_id, day_of_week) do update
 set
   is_closed = excluded.is_closed,
@@ -201,7 +201,7 @@ set
 insert into public.shop_hours (shop_id, day_of_week, is_closed, open_time, close_time)
 select s.id, 4, false, '09:00', '18:00'
 from public.shops s
-where s.slug = 'dapper-lounge'
+where s.slug = 'dapper'
 on conflict (shop_id, day_of_week) do update
 set
   is_closed = excluded.is_closed,
@@ -211,7 +211,7 @@ set
 insert into public.shop_hours (shop_id, day_of_week, is_closed, open_time, close_time)
 select s.id, 5, false, '09:00', '19:00'
 from public.shops s
-where s.slug = 'dapper-lounge'
+where s.slug = 'dapper'
 on conflict (shop_id, day_of_week) do update
 set
   is_closed = excluded.is_closed,
@@ -221,7 +221,7 @@ set
 insert into public.shop_hours (shop_id, day_of_week, is_closed, open_time, close_time)
 select s.id, 6, false, '08:00', '16:00'
 from public.shops s
-where s.slug = 'dapper-lounge'
+where s.slug = 'dapper'
 on conflict (shop_id, day_of_week) do update
 set
   is_closed = excluded.is_closed,
@@ -232,13 +232,13 @@ set
 insert into public.shop_settings (shop_id, key, value_json)
 select s.id, 'booking_rules', '{"slot_interval_minutes": 30, "lead_time_minutes": 0, "max_days_out": 30}'::jsonb
 from public.shops s
-where s.slug = 'dapper-lounge'
+where s.slug = 'dapper'
 on conflict (shop_id, key) do update
 set value_json = excluded.value_json;
 
 insert into public.shop_settings (shop_id, key, value_json)
 select s.id, 'notifications', '{"sms_enabled": false, "email_enabled": false}'::jsonb
 from public.shops s
-where s.slug = 'dapper-lounge'
+where s.slug = 'dapper'
 on conflict (shop_id, key) do update
 set value_json = excluded.value_json;

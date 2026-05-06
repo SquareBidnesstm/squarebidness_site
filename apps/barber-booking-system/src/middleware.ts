@@ -1,24 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
+import { computeSessionToken, sessionCookieName } from "./lib/auth";
 
-const SESSION_COOKIE = "dapper_admin_session";
+export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
 
-export function middleware(req: NextRequest) {
-  // Let the login page through so we don't redirect loop
-  if (req.nextUrl.pathname === "/admin/login") {
-    return NextResponse.next();
+  const match = pathname.match(/^\/([^/]+)\/admin(\/.*)?$/);
+  if (!match) return NextResponse.next();
+
+  const shopSlug = match[1];
+  const rest = (match[2] ?? "").replace(/\/$/, "");
+
+  if (rest === "/login") return NextResponse.next();
+
+  const cookieName = sessionCookieName(shopSlug);
+  const cookie = req.cookies.get(cookieName)?.value;
+
+  if (!cookie) {
+    return NextResponse.redirect(new URL(`/${shopSlug}/admin/login`, req.url));
   }
 
-  const cookie = req.cookies.get(SESSION_COOKIE)?.value;
-  const expected = process.env.ADMIN_SESSION_TOKEN;
-
-  if (!expected || cookie !== expected) {
-    const loginUrl = new URL("/admin/login", req.url);
-    return NextResponse.redirect(loginUrl);
+  const expected = await computeSessionToken(shopSlug);
+  if (cookie !== expected) {
+    return NextResponse.redirect(new URL(`/${shopSlug}/admin/login`, req.url));
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: "/admin/:path*",
+  matcher: ["/((?!_next|api|favicon\\.ico|onboard)[^/]+)/admin(.*)"],
 };
