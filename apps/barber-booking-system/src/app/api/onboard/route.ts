@@ -209,6 +209,13 @@ export async function POST(req: NextRequest) {
       },
     ]);
 
+    // Create a free subscription row for the new shop
+    await supabaseServer.from("subscriptions").insert({
+      shop_id: shop.id,
+      plan: "free",
+      status: "free",
+    });
+
     return NextResponse.json({ ok: true, shopSlug: shop.slug, shopName: shop.name });
   } catch (err) {
     return NextResponse.json(
