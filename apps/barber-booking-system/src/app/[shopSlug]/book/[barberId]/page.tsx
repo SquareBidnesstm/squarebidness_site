@@ -28,12 +28,24 @@ export default async function BookingPage({
 
   if (!barber) notFound();
 
+  const { data: services } = await supabaseServer
+    .from("services")
+    .select("id, slug, name, duration_minutes, price")
+    .eq("shop_id", shop.id)
+    .eq("active", true)
+    .order("sort_order");
+
   return (
     <BookingForm
       shopSlug={shopSlug}
       shopName={shop.name}
       barberSlug={barberId}
       barberName={barber.display_name || barber.name}
+      services={(services ?? []).map((s) => ({
+        id: s.slug,
+        name: s.name,
+        price: Number(s.price),
+      }))}
     />
   );
 }

@@ -3,14 +3,6 @@
 import Link from "next/link";
 import { useState } from "react";
 
-const services = [
-  { id: "haircut", name: "Haircut", price: 35 },
-  { id: "haircut-beard", name: "Haircut + Beard", price: 45 },
-  { id: "kids-cut", name: "Kids Cut", price: 25 },
-  { id: "enhancements", name: "Cut + Enhancements", price: 50 },
-  { id: "vip", name: "VIP Appointment", price: 75 },
-];
-
 const times = [
   "9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM",
   "11:00 AM", "11:30 AM", "12:00 PM", "12:30 PM",
@@ -24,14 +16,17 @@ function getTodayDateString() {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 }
 
+type ServiceOption = { id: string; name: string; price: number };
+
 type Props = {
   shopSlug: string;
   shopName: string;
   barberSlug: string;
   barberName: string;
+  services: ServiceOption[];
 };
 
-export default function BookingForm({ shopSlug, shopName, barberSlug, barberName }: Props) {
+export default function BookingForm({ shopSlug, shopName, barberSlug, barberName, services }: Props) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");

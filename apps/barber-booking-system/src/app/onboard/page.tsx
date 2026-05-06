@@ -13,6 +13,24 @@ const TIMEZONES = [
   { value: "Pacific/Honolulu", label: "Hawaii (HT)" },
 ];
 
+const SHOP_TYPES = [
+  { value: "barbershop", label: "Barbershop" },
+  { value: "beauty_salon", label: "Beauty Salon" },
+  { value: "nail_salon", label: "Nail Salon" },
+  { value: "spa", label: "Spa" },
+  { value: "lash_studio", label: "Lash Studio" },
+  { value: "other", label: "Other" },
+];
+
+const ROLES_BY_TYPE: Record<string, string[]> = {
+  barbershop: ["Barber", "Head Barber", "Master Barber", "Apprentice"],
+  beauty_salon: ["Stylist", "Master Stylist", "Cosmetologist", "Braider", "Color Specialist"],
+  nail_salon: ["Nail Technician", "Senior Nail Tech", "Nail Artist"],
+  spa: ["Esthetician", "Massage Therapist", "Spa Specialist", "Facialist"],
+  lash_studio: ["Lash Artist", "Lash Tech", "Senior Lash Artist"],
+  other: ["Specialist", "Senior Specialist", "Owner"],
+};
+
 type Barber = { name: string; role: string };
 
 function slugify(str: string) {
@@ -25,6 +43,7 @@ function slugify(str: string) {
 export default function OnboardPage() {
   const router = useRouter();
 
+  const [shopType, setShopType] = useState("barbershop");
   const [shopName, setShopName] = useState("");
   const [slug, setSlug] = useState("");
   const [slugEdited, setSlugEdited] = useState(false);
@@ -33,6 +52,15 @@ export default function OnboardPage() {
   const [timezone, setTimezone] = useState("America/Chicago");
   const [ownerName, setOwnerName] = useState("");
   const [barbers, setBarbers] = useState<Barber[]>([{ name: "", role: "Barber" }]);
+
+  const availableRoles = ROLES_BY_TYPE[shopType] ?? ROLES_BY_TYPE.other;
+
+  function handleShopTypeChange(val: string) {
+    setShopType(val);
+    // Reset barber roles to first role for new type
+    const firstRole = ROLES_BY_TYPE[val]?.[0] ?? "Specialist";
+    setBarbers((prev) => prev.map((b) => ({ ...b, role: firstRole })));
+  }
   const [pin, setPin] = useState("");
   const [pinConfirm, setPinConfirm] = useState("");
 
@@ -90,7 +118,7 @@ export default function OnboardPage() {
       const res = await fetch("/api/onboard", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ shopName, slug, city, state, timezone, ownerName, barbers, pin }),
+        body: JSON.stringify({ shopType, shopName, slug, city, state, timezone, ownerName, barbers, pin }),
       });
 
       const data = await res.json();
@@ -206,6 +234,30 @@ export default function OnboardPage() {
               Shop Info
             </h2>
             <div style={{ display: "grid", gap: 16 }}>
+              <Field label="Shop Type" required>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
+                  {SHOP_TYPES.map((t) => (
+                    <button
+                      key={t.value}
+                      type="button"
+                      onClick={() => handleShopTypeChange(t.value)}
+                      style={{
+                        padding: "10px 8px",
+                        borderRadius: 8,
+                        border: shopType === t.value ? "none" : "1px solid #2a2a2a",
+                        background: shopType === t.value ? "#d4af37" : "#111",
+                        color: shopType === t.value ? "#000" : "#888",
+                        fontWeight: 700,
+                        fontSize: 13,
+                        cursor: "pointer",
+                      }}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+              </Field>
+
               <Field label="Shop Name" required>
                 <input
                   value={shopName}
@@ -290,7 +342,10 @@ export default function OnboardPage() {
           {/* Barbers */}
           <div>
             <h2 style={{ fontSize: 18, fontWeight: 800, marginBottom: 20, color: "#aaa" }}>
-              Barbers / Stylists
+              {shopType === "barbershop" ? "Barbers" :
+               shopType === "nail_salon" ? "Nail Techs" :
+               shopType === "spa" ? "Specialists" :
+               shopType === "lash_studio" ? "Lash Artists" : "Stylists / Specialists"}
             </h2>
             <div style={{ display: "grid", gap: 12 }}>
               {barbers.map((b, i) => (
@@ -309,10 +364,9 @@ export default function OnboardPage() {
                     onChange={(e) => updateBarber(i, "role", e.target.value)}
                     style={fieldStyle}
                   >
-                    <option value="Barber">Barber</option>
-                    <option value="Head Barber">Head Barber</option>
-                    <option value="Stylist">Stylist</option>
-                    <option value="Master Barber">Master Barber</option>
+                    {availableRoles.map((r) => (
+                      <option key={r} value={r}>{r}</option>
+                    ))}
                   </select>
                   {barbers.length > 1 && (
                     <button

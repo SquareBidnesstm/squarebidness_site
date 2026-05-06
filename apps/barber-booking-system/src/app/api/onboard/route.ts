@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../lib/supabase/server";
 
 type OnboardPayload = {
+  shopType?: string;
   shopName?: string;
   slug?: string;
   city?: string;
@@ -12,13 +13,48 @@ type OnboardPayload = {
   pin?: string;
 };
 
-const DEFAULT_SERVICES = [
-  { slug: "haircut", name: "Haircut", duration_minutes: 45, price: 35.00, sort_order: 1 },
-  { slug: "haircut-beard", name: "Haircut + Beard", duration_minutes: 60, price: 45.00, sort_order: 2 },
-  { slug: "kids-cut", name: "Kids Cut", duration_minutes: 30, price: 25.00, sort_order: 3 },
-  { slug: "enhancements", name: "Cut + Enhancements", duration_minutes: 60, price: 50.00, sort_order: 4 },
-  { slug: "vip", name: "VIP Appointment", duration_minutes: 90, price: 75.00, sort_order: 5 },
-];
+type ServiceDef = { slug: string; name: string; duration_minutes: number; price: number; sort_order: number };
+
+const SERVICES_BY_TYPE: Record<string, ServiceDef[]> = {
+  barbershop: [
+    { slug: "haircut", name: "Haircut", duration_minutes: 45, price: 35.00, sort_order: 1 },
+    { slug: "haircut-beard", name: "Haircut + Beard", duration_minutes: 60, price: 45.00, sort_order: 2 },
+    { slug: "kids-cut", name: "Kids Cut", duration_minutes: 30, price: 25.00, sort_order: 3 },
+    { slug: "enhancements", name: "Cut + Enhancements", duration_minutes: 60, price: 50.00, sort_order: 4 },
+    { slug: "vip", name: "VIP Appointment", duration_minutes: 90, price: 75.00, sort_order: 5 },
+  ],
+  beauty_salon: [
+    { slug: "wash-style", name: "Wash & Style", duration_minutes: 60, price: 45.00, sort_order: 1 },
+    { slug: "blowout", name: "Blowout", duration_minutes: 45, price: 40.00, sort_order: 2 },
+    { slug: "cut-style", name: "Cut & Style", duration_minutes: 60, price: 55.00, sort_order: 3 },
+    { slug: "hair-color", name: "Hair Color", duration_minutes: 120, price: 80.00, sort_order: 4 },
+    { slug: "braids-natural", name: "Braids / Natural", duration_minutes: 90, price: 65.00, sort_order: 5 },
+    { slug: "vip", name: "VIP Appointment", duration_minutes: 90, price: 100.00, sort_order: 6 },
+  ],
+  nail_salon: [
+    { slug: "manicure", name: "Manicure", duration_minutes: 30, price: 25.00, sort_order: 1 },
+    { slug: "pedicure", name: "Pedicure", duration_minutes: 45, price: 35.00, sort_order: 2 },
+    { slug: "gel-manicure", name: "Gel Manicure", duration_minutes: 45, price: 40.00, sort_order: 3 },
+    { slug: "full-set", name: "Full Set Acrylics", duration_minutes: 60, price: 55.00, sort_order: 4 },
+    { slug: "fill-in", name: "Fill-In", duration_minutes: 45, price: 35.00, sort_order: 5 },
+  ],
+  spa: [
+    { slug: "swedish-massage", name: "Swedish Massage", duration_minutes: 60, price: 75.00, sort_order: 1 },
+    { slug: "deep-tissue", name: "Deep Tissue", duration_minutes: 60, price: 85.00, sort_order: 2 },
+    { slug: "facial", name: "Facial", duration_minutes: 60, price: 65.00, sort_order: 3 },
+    { slug: "body-wrap", name: "Body Wrap", duration_minutes: 75, price: 90.00, sort_order: 4 },
+  ],
+  lash_studio: [
+    { slug: "classic-full-set", name: "Classic Full Set", duration_minutes: 90, price: 85.00, sort_order: 1 },
+    { slug: "volume-full-set", name: "Volume Full Set", duration_minutes: 120, price: 110.00, sort_order: 2 },
+    { slug: "fill", name: "Fill", duration_minutes: 60, price: 55.00, sort_order: 3 },
+    { slug: "lash-lift", name: "Lash Lift", duration_minutes: 45, price: 65.00, sort_order: 4 },
+  ],
+  other: [
+    { slug: "service-1", name: "Service 1", duration_minutes: 30, price: 30.00, sort_order: 1 },
+    { slug: "service-2", name: "Service 2", duration_minutes: 60, price: 50.00, sort_order: 2 },
+  ],
+};
 
 const DEFAULT_HOURS = [
   { day_of_week: 0, is_closed: true, open_time: null, close_time: null },
@@ -41,7 +77,9 @@ export async function POST(req: NextRequest) {
   try {
     const body = (await req.json()) as OnboardPayload;
 
-    const { shopName, slug, city, state, timezone, ownerName, barbers, pin } = body;
+    const { shopType, shopName, slug, city, state, timezone, ownerName, barbers, pin } = body;
+    const cleanShopType = shopType && SERVICES_BY_TYPE[shopType] ? shopType : "barbershop";
+    const DEFAULT_SERVICES = SERVICES_BY_TYPE[cleanShopType];
 
     if (!shopName || !slug || !city || !state || !ownerName || !pin) {
       return NextResponse.json({ ok: false, error: "Missing required fields." }, { status: 400 });
@@ -153,6 +191,11 @@ export async function POST(req: NextRequest) {
         shop_id: shop.id,
         key: "admin_auth",
         value_json: { pin },
+      },
+      {
+        shop_id: shop.id,
+        key: "shop_type",
+        value_json: { type: cleanShopType },
       },
       {
         shop_id: shop.id,

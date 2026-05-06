@@ -16,6 +16,26 @@ export default async function ShopLanding({
     .eq("active", true)
     .single();
 
+  const { data: shopTypeSetting } = await supabaseServer
+    .from("shop_settings")
+    .select("value_json")
+    .eq("shop_id", shop?.id ?? "")
+    .eq("key", "shop_type")
+    .single();
+
+  const shopType = (shopTypeSetting?.value_json as { type?: string } | null)?.type ?? "barbershop";
+
+  const specialistLabel: Record<string, string> = {
+    barbershop: "barber",
+    beauty_salon: "stylist",
+    nail_salon: "nail tech",
+    spa: "specialist",
+    lash_studio: "lash artist",
+    other: "specialist",
+  };
+
+  const label = specialistLabel[shopType] ?? "specialist";
+
   if (!shop) notFound();
 
   const { data: barbers } = await supabaseServer
@@ -53,7 +73,7 @@ export default async function ShopLanding({
           {shop.name}
         </h1>
         <p style={{ color: "#666", fontSize: 16, margin: 0 }}>
-          Select your barber to book an appointment.
+          Select your {label} to book an appointment.
         </p>
       </div>
 
