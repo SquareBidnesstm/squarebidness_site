@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import ServicesTab from "./ServicesTab";
 
 type BookingStatus =
   | "pending"
@@ -74,6 +75,7 @@ export default function AdminPage() {
   const shopSlug = params.shopSlug as string;
   const router = useRouter();
 
+  const [activeTab, setActiveTab] = useState<"bookings" | "services">("bookings");
   const [shopName, setShopName] = useState("");
   const [bookings, setBookings] = useState<AdminBooking[]>([]);
   const [loading, setLoading] = useState(true);
@@ -273,6 +275,33 @@ export default function AdminPage() {
           </p>
         </div>
 
+        {/* Tab nav */}
+        <div style={{ display: "flex", gap: 8, marginBottom: 28 }}>
+          {(["bookings", "services"] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              style={{
+                padding: "10px 20px",
+                borderRadius: 10,
+                border: activeTab === tab ? "none" : "1px solid #2d2d2d",
+                background: activeTab === tab ? "#d4af37" : "#111",
+                color: activeTab === tab ? "#000" : "#888",
+                fontWeight: 800,
+                fontSize: 14,
+                cursor: "pointer",
+                textTransform: "capitalize",
+              }}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        {activeTab === "services" ? (
+          <ServicesTab shopSlug={shopSlug} />
+        ) : (
+        <>
         <div
           style={{
             display: "grid",
@@ -595,6 +624,8 @@ export default function AdminPage() {
             </div>
           )}
         </div>
+        </>
+        )}
       </section>
     </main>
   );
