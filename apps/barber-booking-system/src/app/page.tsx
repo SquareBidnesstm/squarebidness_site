@@ -1,4 +1,34 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "SquareBidness — Booking Platform",
+  description:
+    "Professional appointment booking for barbershops, beauty salons, nail salons, spas, and lash studios. Get your shop online in minutes.",
+  openGraph: {
+    title: "SquareBidness — Booking Platform",
+    description:
+      "Professional appointment booking for barbershops, beauty salons, nail salons, spas, and lash studios.",
+    url: "https://booking.squarebidness.com",
+    siteName: "SquareBidness",
+    images: [
+      {
+        url: "https://booking.squarebidness.com/og-platform.png",
+        width: 1200,
+        height: 630,
+        alt: "SquareBidness — Booking Platform",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SquareBidness — Booking Platform",
+    description:
+      "Professional appointment booking for barbershops, beauty salons, nail salons, spas, and lash studios.",
+    images: ["https://booking.squarebidness.com/og-platform.png"],
+  },
+};
 
 export default function PlatformLanding() {
   return (
