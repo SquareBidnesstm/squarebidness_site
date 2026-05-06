@@ -34,9 +34,17 @@ export default function BookingForm({ shopSlug, shopName, barberSlug, barberName
   const [slots, setSlots] = useState<TimeSlot[]>([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [shopClosed, setShopClosed] = useState(false);
-  const [depositAmount, setDepositAmount] = useState<number | null>(null);
+  const [depositInfo, setDepositInfo] = useState<{ enabled: boolean; amount: number; type: "fixed" | "percent" } | null>(null);
 
   const selectedService = services.find((s) => s.id === service);
+
+  // Fetch deposit settings once on load
+  useEffect(() => {
+    fetch(`/api/${shopSlug}/admin/deposit-settings`)
+      .then((r) => r.json())
+      .then((d) => { if (d.ok && d.settings?.enabled) setDepositInfo(d.settings); })
+      .catch(() => {});
+  }, [shopSlug]);
 
   // Fetch available slots whenever date or service changes
   useEffect(() => {
@@ -74,50 +82,53 @@ export default function BookingForm({ shopSlug, shopName, barberSlug, barberName
     return () => { cancelled = true; };
   }, [date, service, selectedService, shopSlug, barberSlug]);
 
-  async function handleBooking() {
+  function validateForm(): boolean {
     if (!name || !phone || !date || !service || !time) {
       setError("Name, phone, date, service, and time are required.");
-      return;
+      return false;
     }
+    return true;
+  }
 
+  function bookingPayload() {
+    return {
+      barber_id: barberSlug,
+      customer_name: name,
+      customer_phone: phone,
+      customer_email: email || null,
+      service,
+      time: slots.find((s) => s.time === time)?.label ?? time,
+      date,
+    };
+  }
+
+  async function handlePayDeposit() {
+    if (!validateForm()) return;
     setLoading(true);
     setError("");
-
-    // Check if deposit is required
-    const depositRes = await fetch(`/api/${shopSlug}/admin/deposit-settings`).catch(() => null);
-    if (depositRes?.ok) {
-      const depositData = await depositRes.json().catch(() => null);
-      if (depositData?.settings?.enabled) {
-        const dep = await fetch(`/api/${shopSlug}/booking/deposit`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            barber_id: barberSlug, customer_name: name, customer_phone: phone,
-            customer_email: email || null, service,
-            time: slots.find((s) => s.time === time)?.label ?? time, date,
-          }),
-        });
-        const depData = await dep.json().catch(() => null);
-        if (dep.ok && depData?.url) {
-          setDepositAmount(depData.depositAmount);
-          window.location.href = depData.url;
-          return;
-        }
-      }
+    const res = await fetch(`/api/${shopSlug}/booking/deposit`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(bookingPayload()),
+    });
+    const data = await res.json().catch(() => null);
+    setLoading(false);
+    if (res.ok && data?.url) {
+      window.location.href = data.url;
+    } else {
+      setError(data?.error || "Could not start deposit. Try booking without deposit.");
     }
+  }
+
+  async function handleBooking() {
+    if (!validateForm()) return;
+    setLoading(true);
+    setError("");
 
     const res = await fetch(`/api/${shopSlug}/bookings/create`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        barber_id: barberSlug,
-        customer_name: name,
-        customer_phone: phone,
-        customer_email: email || null,
-        service,
-        time: slots.find((s) => s.time === time)?.label ?? time,
-        date,
-      }),
+      body: JSON.stringify(bookingPayload()),
     });
 
     setLoading(false);
@@ -343,25 +354,61 @@ export default function BookingForm({ shopSlug, shopName, barberSlug, barberName
           </Field>
         </div>
 
-        <button
-          onClick={handleBooking}
-          disabled={loading || slotsLoading || slots.length === 0 || !time}
-          style={{
-            marginTop: 30,
-            width: "100%",
-            padding: 16,
-            background: loading ? "#a88d20" : "#d4af37",
-            color: "#000",
-            fontWeight: 800,
-            border: "none",
-            cursor: loading || slotsLoading || slots.length === 0 || !time ? "not-allowed" : "pointer",
+        {/* Deposit option banner */}
+        {depositInfo?.enabled && !slotsLoading && slots.length > 0 && time && (
+          <div style={{
+            marginTop: 24,
+            padding: "14px 16px",
+            background: "#0d0c00",
+            border: "1px solid #3a2a00",
             borderRadius: 10,
-            fontSize: 16,
-            opacity: slotsLoading || (selectedService && slots.length === 0 && !shopClosed && !slotsLoading) ? 0.5 : 1,
-          }}
-        >
-          {loading ? "Booking..." : "Confirm Booking"}
-        </button>
+            fontSize: 13,
+            color: "#aaa",
+          }}>
+            <span style={{ color: "#d4af37", fontWeight: 700 }}>
+              ${depositInfo.type === "percent"
+                ? ((selectedService ? selectedService.price * depositInfo.amount / 100 : 0).toFixed(2))
+                : depositInfo.amount.toFixed(2)} deposit available
+            </span>
+            {" "}— hold your spot now, pay the rest at your appointment.
+          </div>
+        )}
+
+        <div style={{ marginTop: depositInfo?.enabled ? 12 : 30, display: "grid", gap: 10 }}>
+          {depositInfo?.enabled && (
+            <button
+              onClick={handlePayDeposit}
+              disabled={loading || slotsLoading || slots.length === 0 || !time}
+              style={{
+                width: "100%", padding: 16,
+                background: loading ? "#a88d20" : "#d4af37",
+                color: "#000", fontWeight: 800, border: "none",
+                cursor: loading || !time ? "not-allowed" : "pointer",
+                borderRadius: 10, fontSize: 15,
+                opacity: !time ? 0.5 : 1,
+              }}
+            >
+              {loading ? "Loading..." : `Pay Deposit & Confirm`}
+            </button>
+          )}
+
+          <button
+            onClick={handleBooking}
+            disabled={loading || slotsLoading || slots.length === 0 || !time}
+            style={{
+              width: "100%", padding: 16,
+              background: depositInfo?.enabled ? "transparent" : loading ? "#a88d20" : "#d4af37",
+              color: depositInfo?.enabled ? "#888" : "#000",
+              fontWeight: 800,
+              border: depositInfo?.enabled ? "1px solid #2a2a2a" : "none",
+              cursor: loading || slotsLoading || slots.length === 0 || !time ? "not-allowed" : "pointer",
+              borderRadius: 10, fontSize: depositInfo?.enabled ? 14 : 16,
+              opacity: slotsLoading || (selectedService && slots.length === 0 && !shopClosed && !slotsLoading) ? 0.5 : 1,
+            }}
+          >
+            {loading ? "Booking..." : depositInfo?.enabled ? "Book Without Deposit" : "Confirm Booking"}
+          </button>
+        </div>
 
         {error && (
           <div
