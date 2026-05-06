@@ -77,6 +77,7 @@ export async function POST(
     cancel_url: `${origin}/${shopSlug}/admin?billing=cancel`,
     metadata: { shop_slug: shopSlug, shop_id: shop.id },
     subscription_data: {
+      trial_period_days: 30,
       metadata: { shop_slug: shopSlug, shop_id: shop.id },
     },
     allow_promotion_codes: true,

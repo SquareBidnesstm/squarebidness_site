@@ -149,7 +149,7 @@ export default function BillingTab({ shopSlug }: Props) {
                 disabled={working}
                 style={goldButton}
               >
-                {working ? "Loading..." : "Upgrade to Pro — $29/mo"}
+                {working ? "Loading..." : "Start Free Trial — $29/mo after 30 days"}
               </button>
             )}
           </div>
