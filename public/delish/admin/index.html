@@ -395,6 +395,12 @@
     </div>
 
     <div class="card">
+      <h2>Mark Base Options Sold Out</h2>
+      <p class="muted">Checked bases are disabled on plate choices and blocked in checkout. This list resets every day at midnight.</p>
+      <div class="item-list" id="basesSoldOutList"></div>
+    </div>
+
+    <div class="card">
       <h2>Customer Banner Message</h2>
       <p class="muted">Optional live message shown at the top of the Delish order page.</p>
       <textarea id="customerMessage" placeholder="Example: Black Eyed Peas sold out for today."></textarea>
@@ -463,6 +469,12 @@ const reloadPickupWindowsBtn = document.getElementById("reloadPickupWindowsBtn")
       { id: "extra_side_green_beans", name: "Extra Side - Green Beans" },
       { id: "extra_side_potato_salad", name: "Extra Side - Potato Salad" },
       { id: "extra_side_rice_dressing", name: "Extra Side - Rice Dressing" }
+    ];
+
+    const BASE_CATALOG = [
+      { id: "base_cornbread_dressing", name: "Base - Cornbread Dressing" },
+      { id: "base_rice", name: "Base - Rice" },
+      { id: "base_mashed_potatoes", name: "Base - Mashed Potatoes" }
     ];
 
     function setStatus(text, tone = "") {
@@ -741,7 +753,7 @@ async function savePickupWindows() {
       `).join("");
     }
 
-    function renderSoldOutList(selected = []) {
+function renderSoldOutList(selected = []) {
   const selectedSet = new Set(selected);
   const wrap = document.getElementById("itemsSoldOutList");
   wrap.innerHTML = ITEM_CATALOG.map(item => `
@@ -751,6 +763,17 @@ async function savePickupWindows() {
     </label>
   `).join("");
 }
+
+    function renderBaseSoldOutList(selected = []) {
+      const selectedSet = new Set(selected);
+      const wrap = document.getElementById("basesSoldOutList");
+      wrap.innerHTML = BASE_CATALOG.map(base => `
+        <label class="item">
+          <input type="checkbox" value="${base.id}" ${selectedSet.has(base.id) ? "checked" : ""} />
+          <span>${base.name}</span>
+        </label>
+      `).join("");
+    }
 
     function bindMutualExclusion() {
   document.getElementById("itemsOffList").addEventListener("change", (e) => {
@@ -783,6 +806,7 @@ async function savePickupWindows() {
       document.getElementById("customerMessage").value = overrides.customerMessage || "";
       renderItemList(Array.isArray(overrides.itemsOff) ? overrides.itemsOff : []);
       renderSoldOutList(Array.isArray(overrides.itemsSoldOut) ? overrides.itemsSoldOut : []);
+      renderBaseSoldOutList(Array.isArray(overrides.basesSoldOut) ? overrides.basesSoldOut : []);
       setStatus("Overrides loaded.", "good");
     }
 
@@ -802,6 +826,7 @@ async function savePickupWindows() {
 
       const itemsOff = [...document.querySelectorAll("#itemsOffList input:checked")].map(el => el.value);
       const itemsSoldOut = [...document.querySelectorAll("#itemsSoldOutList input:checked")].map(el => el.value);
+      const basesSoldOut = [...document.querySelectorAll("#basesSoldOutList input:checked")].map(el => el.value);
 
       const payload = {
   sections: {
@@ -811,6 +836,7 @@ async function savePickupWindows() {
   },
   itemsOff,
   itemsSoldOut,
+  basesSoldOut,
   customerMessage: document.getElementById("customerMessage").value.trim()
 };
       setStatus("Saving admin changes...");
@@ -894,6 +920,7 @@ reloadPickupWindowsBtn?.addEventListener("click", () => {
       setStatus(err.message || "Unable to load admin.", "bad");
       renderItemList([]);
       renderSoldOutList([]);
+      renderBaseSoldOutList([]);
     });
     loadPickupWindows().catch((err) => {
       console.error(err);

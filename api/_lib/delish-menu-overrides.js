@@ -15,6 +15,8 @@ export const DEFAULT_DELISH_MENU_OVERRIDES = {
   itemsOffDate: "",
   itemsSoldOut: [],
   itemsSoldOutDate: "",
+  basesSoldOut: [],
+  basesSoldOutDate: "",
   customerMessage: "",
   updatedAt: "",
   updatedBy: "system",
@@ -53,6 +55,11 @@ export async function getDelishMenuOverrides() {
     soldOutDate === todayKey && Array.isArray(saved.itemsSoldOut)
       ? saved.itemsSoldOut
       : [];
+  const basesSoldOutDate = String(saved.basesSoldOutDate || "");
+  const basesSoldOut =
+    basesSoldOutDate === todayKey && Array.isArray(saved.basesSoldOut)
+      ? saved.basesSoldOut
+      : [];
 
   return {
     ...DEFAULT_DELISH_MENU_OVERRIDES,
@@ -65,5 +72,7 @@ export async function getDelishMenuOverrides() {
     itemsOffDate: itemsOff.length ? offDate : todayKey,
     itemsSoldOut,
     itemsSoldOutDate: itemsSoldOut.length ? soldOutDate : todayKey,
+    basesSoldOut,
+    basesSoldOutDate: basesSoldOut.length ? basesSoldOutDate : todayKey,
   };
 }

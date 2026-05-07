@@ -20,6 +20,11 @@ function normalizeItemsSoldOut(itemsSoldOut) {
   return [...new Set(itemsSoldOut.map((x) => String(x || "").trim()).filter(Boolean))];
 }
 
+function normalizeBasesSoldOut(basesSoldOut) {
+  if (!Array.isArray(basesSoldOut)) return [];
+  return [...new Set(basesSoldOut.map((x) => String(x || "").trim()).filter(Boolean))];
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -48,6 +53,7 @@ export default async function handler(req, res) {
     const current = await getDelishMenuOverrides();
     const itemsOff = normalizeItemsOff(body.itemsOff);
     const itemsSoldOut = normalizeItemsSoldOut(body.itemsSoldOut);
+    const basesSoldOut = normalizeBasesSoldOut(body.basesSoldOut);
 
     const next = {
       ...current,
@@ -60,6 +66,8 @@ export default async function handler(req, res) {
       itemsOffDate: getCentralDateKey(),
       itemsSoldOut,
       itemsSoldOutDate: getCentralDateKey(),
+      basesSoldOut,
+      basesSoldOutDate: getCentralDateKey(),
       customerMessage: String(body.customerMessage || "").trim().slice(0, 180),
       updatedAt: new Date().toISOString(),
       updatedBy: "operator",

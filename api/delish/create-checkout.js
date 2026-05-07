@@ -283,6 +283,13 @@ function isItemSoldOutBackend(itemId, overrides = {}) {
   return itemsSoldOut.includes(itemId);
 }
 
+function isBaseSoldOutBackend(baseId, overrides = {}) {
+  const basesSoldOut = Array.isArray(overrides?.basesSoldOut)
+    ? overrides.basesSoldOut
+    : [];
+  return basesSoldOut.includes(baseId);
+}
+
 function buildShortOrderSummary(items = []) {
   return items
     .map((item) => `${item.qty}x ${item.name}`)
@@ -547,6 +554,8 @@ export default async function handler(req, res) {
         if (isItemSoldOutBackend(id, menuOverrides)) return null;
  
         const allowed = allowedMap.get(id);
+        const baseId = String(item.baseId || "").trim();
+        if (baseId && isBaseSoldOutBackend(baseId, menuOverrides)) return null;
  
         return {
           id: allowed.id,
@@ -554,7 +563,7 @@ export default async function handler(req, res) {
           qty,
           price: allowed.price,
           total: qty * allowed.price,
-          baseId: item.baseId || "",       // FIX: was missing
+          baseId,       // FIX: was missing
           baseName: item.baseName || "",   // FIX: was missing
           side1Id: item.side1Id || "",
           side2Id: item.side2Id || "",

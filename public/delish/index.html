@@ -577,7 +577,10 @@
 
     return [
       `<option value="">${getBaseLabel(item)}</option>`,
-      ...bases.map(base => `<option value="${base.id}">${base.name}</option>`)
+      ...bases.map(base => {
+        const soldOut = isBaseSoldOut(base.id);
+        return `<option value="${base.id}" ${soldOut ? "disabled" : ""}>${base.name}${soldOut ? " (Sold Out)" : ""}</option>`;
+      })
     ].join("");
   }
 
@@ -977,13 +980,14 @@ function getDrinkSelections() {
       const menuItem = getCurrentMainItems().find(m => m.id === item.id);
       const requiresBase = Array.isArray(menuItem?.baseOptions) && menuItem.baseOptions.length > 0;
       const requiresSides = menuItem?.sideSelectionRequired !== false;
+      const validBase = !item.baseId || !isBaseSoldOut(item.baseId);
 
       if (requiresBase && requiresSides) {
-        return item.baseId && item.side1Id && item.side2Id;
+        return item.baseId && validBase && item.side1Id && item.side2Id;
       }
 
       if (requiresBase && !requiresSides) {
-        return item.baseId;
+        return item.baseId && validBase;
       }
 
       if (!requiresBase && requiresSides) {
@@ -1020,6 +1024,11 @@ function getDrinkSelections() {
   function isItemSoldOut(itemId) {
   const soldOut = Array.isArray(MENU_OVERRIDES?.itemsSoldOut) ? MENU_OVERRIDES.itemsSoldOut : [];
   return soldOut.includes(itemId);
+}
+
+  function isBaseSoldOut(baseId) {
+  const soldOut = Array.isArray(MENU_OVERRIDES?.basesSoldOut) ? MENU_OVERRIDES.basesSoldOut : [];
+  return soldOut.includes(baseId);
 }
 
   function calc() {
