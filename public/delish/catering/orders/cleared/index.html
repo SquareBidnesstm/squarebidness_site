@@ -1,0 +1,465 @@
+<!-- FILE: /public/delish/catering/orders/cleared/index.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cleared Catering Requests | Delish</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#0f0f0f" />
+  <link rel="manifest" href="/delish/manifest.json" />
+  <link rel="icon" sizes="16x16" href="/delish/assets/delish-favicon-16.png" />
+  <link rel="icon" sizes="32x32" href="/delish/assets/delish-favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/delish/assets/delish-logo-mark-180.png" />
+
+  <style>
+    :root{
+      --bg:#0f0f10;
+      --panel:#171718;
+      --panel-2:#1d1d20;
+      --border:#2c2c2f;
+      --text:#f5f2ea;
+      --muted:#cfc7ba;
+      --gold:#d7ae72;
+      --gold-2:#f2d7ad;
+      --gold-soft:rgba(215,174,114,.1);
+      --gold-border:rgba(215,174,114,.24);
+      --red:#a32626;
+      --shadow:0 14px 40px rgba(0,0,0,.28);
+    }
+
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;
+      padding:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    }
+
+    .wrap{
+      width:min(1120px,92%);
+      margin:0 auto;
+      padding:36px 0 72px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:24px;
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-size:.8rem;
+      font-weight:800;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:#cfb78f;
+      margin-bottom:10px;
+    }
+
+    .dot{
+      width:8px;
+      height:8px;
+      border-radius:999px;
+      background:var(--gold);
+      box-shadow:0 0 0 5px rgba(215,174,114,.12);
+      flex:0 0 auto;
+    }
+
+    h1{
+      margin:0;
+      font-size:clamp(2rem,4vw,3.2rem);
+      letter-spacing:-.04em;
+      line-height:.98;
+    }
+
+    .sub{
+      margin:12px 0 0;
+      max-width:760px;
+      color:var(--muted);
+      font-size:1.02rem;
+      line-height:1.6;
+    }
+
+    .refresh-btn,
+    .restore-btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:48px;
+      padding:0 18px;
+      border-radius:999px;
+      border:1px solid rgba(215,174,114,.28);
+      background:linear-gradient(180deg,#f2d7ad,#d7ae72);
+      color:#181410;
+      font-weight:800;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+
+    .restore-btn[disabled]{
+      opacity:.6;
+      cursor:not-allowed;
+    }
+
+    .cross-links{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:18px;
+    }
+
+    .cross-link{
+      display:inline-flex;
+      align-items:center;
+      min-height:42px;
+      padding:0 14px;
+      border-radius:999px;
+      background:#171718;
+      border:1px solid #2c2c2f;
+      color:#cfc7ba;
+      font-weight:800;
+      text-decoration:none;
+    }
+
+    .cross-link.active{
+      background:rgba(215,174,114,.15);
+      border-color:rgba(215,174,114,.35);
+      color:#f2d7ad;
+    }
+
+    .status-bar{
+      margin-bottom:18px;
+      padding:14px 16px;
+      border-radius:16px;
+      background:var(--gold-soft);
+      border:1px solid var(--gold-border);
+      color:#f4ead8;
+      font-size:.98rem;
+    }
+
+    .orders{
+      display:grid;
+      gap:18px;
+    }
+
+    .empty,
+    .order-card{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:24px;
+      padding:22px;
+      box-shadow:var(--shadow);
+    }
+
+    .empty{
+      color:var(--muted);
+      line-height:1.7;
+    }
+
+    .order-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:16px;
+      margin-bottom:18px;
+    }
+
+    .request-number{
+      display:inline-flex;
+      align-items:center;
+      padding:8px 12px;
+      border-radius:999px;
+      background:rgba(215,174,114,.08);
+      border:1px solid rgba(215,174,114,.18);
+      color:#ead3ab;
+      font-size:.85rem;
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+
+    .status-pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:36px;
+      padding:6px 12px;
+      border-radius:999px;
+      font-size:.82rem;
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      border:1px solid rgba(163,38,38,.35);
+      background:rgba(163,38,38,.16);
+      color:#ffd8d8;
+    }
+
+    .customer-name{
+      margin:12px 0 0;
+      font-size:clamp(1.25rem,2.2vw,1.7rem);
+      letter-spacing:-.03em;
+      line-height:1.1;
+    }
+
+    .customer-meta{
+      margin:8px 0 0;
+      color:var(--muted);
+      line-height:1.6;
+      font-size:.98rem;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:14px;
+      margin-top:18px;
+    }
+
+    .panel{
+      background:var(--panel-2);
+      border:1px solid #2a2a2d;
+      border-radius:20px;
+      padding:16px;
+    }
+
+    .label{
+      font-size:.78rem;
+      font-weight:800;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:#cdbda3;
+      margin-bottom:10px;
+    }
+
+    .value{
+      color:var(--text);
+      line-height:1.55;
+      font-size:1rem;
+      word-break:break-word;
+    }
+
+    .actions{
+      margin-top:16px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .mini-status{
+      color:#cfc7ba;
+      font-size:.94rem;
+    }
+
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .topbar{flex-direction:column;align-items:flex-start}
+      .refresh-btn,.restore-btn{width:100%}
+      .order-head{flex-direction:column;align-items:flex-start}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <div class="eyebrow"><span class="dot"></span>Delish Catering Archive</div>
+        <h1>Cleared Requests</h1>
+        <p class="sub">
+          Requests cleared from the active catering screen are kept here so they can be restored if needed.
+        </p>
+      </div>
+      <button id="refreshBtn" class="refresh-btn" type="button">Refresh</button>
+    </div>
+
+    <div class="cross-links">
+      <a href="/delish/orders/" class="cross-link">Kitchen Orders</a>
+      <a href="/delish/catering/orders/" class="cross-link">Catering Orders</a>
+      <a href="/delish/catering/orders/cleared/" class="cross-link active">Cleared Requests</a>
+    </div>
+
+    <div id="statusBar" class="status-bar">Loading cleared catering requests...</div>
+    <section id="orders" class="orders" aria-live="polite"></section>
+  </div>
+
+  <script>
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function formatDate(value) {
+      if (!value) return "Not provided";
+      const parts = String(value).split("-");
+      if (parts.length === 3) {
+        const date = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+        if (!Number.isNaN(date.getTime())) {
+          return date.toLocaleDateString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric"
+          });
+        }
+      }
+      return value;
+    }
+
+    function formatDateTime(value) {
+      if (!value) return "—";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return value;
+      return date.toLocaleString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+      });
+    }
+
+    function prettyStatus(status) {
+      return String(status || "unknown")
+        .replace(/_/g, " ")
+        .replace(/\b\w/g, (m) => m.toUpperCase());
+    }
+
+    async function restoreCatering(id) {
+      const status = document.querySelector(`[data-restore-status="${id}"]`);
+      const btn = document.querySelector(`[data-restore-btn="${id}"]`);
+
+      if (btn) btn.disabled = true;
+      if (status) status.textContent = "Restoring request...";
+
+      try {
+        const res = await fetch("/api/delish/clear-catering-request/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ id, action: "restore" })
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || "Failed to restore catering request.");
+        }
+
+        if (status) status.textContent = "Request restored.";
+        await loadOrders();
+      } catch (error) {
+        if (status) status.textContent = error.message || "Unable to restore request.";
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    function renderOrderCard(order) {
+      return `
+        <article class="order-card">
+          <div class="order-head">
+            <div>
+              <div class="request-number">${escapeHtml(order.requestNumber || "Pending")}</div>
+              <h2 class="customer-name">${escapeHtml(order.customerName || "Unknown customer")}</h2>
+              <div class="customer-meta">
+                ${escapeHtml(order.phone || "Not provided")}<br />
+                ${escapeHtml(order.email || "Not provided")}
+              </div>
+            </div>
+            <div class="status-pill">${prettyStatus(order.status)}</div>
+          </div>
+
+          <div class="grid">
+            <div class="panel">
+              <div class="label">Event Details</div>
+              <div class="value">
+                <strong>Type:</strong> ${escapeHtml(order.eventType || "Not provided")}<br />
+                <strong>Date:</strong> ${escapeHtml(formatDate(order.eventDate))}<br />
+                <strong>Time:</strong> ${escapeHtml(order.eventTime || "Not provided")}<br />
+                <strong>Guests:</strong> ${escapeHtml(order.guestCount || "Not provided")}<br />
+                <strong>Service:</strong> ${escapeHtml(order.serviceType || "Not provided")}
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="label">Clear Details</div>
+              <div class="value">
+                <strong>Previous Status:</strong> ${escapeHtml(prettyStatus(order.previousStatus || "new_request"))}<br />
+                <strong>Cleared At:</strong> ${escapeHtml(formatDateTime(order.clearedAt))}<br />
+                <strong>Created:</strong> ${escapeHtml(formatDateTime(order.createdAt))}
+              </div>
+            </div>
+          </div>
+
+          <div class="panel" style="margin-top:14px;">
+            <div class="label">Requested Items</div>
+            <div class="value">${escapeHtml(order.requestedItems || "Not provided").replace(/\n/g, "<br />")}</div>
+          </div>
+
+          <div class="actions">
+            <button
+              class="restore-btn"
+              type="button"
+              data-restore-btn="${escapeHtml(order.id)}"
+              onclick="restoreCatering('${escapeHtml(order.id)}')"
+            >
+              Restore To Active
+            </button>
+            <div class="mini-status" data-restore-status="${escapeHtml(order.id)}"></div>
+          </div>
+        </article>
+      `;
+    }
+
+    async function loadOrders() {
+      const ordersEl = document.getElementById("orders");
+      const statusBar = document.getElementById("statusBar");
+
+      statusBar.textContent = "Loading cleared catering requests...";
+      ordersEl.innerHTML = "";
+
+      try {
+        const res = await fetch("/api/delish/catering-orders/?view=cleared", {
+          method: "GET",
+          cache: "no-store"
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || "Failed to load cleared requests.");
+        }
+
+        const orders = Array.isArray(data.orders) ? data.orders : [];
+
+        if (!orders.length) {
+          statusBar.textContent = "No cleared catering requests right now.";
+          ordersEl.innerHTML = `<div class="empty">No catering requests have been cleared.</div>`;
+          return;
+        }
+
+        statusBar.textContent = `${orders.length} cleared request${orders.length === 1 ? "" : "s"} loaded.`;
+        ordersEl.innerHTML = orders.map(renderOrderCard).join("");
+      } catch (error) {
+        statusBar.textContent = "Unable to load cleared requests right now.";
+        ordersEl.innerHTML = `<div class="empty">There was a problem loading the cleared request archive.</div>`;
+        console.error("DELISH CLEARED CATERING PAGE ERROR:", error);
+      }
+    }
+
+    document.getElementById("refreshBtn").addEventListener("click", loadOrders);
+    loadOrders();
+    setInterval(loadOrders, 30000);
+  </script>
+</body>
+</html>

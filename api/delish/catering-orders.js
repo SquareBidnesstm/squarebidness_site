@@ -6,6 +6,12 @@ const redis = new Redis({
   token: process.env.DELISH_UPSTASH_REDIS_REST_TOKEN,
 });
 
+const ACTIVE_STATUSES = new Set([
+  "new_request",
+  "awaiting_sms_confirmation",
+  "verified",
+]);
+
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
@@ -33,20 +39,17 @@ export default async function handler(req, res) {
     const keys = ids.map((id) => `delish:catering:${id}`);
     const records = await redis.mget(...keys);
 
-    // Keep this screen focused on requests that still need operator action.
-    const active = (records || [])
-      .filter(Boolean)
-      .filter((r) =>
-        [
-          "new_request",
-          "awaiting_sms_confirmation",
-          "verified",
-        ].includes(r.status)
-      );
+    const view = String(req.query?.view || "active").toLowerCase();
+    const orders = (records || []).filter(Boolean);
+    const filtered =
+      view === "cleared"
+        ? orders.filter((r) => r.status === "cleared")
+        : orders.filter((r) => ACTIVE_STATUSES.has(r.status));
 
     return res.status(200).json({
       ok: true,
-      orders: active,
+      view,
+      orders: filtered,
     });
   } catch (error) {
     console.error("GET /api/delish/catering-orders error:", error);

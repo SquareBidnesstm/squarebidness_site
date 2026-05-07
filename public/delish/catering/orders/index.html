@@ -336,6 +336,22 @@
       cursor:not-allowed;
     }
 
+    .clear-btn{
+      min-height:48px;
+      padding:0 18px;
+      border:none;
+      border-radius:999px;
+      background:#a32626;
+      color:#fff;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .clear-btn[disabled]{
+      opacity:.6;
+      cursor:not-allowed;
+    }
+
     .mini-status{
       color:#cfc7ba;
       font-size:.94rem;
@@ -372,6 +388,7 @@
       .refresh-btn{ width:100%; }
       .deposit-input{ width:100%; }
       .approve-btn{ width:100%; }
+      .clear-btn{ width:100%; }
       .approve-bar{ display:block; }
       .approve-bar > * + *{ margin-top:10px; }
     }
@@ -393,6 +410,7 @@
     <div class="cross-links">
       <a href="/delish/orders/" class="cross-link">Kitchen Orders</a>
       <a href="/delish/catering/orders/" class="cross-link active">Catering Orders</a>
+      <a href="/delish/catering/orders/cleared/" class="cross-link">Cleared Requests</a>
     </div>
 
     <section class="summary">
@@ -535,6 +553,42 @@
       }
     }
 
+    async function clearCatering(id) {
+      const status = document.querySelector(`[data-approve-status="${id}"]`);
+      const btn = document.querySelector(`[data-clear-btn="${id}"]`);
+      const confirmed = window.confirm("Clear this catering request from the active screen?");
+
+      if (!confirmed) {
+        if (status) status.textContent = "Clear cancelled.";
+        return;
+      }
+
+      if (btn) btn.disabled = true;
+      if (status) status.textContent = "Clearing request...";
+
+      try {
+        const res = await fetch("/api/delish/clear-catering-request/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ id, action: "clear" })
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || "Failed to clear catering request.");
+        }
+
+        if (status) status.textContent = "Request cleared.";
+        await loadOrders();
+      } catch (error) {
+        if (status) status.textContent = error.message || "Unable to clear request.";
+        if (btn) btn.disabled = false;
+      }
+    }
+
    function renderOrderCard(order) {
   const canApprove =
     order.status === "new_request" ||
@@ -632,6 +686,14 @@
           <div class="mini-status" data-deposit-preview="${escapeHtml(order.id)}">
             ${depositPreview ? `25% deposit will be $${escapeHtml(depositPreview)}.` : "Enter the full catering total. Deposit is calculated automatically."}
           </div>
+          <button
+            class="clear-btn"
+            type="button"
+            data-clear-btn="${escapeHtml(order.id)}"
+            onclick="clearCatering('${escapeHtml(order.id)}')"
+          >
+            Clear Request
+          </button>
         ` : `
           <div class="mini-status">
             ${order.status === "deposit_sent" ? "Deposit sent" : ""}
