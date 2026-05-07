@@ -12,6 +12,7 @@ export const DEFAULT_DELISH_MENU_OVERRIDES = {
     extraSides: true,
   },
   itemsOff: [],
+  itemsOffDate: "",
   itemsSoldOut: [],
   itemsSoldOutDate: "",
   customerMessage: "",
@@ -42,6 +43,11 @@ export async function getDelishMenuOverrides() {
   }
 
   const todayKey = getCentralDateKey();
+  const offDate = String(saved.itemsOffDate || "");
+  const itemsOff =
+    offDate === todayKey && Array.isArray(saved.itemsOff)
+      ? saved.itemsOff
+      : [];
   const soldOutDate = String(saved.itemsSoldOutDate || "");
   const itemsSoldOut =
     soldOutDate === todayKey && Array.isArray(saved.itemsSoldOut)
@@ -55,7 +61,8 @@ export async function getDelishMenuOverrides() {
       ...DEFAULT_DELISH_MENU_OVERRIDES.sections,
       ...(saved.sections || {}),
     },
-    itemsOff: Array.isArray(saved.itemsOff) ? saved.itemsOff : [],
+    itemsOff,
+    itemsOffDate: itemsOff.length ? offDate : todayKey,
     itemsSoldOut,
     itemsSoldOutDate: itemsSoldOut.length ? soldOutDate : todayKey,
   };

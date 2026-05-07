@@ -46,6 +46,7 @@ export default async function handler(req, res) {
 
     const body = req.body || {};
     const current = await getDelishMenuOverrides();
+    const itemsOff = normalizeItemsOff(body.itemsOff);
     const itemsSoldOut = normalizeItemsSoldOut(body.itemsSoldOut);
 
     const next = {
@@ -55,7 +56,8 @@ export default async function handler(req, res) {
         drinks: body?.sections?.drinks !== false,
         extraSides: body?.sections?.extraSides !== false,
       },
-      itemsOff: normalizeItemsOff(body.itemsOff),
+      itemsOff,
+      itemsOffDate: getCentralDateKey(),
       itemsSoldOut,
       itemsSoldOutDate: getCentralDateKey(),
       customerMessage: String(body.customerMessage || "").trim().slice(0, 180),
