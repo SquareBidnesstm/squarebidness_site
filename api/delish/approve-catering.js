@@ -34,6 +34,10 @@ function moneyToCents(value) {
   return Math.round(Number(value) * 100);
 }
 
+function centsToMoney(cents) {
+  return (Number(cents || 0) / 100).toFixed(2);
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -41,16 +45,22 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { id, depositAmount } = req.body || {};
+    const { id, totalAmount } = req.body || {};
 
     if (!id || typeof id !== "string") {
       return res.status(400).json({ ok: false, error: "Missing catering request id." });
     }
 
-    const deposit = Number(depositAmount);
-    if (!Number.isFinite(deposit) || deposit <= 0) {
-      return res.status(400).json({ ok: false, error: "Invalid deposit amount." });
+    const total = Number(totalAmount);
+    if (!Number.isFinite(total) || total <= 0) {
+      return res.status(400).json({ ok: false, error: "Invalid total catering amount." });
     }
+
+    const totalCents = moneyToCents(total);
+    const depositPercent = 25;
+    const depositCents = Math.max(1, Math.round(totalCents * (depositPercent / 100)));
+    const totalFormatted = centsToMoney(totalCents);
+    const depositFormatted = centsToMoney(depositCents);
 
     const key = `delish:catering:${id}`;
     const existing = await redis.get(key);
@@ -64,6 +74,9 @@ export default async function handler(req, res) {
       return res.status(200).json({
         ok: true,
         alreadyExists: true,
+        totalAmount: existing.totalAmount || "",
+        depositPercent: existing.depositPercent || depositPercent,
+        depositAmount: existing.depositAmount || "",
         depositLink: existing.depositLink,
       });
     }
@@ -78,7 +91,6 @@ export default async function handler(req, res) {
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      payment_method_types: ["card"],
       success_url: `${successUrl}?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${cancelUrl}?request_id=${encodeURIComponent(id)}`,
       customer_email: existing.email || undefined,
@@ -102,7 +114,9 @@ export default async function handler(req, res) {
         eventTime: existing.eventTime || "",
         serviceType: existing.serviceType || "",
 
-        depositAmount: String(deposit),
+        totalAmount: totalFormatted,
+        depositPercent: String(depositPercent),
+        depositAmount: depositFormatted,
       },
 
       line_items: [
@@ -110,10 +124,10 @@ export default async function handler(req, res) {
           quantity: 1,
           price_data: {
             currency: "usd",
-            unit_amount: moneyToCents(deposit),
+            unit_amount: depositCents,
             product_data: {
               name: `Delish Catering Deposit — ${existing.requestNumber}`,
-              description: `${existing.eventDate || "Event date TBD"}${
+              description: `25% deposit on $${totalFormatted} catering total • ${existing.eventDate || "Event date TBD"}${
                 existing.eventTime ? ` • ${existing.eventTime}` : ""
               }`,
             },
@@ -126,7 +140,9 @@ export default async function handler(req, res) {
       ...existing,
       updatedAt: new Date().toISOString(),
       status: "deposit_sent",
-      depositAmount: deposit.toFixed(2),
+      totalAmount: totalFormatted,
+      depositPercent,
+      depositAmount: depositFormatted,
       depositLink: session.url,
       depositSessionId: session.id,
       depositSentAt: new Date().toISOString(),
@@ -148,7 +164,8 @@ Your Delish catering request has been approved.
 Request #: ${existing.requestNumber}
 Event Date: ${existing.eventDate || "Not provided"}
 Event Time: ${existing.eventTime || "Not provided"}
-Deposit Amount: $${updated.depositAmount}
+Total Catering Amount: $${updated.totalAmount}
+Deposit Due: $${updated.depositAmount} (${updated.depositPercent}%)
 
 Use the link below to pay your deposit and secure your date:
 ${session.url}
@@ -163,7 +180,7 @@ Delish Catering
     if (twilioClient && existing.phone) {
       try {
         await twilioClient.messages.create({
-          body: `Delish Catering: Your request ${existing.requestNumber} is approved. Pay your $${updated.depositAmount} deposit here: ${session.url}`,
+          body: `Delish Catering: Your request ${existing.requestNumber} is approved. Pay your 25% deposit of $${updated.depositAmount} here: ${session.url}`,
           from: process.env.TWILIO_FROM_NUMBER,
           to: existing.phone,
         });
@@ -177,6 +194,8 @@ Delish Catering
       id: existing.id,
       requestNumber: existing.requestNumber,
       status: updated.status,
+      totalAmount: updated.totalAmount,
+      depositPercent: updated.depositPercent,
       depositAmount: updated.depositAmount,
       depositLink: updated.depositLink,
     });

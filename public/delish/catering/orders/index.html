@@ -405,11 +405,11 @@
         <div id="summaryNew" class="summary-value">—</div>
       </div>
       <div class="summary-card">
-        <div class="summary-label">Deposit Sent</div>
+        <div class="summary-label">Awaiting SMS</div>
         <div id="summarySent" class="summary-value">—</div>
       </div>
       <div class="summary-card">
-        <div class="summary-label">Deposit Paid</div>
+        <div class="summary-label">Verified</div>
         <div id="summaryPaid" class="summary-value">—</div>
       </div>
     </section>
@@ -468,25 +468,48 @@
       document.getElementById("summaryNew").textContent =
         orders.filter((o) => o.status === "new_request").length;
       document.getElementById("summarySent").textContent =
-        orders.filter((o) => o.status === "deposit_sent").length;
+        orders.filter((o) => o.status === "awaiting_sms_confirmation").length;
       document.getElementById("summaryPaid").textContent =
-        orders.filter((o) => o.status === "deposit_paid").length;
+        orders.filter((o) => o.status === "verified").length;
+    }
+
+    function formatMoney(value) {
+      const amount = Number(value);
+      if (!Number.isFinite(amount)) return "—";
+      return amount.toFixed(2);
+    }
+
+    function calculateDeposit(totalAmount) {
+      const total = Number(totalAmount);
+      if (!Number.isFinite(total) || total <= 0) return "";
+      return (Math.round(total * 100 * 0.25) / 100).toFixed(2);
+    }
+
+    function updateDepositPreview(id) {
+      const input = document.querySelector(`[data-total-input="${id}"]`);
+      const preview = document.querySelector(`[data-deposit-preview="${id}"]`);
+      if (!input || !preview) return;
+
+      const deposit = calculateDeposit(input.value);
+      preview.textContent = deposit
+        ? `25% deposit will be $${deposit}.`
+        : "Enter the full catering total. Deposit is calculated automatically.";
     }
 
     async function approveCatering(id) {
-      const input = document.querySelector(`[data-deposit-input="${id}"]`);
+      const input = document.querySelector(`[data-total-input="${id}"]`);
       const status = document.querySelector(`[data-approve-status="${id}"]`);
       const btn = document.querySelector(`[data-approve-btn="${id}"]`);
 
-      const depositAmount = Number(input.value);
+      const totalAmount = Number(input.value);
 
-      if (!Number.isFinite(depositAmount) || depositAmount <= 0) {
-        status.textContent = "Enter a valid deposit amount.";
+      if (!Number.isFinite(totalAmount) || totalAmount <= 0) {
+        status.textContent = "Enter a valid total catering amount.";
         return;
       }
 
       btn.disabled = true;
-      status.textContent = "Creating deposit link...";
+      status.textContent = "Calculating 25% deposit and creating link...";
 
       try {
         const res = await fetch("/api/delish/approve-catering/", {
@@ -494,7 +517,7 @@
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ id, depositAmount })
+          body: JSON.stringify({ id, totalAmount })
         });
 
         const data = await res.json();
@@ -503,7 +526,7 @@
           throw new Error(data.error || "Failed to approve catering request.");
         }
 
-        status.textContent = `Deposit sent: $${data.depositAmount}`;
+        status.textContent = `25% deposit sent: $${data.depositAmount}`;
         await loadOrders();
       } catch (error) {
         status.textContent = error.message || "Unable to send deposit.";
@@ -518,7 +541,8 @@
     order.status === "awaiting_sms_confirmation" ||
     order.status === "verified";
 
-  const depositAmount = order.depositAmount ? escapeHtml(order.depositAmount) : "";
+  const totalAmount = order.totalAmount ? escapeHtml(order.totalAmount) : "";
+  const depositPreview = order.totalAmount ? calculateDeposit(order.totalAmount) : "";
 
   return `
     <article class="order-card">
@@ -568,9 +592,10 @@
 
       <div class="grid" style="margin-top:14px;">
         <div class="panel">
-          <div class="label">Deposit</div>
+          <div class="label">Catering Total / Deposit</div>
           <div class="value">
-            <strong>Amount:</strong> ${escapeHtml(order.depositAmount || "—")}<br />
+            <strong>Total:</strong> ${escapeHtml(order.totalAmount ? `$${formatMoney(order.totalAmount)}` : "—")}<br />
+            <strong>Deposit:</strong> ${escapeHtml(order.depositAmount ? `$${formatMoney(order.depositAmount)}` : "25% calculated on approval")}<br />
             <strong>Sent At:</strong> ${escapeHtml(formatDateTime(order.depositSentAt))}<br />
             <strong>Paid At:</strong> ${escapeHtml(formatDateTime(order.depositPaidAt))}
           </div>
@@ -591,9 +616,10 @@
             type="number"
             min="1"
             step="0.01"
-            placeholder="Deposit amount"
-            value="${depositAmount}"
-            data-deposit-input="${escapeHtml(order.id)}"
+            placeholder="Total catering amount"
+            value="${totalAmount}"
+            data-total-input="${escapeHtml(order.id)}"
+            oninput="updateDepositPreview('${escapeHtml(order.id)}')"
           />
           <button
             class="approve-btn"
@@ -601,8 +627,11 @@
             data-approve-btn="${escapeHtml(order.id)}"
             onclick="approveCatering('${escapeHtml(order.id)}')"
           >
-            Approve + Send Deposit
+            Approve + Send 25% Deposit
           </button>
+          <div class="mini-status" data-deposit-preview="${escapeHtml(order.id)}">
+            ${depositPreview ? `25% deposit will be $${escapeHtml(depositPreview)}.` : "Enter the full catering total. Deposit is calculated automatically."}
+          </div>
         ` : `
           <div class="mini-status">
             ${order.status === "deposit_sent" ? "Deposit sent" : ""}

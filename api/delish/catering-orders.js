@@ -33,10 +33,16 @@ export default async function handler(req, res) {
     const keys = ids.map((id) => `delish:catering:${id}`);
     const records = await redis.mget(...keys);
 
-    // Filter out anything "completed" (future use)
+    // Keep this screen focused on requests that still need operator action.
     const active = (records || [])
       .filter(Boolean)
-      .filter((r) => r.status !== "completed");
+      .filter((r) =>
+        [
+          "new_request",
+          "awaiting_sms_confirmation",
+          "verified",
+        ].includes(r.status)
+      );
 
     return res.status(200).json({
       ok: true,

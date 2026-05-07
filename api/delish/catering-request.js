@@ -162,6 +162,8 @@ export default async function handler(req, res) {
         clean(body.depositPolicy) ||
         "25% non-refundable deposit required on approved catering orders",
 
+      totalAmount: "",
+      depositPercent: "",
       depositAmount: "",
       depositLink: "",
       depositSessionId: "",
