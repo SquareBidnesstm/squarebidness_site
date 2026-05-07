@@ -18,15 +18,17 @@ export default async function handler(req, res) {
       });
     }
 
-    const [modeRes, resumeRes, messageRes] = await Promise.all([
+    const [modeRes, resumeRes, messageRes, closedDateRes] = await Promise.all([
       redisGet(redisUrl, redisToken, "delish:ordering:mode"),
       redisGet(redisUrl, redisToken, "delish:ordering:resume_at"),
-      redisGet(redisUrl, redisToken, "delish:ordering:message")
+      redisGet(redisUrl, redisToken, "delish:ordering:message"),
+      redisGet(redisUrl, redisToken, "delish:ordering:closed_date")
     ]);
 
     const redisMode = normalizeMode(modeRes);
     const resumeAt = typeof resumeRes === "string" ? resumeRes : "";
     const message = typeof messageRes === "string" ? messageRes : "";
+    const closedDate = typeof closedDateRes === "string" ? closedDateRes : "";
 
     if (!redisMode) {
       return res.status(200).json({
@@ -54,7 +56,7 @@ export default async function handler(req, res) {
     }
 
     if (redisMode === "closed") {
-      if (isBeforeServiceOpen(fallbackState)) {
+      if (closedDate !== fallbackState.now?.isoDate) {
         return res.status(200).json({
           ok: true,
           orderingMode: "auto",
@@ -74,6 +76,7 @@ export default async function handler(req, res) {
         openTime: fallbackState.openTime || "11:00 AM",
         closeTime: fallbackState.closeTime || "3:00 PM",
         resumeAt: "",
+        closedDate,
         message: message || "Online ordering is closed for today."
       });
     }

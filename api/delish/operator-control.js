@@ -62,7 +62,8 @@ export default async function handler(req, res) {
   await Promise.all([
     redisSet(redisUrl, redisToken, "delish:ordering:mode", "open"),
     redisSet(redisUrl, redisToken, "delish:ordering:resume_at", ""),
-    redisSet(redisUrl, redisToken, "delish:ordering:message", "")
+    redisSet(redisUrl, redisToken, "delish:ordering:message", ""),
+    redisSet(redisUrl, redisToken, "delish:ordering:closed_date", "")
   ]);
 
   return res.status(200).json({
@@ -79,7 +80,8 @@ export default async function handler(req, res) {
   await Promise.all([
     redisSet(redisUrl, redisToken, "delish:ordering:mode", "auto"),
     redisSet(redisUrl, redisToken, "delish:ordering:resume_at", ""),
-    redisSet(redisUrl, redisToken, "delish:ordering:message", "")
+    redisSet(redisUrl, redisToken, "delish:ordering:message", ""),
+    redisSet(redisUrl, redisToken, "delish:ordering:closed_date", "")
   ]);
 
   return res.status(200).json({
@@ -94,11 +96,13 @@ export default async function handler(req, res) {
 
     if (mode === "closed") {
   const closedMessage = "Online ordering is closed for today.";
+  const closedDate = getCentralDateKey();
 
   await Promise.all([
     redisSet(redisUrl, redisToken, "delish:ordering:mode", "closed"),
     redisSet(redisUrl, redisToken, "delish:ordering:resume_at", ""),
-    redisSet(redisUrl, redisToken, "delish:ordering:message", closedMessage)
+    redisSet(redisUrl, redisToken, "delish:ordering:message", closedMessage),
+    redisSet(redisUrl, redisToken, "delish:ordering:closed_date", closedDate)
   ]);
 
   return res.status(200).json({
@@ -106,7 +110,8 @@ export default async function handler(req, res) {
     updated: {
       mode: "closed",
       resumeAt: "",
-      message: closedMessage
+      message: closedMessage,
+      closedDate
     }
   });
 }
@@ -135,7 +140,8 @@ export default async function handler(req, res) {
       await Promise.all([
         redisSet(redisUrl, redisToken, "delish:ordering:mode", "paused"),
         redisSet(redisUrl, redisToken, "delish:ordering:resume_at", resumeAt),
-        redisSet(redisUrl, redisToken, "delish:ordering:message", pauseMessage)
+        redisSet(redisUrl, redisToken, "delish:ordering:message", pauseMessage),
+        redisSet(redisUrl, redisToken, "delish:ordering:closed_date", "")
       ]);
 
       return res.status(200).json({
@@ -188,6 +194,22 @@ function formatCentral(iso) {
   }).format(d);
 }
 
+function getCentralDateKey(date = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Chicago",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(date);
+
+  const map = {};
+  for (const part of parts) {
+    if (part.type !== "literal") map[part.type] = part.value;
+  }
+
+  return `${map.year}-${map.month}-${map.day}`;
+}
+
 async function redisSet(redisUrl, redisToken, key, value) {
   const safeValue = value == null ? "" : String(value);
   const url = `${redisUrl.replace(/\/$/, "")}/set/${encodeURIComponent(key)}/${encodeURIComponent(safeValue)}`;
@@ -206,5 +228,4 @@ async function redisSet(redisUrl, redisToken, key, value) {
 
   return response.json();
 }
-
 

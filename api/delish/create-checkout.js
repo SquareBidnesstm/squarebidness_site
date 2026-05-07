@@ -324,15 +324,17 @@ async function getEffectiveOrderingState() {
     return fallbackState;
   }
 
-  const [modeRes, resumeRes, messageRes] = await Promise.all([
+  const [modeRes, resumeRes, messageRes, closedDateRes] = await Promise.all([
     redisGet(redisUrl, redisToken, "delish:ordering:mode"),
     redisGet(redisUrl, redisToken, "delish:ordering:resume_at"),
     redisGet(redisUrl, redisToken, "delish:ordering:message"),
+    redisGet(redisUrl, redisToken, "delish:ordering:closed_date"),
   ]);
 
   const redisMode = normalizeOrderingMode(modeRes);
   const resumeAt = typeof resumeRes === "string" ? resumeRes : "";
   const message = typeof messageRes === "string" ? messageRes : "";
+  const closedDate = typeof closedDateRes === "string" ? closedDateRes : "";
 
   if (!redisMode || redisMode === "auto") {
     return fallbackState;
@@ -350,7 +352,7 @@ async function getEffectiveOrderingState() {
   }
 
   if (redisMode === "closed") {
-    if (isBeforeServiceOpen(fallbackState)) {
+    if (closedDate !== fallbackState.now?.isoDate) {
       return fallbackState;
     }
 
@@ -360,6 +362,7 @@ async function getEffectiveOrderingState() {
       orderingMode: "closed",
       openNow: false,
       reason: "manual_closed",
+      closedDate,
       message: message || "Online ordering is closed for today.",
     };
   }
