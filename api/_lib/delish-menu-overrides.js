@@ -13,16 +13,41 @@ export const DEFAULT_DELISH_MENU_OVERRIDES = {
   },
   itemsOff: [],
   itemsSoldOut: [],
+  itemsSoldOutDate: "",
   customerMessage: "",
   updatedAt: "",
   updatedBy: "system",
 };
+
+export function getCentralDateKey(date = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Chicago",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+
+  const map = {};
+  for (const part of parts) {
+    if (part.type !== "literal") map[part.type] = part.value;
+  }
+
+  return `${map.year}-${map.month}-${map.day}`;
+}
 
 export async function getDelishMenuOverrides() {
   const saved = await redis.get("delish:menu:overrides");
   if (!saved || typeof saved !== "object") {
     return DEFAULT_DELISH_MENU_OVERRIDES;
   }
+
+  const todayKey = getCentralDateKey();
+  const soldOutDate = String(saved.itemsSoldOutDate || "");
+  const itemsSoldOut =
+    soldOutDate === todayKey && Array.isArray(saved.itemsSoldOut)
+      ? saved.itemsSoldOut
+      : [];
+
   return {
     ...DEFAULT_DELISH_MENU_OVERRIDES,
     ...saved,
@@ -31,6 +56,7 @@ export async function getDelishMenuOverrides() {
       ...(saved.sections || {}),
     },
     itemsOff: Array.isArray(saved.itemsOff) ? saved.itemsOff : [],
-    itemsSoldOut: Array.isArray(saved.itemsSoldOut) ? saved.itemsSoldOut : [],
+    itemsSoldOut,
+    itemsSoldOutDate: itemsSoldOut.length ? soldOutDate : todayKey,
   };
 }

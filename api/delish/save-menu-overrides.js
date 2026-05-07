@@ -1,6 +1,9 @@
 // FILE: /api/delish/save-menu-overrides.js
 import { Redis } from "@upstash/redis";
-import { getDelishMenuOverrides } from "../_lib/delish-menu-overrides.js";
+import {
+  getCentralDateKey,
+  getDelishMenuOverrides,
+} from "../_lib/delish-menu-overrides.js";
 
 const redis = new Redis({
   url: process.env.DELISH_UPSTASH_REDIS_REST_URL,
@@ -43,6 +46,7 @@ export default async function handler(req, res) {
 
     const body = req.body || {};
     const current = await getDelishMenuOverrides();
+    const itemsSoldOut = normalizeItemsSoldOut(body.itemsSoldOut);
 
     const next = {
       ...current,
@@ -52,7 +56,8 @@ export default async function handler(req, res) {
         extraSides: body?.sections?.extraSides !== false,
       },
       itemsOff: normalizeItemsOff(body.itemsOff),
-      itemsSoldOut: normalizeItemsSoldOut(body.itemsSoldOut),
+      itemsSoldOut,
+      itemsSoldOutDate: getCentralDateKey(),
       customerMessage: String(body.customerMessage || "").trim().slice(0, 180),
       updatedAt: new Date().toISOString(),
       updatedBy: "operator",
