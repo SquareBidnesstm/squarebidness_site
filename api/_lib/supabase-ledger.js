@@ -62,3 +62,59 @@ export async function writeLedgerEvent({
     clearTimeout(timeout);
   }
 }
+
+export async function fetchLedgerEvents({
+  brand = "",
+  system = "",
+  eventType = "",
+  date = "",
+  start = "",
+  end = "",
+  limit = 1000,
+} = {}) {
+  if (!isLedgerConfigured()) {
+    return { ok: false, error: "SUPABASE_LEDGER_NOT_CONFIGURED" };
+  }
+
+  const params = new URLSearchParams();
+  params.set("select", "id,brand,system,event_type,entity_id,payload,source,created_at");
+  params.set("order", "created_at.desc");
+  params.set("limit", String(Math.min(5000, Math.max(1, Number(limit || 1000)))));
+
+  if (brand) params.set("brand", `eq.${cleanText(brand)}`);
+  if (system) params.set("system", `eq.${cleanText(system)}`);
+  if (eventType) params.set("event_type", `eq.${cleanText(eventType)}`);
+
+  if (date) {
+    params.append("created_at", `gte.${date}T00:00:00.000Z`);
+    params.append("created_at", `lt.${date}T23:59:59.999Z`);
+  } else {
+    if (start) params.append("created_at", `gte.${start}`);
+    if (end) params.append("created_at", `lte.${end}`);
+  }
+
+  try {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/event_ledger?${params.toString()}`, {
+      method: "GET",
+      headers: {
+        apikey: SUPABASE_SERVICE_ROLE_KEY,
+        Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+        Accept: "application/json",
+      },
+    });
+
+    const data = await response.json().catch(() => []);
+
+    if (!response.ok) {
+      return {
+        ok: false,
+        status: response.status,
+        error: Array.isArray(data) ? "LEDGER_FETCH_FAILED" : data?.message || "LEDGER_FETCH_FAILED",
+      };
+    }
+
+    return { ok: true, events: Array.isArray(data) ? data : [] };
+  } catch (error) {
+    return { ok: false, error: error?.message || "LEDGER_FETCH_FAILED" };
+  }
+}
