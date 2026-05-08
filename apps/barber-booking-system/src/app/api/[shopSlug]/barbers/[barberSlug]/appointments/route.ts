@@ -64,9 +64,23 @@ export async function GET(
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
   }
 
+  // Fetch permissions for this barber
+  const { data: permSetting } = await supabaseServer
+    .from("shop_settings")
+    .select("value_json")
+    .eq("shop_id", shop.id)
+    .eq("key", `barber_perms_${barber.id}`)
+    .single();
+
+  const perms = {
+    can_edit_hours: (permSetting?.value_json as Record<string, boolean> | null)?.can_edit_hours ?? false,
+    can_edit_prices: (permSetting?.value_json as Record<string, boolean> | null)?.can_edit_prices ?? false,
+  };
+
   return NextResponse.json({
     ok: true,
     barberName: barber.display_name || barber.name,
     bookings: bookings ?? [],
+    perms,
   });
 }

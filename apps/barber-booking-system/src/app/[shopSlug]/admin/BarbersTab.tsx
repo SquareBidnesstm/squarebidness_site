@@ -39,6 +39,11 @@ type Barber = {
   has_pin: boolean;
 };
 
+type BarberPerms = {
+  can_edit_hours: boolean;
+  can_edit_prices: boolean;
+};
+
 type EditState = {
   name: string;
   display_name: string;
@@ -77,6 +82,10 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
   const [pinError, setPinError] = useState("");
   const [pinSuccess, setPinSuccess] = useState("");
   const [copied, setCopied] = useState<string | null>(null);
+
+  // Permissions state
+  const [perms, setPerms] = useState<Record<string, BarberPerms>>({});
+  const [permsLoaded, setPermsLoaded] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     load();
@@ -250,6 +259,27 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
     navigator.clipboard.writeText(url).then(() => {
       setCopied(slug);
       setTimeout(() => setCopied(null), 2000);
+    });
+  }
+
+  async function loadPerms(barberId: string) {
+    if (permsLoaded[barberId]) return;
+    const res = await fetch(`/api/${shopSlug}/admin/barbers/${barberId}/perms`);
+    const data = await res.json();
+    if (data.ok) {
+      setPerms((prev) => ({ ...prev, [barberId]: data.perms }));
+      setPermsLoaded((prev) => ({ ...prev, [barberId]: true }));
+    }
+  }
+
+  async function togglePerm(barberId: string, perm: keyof BarberPerms) {
+    const current = perms[barberId] ?? { can_edit_hours: false, can_edit_prices: false };
+    const updated = { ...current, [perm]: !current[perm] };
+    setPerms((prev) => ({ ...prev, [barberId]: updated }));
+    await fetch(`/api/${shopSlug}/admin/barbers/${barberId}/perms`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updated),
     });
   }
 
@@ -467,7 +497,7 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
                         onClick={() => {
                           const next = hoursOpen === b.id ? null : b.id;
                           setHoursOpen(next);
-                          if (next) loadBarberHours(b.id);
+                          if (next) { loadBarberHours(b.id); loadPerms(b.id); }
                         }}
                         style={{
                           ...secondaryButton,
@@ -489,6 +519,60 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
                       </button>
                     </div>
                   </div>
+
+                  {/* Permissions panel — load on first expand */}
+                  {(() => {
+                    const bp = perms[b.id] ?? { can_edit_hours: false, can_edit_prices: false };
+                    const hasAnyPerm = bp.can_edit_hours || bp.can_edit_prices;
+                    return (
+                      <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
+                        <span style={{ color: "#444", fontSize: 12, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                          Barber can edit:
+                        </span>
+                        {/* Can edit hours toggle */}
+                        <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}
+                          onClick={() => { loadPerms(b.id); togglePerm(b.id, "can_edit_hours"); }}>
+                          <div style={{
+                            width: 34, height: 18, borderRadius: 999, border: "none",
+                            background: bp.can_edit_hours ? "#d4af37" : "#2a2a2a",
+                            position: "relative", cursor: "pointer", flexShrink: 0, transition: "background 0.15s",
+                          }}>
+                            <span style={{
+                              position: "absolute", top: 2,
+                              left: bp.can_edit_hours ? 18 : 2, width: 14, height: 14,
+                              borderRadius: "50%", background: "#fff", transition: "left 0.15s",
+                            }} />
+                          </div>
+                          <span style={{ fontSize: 13, color: bp.can_edit_hours ? "#d4af37" : "#555", fontWeight: 600 }}>
+                            Own hours
+                          </span>
+                        </label>
+                        {/* Can edit prices toggle */}
+                        <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}
+                          onClick={() => { loadPerms(b.id); togglePerm(b.id, "can_edit_prices"); }}>
+                          <div style={{
+                            width: 34, height: 18, borderRadius: 999, border: "none",
+                            background: bp.can_edit_prices ? "#d4af37" : "#2a2a2a",
+                            position: "relative", cursor: "pointer", flexShrink: 0, transition: "background 0.15s",
+                          }}>
+                            <span style={{
+                              position: "absolute", top: 2,
+                              left: bp.can_edit_prices ? 18 : 2, width: 14, height: 14,
+                              borderRadius: "50%", background: "#fff", transition: "left 0.15s",
+                            }} />
+                          </div>
+                          <span style={{ fontSize: 13, color: bp.can_edit_prices ? "#d4af37" : "#555", fontWeight: 600 }}>
+                            Own prices
+                          </span>
+                        </label>
+                        {hasAnyPerm && (
+                          <span style={{ fontSize: 11, color: "#3a3a3a", marginLeft: 4 }}>
+                            Changes visible on their schedule page
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })()}
 
                   {/* PIN panel */}
                   {isPinOpen && (
