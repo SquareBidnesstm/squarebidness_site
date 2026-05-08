@@ -40,7 +40,46 @@ export async function GET(
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true, barbers: barbers ?? [] });
+  // Fetch PIN presence for each barber
+  const barberIds = (barbers ?? []).map((b) => b.id);
+  let pinSet: Record<string, boolean> = {};
+  if (barberIds.length > 0) {
+    const { data: settings } = await supabaseServer
+      .from("shop_settings")
+      .select("key, value_json")
+      .eq("shop_id", shop.id)
+      .in("key", barberIds.map((id) => `barber_auth_${id}`));
+    for (const s of settings ?? []) {
+      const bid = (s.key as string).replace("barber_auth_", "");
+      pinSet[bid] = !!(s.value_json as { pin?: string } | null)?.pin;
+    }
+  }
+
+  // Compute barber limit
+  const { data: sub } = await supabaseServer
+    .from("subscriptions")
+    .select("plan, status")
+    .eq("shop_id", shop.id)
+    .single();
+
+  const { data: limitSetting } = await supabaseServer
+    .from("shop_settings")
+    .select("value_json")
+    .eq("shop_id", shop.id)
+    .eq("key", "barber_limit")
+    .single();
+
+  const isPro = sub?.status === "active" && sub?.plan === "pro";
+  const defaultLimit = isPro ? 5 : 0;
+  const customLimit = (limitSetting?.value_json as { limit?: number } | null)?.limit;
+  const barberLimit = customLimit ?? defaultLimit;
+
+  const barbersWithPin = (barbers ?? []).map((b) => ({
+    ...b,
+    has_pin: pinSet[b.id] ?? false,
+  }));
+
+  return NextResponse.json({ ok: true, barbers: barbersWithPin, barberLimit });
 }
 
 export async function POST(
@@ -62,6 +101,46 @@ export async function POST(
 
   if (!shop) {
     return NextResponse.json({ ok: false, error: "Shop not found" }, { status: 404 });
+  }
+
+  // Enforce barber limit based on subscription plan
+  const { data: sub } = await supabaseServer
+    .from("subscriptions")
+    .select("plan, status")
+    .eq("shop_id", shop.id)
+    .single();
+
+  // Check for custom limit in shop_settings (platform admin can override)
+  const { data: limitSetting } = await supabaseServer
+    .from("shop_settings")
+    .select("value_json")
+    .eq("shop_id", shop.id)
+    .eq("key", "barber_limit")
+    .single();
+
+  const isPro = sub?.status === "active" && sub?.plan === "pro";
+  const defaultLimit = isPro ? 5 : 0;
+  const customLimit = (limitSetting?.value_json as { limit?: number } | null)?.limit;
+  const barberLimit = customLimit ?? defaultLimit;
+
+  if (barberLimit === 0) {
+    return NextResponse.json(
+      { ok: false, error: "Upgrade to Pro to add barbers." },
+      { status: 403 }
+    );
+  }
+
+  const { count: activeCount } = await supabaseServer
+    .from("barbers")
+    .select("id", { count: "exact", head: true })
+    .eq("shop_id", shop.id)
+    .eq("active", true);
+
+  if ((activeCount ?? 0) >= barberLimit) {
+    return NextResponse.json(
+      { ok: false, error: `Barber limit reached (${barberLimit}). Upgrade your plan to add more.` },
+      { status: 403 }
+    );
   }
 
   const body = await req.json();

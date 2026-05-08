@@ -36,6 +36,7 @@ type Barber = {
   role: string;
   active: boolean;
   sort_order: number;
+  has_pin: boolean;
 };
 
 type EditState = {
@@ -55,6 +56,7 @@ const COMMON_ROLES = [
 
 export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
   const [barbers, setBarbers] = useState<Barber[]>([]);
+  const [barberLimit, setBarberLimit] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -68,6 +70,14 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
   const [hoursSaving, setHoursSaving] = useState(false);
   const [hoursSaved, setHoursSaved] = useState<string | null>(null);
 
+  // PIN state
+  const [pinOpenId, setPinOpenId] = useState<string | null>(null);
+  const [pinInput, setPinInput] = useState("");
+  const [pinSaving, setPinSaving] = useState(false);
+  const [pinError, setPinError] = useState("");
+  const [pinSuccess, setPinSuccess] = useState("");
+  const [copied, setCopied] = useState<string | null>(null);
+
   useEffect(() => {
     load();
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -79,8 +89,12 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
     try {
       const res = await fetch(`/api/${shopSlug}/admin/barbers`);
       const data = await res.json();
-      if (data.ok) setBarbers(data.barbers);
-      else setError(data.error || "Failed to load barbers.");
+      if (data.ok) {
+        setBarbers(data.barbers);
+        setBarberLimit(data.barberLimit ?? 0);
+      } else {
+        setError(data.error || "Failed to load barbers.");
+      }
     } catch {
       setError("Network error.");
     } finally {
@@ -89,7 +103,7 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
   }
 
   const loadBarberHours = useCallback(async (barberId: string) => {
-    if (barberHours[barberId]) return; // already loaded
+    if (barberHours[barberId]) return;
     const res = await fetch(`/api/${shopSlug}/admin/barbers/${barberId}/hours`);
     const data = await res.json();
     if (data.ok) {
@@ -133,6 +147,7 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
     setEditingId(b.id);
     setEditState({ name: b.name, display_name: b.display_name || b.name, role: b.role });
     setAddingNew(false);
+    setPinOpenId(null);
   }
 
   async function saveEdit(id: string) {
@@ -148,7 +163,7 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
     });
     const data = await res.json();
     if (data.ok) {
-      setBarbers((prev) => prev.map((b) => (b.id === id ? data.barber : b)));
+      setBarbers((prev) => prev.map((b) => (b.id === id ? { ...data.barber, has_pin: b.has_pin } : b)));
       setEditingId(null);
     }
     setSaving(false);
@@ -162,7 +177,7 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
     });
     const data = await res.json();
     if (data.ok) {
-      setBarbers((prev) => prev.map((x) => (x.id === b.id ? data.barber : x)));
+      setBarbers((prev) => prev.map((x) => (x.id === b.id ? { ...data.barber, has_pin: b.has_pin } : x)));
     }
   }
 
@@ -180,31 +195,97 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
     });
     const data = await res.json();
     if (data.ok) {
-      setBarbers((prev) => [...prev, data.barber]);
+      setBarbers((prev) => [...prev, { ...data.barber, has_pin: false }]);
       setNewBarber({ name: "", display_name: "", role: "Barber" });
       setAddingNew(false);
+    } else {
+      alert(data.error || "Could not add barber.");
     }
     setAddingSaving(false);
+  }
+
+  function openPin(barberId: string) {
+    setPinOpenId(barberId);
+    setPinInput("");
+    setPinError("");
+    setPinSuccess("");
+    setHoursOpen(null);
+    setEditingId(null);
+  }
+
+  async function savePin(barberId: string) {
+    setPinError("");
+    setPinSuccess("");
+    if (!pinInput || !/^\d{4,12}$/.test(pinInput)) {
+      setPinError("PIN must be 4–12 digits.");
+      return;
+    }
+    setPinSaving(true);
+    const res = await fetch(`/api/${shopSlug}/admin/barbers/${barberId}/pin`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pin: pinInput }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      setPinSuccess("PIN saved!");
+      setPinInput("");
+      setBarbers((prev) => prev.map((b) => (b.id === barberId ? { ...b, has_pin: true } : b)));
+      setTimeout(() => { setPinOpenId(null); setPinSuccess(""); }, 1500);
+    } else {
+      setPinError(data.error || "Could not save PIN.");
+    }
+    setPinSaving(false);
+  }
+
+  async function clearPin(barberId: string) {
+    if (!confirm("Remove this barber's PIN? They won't be able to log in until a new one is set.")) return;
+    await fetch(`/api/${shopSlug}/admin/barbers/${barberId}/pin`, { method: "DELETE" });
+    setBarbers((prev) => prev.map((b) => (b.id === barberId ? { ...b, has_pin: false } : b)));
+    setPinOpenId(null);
+  }
+
+  function copyLink(slug: string) {
+    const url = `${window.location.origin}/${shopSlug}/${slug}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(slug);
+      setTimeout(() => setCopied(null), 2000);
+    });
   }
 
   if (loading) return <div style={emptyBox}>Loading barbers...</div>;
   if (error) return <div style={{ ...emptyBox, color: "#ffb3b3", borderColor: "#532323" }}>{error}</div>;
 
   const activeBarbers = barbers.filter((b) => b.active);
-  const inactiveBarbers = barbers.filter((b) => !b.active);
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
         <div>
           <h2 style={{ margin: 0, fontSize: 28, fontWeight: 900 }}>Barbers</h2>
           <p style={{ margin: "4px 0 0", color: "#666", fontSize: 13 }}>
-            {activeBarbers.length} active · {inactiveBarbers.length} inactive
+            {activeBarbers.length} active
+            {barberLimit > 0 ? ` · ${barberLimit - activeBarbers.length} slot${barberLimit - activeBarbers.length !== 1 ? "s" : ""} remaining (limit ${barberLimit})` : " · Upgrade to Pro to add barbers"}
           </p>
         </div>
         <button
-          onClick={() => { setAddingNew(true); setEditingId(null); }}
-          style={goldButton}
+          onClick={() => {
+            if (barberLimit === 0) {
+              alert("Upgrade to Pro to add barbers.");
+              return;
+            }
+            if (activeBarbers.length >= barberLimit) {
+              alert(`You've reached your ${barberLimit}-barber limit. Contact support to increase your limit.`);
+              return;
+            }
+            setAddingNew(true);
+            setEditingId(null);
+            setPinOpenId(null);
+          }}
+          style={{
+            ...goldButton,
+            opacity: (barberLimit === 0 || activeBarbers.length >= barberLimit) ? 0.5 : 1,
+          }}
         >
           + Add Barber
         </button>
@@ -267,10 +348,12 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
         </div>
       )}
 
-      {/* Active barbers */}
+      {/* Barber list */}
       <div style={{ display: "grid", gap: 12 }}>
         {barbers.map((b) => {
           const isEditing = editingId === b.id;
+          const isPinOpen = pinOpenId === b.id;
+          const barberPageUrl = `/${shopSlug}/${b.slug}`;
 
           return (
             <div
@@ -324,52 +407,128 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
                   </div>
                 </div>
               ) : (
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
-                  <div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
-                      <span style={{ fontSize: 18, fontWeight: 700 }}>
-                        {b.display_name || b.name}
-                      </span>
-                      {b.display_name && b.display_name !== b.name && (
-                        <span style={{ color: "#555", fontSize: 13 }}>({b.name})</span>
-                      )}
-                      {!b.active && (
-                        <span style={{ color: "#ff5555", fontSize: 12, fontWeight: 700 }}>Inactive</span>
-                      )}
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+                    <div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
+                        <span style={{ fontSize: 18, fontWeight: 700 }}>
+                          {b.display_name || b.name}
+                        </span>
+                        {b.display_name && b.display_name !== b.name && (
+                          <span style={{ color: "#555", fontSize: 13 }}>({b.name})</span>
+                        )}
+                        {!b.active && (
+                          <span style={{ color: "#ff5555", fontSize: 12, fontWeight: 700 }}>Inactive</span>
+                        )}
+                        {b.has_pin ? (
+                          <span style={{ color: "#5cd600", fontSize: 11, fontWeight: 700, background: "#0d2200", border: "1px solid #1e4400", borderRadius: 999, padding: "2px 8px" }}>
+                            PIN set
+                          </span>
+                        ) : (
+                          <span style={{ color: "#ff9955", fontSize: 11, fontWeight: 700, background: "#1a0a00", border: "1px solid #331500", borderRadius: 999, padding: "2px 8px" }}>
+                            No PIN
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ color: "#666", fontSize: 13, display: "flex", alignItems: "center", gap: 10 }}>
+                        <span>{b.role}</span>
+                        <span style={{ color: "#333" }}>·</span>
+                        <a
+                          href={barberPageUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: "#555", textDecoration: "none", fontFamily: "monospace", fontSize: 12 }}
+                        >
+                          /{shopSlug}/{b.slug}
+                        </a>
+                        <button
+                          onClick={() => copyLink(b.slug)}
+                          style={{ ...tinyButton, color: copied === b.slug ? "#5cd600" : "#555" }}
+                        >
+                          {copied === b.slug ? "Copied!" : "Copy link"}
+                        </button>
+                      </div>
                     </div>
-                    <div style={{ color: "#666", fontSize: 13 }}>
-                      {b.role} · <span style={{ color: "#555" }}>/{b.slug}</span>
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      <button onClick={() => startEdit(b)} style={secondaryButton}>
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => isPinOpen ? setPinOpenId(null) : openPin(b.id)}
+                        style={{
+                          ...secondaryButton,
+                          color: isPinOpen ? "#d4af37" : "#fff",
+                          borderColor: isPinOpen ? "#3a2a00" : "#2d2d2d",
+                        }}
+                      >
+                        {b.has_pin ? "Reset PIN" : "Set PIN"}
+                      </button>
+                      <button
+                        onClick={() => {
+                          const next = hoursOpen === b.id ? null : b.id;
+                          setHoursOpen(next);
+                          if (next) loadBarberHours(b.id);
+                        }}
+                        style={{
+                          ...secondaryButton,
+                          color: hoursOpen === b.id ? "#d4af37" : "#fff",
+                          borderColor: hoursOpen === b.id ? "#3a2a00" : "#2d2d2d",
+                        }}
+                      >
+                        Hours
+                      </button>
+                      <button
+                        onClick={() => toggleActive(b)}
+                        style={{
+                          ...secondaryButton,
+                          color: b.active ? "#ff7070" : "#5cd600",
+                          borderColor: b.active ? "#440000" : "#1e4400",
+                        }}
+                      >
+                        {b.active ? "Deactivate" : "Activate"}
+                      </button>
                     </div>
                   </div>
-                  <div style={{ display: "flex", gap: 10 }}>
-                    <button onClick={() => startEdit(b)} style={secondaryButton}>
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => {
-                        const next = hoursOpen === b.id ? null : b.id;
-                        setHoursOpen(next);
-                        if (next) loadBarberHours(b.id);
-                      }}
-                      style={{
-                        ...secondaryButton,
-                        color: hoursOpen === b.id ? "#d4af37" : "#fff",
-                        borderColor: hoursOpen === b.id ? "#3a2a00" : "#2d2d2d",
-                      }}
-                    >
-                      Hours
-                    </button>
-                    <button
-                      onClick={() => toggleActive(b)}
-                      style={{
-                        ...secondaryButton,
-                        color: b.active ? "#ff7070" : "#5cd600",
-                        borderColor: b.active ? "#440000" : "#1e4400",
-                      }}
-                    >
-                      {b.active ? "Deactivate" : "Activate"}
-                    </button>
-                  </div>
+
+                  {/* PIN panel */}
+                  {isPinOpen && (
+                    <div style={{ marginTop: 14, paddingTop: 14, borderTop: "1px solid #1a1a1a" }}>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: "#d4af37", marginBottom: 10 }}>
+                        {b.has_pin ? "Reset" : "Set"} PIN for {b.display_name || b.name}
+                      </div>
+                      <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          value={pinInput}
+                          onChange={(e) => { setPinInput(e.target.value.replace(/\D/g, "").slice(0, 12)); setPinError(""); }}
+                          placeholder="4–12 digit PIN"
+                          autoFocus
+                          style={{ ...inputStyle, width: 160, textAlign: "center", letterSpacing: "0.2em", fontSize: 18 }}
+                        />
+                        <button
+                          onClick={() => savePin(b.id)}
+                          disabled={pinSaving || !pinInput}
+                          style={{ ...goldButton, opacity: pinSaving || !pinInput ? 0.6 : 1 }}
+                        >
+                          {pinSaving ? "Saving..." : "Save PIN"}
+                        </button>
+                        {b.has_pin && (
+                          <button
+                            onClick={() => clearPin(b.id)}
+                            style={{ ...secondaryButton, color: "#ff7070", borderColor: "#440000" }}
+                          >
+                            Remove PIN
+                          </button>
+                        )}
+                        <button onClick={() => setPinOpenId(null)} style={secondaryButton}>
+                          Cancel
+                        </button>
+                      </div>
+                      {pinError && <div style={{ color: "#ff7070", fontSize: 13, marginTop: 8 }}>{pinError}</div>}
+                      {pinSuccess && <div style={{ color: "#5cd600", fontSize: 13, marginTop: 8 }}>{pinSuccess}</div>}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -440,7 +599,11 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
       </div>
 
       {barbers.length === 0 && !addingNew && (
-        <div style={emptyBox}>No barbers yet. Add one above.</div>
+        <div style={emptyBox}>
+          {barberLimit === 0
+            ? "Upgrade to Pro to add barbers and give each their own schedule page."
+            : "No barbers yet. Add one above."}
+        </div>
       )}
     </div>
   );
@@ -512,5 +675,16 @@ const secondaryButton: React.CSSProperties = {
   fontWeight: 700,
   cursor: "pointer",
   fontSize: 14,
+  whiteSpace: "nowrap",
+};
+
+const tinyButton: React.CSSProperties = {
+  padding: "3px 8px",
+  borderRadius: 6,
+  border: "1px solid #2d2d2d",
+  background: "transparent",
+  fontWeight: 600,
+  cursor: "pointer",
+  fontSize: 11,
   whiteSpace: "nowrap",
 };
