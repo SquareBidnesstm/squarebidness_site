@@ -228,26 +228,6 @@
       border:1px solid var(--line);
       font-weight:800;
     }
-    .operator-actions{
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:12px;
-      margin-top:14px;
-    }
-    .operator-action{
-      min-height:58px;
-      border-radius:18px;
-      color:#fff;
-      font-size:1rem;
-      box-shadow:0 14px 36px rgba(0,0,0,.22);
-    }
-    .operator-action.pause{
-      background:#a9650c;
-    }
-    .operator-action.close{
-      background:#a32626;
-    }
-
     .pickup-window-list{
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
@@ -283,7 +263,7 @@
   }
 }
     @media (max-width: 800px){
-      .row,.item-list,.window-grid,.operator-actions{grid-template-columns:1fr}
+      .row,.item-list,.window-grid{grid-template-columns:1fr}
     }
   </style>
 </head>
@@ -356,12 +336,6 @@
 
       <div class="status" id="windowStatusBox">Checking ordering window...</div>
 
-      <div class="operator-actions">
-        <button class="operator-action pause" id="adminPause30Btn">Pause 30 Min</button>
-        <button class="operator-action close" id="adminCloseTodayBtn">Close For Today</button>
-      </div>
-
-      <div class="status" id="operatorActionStatusBox">Operator controls ready.</div>
     </div>
 
     <div class="card">
@@ -423,9 +397,6 @@
     const windowMode = document.getElementById("windowMode");
     const windowNow = document.getElementById("windowNow");
     const windowHours = document.getElementById("windowHours");
-    const operatorActionStatusBox = document.getElementById("operatorActionStatusBox");
-    const adminPause30Btn = document.getElementById("adminPause30Btn");
-    const adminCloseTodayBtn = document.getElementById("adminCloseTodayBtn");
     const pickupWindowList = document.getElementById("pickupWindowList");
 const pickupWindowStatusBox = document.getElementById("pickupWindowStatusBox");
 const savePickupWindowsBtn = document.getElementById("savePickupWindowsBtn");
@@ -486,12 +457,6 @@ const reloadPickupWindowsBtn = document.getElementById("reloadPickupWindowsBtn")
       if (!windowStatusBox) return;
       windowStatusBox.textContent = text;
       windowStatusBox.className = "status" + (tone ? ` ${tone}` : "");
-    }
-
-    function setOperatorActionStatus(text, tone = "") {
-      if (!operatorActionStatusBox) return;
-      operatorActionStatusBox.textContent = text;
-      operatorActionStatusBox.className = "status" + (tone ? ` ${tone}` : "");
     }
 
     function setPickupWindowStatus(text, tone = "") {
@@ -695,53 +660,6 @@ async function savePickupWindows() {
       tokenStatus.textContent = getSavedToken() ? "Token saved" : "Token not saved";
     }
 
-    async function postOperatorControl(payload, successMessage) {
-      let token = getSavedToken();
-
-      if (!token) {
-        token = window.prompt("Enter Delish operator token");
-        if (!token) {
-          setOperatorActionStatus("Operator action cancelled.");
-          return;
-        }
-
-        if (window.confirm("Save this token on this device?")) {
-          saveToken(token.trim());
-        }
-      }
-
-      setOperatorActionStatus("Saving operator change...");
-
-      const res = await fetch("/api/delish/operator-control/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-operator-token": token.trim()
-        },
-        body: JSON.stringify(payload)
-      });
-
-      const data = await res.json().catch(() => ({}));
-
-      if (!res.ok || !data.ok) {
-        if (res.status === 401) {
-          clearToken();
-          throw new Error("Unauthorized - wrong operator token. Saved token cleared.");
-        }
-        if (res.status === 405) {
-          throw new Error("Method not allowed - operator control route mismatch.");
-        }
-        if (res.status === 503) {
-          throw new Error(data.error || "Operator control is not configured.");
-        }
-        throw new Error(data.error || "Operator update failed.");
-      }
-
-      setOperatorActionStatus(successMessage || "Operator setting updated.", "good");
-      await loadOrderingWindow();
-      updateTokenStatus();
-    }
-
     function renderItemList(selected = []) {
       const selectedSet = new Set(selected);
       const wrap = document.getElementById("itemsOffList");
@@ -880,24 +798,6 @@ reloadPickupWindowsBtn?.addEventListener("click", () => {
     setPickupWindowStatus(err.message || "Reload failed.", "bad")
   );
 });
-    adminPause30Btn?.addEventListener("click", () => {
-      postOperatorControl(
-        { mode: "paused", pauseMinutes: 30, messageOnly: false },
-        "Ordering paused for 30 minutes."
-      ).catch(err => setOperatorActionStatus(err.message || "Pause failed.", "bad"));
-    });
-    adminCloseTodayBtn?.addEventListener("click", () => {
-      const confirmed = window.confirm("Close ordering for the rest of today?");
-      if (!confirmed) {
-        setOperatorActionStatus("Close cancelled.");
-        return;
-      }
-
-      postOperatorControl(
-        { mode: "closed" },
-        "Ordering closed for today."
-      ).catch(err => setOperatorActionStatus(err.message || "Close failed.", "bad"));
-    });
     document.getElementById("refreshWindowBtn").addEventListener("click", () => {
       loadOrderingWindow().catch(err => setWindowStatus(err.message || "Window check failed.", "bad"));
     });

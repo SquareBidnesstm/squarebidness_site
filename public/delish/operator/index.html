@@ -34,11 +34,17 @@
       margin:0 auto;
       padding:24px;
     }
+    .topline{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin:0 0 24px;
+    }
     .brandRow{
       display:flex;
       align-items:center;
       gap:14px;
-      margin:0 0 24px;
     }
     .brandMark{
       width:72px;
@@ -96,7 +102,8 @@
       grid-template-columns:repeat(2,minmax(0,1fr));
       gap:12px;
     }
-    button{
+    button,
+    .button-link{
       width:100%;
       border:0;
       border-radius:14px;
@@ -104,6 +111,11 @@
       font-size:16px;
       font-weight:700;
       cursor:pointer;
+      text-align:center;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
     }
     .open{background:var(--green);color:#fff}
     .auto{background:var(--blue);color:#fff}
@@ -113,6 +125,10 @@
       background:#22262d;
       color:#fff;
       border:1px solid var(--line);
+    }
+    .topline .button-link{
+      width:auto;
+      white-space:nowrap;
     }
     input, textarea{
       width:100%;
@@ -152,17 +168,22 @@
     }
     @media (max-width:700px){
       .status,.grid,.row{grid-template-columns:1fr}
+      .topline{align-items:stretch;flex-direction:column}
+      .topline .button-link{width:100%}
     }
   </style>
 </head>
 <body>
   <main class="wrap">
-    <div class="brandRow">
-      <img class="brandMark" src="/delish/assets/delish-logo-mark-512.png" alt="Delish logo" loading="eager" decoding="async" />
-      <div>
-        <h1>Delish Operator Control</h1>
-        <p class="sub">Pause, reopen, and manage ordering flow without touching code.</p>
+    <div class="topline">
+      <div class="brandRow">
+        <img class="brandMark" src="/delish/assets/delish-logo-mark-512.png" alt="Delish logo" loading="eager" decoding="async" />
+        <div>
+          <h1>Delish Operator Control</h1>
+          <p class="sub">Pause, reopen, and manage ordering flow without touching code.</p>
+        </div>
       </div>
+      <a class="button-link secondary" href="/delish/admin/">Back to Admin</a>
     </div>
 
     <section class="card">
