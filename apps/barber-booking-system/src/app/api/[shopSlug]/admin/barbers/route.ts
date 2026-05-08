@@ -70,7 +70,7 @@ export async function GET(
     .single();
 
   const isPro = sub?.status === "active" && sub?.plan === "pro";
-  const defaultLimit = isPro ? 5 : 0;
+  const defaultLimit = isPro ? 10 : 0;
   const customLimit = (limitSetting?.value_json as { limit?: number } | null)?.limit;
   const barberLimit = customLimit ?? defaultLimit;
 
@@ -119,7 +119,7 @@ export async function POST(
     .single();
 
   const isPro = sub?.status === "active" && sub?.plan === "pro";
-  const defaultLimit = isPro ? 5 : 0;
+  const defaultLimit = isPro ? 10 : 0;
   const customLimit = (limitSetting?.value_json as { limit?: number } | null)?.limit;
   const barberLimit = customLimit ?? defaultLimit;
 
