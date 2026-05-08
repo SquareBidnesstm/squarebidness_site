@@ -17,6 +17,7 @@ const ACTIVE_KEY = "delish:timeclock:active";
 const PUNCHES_KEY = "delish:timeclock:punches";
 const SHIFTS_KEY = "delish:timeclock:shifts";
 const EMP_KEY = "delish:timeclock:employees";
+const PAYROLL_TURN_INS_KEY = "delish:timeclock:payroll_turn_ins";
 
 const MAX_RECENT = 25;
 const MAX_SHIFTS = 1000;
@@ -65,6 +66,32 @@ function getCentralDateKey(iso) {
   }
 
   return `${map.year}-${map.month}-${map.day}`;
+}
+
+function getCentralDateParts(iso) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: TZ,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    weekday: "long"
+  }).formatToParts(new Date(iso));
+
+  const map = {};
+  for (const part of parts) {
+    if (part.type !== "literal") map[part.type] = part.value;
+  }
+
+  return {
+    dateKey: `${map.year}-${map.month}-${map.day}`,
+    weekday: String(map.weekday || "").toLowerCase()
+  };
+}
+
+function addDaysToDateKey(dateKey, days) {
+  const [year, month, day] = String(dateKey || "").split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day + Number(days || 0)));
+  return date.toISOString().slice(0, 10);
 }
 
 function normalizeEmployeeName(name) {
@@ -177,6 +204,16 @@ async function getShifts() {
   return parseList(await redis("LRANGE", SHIFTS_KEY, 0, MAX_SHIFTS - 1));
 }
 
+async function getPayrollTurnIns() {
+  const saved = await redis("GET", PAYROLL_TURN_INS_KEY);
+  const parsed = parseJson(saved, {});
+  return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+}
+
+async function setPayrollTurnIns(turnIns) {
+  await redis("SET", PAYROLL_TURN_INS_KEY, JSON.stringify(turnIns || {}));
+}
+
 async function setShifts(shifts) {
   await redis("DEL", SHIFTS_KEY);
   const rows = (shifts || []).map(shift => JSON.stringify(shift));
@@ -204,6 +241,13 @@ function activeArrayFromMap(map) {
 function filterShiftsByDate(shifts, date) {
   if (!date) return shifts || [];
   return (shifts || []).filter(shift => shift.dateCentral === date);
+}
+
+function filterShiftsByDateRange(shifts, startDate, endDate) {
+  return (shifts || []).filter(shift => {
+    const date = String(shift.dateCentral || "");
+    return date >= startDate && date <= endDate;
+  });
 }
 
 function summarizeShifts(shifts) {
@@ -249,6 +293,42 @@ function buildShiftUpdate(shift, clockInAt, clockOutAt) {
   };
 }
 
+async function maybeTurnInPayroll(timestamp, activeMap) {
+  if (Object.keys(activeMap || {}).length > 0) return null;
+
+  const { dateKey, weekday } = getCentralDateParts(timestamp);
+  if (weekday !== "monday") return null;
+
+  const periodEnd = dateKey;
+  const periodStart = addDaysToDateKey(periodEnd, -6);
+  const turnIns = await getPayrollTurnIns();
+
+  if (turnIns[periodEnd]) return turnIns[periodEnd];
+
+  const shifts = filterShiftsByDateRange(await getShifts(), periodStart, periodEnd);
+  if (!shifts.length) return null;
+
+  const summary = summarizeShifts(shifts);
+  const turnIn = {
+    id: `payroll_${periodEnd}`,
+    status: "turned_in",
+    payDate: addDaysToDateKey(periodEnd, 1),
+    periodStart,
+    periodEnd,
+    turnedInAt: timestamp,
+    trigger: "last_monday_clock_out",
+    totalHours: summary.totalHours,
+    totalMinutes: summary.totalMinutes,
+    totalShifts: summary.totalShifts,
+    employees: summary.employees
+  };
+
+  turnIns[periodEnd] = turnIn;
+  await setPayrollTurnIns(turnIns);
+
+  return turnIn;
+}
+
 async function buildState(date) {
   const [employees, activeMap, recent, shifts] = await Promise.all([
     getEmployees(),
@@ -256,6 +336,7 @@ async function buildState(date) {
     getRecentPunches(),
     getShifts()
   ]);
+  const payrollTurnIns = await getPayrollTurnIns();
 
   const filteredShifts = filterShiftsByDate(shifts, date);
 
@@ -265,7 +346,10 @@ async function buildState(date) {
     active: activeArrayFromMap(activeMap),
     recent,
     shifts: filteredShifts,
-    summary: summarizeShifts(filteredShifts)
+    summary: summarizeShifts(filteredShifts),
+    payrollTurnIns: Object.values(payrollTurnIns)
+      .sort((a, b) => String(b.periodEnd || "").localeCompare(String(a.periodEnd || "")))
+      .slice(0, 12)
   };
 }
 
@@ -416,11 +500,13 @@ export default async function handler(req, res) {
       await setActiveMap(activeMap);
       await pushPunch({ name, action: "clock_out", timestamp, device });
       await pushCompletedShift(completed);
+      const payrollTurnIn = await maybeTurnInPayroll(timestamp, activeMap);
 
       return send(res, 200, {
         ...(await buildState()),
         message: `${name} clocked out.`,
-        shift: completed
+        shift: completed,
+        payrollTurnIn
       });
     }
 

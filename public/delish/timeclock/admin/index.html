@@ -394,6 +394,12 @@
       border:1px solid rgba(34,197,94,.28);
     }
 
+    .tag.out {
+      background:rgba(215,174,114,.12);
+      color:#f2d7ad;
+      border:1px solid rgba(215,174,114,.3);
+    }
+
     .helper {
       color:var(--muted);
       font-size:.9rem;
@@ -631,6 +637,28 @@
           </table>
         </div>
       </section>
+
+      <section class="section">
+        <h2>Payroll Turn-Ins</h2>
+        <p class="lead">Every Monday, when the last employee clocks out, the Tuesday-through-Monday payroll week is marked turned in for Tuesday payday.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Pay Date</th>
+                <th>Period</th>
+                <th>Hours</th>
+                <th>Shifts</th>
+                <th>Turned In</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="payrollTurnInsBody">
+              <tr><td colspan="6" class="empty">No payroll turn-ins yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
   </main>
 
@@ -661,6 +689,7 @@
       statOrdersPerHour: document.getElementById("statOrdersPerHour"),
       employeeTotalsBody: document.getElementById("employeeTotalsBody"),
       shiftsBody: document.getElementById("shiftsBody"),
+      payrollTurnInsBody: document.getElementById("payrollTurnInsBody"),
       liveList: document.getElementById("liveList"),
       liveCount: document.getElementById("liveCount"),
       newEmployeeName: document.getElementById("newEmployeeName"),
@@ -674,6 +703,7 @@
       employees: [],
       active: [],
       shifts: [],
+      payrollTurnIns: [],
       summary: { employees: [], totalHours: 0, totalShifts: 0 }
     };
 
@@ -883,6 +913,25 @@
       `).join("");
     }
 
+    function renderPayrollTurnIns(turnIns) {
+      const rows = turnIns || [];
+      if (!rows.length) {
+        els.payrollTurnInsBody.innerHTML = `<tr><td colspan="6" class="empty">No payroll turn-ins yet.</td></tr>`;
+        return;
+      }
+
+      els.payrollTurnInsBody.innerHTML = rows.map(item => `
+        <tr>
+          <td>${escapeHtml(item.payDate || "—")}</td>
+          <td>${escapeHtml(item.periodStart || "—")} → ${escapeHtml(item.periodEnd || "—")}</td>
+          <td>${Number(item.totalHours || 0).toFixed(2)}</td>
+          <td>${escapeHtml(item.totalShifts || 0)}</td>
+          <td>${escapeHtml(formatCentralDateTime(item.turnedInAt))}</td>
+          <td><span class="tag out">Turned In</span></td>
+        </tr>
+      `).join("");
+    }
+
   
 function renderStats(data, selectedDate, salesData = {}) {
   const totalHours = Number(data.summary?.totalHours ?? 0);
@@ -987,6 +1036,7 @@ function renderStats(data, selectedDate, salesData = {}) {
     renderStats(data, date, salesData);
     renderEmployeeTotals(data.summary);
     renderShifts(data.shifts || [], date);
+    renderPayrollTurnIns(data.payrollTurnIns || []);
     renderEmployeeOptions(data.employees || []);
     renderLive(data.active || []);
 
