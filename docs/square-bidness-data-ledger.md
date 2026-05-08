@@ -18,6 +18,22 @@ Protected route:
 
 Use the `x-ledger-token` header when possible. The route accepts `SQUARE_BIDNESS_LEDGER_TOKEN`, `LEDGER_EXPORT_TOKEN`, or `DELISH_OPERATOR_TOKEN` as a fallback.
 
+## Test Write Route
+
+Protected route:
+
+```text
+/api/ledger/test-write/
+```
+
+This writes one harmless `ledger_test` event to Supabase. Use it to confirm environment variables, Supabase access, and the `event_ledger` table before testing employee data.
+
+Browser test:
+
+```text
+/api/ledger/test-write/?token=YOUR_LEDGER_TOKEN
+```
+
 Examples:
 
 ```text
