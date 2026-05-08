@@ -1,4 +1,5 @@
 import { Redis } from "@upstash/redis";
+import { writeLedgerEvent } from "../_lib/supabase-ledger.js";
 
 export const config = {
   runtime: "nodejs"
@@ -24,6 +25,17 @@ const MAX_SHIFTS = 1000;
 
 function send(res, status, data) {
   res.status(status).json(data);
+}
+
+async function logTimeclockEvent(eventType, entityId, payload = {}) {
+  return writeLedgerEvent({
+    brand: "delish",
+    system: "timeclock",
+    eventType,
+    entityId,
+    payload,
+    source: "api/delish/timeclock",
+  });
 }
 
 function nowIso() {
@@ -463,6 +475,12 @@ export default async function handler(req, res) {
       activeMap[name] = shift;
       await setActiveMap(activeMap);
       await pushPunch({ name, action: "clock_in", timestamp, device });
+      await logTimeclockEvent("clock_in", shift.id, {
+        shift,
+        employeeName: name,
+        timestamp,
+        device,
+      });
 
       return send(res, 200, {
         ...(await buildState()),
@@ -501,6 +519,18 @@ export default async function handler(req, res) {
       await pushPunch({ name, action: "clock_out", timestamp, device });
       await pushCompletedShift(completed);
       const payrollTurnIn = await maybeTurnInPayroll(timestamp, activeMap);
+      await logTimeclockEvent("clock_out", completed.id, {
+        shift: completed,
+        employeeName: name,
+        timestamp,
+        device,
+      });
+
+      if (payrollTurnIn) {
+        await logTimeclockEvent("payroll_turned_in", payrollTurnIn.id, {
+          payrollTurnIn,
+        });
+      }
 
       return send(res, 200, {
         ...(await buildState()),
@@ -535,6 +565,9 @@ export default async function handler(req, res) {
       }
 
       await setEmployees([...employees, { name, pin }]);
+      await logTimeclockEvent("employee_added", name, {
+        employeeName: name,
+      });
 
       return send(res, 200, await buildState());
     }
@@ -553,6 +586,9 @@ export default async function handler(req, res) {
       await setEmployees(employees.filter(e =>
         normalizeEmployeeName(e?.name || e).toLowerCase() !== name.toLowerCase()
       ));
+      await logTimeclockEvent("employee_removed", name, {
+        employeeName: name,
+      });
 
       return send(res, 200, await buildState());
     }
@@ -579,8 +615,13 @@ export default async function handler(req, res) {
         return send(res, 404, { ok: false, error: "Shift not found." });
       }
 
-      shifts[index] = buildShiftUpdate(shifts[index], clockInAt, clockOutAt);
+      const previousShift = shifts[index];
+      shifts[index] = buildShiftUpdate(previousShift, clockInAt, clockOutAt);
       await setShifts(shifts);
+      await logTimeclockEvent("shift_edited", id, {
+        previousShift,
+        updatedShift: shifts[index],
+      });
 
       return send(res, 200, await buildState(String(body.date || "").trim()));
     }
@@ -597,6 +638,9 @@ export default async function handler(req, res) {
       }
 
       await setShifts(updated);
+      await logTimeclockEvent("shift_deleted", id, {
+        shift: shifts.find(shift => shift.id === id) || null,
+      });
 
       return send(res, 200, await buildState(String(body.date || "").trim()));
     }
