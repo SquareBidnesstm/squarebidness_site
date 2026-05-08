@@ -33,13 +33,15 @@ export async function POST(req: NextRequest) {
         const subscriptionId = session.subscription as string;
         if (!shopId) break;
 
+        const plan = session.metadata?.plan === "solo" ? "solo" : "pro";
+
         await supabaseServer.from("subscriptions").upsert(
           {
             shop_id: shopId,
             stripe_customer_id: customerId,
             stripe_subscription_id: subscriptionId,
             status: "active",
-            plan: "pro",
+            plan,
             current_period_end: null,
           },
           { onConflict: "shop_id" }
@@ -55,13 +57,18 @@ export async function POST(req: NextRequest) {
         const periodEndTs = sub.items?.data?.[0]?.current_period_end ?? null;
         const periodEnd = periodEndTs ? new Date(periodEndTs * 1000).toISOString() : null;
         const status = sub.status === "active" ? "active" : sub.status === "past_due" ? "past_due" : "canceled";
-        const plan = status === "active" ? "pro" : "free";
+
+        // Preserve plan from metadata; fall back to checking price ID
+        let plan = sub.metadata?.plan ?? "";
+        if (!plan || (status !== "active")) {
+          plan = status === "active" ? "pro" : "free";
+        }
 
         await supabaseServer
           .from("subscriptions")
           .update({
             status,
-            plan,
+            plan: status === "active" ? plan : "free",
             stripe_subscription_id: sub.id,
             ...(periodEnd ? { current_period_end: periodEnd } : {}),
           })

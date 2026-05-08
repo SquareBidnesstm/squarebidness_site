@@ -40,6 +40,18 @@ export async function POST(
     return NextResponse.json({ ok: false, error: "Already subscribed. Use billing portal to manage." }, { status: 409 });
   }
 
+  const body = await req.json().catch(() => ({}));
+  const plan: "solo" | "pro" = body.plan === "solo" ? "solo" : "pro";
+
+  const priceId =
+    plan === "solo"
+      ? process.env.STRIPE_SOLO_PRICE_ID!
+      : process.env.STRIPE_PRO_PRICE_ID!;
+
+  if (!priceId) {
+    return NextResponse.json({ ok: false, error: `Price ID for ${plan} plan not configured.` }, { status: 500 });
+  }
+
   const origin = req.headers.get("origin") || `https://booking.squarebidness.com`;
 
   // Reuse existing Stripe customer if we have one
@@ -67,18 +79,13 @@ export async function POST(
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
     mode: "subscription",
-    line_items: [
-      {
-        price: process.env.STRIPE_PRO_PRICE_ID!,
-        quantity: 1,
-      },
-    ],
+    line_items: [{ price: priceId, quantity: 1 }],
     success_url: `${origin}/${shopSlug}/admin?billing=success`,
     cancel_url: `${origin}/${shopSlug}/admin?billing=cancel`,
-    metadata: { shop_slug: shopSlug, shop_id: shop.id },
+    metadata: { shop_slug: shopSlug, shop_id: shop.id, plan },
     subscription_data: {
       trial_period_days: 30,
-      metadata: { shop_slug: shopSlug, shop_id: shop.id },
+      metadata: { shop_slug: shopSlug, shop_id: shop.id, plan },
     },
     allow_promotion_codes: true,
   });

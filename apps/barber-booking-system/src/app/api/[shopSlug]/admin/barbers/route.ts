@@ -69,8 +69,8 @@ export async function GET(
     .eq("key", "barber_limit")
     .single();
 
-  const isPro = sub?.status === "active" && sub?.plan === "pro";
-  const defaultLimit = isPro ? 10 : 0;
+  const activePlan = sub?.status === "active" ? sub?.plan : "free";
+  const defaultLimit = activePlan === "pro" ? 10 : activePlan === "solo" ? 1 : 0;
   const customLimit = (limitSetting?.value_json as { limit?: number } | null)?.limit;
   const barberLimit = customLimit ?? defaultLimit;
 
@@ -118,8 +118,8 @@ export async function POST(
     .eq("key", "barber_limit")
     .single();
 
-  const isPro = sub?.status === "active" && sub?.plan === "pro";
-  const defaultLimit = isPro ? 10 : 0;
+  const activePlan = sub?.status === "active" ? sub?.plan : "free";
+  const defaultLimit = activePlan === "pro" ? 10 : activePlan === "solo" ? 1 : 0;
   const customLimit = (limitSetting?.value_json as { limit?: number } | null)?.limit;
   const barberLimit = customLimit ?? defaultLimit;
 
