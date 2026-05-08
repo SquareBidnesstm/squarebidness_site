@@ -85,6 +85,7 @@ async function redisSet(key, value) {
 
 function getRequestedMenuDay(value) {
   const day = String(value || "").toLowerCase().trim();
+  if (day === "weekend") return "weekend";
   return day === "sunday" ? "sunday" : "saturday";
 }
 
@@ -156,7 +157,7 @@ export default async function handler(req, res) {
         });
       }
 
-      if (match.day !== requestedDay) {
+      if (requestedDay !== "weekend" && match.day !== requestedDay) {
         return res.status(400).json({
           ok: false,
           error: `${match.name} is only available on ${match.day}.`

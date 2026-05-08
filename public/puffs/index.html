@@ -307,11 +307,16 @@
     return today === "sunday" ? "sunday" : "saturday";
   }
 
+  function getOrderMenuDay() {
+    return getMenuDisplayMode() === "both" ? "weekend" : getActiveMenuDay();
+  }
+
   function getMenuDisplayMode() {
     const today = new Date().toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
     if (today === "saturday") return "saturday_only";
     if (today === "sunday") return "sunday_only";
-    return "both";
+    if (today === "monday") return "both";
+    return "closed";
   }
 
   function showError(msg) {
@@ -655,6 +660,14 @@
       return;
     }
 
+    if (mode === "closed") {
+      const empty = document.createElement("div");
+      empty.className = "emptyDay";
+      empty.textContent = "Puff's cooks Saturday and Sunday. The full weekend menu comes back on Monday.";
+      root.appendChild(empty);
+      return;
+    }
+
     root.appendChild(saturdayWrap);
     root.appendChild(sundayWrap);
   }
@@ -760,7 +773,7 @@
       `Pickup: ${when}`,
       `Name: ${name}`,
       `Phone: ${phone}`,
-      `Menu Day: ${getActiveMenuDay()}`,
+      `Menu Day: ${getOrderMenuDay()}`,
       "",
       "Items:"
     ];
@@ -847,7 +860,7 @@
           pickupTime,
           notes,
           smsConsent,
-          menuDay: getActiveMenuDay(),
+          menuDay: getOrderMenuDay(),
           items
         })
       });
