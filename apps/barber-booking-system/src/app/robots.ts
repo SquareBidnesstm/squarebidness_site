@@ -1,4 +1,6 @@
-import type { MetadataRoute } from "next";
+import { MetadataRoute } from "next";
+
+const BASE_URL = "https://booking.squarebidness.com";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -6,16 +8,16 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-      },
-      {
-        userAgent: "facebookexternalhit",
-        allow: "/",
-      },
-      {
-        userAgent: "Twitterbot",
-        allow: "/",
+        disallow: [
+          "/api/",
+          "/platform/",
+          "*/admin/",
+          "*/admin",
+          "*/login",
+        ],
       },
     ],
-    sitemap: "https://booking.squarebidness.com/sitemap.xml",
+    sitemap: `${BASE_URL}/sitemap.xml`,
+    host: BASE_URL,
   };
 }
