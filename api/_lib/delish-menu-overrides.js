@@ -11,6 +11,7 @@ export const DEFAULT_DELISH_MENU_OVERRIDES = {
     drinks: true,
     extraSides: true,
   },
+  sectionsDate: "",
   itemsOff: [],
   itemsOffDate: "",
   itemsSoldOut: [],
@@ -45,6 +46,11 @@ export async function getDelishMenuOverrides() {
   }
 
   const todayKey = getCentralDateKey();
+  const sectionsDate = String(saved.sectionsDate || "");
+  const savedSections =
+    sectionsDate === todayKey && saved.sections && typeof saved.sections === "object"
+      ? saved.sections
+      : {};
   const offDate = String(saved.itemsOffDate || "");
   const itemsOff =
     offDate === todayKey && Array.isArray(saved.itemsOff)
@@ -66,8 +72,9 @@ export async function getDelishMenuOverrides() {
     ...saved,
     sections: {
       ...DEFAULT_DELISH_MENU_OVERRIDES.sections,
-      ...(saved.sections || {}),
+      ...savedSections,
     },
+    sectionsDate: Object.keys(savedSections).length ? sectionsDate : todayKey,
     itemsOff,
     itemsOffDate: itemsOff.length ? offDate : todayKey,
     itemsSoldOut,
