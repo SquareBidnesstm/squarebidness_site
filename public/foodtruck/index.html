@@ -1,0 +1,627 @@
+<!-- /public/foodtruck/index.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <title>Food Truck Online Ordering System | Square Bidness</title>
+  <meta name="description" content="Square Bidness installs food truck online ordering systems: QR menu, prepaid checkout, live orders screen, operator controls, and catering request flow." />
+  <link rel="canonical" href="https://www.squarebidness.com/foodtruck/" />
+  <meta name="robots" content="index,follow" />
+  <meta name="theme-color" content="#0b0b0b" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Food Truck Ordering System — Built by Square Bidness" />
+  <meta property="og:description" content="QR menu, prepaid pickup orders, live order screen, operator controls, and catering request flow for food trucks." />
+  <meta property="og:url" content="https://www.squarebidness.com/foodtruck/" />
+  <meta property="og:site_name" content="Square Bidness" />
+  <meta property="og:image" content="https://www.squarebidness.com/assets/foodtruck-og-1200x630.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Food Truck Ordering System — Square Bidness" />
+  <meta name="twitter:description" content="Turn your food truck menu into a prepaid online ordering lane." />
+  <meta name="twitter:image" content="https://www.squarebidness.com/assets/foodtruck-og-1200x630.jpg" />
+
+  <style>
+    :root{
+      --bg:#0b0b0b;
+      --panel:#141414;
+      --panel2:#1d1d1d;
+      --text:#f6f1e8;
+      --muted:#bfb6a7;
+      --line:#2d2d2d;
+      --gold:#d7ae72;
+      --gold2:#f4d7a6;
+      --green:#1f4b2d;
+      --red:#5a2020;
+      --shadow:0 20px 60px rgba(0,0,0,.32);
+    }
+
+    *{box-sizing:border-box}
+
+    html,body{
+      margin:0;
+      background:
+        radial-gradient(circle at top left, rgba(215,174,114,.16), transparent 34%),
+        linear-gradient(180deg,#0f0f10 0%,#080808 100%);
+      color:var(--text);
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+    }
+
+    a{color:inherit}
+
+    .wrap{
+      width:min(100%,1120px);
+      margin:0 auto;
+      padding:22px;
+    }
+
+    .nav{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:14px;
+      padding:12px 0 24px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight:900;
+      letter-spacing:-.03em;
+    }
+
+    .mark{
+      width:38px;
+      height:38px;
+      border-radius:12px;
+      background:linear-gradient(135deg,var(--gold2),var(--gold));
+      color:#15100a;
+      display:grid;
+      place-items:center;
+      font-weight:1000;
+      box-shadow:var(--shadow);
+    }
+
+    .nav a{
+      text-decoration:none;
+      color:var(--muted);
+      font-size:.94rem;
+      font-weight:700;
+    }
+
+    .hero{
+      display:grid;
+      grid-template-columns:1.05fr .95fr;
+      gap:22px;
+      align-items:stretch;
+      padding:18px 0 28px;
+    }
+
+    .card{
+      background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.025));
+      border:1px solid rgba(255,255,255,.09);
+      border-radius:28px;
+      padding:24px;
+      box-shadow:var(--shadow);
+    }
+
+    .kicker{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      background:rgba(215,174,114,.12);
+      border:1px solid rgba(215,174,114,.25);
+      color:var(--gold2);
+      font-size:.78rem;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.1em;
+      margin-bottom:16px;
+    }
+
+    h1{
+      margin:0;
+      font-size:clamp(2.4rem,6vw,5rem);
+      line-height:.92;
+      letter-spacing:-.075em;
+    }
+
+    .lead{
+      margin:18px 0 0;
+      color:#ded4c5;
+      font-size:1.12rem;
+      line-height:1.62;
+      max-width:760px;
+    }
+
+    .hero-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      margin-top:24px;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:48px;
+      padding:0 18px;
+      border-radius:999px;
+      text-decoration:none;
+      border:1px solid rgba(255,255,255,.12);
+      background:#1a1a1a;
+      color:#fff;
+      font-weight:900;
+    }
+
+    .btn.primary{
+      background:linear-gradient(180deg,var(--gold2),var(--gold));
+      color:#18100a;
+      border:none;
+    }
+
+    .proof{
+      display:grid;
+      gap:12px;
+    }
+
+    .proof-box{
+      background:rgba(0,0,0,.22);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:20px;
+      padding:16px;
+    }
+
+    .proof-label{
+      color:var(--muted);
+      font-size:.78rem;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.09em;
+      margin-bottom:6px;
+    }
+
+    .proof-value{
+      color:#fff;
+      font-size:1.25rem;
+      font-weight:1000;
+      line-height:1.25;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:16px;
+      margin:22px 0;
+    }
+
+    .feature{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:24px;
+      padding:20px;
+    }
+
+    .feature h3{
+      margin:0 0 8px;
+      color:var(--gold2);
+      font-size:1.05rem;
+    }
+
+    .feature p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.55;
+      font-size:.96rem;
+    }
+
+    .section{
+      margin-top:22px;
+    }
+
+    .section h2{
+      margin:0 0 10px;
+      font-size:clamp(1.7rem,3vw,2.5rem);
+      letter-spacing:-.045em;
+    }
+
+    .section p{
+      color:var(--muted);
+      line-height:1.65;
+    }
+
+    .steps{
+      display:grid;
+      gap:12px;
+      margin-top:14px;
+    }
+
+    .step{
+      display:grid;
+      grid-template-columns:48px 1fr;
+      gap:14px;
+      align-items:start;
+      padding:16px;
+      border-radius:20px;
+      background:var(--panel);
+      border:1px solid var(--line);
+    }
+
+    .num{
+      width:42px;
+      height:42px;
+      border-radius:14px;
+      display:grid;
+      place-items:center;
+      background:rgba(215,174,114,.13);
+      color:var(--gold2);
+      font-weight:1000;
+      border:1px solid rgba(215,174,114,.22);
+    }
+
+    .step h3{
+      margin:0 0 4px;
+      font-size:1.03rem;
+    }
+
+    .step p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.55;
+    }
+
+    .offer{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:18px;
+      margin-top:22px;
+    }
+
+    .price{
+      font-size:2.7rem;
+      font-weight:1000;
+      letter-spacing:-.06em;
+      color:#fff;
+      margin:6px 0;
+    }
+
+    .small{
+      color:var(--muted);
+      font-size:.92rem;
+      line-height:1.5;
+    }
+
+    .list{
+      display:grid;
+      gap:10px;
+      margin:16px 0 0;
+      padding:0;
+      list-style:none;
+    }
+
+    .list li{
+      display:flex;
+      gap:10px;
+      color:#ded6c9;
+      line-height:1.45;
+    }
+
+    .list li::before{
+      content:"✓";
+      color:var(--gold2);
+      font-weight:1000;
+    }
+
+    .form{
+      display:grid;
+      gap:12px;
+      margin-top:12px;
+    }
+
+    input,textarea,select{
+      width:100%;
+      border:1px solid var(--line);
+      background:#101010;
+      color:#fff;
+      border-radius:14px;
+      padding:13px 14px;
+      font:inherit;
+    }
+
+    textarea{
+      min-height:110px;
+      resize:vertical;
+    }
+
+    .form-note{
+      color:var(--muted);
+      font-size:.86rem;
+      line-height:1.45;
+    }
+
+    .footer{
+      border-top:1px solid var(--line);
+      margin-top:30px;
+      padding:20px 0 10px;
+      color:#978e80;
+      font-size:.9rem;
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .footer a{
+      text-decoration:none;
+      color:#ddd;
+    }
+
+    @media (max-width:900px){
+      .hero,.offer{grid-template-columns:1fr}
+      .grid{grid-template-columns:1fr}
+    }
+
+    @media (max-width:560px){
+      .wrap{padding:16px}
+      .card{padding:20px}
+      h1{font-size:3rem}
+      .nav{align-items:flex-start}
+    }
+  </style>
+
+  <script defer src="/scripts/sb-analytics.js"></script>
+</head>
+
+<body>
+  <div class="wrap">
+    <nav class="nav" aria-label="Food truck onboarding navigation">
+      <div class="brand">
+        <div class="mark">SB</div>
+        <div>Square Bidness</div>
+      </div>
+      <a href="https://www.squarebidness.com/">Back to Square Bidness</a>
+    </nav>
+
+    <main>
+      <section class="hero">
+        <div class="card">
+          <div class="kicker">Food Truck Expo • June 7</div>
+          <h1>Turn your food truck line into a paid online ordering lane.</h1>
+          <p class="lead">
+            Square Bidness installs the same type of system built for Puff’s Smokehouse:
+            QR menu, prepaid checkout, live orders screen, operator controls, catering requests,
+            and customer pickup flow — built for real food truck pressure.
+          </p>
+
+          <div class="hero-actions">
+            <a class="btn primary" href="#start">Start Food Truck Onboarding</a>
+            <a class="btn" href="/puffs/">View Puff’s Example</a>
+          </div>
+        </div>
+
+        <aside class="card proof" aria-label="System highlights">
+          <div class="proof-box">
+            <div class="proof-label">Customer Flow</div>
+            <div class="proof-value">Scan QR → Order → Pay → Pickup</div>
+          </div>
+
+          <div class="proof-box">
+            <div class="proof-label">Operator Flow</div>
+            <div class="proof-value">Live orders screen with ready / picked up status</div>
+          </div>
+
+          <div class="proof-box">
+            <div class="proof-label">Control</div>
+            <div class="proof-value">Pause ordering, force open, mark sold out, update menu</div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="grid" aria-label="Food truck system features">
+        <div class="feature">
+          <h3>QR Menu</h3>
+          <p>Customers scan your card, flyer, table sign, or window decal and land directly on your food truck ordering page.</p>
+        </div>
+
+        <div class="feature">
+          <h3>Prepaid Checkout</h3>
+          <p>Orders are paid before they hit the truck. Less chasing cash, fewer fake orders, cleaner pickup flow.</p>
+        </div>
+
+        <div class="feature">
+          <h3>Live Order Screen</h3>
+          <p>Your team sees paid orders in one place with customer name, phone, pickup time, items, notes, and status.</p>
+        </div>
+
+        <div class="feature">
+          <h3>Operator Controls</h3>
+          <p>Pause ordering, force open, add customer messages, mark items sold out, and hide sections without rebuilding the site.</p>
+        </div>
+
+        <div class="feature">
+          <h3>Catering Requests</h3>
+          <p>Separate catering intake for bigger jobs, events, deposits, and follow-up without clogging the pickup menu.</p>
+        </div>
+
+        <div class="feature">
+          <h3>Built for Events</h3>
+          <p>Festival menus, weekend specials, and temporary item changes can be handled without confusing customers.</p>
+        </div>
+      </section>
+
+      <section class="section card">
+        <h2>This is not just a website.</h2>
+        <p>
+          This is a food truck ordering system built to organize demand. The goal is simple:
+          reduce phone chaos, speed up pickup, and help customers order before they reach the window.
+        </p>
+
+        <div class="steps">
+          <div class="step">
+            <div class="num">1</div>
+            <div>
+              <h3>We set up your food truck page.</h3>
+              <p>Your menu, brand colors, pickup flow, and customer ordering page are built around your real operation.</p>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="num">2</div>
+            <div>
+              <h3>We connect payment and orders.</h3>
+              <p>Stripe checkout routes paid orders into a live screen your team can use during service.</p>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="num">3</div>
+            <div>
+              <h3>You run service from the screen.</h3>
+              <p>New orders come in, your team marks them ready or picked up, and the line stays organized.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="offer" id="start">
+        <div class="card">
+          <div class="kicker">Food Truck Install</div>
+          <h2>Built for vendors who are ready to move faster.</h2>
+          <div class="price">Start onboarding</div>
+          <p class="small">
+            Use this form to get on the Square Bidness food truck install list.
+            We’ll review your menu, ordering flow, event needs, and payment setup.
+          </p>
+
+          <ul class="list">
+            <li>Food truck menu page</li>
+            <li>Stripe checkout setup</li>
+            <li>Live order screen</li>
+            <li>Admin controls for menu and sold out items</li>
+            <li>Catering request flow</li>
+            <li>QR code for cards, flyers, and window signs</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h2>Food Truck Onboarding</h2>
+          <p class="small">
+            Fill this out and we’ll know what kind of system your truck needs.
+          </p>
+
+          <form class="form" id="foodtruckForm">
+            <input id="ownerName" name="ownerName" placeholder="Owner Name" autocomplete="name" required />
+            <input id="businessName" name="businessName" placeholder="Food Truck / Business Name" required />
+            <input id="phone" name="phone" placeholder="Phone Number" inputmode="tel" autocomplete="tel" required />
+            <input id="email" name="email" placeholder="Email Address" type="email" autocomplete="email" />
+
+            <select id="currentFlow" name="currentFlow">
+              <option value="">How do you currently take orders?</option>
+              <option>Walk-up only</option>
+              <option>Phone calls</option>
+              <option>Text messages</option>
+              <option>DMs / social media</option>
+              <option>Already using online ordering</option>
+            </select>
+
+            <select id="launchTimeline" name="launchTimeline">
+              <option value="">When do you want to launch?</option>
+              <option>ASAP</option>
+              <option>Within 2 weeks</option>
+              <option>This month</option>
+              <option>Before my next event</option>
+              <option>Just gathering information</option>
+            </select>
+
+            <textarea id="notes" name="notes" placeholder="Tell us about your menu, events, catering, or what you need customers to order online."></textarea>
+
+            <button class="btn primary" type="submit">Submit Food Truck Onboarding</button>
+
+            <div class="form-note" id="formStatus">
+              By submitting, you’re requesting information about a Square Bidness food truck ordering system.
+            </div>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div>© 2026 Square Bidness · Food Truck Systems</div>
+      <div>
+        <a href="/puffs/">Puff’s Example</a> ·
+        <a href="/install/">Install Intake</a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const form = document.getElementById("foodtruckForm");
+    const formStatus = document.getElementById("formStatus");
+
+    function clean(value) {
+      return String(value || "").trim();
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const payload = {
+        source: "foodtruck_onboarding",
+        ownerName: clean(document.getElementById("ownerName").value),
+        businessName: clean(document.getElementById("businessName").value),
+        phone: clean(document.getElementById("phone").value),
+        email: clean(document.getElementById("email").value),
+        currentFlow: clean(document.getElementById("currentFlow").value),
+        launchTimeline: clean(document.getElementById("launchTimeline").value),
+        notes: clean(document.getElementById("notes").value)
+      };
+
+      if (!payload.ownerName || !payload.businessName || !payload.phone) {
+        formStatus.textContent = "Owner name, business name, and phone number are required.";
+        return;
+      }
+
+      formStatus.textContent = "Submitting...";
+
+      try {
+        const res = await fetch("/api/install-intake/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            contactName: payload.ownerName,
+            businessName: payload.businessName,
+            phone: payload.phone,
+            email: payload.email,
+            businessType: "Food Truck",
+            currentOrderFlow: payload.currentFlow,
+            launchTimeline: payload.launchTimeline,
+            notes: payload.notes,
+            source: payload.source
+          })
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || data.ok === false) {
+          throw new Error(data.error || data.message || "Unable to submit onboarding.");
+        }
+
+        formStatus.textContent = "Received. Square Bidness will follow up with the next step.";
+        form.reset();
+      } catch (err) {
+        formStatus.textContent = err.message || "Unable to submit right now. Please try again.";
+      }
+    });
+  </script>
+</body>
+</html>
