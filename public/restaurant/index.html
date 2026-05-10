@@ -1,0 +1,584 @@
+<!-- /public/restaurant/index.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <title>Restaurant Onboarding | Square Bidness</title>
+  <meta name="description" content="Square Bidness restaurant onboarding for online ordering, QR menus, prepaid checkout, live order screens, catering requests, and operator controls." />
+  <link rel="canonical" href="https://www.squarebidness.com/restaurant/" />
+  <meta name="robots" content="index,follow" />
+  <meta name="theme-color" content="#0b0b0b" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Restaurant Onboarding | Square Bidness" />
+  <meta property="og:description" content="Start a restaurant ordering system with QR menu, prepaid checkout, live orders, operator controls, and catering intake." />
+  <meta property="og:url" content="https://www.squarebidness.com/restaurant/" />
+  <meta property="og:site_name" content="Square Bidness" />
+  <meta property="og:image" content="https://www.squarebidness.com/assets/foodtruck-og-1200x630.jpg" />
+
+  <style>
+    :root{
+      --bg:#0a0a0a;
+      --panel:#121212;
+      --text:#f7f1e8;
+      --muted:#bfb5a5;
+      --soft:#ddd2c1;
+      --line:#2a2a2a;
+      --gold:#d7ae72;
+      --gold2:#f4d7a6;
+      --shadow:0 24px 70px rgba(0,0,0,.38);
+    }
+
+    *{box-sizing:border-box}
+
+    html,body{
+      margin:0;
+      overflow-x:hidden;
+      background:
+        radial-gradient(circle at 8% 0%, rgba(215,174,114,.14), transparent 30%),
+        linear-gradient(180deg,#111 0%,var(--bg) 54%,#070707 100%);
+      color:var(--text);
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+    }
+
+    a{color:inherit}
+
+    .wrap{
+      width:min(100%,1120px);
+      max-width:100vw;
+      margin:0 auto;
+      padding:22px;
+    }
+
+    .nav{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:14px;
+      padding:10px 0 22px;
+    }
+
+    .brand{
+      font-weight:1000;
+      letter-spacing:-.03em;
+      font-size:1.05rem;
+    }
+
+    .nav a{
+      text-decoration:none;
+      color:var(--muted);
+      font-size:.94rem;
+      font-weight:800;
+    }
+
+    .intro{
+      display:grid;
+      grid-template-columns:1.22fr .78fr;
+      gap:18px;
+      align-items:start;
+    }
+
+    .panel{
+      min-width:0;
+      max-width:100%;
+      background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.025));
+      border:1px solid rgba(255,255,255,.09);
+      border-radius:22px;
+      box-shadow:var(--shadow);
+    }
+
+    .form-card,.summary,.section{padding:22px}
+
+    .summary{
+      position:sticky;
+      top:16px;
+    }
+
+    .kicker{
+      color:var(--gold2);
+      font-size:.76rem;
+      font-weight:1000;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      margin:0 0 10px;
+    }
+
+    h1{
+      margin:0;
+      font-size:clamp(2rem,4.6vw,4.25rem);
+      line-height:.94;
+      letter-spacing:-.065em;
+      overflow-wrap:anywhere;
+    }
+
+    h2{
+      margin:0;
+      font-size:clamp(1.55rem,3vw,2.4rem);
+      line-height:1;
+      letter-spacing:-.05em;
+    }
+
+    .lead,.form-head p,.section p{
+      color:var(--soft);
+      line-height:1.58;
+    }
+
+    .form-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:18px;
+      margin-bottom:16px;
+    }
+
+    .form-head p{
+      margin:8px 0 0;
+      max-width:58ch;
+    }
+
+    .badge{
+      flex:0 0 auto;
+      border:1px solid rgba(215,174,114,.28);
+      color:var(--gold2);
+      border-radius:999px;
+      padding:8px 11px;
+      font-size:.75rem;
+      font-weight:1000;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      background:rgba(215,174,114,.1);
+    }
+
+    .form{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      min-width:0;
+    }
+
+    .wide{grid-column:1 / -1}
+
+    label{
+      display:grid;
+      gap:7px;
+      color:#dacdbb;
+      font-size:.86rem;
+      font-weight:850;
+      min-width:0;
+    }
+
+    input,textarea,select{
+      min-width:0;
+      width:100%;
+      border:1px solid var(--line);
+      background:#0d0d0d;
+      color:#fff;
+      border-radius:12px;
+      padding:13px 14px;
+      font:inherit;
+      min-height:48px;
+    }
+
+    textarea{
+      min-height:116px;
+      resize:vertical;
+    }
+
+    input:focus,textarea:focus,select:focus{
+      outline:2px solid rgba(215,174,114,.42);
+      outline-offset:2px;
+    }
+
+    .actions{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      gap:12px;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:48px;
+      padding:0 18px;
+      border-radius:999px;
+      border:0;
+      background:linear-gradient(180deg,var(--gold2),var(--gold));
+      color:#18100a;
+      font-weight:950;
+      cursor:pointer;
+    }
+
+    .form-note{
+      color:var(--muted);
+      font-size:.88rem;
+      line-height:1.45;
+    }
+
+    .quick-list,.feature-list{
+      display:grid;
+      gap:10px;
+      margin:18px 0 0;
+      padding:0;
+      list-style:none;
+    }
+
+    .quick-list li,.feature-list li{
+      display:flex;
+      gap:10px;
+      color:#e5dac8;
+      line-height:1.42;
+      font-weight:750;
+    }
+
+    .quick-list li::before,.feature-list li::before{
+      content:"✓";
+      color:var(--gold2);
+      font-weight:1000;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:14px;
+      margin:18px 0 0;
+    }
+
+    .feature{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:18px;
+    }
+
+    .feature h3{
+      margin:0 0 8px;
+      color:var(--gold2);
+      font-size:1rem;
+    }
+
+    .feature p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.55;
+      font-size:.94rem;
+    }
+
+    .section{
+      margin-top:18px;
+    }
+
+    .footer{
+      border-top:1px solid var(--line);
+      margin-top:24px;
+      padding:18px 0 10px;
+      color:#978e80;
+      font-size:.9rem;
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .footer a{
+      text-decoration:none;
+      color:#ddd;
+    }
+
+    @media (max-width:900px){
+      .intro,.grid{grid-template-columns:1fr}
+      .summary{position:static}
+      .form-head{display:block}
+      .badge{display:inline-flex;margin-top:12px}
+    }
+
+    @media (max-width:620px){
+      .wrap{width:100%;padding:16px}
+      .form-card,.summary,.section{padding:18px;overflow:hidden}
+      .form{grid-template-columns:1fr}
+      h1{font-size:clamp(1.85rem,9vw,2.45rem);line-height:1;letter-spacing:-.045em}
+      h2{font-size:clamp(1.5rem,8vw,2.2rem)}
+      .nav{align-items:flex-start;flex-wrap:wrap}
+      .nav a{font-size:.86rem;max-width:100%;overflow-wrap:anywhere}
+      input,textarea,select{font-size:16px}
+    }
+  </style>
+
+  <script defer src="/scripts/sb-analytics.js"></script>
+</head>
+
+<body>
+  <div class="wrap">
+    <nav class="nav" aria-label="Restaurant onboarding navigation">
+      <div class="brand">Square Bidness</div>
+      <a href="https://www.squarebidness.com/">Back to Square Bidness</a>
+    </nav>
+
+    <main>
+      <section class="intro" aria-labelledby="restaurant-title">
+        <section class="panel form-card" id="start" aria-labelledby="restaurant-title">
+          <div class="form-head">
+            <div>
+              <p class="kicker">Restaurant Onboarding</p>
+              <h1 id="restaurant-title">Start your restaurant ordering system.</h1>
+              <p>
+                Tell us how your restaurant takes orders now and what you need installed.
+              </p>
+            </div>
+            <div class="badge">Intake Form</div>
+          </div>
+
+          <form class="form" id="restaurantForm">
+            <label>
+              Contact Name
+              <input id="name" name="name" autocomplete="name" required />
+            </label>
+
+            <label>
+              Restaurant / Business Name
+              <input id="business" name="business" required />
+            </label>
+
+            <label>
+              Phone Number
+              <input id="phone" name="phone" inputmode="tel" autocomplete="tel" required />
+            </label>
+
+            <label>
+              Email Address
+              <input id="email" name="email" type="email" autocomplete="email" />
+            </label>
+
+            <label>
+              City
+              <input id="city" name="city" autocomplete="address-level2" />
+            </label>
+
+            <label>
+              State
+              <input id="state" name="state" autocomplete="address-level1" />
+            </label>
+
+            <label>
+              Service Style
+              <select id="serviceStyle" name="serviceStyle">
+                <option value="">What kind of restaurant?</option>
+                <option>Quick service</option>
+                <option>Counter service</option>
+                <option>Full service</option>
+                <option>Takeout focused</option>
+                <option>Catering focused</option>
+                <option>Pop-up / event kitchen</option>
+              </select>
+            </label>
+
+            <label>
+              Current Order Flow
+              <select id="orderFlow" name="orderFlow">
+                <option value="">How do you currently take orders?</option>
+                <option>Walk-up / dine-in only</option>
+                <option>Phone calls</option>
+                <option>Text messages</option>
+                <option>DMs / social media</option>
+                <option>Third-party apps</option>
+                <option>Already using online ordering</option>
+              </select>
+            </label>
+
+            <label>
+              Current Tools
+              <select id="currentTools" name="currentTools">
+                <option value="">What do you use now?</option>
+                <option>Square</option>
+                <option>Toast</option>
+                <option>Clover</option>
+                <option>Stripe</option>
+                <option>Cash App / Zelle</option>
+                <option>Nothing formal yet</option>
+                <option>Other</option>
+              </select>
+            </label>
+
+            <label>
+              Launch Timeline
+              <select id="launchTimeline" name="launchTimeline">
+                <option value="">When do you want to launch?</option>
+                <option>ASAP</option>
+                <option>Within 2 weeks</option>
+                <option>This month</option>
+                <option>Before my next event</option>
+                <option>Just gathering information</option>
+              </select>
+            </label>
+
+            <label>
+              Catering Needed?
+              <select id="cateringNeeded" name="cateringNeeded">
+                <option value="">Do you need catering intake?</option>
+                <option>Yes</option>
+                <option>No</option>
+                <option>Maybe later</option>
+              </select>
+            </label>
+
+            <label>
+              Monthly Order Volume
+              <select id="monthlyVolume" name="monthlyVolume">
+                <option value="">Estimated monthly online orders?</option>
+                <option>Under 100</option>
+                <option>100-300</option>
+                <option>300-750</option>
+                <option>750+</option>
+                <option>Not sure yet</option>
+              </select>
+            </label>
+
+            <label class="wide">
+              Must-Have Features
+              <input id="mustHave" name="mustHave" placeholder="Example: prepaid pickup, catering deposits, sold-out controls, QR menu" />
+            </label>
+
+            <label class="wide">
+              Notes
+              <textarea id="notes" name="notes" placeholder="Tell us about your menu, ordering pressure, catering, events, or what you need customers to do online."></textarea>
+            </label>
+
+            <div class="wide actions">
+              <button class="btn" type="submit">Submit Restaurant Onboarding</button>
+              <div class="form-note" id="formStatus">
+                Your details will be collected in the Square Bidness install intake sheet and emailed to Marcus.
+              </div>
+            </div>
+          </form>
+        </section>
+
+        <aside class="panel summary">
+          <h2>Online ordering built around your real operation.</h2>
+          <p class="lead">
+            Square Bidness installs ordering systems for restaurants that need cleaner pickup,
+            fewer missed calls, and a more organized catering flow.
+          </p>
+
+          <ul class="quick-list" aria-label="Restaurant install includes">
+            <li>QR menu and ordering page</li>
+            <li>Prepaid pickup checkout</li>
+            <li>Live order screen for staff</li>
+            <li>Catering request and deposit flow</li>
+            <li>Operator controls for menu changes</li>
+          </ul>
+        </aside>
+      </section>
+
+      <section class="grid" aria-label="Restaurant system features">
+        <div class="feature">
+          <h3>QR Menu</h3>
+          <p>Customers scan at the counter, table, event, or flyer and land on the restaurant order page.</p>
+        </div>
+
+        <div class="feature">
+          <h3>Prepaid Pickup</h3>
+          <p>Customers pay before the order hits your kitchen, which keeps pickup cleaner and reduces fake orders.</p>
+        </div>
+
+        <div class="feature">
+          <h3>Live Orders</h3>
+          <p>Staff can see incoming paid orders, customer details, notes, and order status in one place.</p>
+        </div>
+
+        <div class="feature">
+          <h3>Operator Controls</h3>
+          <p>Pause ordering, mark sold out, update item notes, and adjust menu flow without rebuilding the site.</p>
+        </div>
+
+        <div class="feature">
+          <h3>Catering Flow</h3>
+          <p>Collect event requests, guest count, service needs, and follow-up details without clogging pickup orders.</p>
+        </div>
+
+        <div class="feature">
+          <h3>Built to Install</h3>
+          <p>The intake gives Square Bidness the details needed to scope your ordering system and next steps.</p>
+        </div>
+      </section>
+
+      <section class="section panel">
+        <h2>Where does the form submit?</h2>
+        <p>
+          This page posts to <strong>/api/install-intake/</strong>. That endpoint forwards the lead into the
+          existing Square Bidness install intake sheet, sends an SMS alert when configured, and now sends an
+          email alert to <strong>marcusbuckner@squarebidness.com</strong> when the Resend email key is available.
+        </p>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div>© 2026 Square Bidness · Restaurant Systems</div>
+      <div>
+        <a href="/foodtruck/">Food Truck Onboarding</a> ·
+        <a href="/install/">Install Intake</a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const form = document.getElementById("restaurantForm");
+    const formStatus = document.getElementById("formStatus");
+
+    function clean(value) {
+      return String(value || "").trim();
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const payload = {
+        source: "restaurant_onboarding",
+        name: clean(document.getElementById("name").value),
+        business: clean(document.getElementById("business").value),
+        phone: clean(document.getElementById("phone").value),
+        email: clean(document.getElementById("email").value),
+        city: clean(document.getElementById("city").value),
+        state: clean(document.getElementById("state").value),
+        businessType: "Restaurant",
+        serviceStyle: clean(document.getElementById("serviceStyle").value),
+        orderFlow: clean(document.getElementById("orderFlow").value),
+        currentTools: clean(document.getElementById("currentTools").value),
+        launchTimeline: clean(document.getElementById("launchTimeline").value),
+        cateringNeeded: clean(document.getElementById("cateringNeeded").value),
+        monthlyVolume: clean(document.getElementById("monthlyVolume").value),
+        mustHave: clean(document.getElementById("mustHave").value),
+        notes: clean(document.getElementById("notes").value)
+      };
+
+      if (!payload.name || !payload.business || !payload.phone) {
+        formStatus.textContent = "Contact name, business name, and phone number are required.";
+        return;
+      }
+
+      formStatus.textContent = "Submitting...";
+
+      try {
+        const res = await fetch("/api/install-intake/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || data.ok === false) {
+          throw new Error(data.error || data.message || "Unable to submit onboarding.");
+        }
+
+        formStatus.textContent = `Received. Lead ID: ${data.leadId}. Square Bidness will follow up with the next step.`;
+        form.reset();
+      } catch (err) {
+        formStatus.textContent = err.message || "Unable to submit right now. Please try again.";
+      }
+    });
+  </script>
+</body>
+</html>
