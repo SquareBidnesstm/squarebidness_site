@@ -4,6 +4,7 @@ import path from "node:path";
 const ROOT = process.cwd();
 const COURAGEAUX_DIR = path.join(ROOT, "public", "courageaux");
 const PARTIALS_DIR = path.join(COURAGEAUX_DIR, "_partials");
+const SHOULD_BAKE = process.env.VERCEL === "1" || process.env.COURAGEAUX_BAKE === "1";
 
 function read(filePath) {
   return fs.readFileSync(filePath, "utf8");
@@ -44,6 +45,11 @@ function applyIncludes(html) {
 }
 
 function main() {
+  if (!SHOULD_BAKE) {
+    console.log("ℹ️ Courageaux include bake skipped. Set COURAGEAUX_BAKE=1 to run it locally.");
+    return;
+  }
+
   const pages = walk(COURAGEAUX_DIR);
 
   // sanity check partials exist
