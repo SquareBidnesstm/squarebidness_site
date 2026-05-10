@@ -34,12 +34,22 @@
     const params = new URLSearchParams(window.location.search);
     const restartUrl = new URL("/api/stripe-connect/create-account-link/", window.location.origin);
     const source = params.get("source") || "stripe_connect_refresh";
+    const client = params.get("client") || "";
     const leadId = params.get("leadId") || "";
+    const returnTo = params.get("returnTo") || "";
 
     restartUrl.searchParams.set("source", source);
 
+    if (client) {
+      restartUrl.searchParams.set("client", client);
+    }
+
     if (leadId) {
       restartUrl.searchParams.set("leadId", leadId);
+    }
+
+    if (returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//")) {
+      restartUrl.searchParams.set("returnTo", returnTo);
     }
 
     restartStripe.href = restartUrl.pathname + restartUrl.search;

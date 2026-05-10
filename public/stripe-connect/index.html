@@ -403,12 +403,22 @@
     const params = new URLSearchParams(window.location.search);
     const connectUrl = new URL("/api/stripe-connect/create-account-link/", window.location.origin);
     const source = params.get("source") || "direct_stripe_connect";
+    const client = params.get("client") || "";
     const leadId = params.get("leadId") || "";
+    const returnTo = params.get("returnTo") || "";
 
     connectUrl.searchParams.set("source", source);
 
+    if (client) {
+      connectUrl.searchParams.set("client", client);
+    }
+
     if (leadId) {
       connectUrl.searchParams.set("leadId", leadId);
+    }
+
+    if (returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//")) {
+      connectUrl.searchParams.set("returnTo", returnTo);
     }
 
     connectStripe.href = connectUrl.pathname + connectUrl.search;

@@ -34,13 +34,30 @@
       <b>Checking Stripe status...</b>
       Confirming whether business details, charges, and payouts are ready.
     </div>
-    <a class="btn" href="/stripe-connect/">Back to Stripe Connect</a>
+    <a class="btn" id="nextStep" href="/stripe-connect/">Back to Stripe Connect</a>
   </main>
 
   <script>
     const statusBox = document.getElementById("stripeStatus");
+    const nextStep = document.getElementById("nextStep");
     const params = new URLSearchParams(window.location.search);
     const account = params.get("account");
+    const client = params.get("client") || "";
+    const returnTo = params.get("returnTo") || "";
+
+    const clientLabels = {
+      delish: "Delish",
+      puffs: "Puff's",
+      restaurant: "Restaurant",
+      foodtruck: "Food Truck"
+    };
+
+    if (returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//")) {
+      nextStep.href = returnTo;
+      nextStep.textContent = clientLabels[client]
+        ? `Back to ${clientLabels[client]}`
+        : "Back to client page";
+    }
 
     function setStatus(state, title, body) {
       statusBox.dataset.state = state;
