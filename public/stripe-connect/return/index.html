@@ -13,6 +13,12 @@
     .kicker{color:#28d17c;font-weight:900;text-transform:uppercase;letter-spacing:.12em;font-size:.78rem}
     h1{font-size:clamp(2.1rem,7vw,4rem);line-height:.9;letter-spacing:-.06em;margin:14px 0}
     p{color:#cfc8ba;font-size:1.02rem}
+    .status{margin-top:18px;border:1px solid rgba(40,209,124,.26);background:rgba(40,209,124,.08);border-radius:18px;padding:16px;color:#ddd5c9}
+    .status b{display:block;color:#28d17c;margin-bottom:6px}
+    .status[data-state="warn"]{border-color:rgba(216,179,90,.32);background:rgba(216,179,90,.08)}
+    .status[data-state="warn"] b{color:#d8b35a}
+    .status[data-state="error"]{border-color:rgba(255,105,97,.34);background:rgba(255,105,97,.08)}
+    .status[data-state="error"] b{color:#ff8a80}
     .btn{display:inline-flex;margin-top:18px;border-radius:999px;padding:14px 18px;background:#d8b35a;color:#15110a;font-weight:900;text-decoration:none}
   </style>
 </head>
@@ -24,7 +30,54 @@
       Your business has returned from Stripe onboarding. Square Bidness will verify
       the account status before payments are turned on inside your operator system.
     </p>
+    <div class="status" id="stripeStatus" data-state="warn">
+      <b>Checking Stripe status...</b>
+      Confirming whether business details, charges, and payouts are ready.
+    </div>
     <a class="btn" href="/stripe-connect/">Back to Stripe Connect</a>
   </main>
+
+  <script>
+    const statusBox = document.getElementById("stripeStatus");
+    const params = new URLSearchParams(window.location.search);
+    const account = params.get("account");
+
+    function setStatus(state, title, body) {
+      statusBox.dataset.state = state;
+      statusBox.innerHTML = `<b>${title}</b>${body}`;
+    }
+
+    async function checkStatus() {
+      if (!account) {
+        setStatus("warn", "Manual verification needed", "Stripe did not return an account ID on this visit.");
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/stripe-connect/account-status/?account=${encodeURIComponent(account)}`);
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Unable to check account status.");
+        }
+
+        if (data.detailsSubmitted && data.chargesEnabled && data.payoutsEnabled) {
+          setStatus("ready", "Stripe account ready", "Business details, charges, and payouts are enabled.");
+          return;
+        }
+
+        const openItems = [...(data.currentlyDue || []), ...(data.pastDue || [])].length;
+        const next = openItems > 0
+          ? `${openItems} Stripe requirement${openItems === 1 ? "" : "s"} still need attention.`
+          : "Stripe may still be reviewing details before charges and payouts are enabled.";
+
+        setStatus("warn", "Stripe account pending", next);
+      } catch (err) {
+        setStatus("error", "Status check failed", err.message || "Square Bidness will verify this manually.");
+      }
+    }
+
+    checkStatus();
+  </script>
 </body>
 </html>

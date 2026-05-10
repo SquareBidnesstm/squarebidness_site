@@ -584,8 +584,11 @@
           throw new Error(data.error || data.message || "Unable to submit onboarding.");
         }
 
-        formStatus.textContent = `Received. Lead ID: ${data.leadId}. Square Bidness will follow up with the next step.`;
+        formStatus.textContent = `Received. Lead ID: ${data.leadId}. Next step: connect Stripe so payment rails can be prepared.`;
         form.reset();
+        window.setTimeout(() => {
+          window.location.assign(`/stripe-connect/?source=restaurant_onboarding&leadId=${encodeURIComponent(data.leadId || "")}`);
+        }, 900);
       } catch (err) {
         formStatus.textContent = err.message || "Unable to submit right now. Please try again.";
       }

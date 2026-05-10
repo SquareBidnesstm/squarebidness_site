@@ -24,9 +24,25 @@
       This Stripe onboarding link expired or was already used. Start again to generate
       a fresh secure onboarding link.
     </p>
-    <a class="btn" href="/api/stripe-connect/create-account-link/">
+    <a class="btn" id="restartStripe" href="/api/stripe-connect/create-account-link/">
       Restart Stripe Onboarding
     </a>
   </main>
+
+  <script>
+    const restartStripe = document.getElementById("restartStripe");
+    const params = new URLSearchParams(window.location.search);
+    const restartUrl = new URL("/api/stripe-connect/create-account-link/", window.location.origin);
+    const source = params.get("source") || "stripe_connect_refresh";
+    const leadId = params.get("leadId") || "";
+
+    restartUrl.searchParams.set("source", source);
+
+    if (leadId) {
+      restartUrl.searchParams.set("leadId", leadId);
+    }
+
+    restartStripe.href = restartUrl.pathname + restartUrl.search;
+  </script>
 </body>
 </html>

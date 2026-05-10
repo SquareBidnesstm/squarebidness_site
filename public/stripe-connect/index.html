@@ -170,10 +170,37 @@
       color:var(--text);
     }
 
+    .ack{
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      margin-top:24px;
+      padding:16px;
+      border:1px solid rgba(216,179,90,.28);
+      background:rgba(216,179,90,.08);
+      border-radius:18px;
+      color:#dfd6c7;
+      font-weight:750;
+    }
+
+    .ack input{
+      width:20px;
+      height:20px;
+      accent-color:var(--gold);
+      flex:0 0 auto;
+      margin-top:2px;
+    }
+
     .note{
       margin-top:16px;
       color:var(--muted);
       font-size:.9rem;
+    }
+
+    .btn[aria-disabled="true"]{
+      opacity:.46;
+      pointer-events:none;
+      box-shadow:none;
     }
 
     .side{
@@ -282,17 +309,23 @@
 
     <section class="hero">
       <div class="card main">
-        <div class="kicker"><span class="dot"></span> Secure operator onboarding</div>
+        <div class="kicker"><span class="dot"></span> Phase 2 payment rails</div>
 
-        <h1>Connect Stripe to your Square Bidness system.</h1>
+        <h1>Connect Stripe after onboarding.</h1>
 
         <p class="lead">
-          This page is for approved Square Bidness clients preparing to accept online payments,
-          deposits, pickup orders, catering requests, reservations, or operator-controlled checkout.
+          This is the commitment step after the intake form. Stripe Connect lets Square Bidness
+          prepare your online checkout, deposits, pickup orders, catering requests, reservations,
+          and operator-controlled payment flow.
         </p>
 
+        <label class="ack" for="phaseTwoAck">
+          <input id="phaseTwoAck" type="checkbox" />
+          <span>I submitted onboarding and I’m ready for Square Bidness to prepare Stripe-powered payments for my operator system.</span>
+        </label>
+
         <div class="actions">
-          <a class="btn primary" href="/api/stripe-connect/create-account-link/">
+          <a class="btn primary" id="connectStripe" href="/api/stripe-connect/create-account-link/" aria-disabled="true">
             Connect Stripe Account
           </a>
 
@@ -302,9 +335,9 @@
         </div>
 
         <p class="note">
-          You’ll be redirected to Stripe to complete business verification. Stripe-hosted onboarding
-          requires return and refresh URLs for a proper flow. Stripe also notes that returning to the
-          platform does not always mean every verification requirement is complete. 
+          You’ll be redirected to Stripe to complete business verification. Returning to Square Bidness
+          does not always mean every Stripe requirement is finished, so the return page checks account
+          status before the system is treated as payment-ready.
         </p>
       </div>
 
@@ -319,7 +352,7 @@
             <div class="num">1</div>
             <div>
               <b>Start onboarding</b>
-              <span>Use the secure Stripe flow to connect your business.</span>
+              <span>Submit the food truck or restaurant intake form first.</span>
             </div>
           </div>
 
@@ -335,7 +368,7 @@
             <div class="num">3</div>
             <div>
               <b>Return to Square Bidness</b>
-              <span>Once connected, your payment lane can be wired into your system.</span>
+              <span>Square Bidness checks status and wires the payment lane into your system.</span>
             </div>
           </div>
         </div>
@@ -363,5 +396,26 @@
       Principles. Morals. Business Done Right. © Square Bidness
     </p>
   </main>
+
+  <script>
+    const ack = document.getElementById("phaseTwoAck");
+    const connectStripe = document.getElementById("connectStripe");
+    const params = new URLSearchParams(window.location.search);
+    const connectUrl = new URL("/api/stripe-connect/create-account-link/", window.location.origin);
+    const source = params.get("source") || "direct_stripe_connect";
+    const leadId = params.get("leadId") || "";
+
+    connectUrl.searchParams.set("source", source);
+
+    if (leadId) {
+      connectUrl.searchParams.set("leadId", leadId);
+    }
+
+    connectStripe.href = connectUrl.pathname + connectUrl.search;
+
+    ack.addEventListener("change", () => {
+      connectStripe.setAttribute("aria-disabled", ack.checked ? "false" : "true");
+    });
+  </script>
 </body>
 </html>
