@@ -158,6 +158,37 @@
       text-decoration:none;
     }
 
+    .floating{
+      position:fixed;
+      right:max(14px,env(safe-area-inset-right));
+      bottom:calc(16px + env(safe-area-inset-bottom));
+      z-index:60;
+      display:grid;
+      gap:10px;
+      width:min(210px,calc(100vw - 28px));
+    }
+
+    .fab{
+      appearance:none;
+      border:1px solid rgba(216,177,106,.55);
+      border-radius:999px;
+      min-height:58px;
+      padding:0 18px;
+      background:var(--gold);
+      color:#12100b;
+      font:inherit;
+      font-size:1.05rem;
+      font-weight:950;
+      box-shadow:0 14px 44px rgba(0,0,0,.42);
+      cursor:pointer;
+    }
+
+    .fab--dark{
+      background:#100f0d;
+      color:var(--text);
+      border-color:rgba(255,255,255,.12);
+    }
+
     .section{
       margin-top:22px;
       border:1px solid var(--line);
@@ -423,6 +454,15 @@
         align-items:flex-start;
         flex-direction:column;
       }
+      .floating{
+        right:12px;
+        bottom:calc(12px + env(safe-area-inset-bottom));
+        width:min(176px,calc(100vw - 24px));
+      }
+      .fab{
+        min-height:52px;
+        font-size:.98rem;
+      }
     }
 
     @media print{
@@ -435,7 +475,7 @@
       }
       .sub,.card p,.card li,.slot-detail,.quick-card p,.footer,.link-row span{color:#333}
       a{color:#111}
-      .nav{display:none}
+      .nav,.floating{display:none}
     }
   </style>
 </head>
@@ -470,7 +510,7 @@
         </div>
       </div>
 
-      <nav class="nav">
+      <nav class="nav" id="quick-links" aria-label="AI Across America quick links">
         <a href="#mission">Mission</a>
         <a href="#event-brief">Event Brief</a>
         <a href="#schedule">Agenda</a>
@@ -1001,5 +1041,27 @@
     </div>
 
   </main>
+
+  <div class="floating" aria-label="Page shortcuts">
+    <button class="fab fab--dark" type="button" id="topBtn">Top</button>
+    <button class="fab" type="button" id="quickLinksBtn">Quick links</button>
+  </div>
+
+  <script>
+    (() => {
+      const scrollToTarget = (selector) => {
+        const target = document.querySelector(selector);
+        if (target) target.scrollIntoView({ behavior:"smooth", block:"start" });
+      };
+
+      document.getElementById("topBtn")?.addEventListener("click", () => {
+        window.scrollTo({ top:0, behavior:"smooth" });
+      });
+
+      document.getElementById("quickLinksBtn")?.addEventListener("click", () => {
+        scrollToTarget("#quick-links");
+      });
+    })();
+  </script>
 </body>
 </html>
