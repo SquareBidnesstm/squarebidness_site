@@ -3,6 +3,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { supabaseServer } from "../../lib/supabase/server";
 import { verifyAdminSession } from "../../lib/auth";
+import NavLogo from "../../components/NavLogo";
 
 export const revalidate = 0;
 
@@ -53,7 +54,7 @@ export default async function AdminDashboardPage() {
       {/* NAV */}
       <nav style={{ borderBottom: "1px solid #111", padding: "0 20px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 64, background: "#000", position: "sticky", top: 0, zIndex: 50 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <span style={{ fontWeight: 950, letterSpacing: "-0.04em", fontSize: "1.1rem" }}>SB Events</span>
+          <NavLogo />
           <span style={{ padding: "2px 8px", background: "#1a1a00", border: "1px solid #713f12", borderRadius: 999, color: "#facc15", fontSize: 10, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase" }}>Admin</span>
         </div>
         <a href="/api/admin/logout" style={{ color: "#a1a1aa", fontSize: "0.85rem" }}>Sign Out</a>

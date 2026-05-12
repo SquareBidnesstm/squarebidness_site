@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { supabaseServer } from "../../../lib/supabase/server";
+import NavLogo from "../../../components/NavLogo";
 
 export const revalidate = 0;
 
@@ -29,8 +30,9 @@ export default async function OrderConfirmationPage({
 
   return (
     <div style={{ minHeight: "100vh" }}>
-      <nav style={{ borderBottom: "1px solid #111", padding: "0 14px", display: "flex", alignItems: "center", height: 56, background: "#000" }}>
-        <Link href="/" style={{ color: "#a1a1aa", fontSize: "0.9rem" }}>← Back to Events</Link>
+      <nav style={{ borderBottom: "1px solid #111", padding: "0 14px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 64, background: "#000" }}>
+        <NavLogo />
+        <Link href="/" style={{ color: "#a1a1aa", fontSize: "0.85rem" }}>← Back to Events</Link>
       </nav>
 
       <main style={{ padding: "40px 14px 80px" }}>

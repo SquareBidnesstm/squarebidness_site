@@ -15,9 +15,12 @@ export default async function OrganizerLoginPage({
   return (
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
       <div style={{ width: "100%", maxWidth: 420 }}>
-        <a href="/" style={{ display: "inline-flex", alignItems: "center", gap: 8, color: "#a1a1aa", fontSize: "0.85rem", textDecoration: "none", marginBottom: 28 }}>
-          ← Back to events
-        </a>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 32 }}>
+          <a href="/" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, textDecoration: "none" }}>
+            <img src="/sb-mark.png" alt="Square Bidness" style={{ height: 48, width: "auto" }} />
+            <span style={{ color: "#fff", fontSize: "0.6rem", fontWeight: 900, letterSpacing: "0.18em", textTransform: "uppercase" }}>Events</span>
+          </a>
+        </div>
         <h1 style={{ fontSize: "2rem", fontWeight: 950, letterSpacing: "-0.05em", marginBottom: 6 }}>Welcome back.</h1>
         <p style={{ color: "#a1a1aa", marginBottom: 28 }}>Sign in to manage your events.</p>
 

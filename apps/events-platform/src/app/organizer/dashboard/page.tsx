@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { supabaseServer } from "../../../lib/supabase/server";
+import NavLogo from "../../../components/NavLogo";
 
 export const revalidate = 0;
 
@@ -32,7 +33,7 @@ export default async function OrganizerDashboardPage() {
   return (
     <div style={{ minHeight: "100vh" }}>
       <nav style={{ borderBottom: "1px solid #111", padding: "0 14px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 64, background: "#000" }}>
-        <Link href="/" style={{ fontWeight: 950, letterSpacing: "-0.04em" }}>SB Events</Link>
+        <NavLogo />
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
           <span style={{ color: "#a1a1aa", fontSize: "0.9rem" }}>{organizer.name}</span>
           <a href="/api/organizer/logout" className="btn btn--ghost" style={{ minHeight: 36, fontSize: "0.85rem", padding: "0 14px" }}>Sign Out</a>

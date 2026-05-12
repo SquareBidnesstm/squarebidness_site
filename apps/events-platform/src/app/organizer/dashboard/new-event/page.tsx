@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { supabaseServer } from "../../../../lib/supabase/server";
 import { computeOrganizerSessionToken } from "../../../../lib/auth";
 import { EVENT_CATEGORIES } from "../../../../lib/constants";
+import NavLogo from "../../../../components/NavLogo";
 
 export const revalidate = 0;
 
@@ -41,8 +42,11 @@ export default async function NewEventPage({
   return (
     <div style={{ minHeight: "100vh" }}>
       <nav style={{ borderBottom: "1px solid #111", padding: "0 14px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 64, background: "#000" }}>
-        <Link href="/organizer/dashboard" style={{ color: "#a1a1aa", fontSize: "0.9rem" }}>← Dashboard</Link>
-        <span style={{ color: "#a1a1aa", fontSize: "0.9rem" }}>{organizer.name}</span>
+        <NavLogo />
+        <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
+          <Link href="/organizer/dashboard" style={{ color: "#a1a1aa", fontSize: "0.85rem" }}>← Dashboard</Link>
+          <span style={{ color: "#555", fontSize: "0.85rem" }}>{organizer.name}</span>
+        </div>
       </nav>
 
       <main style={{ padding: "32px 14px 80px" }}>

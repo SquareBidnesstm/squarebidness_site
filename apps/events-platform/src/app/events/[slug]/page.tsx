@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { supabaseServer } from "../../../lib/supabase/server";
 import { EVENT_CATEGORIES } from "../../../lib/constants";
+import NavLogo from "../../../components/NavLogo";
 
 export const revalidate = 30;
 
@@ -34,8 +35,9 @@ export default async function EventPage({
   return (
     <div style={{ minHeight: "100vh" }}>
       {/* NAV */}
-      <nav style={{ borderBottom: "1px solid #111", padding: "0 14px", display: "flex", alignItems: "center", height: 56, background: "#000", position: "sticky", top: 0, zIndex: 50 }}>
-        <Link href="/" style={{ color: "#a1a1aa", fontSize: "0.9rem" }}>← All Events</Link>
+      <nav style={{ borderBottom: "1px solid #111", padding: "0 14px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 64, background: "#000", position: "sticky", top: 0, zIndex: 50 }}>
+        <NavLogo />
+        <Link href="/" style={{ color: "#a1a1aa", fontSize: "0.85rem" }}>← All Events</Link>
       </nav>
 
       {/* COVER */}
