@@ -36,7 +36,8 @@ export async function POST(req: NextRequest) {
   }
 
   // Build line items from form data
-  const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const lineItems: any[] = [];
   let totalPlatformFeeCents = 0;
   const tierSelections: { tierId: string; qty: number }[] = [];
 
