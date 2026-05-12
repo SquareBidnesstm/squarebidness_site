@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
           buyer_name: order.buyer_name,
           buyer_email: order.buyer_email,
           price_snapshot: tier?.price ?? 0,
-          qr_data_url: qrDataUrl,
+          qr_code: qrDataUrl,
           status: "valid",
         });
 

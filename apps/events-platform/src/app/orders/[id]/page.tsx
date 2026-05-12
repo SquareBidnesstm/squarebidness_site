@@ -16,8 +16,8 @@ export default async function OrderConfirmationPage({
     .from("orders")
     .select(`
       *,
-      events ( title, slug, starts_at, venue_name, city, state, cover_image_url ),
-      tickets ( id, ticket_code, tier_name, qr_data_url, status )
+      events ( title, slug, starts_at, ends_at, venue_name, city, state, cover_image_url ),
+      tickets ( id, ticket_code, tier_name, tier_id, qr_code, status )
     `)
     .eq("id", id)
     .single();
@@ -36,99 +36,143 @@ export default async function OrderConfirmationPage({
       </nav>
 
       <main style={{ padding: "40px 14px 80px" }}>
-        <div className="wrap" style={{ maxWidth: 600, margin: "0 auto" }}>
+        <div className="wrap" style={{ maxWidth: 560, margin: "0 auto" }}>
 
           {isPending ? (
-            <div style={{ textAlign: "center", padding: "40px 0" }}>
-              <p style={{ fontSize: "2rem", marginBottom: 12 }}>⏳</p>
+            <div style={{ textAlign: "center", padding: "60px 0" }}>
+              <p style={{ fontSize: "2.5rem", marginBottom: 16 }}>⏳</p>
               <h1 style={{ fontSize: "1.5rem", fontWeight: 950, marginBottom: 8 }}>Processing your order…</h1>
-              <p style={{ color: "#a1a1aa" }}>This usually takes just a moment. Refresh this page in a few seconds.</p>
+              <p style={{ color: "#a1a1aa", marginBottom: 24 }}>This usually takes just a moment.</p>
+              <meta httpEquiv="refresh" content="3" />
+              <p style={{ color: "#555", fontSize: "0.85rem" }}>Page will refresh automatically.</p>
             </div>
+
           ) : order.status === "cancelled" ? (
-            <div style={{ textAlign: "center", padding: "40px 0" }}>
-              <p style={{ fontSize: "2rem", marginBottom: 12 }}>❌</p>
+            <div style={{ textAlign: "center", padding: "60px 0" }}>
+              <p style={{ fontSize: "2.5rem", marginBottom: 16 }}>❌</p>
               <h1 style={{ fontSize: "1.5rem", fontWeight: 950, marginBottom: 8 }}>Order Cancelled</h1>
-              <p style={{ color: "#a1a1aa", marginBottom: 20 }}>This order has been cancelled.</p>
+              <p style={{ color: "#a1a1aa", marginBottom: 24 }}>This order has been cancelled.</p>
               <Link href="/" className="btn btn--primary">Browse Events</Link>
             </div>
+
           ) : (
             <>
-              {/* Success Header */}
+              {/* Success header */}
               <div style={{ textAlign: "center", marginBottom: 32 }}>
-                <div style={{ width: 64, height: 64, borderRadius: 999, background: "#0a2a0a", border: "1px solid #166534", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", fontSize: "1.8rem" }}>
-                  ✓
-                </div>
+                <div style={{
+                  width: 64, height: 64, borderRadius: 999,
+                  background: "#0a2a0a", border: "2px solid #22c55e",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  margin: "0 auto 16px", fontSize: "1.8rem",
+                }}>✓</div>
                 <h1 style={{ fontSize: "1.8rem", fontWeight: 950, letterSpacing: "-0.05em", marginBottom: 6 }}>You're going!</h1>
-                <p style={{ color: "#a1a1aa" }}>Order <span style={{ color: "#fff", fontWeight: 800 }}>{order.order_code}</span> confirmed</p>
+                <p style={{ color: "#a1a1aa" }}>
+                  Order <span style={{ color: "#fff", fontWeight: 800, fontFamily: "monospace" }}>{order.order_code}</span> confirmed
+                </p>
               </div>
 
-              {/* Event Summary */}
+              {/* Event summary */}
               <div className="card" style={{ marginBottom: 20, display: "flex", gap: 14, alignItems: "center" }}>
                 {event?.cover_image_url && (
                   <img src={event.cover_image_url} alt={event.title} style={{ width: 72, height: 72, borderRadius: 10, objectFit: "cover", flexShrink: 0 }} />
                 )}
                 <div>
-                  <p style={{ fontWeight: 900, fontSize: "1rem" }}>{event?.title}</p>
-                  <p style={{ color: "#a1a1aa", fontSize: "0.85rem", marginTop: 2 }}>
-                    {event?.starts_at && new Date(event.starts_at).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
-                    {event?.venue_name && ` · ${event.venue_name}`}
-                    {event?.city && `, ${event.city}`}
+                  <p style={{ fontWeight: 900, fontSize: "1rem", marginBottom: 4 }}>{event?.title}</p>
+                  <p style={{ color: "#a1a1aa", fontSize: "0.85rem" }}>
+                    {event?.starts_at && new Date(event.starts_at).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
+                  </p>
+                  {event?.venue_name && (
+                    <p style={{ color: "#a1a1aa", fontSize: "0.85rem" }}>
+                      {[event.venue_name, event.city, event.state].filter(Boolean).join(" · ")}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Screenshot instruction banner */}
+              <div style={{
+                background: "#0a1a0a", border: "1px solid #166534", borderRadius: 12,
+                padding: "14px 16px", marginBottom: 24,
+                display: "flex", gap: 12, alignItems: "flex-start",
+              }}>
+                <span style={{ fontSize: "1.4rem", flexShrink: 0 }}>📸</span>
+                <div>
+                  <p style={{ fontWeight: 900, color: "#22c55e", marginBottom: 4, fontSize: "0.95rem" }}>
+                    Save your ticket
+                  </p>
+                  <p style={{ color: "#a1a1aa", fontSize: "0.85rem", lineHeight: 1.5 }}>
+                    <strong style={{ color: "#fff" }}>Screenshot this page</strong> to save your QR code.
+                    You'll also receive it by email. Show the QR code at the door — no printout needed.
                   </p>
                 </div>
               </div>
 
               {/* Tickets */}
-              <h2 style={{ fontSize: "1rem", fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 12 }}>
+              <h2 style={{ fontSize: "0.85rem", fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase", color: "#a1a1aa", marginBottom: 12 }}>
                 Your Ticket{tickets.length !== 1 ? "s" : ""} ({tickets.length})
               </h2>
 
-              <div style={{ display: "grid", gap: 12, marginBottom: 28 }}>
+              <div style={{ display: "grid", gap: 16, marginBottom: 28 }}>
                 {tickets.map((ticket: any) => (
-                  <div key={ticket.id} className="card" style={{ textAlign: "center", padding: 24 }}>
-                    <p style={{ fontWeight: 900, fontSize: "1rem", marginBottom: 4 }}>{ticket.tier_name}</p>
-                    <p style={{ color: "#a1a1aa", fontSize: "0.8rem", fontFamily: "monospace", marginBottom: 16 }}>
+                  <div key={ticket.id} className="card" style={{ textAlign: "center", padding: "28px 20px" }}>
+                    {/* Tier + code */}
+                    <p style={{ fontWeight: 900, fontSize: "1.05rem", marginBottom: 4 }}>
+                      {ticket.tier_name || "General Admission"}
+                    </p>
+                    <p style={{ color: "#a1a1aa", fontSize: "0.8rem", fontFamily: "monospace", letterSpacing: "0.05em", marginBottom: 20 }}>
                       {ticket.ticket_code}
                     </p>
-                    {ticket.qr_data_url ? (
-                      <img
-                        src={ticket.qr_data_url}
-                        alt={`QR code for ${ticket.ticket_code}`}
-                        style={{ width: 180, height: 180, margin: "0 auto", display: "block", borderRadius: 8 }}
-                      />
+
+                    {/* QR Code */}
+                    {ticket.qr_code ? (
+                      <div style={{ display: "inline-block", padding: 12, background: "#fff", borderRadius: 12 }}>
+                        <img
+                          src={ticket.qr_code}
+                          alt={`QR for ${ticket.ticket_code}`}
+                          style={{ width: 200, height: 200, display: "block" }}
+                        />
+                      </div>
                     ) : (
-                      <div style={{ width: 180, height: 180, background: "#111", borderRadius: 8, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "center", color: "#555" }}>
-                        QR generating…
+                      <div style={{
+                        width: 224, height: 224, background: "#111", borderRadius: 12,
+                        margin: "0 auto", display: "flex", alignItems: "center",
+                        justifyContent: "center", color: "#555", fontSize: "0.85rem",
+                      }}>
+                        QR code generating…
                       </div>
                     )}
-                    <p style={{ marginTop: 12, fontSize: "0.8rem", color: "#555" }}>
-                      Show this QR code at the door
+
+                    <p style={{ marginTop: 16, fontSize: "0.8rem", color: "#555" }}>
+                      Show at the door · One scan per ticket
                     </p>
                   </div>
                 ))}
               </div>
 
-              {/* Order Details */}
-              <div className="card" style={{ marginBottom: 20 }}>
+              {/* Order details */}
+              <div className="card" style={{ marginBottom: 24 }}>
                 <p style={{ color: "#a1a1aa", fontSize: 11, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 12 }}>Order Details</p>
                 <div style={{ display: "grid", gap: 8 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.9rem" }}>
                     <span style={{ color: "#a1a1aa" }}>Name</span>
                     <span style={{ fontWeight: 700 }}>{order.buyer_name}</span>
                   </div>
-                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.9rem" }}>
                     <span style={{ color: "#a1a1aa" }}>Email</span>
                     <span style={{ fontWeight: 700 }}>{order.buyer_email}</span>
                   </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid #111", paddingTop: 8, marginTop: 4 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 8, marginTop: 4, borderTop: "1px solid #111" }}>
                     <span style={{ color: "#a1a1aa" }}>Total Paid</span>
-                    <span style={{ fontWeight: 900, color: "#22c55e" }}>${Number(order.total).toFixed(2)}</span>
+                    <span style={{ fontWeight: 900, color: "#22c55e", fontSize: "1.05rem" }}>${Number(order.total).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
 
-              <Link href={`/events/${event?.slug}`} style={{ color: "#a1a1aa", fontSize: "0.85rem", display: "block", textAlign: "center" }}>
-                ← Back to event
-              </Link>
+              {/* Bottom note */}
+              <p style={{ textAlign: "center", color: "#555", fontSize: "0.8rem", lineHeight: 1.6 }}>
+                Questions? Contact the event organizer directly.<br />
+                <Link href={`/events/${event?.slug}`} style={{ color: "#a1a1aa" }}>← Back to event</Link>
+              </p>
             </>
           )}
         </div>
