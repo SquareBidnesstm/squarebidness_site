@@ -213,6 +213,31 @@
   margin-top: 10px;
 }
 
+    .flashSaleSection{
+      display:none;
+      margin-top:24px;
+      padding:16px;
+      border-radius:16px;
+      background:linear-gradient(180deg,rgba(90,34,34,.42),rgba(18,18,18,.96));
+      border:1px solid rgba(255,95,95,.38);
+      box-shadow:0 18px 54px rgba(0,0,0,.28);
+    }
+    .flashSaleSection.is-visible{display:block}
+    .flashSaleKicker{
+      display:inline-flex;
+      padding:6px 10px;
+      border-radius:999px;
+      background:#d93636;
+      color:#fff;
+      font-size:12px;
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      margin-bottom:8px;
+    }
+    .flashSaleSection h2{margin-bottom:4px}
+    .flashSaleSection .menuItem{border-color:rgba(255,255,255,.12)}
+
     .qtyWrap.is-disabled {
       opacity:.55;
       pointer-events:none;
@@ -249,6 +274,13 @@
   </div>
 
   <div class="liveNote" id="orderingBanner">Loading today’s ordering status...</div>
+
+  <div class="flashSaleSection" id="flashSaleSection">
+    <div class="flashSaleKicker">Flash Sale</div>
+    <h2 id="flashSaleTitle">Flash Sale</h2>
+    <div class="menuNote" id="flashSaleMessage">Limited-time plates available now.</div>
+    <div id="flashSaleItems"></div>
+  </div>
 
   <div class="section">
     <input id="customerName" placeholder="Full Name" />
@@ -330,6 +362,7 @@
   let EXTRA_SIDES_BASE = [];
   let EXTRA_SIDES_FRIDAY_SUNDAY = [];
   let LAGNIAPPE = [];
+  let FLASH_SALE = null;
 
   const customerName = document.getElementById("customerName");
   const customerPhone = document.getElementById("customerPhone");
@@ -347,6 +380,10 @@
   const orderingBanner = document.getElementById("orderingBanner");
   const lagniappeItems = document.getElementById("lagniappeItems");
   const taxDisplay = document.getElementById("taxDisplay");
+  const flashSaleSection = document.getElementById("flashSaleSection");
+  const flashSaleTitle = document.getElementById("flashSaleTitle");
+  const flashSaleMessage = document.getElementById("flashSaleMessage");
+  const flashSaleItems = document.getElementById("flashSaleItems");
 
   let currentDay = null;
   let currentMode = "closed";
@@ -382,6 +419,19 @@
 
     orderingStatus = data;
     return data;
+  }
+
+  async function loadFlashSale() {
+    const res = await fetch(`/api/delish/flash-sale/?t=${Date.now()}`, { cache: "no-store" });
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || !data.ok) {
+      FLASH_SALE = null;
+      return null;
+    }
+
+    FLASH_SALE = data.sale || null;
+    return FLASH_SALE;
   }
 
   async function loadPickupWindows() {
@@ -504,6 +554,11 @@
    function updateOrderingBanner(state) {
   if (!orderingBanner) return;
 
+  if (isFlashSaleActiveClient()) {
+    orderingBanner.textContent = FLASH_SALE.message || "Flash sale is live. Limited plates available for pickup.";
+    return;
+  }
+
   if (MENU_OVERRIDES?.customerMessage) {
     orderingBanner.textContent = MENU_OVERRIDES.customerMessage;
     return;
@@ -551,6 +606,56 @@
     item => isItemEnabled(item.id) && !isItemSoldOut(item.id)
   );
 }
+
+  function isFlashSaleActiveClient() {
+    return !!(FLASH_SALE && FLASH_SALE.active && Array.isArray(FLASH_SALE.items) && FLASH_SALE.items.length);
+  }
+
+  function getFlashSaleItems() {
+    return isFlashSaleActiveClient() ? FLASH_SALE.items : [];
+  }
+
+  function renderFlashSaleItem(item) {
+    return `
+      <div class="menuItem">
+        <div class="menuTop">
+          <div class="menuCopy">
+            <span>FLASH SALE - ${item.name} ($${Number(item.price).toFixed(2)})</span>
+            ${item.limit ? `<small>Limited quantity: ${item.limit} available.</small>` : `<small>Limited-time flash sale price.</small>`}
+          </div>
+          <div class="qtyWrap">
+            <button type="button" class="qtyBtn" data-target="${item.flashId}Qty" data-action="decrease">−</button>
+            <input type="number" min="0" max="${item.limit ? Number(item.limit) : 20}" value="0" id="${item.flashId}Qty" class="qty" />
+            <button type="button" class="qtyBtn" data-target="${item.flashId}Qty" data-action="increase">+</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderFlashSale() {
+    if (!flashSaleSection || !flashSaleItems) return;
+
+    if (!isFlashSaleActiveClient()) {
+      flashSaleSection.classList.remove("is-visible");
+      flashSaleItems.innerHTML = "";
+      return;
+    }
+
+    flashSaleTitle.textContent = FLASH_SALE.title || "Flash Sale";
+    flashSaleMessage.textContent = FLASH_SALE.message || "Limited-time plates available now.";
+    flashSaleItems.innerHTML = getFlashSaleItems().map(renderFlashSaleItem).join("");
+    flashSaleSection.classList.add("is-visible");
+
+    const label = FLASH_SALE.pickupWindow || "Flash Sale Pickup";
+    const exists = Array.from(pickupWindow.options).some(option => option.value === label);
+    if (!exists) {
+      pickupWindow.insertAdjacentHTML("beforeend", `<option value="${label}">${label}</option>`);
+    }
+    if (!pickupWindow.value) {
+      pickupWindow.value = label;
+    }
+  }
 
   function isExtraSideAllowedForDay(day) {
     const menu = MENU_BY_DAY[day];
@@ -821,6 +926,8 @@ if (isExtraSideAllowedForDay(state.today) && isSectionEnabled("extraSides")) {
   attachQtyButtons();
   attachPlateSideListeners();
   syncPlateSides();
+  renderFlashSale();
+  attachQtyButtons();
 } else if (state.reason === "not_a_service_day") {
     menuDayTitle.textContent = "Delish — Closed Today";
     menuDayNote.textContent = "Pickup Only · Alexandria, Louisiana";
@@ -836,6 +943,8 @@ if (isExtraSideAllowedForDay(state.today) && isSectionEnabled("extraSides")) {
     drinkItems.innerHTML = "";
     renderSelectOptions(extraSideSelect, [], "Extra Side (optional)");
     lagniappeItems.innerHTML = "";
+    renderFlashSale();
+    attachQtyButtons();
   } else {
     menuDayTitle.textContent = "Delish — Temporarily Unavailable";
     menuDayNote.textContent = "Pickup Only · Alexandria, Louisiana";
@@ -851,6 +960,8 @@ if (isExtraSideAllowedForDay(state.today) && isSectionEnabled("extraSides")) {
     drinkItems.innerHTML = "";
     renderSelectOptions(extraSideSelect, [], "Extra Side (optional)");
     lagniappeItems.innerHTML = "";
+    renderFlashSale();
+    attachQtyButtons();
   }
 
   calc();
@@ -944,6 +1055,26 @@ function getDrinkSelections() {
   }, []);
 }
 
+function getFlashSaleSelections() {
+  return getFlashSaleItems().reduce((items, item) => {
+    const qtyEl = document.getElementById(`${item.flashId}Qty`);
+    const qty = Number(qtyEl?.value || 0);
+
+    if (qty > 0) {
+      items.push({
+        id: item.flashId,
+        name: `FLASH SALE - ${item.name}`,
+        price: Number(item.price),
+        qty,
+        flashSale: true,
+        sourceId: item.sourceId
+      });
+    }
+
+    return items;
+  }, []);
+}
+
   function getSelectedItems() {
   const plateSelections = getPlateSelections();
   const items = plateSelections.items.map(item => ({
@@ -969,6 +1100,9 @@ function getDrinkSelections() {
 
   const lagniappeItemsSelected = getLagniappeSelections();
   items.push(...lagniappeItemsSelected);
+
+  const flashSaleItemsSelected = getFlashSaleSelections();
+  items.push(...flashSaleItemsSelected);
 
   return { items, sideNotes: plateSelections.sideNotes };
 }
@@ -1061,13 +1195,15 @@ function getDrinkSelections() {
 const plateItems = getPlateSelections().items;
 const lagniappeItemsSelected = getLagniappeSelections();
 const drinkItemsSelected = getDrinkSelections();
+const flashSaleItemsSelected = getFlashSaleSelections();
 const hasOrderItem =
   plateItems.length > 0 ||
   lagniappeItemsSelected.length > 0 ||
-  drinkItemsSelected.length > 0;
+  drinkItemsSelected.length > 0 ||
+  flashSaleItemsSelected.length > 0;
 const sidesOk = plateItems.length > 0 ? selectedPlatesHaveSides() : true;
 
-    if (!state.openNow) {
+    if (!state.openNow && !isFlashSaleActiveClient()) {
       checkoutBtn.disabled = true;
 
       if (state.reason === "manual_closed") {
@@ -1123,8 +1259,9 @@ const sidesOk = plateItems.length > 0 ? selectedPlatesHaveSides() : true;
    const plateSelections = getPlateSelections();
 const lagniappeItemsSelected = getLagniappeSelections();
 const drinkItemsSelected = getDrinkSelections();
+const flashSaleItemsSelected = getFlashSaleSelections();
 
-if (!plateSelections.items.length && !lagniappeItemsSelected.length && !drinkItemsSelected.length) {
+if (!plateSelections.items.length && !lagniappeItemsSelected.length && !drinkItemsSelected.length && !flashSaleItemsSelected.length) {
   showStatus("Add at least one main plate, drink, or Lagniappe item first.");
   return;
 }
@@ -1161,6 +1298,8 @@ if (!plateSelections.items.length && !lagniappeItemsSelected.length && !drinkIte
         items: selectedItems.map(item => ({
           id: item.id,
           qty: item.qty,
+          sourceId: item.sourceId || "",
+          flashSale: item.flashSale === true,
           baseId: item.baseId || "",
           baseName: item.baseName || "",
           side1Id: item.side1Id || "",
@@ -1171,7 +1310,7 @@ if (!plateSelections.items.length && !lagniappeItemsSelected.length && !drinkIte
         subtotal,
         tax,
         total,
-        source: "delish-web"
+        source: flashSaleItemsSelected.length ? "delish-flash-sale" : "delish-web"
       };
 
       const res = await fetch("/api/delish/create-checkout/", {
@@ -1200,6 +1339,7 @@ if (!plateSelections.items.length && !lagniappeItemsSelected.length && !drinkIte
       await loadMenuOverrides();
       await loadOrderingStatus();
       await loadPickupWindows();
+      await loadFlashSale();
       applyDailyMenu();
     } catch (error) {
       console.error("DELISH INIT ERROR:", error);

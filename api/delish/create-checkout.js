@@ -6,6 +6,7 @@ import {
   getDisabledPickupWindows,
   isAllowedPickupWindow,
 } from "../_lib/delish-pickup-windows.js";
+import { getDelishFlashSale, isFlashSaleActive } from "../_lib/delish-flash-sale.js";
 
 const stripe = new Stripe(process.env.DELISH_STRIPE_SECRET_KEY, {
   apiVersion: "2025-02-24.acacia",
@@ -259,6 +260,24 @@ function buildAllowedMap(items) {
   return new Map(items.map((item) => [item.id, item]));
 }
 
+function buildFlashSaleMap(flashSale) {
+  if (!isFlashSaleActive(flashSale)) return new Map();
+
+  return new Map(
+    (flashSale.items || []).map((item) => [
+      item.flashId,
+      {
+        id: item.flashId,
+        sourceId: item.sourceId,
+        name: `FLASH SALE - ${item.name}`,
+        price: item.price,
+        limit: item.limit,
+        flashSale: true,
+      },
+    ])
+  );
+}
+
 function isItemAllowedForCurrentDay(itemId, todayDay) {
   if (FRIDAY_ONLY_ITEM_IDS.has(itemId)) {
     return todayDay === "friday";
@@ -491,8 +510,15 @@ export default async function handler(req, res) {
     const todayIso = orderingState.now.isoDate;
     const todayDay = orderingState.today;
     const menuOverrides = await getDelishMenuOverrides();
+    const flashSale = await getDelishFlashSale();
+    const flashSaleMap = buildFlashSaleMap(flashSale);
+    const requestedItemIds = body.items.map((item) => String(item.id || "").trim());
+    const isFlashSaleOrder =
+      flashSaleMap.size > 0 &&
+      requestedItemIds.length > 0 &&
+      requestedItemIds.every((id) => flashSaleMap.has(id));
 
-    if (!orderingState.openNow) {
+    if (!orderingState.openNow && !isFlashSaleOrder) {
       let message = orderingState.message || "Online ordering is closed right now.";
 
       if (orderingState.reason === "manual_closed") {
@@ -523,7 +549,7 @@ export default async function handler(req, res) {
     const requestedPickupWindow = String(body.pickupWindow || "").trim();
     const disabledPickupWindows = await getDisabledPickupWindows();
 
-    if (!isAllowedPickupWindow(requestedPickupWindow)) {
+    if (!isAllowedPickupWindow(requestedPickupWindow) && !(isFlashSaleOrder && requestedPickupWindow === flashSale.pickupWindow)) {
       return res.status(400).json({
         ok: false,
         error: "PICKUP_WINDOW_NOT_ALLOWED",
@@ -531,7 +557,7 @@ export default async function handler(req, res) {
       });
     }
 
-    if (disabledPickupWindows.includes(requestedPickupWindow)) {
+    if (!isFlashSaleOrder && disabledPickupWindows.includes(requestedPickupWindow)) {
       return res.status(403).json({
         ok: false,
         error: "PICKUP_WINDOW_DISABLED",
@@ -550,24 +576,31 @@ export default async function handler(req, res) {
     const cleanItems = body.items
       .map((item) => {
         const id = String(item.id || "").trim();
-        const qty = Math.min(3, Math.max(1, Number(item.qty || 1)));
+        const rawQty = Math.max(1, Number(item.qty || 1));
  
-        if (!id || !allowedMap.has(id)) return null;
-        if (!isItemAllowedForCurrentDay(id, todayDay)) return null;
-        if (!isSectionEnabledBackend(id, menuOverrides)) return null;
-        if (!isItemEnabledBackend(id, menuOverrides)) return null;
-        if (isItemSoldOutBackend(id, menuOverrides)) return null;
- 
-        const allowed = allowedMap.get(id);
+        const isFlashItem = flashSaleMap.has(id);
+        if (!id || (!allowedMap.has(id) && !isFlashItem)) return null;
+        if (!isFlashItem && !isItemAllowedForCurrentDay(id, todayDay)) return null;
+        if (!isFlashItem && !isSectionEnabledBackend(id, menuOverrides)) return null;
+        if (!isFlashItem && !isItemEnabledBackend(id, menuOverrides)) return null;
+        if (!isFlashItem && isItemSoldOutBackend(id, menuOverrides)) return null;
+
+        const allowed = isFlashItem ? flashSaleMap.get(id) : allowedMap.get(id);
+        const maxQty = isFlashItem
+          ? Math.max(1, Number(allowed.limit || 20))
+          : 3;
+        const qty = Math.min(maxQty, rawQty);
         const baseId = String(item.baseId || "").trim();
-        if (baseId && isBaseSoldOutBackend(baseId, menuOverrides)) return null;
+        if (!isFlashItem && baseId && isBaseSoldOutBackend(baseId, menuOverrides)) return null;
  
         return {
           id: allowed.id,
+          sourceId: allowed.sourceId || "",
           name: allowed.name,
           qty,
           price: allowed.price,
           total: qty * allowed.price,
+          flashSale: allowed.flashSale === true,
           baseId,       // FIX: was missing
           baseName: item.baseName || "",   // FIX: was missing
           side1Id: item.side1Id || "",
@@ -625,6 +658,7 @@ export default async function handler(req, res) {
             itemId: item.id,
             activeMenuDay: todayDay,
             brand: "Delish",
+            flashSale: item.flashSale ? "yes" : "no",
           },
         },
         unit_amount: Math.round(Number(item.price) * 100),
@@ -670,6 +704,7 @@ export default async function handler(req, res) {
       total: String(calculatedTotal),
       source: safeMeta(body.source || "delish-order-page", 50),
       activeMenuDay: safeMeta(todayDay, 20),
+      flashSale: isFlashSaleOrder ? "yes" : "no",
     };
 
     const session = await stripe.checkout.sessions.create({
