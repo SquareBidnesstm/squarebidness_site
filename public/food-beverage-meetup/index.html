@@ -158,6 +158,37 @@
       text-decoration:none;
     }
 
+    .floating{
+      position:fixed;
+      right:max(14px,env(safe-area-inset-right));
+      bottom:calc(16px + env(safe-area-inset-bottom));
+      z-index:60;
+      display:grid;
+      gap:10px;
+      width:min(210px,calc(100vw - 28px));
+    }
+
+    .fab{
+      appearance:none;
+      border:1px solid rgba(217,183,111,.55);
+      border-radius:999px;
+      min-height:58px;
+      padding:0 18px;
+      background:var(--lime);
+      color:#11100d;
+      font:inherit;
+      font-size:1.05rem;
+      font-weight:950;
+      box-shadow:0 14px 44px rgba(0,0,0,.42);
+      cursor:pointer;
+    }
+
+    .fab--dark{
+      background:#14110c;
+      color:var(--text);
+      border-color:rgba(255,255,255,.12);
+    }
+
     .section{
       margin-top:22px;
       border-radius:var(--radius);
@@ -292,6 +323,15 @@
       .link-row{
         flex-direction:column;
       }
+      .floating{
+        right:12px;
+        bottom:calc(12px + env(safe-area-inset-bottom));
+        width:min(176px,calc(100vw - 24px));
+      }
+      .fab{
+        min-height:52px;
+        font-size:.98rem;
+      }
     }
 
     @media print{
@@ -303,7 +343,7 @@
         border-color:#ccc;
       }
       .sub,.quick-card p,.card p,.card li,.slot-detail,.link-row span{color:#333}
-      .nav{display:none}
+      .nav,.floating{display:none}
       a{color:#111}
     }
   </style>
@@ -337,7 +377,7 @@
         </div>
       </div>
 
-      <nav class="nav">
+      <nav class="nav" id="quick-links" aria-label="Food and beverage meetup quick links">
         <a href="#brief">Event Brief</a>
         <a href="#investors">Investor Panel</a>
         <a href="#mission">Mission</a>
@@ -718,5 +758,27 @@
       Square Bidness · Principles. Morals. Business Done Right.
     </div>
   </main>
+
+  <div class="floating" aria-label="Page shortcuts">
+    <button class="fab fab--dark" type="button" id="topBtn">Top</button>
+    <button class="fab" type="button" id="quickLinksBtn">Quick links</button>
+  </div>
+
+  <script>
+    (() => {
+      const scrollToTarget = (selector) => {
+        const target = document.querySelector(selector);
+        if (target) target.scrollIntoView({ behavior:"smooth", block:"start" });
+      };
+
+      document.getElementById("topBtn")?.addEventListener("click", () => {
+        window.scrollTo({ top:0, behavior:"smooth" });
+      });
+
+      document.getElementById("quickLinksBtn")?.addEventListener("click", () => {
+        scrollToTarget("#quick-links");
+      });
+    })();
+  </script>
 </body>
 </html>
