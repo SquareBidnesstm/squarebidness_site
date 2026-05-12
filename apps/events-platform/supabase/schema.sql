@@ -23,6 +23,9 @@ create table if not exists public.organizers (
   stripe_account_id text unique,
   stripe_onboarding_complete boolean not null default false,
 
+  -- Auth
+  password_hash text,
+
   -- Admin fallback
   is_admin boolean not null default false,
 

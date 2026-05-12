@@ -45,8 +45,9 @@ export default async function HomePage({
         top: 0,
         zIndex: 50,
       }}>
-        <Link href="/" style={{ fontWeight: 950, fontSize: "1.1rem", letterSpacing: "-0.04em" }}>
-          SB Events
+        <Link href="/" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, textDecoration: "none" }}>
+          <img src="/sb-mark.png" alt="Square Bidness" style={{ height: 38, width: "auto", display: "block" }} />
+          <span style={{ color: "#fff", fontSize: "0.65rem", fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase" }}>Events</span>
         </Link>
         <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
           <Link href="/organizer/login" className="btn btn--ghost" style={{ minHeight: 36, fontSize: "0.85rem", padding: "0 14px" }}>
