@@ -5,9 +5,15 @@ export const metadata: Metadata = {
   title: "Square Bidness Events",
   description: "Comedy shows, trail rides, concerts, and community events across Louisiana.",
   metadataBase: new URL("https://events.squarebidness.com"),
+  icons: {
+    icon: "/icon.svg",
+    apple: "/icon.svg",
+    shortcut: "/icon.svg",
+  },
   openGraph: {
     siteName: "Square Bidness Events",
     type: "website",
+    images: [{ url: "/icon.svg", width: 512, height: 600 }],
   },
 };
 
