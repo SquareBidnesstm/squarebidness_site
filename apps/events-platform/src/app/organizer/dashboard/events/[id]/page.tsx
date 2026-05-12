@@ -5,6 +5,7 @@ import { supabaseServer } from "../../../../../lib/supabase/server";
 import { computeOrganizerSessionToken } from "../../../../../lib/auth";
 import { EVENT_CATEGORIES } from "../../../../../lib/constants";
 import NavLogo from "../../../../../components/NavLogo";
+import RefundButton from "../../../../../components/RefundButton";
 
 export const revalidate = 0;
 
@@ -47,6 +48,16 @@ export default async function ManageEventPage({
   const totalCapacity = tiers.reduce((s: number, t: any) => s + t.quantity, 0);
   const revenue = tiers.reduce((s: number, t: any) => s + (Number(t.price) * t.quantity_sold), 0);
   const categoryLabel = EVENT_CATEGORIES.find(c => c.value === event.category)?.label ?? event.category;
+
+  // Fetch orders for this event
+  const { data: orders } = await supabaseServer
+    .from("orders")
+    .select("id, order_code, buyer_name, buyer_email, total, status, created_at")
+    .eq("event_id", event.id)
+    .order("created_at", { ascending: false })
+    .limit(100);
+
+  const orderList = (orders ?? []) as any[];
 
   return (
     <div style={{ minHeight: "100vh" }}>
@@ -124,6 +135,61 @@ export default async function ManageEventPage({
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Orders */}
+          <div className="card" style={{ marginBottom: 24 }}>
+            <p style={{ color: "#a1a1aa", fontSize: 11, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 14 }}>
+              Orders ({orderList.length})
+            </p>
+            {orderList.length === 0 ? (
+              <p style={{ color: "#555", fontSize: "0.9rem" }}>No orders yet.</p>
+            ) : (
+              <div style={{ display: "grid", gap: 8 }}>
+                {orderList.map((order: any) => (
+                  <div key={order.id} style={{
+                    display: "flex", justifyContent: "space-between", alignItems: "center",
+                    padding: "12px 14px", background: "#050505", borderRadius: 10,
+                    border: "1px solid #1d1d1f", gap: 12, flexWrap: "wrap",
+                  }}>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
+                        <p style={{ fontWeight: 800, fontSize: "0.9rem", fontFamily: "monospace" }}>{order.order_code}</p>
+                        <span style={{
+                          fontSize: "0.7rem", fontWeight: 900, padding: "2px 8px", borderRadius: 99,
+                          background: order.status === "paid" ? "#0a2a0a" : order.status === "cancelled" ? "#1a0a0a" : "#1a1a0a",
+                          color: order.status === "paid" ? "#22c55e" : order.status === "cancelled" ? "#ef4444" : "#eab308",
+                          border: `1px solid ${order.status === "paid" ? "#166534" : order.status === "cancelled" ? "#7f1d1d" : "#713f12"}`,
+                          textTransform: "uppercase",
+                        }}>
+                          {order.status}
+                        </span>
+                      </div>
+                      <p style={{ color: "#a1a1aa", fontSize: "0.8rem" }}>{order.buyer_name} · {order.buyer_email}</p>
+                      <p style={{ color: "#555", fontSize: "0.75rem" }}>
+                        {new Date(order.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      </p>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+                      <p style={{ fontWeight: 900, color: "#22c55e", fontSize: "0.95rem" }}>
+                        ${Number(order.total).toFixed(2)}
+                      </p>
+                      {order.status === "paid" && (
+                        <RefundButton
+                          orderId={order.id}
+                          orderCode={order.order_code}
+                          buyerName={order.buyer_name}
+                          total={Number(order.total)}
+                        />
+                      )}
+                      {order.status === "cancelled" && (
+                        <span style={{ fontSize: "0.75rem", color: "#555" }}>Refunded</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Publish / Cancel actions */}
