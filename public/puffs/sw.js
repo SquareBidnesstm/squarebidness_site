@@ -1,5 +1,5 @@
 // /puffs/sw.js
-const CACHE = "puffs-v6";
+const CACHE = "puffs-v7";
 
 const ASSETS = [
   "/puffs/",

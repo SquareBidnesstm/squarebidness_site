@@ -11,7 +11,7 @@
   <meta name="author" content="Denerian Collins" />
   <meta name="format-detection" content="telephone=no" />
   <meta name="theme-color" content="#0b0b0b" />
-  <meta name="sb:build" content="v20260329-puffs-root-menu-live" />
+  <meta name="sb:build" content="v20260512-puffs-weekday-preview" />
 
   <link rel="manifest" href="/puffs/manifest.webmanifest" />
   <link rel="icon" href="/puffs/icons/icon-192.png" type="image/png" />
@@ -90,6 +90,7 @@
       width:30px;height:30px;border-radius:9px;border:1px solid #2f2f2f;
       background:#101010;color:#fff;cursor:pointer;
     }
+    .qty button:disabled{opacity:.45;cursor:not-allowed}
     .tiny{font-size:.86rem;color:#9c9c9c}
     .muted{color:var(--muted)}
     .stack{display:grid;gap:10px}
@@ -311,12 +312,16 @@
     return getMenuDisplayMode() === "both" ? "weekend" : getActiveMenuDay();
   }
 
+  function isOrderingDay() {
+    const today = new Date().toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
+    return today === "saturday" || today === "sunday";
+  }
+
   function getMenuDisplayMode() {
     const today = new Date().toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
     if (today === "saturday") return "saturday_only";
     if (today === "sunday") return "sunday_only";
-    if (today === "monday") return "both";
-    return "closed";
+    return "both";
   }
 
   function showError(msg) {
@@ -353,7 +358,7 @@
     if (resumeAtText) return `Online ordering is paused. Reopening ${resumeAtText}.`;
     if (OPERATOR_STATUS?.mode === "paused") return "Online ordering is temporarily paused.";
 
-    return "Please come back during open hours.";
+    return "The menu is available for preview. Online ordering opens Saturday and Sunday.";
   }
 
   function applyStoreState() {
@@ -380,6 +385,10 @@
 
     btnCheckout.disabled = !STORE_OPEN;
     btnCheckout.classList.toggle("disabled", !STORE_OPEN);
+
+    document.querySelectorAll("[data-cart-control]").forEach((control) => {
+      control.disabled = !STORE_OPEN || control.dataset.soldOut === "true";
+    });
   }
 
   async function loadOperatorStatus() {
@@ -481,7 +490,7 @@
       : [];
 
     TAX_RATE = Number.isFinite(Number(data.taxRate)) ? Number(data.taxRate) : 0.0895;
-    MENU_OPEN = data.open !== false;
+    MENU_OPEN = data.open !== false && isOrderingDay();
 
     const specialBanner = document.getElementById("specialBanner");
     const adminMessage = String(MENU_OVERRIDES.customerMessage || "").trim();
@@ -524,7 +533,9 @@
     const minus = document.createElement("button");
     minus.type = "button";
     minus.textContent = "–";
-    minus.disabled = soldOut;
+    minus.disabled = soldOut || !STORE_OPEN;
+    minus.dataset.cartControl = "true";
+    minus.dataset.soldOut = soldOut ? "true" : "false";
     minus.onclick = () => updateQty(item.id, -1);
 
     const val = document.createElement("span");
@@ -536,7 +547,9 @@
     const plus = document.createElement("button");
     plus.type = "button";
     plus.textContent = "+";
-    plus.disabled = soldOut;
+    plus.disabled = soldOut || !STORE_OPEN;
+    plus.dataset.cartControl = "true";
+    plus.dataset.soldOut = soldOut ? "true" : "false";
     plus.onclick = () => updateQty(item.id, 1);
 
     qty.append(minus, val, plus);
@@ -660,12 +673,11 @@
       return;
     }
 
-    if (mode === "closed") {
-      const empty = document.createElement("div");
-      empty.className = "emptyDay";
-      empty.textContent = "Puff's cooks Saturday and Sunday. The full weekend menu comes back on Monday.";
-      root.appendChild(empty);
-      return;
+    if (!STORE_OPEN) {
+      const preview = document.createElement("div");
+      preview.className = "emptyDay";
+      preview.textContent = "Menu preview is live. Online ordering opens Saturday and Sunday.";
+      root.appendChild(preview);
     }
 
     root.appendChild(saturdayWrap);
