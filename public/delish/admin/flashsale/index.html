@@ -39,7 +39,10 @@
     .status.bad{background:rgba(90,34,34,.28);border-color:rgba(196,88,88,.45);color:#ffd3d3}
     .toggleRow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px;border-radius:16px;background:var(--panel2);border:1px solid var(--line)}
     .toggleRow input{width:auto;transform:scale(1.2)}
-    @media(max-width:760px){.grid,.row{grid-template-columns:1fr}.row{align-items:stretch}.brandMark{width:58px;height:58px}}
+    .windowGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:8px}
+    .windowOption{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px;border-radius:14px;background:var(--panel2);border:1px solid var(--line)}
+    .windowOption input{width:auto}
+    @media(max-width:760px){.grid,.row{grid-template-columns:1fr}.windowGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.row{align-items:stretch}.brandMark{width:58px;height:58px}}
   </style>
 </head>
 <body>
@@ -78,15 +81,22 @@
         <label>Sale title
           <input id="title" value="Flash Sale" />
         </label>
-        <label>Pickup label
-          <input id="pickupWindow" value="Flash Sale Pickup" />
-        </label>
         <label>Start
           <input id="startAt" type="datetime-local" />
         </label>
         <label>End
           <input id="endAt" type="datetime-local" />
         </label>
+      </div>
+      <div style="margin-top:12px;">
+        <label>Flash sale pickup windows</label>
+        <div class="windowGrid" id="pickupWindows">
+          <label class="windowOption">2:00 PM <input type="checkbox" value="2:00 PM" /></label>
+          <label class="windowOption">2:30 PM <input type="checkbox" value="2:30 PM" /></label>
+          <label class="windowOption">3:00 PM <input type="checkbox" value="3:00 PM" /></label>
+          <label class="windowOption">3:30 PM <input type="checkbox" value="3:30 PM" /></label>
+        </div>
+        <p class="muted" style="margin:8px 0 0;">These only affect flash sale ordering. Regular pickup windows stay separate.</p>
       </div>
       <label style="display:block;margin-top:12px;">Customer message
         <textarea id="message" placeholder="Example: Flash sale live until 3:30 PM or sold out."></textarea>
@@ -217,13 +227,17 @@
     }
 
     function readPayload() {
+      const pickupWindows = [...document.querySelectorAll("#pickupWindows input[type='checkbox']")]
+        .filter(input => input.checked)
+        .map(input => input.value);
+
       return {
         enabled: document.getElementById("enabled").checked,
         title: document.getElementById("title").value,
         message: document.getElementById("message").value,
         startAt: document.getElementById("startAt").value,
         endAt: document.getElementById("endAt").value,
-        pickupWindow: document.getElementById("pickupWindow").value,
+        pickupWindows,
         items: currentItems.map(item => {
           const selected = catalog.find(option => option.id === item.sourceId);
           return {
@@ -242,7 +256,10 @@
       document.getElementById("message").value = sale.message || "";
       document.getElementById("startAt").value = sale.startAt || "";
       document.getElementById("endAt").value = sale.endAt || "";
-      document.getElementById("pickupWindow").value = sale.pickupWindow || "Flash Sale Pickup";
+      const selectedWindows = new Set(Array.isArray(sale.pickupWindows) ? sale.pickupWindows : []);
+      document.querySelectorAll("#pickupWindows input[type='checkbox']").forEach((input) => {
+        input.checked = selectedWindows.has(input.value);
+      });
       currentItems = Array.isArray(sale.items) ? sale.items.map(item => ({ ...item })) : [];
       renderPill(sale);
       renderItems();

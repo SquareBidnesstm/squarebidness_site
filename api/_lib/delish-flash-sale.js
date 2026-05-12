@@ -1,6 +1,12 @@
 import { Redis } from "@upstash/redis";
 
 export const DELISH_FLASH_SALE_KEY = "delish:flash_sale";
+export const DELISH_FLASH_PICKUP_WINDOWS = [
+  "2:00 PM",
+  "2:30 PM",
+  "3:00 PM",
+  "3:30 PM",
+];
 
 const redis = new Redis({
   url: process.env.DELISH_UPSTASH_REDIS_REST_URL,
@@ -38,6 +44,20 @@ function normalizeLimit(value) {
   return Math.floor(limit);
 }
 
+function normalizePickupWindows(value, legacyPickupWindow = "") {
+  const requested = Array.isArray(value) ? value : [];
+  const clean = requested.filter((windowLabel) =>
+    DELISH_FLASH_PICKUP_WINDOWS.includes(String(windowLabel || "").trim())
+  );
+
+  if (clean.length) return [...new Set(clean)];
+
+  const legacy = String(legacyPickupWindow || "").trim();
+  if (DELISH_FLASH_PICKUP_WINDOWS.includes(legacy)) return [legacy];
+
+  return [];
+}
+
 export function normalizeFlashSale(input = {}) {
   const items = Array.isArray(input.items)
     ? input.items
@@ -66,7 +86,7 @@ export function normalizeFlashSale(input = {}) {
     message: String(input.message || "").trim().slice(0, 180),
     startAt: String(input.startAt || "").trim().slice(0, 20),
     endAt: String(input.endAt || "").trim().slice(0, 20),
-    pickupWindow: String(input.pickupWindow || "Flash Sale Pickup").trim().slice(0, 60),
+    pickupWindows: normalizePickupWindows(input.pickupWindows, input.pickupWindow),
     items,
     updatedAt: new Date().toISOString(),
   };
@@ -74,6 +94,7 @@ export function normalizeFlashSale(input = {}) {
 
 export function isFlashSaleActive(sale, now = getCentralNow()) {
   if (!sale?.enabled || !Array.isArray(sale.items) || !sale.items.length) return false;
+  if (!Array.isArray(sale.pickupWindows) || !sale.pickupWindows.length) return false;
   if (sale.startAt && now < sale.startAt) return false;
   if (sale.endAt && now > sale.endAt) return false;
   return true;

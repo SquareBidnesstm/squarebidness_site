@@ -647,13 +647,15 @@
     flashSaleItems.innerHTML = getFlashSaleItems().map(renderFlashSaleItem).join("");
     flashSaleSection.classList.add("is-visible");
 
-    const label = FLASH_SALE.pickupWindow || "Flash Sale Pickup";
-    const exists = Array.from(pickupWindow.options).some(option => option.value === label);
-    if (!exists) {
-      pickupWindow.insertAdjacentHTML("beforeend", `<option value="${label}">${label}</option>`);
-    }
+    const windows = Array.isArray(FLASH_SALE.pickupWindows) ? FLASH_SALE.pickupWindows : [];
+    windows.forEach((label) => {
+      const exists = Array.from(pickupWindow.options).some(option => option.value === label);
+      if (!exists) {
+        pickupWindow.insertAdjacentHTML("beforeend", `<option value="${label}">${label}</option>`);
+      }
+    });
     if (!pickupWindow.value) {
-      pickupWindow.value = label;
+      pickupWindow.value = windows[0] || "";
     }
   }
 

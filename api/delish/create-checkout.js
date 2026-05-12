@@ -549,7 +549,11 @@ export default async function handler(req, res) {
     const requestedPickupWindow = String(body.pickupWindow || "").trim();
     const disabledPickupWindows = await getDisabledPickupWindows();
 
-    if (!isAllowedPickupWindow(requestedPickupWindow) && !(isFlashSaleOrder && requestedPickupWindow === flashSale.pickupWindow)) {
+    const flashPickupWindows = Array.isArray(flashSale.pickupWindows)
+      ? flashSale.pickupWindows
+      : [];
+
+    if (!isAllowedPickupWindow(requestedPickupWindow) && !(isFlashSaleOrder && flashPickupWindows.includes(requestedPickupWindow))) {
       return res.status(400).json({
         ok: false,
         error: "PICKUP_WINDOW_NOT_ALLOWED",
