@@ -5,9 +5,15 @@ export const metadata: Metadata = {
   title: "Square Bidness Events",
   description: "Comedy shows, trail rides, concerts, and community events across Louisiana.",
   metadataBase: new URL("https://events.squarebidness.com"),
+  applicationName: "SB Events",
+  appleWebApp: {
+    capable: true,
+    title: "SB Events",
+    statusBarStyle: "black-translucent",
+  },
   icons: {
     icon: "/icon.svg",
-    apple: "/icon.svg",
+    apple: "/sb-mark.png",
     shortcut: "/icon.svg",
   },
   openGraph: {
