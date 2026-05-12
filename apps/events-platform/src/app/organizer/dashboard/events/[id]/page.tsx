@@ -1,0 +1,150 @@
+import { redirect, notFound } from "next/navigation";
+import Link from "next/link";
+import { cookies } from "next/headers";
+import { supabaseServer } from "../../../../../lib/supabase/server";
+import { computeOrganizerSessionToken } from "../../../../../lib/auth";
+import { EVENT_CATEGORIES } from "../../../../../lib/constants";
+
+export const revalidate = 0;
+
+export default async function ManageEventPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+
+  // Auth
+  const cookieStore = await cookies();
+  const allCookies = cookieStore.getAll();
+  const sessionCookie = allCookies.find((c) => c.name.startsWith("org_session_"));
+  if (!sessionCookie) redirect("/organizer/login");
+
+  const organizerSlug = sessionCookie.name.replace("org_session_", "");
+  const expectedToken = await computeOrganizerSessionToken(organizerSlug);
+  if (sessionCookie.value !== expectedToken) redirect("/organizer/login");
+
+  const { data: organizer } = await supabaseServer
+    .from("organizers")
+    .select("id, name")
+    .eq("slug", organizerSlug)
+    .single();
+
+  if (!organizer) redirect("/organizer/login");
+
+  const { data: event } = await supabaseServer
+    .from("events")
+    .select("*, ticket_tiers ( * )")
+    .eq("id", id)
+    .eq("organizer_id", organizer.id)
+    .single();
+
+  if (!event) notFound();
+
+  const tiers = (event.ticket_tiers ?? []) as any[];
+  const totalSold = tiers.reduce((s: number, t: any) => s + t.quantity_sold, 0);
+  const totalCapacity = tiers.reduce((s: number, t: any) => s + t.quantity, 0);
+  const revenue = tiers.reduce((s: number, t: any) => s + (Number(t.price) * t.quantity_sold), 0);
+  const categoryLabel = EVENT_CATEGORIES.find(c => c.value === event.category)?.label ?? event.category;
+
+  return (
+    <div style={{ minHeight: "100vh" }}>
+      <nav style={{ borderBottom: "1px solid #111", padding: "0 14px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 64, background: "#000" }}>
+        <Link href="/organizer/dashboard" style={{ color: "#a1a1aa", fontSize: "0.9rem" }}>← Dashboard</Link>
+        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+          <span style={{ color: "#a1a1aa", fontSize: "0.9rem" }}>{organizer.name}</span>
+          <a href="/api/organizer/logout" className="btn btn--ghost" style={{ minHeight: 36, fontSize: "0.85rem", padding: "0 14px" }}>Sign Out</a>
+        </div>
+      </nav>
+
+      <main style={{ padding: "32px 14px 80px" }}>
+        <div className="wrap">
+
+          {/* Header */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: 28, gap: 16, flexWrap: "wrap" }}>
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+                <h1 style={{ fontSize: "1.8rem", fontWeight: 950, letterSpacing: "-0.05em" }}>{event.title}</h1>
+                <span className={`badge ${event.status === "published" ? "badge--green" : event.status === "cancelled" ? "badge--red" : "badge--gray"}`}>
+                  {event.status}
+                </span>
+              </div>
+              <p style={{ color: "#a1a1aa", fontSize: "0.9rem" }}>
+                {categoryLabel} · {new Date(event.starts_at).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
+              </p>
+            </div>
+            <div style={{ display: "flex", gap: 10 }}>
+              <Link href={`/events/${event.slug}`} className="btn btn--ghost" style={{ minHeight: 36, fontSize: "0.85rem", padding: "0 14px" }} target="_blank">
+                View Page ↗
+              </Link>
+              <Link href={`/scan/${event.slug}`} className="btn btn--outline" style={{ minHeight: 36, fontSize: "0.85rem", padding: "0 14px" }}>
+                🔍 Scanner
+              </Link>
+            </div>
+          </div>
+
+          {/* Stats */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 28 }}>
+            <div className="card" style={{ textAlign: "center" }}>
+              <p style={{ color: "#a1a1aa", fontSize: 11, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 6 }}>Tickets Sold</p>
+              <p style={{ fontSize: "2rem", fontWeight: 950 }}>{totalSold}</p>
+              <p style={{ color: "#555", fontSize: "0.8rem" }}>of {totalCapacity}</p>
+            </div>
+            <div className="card" style={{ textAlign: "center" }}>
+              <p style={{ color: "#a1a1aa", fontSize: 11, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 6 }}>Gross Revenue</p>
+              <p style={{ fontSize: "2rem", fontWeight: 950, color: "#22c55e" }}>${revenue.toFixed(2)}</p>
+              <p style={{ color: "#555", fontSize: "0.8rem" }}>before platform fee</p>
+            </div>
+            <div className="card" style={{ textAlign: "center" }}>
+              <p style={{ color: "#a1a1aa", fontSize: 11, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 6 }}>Capacity</p>
+              <p style={{ fontSize: "2rem", fontWeight: 950 }}>
+                {totalCapacity > 0 ? Math.round((totalSold / totalCapacity) * 100) : 0}%
+              </p>
+              <p style={{ color: "#555", fontSize: "0.8rem" }}>filled</p>
+            </div>
+          </div>
+
+          {/* Ticket Tiers */}
+          <div className="card" style={{ marginBottom: 24 }}>
+            <p style={{ color: "#a1a1aa", fontSize: 11, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 14 }}>Ticket Tiers</p>
+            <div style={{ display: "grid", gap: 10 }}>
+              {tiers.length === 0 ? (
+                <p style={{ color: "#555" }}>No ticket tiers yet.</p>
+              ) : tiers.map((tier: any) => (
+                <div key={tier.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 14px", background: "#050505", borderRadius: 10, border: "1px solid #1d1d1f" }}>
+                  <div>
+                    <p style={{ fontWeight: 800 }}>{tier.name}</p>
+                    {tier.description && <p style={{ color: "#555", fontSize: "0.8rem", marginTop: 2 }}>{tier.description}</p>}
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    <p style={{ fontWeight: 900 }}>{Number(tier.price) === 0 ? "Free" : `$${Number(tier.price).toFixed(2)}`}</p>
+                    <p style={{ color: "#a1a1aa", fontSize: "0.8rem" }}>{tier.quantity_sold} / {tier.quantity} sold</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Publish / Cancel actions */}
+          {event.status === "draft" && (
+            <form action="/api/organizer/events/publish" method="POST" style={{ display: "inline" }}>
+              <input type="hidden" name="eventId" value={event.id} />
+              <button type="submit" className="btn btn--primary" style={{ marginRight: 10 }}>
+                Publish Event
+              </button>
+            </form>
+          )}
+          {event.status === "published" && (
+            <form action="/api/organizer/events/unpublish" method="POST" style={{ display: "inline" }}>
+              <input type="hidden" name="eventId" value={event.id} />
+              <button type="submit" className="btn btn--ghost">
+                Unpublish
+              </button>
+            </form>
+          )}
+
+        </div>
+      </main>
+    </div>
+  );
+}
