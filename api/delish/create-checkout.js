@@ -15,7 +15,12 @@ const MENU_BY_DAY = {
   monday: [
     {
       id: "monday_red_beans_fried_chicken",
-      name: "Red Beans or Okra with Fried Chicken",
+      name: "Red Beans with Fried Chicken",
+      price: 13.99,
+    },
+    {
+      id: "monday_okra_fried_chicken",
+      name: "Okra with Fried Chicken",
       price: 13.99,
     },
     {
