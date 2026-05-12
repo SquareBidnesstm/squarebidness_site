@@ -429,6 +429,17 @@
       .inline-fields {
         grid-template-columns:1fr;
       }
+
+      .toolbar input,
+      .toolbar button,
+      .toolbar a,
+      .manager-grid input,
+      .employee-grid input,
+      .employee-grid select,
+      .employee-grid button {
+        width:100%;
+        justify-content:center;
+      }
     }
 
     @media (max-width: 560px) {
@@ -753,6 +764,14 @@
       return (els.managerPin.value || "").trim();
     }
 
+    function buildCsvUrl(date = els.date.value) {
+      const qs = new URLSearchParams();
+      qs.set("mode", "csv");
+      if (date) qs.set("date", date);
+      qs.set("managerPin", getManagerPin());
+      return `${API_URL}?${qs.toString()}`;
+    }
+
     function getSalesValue() {
       return Number(els.sales.value || 0);
     }
@@ -1040,7 +1059,7 @@ function renderStats(data, selectedDate, salesData = {}) {
     renderEmployeeOptions(data.employees || []);
     renderLive(data.active || []);
 
-    els.csvLink.href = `${API_URL}?mode=csv${date ? `&date=${encodeURIComponent(date)}` : ""}`;
+    els.csvLink.href = buildCsvUrl(date);
 
    const activeCount = (data.active || []).length;
 if (activeCount >= 4) {
@@ -1183,6 +1202,15 @@ if (activeCount >= 4) {
     els.loadBtn.addEventListener("click", loadAdmin);
     els.addEmployeeBtn.addEventListener("click", addEmployee);
     els.deleteEmployeeBtn.addEventListener("click", deleteEmployee);
+    els.csvLink.addEventListener("click", (event) => {
+      if (!getManagerPin()) {
+        event.preventDefault();
+        setStatus("Manager PIN required to export CSV.", "warn");
+        return;
+      }
+
+      els.csvLink.href = buildCsvUrl();
+    });
     els.sales.setAttribute("readonly", "readonly");
 els.sales.addEventListener("focus", () => {
   setStatus("Sales is now pulled from Delish order data.", "good");

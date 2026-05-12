@@ -435,7 +435,7 @@
           </div>
 
           <div class="footer-note">
-            Next phase: shift duration, CSV export, labor totals, and manager controls.
+            Manager review, labor totals, payroll turn-ins, and CSV export live in Time Clock Admin.
           </div>
         </div>
       </section>
@@ -527,16 +527,6 @@
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || "Request failed");
   return data;
-}
-
-async function fetchSales(date) {
-  if (!date) return { grossSales: 0, orderCount: 0 };
-
-  try {
-    return await fetchJson(`/api/delish/sales-summary/?date=${encodeURIComponent(date)}&t=${Date.now()}`);
-  } catch {
-    return { grossSales: 0, orderCount: 0 };
-  }
 }
 
     function renderEmployees(employees) {

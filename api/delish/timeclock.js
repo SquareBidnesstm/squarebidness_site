@@ -12,7 +12,10 @@ const redisClient = REDIS_URL && REDIS_TOKEN
   : null;
 
 const TZ = "America/Chicago";
-const MANAGER_PIN = process.env.DELISH_TIMECLOCK_MANAGER_PIN || "9999";
+const MANAGER_PIN =
+  process.env.DELISH_TIMECLOCK_MANAGER_PIN ||
+  process.env.DELISH_OPERATOR_TOKEN ||
+  "";
 
 const ACTIVE_KEY = "delish:timeclock:active";
 const PUNCHES_KEY = "delish:timeclock:punches";
@@ -366,6 +369,12 @@ async function buildState(date) {
 }
 
 function requireManager(pin) {
+  if (!MANAGER_PIN) {
+    const err = new Error("Time clock manager PIN is not configured.");
+    err.status = 503;
+    throw err;
+  }
+
   if (String(pin || "").trim() !== MANAGER_PIN) {
     const err = new Error("Manager PIN required.");
     err.status = 401;
@@ -405,6 +414,8 @@ function shiftsToCsv(shifts) {
 }
 
 async function sendCsv(req, res) {
+  requireManager(req.query?.managerPin);
+
   const date = String(req.query?.date || "").trim();
   const shifts = filterShiftsByDate(await getShifts(), date);
   const csv = shiftsToCsv(shifts);
