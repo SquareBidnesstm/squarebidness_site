@@ -17,8 +17,7 @@ export default async function AdminLoginPage({
       <div style={{ width: "100%", maxWidth: 380 }}>
         <div style={{ textAlign: "center", marginBottom: 32 }}>
           <a href="/" style={{ display: "inline-flex", flexDirection: "column", alignItems: "center", gap: 2, textDecoration: "none", marginBottom: 16 }}>
-            <img src="/sb-mark.png" alt="Square Bidness" style={{ height: 48, width: "auto" }} />
-            <span style={{ color: "#fff", fontSize: "0.6rem", fontWeight: 900, letterSpacing: "0.18em", textTransform: "uppercase" }}>Events</span>
+            <img src="/events-192.png" alt="SB Events" style={{ height: 48, width: 48, borderRadius: 12 }} />
           </a>
           <p style={{ color: "#a1a1aa", fontSize: 11, fontWeight: 900, letterSpacing: "0.15em", textTransform: "uppercase", marginTop: 8 }}>Admin Access</p>
         </div>

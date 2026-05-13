@@ -12,10 +12,13 @@ export const revalidate = 0;
 
 export default async function ManageEventPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ waitlist_notified?: string }>;
 }) {
   const { id } = await params;
+  const { waitlist_notified } = await searchParams;
 
   // Auth
   const cookieStore = await cookies();
@@ -50,7 +53,6 @@ export default async function ManageEventPage({
   const revenue = tiers.reduce((s: number, t: any) => s + (Number(t.price) * t.quantity_sold), 0);
   const categoryLabel = EVENT_CATEGORIES.find(c => c.value === event.category)?.label ?? event.category;
 
-  // Fetch orders for this event
   const { data: orders } = await supabaseServer
     .from("orders")
     .select("id, order_code, buyer_name, buyer_email, total, status, created_at")
@@ -59,6 +61,14 @@ export default async function ManageEventPage({
     .limit(100);
 
   const orderList = (orders ?? []) as any[];
+
+  const { data: waitlistEntries } = await supabaseServer
+    .from("waitlist")
+    .select("id, name, email, created_at")
+    .eq("event_id", event.id)
+    .order("created_at", { ascending: true });
+
+  const waitlist = (waitlistEntries ?? []) as any[];
 
   return (
     <div style={{ minHeight: "100vh" }}>
@@ -96,6 +106,12 @@ export default async function ManageEventPage({
               <Link href={`/scan/${event.slug}`} className="btn btn--outline" style={{ minHeight: 36, fontSize: "0.85rem", padding: "0 14px" }}>
                 🔍 Scanner
               </Link>
+              <form action="/api/organizer/events/duplicate" method="POST" style={{ display: "inline" }}>
+                <input type="hidden" name="eventId" value={event.id} />
+                <button type="submit" className="btn btn--ghost" style={{ minHeight: 36, fontSize: "0.85rem", padding: "0 14px" }}>
+                  📋 Duplicate
+                </button>
+              </form>
             </div>
           </div>
 
@@ -182,6 +198,40 @@ export default async function ManageEventPage({
                         <span style={{ fontSize: "0.75rem", color: "#555" }}>Refunded</span>
                       )}
                     </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Waitlist */}
+          <div className="card" style={{ marginBottom: 24 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+              <p style={{ color: "#a1a1aa", fontSize: 11, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase" }}>
+                Waitlist ({waitlist.length})
+              </p>
+              {waitlist.length > 0 && (
+                <form action="/api/organizer/events/notify-waitlist" method="POST" style={{ display: "inline" }}>
+                  <input type="hidden" name="eventId" value={event.id} />
+                  <button type="submit" className="btn btn--ghost" style={{ minHeight: 32, fontSize: "0.8rem", padding: "0 12px" }}>
+                    📣 Notify All
+                  </button>
+                </form>
+              )}
+            </div>
+            {waitlist_notified && (
+              <div style={{ background: "#0a2a0a", border: "1px solid #166534", borderRadius: 8, padding: "10px 14px", marginBottom: 12, color: "#22c55e", fontSize: "0.85rem" }}>
+                ✓ Notified {waitlist_notified} waitlist {Number(waitlist_notified) === 1 ? "person" : "people"} by email.
+              </div>
+            )}
+            {waitlist.length === 0 ? (
+              <p style={{ color: "#555", fontSize: "0.9rem" }}>No one on the waitlist yet.</p>
+            ) : (
+              <div style={{ display: "grid", gap: 6 }}>
+                {waitlist.map((entry: any) => (
+                  <div key={entry.id} style={{ display: "flex", justifyContent: "space-between", padding: "10px 12px", background: "#050505", borderRadius: 8, border: "1px solid #1d1d1f", fontSize: "0.85rem" }}>
+                    <span style={{ fontWeight: 700 }}>{entry.name}</span>
+                    <span style={{ color: "#a1a1aa" }}>{entry.email}</span>
                   </div>
                 ))}
               </div>

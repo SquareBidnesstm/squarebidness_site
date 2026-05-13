@@ -13,6 +13,7 @@ export async function POST(req: NextRequest) {
   const buyerName = formData.get("buyerName") as string;
   const buyerEmail = formData.get("buyerEmail") as string;
   const buyerPhone = formData.get("buyerPhone") as string | null;
+  const promoId = formData.get("promoId") as string | null;
 
   if (!eventSlug || !buyerName || !buyerEmail) {
     return NextResponse.json({ ok: false, error: "Missing required fields" }, { status: 400 });
@@ -79,6 +80,41 @@ export async function POST(req: NextRequest) {
 
   if (tierSelections.length === 0) {
     return NextResponse.json({ ok: false, error: "No tickets selected" }, { status: 400 });
+  }
+
+  // Apply promo discount if provided
+  let discountAmountCents = 0;
+  if (promoId) {
+    const { data: promo } = await supabaseServer
+      .from("promo_codes")
+      .select("*")
+      .eq("id", promoId)
+      .eq("active", true)
+      .single();
+
+    if (promo && (promo.max_uses === null || promo.uses < promo.max_uses)) {
+      const subtotalCents = lineItems.reduce((s, li) => s + ((li.price_data as any).unit_amount * (li.quantity ?? 1)), 0);
+      discountAmountCents = promo.discount_type === "percent"
+        ? Math.round((subtotalCents * promo.discount_value) / 100)
+        : Math.min(Math.round(promo.discount_value * 100), subtotalCents);
+
+      if (discountAmountCents > 0) {
+        // Distribute discount proportionally across paid line items
+        let remaining = discountAmountCents;
+        for (let i = 0; i < lineItems.length; i++) {
+          const li = lineItems[i] as any;
+          if (li.price_data.unit_amount > 0) {
+            const itemTotal = li.price_data.unit_amount * li.quantity;
+            const share = i === lineItems.length - 1
+              ? remaining
+              : Math.round((itemTotal / (lineItems.reduce((s: number, l: any) => s + l.price_data.unit_amount * l.quantity, 0))) * discountAmountCents);
+            const newUnit = Math.max(0, li.price_data.unit_amount - Math.round(share / li.quantity));
+            remaining -= (li.price_data.unit_amount - newUnit) * li.quantity;
+            li.price_data.unit_amount = newUnit;
+          }
+        }
+      }
+    }
   }
 
   // Add platform fee line item if applicable
@@ -149,6 +185,11 @@ export async function POST(req: NextRequest) {
     .from("orders")
     .update({ stripe_session_id: session.id })
     .eq("id", order.id);
+
+  // Increment promo uses
+  if (promoId && discountAmountCents > 0) {
+    await supabaseServer.rpc("increment_promo_uses", { promo_id: promoId });
+  }
 
   return NextResponse.redirect(session.url!, { status: 303 });
 }

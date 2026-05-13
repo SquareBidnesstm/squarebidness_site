@@ -5,6 +5,9 @@ import { supabaseServer } from "../../../lib/supabase/server";
 import { EVENT_CATEGORIES } from "../../../lib/constants";
 import NavLogo from "../../../components/NavLogo";
 import FreeRSVPForm from "../../../components/FreeRSVPForm";
+import ShareButton from "../../../components/ShareButton";
+import WaitlistForm from "../../../components/WaitlistForm";
+import CheckoutForm from "../../../components/CheckoutForm";
 
 export const revalidate = 30;
 
@@ -63,7 +66,7 @@ export default async function EventPage({
     .from("events")
     .select(`
       *,
-      organizers ( name, logo_url, bio ),
+      organizers ( name, logo_url, bio, slug ),
       ticket_tiers ( * )
     `)
     .eq("slug", slug)
@@ -104,20 +107,36 @@ export default async function EventPage({
             <span style={{ display: "inline-block", padding: "4px 10px", borderRadius: 999, background: "#0a1a0a", color: "#22c55e", border: "1px solid #166534", fontSize: 11, fontWeight: 900, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 14 }}>
               {categoryLabel}
             </span>
-            <h1 style={{ fontSize: "clamp(1.8rem, 5vw, 3rem)", fontWeight: 950, letterSpacing: "-0.05em", lineHeight: 0.95, marginBottom: 20 }}>
-              {event.title}
-            </h1>
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 20 }}>
+              <h1 style={{ fontSize: "clamp(1.8rem, 5vw, 3rem)", fontWeight: 950, letterSpacing: "-0.05em", lineHeight: 0.95, margin: 0 }}>
+                {event.title}
+              </h1>
+              <ShareButton title={event.title} url={`https://events.squarebidness.com/events/${slug}`} />
+            </div>
 
             {/* Date & Location */}
             <div className="card" style={{ marginBottom: 24, display: "grid", gap: 16 }}>
               <div>
                 <p style={{ color: "#a1a1aa", fontSize: 11, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 4 }}>Date & Time</p>
-                <p style={{ fontWeight: 800 }}>
-                  {eventDate.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
-                </p>
-                <p style={{ color: "#a1a1aa" }}>
-                  {eventDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })} – {eventEnd.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
-                </p>
+                {eventDate.toDateString() === eventEnd.toDateString() ? (
+                  <>
+                    <p style={{ fontWeight: 800 }}>
+                      {eventDate.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
+                    </p>
+                    <p style={{ color: "#a1a1aa" }}>
+                      {eventDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })} – {eventEnd.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p style={{ fontWeight: 800 }}>
+                      {eventDate.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })} – {eventEnd.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
+                    </p>
+                    <p style={{ color: "#a1a1aa" }}>
+                      Starts {eventDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })} · Ends {eventEnd.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
+                    </p>
+                  </>
+                )}
               </div>
               {(event.venue_name || event.address || event.city) && (
                 <div>
@@ -138,10 +157,32 @@ export default async function EventPage({
               </div>
             )}
 
+            {/* Refund Policy */}
+            {event.refund_policy && (
+              <div className="card" style={{ marginBottom: 24 }}>
+                <p style={{ color: "#a1a1aa", fontSize: 11, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 8 }}>Refund Policy</p>
+                <p style={{ fontWeight: 800, fontSize: "0.9rem", marginBottom: event.refund_policy_notes ? 4 : 0 }}>
+                  {{
+                    no_refunds: "No Refunds",
+                    up_to_24h: "Refunds up to 24 hours before the event",
+                    up_to_48h: "Refunds up to 48 hours before the event",
+                    up_to_7d: "Refunds up to 7 days before the event",
+                    custom: "Custom Policy",
+                  }[event.refund_policy as string] ?? event.refund_policy}
+                </p>
+                {event.refund_policy_notes && <p style={{ color: "#71717a", fontSize: "0.85rem" }}>{event.refund_policy_notes}</p>}
+              </div>
+            )}
+
             {/* Organizer */}
             <div className="card">
               <p style={{ color: "#a1a1aa", fontSize: 11, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 10 }}>Organizer</p>
-              <p style={{ fontWeight: 800 }}>{(event.organizers as any)?.name}</p>
+              <Link href={`/organizer/${(event.organizers as any)?.slug ?? ""}`} style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 10 }}>
+                {(event.organizers as any)?.logo_url && (
+                  <img src={(event.organizers as any).logo_url} alt="" style={{ width: 36, height: 36, borderRadius: 8, objectFit: "cover" }} />
+                )}
+                <p style={{ fontWeight: 800, color: "#fff" }}>{(event.organizers as any)?.name}</p>
+              </Link>
               {(event.organizers as any)?.bio && (
                 <p style={{ color: "#a1a1aa", fontSize: "0.9rem", marginTop: 6 }}>{(event.organizers as any).bio}</p>
               )}
@@ -197,39 +238,32 @@ export default async function EventPage({
                     }))}
                   />
                 ) : (
-                  <form action="/api/checkout" method="POST" style={{ marginTop: 16 }}>
-                    <input type="hidden" name="eventSlug" value={event.slug} />
-                    <div style={{ display: "grid", gap: 10, marginBottom: 14 }}>
-                      {tiers.filter((t: any) => (t.quantity - t.quantity_sold) > 0).map((tier: any) => (
-                        <div key={tier.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <label htmlFor={`qty_${tier.id}`} style={{ fontSize: "0.9rem", fontWeight: 700 }}>{tier.name}</label>
-                          <select
-                            id={`qty_${tier.id}`}
-                            name={`tier_${tier.id}`}
-                            className="input"
-                            style={{ width: 80 }}
-                          >
-                            {Array.from({ length: Math.min(tier.quantity - tier.quantity_sold, 10) + 1 }, (_, i) => (
-                              <option key={i} value={i}>{i}</option>
-                            ))}
-                          </select>
-                        </div>
-                      ))}
-                      <input name="buyerName" placeholder="Your Name" className="input" required />
-                      <input name="buyerEmail" type="email" placeholder="Your Email" className="input" required />
-                      <input name="buyerPhone" type="tel" placeholder="Phone (optional)" className="input" />
-                    </div>
-                    <button type="submit" className="btn btn--primary btn--wide">
-                      Get Tickets
-                    </button>
-                    <p style={{ color: "#555", fontSize: "0.78rem", textAlign: "center", marginTop: 10 }}>
-                      $1.00 platform fee per paid ticket · Secure checkout
-                    </p>
-                  </form>
+                  <div style={{ marginTop: 16 }}>
+                    <CheckoutForm
+                      eventSlug={event.slug}
+                      eventId={event.id}
+                      tiers={tiers.filter((t: any) => (t.quantity - t.quantity_sold) > 0).map((t: any) => ({
+                        id: t.id,
+                        name: t.name,
+                        description: t.description,
+                        price: Number(t.price),
+                        quantity: t.quantity,
+                        quantity_sold: t.quantity_sold,
+                      }))}
+                    />
+                  </div>
                 )
               )}
             </div>
+
+            {/* Waitlist — shown when ALL tiers are sold out */}
+            {tiers.length > 0 && tiers.every((t: any) => t.quantity - t.quantity_sold <= 0) && (
+              <div style={{ marginTop: 16 }}>
+                <WaitlistForm eventId={event.id} />
+              </div>
+            )}
           </div>
+        </div>
 
         </div>
       </main>

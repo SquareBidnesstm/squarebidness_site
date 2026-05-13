@@ -46,6 +46,8 @@ export async function POST(req: NextRequest) {
   const city = (formData.get("city") as string)?.trim() || null;
   const state = (formData.get("state") as string)?.trim() || null;
   const cover_image_url = (formData.get("cover_image_url") as string)?.trim() || null;
+  const refund_policy = (formData.get("refund_policy") as string) || "no_refunds";
+  const refund_policy_notes = (formData.get("refund_policy_notes") as string)?.trim() || null;
 
   if (!title || !starts_at || !ends_at) {
     return NextResponse.redirect(
@@ -69,6 +71,8 @@ export async function POST(req: NextRequest) {
       city,
       state,
       cover_image_url,
+      refund_policy,
+      refund_policy_notes,
     })
     .eq("id", eventId);
 

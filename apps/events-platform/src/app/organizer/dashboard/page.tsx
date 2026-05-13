@@ -51,6 +51,12 @@ export default async function OrganizerDashboardPage() {
               <Link href="/organizer/dashboard/analytics" className="btn btn--ghost" style={{ minHeight: 36, fontSize: "0.85rem", padding: "0 14px" }}>
                 📊 Analytics
               </Link>
+              <Link href="/organizer/dashboard/promos" className="btn btn--ghost" style={{ minHeight: 36, fontSize: "0.85rem", padding: "0 14px" }}>
+                🎫 Promos
+              </Link>
+              <Link href="/organizer/dashboard/profile" className="btn btn--ghost" style={{ minHeight: 36, fontSize: "0.85rem", padding: "0 14px" }}>
+                👤 Profile
+              </Link>
               <Link href="/organizer/dashboard/new-event" className="btn btn--primary">
                 + New Event
               </Link>

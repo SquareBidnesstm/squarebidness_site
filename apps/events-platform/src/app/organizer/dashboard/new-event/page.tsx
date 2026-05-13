@@ -96,6 +96,7 @@ export default async function NewEventPage({
             {/* Date & Time */}
             <div className="card" style={{ display: "grid", gap: 14 }}>
               <p style={{ color: "#a1a1aa", fontSize: 11, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 2 }}>Date & Time</p>
+              <p style={{ color: "#555", fontSize: "0.8rem", marginBottom: 8 }}>Multi-day events are supported — just set the end date to a different day.</p>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 <div className="form-group">
                   <label className="label">Start *</label>
@@ -136,6 +137,27 @@ export default async function NewEventPage({
               <div className="form-group">
                 <label className="label">Location Notes</label>
                 <input name="location_notes" className="input" placeholder="e.g. Enter through the side door" />
+              </div>
+            </div>
+
+            {/* Refund Policy */}
+            <div className="card" style={{ display: "grid", gap: 14 }}>
+              <p style={{ color: "#a1a1aa", fontSize: 11, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 2 }}>Refund Policy</p>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div className="form-group">
+                  <label className="label">Policy</label>
+                  <select name="refund_policy" className="input" defaultValue="no_refunds">
+                    <option value="no_refunds">No Refunds</option>
+                    <option value="up_to_24h">Refunds up to 24 hours before</option>
+                    <option value="up_to_48h">Refunds up to 48 hours before</option>
+                    <option value="up_to_7d">Refunds up to 7 days before</option>
+                    <option value="custom">Custom Policy</option>
+                  </select>
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="label">Policy Notes (optional)</label>
+                <input name="refund_policy_notes" className="input" placeholder="e.g. All sales final. Contact us at events@example.com for exceptions." />
               </div>
             </div>
 

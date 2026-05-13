@@ -90,10 +90,7 @@ export default function PlatformLanding() {
 
         {/* NAV */}
         <nav style={{ borderBottom: "1px solid #111", padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 64, position: "sticky", top: 0, background: "#050505", zIndex: 50 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <img src="/booking-192.png" alt="SquareBidness Booking" style={{ height: 36, width: 36, borderRadius: 8 }} />
-            <span style={{ fontWeight: 900, fontSize: "0.95rem", letterSpacing: "-0.02em" }}>SB Booking</span>
-          </div>
+          <img src="/booking-192.png" alt="SquareBidness Booking" style={{ height: 36, width: 36, borderRadius: 8 }} />
           <Link href="/onboard" style={{ display: "inline-block", padding: "8px 18px", background: "#d4af37", color: "#000", fontWeight: 800, borderRadius: 8, fontSize: "0.85rem", textDecoration: "none" }}>
             Get Started Free
           </Link>

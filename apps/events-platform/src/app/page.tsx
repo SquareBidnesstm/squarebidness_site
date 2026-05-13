@@ -4,6 +4,37 @@ import { EVENT_CATEGORIES } from "../lib/constants";
 
 export const revalidate = 60;
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      url: "https://events.squarebidness.com",
+      name: "Square Bidness Events",
+      description: "Find and buy tickets to events in Louisiana — concerts, comedy shows, trail rides, pop-ups, and community events.",
+      potentialAction: {
+        "@type": "SearchAction",
+        target: "https://events.squarebidness.com/?q={search_term_string}",
+        "query-input": "required name=search_term_string",
+      },
+    },
+    {
+      "@type": "Organization",
+      name: "Square Bidness Events",
+      url: "https://events.squarebidness.com",
+      logo: "https://events.squarebidness.com/events-192.png",
+      sameAs: ["https://squarebidness.com"],
+    },
+    {
+      "@type": "EventSeries",
+      name: "Louisiana Events",
+      url: "https://events.squarebidness.com",
+      location: { "@type": "State", name: "Louisiana", address: { "@type": "PostalAddress", addressRegion: "LA", addressCountry: "US" } },
+      description: "Concerts, comedy shows, trail rides, pop-up markets, and community events across Louisiana.",
+    },
+  ],
+};
+
 export default async function HomePage({
   searchParams,
 }: {
@@ -32,6 +63,7 @@ export default async function HomePage({
 
   return (
     <div style={{ minHeight: "100vh" }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       {/* NAV */}
       <nav style={{
         borderBottom: "1px solid #111",
@@ -77,10 +109,10 @@ export default async function HomePage({
             Louisiana Events
           </p>
           <h1 style={{ fontSize: "clamp(2.5rem, 8vw, 5rem)", fontWeight: 950, letterSpacing: "-0.07em", lineHeight: 0.92, marginBottom: 16 }}>
-            Find your next event.
+            Louisiana events, tickets & more.
           </h1>
           <p style={{ color: "#a1a1aa", fontSize: "clamp(1rem, 2vw, 1.2rem)", maxWidth: 520, margin: "0 auto 28px" }}>
-            Comedy shows, trail rides, concerts, pop-ups and community events across Louisiana.
+            Concerts, comedy shows, trail rides, pop-ups, and community events across Louisiana. Buy tickets in seconds.
           </p>
 
           {/* SEARCH */}

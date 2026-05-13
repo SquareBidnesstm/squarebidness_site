@@ -6,7 +6,7 @@ import { sendBuyerSMS } from "../../../lib/notifications/sms";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { eventId, tierId, name, email, phone, qty } = body;
+  const { eventId, tierId, name, email, phone, qty, promoId } = body;
 
   if (!eventId || !tierId || !name || !email || !qty) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -124,6 +124,11 @@ export async function POST(req: NextRequest) {
       orderId: order.id,
       ticketCount: qty,
     }).catch((err) => console.error("RSVP SMS error:", err));
+  }
+
+  // Track promo code usage
+  if (promoId) {
+    await supabaseServer.rpc("increment_promo_uses", { promo_id: promoId }).catch(() => {});
   }
 
   return NextResponse.json({ ok: true, orderId: order.id, orderCode: order.order_code });

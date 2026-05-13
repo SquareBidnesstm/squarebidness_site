@@ -7,10 +7,13 @@ export const revalidate = 0;
 
 export default async function OrderConfirmationPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ resend?: string }>;
 }) {
   const { id } = await params;
+  const { resend } = await searchParams;
 
   const { data: order } = await supabaseServer
     .from("orders")
@@ -166,6 +169,22 @@ export default async function OrderConfirmationPage({
                     <span style={{ fontWeight: 900, color: "#22c55e", fontSize: "1.05rem" }}>${Number(order.total).toFixed(2)}</span>
                   </div>
                 </div>
+              </div>
+
+              {/* Resend email */}
+              <div style={{ textAlign: "center", marginBottom: 24 }}>
+                {resend === "sent" && (
+                  <p style={{ color: "#22c55e", fontSize: "0.85rem", marginBottom: 10 }}>✓ Confirmation email sent to {order.buyer_email}</p>
+                )}
+                {resend === "error" && (
+                  <p style={{ color: "#ef4444", fontSize: "0.85rem", marginBottom: 10 }}>Failed to send email. Please try again.</p>
+                )}
+                <form action="/api/orders/resend-email" method="POST" style={{ display: "inline" }}>
+                  <input type="hidden" name="orderId" value={order.id} />
+                  <button type="submit" className="btn btn--ghost" style={{ fontSize: "0.85rem", minHeight: 36, padding: "0 16px" }}>
+                    📧 Resend confirmation email
+                  </button>
+                </form>
               </div>
 
               {/* Bottom note */}

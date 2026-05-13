@@ -51,6 +51,8 @@ export async function POST(req: Request) {
     const state = (formData.get("state") as string)?.trim() || null;
     const zip = (formData.get("zip") as string)?.trim() || null;
     const locationNotes = (formData.get("location_notes") as string)?.trim() || null;
+    const refundPolicy = (formData.get("refund_policy") as string)?.trim() || "no_refunds";
+    const refundPolicyNotes = (formData.get("refund_policy_notes") as string)?.trim() || null;
     const action = (formData.get("action") as string) ?? "draft";
 
     if (!title || !category || !startsAt || !endsAt) {
@@ -93,6 +95,8 @@ export async function POST(req: Request) {
         location_notes: locationNotes,
         status,
         is_public: status === "published",
+        refund_policy: refundPolicy,
+        refund_policy_notes: refundPolicyNotes,
       })
       .select("id")
       .single();

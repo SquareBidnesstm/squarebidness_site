@@ -16,10 +16,33 @@ export default function FreeRSVPForm({
   const [qty, setQty] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [promoCode, setPromoCode] = useState("");
+  const [promoId, setPromoId] = useState<string | null>(null);
+  const [promoError, setPromoError] = useState("");
+  const [promoLoading, setPromoLoading] = useState(false);
   const router = useRouter();
 
   const available = tiers.filter((t) => t.quantity - t.quantity_sold > 0);
   const totalSelected = Object.values(qty).reduce((s, n) => s + n, 0);
+
+  async function applyPromo() {
+    if (!promoCode.trim()) return;
+    setPromoLoading(true);
+    setPromoError("");
+    setPromoId(null);
+    const res = await fetch("/api/promo/validate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code: promoCode, eventId, subtotal: 0 }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setPromoError(data.error ?? "Invalid code");
+    } else {
+      setPromoId(data.promoId);
+    }
+    setPromoLoading(false);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -38,7 +61,7 @@ export default function FreeRSVPForm({
       const res = await fetch("/api/rsvp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ eventId, tierId, name: name.trim(), email: email.trim(), phone: phone.trim(), qty: q }),
+        body: JSON.stringify({ eventId, tierId, name: name.trim(), email: email.trim(), phone: phone.trim(), qty: q, promoId }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? "Something went wrong."); return; }
@@ -103,6 +126,30 @@ export default function FreeRSVPForm({
           className="input"
         />
       </div>
+      {/* Optional promo / access code */}
+      <div style={{ marginBottom: 14 }}>
+        <div style={{ display: "flex", gap: 8 }}>
+          <input
+            className="input"
+            placeholder="Access code (optional)"
+            value={promoCode}
+            onChange={(e) => { setPromoCode(e.target.value.toUpperCase()); setPromoId(null); setPromoError(""); }}
+            style={{ flex: 1 }}
+          />
+          <button
+            type="button"
+            onClick={applyPromo}
+            disabled={promoLoading || !promoCode.trim()}
+            className="btn btn--ghost"
+            style={{ minHeight: 44, padding: "0 14px", fontSize: "0.85rem" }}
+          >
+            {promoLoading ? "…" : "Apply"}
+          </button>
+        </div>
+        {promoError && <p style={{ color: "#ef4444", fontSize: "0.82rem", marginTop: 6 }}>{promoError}</p>}
+        {promoId && <p style={{ color: "#22c55e", fontSize: "0.82rem", marginTop: 6 }}>✓ Code accepted</p>}
+      </div>
+
       <button
         type="submit"
         disabled={loading || totalSelected === 0 || !name.trim() || !email.trim()}

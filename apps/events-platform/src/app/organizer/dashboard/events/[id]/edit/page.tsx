@@ -155,6 +155,26 @@ export default async function EditEventPage({
                 </div>
               </div>
 
+              <div className="card">
+                <p style={{ fontWeight: 900, marginBottom: 16 }}>Refund Policy</p>
+                <div style={{ display: "grid", gap: 14 }}>
+                  <div>
+                    <label style={labelStyle}>Policy</label>
+                    <select name="refund_policy" defaultValue={event.refund_policy ?? "no_refunds"} style={{ ...inputStyle, cursor: "pointer" }}>
+                      <option value="no_refunds">No Refunds</option>
+                      <option value="up_to_24h">Refunds up to 24 hours before event</option>
+                      <option value="up_to_48h">Refunds up to 48 hours before event</option>
+                      <option value="up_to_7d">Refunds up to 7 days before event</option>
+                      <option value="custom">Custom Policy</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Policy Notes (optional)</label>
+                    <input name="refund_policy_notes" defaultValue={event.refund_policy_notes ?? ""} placeholder="Any additional details..." style={inputStyle} />
+                  </div>
+                </div>
+              </div>
+
               <div style={{ display: "flex", gap: 10 }}>
                 <button type="submit" className="btn btn--primary" style={{ flex: 1, minHeight: 48 }}>
                   Save Changes
