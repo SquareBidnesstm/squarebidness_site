@@ -264,8 +264,6 @@ export default async function EventPage({
             )}
           </div>
         </div>
-
-        </div>
       </main>
     </div>
   );
