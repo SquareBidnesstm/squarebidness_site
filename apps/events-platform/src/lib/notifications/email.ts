@@ -100,7 +100,7 @@ export async function sendBuyerConfirmation(params: SendBuyerConfirmationParams)
   }
 
   await resend.emails.send({
-    from: "SB Events <tickets@events.squarebidness.com>",
+    from: "SB Events <tickets@squarebidness.com>",
     to: params.buyerEmail,
     subject: `Your tickets for ${params.eventTitle} — ${params.orderCode}`,
     html: buildBuyerEmailHtml(params),
@@ -121,7 +121,7 @@ export async function sendOrganizerSaleNotification(params: SendOrganizerSalePar
   if (!process.env.RESEND_API_KEY) return;
 
   await resend.emails.send({
-    from: "SB Events <no-reply@events.squarebidness.com>",
+    from: "SB Events <tickets@squarebidness.com>",
     to: params.organizerEmail,
     subject: `🎟️ ${params.ticketCount} ticket${params.ticketCount !== 1 ? "s" : ""} sold — ${params.eventTitle}`,
     html: `

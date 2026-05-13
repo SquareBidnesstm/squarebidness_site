@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
   const resetUrl = `${PLATFORM_URL}/organizer/reset-password?token=${rawToken}`;
 
   await resend.emails.send({
-    from: "SB Events <tickets@events.squarebidness.com>",
+    from: "SB Events <tickets@squarebidness.com>",
     to: organizer.email,
     subject: "Reset your SB Events password",
     html: `
