@@ -1,6 +1,8 @@
 const ERROR_MESSAGES: Record<string, string> = {
   missing_fields: "Please fill in all fields.",
   invalid_credentials: "Invalid email or password.",
+  not_verified: "Please verify your email before logging in. Check your inbox.",
+  invalid_token: "That verification link is invalid or expired.",
   server_error: "Something went wrong. Please try again.",
 };
 

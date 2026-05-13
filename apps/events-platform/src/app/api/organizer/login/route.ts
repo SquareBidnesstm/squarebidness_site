@@ -55,11 +55,23 @@ export async function POST(req: Request) {
 
     const { data: organizer } = await supabaseServer
       .from("organizers")
-      .select("id, slug, password_hash, active")
+      .select("id, slug, password_hash, active, email_verified")
       .eq("email", email)
       .maybeSingle();
 
-    if (!organizer || !organizer.active) {
+    if (!organizer) {
+      return NextResponse.redirect(
+        new URL("/organizer/login?error=invalid_credentials", req.url)
+      );
+    }
+
+    if (organizer.email_verified === false) {
+      return NextResponse.redirect(
+        new URL("/organizer/login?error=not_verified", req.url)
+      );
+    }
+
+    if (!organizer.active) {
       return NextResponse.redirect(
         new URL("/organizer/login?error=invalid_credentials", req.url)
       );

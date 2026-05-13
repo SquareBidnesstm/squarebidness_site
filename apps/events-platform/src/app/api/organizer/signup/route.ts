@@ -4,11 +4,15 @@
 // =========================================================
 
 import { NextResponse } from "next/server";
+import { Resend } from "resend";
 import { supabaseServer } from "../../../../lib/supabase/server";
 import {
   computeOrganizerSessionToken,
   organizerSessionCookieName,
 } from "../../../../lib/auth";
+import { PLATFORM_URL } from "../../../../lib/constants";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 function slugify(text: string): string {
   return text
@@ -92,6 +96,8 @@ export async function POST(req: Request) {
 
     const passwordHash = await hashPassword(password);
 
+    const verificationToken = crypto.randomUUID();
+
     const { data: organizer, error } = await supabaseServer
       .from("organizers")
       .insert({
@@ -101,7 +107,9 @@ export async function POST(req: Request) {
         phone,
         password_hash: passwordHash,
         stripe_onboarding_complete: false,
-        active: true,
+        active: false,
+        email_verified: false,
+        verification_token: verificationToken,
       })
       .select("slug")
       .single();
@@ -113,21 +121,27 @@ export async function POST(req: Request) {
       );
     }
 
-    // Set session cookie
-    const token = await computeOrganizerSessionToken(organizer.slug);
-    const cookieName = organizerSessionCookieName(organizer.slug);
-    const res = NextResponse.redirect(
-      new URL("/organizer/dashboard", req.url)
-    );
-    res.cookies.set(cookieName, token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "lax",
-      path: "/",
-      maxAge: 60 * 60 * 24 * 30, // 30 days
-    });
+    // Send verification email
+    const verifyUrl = `${PLATFORM_URL}/api/organizer/verify-email?token=${verificationToken}`;
+    await resend.emails.send({
+      from: "SB Events <noreply@squarebidness.com>",
+      to: email,
+      subject: "Verify your SB Events account",
+      html: `
+        <div style="background:#000;color:#fff;font-family:sans-serif;padding:40px 24px;max-width:480px;margin:0 auto;">
+          <p style="font-size:1.5rem;font-weight:900;margin-bottom:8px;">Welcome, ${name}!</p>
+          <p style="color:#a1a1aa;margin-bottom:24px;">Click below to verify your email and activate your organizer account.</p>
+          <a href="${verifyUrl}" style="display:inline-block;background:#ef4444;color:#fff;font-weight:900;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:1rem;">
+            Verify Email
+          </a>
+          <p style="color:#555;font-size:0.8rem;margin-top:24px;">If you didn't sign up for SB Events, ignore this email.</p>
+        </div>
+      `,
+    }).catch((err) => console.error("Verification email error:", err));
 
-    return res;
+    return NextResponse.redirect(
+      new URL("/organizer/signup?verify=1", req.url)
+    );
   } catch (err) {
     console.error("Signup error:", err);
     return NextResponse.redirect(

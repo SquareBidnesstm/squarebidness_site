@@ -9,10 +9,23 @@ const ERROR_MESSAGES: Record<string, string> = {
 export default async function OrganizerSignupPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; verify?: string }>;
 }) {
-  const { error } = await searchParams;
+  const { error, verify } = await searchParams;
   const errorMessage = error ? (ERROR_MESSAGES[error] ?? "An error occurred.") : null;
+
+  if (verify === "1") {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+        <div style={{ width: "100%", maxWidth: 420, textAlign: "center" }}>
+          <p style={{ fontSize: "3rem", marginBottom: 16 }}>📧</p>
+          <h1 style={{ fontSize: "1.6rem", fontWeight: 950, letterSpacing: "-0.04em", marginBottom: 8 }}>Check your email</h1>
+          <p style={{ color: "#a1a1aa", marginBottom: 24 }}>We sent a verification link to your email address. Click it to activate your account.</p>
+          <a href="/organizer/login" style={{ color: "#a1a1aa", fontSize: "0.9rem" }}>← Back to login</a>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>

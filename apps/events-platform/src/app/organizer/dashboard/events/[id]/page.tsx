@@ -6,6 +6,7 @@ import { computeOrganizerSessionToken } from "../../../../../lib/auth";
 import { EVENT_CATEGORIES } from "../../../../../lib/constants";
 import NavLogo from "../../../../../components/NavLogo";
 import RefundButton from "../../../../../components/RefundButton";
+import TierEditor from "../../../../../components/TierEditor";
 
 export const revalidate = 0;
 
@@ -122,22 +123,14 @@ export default async function ManageEventPage({
           {/* Ticket Tiers */}
           <div className="card" style={{ marginBottom: 24 }}>
             <p style={{ color: "#a1a1aa", fontSize: 11, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 14 }}>Ticket Tiers</p>
-            <div style={{ display: "grid", gap: 10 }}>
-              {tiers.length === 0 ? (
-                <p style={{ color: "#555" }}>No ticket tiers yet.</p>
-              ) : tiers.map((tier: any) => (
-                <div key={tier.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 14px", background: "#050505", borderRadius: 10, border: "1px solid #1d1d1f" }}>
-                  <div>
-                    <p style={{ fontWeight: 800 }}>{tier.name}</p>
-                    {tier.description && <p style={{ color: "#555", fontSize: "0.8rem", marginTop: 2 }}>{tier.description}</p>}
-                  </div>
-                  <div style={{ textAlign: "right" }}>
-                    <p style={{ fontWeight: 900 }}>{Number(tier.price) === 0 ? "Free" : `$${Number(tier.price).toFixed(2)}`}</p>
-                    <p style={{ color: "#a1a1aa", fontSize: "0.8rem" }}>{tier.quantity_sold} / {tier.quantity} sold</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <TierEditor tiers={tiers.map((t: any) => ({
+              id: t.id,
+              name: t.name,
+              description: t.description,
+              price: Number(t.price),
+              quantity: t.quantity,
+              quantity_sold: t.quantity_sold,
+            }))} />
           </div>
 
           {/* Orders */}
