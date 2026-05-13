@@ -187,6 +187,17 @@ export default async function OrderConfirmationPage({
                 </form>
               </div>
 
+              {/* Add to home screen prompt */}
+              <div style={{ background: "linear-gradient(180deg,rgba(239,68,68,.1),rgba(255,255,255,.03))", border: "1px solid rgba(239,68,68,.25)", borderRadius: 16, padding: "18px 20px", marginBottom: 24 }}>
+                <strong style={{ display: "block", fontSize: "1rem", marginBottom: 6 }}>📲 Add SB Events to your home screen</strong>
+                <p style={{ margin: "0 0 14px", color: "#a1a1aa", fontSize: "0.88rem", lineHeight: 1.5 }}>
+                  Next time you buy tickets, tap the icon and you're in. No searching needed.
+                </p>
+                <Link href="/add-homescreen" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "10px 20px", borderRadius: 10, background: "#ef4444", color: "#fff", fontWeight: 900, fontSize: "0.9rem", textDecoration: "none" }}>
+                  Add Web App →
+                </Link>
+              </div>
+
               {/* Bottom note */}
               <p style={{ textAlign: "center", color: "#555", fontSize: "0.8rem", lineHeight: 1.6 }}>
                 Questions? Contact the event organizer directly.<br />

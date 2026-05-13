@@ -186,6 +186,17 @@ export default function BookingForm({ shopSlug, shopName, barberSlug, barberName
               {confirmed.code}
             </div>
           </div>
+          {/* Add to home screen prompt */}
+          <div style={{ background: "linear-gradient(180deg,rgba(212,175,55,.1),rgba(255,255,255,.03))", border: "1px solid rgba(212,175,55,.25)", borderRadius: 16, padding: "18px 20px", marginBottom: 20, textAlign: "left" }}>
+            <strong style={{ display: "block", fontSize: "1rem", marginBottom: 6, color: "#fff" }}>📲 Add SB Booking to your home screen</strong>
+            <p style={{ margin: "0 0 14px", color: "#a1a1aa", fontSize: "0.85rem", lineHeight: 1.5 }}>
+              Next time, tap the icon on your phone and book in seconds.
+            </p>
+            <a href="/add-homescreen" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "10px 20px", borderRadius: 10, background: "#d4af37", color: "#000", fontWeight: 900, fontSize: "0.9rem", textDecoration: "none" }}>
+              Add Web App →
+            </a>
+          </div>
+
           <button
             onClick={() => {
               setConfirmed(null);
