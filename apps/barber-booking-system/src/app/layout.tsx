@@ -71,6 +71,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <meta name="apple-mobile-web-app-title" content="Booking" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+      </head>
       <body>{children}</body>
     </html>
   );
