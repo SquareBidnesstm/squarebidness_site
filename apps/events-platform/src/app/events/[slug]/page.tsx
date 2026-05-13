@@ -1,10 +1,56 @@
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { supabaseServer } from "../../../lib/supabase/server";
 import { EVENT_CATEGORIES } from "../../../lib/constants";
 import NavLogo from "../../../components/NavLogo";
+import FreeRSVPForm from "../../../components/FreeRSVPForm";
 
 export const revalidate = 30;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const { data: event } = await supabaseServer
+    .from("events")
+    .select("title, description, starts_at, venue_name, city, state, cover_image_url, category")
+    .eq("slug", slug)
+    .eq("status", "published")
+    .single();
+
+  if (!event) return { title: "Event Not Found" };
+
+  const dateStr = new Date(event.starts_at).toLocaleDateString("en-US", {
+    weekday: "long", month: "long", day: "numeric", year: "numeric",
+  });
+  const location = [event.venue_name, event.city, event.state].filter(Boolean).join(", ");
+  const description = event.description
+    ? `${event.description.slice(0, 140)}…`
+    : `${dateStr}${location ? ` · ${location}` : ""} — Get your tickets on Square Bidness Events.`;
+
+  const image = event.cover_image_url ?? "/events-meta-1200x630.png";
+
+  return {
+    title: `${event.title} | Square Bidness Events`,
+    description,
+    openGraph: {
+      title: event.title,
+      description,
+      type: "website",
+      images: [{ url: image, width: 1200, height: 630 }],
+      siteName: "Square Bidness Events",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: event.title,
+      description,
+      images: [image],
+    },
+  };
+}
 
 export default async function EventPage({
   params,
@@ -27,6 +73,7 @@ export default async function EventPage({
   if (!event) notFound();
 
   const tiers = (event.ticket_tiers ?? []).filter((t: any) => t.active).sort((a: any, b: any) => a.sort_order - b.sort_order);
+  const isFreeEvent = tiers.length > 0 && tiers.every((t: any) => Number(t.price) === 0);
   const categoryLabel = EVENT_CATEGORIES.find(c => c.value === event.category)?.label ?? event.category;
 
   const eventDate = new Date(event.starts_at);
@@ -138,35 +185,48 @@ export default async function EventPage({
               )}
 
               {tiers.some((t: any) => (t.quantity - t.quantity_sold) > 0) && (
-                <form action="/api/checkout" method="POST" style={{ marginTop: 16 }}>
-                  <input type="hidden" name="eventSlug" value={event.slug} />
-                  <div style={{ display: "grid", gap: 10, marginBottom: 14 }}>
-                    {tiers.filter((t: any) => (t.quantity - t.quantity_sold) > 0).map((tier: any) => (
-                      <div key={tier.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <label htmlFor={`qty_${tier.id}`} style={{ fontSize: "0.9rem", fontWeight: 700 }}>{tier.name}</label>
-                        <select
-                          id={`qty_${tier.id}`}
-                          name={`tier_${tier.id}`}
-                          className="input"
-                          style={{ width: 80 }}
-                        >
-                          {Array.from({ length: Math.min(tier.quantity - tier.quantity_sold, 10) + 1 }, (_, i) => (
-                            <option key={i} value={i}>{i}</option>
-                          ))}
-                        </select>
-                      </div>
-                    ))}
-                    <input name="buyerName" placeholder="Your Name" className="input" required />
-                    <input name="buyerEmail" type="email" placeholder="Your Email" className="input" required />
-                    <input name="buyerPhone" type="tel" placeholder="Phone (optional)" className="input" />
-                  </div>
-                  <button type="submit" className="btn btn--primary btn--wide">
-                    Get Tickets
-                  </button>
-                  <p style={{ color: "#555", fontSize: "0.78rem", textAlign: "center", marginTop: 10 }}>
-                    $1.00 platform fee per paid ticket · Secure checkout
-                  </p>
-                </form>
+                isFreeEvent ? (
+                  <FreeRSVPForm
+                    eventId={event.id}
+                    tiers={tiers.filter((t: any) => (t.quantity - t.quantity_sold) > 0).map((t: any) => ({
+                      id: t.id,
+                      name: t.name,
+                      description: t.description,
+                      quantity: t.quantity,
+                      quantity_sold: t.quantity_sold,
+                    }))}
+                  />
+                ) : (
+                  <form action="/api/checkout" method="POST" style={{ marginTop: 16 }}>
+                    <input type="hidden" name="eventSlug" value={event.slug} />
+                    <div style={{ display: "grid", gap: 10, marginBottom: 14 }}>
+                      {tiers.filter((t: any) => (t.quantity - t.quantity_sold) > 0).map((tier: any) => (
+                        <div key={tier.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <label htmlFor={`qty_${tier.id}`} style={{ fontSize: "0.9rem", fontWeight: 700 }}>{tier.name}</label>
+                          <select
+                            id={`qty_${tier.id}`}
+                            name={`tier_${tier.id}`}
+                            className="input"
+                            style={{ width: 80 }}
+                          >
+                            {Array.from({ length: Math.min(tier.quantity - tier.quantity_sold, 10) + 1 }, (_, i) => (
+                              <option key={i} value={i}>{i}</option>
+                            ))}
+                          </select>
+                        </div>
+                      ))}
+                      <input name="buyerName" placeholder="Your Name" className="input" required />
+                      <input name="buyerEmail" type="email" placeholder="Your Email" className="input" required />
+                      <input name="buyerPhone" type="tel" placeholder="Phone (optional)" className="input" />
+                    </div>
+                    <button type="submit" className="btn btn--primary btn--wide">
+                      Get Tickets
+                    </button>
+                    <p style={{ color: "#555", fontSize: "0.78rem", textAlign: "center", marginTop: 10 }}>
+                      $1.00 platform fee per paid ticket · Secure checkout
+                    </p>
+                  </form>
+                )
               )}
             </div>
           </div>

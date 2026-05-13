@@ -45,6 +45,9 @@ export default async function OrganizerDashboardPage() {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28, flexWrap: "wrap", gap: 12 }}>
             <h1 style={{ fontSize: "1.8rem", fontWeight: 950, letterSpacing: "-0.05em" }}>Your Events</h1>
             <div style={{ display: "flex", gap: 10 }}>
+              <Link href="/organizer/dashboard/payouts" className="btn btn--ghost" style={{ minHeight: 36, fontSize: "0.85rem", padding: "0 14px" }}>
+                💳 Payouts
+              </Link>
               <Link href="/organizer/dashboard/analytics" className="btn btn--ghost" style={{ minHeight: 36, fontSize: "0.85rem", padding: "0 14px" }}>
                 📊 Analytics
               </Link>
