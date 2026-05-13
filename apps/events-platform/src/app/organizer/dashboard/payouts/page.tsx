@@ -59,7 +59,7 @@ export default async function PayoutsPage() {
 
   try {
     [balance] = await Promise.all([
-      stripe.balance.retrieve({ stripeAccount: organizer.stripe_account_id }),
+      stripe.balance.retrieve({}, { stripeAccount: organizer.stripe_account_id }),
     ]);
 
     const payoutList = await stripe.payouts.list(
