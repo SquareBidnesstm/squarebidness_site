@@ -7,20 +7,10 @@ export default function NavLogo() {
       style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, textDecoration: "none" }}
     >
       <img
-        src="/sb-mark.png"
-        alt="Square Bidness"
-        style={{ height: 36, width: "auto", display: "block" }}
+        src="/events-192.png"
+        alt="SB Events"
+        style={{ height: 40, width: 40, display: "block", borderRadius: 10 }}
       />
-      <span style={{
-        color: "#fff",
-        fontSize: "0.6rem",
-        fontWeight: 900,
-        letterSpacing: "0.18em",
-        textTransform: "uppercase",
-        lineHeight: 1,
-      }}>
-        Events
-      </span>
     </Link>
   );
 }
