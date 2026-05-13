@@ -48,7 +48,7 @@ export default function AddHomescreenPage() {
             <img src="/booking-192.png" alt="SB Booking app icon" style={{ width: 104, height: 104, borderRadius: 24, objectFit: "cover", display: "block", margin: "0 auto 12px", boxShadow: "0 14px 30px rgba(0,0,0,.4)" }} />
             <p style={{ margin: 0, fontSize: "1.25rem", fontWeight: 900 }}>SB Booking on your phone</p>
             <p style={{ margin: "8px 0 0", color: "#a1a1aa", fontSize: "0.92rem", lineHeight: 1.45 }}>
-              The home screen name is already set to <strong style={{ color: "#fff" }}>SB Booking</strong>.
+              The home screen name is already set to <strong style={{ color: "#fff" }}>Booking</strong>.
             </p>
           </div>
         </div>
@@ -61,7 +61,7 @@ export default function AddHomescreenPage() {
               <li style={{ margin: "8px 0" }}>Open SB Booking in <strong style={{ color: "#fff" }}>Safari</strong>.</li>
               <li style={{ margin: "8px 0" }}>Tap the <strong style={{ color: "#fff" }}>share button</strong> (box with arrow).</li>
               <li style={{ margin: "8px 0" }}>Scroll down and tap <strong style={{ color: "#fff" }}>Add to Home Screen</strong>.</li>
-              <li style={{ margin: "8px 0" }}>Name it <strong style={{ color: "#fff" }}>SB Booking</strong> and tap <strong style={{ color: "#fff" }}>Add</strong>.</li>
+              <li style={{ margin: "8px 0" }}>Name it <strong style={{ color: "#fff" }}>Booking</strong> and tap <strong style={{ color: "#fff" }}>Add</strong>.</li>
             </ol>
           </div>
 

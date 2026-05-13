@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   ],
   appleWebApp: {
     capable: true,
-    title: "SB Booking",
+    title: "Booking",
     statusBarStyle: "black-translucent",
   },
   icons: {
