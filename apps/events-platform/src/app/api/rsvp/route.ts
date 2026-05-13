@@ -128,7 +128,7 @@ export async function POST(req: NextRequest) {
 
   // Track promo code usage
   if (promoId) {
-    await supabaseServer.rpc("increment_promo_uses", { promo_id: promoId }).catch(() => {});
+    try { await supabaseServer.rpc("increment_promo_uses", { promo_id: promoId }); } catch { /* non-critical */ }
   }
 
   return NextResponse.json({ ok: true, orderId: order.id, orderCode: order.order_code });
