@@ -85,9 +85,12 @@ export default async function ManageEventPage({
                 {categoryLabel} · {new Date(event.starts_at).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
               </p>
             </div>
-            <div style={{ display: "flex", gap: 10 }}>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <Link href={`/organizer/dashboard/events/${event.id}/edit`} className="btn btn--ghost" style={{ minHeight: 36, fontSize: "0.85rem", padding: "0 14px" }}>
+                ✏️ Edit
+              </Link>
               <Link href={`/events/${event.slug}`} className="btn btn--ghost" style={{ minHeight: 36, fontSize: "0.85rem", padding: "0 14px" }} target="_blank">
-                View Page ↗
+                View ↗
               </Link>
               <Link href={`/scan/${event.slug}`} className="btn btn--outline" style={{ minHeight: 36, fontSize: "0.85rem", padding: "0 14px" }}>
                 🔍 Scanner

@@ -45,6 +45,9 @@ export default async function OrganizerLoginPage({
           </button>
 
           <p style={{ textAlign: "center", color: "#555", fontSize: "0.85rem" }}>
+            <a href="/organizer/forgot-password" style={{ color: "#a1a1aa" }}>Forgot password?</a>
+          </p>
+          <p style={{ textAlign: "center", color: "#555", fontSize: "0.85rem" }}>
             No account?{" "}
             <a href="/organizer/signup" style={{ color: "#a1a1aa" }}>List an event</a>
           </p>

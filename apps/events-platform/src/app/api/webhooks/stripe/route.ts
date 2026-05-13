@@ -58,11 +58,33 @@ export async function POST(req: NextRequest) {
     const issuedTickets: { ticketCode: string; tierName: string; qrDataUrl: string }[] = [];
 
     for (const { tierId, qty } of selections) {
-      const { data: tier } = await supabaseServer
+      const { data: tierData } = await supabaseServer
         .from("ticket_tiers")
-        .select("name, price")
+        .select("name, price, quantity, quantity_sold")
         .eq("id", tierId)
         .single();
+
+      if (!tierData) continue;
+
+      // Atomic capacity guard: only update if quantity_sold + qty <= quantity
+      const { data: updated } = await supabaseServer
+        .from("ticket_tiers")
+        .update({ quantity_sold: tierData.quantity_sold + qty })
+        .eq("id", tierId)
+        .lte("quantity_sold", tierData.quantity - qty)
+        .select("id")
+        .single();
+
+      if (!updated) {
+        // Race condition — another purchase took the last spots, auto-refund
+        console.error(`Oversell prevented for tier ${tierId}, order ${order.id}`);
+        if (order.stripe_payment_intent_id) {
+          await stripe.refunds.create({ payment_intent: order.stripe_payment_intent_id })
+            .catch((e) => console.error("Auto-refund failed:", e));
+        }
+        await supabaseServer.from("orders").update({ status: "cancelled" }).eq("id", order.id);
+        return NextResponse.json({ ok: true });
+      }
 
       for (let i = 0; i < qty; i++) {
         const ticketCode = `TKT-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
@@ -73,17 +95,17 @@ export async function POST(req: NextRequest) {
           order_id: order.id,
           event_id: order.event_id,
           tier_id: tierId,
-          tier_name: tier?.name ?? "",
+          tier_name: tierData.name ?? "",
           buyer_name: order.buyer_name,
           buyer_email: order.buyer_email,
-          price_snapshot: tier?.price ?? 0,
+          price_snapshot: tierData.price ?? 0,
           qr_code: qrDataUrl,
           status: "valid",
         });
 
         issuedTickets.push({
           ticketCode,
-          tierName: tier?.name ?? "Ticket",
+          tierName: tierData.name ?? "Ticket",
           qrDataUrl,
         });
       }
