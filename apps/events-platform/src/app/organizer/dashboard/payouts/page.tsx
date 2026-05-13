@@ -198,7 +198,7 @@ export default async function PayoutsPage() {
                         </span>
                       </div>
                       <p style={{ color: "#555", fontSize: "0.75rem" }}>
-                        {payout.description ?? "Stripe Payout"} · {payout.destination_payment_method_details ? "Bank" : "Bank account"}
+                        {payout.description ?? "Stripe Payout"} · Bank account
                       </p>
                     </div>
                     <div style={{ textAlign: "right", flexShrink: 0 }}>
