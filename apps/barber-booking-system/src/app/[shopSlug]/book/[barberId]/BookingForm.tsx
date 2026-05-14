@@ -365,7 +365,7 @@ export default function BookingForm({ shopSlug, shopName, barberSlug, barberName
           </Field>
         </div>
 
-        {/* Deposit option banner */}
+        {/* Deposit banner — shown when deposit is required */}
         {depositInfo?.enabled && !slotsLoading && slots.length > 0 && time && (
           <div style={{
             marginTop: 24,
@@ -379,14 +379,14 @@ export default function BookingForm({ shopSlug, shopName, barberSlug, barberName
             <span style={{ color: "#d4af37", fontWeight: 700 }}>
               ${depositInfo.type === "percent"
                 ? ((selectedService ? selectedService.price * depositInfo.amount / 100 : 0).toFixed(2))
-                : depositInfo.amount.toFixed(2)} deposit available
+                : depositInfo.amount.toFixed(2)} deposit required
             </span>
-            {" "}— hold your spot now, pay the rest at your appointment.
+            {" "}— holds your spot. Pay the rest at your appointment.
           </div>
         )}
 
-        <div style={{ marginTop: depositInfo?.enabled ? 12 : 30, display: "grid", gap: 10 }}>
-          {depositInfo?.enabled && (
+        <div style={{ marginTop: 30, display: "grid", gap: 10 }}>
+          {depositInfo?.enabled ? (
             <button
               onClick={handlePayDeposit}
               disabled={loading || slotsLoading || slots.length === 0 || !time}
@@ -399,26 +399,24 @@ export default function BookingForm({ shopSlug, shopName, barberSlug, barberName
                 opacity: !time ? 0.5 : 1,
               }}
             >
-              {loading ? "Loading..." : `Pay Deposit & Confirm`}
+              {loading ? "Loading..." : "Pay Deposit & Book"}
+            </button>
+          ) : (
+            <button
+              onClick={handleBooking}
+              disabled={loading || slotsLoading || slots.length === 0 || !time}
+              style={{
+                width: "100%", padding: 16,
+                background: loading ? "#a88d20" : "#d4af37",
+                color: "#000", fontWeight: 800, border: "none",
+                cursor: loading || slotsLoading || slots.length === 0 || !time ? "not-allowed" : "pointer",
+                borderRadius: 10, fontSize: 16,
+                opacity: slotsLoading || (selectedService && slots.length === 0 && !shopClosed && !slotsLoading) ? 0.5 : 1,
+              }}
+            >
+              {loading ? "Booking..." : "Confirm Booking"}
             </button>
           )}
-
-          <button
-            onClick={handleBooking}
-            disabled={loading || slotsLoading || slots.length === 0 || !time}
-            style={{
-              width: "100%", padding: 16,
-              background: depositInfo?.enabled ? "transparent" : loading ? "#a88d20" : "#d4af37",
-              color: depositInfo?.enabled ? "#888" : "#000",
-              fontWeight: 800,
-              border: depositInfo?.enabled ? "1px solid #2a2a2a" : "none",
-              cursor: loading || slotsLoading || slots.length === 0 || !time ? "not-allowed" : "pointer",
-              borderRadius: 10, fontSize: depositInfo?.enabled ? 14 : 16,
-              opacity: slotsLoading || (selectedService && slots.length === 0 && !shopClosed && !slotsLoading) ? 0.5 : 1,
-            }}
-          >
-            {loading ? "Booking..." : depositInfo?.enabled ? "Book Without Deposit" : "Confirm Booking"}
-          </button>
         </div>
 
         {error && (

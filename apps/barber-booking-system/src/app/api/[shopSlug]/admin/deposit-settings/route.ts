@@ -18,7 +18,7 @@ export async function GET(
 
   return NextResponse.json({
     ok: true,
-    settings: data?.value_json ?? { enabled: false, amount: 10, type: "fixed" },
+    settings: data?.value_json ?? { enabled: true, amount: 20, type: "fixed" },
   });
 }
 
