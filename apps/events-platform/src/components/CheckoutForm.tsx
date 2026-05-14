@@ -55,7 +55,10 @@ export default function CheckoutForm({
   const totalQty = Object.values(quantities).reduce((s, q) => s + q, 0);
   const platformFee = availableTiers.reduce((sum, t) => {
     const qty = quantities[t.id] ?? 0;
-    return sum + (Number(t.price) > 0 ? qty : 0);
+    if (Number(t.price) === 0) return sum;
+    const ep = effectivePrice(t, qty);
+    const feePerTicket = 1.50 + ep * 0.02;
+    return sum + feePerTicket * qty;
   }, 0);
 
   const discountAmount = promo ? Math.min(promo.discountAmount, subtotal) : 0;
@@ -207,7 +210,7 @@ export default function CheckoutForm({
         {submitting ? "Redirecting…" : "Get Tickets"}
       </button>
       <p style={{ color: "#555", fontSize: "0.78rem", textAlign: "center", marginTop: 10 }}>
-        $1.00 platform fee per paid ticket · Secure checkout
+        $1.50 + 2% platform fee per paid ticket · Secure checkout
       </p>
     </form>
   );

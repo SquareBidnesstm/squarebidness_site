@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { supabaseServer } from "../../../lib/supabase/server";
-import { PLATFORM_FEE_CENTS, PLATFORM_URL } from "../../../lib/constants";
+import { PLATFORM_FEE_BASE_CENTS, PLATFORM_FEE_PCT, PLATFORM_URL } from "../../../lib/constants";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2026-04-22.dahlia" as any,
@@ -70,7 +70,8 @@ export async function POST(req: NextRequest) {
         },
         quantity: qty,
       });
-      totalPlatformFeeCents += PLATFORM_FEE_CENTS * qty;
+      const feePerTicketCents = PLATFORM_FEE_BASE_CENTS + Math.round(priceCents * PLATFORM_FEE_PCT);
+      totalPlatformFeeCents += feePerTicketCents * qty;
     } else {
       // Free tier — no charge
       lineItems.push({

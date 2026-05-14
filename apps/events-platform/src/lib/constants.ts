@@ -1,4 +1,5 @@
-export const PLATFORM_FEE_CENTS = 100; // $1.00 flat per paid ticket
+export const PLATFORM_FEE_BASE_CENTS = 150;  // $1.50 flat per paid ticket
+export const PLATFORM_FEE_PCT = 0.02;         // + 2% of ticket price
 export const CANCELLATION_FEE_PERCENT = 0.08; // 8% cancellation/processing fee
 export const PLATFORM_NAME = "Square Bidness Events";
 export const PLATFORM_URL = "https://events.squarebidness.com";
