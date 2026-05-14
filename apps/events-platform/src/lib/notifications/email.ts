@@ -262,6 +262,52 @@ interface SendWaitlistNotificationParams {
   eventSlug: string;
 }
 
+// ─── Event Cancellation ───────────────────────────────────────────────────────
+
+interface SendEventCancellationParams {
+  buyerName: string;
+  buyerEmail: string;
+  eventTitle: string;
+  eventDate: string;
+  orderCode: string;
+  total: number;
+  refunded: boolean;
+}
+
+export async function sendEventCancellationNotice(params: SendEventCancellationParams) {
+  if (!process.env.RESEND_API_KEY) return;
+  await resend.emails.send({
+    from: "SB Events <tickets@squarebidness.com>",
+    to: params.buyerEmail,
+    subject: `Event cancelled: ${params.eventTitle}`,
+    html: emailShell(`
+      <div style="text-align:center;margin-bottom:28px;">
+        <div style="display:inline-block;background:#1a0a0a;border:1px solid #7f1d1d;border-radius:999px;padding:8px 20px;margin-bottom:14px;">
+          <span style="color:#ef4444;font-size:13px;font-weight:900;letter-spacing:0.04em;">Event Cancelled</span>
+        </div>
+        <h1 style="font-size:24px;font-weight:900;letter-spacing:-0.04em;margin:0 0 8px;">Hi ${params.buyerName},</h1>
+        <p style="color:#a1a1aa;font-size:15px;margin:0;line-height:1.6;">
+          We're sorry to let you know that <strong style="color:#fff;">${params.eventTitle}</strong> on <strong style="color:#fff;">${params.eventDate}</strong> has been cancelled by the organizer.
+        </p>
+      </div>
+
+      <div style="background:#0a0a0a;border:1px solid #1d1d1f;border-radius:14px;padding:20px;margin-bottom:24px;">
+        <p style="color:#a1a1aa;font-size:13px;margin:0 0 6px;">Order <strong style="color:#fff;font-family:monospace;">${params.orderCode}</strong></p>
+        ${params.refunded && params.total > 0
+          ? `<p style="color:#22c55e;font-size:14px;font-weight:900;margin:0;">✓ Refund of $${params.total.toFixed(2)} has been issued to your original payment method. Allow 5–10 business days.</p>`
+          : params.total === 0
+          ? `<p style="color:#a1a1aa;font-size:13px;margin:0;">Your free ticket has been voided.</p>`
+          : `<p style="color:#eab308;font-size:13px;margin:0;">Your refund is being processed. Contact support if you don't see it within 10 business days.</p>`
+        }
+      </div>
+
+      <p style="color:#555;font-size:13px;text-align:center;margin:0;">
+        Questions? Reply to this email or visit <a href="https://events.squarebidness.com" style="color:#a1a1aa;">events.squarebidness.com</a>
+      </p>
+    `),
+  });
+}
+
 export async function sendWaitlistNotification(params: SendWaitlistNotificationParams) {
   if (!process.env.RESEND_API_KEY) return;
   await resend.emails.send({

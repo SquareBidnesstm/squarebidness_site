@@ -8,6 +8,7 @@ import NavLogo from "../../../../../components/NavLogo";
 import RefundButton from "../../../../../components/RefundButton";
 import TierEditor from "../../../../../components/TierEditor";
 import EmailBlastForm from "../../../../../components/EmailBlastForm";
+import CancelEventButton from "../../../../../components/CancelEventButton";
 
 export const revalidate = 0;
 
@@ -276,6 +277,13 @@ export default async function ManageEventPage({
                 Unpublish
               </button>
             </form>
+          )}
+          {event.status !== "cancelled" && (
+            <CancelEventButton
+              eventId={event.id}
+              eventTitle={event.title}
+              paidOrderCount={orderList.filter((o: any) => o.status === "paid").length}
+            />
           )}
 
         </div>
