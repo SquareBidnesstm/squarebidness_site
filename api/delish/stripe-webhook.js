@@ -287,12 +287,21 @@ No catering record found in Redis. Reconcile manually.`,
   }
 
   // safe items parse for pickup orders
+  const recordId = metadata.recordId || metadata.orderNumber || "";
+  const pendingOrder = recordId
+    ? await redis.get(`delish:pending-order:${recordId}`)
+    : null;
+
   let items = [];
-  try {
-    items = JSON.parse(getItemsJson(metadata));
-    if (!Array.isArray(items)) items = [];
-  } catch {
-    items = [];
+  if (pendingOrder && Array.isArray(pendingOrder.items)) {
+    items = pendingOrder.items;
+  } else {
+    try {
+      items = JSON.parse(getItemsJson(metadata));
+      if (!Array.isArray(items)) items = [];
+    } catch {
+      items = [];
+    }
   }
 
   const existingOrderId = await redis.get(`delish:order:by-session:${sessionId}`);
@@ -313,27 +322,32 @@ No catering record found in Redis. Reconcile manually.`,
 
   const order = {
     id: crypto.randomUUID(),
-    orderNumber: metadata.orderNumber || metadata.recordId || `DL-${Date.now()}`,
+    orderNumber:
+      pendingOrder?.orderNumber ||
+      metadata.orderNumber ||
+      metadata.recordId ||
+      `DL-${Date.now()}`,
     createdAt: new Date().toISOString(),
     completedAt: "",
     status: "received",
     orderState: "received",
-    smsConsent: metadata.smsConsent === "yes" ? "yes" : "no",
-    customerName: metadata.customerName || "",
-    customerPhone: metadata.customerPhone || "",
-    customerEmail: metadata.customerEmail || "",
-    pickupDate: metadata.pickupDate || "",
-    pickupWindow: metadata.pickupWindow || "",
-    notes: metadata.notes || "",
+    smsConsent:
+      pendingOrder?.smsConsent || (metadata.smsConsent === "yes" ? "yes" : "no"),
+    customerName: pendingOrder?.customerName || metadata.customerName || "",
+    customerPhone: pendingOrder?.customerPhone || metadata.customerPhone || "",
+    customerEmail: pendingOrder?.customerEmail || metadata.customerEmail || "",
+    pickupDate: pendingOrder?.pickupDate || metadata.pickupDate || "",
+    pickupWindow: pendingOrder?.pickupWindow || metadata.pickupWindow || "",
+    notes: pendingOrder?.notes || metadata.notes || "",
     items,
-    subtotal: Number(metadata.subtotal || 0),
-    tax: Number(metadata.tax || 0),
+    subtotal: Number(pendingOrder?.subtotal ?? metadata.subtotal ?? 0),
+    tax: Number(pendingOrder?.tax ?? metadata.tax ?? 0),
     total:
       typeof session.amount_total === "number"
         ? Number((session.amount_total / 100).toFixed(2))
-        : Number(metadata.total || 0),
+        : Number(pendingOrder?.total ?? metadata.total ?? 0),
     paymentStatus: "paid",
-    source: metadata.source || "stripe-webhook",
+    source: pendingOrder?.source || metadata.source || "stripe-webhook",
     stripeSessionId: sessionId,
   };
 
@@ -358,8 +372,17 @@ No catering record found in Redis. Reconcile manually.`,
 // ------------------------------------------------------------
  
   try {
-    const smsConsent = metadata.smsConsent === "yes";
-    const smsTo = normalizeUsPhone(metadata.customerPhone || "");
+    const smsConsent = order.smsConsent === "yes";
+    const smsTo = normalizeUsPhone(order.customerPhone || "");
+    const smsMetadata = {
+      ...metadata,
+      ...pendingOrder,
+      ...order,
+      amountTotal:
+        typeof session.amount_total === "number"
+          ? (session.amount_total / 100).toFixed(2)
+          : "",
+    };
  
     // Customer confirmation SMS (only with consent + valid phone)
     if (smsConsent && smsTo) {
@@ -371,13 +394,7 @@ No catering record found in Redis. Reconcile manually.`,
  
       const smsResult = await sendDelishSms({
         to: smsTo,
-        message: buildPickupSms({
-          ...metadata,
-          amountTotal:
-            typeof session.amount_total === "number"
-              ? (session.amount_total / 100).toFixed(2)
-              : "",
-        }),
+        message: buildPickupSms(smsMetadata),
       });
  
       console.log("DELISH SMS HELPER RESULT:", smsResult);
@@ -385,7 +402,7 @@ No catering record found in Redis. Reconcile manually.`,
     } else {
       console.log("DELISH PICKUP SMS SKIPPED:", {
         smsConsent,
-        rawPhone: metadata.customerPhone || "",
+        rawPhone: order.customerPhone || metadata.customerPhone || "",
         normalizedPhone: smsTo,
       });
     }
@@ -395,13 +412,7 @@ No catering record found in Redis. Reconcile manually.`,
     if (ownerSmsTo) {
       await sendDelishSms({
         to: ownerSmsTo,
-        message: buildOwnerNewOrderSms({
-          ...metadata,
-          amountTotal:
-            typeof session.amount_total === "number"
-              ? (session.amount_total / 100).toFixed(2)
-              : "",
-        }),
+        message: buildOwnerNewOrderSms(smsMetadata),
       });
     }
   } catch (smsError) {

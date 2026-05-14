@@ -1,4 +1,5 @@
 // FILE: /api/delish/create-checkout.js
+import { Redis } from "@upstash/redis";
 import Stripe from "stripe";
 import { getDelishOrderingState } from "../_lib/delish-ordering-config.js";
 import { getDelishMenuOverrides } from "../_lib/delish-menu-overrides.js";
@@ -11,6 +12,13 @@ import { getDelishFlashSale, isFlashSaleActive } from "../_lib/delish-flash-sale
 const stripe = new Stripe(process.env.DELISH_STRIPE_SECRET_KEY, {
   apiVersion: "2025-02-24.acacia",
 });
+
+const redis = new Redis({
+  url: process.env.DELISH_UPSTASH_REDIS_REST_URL,
+  token: process.env.DELISH_UPSTASH_REDIS_REST_TOKEN,
+});
+
+const PENDING_ORDER_TTL_SECONDS = 60 * 60 * 24;
 
 const MENU_BY_DAY = {
   monday: [
@@ -325,27 +333,6 @@ function safeMeta(value, max = 500) {
   return String(value || "").slice(0, max);
 }
 
-function buildChunkedMetadata(prefix, value, chunkSize = 450) {
-  const text = String(value || "");
-  const chunks = [];
-
-  for (let index = 0; index < text.length; index += chunkSize) {
-    chunks.push(text.slice(index, index + chunkSize));
-  }
-
-  if (!chunks.length) chunks.push("[]");
-
-  return chunks.reduce(
-    (meta, chunk, index) => ({
-      ...meta,
-      [`${prefix}${index + 1}`]: chunk,
-    }),
-    {
-      [`${prefix}ChunkCount`]: String(chunks.length),
-    }
-  );
-}
-
 function normalizeOrderingMode(value) {
   const mode = String(value || "").toLowerCase().trim();
   if (["auto", "open", "paused", "closed"].includes(mode)) return mode;
@@ -517,6 +504,16 @@ export default async function handler(req, res) {
       });
     }
 
+    if (
+      !process.env.DELISH_UPSTASH_REDIS_REST_URL ||
+      !process.env.DELISH_UPSTASH_REDIS_REST_TOKEN
+    ) {
+      return res.status(500).json({
+        ok: false,
+        error: "Missing Delish Redis configuration.",
+      });
+    }
+
     const body =
       typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
 
@@ -663,13 +660,6 @@ export default async function handler(req, res) {
     const recordId = makeRecordId();
     const shortOrderSummary = buildShortOrderSummary(cleanItems);
 
-    let itemsJson = "[]";
-    try {
-      itemsJson = JSON.stringify(cleanItems);
-    } catch {
-      itemsJson = "[]";
-    }
-
     const lineItems = cleanItems.map((item) => ({
       quantity: item.qty,
       price_data: {
@@ -709,7 +699,33 @@ export default async function handler(req, res) {
       });
     }
 
-    const itemsMetadata = buildChunkedMetadata("itemsJson", itemsJson);
+    const pendingOrder = {
+      orderNumber: recordId,
+      recordId,
+      createdAt: new Date().toISOString(),
+      status: "pending_payment",
+      orderState: "pending_payment",
+      orderType: "paid_pickup",
+      smsConsent: "yes",
+      customerName: safeMeta(body.customerName, 100),
+      customerPhone: safeMeta(body.customerPhone, 30),
+      customerEmail: safeMeta(body.customerEmail || "", 120),
+      pickupDate: safeMeta(body.pickupDate, 20),
+      pickupWindow: safeMeta(body.pickupWindow, 40),
+      notes: safeMeta(body.notes || body.orderNotes || "", 300),
+      items: cleanItems,
+      itemCount: cleanItems.length,
+      subtotal: calculatedSubtotal,
+      tax: calculatedTax,
+      total: calculatedTotal,
+      source: safeMeta(body.source || "delish-order-page", 50),
+      activeMenuDay: safeMeta(todayDay, 20),
+      flashSale: isFlashSaleOrder ? "yes" : "no",
+    };
+
+    await redis.set(`delish:pending-order:${recordId}`, pendingOrder, {
+      ex: PENDING_ORDER_TTL_SECONDS,
+    });
 
     const sharedMetadata = {
       brand: "Delish",
@@ -724,8 +740,7 @@ export default async function handler(req, res) {
       notes: safeMeta(body.notes || body.orderNotes || "", 300),
       smsConsent: "yes",
       orderSummary: shortOrderSummary,
-      itemsJson: itemsJson.length <= 500 ? itemsJson : "chunked",
-      ...itemsMetadata,
+      pendingOrderKey: `delish:pending-order:${recordId}`,
       itemCount: String(cleanItems.length),
       subtotal: String(calculatedSubtotal),
       tax: String(calculatedTax),
@@ -747,6 +762,16 @@ export default async function handler(req, res) {
       },
       customer_email: body.customerEmail || undefined,
     });
+
+    await redis.set(
+      `delish:pending-order:${recordId}`,
+      {
+        ...pendingOrder,
+        stripeSessionId: session.id,
+        stripeCheckoutUrl: session.url || "",
+      },
+      { ex: PENDING_ORDER_TTL_SECONDS }
+    );
 
     return res.status(200).json({
       ok: true,

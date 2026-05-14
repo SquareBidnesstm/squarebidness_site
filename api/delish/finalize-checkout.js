@@ -1,8 +1,14 @@
 // FILE: /api/delish/finalize-checkout.js
+import { Redis } from "@upstash/redis";
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.DELISH_STRIPE_SECRET_KEY, {
   apiVersion: "2025-02-24.acacia",
+});
+
+const redis = new Redis({
+  url: process.env.DELISH_UPSTASH_REDIS_REST_URL,
+  token: process.env.DELISH_UPSTASH_REDIS_REST_TOKEN,
 });
 
 function getItemsJson(metadata = {}) {
@@ -42,33 +48,46 @@ export default async function handler(req, res) {
     }
 
     const metadata = session.metadata || {};
+    const recordId = metadata.recordId || metadata.orderNumber || "";
+    const pendingOrder = recordId
+      ? await redis.get(`delish:pending-order:${recordId}`)
+      : null;
 
     let items = [];
-    try {
-      items = JSON.parse(getItemsJson(metadata));
-      if (!Array.isArray(items)) items = [];
-    } catch {
-      items = [];
+    if (pendingOrder && Array.isArray(pendingOrder.items)) {
+      items = pendingOrder.items;
+    } else {
+      try {
+        items = JSON.parse(getItemsJson(metadata));
+        if (!Array.isArray(items)) items = [];
+      } catch {
+        items = [];
+      }
     }
 
     return res.status(200).json({
       ok: true,
       order: {
-        orderNumber: metadata.orderNumber || metadata.recordId || session.id,
-        customerName: metadata.customerName || "",
-        customerPhone: metadata.customerPhone || "",
-        customerEmail: metadata.customerEmail || "",
-        pickupDate: metadata.pickupDate || "",
-        pickupWindow: metadata.pickupWindow || "",
-        notes: metadata.notes || metadata.orderNotes || "",
-        smsConsent: metadata.smsConsent === "yes" ? "yes" : "no",
+        orderNumber:
+          pendingOrder?.orderNumber ||
+          metadata.orderNumber ||
+          metadata.recordId ||
+          session.id,
+        customerName: pendingOrder?.customerName || metadata.customerName || "",
+        customerPhone: pendingOrder?.customerPhone || metadata.customerPhone || "",
+        customerEmail: pendingOrder?.customerEmail || metadata.customerEmail || "",
+        pickupDate: pendingOrder?.pickupDate || metadata.pickupDate || "",
+        pickupWindow: pendingOrder?.pickupWindow || metadata.pickupWindow || "",
+        notes: pendingOrder?.notes || metadata.notes || metadata.orderNotes || "",
+        smsConsent:
+          pendingOrder?.smsConsent || (metadata.smsConsent === "yes" ? "yes" : "no"),
         items,
-        subtotal: Number(metadata.subtotal || 0),
-        tax: Number(metadata.tax || 0),
+        subtotal: Number(pendingOrder?.subtotal ?? metadata.subtotal ?? 0),
+        tax: Number(pendingOrder?.tax ?? metadata.tax ?? 0),
         total:
           typeof session.amount_total === "number"
             ? Number((session.amount_total / 100).toFixed(2))
-            : Number(metadata.total || 0),
+            : Number(pendingOrder?.total ?? metadata.total ?? 0),
         paymentStatus: "paid",
         stripeSessionId: session.id,
       },
