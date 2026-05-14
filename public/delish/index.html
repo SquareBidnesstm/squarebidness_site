@@ -1223,13 +1223,13 @@ const flashSaleOnly =
     }
 
     if (!state.openNow && isFlashSaleActiveClient() && hasOrderItem && !flashSaleOnly) {
-      checkoutBtn.disabled = true;
+      checkoutBtn.disabled = false;
       checkoutBtn.textContent = "Flash Sale Only";
       return;
     }
 
     if (!(nameOk && phoneOk && pickupOk && hasOrderItem && sidesOk)) {
-      checkoutBtn.disabled = true;
+      checkoutBtn.disabled = false;
       checkoutBtn.textContent = "Complete Order";
       return;
     }
@@ -1257,6 +1257,31 @@ const flashSaleOnly =
       flashSaleItemsSelected.length > 0 &&
       selectedItems.length === flashSaleItemsSelected.length;
 
+    if (!customerName.value.trim()) {
+      showStatus("Please enter your name.");
+      return;
+    }
+
+    if (!isValidPhone(customerPhone.value.trim())) {
+      showStatus("Please enter a valid 10-digit US phone number.");
+      return;
+    }
+
+    if (!pickupWindow.value.trim()) {
+      showStatus("Please choose a pickup time.");
+      return;
+    }
+
+    if (!plateSelections.items.length && !lagniappeItemsSelected.length && !drinkItemsSelected.length && !flashSaleItemsSelected.length) {
+      showStatus("Add at least one main plate, drink, or Lagniappe item first.");
+      return;
+    }
+
+    if (!state.openNow && isFlashSaleActiveClient() && !flashSaleOnly) {
+      showStatus("Flash sale checkout is only for flash sale plates. Remove regular menu items to continue.");
+      return;
+    }
+
     if (!state.openNow && !flashSaleOnly) {
       if (state.reason === "manual_closed") {
         showStatus("Online ordering is currently paused.");
@@ -1269,15 +1294,6 @@ const flashSaleOnly =
       }
       return;
     }
-    if (!isValidPhone(customerPhone.value.trim())) {
-    showStatus("Please enter a valid 10-digit US phone number.");
-    return;
-  }
-
-if (!plateSelections.items.length && !lagniappeItemsSelected.length && !drinkItemsSelected.length && !flashSaleItemsSelected.length) {
-  showStatus("Add at least one main plate, drink, or Lagniappe item first.");
-  return;
-}
 
     if (plateSelections.items.length > 0 && !selectedPlatesHaveSides()) {
       showStatus("Each main plate requires all required selections before checkout.");
