@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { supabaseServer } from "../../../../lib/supabase/server";
+import { sendPushToBarber, sendPushToShopAdmins } from "../../../../lib/push";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-04-22.dahlia" });
 
@@ -15,8 +16,11 @@ export async function POST(
 
   const { data: booking } = await supabaseServer
     .from("bookings")
-    .select(`id, status, payment_status, starts_at, customer_name, customer_phone, shop_id,
-      shops(timezone), payments(id, amount, provider_payment_id, payment_type, status)`)
+    .select(`id, status, payment_status, starts_at, customer_name, customer_phone, shop_id, barber_id,
+      shops(id, slug, name, timezone),
+      barbers(id, name, display_name),
+      services(name),
+      payments(id, amount, provider_payment_id, payment_type, status)`)
     .eq("cancel_token", token)
     .single();
 
@@ -51,6 +55,56 @@ export async function POST(
       refunded = true;
     } catch (e) {
       console.error("Self-cancel refund failed:", e);
+    }
+  }
+
+  // Notify barber and admin
+  const shop = booking.shops as any;
+  const barber = booking.barbers as any;
+  const service = booking.services as any;
+
+  const apptStr = new Date(booking.starts_at).toLocaleString("en-US", {
+    weekday: "short", month: "short", day: "numeric",
+    hour: "numeric", minute: "2-digit",
+    timeZone: shop?.timezone ?? "America/New_York",
+  });
+  const pushTitle = "Booking Cancelled";
+  const pushBody = `${booking.customer_name} — ${service?.name ?? "appointment"} on ${apptStr} was cancelled by customer`;
+  const pushUrl = `/${shop?.slug}/admin`;
+
+  if (barber?.id) {
+    sendPushToBarber(barber.id, { title: pushTitle, body: pushBody, url: pushUrl }).catch(console.error);
+  }
+  if (shop?.id) {
+    sendPushToShopAdmins(shop.id, { title: pushTitle, body: pushBody, url: pushUrl }).catch(console.error);
+  }
+
+  // SMS to barber's phone if they have one stored (best effort)
+  const sid = process.env.TWILIO_ACCOUNT_SID;
+  const twilioToken = process.env.TWILIO_AUTH_TOKEN;
+  const messagingSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
+  const fromNumber = process.env.DAPPER_FROM_NUMBER;
+
+  if (sid && twilioToken && (messagingSid || fromNumber) && shop?.slug) {
+    const { data: shopRow } = await supabaseServer
+      .from("shops").select("notification_phone").eq("id", shop.id).single();
+    const notifyPhone = (shopRow as any)?.notification_phone;
+
+    if (notifyPhone) {
+      const digits = notifyPhone.replace(/\D/g, "");
+      const e164 = digits.length === 10 ? `+1${digits}` : digits.length === 11 && digits.startsWith("1") ? `+${digits}` : null;
+      if (e164) {
+        const smsBody = `❌ Cancelled: ${booking.customer_name} — ${service?.name ?? "appointment"}\n${apptStr}\nBarber: ${barber?.display_name || barber?.name || ""}`;
+        const msgParams = new URLSearchParams({ To: e164, Body: smsBody });
+        if (messagingSid) msgParams.set("MessagingServiceSid", messagingSid);
+        else msgParams.set("From", fromNumber!);
+        const creds = Buffer.from(`${sid}:${twilioToken}`).toString("base64");
+        fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
+          method: "POST",
+          headers: { Authorization: `Basic ${creds}`, "Content-Type": "application/x-www-form-urlencoded" },
+          body: msgParams.toString(),
+        }).catch(console.error);
+      }
     }
   }
 

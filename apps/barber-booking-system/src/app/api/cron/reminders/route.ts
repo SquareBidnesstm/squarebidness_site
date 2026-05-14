@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
   const { data: bookings, error } = await supabaseServer
     .from("bookings")
     .select(`
-      id, customer_name, customer_phone, appointment_date, starts_at, booking_code,
+      id, customer_name, customer_phone, appointment_date, starts_at, booking_code, cancel_token,
       shops ( slug, timezone ),
       barbers ( slug, name, display_name ),
       services ( name )
@@ -69,6 +69,9 @@ export async function GET(req: NextRequest) {
       hour: "numeric", minute: "2-digit", timeZone: shop.timezone ?? "America/New_York",
     });
     const rebookUrl = `https://booking.squarebidness.com/${shop.slug}/book/${barber.slug}`;
+    const cancelToken = (booking as any).cancel_token ?? null;
+    const rescheduleUrl = cancelToken ? `https://booking.squarebidness.com/reschedule/${cancelToken}` : null;
+    const cancelUrl = cancelToken ? `https://booking.squarebidness.com/cancel/${cancelToken}` : null;
     const body = [
       `Reminder ✂️ Your appointment is tomorrow!`,
       ``,
@@ -78,8 +81,9 @@ export async function GET(req: NextRequest) {
       `Barber: ${barber.display_name || barber.name}`,
       `Code: ${booking.booking_code}`,
       ``,
-      `Book again: ${rebookUrl}`,
-    ].join("\n");
+      rescheduleUrl ? `Reschedule: ${rescheduleUrl}` : null,
+      cancelUrl ? `Cancel: ${cancelUrl}` : null,
+    ].filter(Boolean).join("\n");
 
     const msgParams = new URLSearchParams({ To: normalizedPhone, Body: body });
     if (messagingSid) msgParams.set("MessagingServiceSid", messagingSid);
