@@ -39,9 +39,9 @@ export default async function AdminDashboardPage() {
       .limit(50),
     supabaseServer
       .from("orders")
-      .select("id, order_code, status, total, platform_fee, buyer_name, buyer_email, created_at, events ( title )")
+      .select("id, order_code, status, total, platform_fee, buyer_name, buyer_email, created_at, ref_code, events ( title )")
       .order("created_at", { ascending: false })
-      .limit(100),
+      .limit(200),
     supabaseServer
       .from("platform_payouts")
       .select("amount_cents, created_at"),
@@ -58,6 +58,50 @@ export default async function AdminDashboardPage() {
   const stuckOrders = (orders ?? []).filter(
     (o: any) => o.status === "paid" && !ordersWithTickets.has(o.id)
   );
+
+  // ── Analytics ─────────────────────────────────────────────
+  const paidOrders = (orders ?? []).filter((o: any) => o.status === "paid");
+
+  // Daily revenue — last 14 days
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const dailyRevenue: { label: string; total: number }[] = Array.from({ length: 14 }, (_, i) => {
+    const d = new Date(today);
+    d.setDate(d.getDate() - (13 - i));
+    return { label: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }), total: 0 };
+  });
+  for (const o of paidOrders) {
+    const od = new Date(o.created_at);
+    od.setHours(0, 0, 0, 0);
+    const diffDays = Math.round((today.getTime() - od.getTime()) / 86400000);
+    if (diffDays >= 0 && diffDays < 14) {
+      dailyRevenue[13 - diffDays].total += Number(o.total);
+    }
+  }
+  const maxDayRevenue = Math.max(...dailyRevenue.map(d => d.total), 1);
+
+  // Referral breakdown
+  const refMap = new Map<string, { count: number; revenue: number }>();
+  for (const o of paidOrders) {
+    if (o.ref_code) {
+      const existing = refMap.get(o.ref_code) ?? { count: 0, revenue: 0 };
+      refMap.set(o.ref_code, { count: existing.count + 1, revenue: existing.revenue + Number(o.total) });
+    }
+  }
+  const refRows = Array.from(refMap.entries())
+    .map(([code, stats]) => ({ code, ...stats }))
+    .sort((a, b) => b.revenue - a.revenue);
+
+  // Top buyers
+  const buyerMap = new Map<string, { name: string; count: number; revenue: number }>();
+  for (const o of paidOrders) {
+    const existing = buyerMap.get(o.buyer_email) ?? { name: o.buyer_name, count: 0, revenue: 0 };
+    buyerMap.set(o.buyer_email, { name: o.buyer_name, count: existing.count + 1, revenue: existing.revenue + Number(o.total) });
+  }
+  const topBuyers = Array.from(buyerMap.entries())
+    .map(([email, stats]) => ({ email, ...stats }))
+    .sort((a, b) => b.revenue - a.revenue)
+    .slice(0, 10);
 
   const totalRevenue = (payouts ?? []).reduce((s, p) => s + p.amount_cents, 0) / 100;
   const completedOrders = (orders ?? []).filter(o => o.status === "paid");
@@ -105,6 +149,94 @@ export default async function AdminDashboardPage() {
               <p style={{ color: "#a1a1aa", fontSize: 10, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 6 }}>Orders</p>
               <p style={{ fontSize: "2rem", fontWeight: 950 }}>{completedOrders.length}</p>
               <p style={{ color: "#555", fontSize: "0.75rem" }}>completed</p>
+            </div>
+          </div>
+
+          {/* ANALYTICS */}
+          <h2 style={{ fontSize: "1.1rem", fontWeight: 950, letterSpacing: "-0.04em", marginBottom: 16 }}>Analytics</h2>
+
+          {/* Daily Revenue Chart */}
+          <div className="card" style={{ marginBottom: 24 }}>
+            <p style={{ color: "#a1a1aa", fontSize: 10, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 16 }}>Daily Revenue — Last 14 Days</p>
+            <div style={{ display: "flex", alignItems: "flex-end", gap: 6, height: 100 }}>
+              {dailyRevenue.map((d, i) => {
+                const barH = Math.max(4, Math.round((d.total / maxDayRevenue) * 88));
+                return (
+                  <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                    {d.total > 0 && (
+                      <span style={{ fontSize: 9, color: "#22c55e", fontWeight: 800 }}>${d.total.toFixed(0)}</span>
+                    )}
+                    <div style={{
+                      width: "100%", height: barH, borderRadius: "3px 3px 0 0",
+                      background: d.total > 0 ? "#166534" : "#111",
+                      minHeight: 4,
+                    }} />
+                    <span style={{ fontSize: 8, color: "#555", whiteSpace: "nowrap", transform: "rotate(-40deg)", transformOrigin: "top right", marginTop: 2 }}>
+                      {d.label}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Referrals + Top Buyers */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 32 }}>
+            {/* Referral Breakdown */}
+            <div className="card">
+              <p style={{ color: "#a1a1aa", fontSize: 10, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 12 }}>Referral Codes</p>
+              {refRows.length === 0 ? (
+                <p style={{ color: "#555", fontSize: "0.85rem" }}>No referral orders yet.</p>
+              ) : (
+                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                  <thead>
+                    <tr>
+                      {["Code", "Orders", "Revenue"].map(h => (
+                        <th key={h} style={{ textAlign: "left", color: "#555", fontSize: 10, fontWeight: 900, letterSpacing: "0.1em", textTransform: "uppercase", paddingBottom: 8 }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {refRows.map(r => (
+                      <tr key={r.code} style={{ borderTop: "1px solid #111" }}>
+                        <td style={{ padding: "8px 0", fontFamily: "monospace", fontSize: "0.8rem", color: "#a1a1aa" }}>{r.code}</td>
+                        <td style={{ padding: "8px 0", fontWeight: 800 }}>{r.count}</td>
+                        <td style={{ padding: "8px 0", fontWeight: 800, color: "#22c55e" }}>${r.revenue.toFixed(2)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            {/* Top Buyers */}
+            <div className="card">
+              <p style={{ color: "#a1a1aa", fontSize: 10, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 12 }}>Top Buyers</p>
+              {topBuyers.length === 0 ? (
+                <p style={{ color: "#555", fontSize: "0.85rem" }}>No orders yet.</p>
+              ) : (
+                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                  <thead>
+                    <tr>
+                      {["Buyer", "Orders", "Spent"].map(h => (
+                        <th key={h} style={{ textAlign: "left", color: "#555", fontSize: 10, fontWeight: 900, letterSpacing: "0.1em", textTransform: "uppercase", paddingBottom: 8 }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {topBuyers.map(b => (
+                      <tr key={b.email} style={{ borderTop: "1px solid #111" }}>
+                        <td style={{ padding: "8px 0" }}>
+                          <p style={{ fontWeight: 700, fontSize: "0.85rem" }}>{b.name}</p>
+                          <p style={{ color: "#555", fontSize: "0.75rem" }}>{b.email}</p>
+                        </td>
+                        <td style={{ padding: "8px 0", fontWeight: 800 }}>{b.count}</td>
+                        <td style={{ padding: "8px 0", fontWeight: 800, color: "#22c55e" }}>${b.revenue.toFixed(2)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </div>
 

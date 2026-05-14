@@ -52,7 +52,7 @@ export default async function AnalyticsPage() {
   const { data: orders } = eventIds.length > 0
     ? await supabaseServer
         .from("orders")
-        .select("id, order_code, buyer_name, buyer_email, total, created_at, event_id, events ( title )")
+        .select("id, order_code, buyer_name, buyer_email, total, created_at, event_id, ref_code, events ( title )")
         .in("event_id", eventIds)
         .eq("status", "paid")
         .order("created_at", { ascending: false })
@@ -96,6 +96,29 @@ export default async function AnalyticsPage() {
     }
   }
   const tiers = Object.values(tierMap).sort((a, b) => b.revenue - a.revenue);
+
+  // ── Referral code breakdown ────────────────────────────
+  const refBreakdown = new Map<string, { count: number; revenue: number }>();
+  for (const o of orderList) {
+    if ((o as any).ref_code) {
+      const code = (o as any).ref_code as string;
+      const curr = refBreakdown.get(code) ?? { count: 0, revenue: 0 };
+      refBreakdown.set(code, { count: curr.count + 1, revenue: curr.revenue + Number(o.total) });
+    }
+  }
+  const refRows = Array.from(refBreakdown.entries())
+    .map(([code, s]) => ({ code, ...s }))
+    .sort((a, b) => b.revenue - a.revenue);
+
+  // ── Top buyers ─────────────────────────────────────────
+  const buyerBreakdown = new Map<string, { name: string; count: number; revenue: number }>();
+  for (const o of orderList) {
+    const curr = buyerBreakdown.get(o.buyer_email) ?? { name: o.buyer_name, count: 0, revenue: 0 };
+    buyerBreakdown.set(o.buyer_email, { name: o.buyer_name, count: curr.count + 1, revenue: curr.revenue + Number(o.total) });
+  }
+  const topBuyers = Array.from(buyerBreakdown.values())
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 8);
 
   return (
     <div style={{ minHeight: "100vh" }}>
@@ -230,6 +253,58 @@ export default async function AnalyticsPage() {
                   );
                 })}
               </div>
+            </div>
+          )}
+
+          {/* Referral + Top Buyers */}
+          {(refRows.length > 0 || topBuyers.length > 0) && (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 28 }}>
+              {refRows.length > 0 && (
+                <div className="card">
+                  <p style={{ color: "#a1a1aa", fontSize: 11, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 12 }}>
+                    🔗 Referral Codes
+                  </p>
+                  <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                    <thead>
+                      <tr>
+                        {["Code", "Orders", "Revenue"].map(h => (
+                          <th key={h} style={{ textAlign: "left", color: "#555", fontSize: 10, fontWeight: 900, letterSpacing: "0.1em", textTransform: "uppercase", paddingBottom: 8 }}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {refRows.map(r => (
+                        <tr key={r.code} style={{ borderTop: "1px solid #111" }}>
+                          <td style={{ padding: "8px 0", fontFamily: "monospace", fontSize: "0.78rem", color: "#a1a1aa" }}>{r.code}</td>
+                          <td style={{ padding: "8px 0", fontWeight: 800 }}>{r.count}</td>
+                          <td style={{ padding: "8px 0", fontWeight: 800, color: "#22c55e" }}>${r.revenue.toFixed(2)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+              {topBuyers.length > 0 && (
+                <div className="card">
+                  <p style={{ color: "#a1a1aa", fontSize: 11, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 12 }}>
+                    🏆 Top Buyers
+                  </p>
+                  <div style={{ display: "grid", gap: 8 }}>
+                    {topBuyers.map((b, i) => (
+                      <div key={b.name + b.revenue} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <span style={{ color: "#555", fontSize: "0.75rem", fontWeight: 900, width: 16 }}>{i + 1}</span>
+                          <div>
+                            <p style={{ fontWeight: 700, fontSize: "0.85rem" }}>{b.name}</p>
+                            <p style={{ color: "#555", fontSize: "0.7rem" }}>{b.count} order{b.count !== 1 ? "s" : ""}</p>
+                          </div>
+                        </div>
+                        <p style={{ fontWeight: 900, color: "#22c55e", fontSize: "0.85rem" }}>${b.revenue.toFixed(2)}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
