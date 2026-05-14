@@ -20,6 +20,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
+  // ── Payment failed: clean up stuck pending orders ──────
+  if (event.type === "payment_intent.payment_failed") {
+    const pi = event.data.object as Stripe.PaymentIntent;
+    const orderId = pi.metadata?.order_id;
+    if (orderId) {
+      await supabaseServer
+        .from("orders")
+        .update({ status: "cancelled" })
+        .eq("id", orderId)
+        .eq("status", "pending");
+    }
+    return NextResponse.json({ ok: true });
+  }
+
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
     const orderId = session.metadata?.order_id;
@@ -29,20 +43,29 @@ export async function POST(req: NextRequest) {
 
     if (!orderId) return NextResponse.json({ ok: true });
 
-    // Mark order paid
-    await supabaseServer
+    // Idempotency: only transition from pending → paid
+    // If Stripe retries and the order is already paid, this update affects 0 rows
+    const { data: claimed } = await supabaseServer
       .from("orders")
       .update({
         status: "paid",
         stripe_payment_intent_id: session.payment_intent as string,
       })
-      .eq("id", orderId);
+      .eq("id", orderId)
+      .eq("status", "pending")
+      .select("id")
+      .single();
 
-    // Fetch order + event + organizer
+    if (!claimed) {
+      // Order already processed — return 200 so Stripe stops retrying
+      return NextResponse.json({ ok: true });
+    }
+
+    // Fetch full order now that it's confirmed paid
     const { data: order } = await supabaseServer
       .from("orders")
       .select("*, events ( *, organizers ( name, email, phone ) )")
-      .eq("id", orderId)
+      .eq("id", claimed.id)
       .single();
 
     if (!order) return NextResponse.json({ ok: true });

@@ -35,6 +35,48 @@ export function FeaturedToggle({ eventId, initialFeatured }: { eventId: string; 
   );
 }
 
+export function RefulfillButton({ orderId, orderCode }: { orderId: string; orderCode: string }) {
+  const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
+  const [count, setCount] = useState(0);
+  const [errMsg, setErrMsg] = useState("");
+
+  async function refulfill() {
+    if (!confirm(`Re-fulfill order ${orderCode}? This will issue tickets and resend the confirmation email.`)) return;
+    setStatus("loading");
+    const res = await fetch("/api/admin/orders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderId, action: "refulfill" }),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      setCount(data.ticketsIssued);
+      setStatus("done");
+    } else {
+      setErrMsg(data.error ?? "Failed");
+      setStatus("error");
+    }
+  }
+
+  if (status === "done") return <span style={{ color: "#22c55e", fontSize: "0.75rem", fontWeight: 800 }}>✓ {count} ticket{count !== 1 ? "s" : ""} issued</span>;
+  if (status === "error") return <span style={{ color: "#ef4444", fontSize: "0.75rem" }}>{errMsg}</span>;
+
+  return (
+    <button
+      onClick={refulfill}
+      disabled={status === "loading"}
+      style={{
+        fontSize: "0.7rem", fontWeight: 900, padding: "4px 12px", borderRadius: 99,
+        cursor: "pointer", border: "1px solid #713f12",
+        background: "#1a0f00", color: "#fb923c",
+        opacity: status === "loading" ? 0.5 : 1,
+      }}
+    >
+      {status === "loading" ? "Working…" : "Re-fulfill"}
+    </button>
+  );
+}
+
 export function OrganizerActiveToggle({ organizerId, initialActive }: { organizerId: string; initialActive: boolean }) {
   const [active, setActive] = useState(initialActive);
   const [loading, setLoading] = useState(false);

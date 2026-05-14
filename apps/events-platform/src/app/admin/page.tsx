@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { supabaseServer } from "../../lib/supabase/server";
 import { verifyAdminSession } from "../../lib/auth";
 import NavLogo from "../../components/NavLogo";
-import { FeaturedToggle, OrganizerActiveToggle } from "../../components/AdminToggles";
+import { FeaturedToggle, OrganizerActiveToggle, RefulfillButton } from "../../components/AdminToggles";
 
 export const revalidate = 0;
 
@@ -26,6 +26,7 @@ export default async function AdminDashboardPage() {
     { data: events },
     { data: orders },
     { data: payouts },
+    { data: ticketCounts },
   ] = await Promise.all([
     supabaseServer
       .from("organizers")
@@ -44,7 +45,19 @@ export default async function AdminDashboardPage() {
     supabaseServer
       .from("platform_payouts")
       .select("amount_cents, created_at"),
+    supabaseServer
+      .from("tickets")
+      .select("order_id")
+      .not("status", "eq", "cancelled"),
   ]);
+
+  // Build set of order IDs that have at least one active ticket
+  const ordersWithTickets = new Set((ticketCounts ?? []).map((t: any) => t.order_id));
+
+  // Paid orders with no tickets issued = stuck (webhook may have dropped)
+  const stuckOrders = (orders ?? []).filter(
+    (o: any) => o.status === "paid" && !ordersWithTickets.has(o.id)
+  );
 
   const totalRevenue = (payouts ?? []).reduce((s, p) => s + p.amount_cents, 0) / 100;
   const completedOrders = (orders ?? []).filter(o => o.status === "paid");
@@ -173,6 +186,45 @@ export default async function AdminDashboardPage() {
               </tbody>
             </table>
           </div>
+
+          {/* STUCK ORDERS */}
+          {stuckOrders.length > 0 && (
+            <>
+              <h2 style={{ fontSize: "1.1rem", fontWeight: 950, letterSpacing: "-0.04em", marginBottom: 8, color: "#fb923c" }}>
+                ⚠️ Stuck Orders ({stuckOrders.length})
+              </h2>
+              <p style={{ color: "#a1a1aa", fontSize: "0.8rem", marginBottom: 12 }}>
+                Paid orders with no tickets issued — webhook likely dropped. Re-fulfill to issue tickets and resend confirmation.
+              </p>
+              <div className="card" style={{ marginBottom: 32, padding: 0, overflow: "hidden", border: "1px solid #713f12" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                  <thead>
+                    <tr style={{ borderBottom: "1px solid #111" }}>
+                      {["Order", "Event", "Buyer", "Total", "Date", "Action"].map(h => (
+                        <th key={h} style={{ padding: "10px 16px", textAlign: "left", color: "#555", fontSize: 11, fontWeight: 900, letterSpacing: "0.1em", textTransform: "uppercase" }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {stuckOrders.map((order: any) => (
+                      <tr key={order.id} style={{ borderBottom: "1px solid #0a0a0a" }}>
+                        <td style={{ padding: "12px 16px", fontFamily: "monospace", fontSize: "0.8rem", color: "#fb923c" }}>{order.order_code}</td>
+                        <td style={{ padding: "12px 16px", fontSize: "0.85rem" }}>{order.events?.title}</td>
+                        <td style={{ padding: "12px 16px", fontSize: "0.85rem", color: "#a1a1aa" }}>{order.buyer_name}</td>
+                        <td style={{ padding: "12px 16px", fontWeight: 800 }}>${Number(order.total).toFixed(2)}</td>
+                        <td style={{ padding: "12px 16px", color: "#555", fontSize: "0.8rem" }}>
+                          {new Date(order.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                        </td>
+                        <td style={{ padding: "12px 16px" }}>
+                          <RefulfillButton orderId={order.id} orderCode={order.order_code} />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
 
           {/* RECENT ORDERS */}
           <h2 style={{ fontSize: "1.1rem", fontWeight: 950, letterSpacing: "-0.04em", marginBottom: 12 }}>Recent Orders</h2>
