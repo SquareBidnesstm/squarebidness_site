@@ -47,6 +47,7 @@ async function sendConfirmationSMS({
   startsAt,
   bookingCode,
   timezone,
+  cancelToken,
 }: {
   to: string;
   customerName: string;
@@ -58,6 +59,7 @@ async function sendConfirmationSMS({
   startsAt: string;
   bookingCode: string;
   timezone: string;
+  cancelToken?: string | null;
 }) {
   const sid = process.env.TWILIO_ACCOUNT_SID;
   const token = process.env.TWILIO_AUTH_TOKEN;
@@ -78,6 +80,7 @@ async function sendConfirmationSMS({
   });
 
   const rebookUrl = `https://booking.squarebidness.com/${shopSlug}/book/${barberSlug}`;
+  const cancelUrl = cancelToken ? `https://booking.squarebidness.com/cancel/${cancelToken}` : null;
   const body = [
     `You're confirmed! ✂️`,
     ``,
@@ -87,8 +90,9 @@ async function sendConfirmationSMS({
     `Barber: ${barberName}`,
     `Code: ${bookingCode}`,
     ``,
+    cancelUrl ? `Cancel: ${cancelUrl}` : null,
     `Book again: ${rebookUrl}`,
-  ].join("\n");
+  ].filter(Boolean).join("\n");
 
   const msgParams = new URLSearchParams({ To: to, Body: body });
   if (messagingSid) {
@@ -224,7 +228,7 @@ export async function POST(
         source: "shop_booking_page",
         confirmed_at: new Date().toISOString(),
       })
-      .select("id, booking_code, customer_name, starts_at, ends_at, status")
+      .select("id, booking_code, customer_name, starts_at, ends_at, status, cancel_token")
       .single();
 
     if (bookingError || !booking) {
@@ -247,6 +251,7 @@ export async function POST(
         startsAt: booking.starts_at,
         bookingCode: booking.booking_code,
         timezone: shop.timezone,
+        cancelToken: booking.cancel_token ?? null,
       }).catch((err) =>
         console.error("SMS ERROR:", err instanceof Error ? err.message : err)
       );

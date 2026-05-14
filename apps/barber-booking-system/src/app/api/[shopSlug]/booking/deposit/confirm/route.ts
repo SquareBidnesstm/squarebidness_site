@@ -100,7 +100,7 @@ export async function GET(
       source: "shop_booking_page",
       confirmed_at: new Date().toISOString(),
     })
-    .select("id, booking_code, starts_at").single();
+    .select("id, booking_code, starts_at, cancel_token").single();
 
   if (!booking) return NextResponse.redirect(new URL(`/${shopSlug}`, req.url));
 
@@ -132,6 +132,7 @@ export async function GET(
         hour: "numeric", minute: "2-digit", timeZone: shop.timezone,
       });
       const rebookUrl = `https://booking.squarebidness.com/${shopSlug}/book/${bookingData.barber_id}`;
+      const cancelUrl = (booking as any).cancel_token ? `https://booking.squarebidness.com/cancel/${(booking as any).cancel_token}` : null;
       const body = [
         `You're confirmed! ✂️`,
         ``,
@@ -141,8 +142,9 @@ export async function GET(
         `Barber: ${barber.display_name || barber.name}`,
         `Code: ${booking.booking_code}`,
         ``,
+        cancelUrl ? `Cancel: ${cancelUrl}` : null,
         `Book again: ${rebookUrl}`,
-      ].join("\n");
+      ].filter(Boolean).join("\n");
 
       const msgParams = new URLSearchParams({ To: normalizedPhone, Body: body });
       if (messagingSid) msgParams.set("MessagingServiceSid", messagingSid);
