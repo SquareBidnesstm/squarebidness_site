@@ -3,6 +3,7 @@ import Link from "next/link";
 import { supabaseServer } from "../../../lib/supabase/server";
 import NavLogo from "../../../components/NavLogo";
 import TicketTransferForm from "../../../components/TicketTransferForm";
+import PushSubscribeButton from "../../../components/PushSubscribeButton";
 
 export const revalidate = 0;
 
@@ -194,6 +195,9 @@ export default async function OrderConfirmationPage({
                   </button>
                 </form>
               </div>
+
+              {/* Day-of push reminder */}
+              <PushSubscribeButton orderId={order.id} />
 
               {/* Add to home screen prompt */}
               <div style={{ background: "linear-gradient(180deg,rgba(239,68,68,.1),rgba(255,255,255,.03))", border: "1px solid rgba(239,68,68,.25)", borderRadius: 16, padding: "18px 20px", marginBottom: 24 }}>

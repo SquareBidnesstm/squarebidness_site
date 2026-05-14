@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+const STORAGE_KEY = "sb_tickets_email";
 import Link from "next/link";
 import NavLogo from "../../components/NavLogo";
 
@@ -37,29 +39,49 @@ export default function MyTicketsPage() {
   const [error, setError] = useState("");
   const [searched, setSearched] = useState(false);
 
-  async function handleLookup(e: React.FormEvent) {
-    e.preventDefault();
-    if (!email.trim()) return;
+  // Auto-lookup if email saved from previous visit
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      setEmail(saved);
+      lookup(saved);
+    }
+  }, []);
+
+  async function lookup(addr: string) {
+    if (!addr.trim()) return;
     setLoading(true);
     setError("");
     setOrders(null);
     setSearched(false);
-
     try {
       const res = await fetch("/api/tickets/lookup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: addr }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? "Something went wrong"); return; }
       setOrders(data.orders);
       setSearched(true);
+      localStorage.setItem(STORAGE_KEY, addr);
     } catch {
       setError("Network error. Please try again.");
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleLookup(e: React.FormEvent) {
+    e.preventDefault();
+    await lookup(email);
+  }
+
+  function handleForget() {
+    localStorage.removeItem(STORAGE_KEY);
+    setEmail("");
+    setOrders(null);
+    setSearched(false);
   }
 
   return (
@@ -91,6 +113,15 @@ export default function MyTicketsPage() {
               {loading ? "…" : "Find"}
             </button>
           </form>
+
+          {searched && (
+            <p style={{ fontSize: "0.8rem", color: "#555", marginBottom: 16, marginTop: -20 }}>
+              Showing tickets for <strong style={{ color: "#a1a1aa" }}>{email}</strong> ·{" "}
+              <button onClick={handleForget} style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer", fontSize: "0.8rem", padding: 0 }}>
+                Not you?
+              </button>
+            </p>
+          )}
 
           {error && (
             <p style={{ color: "#ef4444", fontSize: "0.9rem", marginBottom: 20 }}>{error}</p>

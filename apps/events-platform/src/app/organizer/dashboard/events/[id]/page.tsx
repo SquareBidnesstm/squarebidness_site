@@ -9,6 +9,7 @@ import RefundButton from "../../../../../components/RefundButton";
 import TierEditor from "../../../../../components/TierEditor";
 import EmailBlastForm from "../../../../../components/EmailBlastForm";
 import CancelEventButton from "../../../../../components/CancelEventButton";
+import PushBlastButton from "../../../../../components/PushBlastButton";
 
 export const revalidate = 0;
 
@@ -114,6 +115,9 @@ export default async function ManageEventPage({
               <Link href={`/scan/${event.slug}`} className="btn btn--outline" style={{ minHeight: 36, fontSize: "0.85rem", padding: "0 14px" }}>
                 🔍 Scanner
               </Link>
+              <a href={`/api/organizer/events/export?eventId=${event.id}`} download className="btn btn--ghost" style={{ minHeight: 36, fontSize: "0.85rem", padding: "0 14px" }}>
+                ⬇️ Export CSV
+              </a>
               <form action="/api/organizer/events/duplicate" method="POST" style={{ display: "inline" }}>
                 <input type="hidden" name="eventId" value={event.id} />
                 <button type="submit" className="btn btn--ghost" style={{ minHeight: 36, fontSize: "0.85rem", padding: "0 14px" }}>
@@ -225,6 +229,15 @@ export default async function ManageEventPage({
               📣 Email Attendees
             </p>
             <EmailBlastForm eventId={event.id} recipientCount={orderList.filter((o: any) => o.status === "paid").length} />
+          </div>
+
+          {/* Push Notifications */}
+          <div className="card" style={{ marginBottom: 24 }}>
+            <p style={{ color: "#a1a1aa", fontSize: 11, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 6 }}>
+              🔔 Push Notification
+            </p>
+            <p style={{ color: "#555", fontSize: "0.8rem", marginBottom: 14 }}>Send a push to attendees who opted in for reminders.</p>
+            <PushBlastButton eventId={event.id} />
           </div>
 
           {/* Waitlist */}
