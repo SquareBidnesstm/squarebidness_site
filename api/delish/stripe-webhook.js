@@ -34,6 +34,19 @@ function normalizeUsPhone(phone) {
   return null;
 }
 
+function getItemsJson(metadata = {}) {
+  const chunkCount = Math.max(0, Number(metadata.itemsJsonChunkCount || 0));
+
+  if (chunkCount > 0) {
+    let combined = "";
+    for (let index = 1; index <= chunkCount; index += 1) {
+      combined += String(metadata[`itemsJson${index}`] || "");
+    }
+    return combined || "[]";
+  }
+
+  return metadata.itemsJson || "[]";
+}
 
 
 function buildPickupSms(metadata) {
@@ -45,7 +58,7 @@ function buildPickupSms(metadata) {
 
   let itemLines = [];
   try {
-    const items = JSON.parse(metadata.itemsJson || "[]");
+    const items = JSON.parse(getItemsJson(metadata));
     if (Array.isArray(items) && items.length) {
       itemLines = items.map((i) => {
         const qty = Number(i.qty || 0);
@@ -276,7 +289,7 @@ No catering record found in Redis. Reconcile manually.`,
   // safe items parse for pickup orders
   let items = [];
   try {
-    items = JSON.parse(metadata.itemsJson || "[]");
+    items = JSON.parse(getItemsJson(metadata));
     if (!Array.isArray(items)) items = [];
   } catch {
     items = [];

@@ -325,6 +325,27 @@ function safeMeta(value, max = 500) {
   return String(value || "").slice(0, max);
 }
 
+function buildChunkedMetadata(prefix, value, chunkSize = 450) {
+  const text = String(value || "");
+  const chunks = [];
+
+  for (let index = 0; index < text.length; index += chunkSize) {
+    chunks.push(text.slice(index, index + chunkSize));
+  }
+
+  if (!chunks.length) chunks.push("[]");
+
+  return chunks.reduce(
+    (meta, chunk, index) => ({
+      ...meta,
+      [`${prefix}${index + 1}`]: chunk,
+    }),
+    {
+      [`${prefix}ChunkCount`]: String(chunks.length),
+    }
+  );
+}
+
 function normalizeOrderingMode(value) {
   const mode = String(value || "").toLowerCase().trim();
   if (["auto", "open", "paused", "closed"].includes(mode)) return mode;
@@ -688,6 +709,8 @@ export default async function handler(req, res) {
       });
     }
 
+    const itemsMetadata = buildChunkedMetadata("itemsJson", itemsJson);
+
     const sharedMetadata = {
       brand: "Delish",
       recordId,
@@ -701,7 +724,8 @@ export default async function handler(req, res) {
       notes: safeMeta(body.notes || body.orderNotes || "", 300),
       smsConsent: "yes",
       orderSummary: shortOrderSummary,
-      itemsJson,
+      itemsJson: itemsJson.length <= 500 ? itemsJson : "chunked",
+      ...itemsMetadata,
       itemCount: String(cleanItems.length),
       subtotal: String(calculatedSubtotal),
       tax: String(calculatedTax),
