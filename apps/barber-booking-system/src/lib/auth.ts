@@ -55,6 +55,18 @@ export function sessionCookieName(shopSlug: string): string {
   return `session_${shopSlug}`;
 }
 
+import { supabaseServer } from "./supabase/server";
+
+export async function checkActiveSubscription(shopId: string): Promise<boolean> {
+  const { data } = await supabaseServer
+    .from("subscriptions")
+    .select("status, plan")
+    .eq("shop_id", shopId)
+    .single();
+  if (!data) return false;
+  return data.status === "active" && data.plan !== "free";
+}
+
 export async function verifyAdminSession(
   req: Request,
   shopSlug: string

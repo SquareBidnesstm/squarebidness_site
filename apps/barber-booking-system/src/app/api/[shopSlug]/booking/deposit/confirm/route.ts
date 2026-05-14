@@ -82,7 +82,7 @@ export async function GET(
   const { data: customer } = await supabaseServer
     .from("customers").insert({ shop_id: shop.id, full_name: bookingData.customer_name }).select("id").single();
 
-  const { data: booking } = await supabaseServer
+  const { data: booking, error: bookingError } = await supabaseServer
     .from("bookings").insert({
       booking_code: bookingCode,
       shop_id: shop.id,
@@ -104,7 +104,14 @@ export async function GET(
     })
     .select("id, booking_code, starts_at, cancel_token").single();
 
-  if (!booking) return NextResponse.redirect(new URL(`/${shopSlug}`, req.url));
+  if (!booking) {
+    const isOverlap = (bookingError as any)?.code === "23P01";
+    // Deposit was charged but slot taken — redirect to a friendly error instead of silent 404
+    const dest = isOverlap
+      ? `/${shopSlug}/book?overlap=1`
+      : `/${shopSlug}`;
+    return NextResponse.redirect(new URL(dest, req.url));
+  }
 
   // Record the deposit payment so it survives reschedules
   const depositAmountCents = session.amount_total ?? 0;

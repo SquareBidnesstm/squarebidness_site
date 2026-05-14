@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../../../lib/supabase/server";
-import { verifyAdminSession } from "../../../../../lib/auth";
+import { verifyAdminSession, checkActiveSubscription } from "../../../../../lib/auth";
 
 function normalizePhone(raw: string): string | null {
   const digits = raw.replace(/\D/g, "");
@@ -35,6 +35,11 @@ export async function POST(
   const { data: shop } = await supabaseServer
     .from("shops").select("id, slug, timezone").eq("slug", shopSlug).eq("active", true).single();
   if (!shop) return NextResponse.json({ ok: false, error: "Shop not found" }, { status: 404 });
+
+  const hasActivePlan = await checkActiveSubscription(shop.id);
+  if (!hasActivePlan) {
+    return NextResponse.json({ ok: false, error: "Subscription inactive. Upgrade to accept bookings." }, { status: 402 });
+  }
 
   const { data: barber } = await supabaseServer
     .from("barbers").select("id, slug, name, display_name").eq("shop_id", shop.id).eq("id", barber_id).eq("active", true).single();
@@ -75,7 +80,11 @@ export async function POST(
     }).select("id, booking_code, customer_name, starts_at").single();
 
   if (bookingError || !booking) {
-    return NextResponse.json({ ok: false, error: bookingError?.message || "Could not create booking" }, { status: 500 });
+    const isOverlap = (bookingError as any)?.code === "23P01";
+    return NextResponse.json(
+      { ok: false, error: isOverlap ? "That time slot is already booked." : (bookingError?.message || "Could not create booking") },
+      { status: isOverlap ? 409 : 500 }
+    );
   }
 
   // Send SMS if phone provided

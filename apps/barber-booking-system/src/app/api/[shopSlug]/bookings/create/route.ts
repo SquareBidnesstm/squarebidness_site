@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../../../lib/supabase/server";
+import { checkActiveSubscription } from "../../../../../lib/auth";
 import { sendPushToBarber, sendPushToShopAdmins } from "../../../../../lib/push";
 import { sendConfirmationEmail } from "../../../../../lib/email";
 
@@ -153,6 +154,11 @@ export async function POST(
       return NextResponse.json({ ok: false, error: "Shop not found" }, { status: 404 });
     }
 
+    const hasActivePlan = await checkActiveSubscription(shop.id);
+    if (!hasActivePlan) {
+      return NextResponse.json({ ok: false, error: "This shop's subscription is inactive. Online booking is unavailable." }, { status: 402 });
+    }
+
     const { data: barber, error: barberError } = await supabaseServer
       .from("barbers")
       .select("id, slug, name, display_name")
@@ -236,9 +242,10 @@ export async function POST(
       .single();
 
     if (bookingError || !booking) {
+      const isOverlap = (bookingError as any)?.code === "23P01";
       return NextResponse.json(
-        { ok: false, error: bookingError?.message || "Could not create booking" },
-        { status: 500 }
+        { ok: false, error: isOverlap ? "That time slot was just taken. Please pick another time." : (bookingError?.message || "Could not create booking") },
+        { status: isOverlap ? 409 : 500 }
       );
     }
 

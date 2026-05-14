@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { supabaseServer } from "../../../../../lib/supabase/server";
+import { checkActiveSubscription } from "../../../../../lib/auth";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-04-22.dahlia" });
 
@@ -23,6 +24,11 @@ export async function POST(
   const { data: shop } = await supabaseServer
     .from("shops").select("id, name, slug, timezone").eq("slug", shopSlug).eq("active", true).single();
   if (!shop) return NextResponse.json({ ok: false, error: "Shop not found" }, { status: 404 });
+
+  const hasActivePlan = await checkActiveSubscription(shop.id);
+  if (!hasActivePlan) {
+    return NextResponse.json({ ok: false, error: "This shop's subscription is inactive. Online booking is unavailable." }, { status: 402 });
+  }
 
   // Get deposit settings
   const { data: depositSetting } = await supabaseServer
