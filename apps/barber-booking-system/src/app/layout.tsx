@@ -11,8 +11,8 @@ export const metadata: Metadata = {
   applicationName: "SquareBidness Booking",
   manifest: "/manifest.json",
   title: {
-    default: "Online Booking App for Barbers, Nail Techs & Hair Stylists | SquareBidness",
-    template: "%s | SquareBidness Booking",
+    default: "Online Booking App for Barbers, Nail Techs & Hair Stylists | Booking",
+    template: "%s | Booking",
   },
   description: "Free online booking app for barbers, nail technicians, hair stylists, lash artists, and beauty salons. Let clients book appointments 24/7. Get your shop online in minutes.",
   keywords: [
