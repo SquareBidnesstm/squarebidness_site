@@ -191,6 +191,33 @@ export default async function NewEventPage({
               ))}
             </div>
 
+            {/* Recurrence */}
+            <div className="card" style={{ display: "grid", gap: 14 }}>
+              <p style={{ color: "#a1a1aa", fontSize: 11, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 2 }}>Recurrence</p>
+              <p style={{ color: "#555", fontSize: "0.82rem" }}>
+                Schedule multiple dates at once. Each copy is saved as a draft so you can review before publishing.
+              </p>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div className="form-group">
+                  <label className="label">Repeat</label>
+                  <select name="recurrence_rule" className="input" defaultValue="">
+                    <option value="">One-time (no repeat)</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="biweekly">Every 2 weeks</option>
+                    <option value="monthly">Monthly</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="label">Number of dates</label>
+                  <select name="recurrence_count" className="input" defaultValue="4">
+                    {[2, 3, 4, 6, 8, 10, 12].map(n => (
+                      <option key={n} value={n}>{n} dates total</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
             {/* Submit */}
             <div style={{ display: "flex", gap: 12 }}>
               <button type="submit" name="action" value="draft" className="btn btn--ghost btn--wide">

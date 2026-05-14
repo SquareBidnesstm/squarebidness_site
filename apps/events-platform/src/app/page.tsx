@@ -81,7 +81,21 @@ export default async function HomePage({
   if (category) query = query.eq("category", category);
   if (q) query = query.ilike("title", `%${q}%`);
 
-  const { data: events } = await query;
+  const [{ data: events }, { data: featuredEvents }] = await Promise.all([
+    query,
+    // Featured only shown on unfiltered homepage
+    (!category && !q && !date)
+      ? supabaseServer
+          .from("events")
+          .select(`id, slug, title, category, starts_at, venue_name, city, cover_image_url, ticket_tiers ( price, quantity, quantity_sold )`)
+          .eq("status", "published")
+          .eq("is_public", true)
+          .eq("is_featured", true)
+          .gte("starts_at", now.toISOString())
+          .order("starts_at", { ascending: true })
+          .limit(6)
+      : Promise.resolve({ data: [] }),
+  ]);
 
   return (
     <div style={{ minHeight: "100vh" }}>
@@ -158,6 +172,47 @@ export default async function HomePage({
 
       <main style={{ padding: "32px 14px 64px" }}>
         <div className="wrap">
+
+          {/* FEATURED STRIP */}
+          {featuredEvents && featuredEvents.length > 0 && (
+            <div style={{ marginBottom: 36 }}>
+              <p style={{ fontSize: 11, fontWeight: 900, letterSpacing: "0.13em", textTransform: "uppercase", color: "#ef4444", marginBottom: 12 }}>
+                ⭐ Featured
+              </p>
+              <div style={{ display: "flex", gap: 14, overflowX: "auto", paddingBottom: 8, scrollbarWidth: "none" }}>
+                {featuredEvents.map((ev: any) => {
+                  const tiers = ev.ticket_tiers ?? [];
+                  const minPrice = tiers.length ? Math.min(...tiers.map((t: any) => Number(t.price))) : null;
+                  const soldOut = tiers.length > 0 && tiers.every((t: any) => t.quantity_sold >= t.quantity);
+                  return (
+                    <Link key={ev.id} href={`/events/${ev.slug}`} style={{ textDecoration: "none", flexShrink: 0, width: 220 }}>
+                      <div style={{ borderRadius: 14, overflow: "hidden", border: "1px solid #ef444440", background: "#080808" }}>
+                        <div style={{ height: 130, background: "#0a0a0a", position: "relative" }}>
+                          {ev.cover_image_url
+                            ? <img src={ev.cover_image_url} alt={ev.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                            : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2rem" }}>🎟️</div>
+                          }
+                          {soldOut && (
+                            <span className="badge badge--red" style={{ position: "absolute", top: 8, right: 8, fontSize: "0.6rem" }}>Sold Out</span>
+                          )}
+                        </div>
+                        <div style={{ padding: "12px 12px 14px" }}>
+                          <p style={{ fontWeight: 900, fontSize: "0.9rem", color: "#fff", marginBottom: 4, lineHeight: 1.2 }}>{ev.title}</p>
+                          <p style={{ color: "#a1a1aa", fontSize: "0.75rem", marginBottom: 2 }}>
+                            {new Date(ev.starts_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                          </p>
+                          {ev.city && <p style={{ color: "#555", fontSize: "0.72rem" }}>{ev.city}</p>}
+                          <p style={{ fontWeight: 900, color: "#ef4444", fontSize: "0.85rem", marginTop: 6 }}>
+                            {soldOut ? "Sold Out" : (minPrice === 0 || minPrice === null ? "Free" : `From $${Number(minPrice).toFixed(0)}`)}
+                          </p>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* DATE FILTERS */}
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>

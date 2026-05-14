@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { supabaseServer } from "../../lib/supabase/server";
 import { verifyAdminSession } from "../../lib/auth";
 import NavLogo from "../../components/NavLogo";
+import { FeaturedToggle, OrganizerActiveToggle } from "../../components/AdminToggles";
 
 export const revalidate = 0;
 
@@ -32,7 +33,7 @@ export default async function AdminDashboardPage() {
       .order("created_at", { ascending: false }),
     supabaseServer
       .from("events")
-      .select("id, title, slug, status, starts_at, city, state, organizer_id, organizers ( name )")
+      .select("id, title, slug, status, starts_at, city, state, is_featured, organizer_id, organizers ( name )")
       .order("starts_at", { ascending: false })
       .limit(50),
     supabaseServer
@@ -116,9 +117,7 @@ export default async function AdminDashboardPage() {
                       </span>
                     </td>
                     <td style={{ padding: "12px 16px" }}>
-                      <span className={`badge ${org.active ? "badge--green" : "badge--red"}`}>
-                        {org.active ? "Active" : "Inactive"}
-                      </span>
+                      <OrganizerActiveToggle organizerId={org.id} initialActive={org.active ?? true} />
                     </td>
                     <td style={{ padding: "12px 16px", color: "#555", fontSize: "0.85rem" }}>
                       {new Date(org.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
@@ -138,7 +137,7 @@ export default async function AdminDashboardPage() {
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ borderBottom: "1px solid #111" }}>
-                  {["Event", "Organizer", "Date", "Location", "Status"].map(h => (
+                  {["Event", "Organizer", "Date", "Location", "Status", "Featured"].map(h => (
                     <th key={h} style={{ padding: "10px 16px", textAlign: "left", color: "#555", fontSize: 11, fontWeight: 900, letterSpacing: "0.1em", textTransform: "uppercase" }}>{h}</th>
                   ))}
                 </tr>
@@ -163,10 +162,13 @@ export default async function AdminDashboardPage() {
                         {ev.status}
                       </span>
                     </td>
+                    <td style={{ padding: "12px 16px" }}>
+                      <FeaturedToggle eventId={ev.id} initialFeatured={ev.is_featured ?? false} />
+                    </td>
                   </tr>
                 ))}
                 {!events?.length && (
-                  <tr><td colSpan={5} style={{ padding: 24, textAlign: "center", color: "#555" }}>No events yet.</td></tr>
+                  <tr><td colSpan={6} style={{ padding: 24, textAlign: "center", color: "#555" }}>No events yet.</td></tr>
                 )}
               </tbody>
             </table>

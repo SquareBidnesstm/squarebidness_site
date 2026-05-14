@@ -54,6 +54,8 @@ export async function POST(req: Request) {
     const refundPolicy = (formData.get("refund_policy") as string)?.trim() || "no_refunds";
     const refundPolicyNotes = (formData.get("refund_policy_notes") as string)?.trim() || null;
     const action = (formData.get("action") as string) ?? "draft";
+    const recurrenceRule = (formData.get("recurrence_rule") as string)?.trim() || null;
+    const recurrenceCount = parseInt((formData.get("recurrence_count") as string) ?? "1") || 1;
 
     if (!title || !category || !startsAt || !endsAt) {
       return NextResponse.redirect(
@@ -75,67 +77,95 @@ export async function POST(req: Request) {
 
     const status = action === "publish" ? "published" : "draft";
 
-    // Create event
-    const { data: event, error: eventError } = await supabaseServer
-      .from("events")
-      .insert({
-        organizer_id: organizer.id,
-        title,
-        slug: eventSlug,
-        category,
-        description,
-        cover_image_url: coverImageUrl,
-        starts_at: new Date(startsAt).toISOString(),
-        ends_at: new Date(endsAt).toISOString(),
-        venue_name: venueName,
-        address,
-        city,
-        state,
-        zip,
-        location_notes: locationNotes,
-        status,
-        is_public: status === "published",
-        refund_policy: refundPolicy,
-        refund_policy_notes: refundPolicyNotes,
-      })
-      .select("id")
-      .single();
+    // Recurrence group ID (shared across all copies)
+    const recurrenceGroupId = recurrenceRule ? crypto.randomUUID() : null;
 
-    if (eventError || !event) {
-      console.error("Event create error:", eventError);
-      return NextResponse.redirect(
-        new URL("/organizer/dashboard/new-event?error=db_error", req.url)
-      );
+    // Build starts/ends offsets for each occurrence
+    function addOffset(dateStr: string, rule: string, n: number): string {
+      const d = new Date(dateStr);
+      if (rule === "weekly") d.setDate(d.getDate() + 7 * n);
+      else if (rule === "biweekly") d.setDate(d.getDate() + 14 * n);
+      else if (rule === "monthly") d.setMonth(d.getMonth() + n);
+      return d.toISOString();
     }
 
-    // Create ticket tiers
-    const tierInserts = [];
+    const startsIso = new Date(startsAt).toISOString();
+    const endsIso = new Date(endsAt).toISOString();
+
+    // Prepare base tiers payload
+    const tierPayload: { name: string; price: number; quantity: number; description: string | null; sort_order: number }[] = [];
     for (let n = 1; n <= 3; n++) {
       const tierName = (formData.get(`tier_${n}_name`) as string)?.trim();
-      const tierPrice = formData.get(`tier_${n}_price`) as string;
-      const tierQty = formData.get(`tier_${n}_quantity`) as string;
-      const tierDesc = (formData.get(`tier_${n}_description`) as string)?.trim() || null;
-
       if (!tierName) continue;
-
-      tierInserts.push({
-        event_id: event.id,
+      tierPayload.push({
         name: tierName,
-        price: parseFloat(tierPrice) || 0,
-        quantity: parseInt(tierQty) || 0,
-        quantity_sold: 0,
-        description: tierDesc,
+        price: parseFloat(formData.get(`tier_${n}_price`) as string) || 0,
+        quantity: parseInt(formData.get(`tier_${n}_quantity`) as string) || 0,
+        description: (formData.get(`tier_${n}_description`) as string)?.trim() || null,
         sort_order: n,
-        active: true,
       });
     }
 
-    if (tierInserts.length > 0) {
-      await supabaseServer.from("ticket_tiers").insert(tierInserts);
+    const totalOccurrences = recurrenceRule ? Math.min(recurrenceCount, 12) : 1;
+    let firstEventId = "";
+
+    for (let i = 0; i < totalOccurrences; i++) {
+      const occurrenceStartsAt = i === 0 ? startsIso : addOffset(startsIso, recurrenceRule!, i);
+      const occurrenceEndsAt = i === 0 ? endsIso : addOffset(endsIso, recurrenceRule!, i);
+
+      // Each occurrence after the first is always draft
+      const occurrenceStatus = i === 0 ? status : "draft";
+
+      let occurrenceSlug = i === 0 ? eventSlug : slugify(`${title}-${i + 1}`);
+      if (i > 0) {
+        const { data: slugCheck } = await supabaseServer.from("events").select("id").eq("slug", occurrenceSlug).maybeSingle();
+        if (slugCheck) occurrenceSlug = `${occurrenceSlug}-${Date.now().toString(36)}`;
+      }
+
+      const { data: ev, error: evErr } = await supabaseServer
+        .from("events")
+        .insert({
+          organizer_id: organizer.id,
+          title: totalOccurrences > 1 ? `${title} (${i + 1}/${totalOccurrences})` : title,
+          slug: occurrenceSlug,
+          category,
+          description,
+          cover_image_url: coverImageUrl,
+          starts_at: occurrenceStartsAt,
+          ends_at: occurrenceEndsAt,
+          venue_name: venueName,
+          address,
+          city,
+          state,
+          zip,
+          location_notes: locationNotes,
+          status: occurrenceStatus,
+          is_public: occurrenceStatus === "published",
+          refund_policy: refundPolicy,
+          refund_policy_notes: refundPolicyNotes,
+          recurrence_group_id: recurrenceGroupId,
+          recurrence_rule: recurrenceRule,
+        })
+        .select("id")
+        .single();
+
+      if (evErr || !ev) {
+        console.error("Event create error:", evErr);
+        if (i === 0) return NextResponse.redirect(new URL("/organizer/dashboard/new-event?error=db_error", req.url));
+        break;
+      }
+
+      if (i === 0) firstEventId = ev.id;
+
+      if (tierPayload.length > 0) {
+        await supabaseServer.from("ticket_tiers").insert(
+          tierPayload.map(t => ({ ...t, event_id: ev.id, quantity_sold: 0, active: true }))
+        );
+      }
     }
 
     return NextResponse.redirect(
-      new URL(`/organizer/dashboard/events/${event.id}`, req.url)
+      new URL(`/organizer/dashboard/events/${firstEventId}`, req.url)
     );
   } catch (err) {
     console.error("Create event error:", err);

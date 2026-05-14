@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { supabaseServer } from "../../../lib/supabase/server";
 import NavLogo from "../../../components/NavLogo";
+import TicketTransferForm from "../../../components/TicketTransferForm";
 
 export const revalidate = 0;
 
@@ -148,6 +149,13 @@ export default async function OrderConfirmationPage({
                     <p style={{ marginTop: 16, fontSize: "0.8rem", color: "#555" }}>
                       Show at the door · One scan per ticket
                     </p>
+
+                    {ticket.status === "valid" && (
+                      <TicketTransferForm
+                        ticketCode={ticket.ticket_code}
+                        tierName={ticket.tier_name || "General Admission"}
+                      />
+                    )}
                   </div>
                 ))}
               </div>
