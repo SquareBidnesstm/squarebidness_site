@@ -37,6 +37,7 @@ export async function GET(
     customer_phone: string;
     customer_email: string | null;
     visits: number;
+    no_shows: number;
     last_visit: string;
     services: string[];
   }>();
@@ -44,9 +45,11 @@ export async function GET(
   for (const row of rows ?? []) {
     const phone = row.customer_phone as string;
     const svcName = (row.services as any)?.name ?? null;
+    const isNoShow = row.status === "no_show";
     const existing = byPhone.get(phone);
     if (existing) {
       existing.visits += 1;
+      if (isNoShow) existing.no_shows += 1;
       if (row.starts_at > existing.last_visit) {
         existing.last_visit = row.starts_at;
         existing.customer_name = row.customer_name;
@@ -58,6 +61,7 @@ export async function GET(
         customer_phone: phone,
         customer_email: row.customer_email ?? null,
         visits: 1,
+        no_shows: isNoShow ? 1 : 0,
         last_visit: row.starts_at,
         services: svcName ? [svcName] : [],
       });

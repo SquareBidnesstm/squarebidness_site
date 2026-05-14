@@ -162,6 +162,23 @@ export async function POST(req: NextRequest) {
 
         // Deposit booking fallback — runs if redirect didn't create the booking
         if (session.mode === "payment") {
+          // Balance payment via admin-generated link
+          if (session.metadata?.payment_type === "balance" && session.metadata?.booking_id) {
+            const bookingId = session.metadata.booking_id;
+            const shopId = session.metadata.shop_id;
+            const amountCents = session.amount_total ?? 0;
+            await supabaseServer.from("payments").insert({
+              booking_id: bookingId,
+              shop_id: shopId,
+              amount: (amountCents / 100).toFixed(2),
+              payment_type: "balance",
+              provider: "stripe",
+              provider_payment_id: session.payment_intent as string ?? null,
+              status: "succeeded",
+            });
+            await supabaseServer.from("bookings").update({ payment_status: "paid" }).eq("id", bookingId);
+            break;
+          }
           await handleDepositBooking(session);
           break;
         }

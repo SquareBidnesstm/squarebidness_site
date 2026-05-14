@@ -7,6 +7,7 @@ type Client = {
   customer_phone: string;
   customer_email: string | null;
   visits: number;
+  no_shows: number;
   last_visit: string;
   services: string[];
 };
@@ -135,7 +136,16 @@ function ClientRow({ client, shopSlug }: { client: Client; shopSlug: string }) {
           <p style={{ color: "#d4af37", fontWeight: 700, fontSize: 14 }}>
             {client.visits} visit{client.visits !== 1 ? "s" : ""}
           </p>
-          <p style={{ color: "#666", fontSize: 12 }}>Last: {lastDate}</p>
+          {client.no_shows > 0 && (
+            <span style={{
+              display: "inline-block", fontSize: 11, fontWeight: 700,
+              padding: "2px 7px", borderRadius: 6,
+              background: "#1a0800", color: "#ff9944", border: "1px solid #331500",
+            }}>
+              {client.no_shows} no-show{client.no_shows > 1 ? "s" : ""}
+            </span>
+          )}
+          <p style={{ color: "#666", fontSize: 12, marginTop: client.no_shows > 0 ? 3 : 0 }}>Last: {lastDate}</p>
         </div>
       </button>
 

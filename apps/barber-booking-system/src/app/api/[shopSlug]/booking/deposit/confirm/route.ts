@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { supabaseServer } from "../../../../../../lib/supabase/server";
+import { sendPushToBarber, sendPushToShopAdmins } from "../../../../../../lib/push";
+import { sendConfirmationEmail } from "../../../../../../lib/email";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-04-22.dahlia" });
 
@@ -132,7 +134,9 @@ export async function GET(
         hour: "numeric", minute: "2-digit", timeZone: shop.timezone,
       });
       const rebookUrl = `https://booking.squarebidness.com/${shopSlug}/book/${bookingData.barber_id}`;
-      const cancelUrl = (booking as any).cancel_token ? `https://booking.squarebidness.com/cancel/${(booking as any).cancel_token}` : null;
+      const cancelToken = (booking as any).cancel_token ?? null;
+      const cancelUrl = cancelToken ? `https://booking.squarebidness.com/cancel/${cancelToken}` : null;
+      const rescheduleUrl = cancelToken ? `https://booking.squarebidness.com/reschedule/${cancelToken}` : null;
       const body = [
         `You're confirmed! ✂️`,
         ``,
@@ -142,6 +146,7 @@ export async function GET(
         `Barber: ${barber.display_name || barber.name}`,
         `Code: ${booking.booking_code}`,
         ``,
+        rescheduleUrl ? `Reschedule: ${rescheduleUrl}` : null,
         cancelUrl ? `Cancel: ${cancelUrl}` : null,
         `Book again: ${rebookUrl}`,
       ].filter(Boolean).join("\n");
@@ -157,6 +162,28 @@ export async function GET(
       }).catch(console.error);
     }
   }
+
+  // Email confirmation (non-blocking)
+  if (bookingData.customer_email) {
+    const time24 = convertDisplayTimeTo24Hour(bookingData.time);
+    sendConfirmationEmail({
+      to: bookingData.customer_email,
+      customerName: bookingData.customer_name,
+      shopName: shop.name,
+      barberName: barber.display_name || barber.name,
+      serviceName: svc.name,
+      appointmentDate: bookingData.date,
+      startsAt: booking.starts_at,
+      bookingCode: booking.booking_code,
+      timezone: shop.timezone,
+      cancelToken: (booking as any).cancel_token ?? null,
+    }).catch((err) => console.error("EMAIL ERROR:", err instanceof Error ? err.message : err));
+  }
+
+  // Fire push notifications (non-blocking)
+  const pushBody = `${bookingData.customer_name} — ${svc.name} on ${bookingData.date}`;
+  sendPushToBarber(barber.id, { title: "New Booking (Deposit Paid)", body: pushBody, url: `/${shopSlug}/admin` }).catch(console.error);
+  sendPushToShopAdmins(shop.id, { title: "New Booking (Deposit Paid)", body: pushBody, url: `/${shopSlug}/admin` }).catch(console.error);
 
   return NextResponse.redirect(new URL(`/${shopSlug}/book/${bookingData.barber_id}/confirmed?code=${booking.booking_code}`, req.url));
 }

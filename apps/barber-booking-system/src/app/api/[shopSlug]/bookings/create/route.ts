@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../../../lib/supabase/server";
+import { sendPushToBarber, sendPushToShopAdmins } from "../../../../../lib/push";
+import { sendConfirmationEmail } from "../../../../../lib/email";
 
 type CreateBookingPayload = {
   barber_id?: string;
@@ -81,6 +83,7 @@ async function sendConfirmationSMS({
 
   const rebookUrl = `https://booking.squarebidness.com/${shopSlug}/book/${barberSlug}`;
   const cancelUrl = cancelToken ? `https://booking.squarebidness.com/cancel/${cancelToken}` : null;
+  const rescheduleUrl = cancelToken ? `https://booking.squarebidness.com/reschedule/${cancelToken}` : null;
   const body = [
     `You're confirmed! ✂️`,
     ``,
@@ -90,6 +93,7 @@ async function sendConfirmationSMS({
     `Barber: ${barberName}`,
     `Code: ${bookingCode}`,
     ``,
+    rescheduleUrl ? `Reschedule: ${rescheduleUrl}` : null,
     cancelUrl ? `Cancel: ${cancelUrl}` : null,
     `Book again: ${rebookUrl}`,
   ].filter(Boolean).join("\n");
@@ -256,6 +260,29 @@ export async function POST(
         console.error("SMS ERROR:", err instanceof Error ? err.message : err)
       );
     }
+
+    // Send email confirmation if address provided (non-blocking)
+    if (body.customer_email) {
+      sendConfirmationEmail({
+        to: body.customer_email,
+        customerName: body.customer_name,
+        shopName: shop.name ?? shopSlug,
+        barberName: barber.display_name || barber.name,
+        serviceName: service.name,
+        appointmentDate,
+        startsAt: booking.starts_at,
+        bookingCode: booking.booking_code,
+        timezone: shop.timezone,
+        cancelToken: booking.cancel_token ?? null,
+      }).catch((err) => console.error("EMAIL ERROR:", err instanceof Error ? err.message : err));
+    }
+
+    // Fire push notifications (non-blocking)
+    const pushTitle = "New Booking";
+    const pushBody = `${body.customer_name} — ${service.name} on ${appointmentDate}`;
+    const pushUrl = `/${shopSlug}/admin`;
+    sendPushToBarber(barber.id, { title: pushTitle, body: pushBody, url: pushUrl }).catch(console.error);
+    sendPushToShopAdmins(shop.id, { title: pushTitle, body: pushBody, url: pushUrl }).catch(console.error);
 
     return NextResponse.json({ ok: true, booking, barber: barber.display_name || barber.name, service: service.name });
   } catch (error) {

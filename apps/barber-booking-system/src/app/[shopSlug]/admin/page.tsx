@@ -652,19 +652,40 @@ export default function AdminPage() {
                           <span style={{ color: "#666" }}>Created: </span>
                           {new Date(booking.created_at).toLocaleString()}
                         </div>
-                        {booking.payment_status === "deposit_paid" && booking.status === "completed" && (
-                          <button
-                            type="button"
-                            onClick={async () => {
-                              const res = await fetch(`/api/${shopSlug}/admin/bookings/${booking.id}/collect-balance`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ provider: "manual" }) });
-                              const d = await res.json();
-                              if (d.ok) setBookings(prev => prev.map(b => b.id === booking.id ? { ...b, payment_status: "paid" } : b));
-                            }}
-                            style={{ marginTop: 8, padding: "10px 16px", borderRadius: 10, border: "none", background: "#d4af37", color: "#000", fontWeight: 800, cursor: "pointer", fontSize: 13 }}
-                          >
-                            Collect Balance — {formatMoney(Math.max(0, Number(booking.services?.price ?? 0) - (booking.payments?.filter(p => p.status === "succeeded").reduce((s, p) => s + Number(p.amount), 0) ?? 0)))}
-                          </button>
-                        )}
+                        {booking.payment_status === "deposit_paid" && booking.status === "completed" && (() => {
+                          const remaining = Math.max(0, Number(booking.services?.price ?? 0) - (booking.payments?.filter(p => p.status === "succeeded").reduce((s, p) => s + Number(p.amount), 0) ?? 0));
+                          return (
+                            <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  const res = await fetch(`/api/${shopSlug}/admin/bookings/${booking.id}/collect-balance`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ provider: "manual" }) });
+                                  const d = await res.json();
+                                  if (d.ok) setBookings(prev => prev.map(b => b.id === booking.id ? { ...b, payment_status: "paid" } : b));
+                                }}
+                                style={{ padding: "10px 16px", borderRadius: 10, border: "none", background: "#d4af37", color: "#000", fontWeight: 800, cursor: "pointer", fontSize: 13 }}
+                              >
+                                Collect Cash — {formatMoney(remaining)}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  const res = await fetch(`/api/${shopSlug}/admin/bookings/${booking.id}/payment-link`, { method: "POST", headers: { "Content-Type": "application/json" } });
+                                  const d = await res.json();
+                                  if (d.ok && d.url) {
+                                    await navigator.clipboard.writeText(d.url).catch(() => {});
+                                    window.open(d.url, "_blank");
+                                  } else {
+                                    alert(d.error || "Could not generate payment link.");
+                                  }
+                                }}
+                                style={{ padding: "10px 16px", borderRadius: 10, border: "1px solid #2d2d2d", background: "#111", color: "#d4af37", fontWeight: 800, cursor: "pointer", fontSize: 13 }}
+                              >
+                                💳 Send Payment Link — {formatMoney(remaining)}
+                              </button>
+                            </div>
+                          );
+                        })()}
                       </div>
                     )}
 
