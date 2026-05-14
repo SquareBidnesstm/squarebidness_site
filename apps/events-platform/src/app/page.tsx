@@ -79,9 +79,25 @@ export default async function HomePage({
 
   if (dateTo) query = query.lte("starts_at", dateTo);
   if (category) query = query.eq("category", category);
-  if (q) query = query.ilike("title", `%${q}%`);
 
-  const [{ data: events }, { data: featuredEvents }] = await Promise.all([
+  // Search: title, city, venue_name. Organizer name needs a separate lookup.
+  let organizerEventIds: string[] | null = null;
+  if (q) {
+    query = query.or(`title.ilike.%${q}%,city.ilike.%${q}%,venue_name.ilike.%${q}%`);
+
+    // Also search by organizer name — fetch matching organizer IDs, then include their events
+    const { data: matchingOrgs } = await supabaseServer
+      .from("organizers")
+      .select("id")
+      .ilike("name", `%${q}%`)
+      .eq("active", true);
+
+    if (matchingOrgs?.length) {
+      organizerEventIds = matchingOrgs.map((o: any) => o.id);
+    }
+  }
+
+  const [{ data: baseEvents }, { data: featuredEvents }, { data: orgEvents }] = await Promise.all([
     query,
     // Featured only shown on unfiltered homepage
     (!category && !q && !date)
@@ -95,7 +111,28 @@ export default async function HomePage({
           .order("starts_at", { ascending: true })
           .limit(6)
       : Promise.resolve({ data: [] }),
+    // Organizer name match events
+    organizerEventIds?.length
+      ? supabaseServer
+          .from("events")
+          .select(`id, slug, title, category, starts_at, ends_at, venue_name, city, state, cover_image_url, status, organizers ( name ), ticket_tiers ( price, quantity, quantity_sold )`)
+          .eq("status", "published")
+          .eq("is_public", true)
+          .gte("starts_at", dateFrom)
+          .in("organizer_id", organizerEventIds)
+          .order("starts_at", { ascending: true })
+          .limit(20)
+      : Promise.resolve({ data: [] }),
   ]);
+
+  // Merge base + org events, deduplicate by id
+  const seen = new Set<string>();
+  const events: typeof baseEvents = [];
+  for (const ev of [...(baseEvents ?? []), ...(orgEvents ?? [])]) {
+    if (!seen.has(ev.id)) { seen.add(ev.id); events.push(ev); }
+  }
+  events.sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime());
+
 
   return (
     <div style={{ minHeight: "100vh" }}>

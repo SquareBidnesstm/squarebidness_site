@@ -177,6 +177,19 @@ export default async function EventPage({
               </div>
             )}
 
+            {/* Part of a series */}
+            {event.recurrence_group_id && (
+              <div className="card" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <p style={{ color: "#a1a1aa", fontSize: 11, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 4 }}>Recurring Event</p>
+                  <p style={{ fontSize: "0.85rem", color: "#fff" }}>This is part of a series</p>
+                </div>
+                <Link href={`/series/${event.recurrence_group_id}`} className="btn btn--ghost" style={{ minHeight: 36, fontSize: "0.82rem", padding: "0 14px", whiteSpace: "nowrap" }}>
+                  All Dates →
+                </Link>
+              </div>
+            )}
+
             {/* Organizer */}
             <div className="card">
               <p style={{ color: "#a1a1aa", fontSize: 11, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 10 }}>Organizer</p>
