@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Delish Health Check</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#0f0f10" />
+  <style>
+    :root{
+      --bg:#0f0f10;
+      --panel:#171718;
+      --line:#2c2c2f;
+      --text:#f5f2ea;
+      --muted:#b9b2a7;
+      --gold:#d7ae72;
+      --good:#62d18f;
+      --warn:#f1c75b;
+      --bad:#ff7979;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      line-height:1.5;
+    }
+    .wrap{width:min(980px,calc(100% - 28px));margin:0 auto;padding:24px 0 40px}
+    .top{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
+      margin-bottom:18px;
+    }
+    .eyebrow{
+      margin:0 0 4px;
+      color:var(--gold);
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      font-size:.76rem;
+      font-weight:900;
+    }
+    h1{margin:0;font-size:clamp(2rem,6vw,3.4rem);line-height:1;letter-spacing:-.04em}
+    .sub{margin:10px 0 0;color:var(--muted);max-width:680px}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+    .btn{
+      border:1px solid var(--line);
+      background:#1d1d1f;
+      color:var(--text);
+      min-height:46px;
+      padding:0 16px;
+      border-radius:999px;
+      font-weight:900;
+      text-decoration:none;
+      cursor:pointer;
+    }
+    .btn--gold{background:var(--gold);color:#17120c;border-color:var(--gold)}
+    .hero,.card{
+      border:1px solid var(--line);
+      background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
+      border-radius:18px;
+      padding:18px;
+    }
+    .hero{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:14px;
+      align-items:center;
+      margin-bottom:14px;
+    }
+    .status{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:44px;
+      padding:0 16px;
+      border-radius:999px;
+      font-weight:1000;
+      background:#252525;
+      color:var(--muted);
+    }
+    .status.pass{background:rgba(98,209,143,.14);color:var(--good)}
+    .status.warn{background:rgba(241,199,91,.14);color:var(--warn)}
+    .status.fail{background:rgba(255,121,121,.14);color:var(--bad)}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .card h2,.card h3{margin:0 0 8px}
+    .meta{color:var(--muted);font-size:.95rem}
+    .checks{display:grid;gap:10px;margin-top:14px}
+    .check{
+      display:grid;
+      grid-template-columns:auto 1fr;
+      gap:12px;
+      align-items:start;
+      padding:14px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:#141415;
+    }
+    .dot{width:14px;height:14px;border-radius:50%;margin-top:5px;background:var(--muted)}
+    .check.pass .dot{background:var(--good)}
+    .check.warn .dot{background:var(--warn)}
+    .check.fail .dot{background:var(--bad)}
+    .check strong{display:block}
+    .check small{display:block;color:var(--muted);margin-top:2px}
+    .list{margin:0;padding-left:1.1rem;color:var(--muted)}
+    .list li+li{margin-top:4px}
+    .footer{margin-top:14px;color:var(--muted);font-size:.9rem}
+    @media(max-width:760px){
+      .hero,.grid{grid-template-columns:1fr}
+      .actions{width:100%}
+      .btn{flex:1}
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="top">
+      <div>
+        <p class="eyebrow">Delish Admin</p>
+        <h1>Health Check</h1>
+        <p class="sub">Read-only preflight for ordering status, Redis, pickup windows, flash sale state, and recent order storage.</p>
+      </div>
+      <div class="actions">
+        <button class="btn btn--gold" type="button" id="refreshBtn">Refresh</button>
+        <a class="btn" href="/delish/admin/">Admin</a>
+        <a class="btn" href="/delish/orders/">Kitchen</a>
+      </div>
+    </section>
+
+    <section class="hero">
+      <div>
+        <div class="meta" id="checkedAt">Checking...</div>
+        <div class="meta" id="summary">Loading Delish health state.</div>
+      </div>
+      <div class="status" id="overallStatus">Checking</div>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h2>Ordering</h2>
+        <div class="meta" id="orderingBox">Loading...</div>
+      </article>
+      <article class="card">
+        <h2>Pickup Windows</h2>
+        <div class="meta" id="pickupBox">Loading...</div>
+      </article>
+      <article class="card">
+        <h2>Flash Sale</h2>
+        <div class="meta" id="flashBox">Loading...</div>
+      </article>
+      <article class="card">
+        <h2>Recent Orders</h2>
+        <div class="meta" id="ordersBox">Loading...</div>
+      </article>
+    </section>
+
+    <section class="checks" id="checks"></section>
+    <div class="footer">This page does not open, close, clear, or change anything.</div>
+  </main>
+
+  <script>
+    const overallStatus = document.getElementById("overallStatus");
+    const checkedAt = document.getElementById("checkedAt");
+    const summary = document.getElementById("summary");
+    const orderingBox = document.getElementById("orderingBox");
+    const pickupBox = document.getElementById("pickupBox");
+    const flashBox = document.getElementById("flashBox");
+    const ordersBox = document.getElementById("ordersBox");
+    const checksEl = document.getElementById("checks");
+    const refreshBtn = document.getElementById("refreshBtn");
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function setStatus(status) {
+      overallStatus.className = `status ${status}`;
+      overallStatus.textContent = status === "pass" ? "Ready" : status === "warn" ? "Check" : "Needs Attention";
+    }
+
+    function line(label, value) {
+      return `<div><strong>${escapeHtml(label)}:</strong> ${escapeHtml(value)}</div>`;
+    }
+
+    function render(data) {
+      setStatus(data.status || "fail");
+      checkedAt.textContent = `Checked ${data.checkedAtCentral || data.checkedAt || ""}`;
+      summary.textContent = data.status === "pass"
+        ? "All core Delish systems are reachable."
+        : "One or more Delish systems needs attention.";
+
+      const ordering = data.details?.ordering || {};
+      orderingBox.innerHTML = [
+        line("Today", ordering.today || ""),
+        line("Open now", ordering.openNow ? "Yes" : "No"),
+        line("Reason", ordering.reason || ""),
+        line("Hours", `${ordering.openTime || ""} - ${ordering.closeTime || ""}`),
+      ].join("");
+
+      const pickup = data.details?.pickupWindows || {};
+      const disabled = pickup.disabledWindows || [];
+      pickupBox.innerHTML = [
+        line("Total windows", (pickup.windows || []).length),
+        line("Disabled", disabled.length ? disabled.join(", ") : "None"),
+      ].join("");
+
+      const flash = data.details?.flashSale || {};
+      flashBox.innerHTML = [
+        line("Enabled", flash.enabled ? "Yes" : "No"),
+        line("Active", flash.active ? "Yes" : "No"),
+        line("Items", Array.isArray(flash.items) ? flash.items.length : 0),
+      ].join("");
+
+      const recent = data.details?.recentOrderIds || [];
+      ordersBox.innerHTML = recent.length
+        ? `<ul class="list">${recent.slice(0, 5).map((id) => `<li>${escapeHtml(id)}</li>`).join("")}</ul>`
+        : "No recent order IDs returned.";
+
+      checksEl.innerHTML = (data.checks || []).map((check) => {
+        const detail = Object.entries(check)
+          .filter(([key]) => !["label", "ok", "status"].includes(key))
+          .map(([key, value]) => `${key}: ${typeof value === "object" ? JSON.stringify(value) : value}`)
+          .join(" · ");
+
+        return `
+          <div class="check ${escapeHtml(check.status)}">
+            <span class="dot"></span>
+            <div>
+              <strong>${escapeHtml(check.label)}</strong>
+              ${detail ? `<small>${escapeHtml(detail)}</small>` : ""}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function loadHealth() {
+      refreshBtn.disabled = true;
+      refreshBtn.textContent = "Checking...";
+
+      try {
+        const res = await fetch(`/api/delish/health-check/?t=${Date.now()}`, { cache: "no-store" });
+        const data = await res.json();
+        render(data);
+      } catch (error) {
+        render({
+          status: "fail",
+          checkedAtCentral: new Date().toLocaleString(),
+          checks: [{ label: error.message || "Health check failed", status: "fail" }],
+          details: {},
+        });
+      } finally {
+        refreshBtn.disabled = false;
+        refreshBtn.textContent = "Refresh";
+      }
+    }
+
+    refreshBtn.addEventListener("click", loadHealth);
+    loadHealth();
+  </script>
+</body>
+</html>
