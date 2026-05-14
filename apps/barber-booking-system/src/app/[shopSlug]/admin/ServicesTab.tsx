@@ -30,7 +30,7 @@ export default function ServicesTab({ shopSlug }: { shopSlug: string }) {
   const [addingSaving, setAddingSaving] = useState(false);
 
   const [depositEnabled, setDepositEnabled] = useState(true);
-  const [depositAmount, setDepositAmount] = useState("20");
+  const [depositAmount, setDepositAmount] = useState("15");
   const [depositType, setDepositType] = useState<"fixed" | "percent">("fixed");
   const [depositSaving, setDepositSaving] = useState(false);
   const [depositSaved, setDepositSaved] = useState(false);
