@@ -38,9 +38,30 @@ const jsonLd = {
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string; q?: string }>;
+  searchParams: Promise<{ category?: string; q?: string; date?: string }>;
 }) {
-  const { category, q } = await searchParams;
+  const { category, q, date } = await searchParams;
+
+  const now = new Date();
+
+  // Date range bounds
+  let dateFrom = now.toISOString();
+  let dateTo: string | null = null;
+
+  if (date === "week") {
+    const end = new Date(now); end.setDate(now.getDate() + 7);
+    dateTo = end.toISOString();
+  } else if (date === "weekend") {
+    const day = now.getDay();
+    const fri = new Date(now); fri.setDate(now.getDate() + ((5 - day + 7) % 7));
+    fri.setHours(0, 0, 0, 0);
+    const sun = new Date(fri); sun.setDate(fri.getDate() + 2); sun.setHours(23, 59, 59, 999);
+    dateFrom = fri < now ? now.toISOString() : fri.toISOString();
+    dateTo = sun.toISOString();
+  } else if (date === "month") {
+    const end = new Date(now); end.setDate(now.getDate() + 30);
+    dateTo = end.toISOString();
+  }
 
   let query = supabaseServer
     .from("events")
@@ -52,10 +73,11 @@ export default async function HomePage({
     `)
     .eq("status", "published")
     .eq("is_public", true)
-    .gte("starts_at", new Date().toISOString())
+    .gte("starts_at", dateFrom)
     .order("starts_at", { ascending: true })
     .limit(40);
 
+  if (dateTo) query = query.lte("starts_at", dateTo);
   if (category) query = query.eq("category", category);
   if (q) query = query.ilike("title", `%${q}%`);
 
@@ -80,7 +102,10 @@ export default async function HomePage({
         <Link href="/" style={{ textDecoration: "none" }}>
           <img src="/events-192.png" alt="SB Events" style={{ height: 40, width: 40, display: "block", borderRadius: 10 }} />
         </Link>
-        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+          <Link href="/my-tickets" style={{ color: "#a1a1aa", fontSize: "0.85rem", textDecoration: "none" }}>
+            My Tickets
+          </Link>
           <Link href="/organizer/login" className="btn btn--ghost" style={{ minHeight: 36, fontSize: "0.85rem", padding: "0 14px" }}>
             Organizer Login
           </Link>
@@ -134,10 +159,41 @@ export default async function HomePage({
       <main style={{ padding: "32px 14px 64px" }}>
         <div className="wrap">
 
+          {/* DATE FILTERS */}
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
+            {[
+              { label: "Any Date", value: undefined },
+              { label: "This Week", value: "week" },
+              { label: "This Weekend", value: "weekend" },
+              { label: "This Month", value: "month" },
+            ].map(({ label, value }) => {
+              const active = date === value;
+              const params = new URLSearchParams();
+              if (value) params.set("date", value);
+              if (category) params.set("category", category);
+              if (q) params.set("q", q);
+              const href = `/?${params.toString()}`;
+              return (
+                <Link
+                  key={label}
+                  href={href}
+                  style={{
+                    padding: "5px 13px", borderRadius: 999, fontSize: 12, fontWeight: 800,
+                    background: active ? "#ef4444" : "#0b0b0b",
+                    color: active ? "#fff" : "#a1a1aa",
+                    border: "1px solid " + (active ? "#ef4444" : "#242427"),
+                  }}
+                >
+                  {label}
+                </Link>
+              );
+            })}
+          </div>
+
           {/* CATEGORY FILTERS */}
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 28 }}>
             <Link
-              href="/"
+              href={`/?${new URLSearchParams({ ...(q ? { q } : {}), ...(date ? { date } : {}) }).toString()}`}
               style={{
                 padding: "6px 14px", borderRadius: 999, fontSize: 13, fontWeight: 800,
                 background: !category ? "#fff" : "#0b0b0b",
@@ -147,20 +203,25 @@ export default async function HomePage({
             >
               All
             </Link>
-            {EVENT_CATEGORIES.map((cat) => (
-              <Link
-                key={cat.value}
-                href={`/?category=${cat.value}`}
-                style={{
-                  padding: "6px 14px", borderRadius: 999, fontSize: 13, fontWeight: 800,
-                  background: category === cat.value ? "#fff" : "#0b0b0b",
-                  color: category === cat.value ? "#000" : "#fff",
-                  border: "1px solid " + (category === cat.value ? "#fff" : "#242427"),
-                }}
-              >
-                {cat.label}
-              </Link>
-            ))}
+            {EVENT_CATEGORIES.map((cat) => {
+              const params = new URLSearchParams({ category: cat.value });
+              if (q) params.set("q", q);
+              if (date) params.set("date", date);
+              return (
+                <Link
+                  key={cat.value}
+                  href={`/?${params.toString()}`}
+                  style={{
+                    padding: "6px 14px", borderRadius: 999, fontSize: 13, fontWeight: 800,
+                    background: category === cat.value ? "#fff" : "#0b0b0b",
+                    color: category === cat.value ? "#000" : "#fff",
+                    border: "1px solid " + (category === cat.value ? "#fff" : "#242427"),
+                  }}
+                >
+                  {cat.label}
+                </Link>
+              );
+            })}
           </div>
 
           {/* EVENT GRID */}

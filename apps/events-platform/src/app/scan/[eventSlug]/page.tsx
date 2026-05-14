@@ -19,6 +19,18 @@ export default async function ScanPage({
 
   if (!event) notFound();
 
+  const [{ count: checkedInCount }, { count: totalCount }] = await Promise.all([
+    supabaseServer
+      .from("tickets")
+      .select("id", { count: "exact", head: true })
+      .eq("event_id", event.id)
+      .eq("status", "checked_in"),
+    supabaseServer
+      .from("tickets")
+      .select("id", { count: "exact", head: true })
+      .eq("event_id", event.id),
+  ]);
+
   return (
     <ScannerClient
       eventId={event.id}
@@ -27,6 +39,8 @@ export default async function ScanPage({
         weekday: "short", month: "short", day: "numeric",
       })}
       venueName={[event.venue_name, event.city, event.state].filter(Boolean).join(" · ")}
+      initialCheckedIn={checkedInCount ?? 0}
+      totalTickets={totalCount ?? 0}
     />
   );
 }

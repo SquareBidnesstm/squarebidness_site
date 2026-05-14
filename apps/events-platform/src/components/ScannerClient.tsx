@@ -13,11 +13,15 @@ export default function ScannerClient({
   eventTitle,
   eventDate,
   venueName,
+  initialCheckedIn = 0,
+  totalTickets = 0,
 }: {
   eventId: string;
   eventTitle: string;
   eventDate: string;
   venueName: string;
+  initialCheckedIn?: number;
+  totalTickets?: number;
 }) {
   const [ticketCode, setTicketCode] = useState("");
   const [result, setResult] = useState<ScanResult | null>(null);
@@ -25,7 +29,9 @@ export default function ScannerClient({
   const [cameraActive, setCameraActive] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [sessionCount, setSessionCount] = useState(0);
+  const [checkedIn, setCheckedIn] = useState(initialCheckedIn);
   const [hasBarcodeDetector, setHasBarcodeDetector] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -37,6 +43,7 @@ export default function ScannerClient({
 
   useEffect(() => {
     setHasBarcodeDetector("BarcodeDetector" in window);
+    setIsIOS(/iphone|ipad|ipod/i.test(navigator.userAgent));
     return () => {
       stopCamera();
     };
@@ -58,7 +65,10 @@ export default function ScannerClient({
       });
       const data: ScanResult = await res.json();
       setResult(data);
-      if (data.ok) setSessionCount((n) => n + 1);
+      if (data.ok) {
+        setSessionCount((n) => n + 1);
+        setCheckedIn((n) => n + 1);
+      }
     } catch {
       setResult({ ok: false, message: "Network error. Try again." });
     } finally {
@@ -152,8 +162,10 @@ export default function ScannerClient({
           </div>
           <div style={{ textAlign: "right" }}>
             <p style={{ fontSize: "0.7rem", color: "#555", fontWeight: 900, letterSpacing: "0.1em", textTransform: "uppercase" }}>Checked In</p>
-            <p style={{ fontSize: "1.8rem", fontWeight: 950, color: "#22c55e", lineHeight: 1 }}>{sessionCount}</p>
-            <p style={{ fontSize: "0.65rem", color: "#333" }}>this session</p>
+            <p style={{ fontSize: "1.8rem", fontWeight: 950, color: "#22c55e", lineHeight: 1 }}>
+              {checkedIn}{totalTickets > 0 ? <span style={{ fontSize: "1rem", color: "#555" }}>/{totalTickets}</span> : null}
+            </p>
+            <p style={{ fontSize: "0.65rem", color: "#333" }}>+{sessionCount} this session</p>
           </div>
         </div>
       </div>
@@ -251,9 +263,19 @@ export default function ScannerClient({
         )}
 
         {!hasBarcodeDetector && (
-          <p style={{ color: "#555", fontSize: "0.78rem", textAlign: "center", marginBottom: 12 }}>
-            Camera scanning not supported in this browser. Use manual entry below.
-          </p>
+          <div style={{
+            width: "100%", padding: "12px 16px", borderRadius: 10, marginBottom: 12,
+            background: "#0a0a00", border: "1px solid #2a2a00",
+          }}>
+            <p style={{ color: "#facc15", fontSize: "0.78rem", fontWeight: 700, marginBottom: 2 }}>
+              📷 Camera scanning unavailable
+            </p>
+            <p style={{ color: "#a1a1aa", fontSize: "0.75rem" }}>
+              {isIOS
+                ? "iOS Safari doesn't support QR scanning. Use manual ticket code entry below, or open this page in Chrome on Android."
+                : "Your browser doesn't support QR scanning. Use manual entry below."}
+            </p>
+          </div>
         )}
 
         {/* Divider */}
