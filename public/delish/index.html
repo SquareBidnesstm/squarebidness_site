@@ -1204,6 +1204,9 @@ const hasOrderItem =
   drinkItemsSelected.length > 0 ||
   flashSaleItemsSelected.length > 0;
 const sidesOk = plateItems.length > 0 ? selectedPlatesHaveSides() : true;
+const flashSaleOnly =
+  flashSaleItemsSelected.length > 0 &&
+  selectedItems.length === flashSaleItemsSelected.length;
 
     if (!state.openNow && !isFlashSaleActiveClient()) {
       checkoutBtn.disabled = true;
@@ -1216,6 +1219,12 @@ const sidesOk = plateItems.length > 0 ? selectedPlatesHaveSides() : true;
         checkoutBtn.textContent = "Closed Today";
       }
 
+      return;
+    }
+
+    if (!state.openNow && isFlashSaleActiveClient() && hasOrderItem && !flashSaleOnly) {
+      checkoutBtn.disabled = true;
+      checkoutBtn.textContent = "Flash Sale Only";
       return;
     }
 
@@ -1238,8 +1247,17 @@ const sidesOk = plateItems.length > 0 ? selectedPlatesHaveSides() : true;
     clearStatus();
 
     const state = getServiceState();
+    const selected = getSelectedItems();
+    const selectedItems = selected.items;
+    const plateSelections = getPlateSelections();
+    const lagniappeItemsSelected = getLagniappeSelections();
+    const drinkItemsSelected = getDrinkSelections();
+    const flashSaleItemsSelected = getFlashSaleSelections();
+    const flashSaleOnly =
+      flashSaleItemsSelected.length > 0 &&
+      selectedItems.length === flashSaleItemsSelected.length;
 
-    if (!state.openNow) {
+    if (!state.openNow && !flashSaleOnly) {
       if (state.reason === "manual_closed") {
         showStatus("Online ordering is currently paused.");
             } else if (state.reason === "outside_service_window") {
@@ -1255,13 +1273,6 @@ const sidesOk = plateItems.length > 0 ? selectedPlatesHaveSides() : true;
     showStatus("Please enter a valid 10-digit US phone number.");
     return;
   }
-
-    const selected = getSelectedItems();
-    const selectedItems = selected.items;
-   const plateSelections = getPlateSelections();
-const lagniappeItemsSelected = getLagniappeSelections();
-const drinkItemsSelected = getDrinkSelections();
-const flashSaleItemsSelected = getFlashSaleSelections();
 
 if (!plateSelections.items.length && !lagniappeItemsSelected.length && !drinkItemsSelected.length && !flashSaleItemsSelected.length) {
   showStatus("Add at least one main plate, drink, or Lagniappe item first.");
