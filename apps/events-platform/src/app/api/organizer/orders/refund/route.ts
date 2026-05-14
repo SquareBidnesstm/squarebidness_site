@@ -55,6 +55,8 @@ export async function POST(req: NextRequest) {
     try {
       await stripe.refunds.create({
         payment_intent: order.stripe_payment_intent_id,
+        reverse_transfer: true,        // debit organizer's connected account, not platform
+        refund_application_fee: false, // platform keeps the $1/ticket fee
       });
     } catch (err: any) {
       console.error("Stripe refund error:", err);
