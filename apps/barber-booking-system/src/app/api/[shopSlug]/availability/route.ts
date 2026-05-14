@@ -126,8 +126,22 @@ export async function GET(
 
   const { data: existingBookings } = await bookingsQuery;
 
+  // Also block any blocked_times for this barber (or shop-wide blocks) on this date
+  const { data: blockedTimes } = await supabaseServer
+    .from("blocked_times")
+    .select("starts_at, ends_at")
+    .eq("shop_id", shop.id)
+    .or(`barber_id.eq.${barber.id},barber_id.is.null`)
+    .lte("starts_at", `${date}T23:59:59`)
+    .gte("ends_at", `${date}T00:00:00`);
+
   // Parse existing bookings into minute ranges
-  const bookedRanges = (existingBookings ?? []).map((b) => {
+  const allBlocked = [
+    ...(existingBookings ?? []),
+    ...(blockedTimes ?? []),
+  ];
+
+  const bookedRanges = allBlocked.map((b) => {
     const start = new Date(b.starts_at);
     const end = new Date(b.ends_at);
     // Convert UTC ISO to local minutes-from-midnight for this date

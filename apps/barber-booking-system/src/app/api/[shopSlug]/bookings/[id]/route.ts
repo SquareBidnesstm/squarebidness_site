@@ -141,6 +141,8 @@ export async function PATCH(
 
   // --- Status update path ---
   const status = body.status as string;
+  // refund_deposit: true = issue Stripe refund; false = keep deposit (no-show/late cancel)
+  const refundDeposit: boolean = body.refund_deposit === true;
 
   if (!VALID_STATUSES.includes(status as BookingStatus)) {
     return NextResponse.json(
@@ -149,11 +151,16 @@ export async function PATCH(
     );
   }
 
+  const now = new Date().toISOString();
+  const updateFields: Record<string, unknown> = { status };
+  if (status === "cancelled") updateFields.cancelled_at = now;
+  if (status === "completed") updateFields.completed_at = now;
+
   const { data, error } = await supabaseServer
     .from("bookings")
-    .update({ status })
+    .update(updateFields)
     .eq("id", id)
-    .select("id, status, booking_code")
+    .select("id, status, booking_code, payment_status, customer_phone, customer_name, shop_id")
     .single();
 
   if (error || !data) {
@@ -161,6 +168,61 @@ export async function PATCH(
       { ok: false, error: error?.message || "Update failed" },
       { status: 500 }
     );
+  }
+
+  // Handle deposit when cancelling or marking no-show
+  if (
+    (status === "cancelled" || status === "no_show") &&
+    data.payment_status === "deposit_paid"
+  ) {
+    // Find the Stripe deposit payment
+    const { data: depositPayment } = await supabaseServer
+      .from("payments")
+      .select("id, amount, provider_payment_id")
+      .eq("booking_id", id)
+      .eq("payment_type", "deposit")
+      .eq("status", "succeeded")
+      .single();
+
+    if (depositPayment) {
+      if (refundDeposit && depositPayment.provider_payment_id) {
+        // Issue Stripe refund
+        try {
+          const stripe = new (await import("stripe")).default(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-04-22.dahlia" });
+          await stripe.refunds.create({ payment_intent: depositPayment.provider_payment_id });
+          await supabaseServer.from("payments").update({ status: "refunded" }).eq("id", depositPayment.id);
+          await supabaseServer.from("bookings").update({ payment_status: "refunded" }).eq("id", id);
+        } catch (e) {
+          console.error("Deposit refund failed:", e);
+        }
+      }
+      // If not refunding, deposit is forfeited — no action needed, stays as deposit_paid
+
+      // SMS notify customer
+      const normalizedPhone = normalizePhone(data.customer_phone ?? "");
+      if (normalizedPhone) {
+        const sid = process.env.TWILIO_ACCOUNT_SID;
+        const token = process.env.TWILIO_AUTH_TOKEN;
+        const messagingSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
+        const fromNumber = process.env.DAPPER_FROM_NUMBER;
+        if (sid && token && (messagingSid || fromNumber)) {
+          const smsBody = status === "no_show"
+            ? `Hi ${data.customer_name}, we missed you today ✂️. Your appointment has been marked as a no-show. Your deposit has been forfeited. Please contact us to rebook.`
+            : refundDeposit
+              ? `Hi ${data.customer_name}, your appointment has been cancelled and your $${Number(depositPayment.amount).toFixed(2)} deposit has been refunded. It may take 5–10 business days to appear.`
+              : `Hi ${data.customer_name}, your appointment has been cancelled. Your deposit has been forfeited per our cancellation policy.`;
+          const msgParams = new URLSearchParams({ To: normalizedPhone, Body: smsBody });
+          if (messagingSid) msgParams.set("MessagingServiceSid", messagingSid);
+          else msgParams.set("From", fromNumber!);
+          const creds = Buffer.from(`${sid}:${token}`).toString("base64");
+          fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
+            method: "POST",
+            headers: { Authorization: `Basic ${creds}`, "Content-Type": "application/x-www-form-urlencoded" },
+            body: msgParams.toString(),
+          }).catch(console.error);
+        }
+      }
+    }
   }
 
   return NextResponse.json({ ok: true, booking: data });

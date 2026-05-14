@@ -8,6 +8,7 @@ import HoursTab from "./HoursTab";
 import BillingTab from "./BillingTab";
 import WalkInModal from "./WalkInModal";
 import RescheduleModal from "./RescheduleModal";
+import BlockTimeModal from "./BlockTimeModal";
 
 type BookingStatus =
   | "pending"
@@ -95,6 +96,7 @@ export default function AdminPage() {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [loggingOut, setLoggingOut] = useState(false);
   const [showWalkIn, setShowWalkIn] = useState(false);
+  const [showBlockTime, setShowBlockTime] = useState(false);
   const [reschedulingBooking, setReschedulingBooking] = useState<AdminBooking | null>(null);
   const [walkInSuccess, setWalkInSuccess] = useState<{ booking_code: string; customer_name: string; barber: string; service: string } | null>(null);
 
@@ -130,23 +132,28 @@ export default function AdminPage() {
     router.push(`/${shopSlug}/admin/login`);
   }
 
+  const [forfeitPrompt, setForfeitPrompt] = useState<{ bookingId: string; status: BookingStatus } | null>(null);
+
   const updateStatus = useCallback(
-    async (bookingId: string, newStatus: BookingStatus) => {
+    async (bookingId: string, newStatus: BookingStatus, refundDeposit?: boolean) => {
       setUpdatingId(bookingId);
       try {
         const res = await fetch(`/api/${shopSlug}/bookings/${bookingId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: newStatus }),
+          body: JSON.stringify({ status: newStatus, refund_deposit: refundDeposit ?? false }),
         });
         const data = await res.json();
         if (res.ok && data.ok) {
           setBookings((prev) =>
             prev.map((b) =>
-              b.id === bookingId ? { ...b, status: newStatus } : b
+              b.id === bookingId
+                ? { ...b, status: newStatus, payment_status: data.booking?.payment_status ?? b.payment_status }
+                : b
             )
           );
           setManagingId(null);
+          setForfeitPrompt(null);
         }
       } finally {
         setUpdatingId(null);
@@ -419,6 +426,13 @@ export default function AdminPage() {
               <div style={{ color: "#8f8f8f", fontSize: 14 }}>{filteredBookings.length} shown</div>
               <button
                 type="button"
+                onClick={() => setShowBlockTime(true)}
+                style={secondaryButton}
+              >
+                Block Time
+              </button>
+              <button
+                type="button"
                 onClick={() => { setWalkInSuccess(null); setShowWalkIn(true); }}
                 style={goldButton}
               >
@@ -619,6 +633,19 @@ export default function AdminPage() {
                           <span style={{ color: "#666" }}>Created: </span>
                           {new Date(booking.created_at).toLocaleString()}
                         </div>
+                        {booking.payment_status === "deposit_paid" && booking.status === "completed" && (
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              const res = await fetch(`/api/${shopSlug}/admin/bookings/${booking.id}/collect-balance`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ provider: "manual" }) });
+                              const d = await res.json();
+                              if (d.ok) setBookings(prev => prev.map(b => b.id === booking.id ? { ...b, payment_status: "paid" } : b));
+                            }}
+                            style={{ marginTop: 8, padding: "10px 16px", borderRadius: 10, border: "none", background: "#d4af37", color: "#000", fontWeight: 800, cursor: "pointer", fontSize: 13 }}
+                          >
+                            Collect Balance — {formatMoney(Math.max(0, Number(booking.services?.price ?? 0) - (booking.payments?.filter(p => p.status === "succeeded").reduce((s, p) => s + Number(p.amount), 0) ?? 0)))}
+                          </button>
+                        )}
                       </div>
                     )}
 
@@ -651,7 +678,13 @@ export default function AdminPage() {
                                 key={s}
                                 type="button"
                                 disabled={isUpdating}
-                                onClick={() => updateStatus(booking.id, s)}
+                                onClick={() => {
+                                  if ((s === "cancelled" || s === "no_show") && booking.payment_status === "deposit_paid") {
+                                    setForfeitPrompt({ bookingId: booking.id, status: s });
+                                  } else {
+                                    updateStatus(booking.id, s);
+                                  }
+                                }}
                                 style={{
                                   padding: "10px 14px",
                                   borderRadius: 10,
@@ -708,6 +741,45 @@ export default function AdminPage() {
               .catch(console.error);
           }}
         />
+      )}
+
+      {showBlockTime && <BlockTimeModal shopSlug={shopSlug} onClose={() => setShowBlockTime(false)} />}
+
+      {forfeitPrompt && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", zIndex: 999, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+          <div style={{ background: "#0d0d0d", border: "1px solid #2d2d2d", borderRadius: 24, padding: 32, maxWidth: 440, width: "100%" }}>
+            <h3 style={{ margin: "0 0 12px", fontSize: 22, fontWeight: 900 }}>
+              {forfeitPrompt.status === "no_show" ? "Mark No-Show" : "Cancel Booking"}
+            </h3>
+            <p style={{ color: "#aaa", fontSize: 14, marginBottom: 24 }}>
+              This booking has a deposit paid. What should happen to it?
+            </p>
+            <div style={{ display: "grid", gap: 10 }}>
+              <button
+                disabled={!!updatingId}
+                onClick={() => updateStatus(forfeitPrompt.bookingId, forfeitPrompt.status, false)}
+                style={{ padding: "14px 20px", borderRadius: 12, border: "1px solid #3d0000", background: "#1a0000", color: "#ff7070", fontWeight: 800, cursor: "pointer", textAlign: "left" }}
+              >
+                <div style={{ fontWeight: 900, marginBottom: 2 }}>Forfeit deposit</div>
+                <div style={{ fontSize: 12, color: "#884444" }}>Keep the deposit. Client is not refunded.</div>
+              </button>
+              <button
+                disabled={!!updatingId}
+                onClick={() => updateStatus(forfeitPrompt.bookingId, forfeitPrompt.status, true)}
+                style={{ padding: "14px 20px", borderRadius: 12, border: "1px solid #2d2d2d", background: "#111", color: "#fff", fontWeight: 800, cursor: "pointer", textAlign: "left" }}
+              >
+                <div style={{ fontWeight: 900, marginBottom: 2 }}>Refund deposit</div>
+                <div style={{ fontSize: 12, color: "#666" }}>Issue a Stripe refund. Takes 5–10 business days.</div>
+              </button>
+              <button
+                onClick={() => setForfeitPrompt(null)}
+                style={{ padding: "12px 20px", borderRadius: 12, border: "none", background: "transparent", color: "#555", fontWeight: 700, cursor: "pointer" }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {reschedulingBooking && (
