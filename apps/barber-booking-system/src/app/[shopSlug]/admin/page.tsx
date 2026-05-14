@@ -6,6 +6,8 @@ import ServicesTab from "./ServicesTab";
 import BarbersTab from "./BarbersTab";
 import HoursTab from "./HoursTab";
 import BillingTab from "./BillingTab";
+import WalkInModal from "./WalkInModal";
+import RescheduleModal from "./RescheduleModal";
 
 type BookingStatus =
   | "pending"
@@ -91,6 +93,9 @@ export default function AdminPage() {
   const [managingId, setManagingId] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [showWalkIn, setShowWalkIn] = useState(false);
+  const [reschedulingBooking, setReschedulingBooking] = useState<AdminBooking | null>(null);
+  const [walkInSuccess, setWalkInSuccess] = useState<{ booking_code: string; customer_name: string; barber: string; service: string } | null>(null);
 
   const today = useMemo(() => getTodayString(), []);
 
@@ -409,10 +414,28 @@ export default function AdminPage() {
             }}
           >
             <h2 style={{ margin: 0, fontSize: 30, fontWeight: 900 }}>Bookings</h2>
-            <div style={{ color: "#8f8f8f", fontSize: 14 }}>
-              {filteredBookings.length} shown
+            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+              <div style={{ color: "#8f8f8f", fontSize: 14 }}>{filteredBookings.length} shown</div>
+              <button
+                type="button"
+                onClick={() => { setWalkInSuccess(null); setShowWalkIn(true); }}
+                style={goldButton}
+              >
+                + Walk-In
+              </button>
             </div>
           </div>
+
+          {walkInSuccess && (
+            <div style={{ background: "#0a2200", border: "1px solid #1e4400", borderRadius: 14, padding: "14px 18px", marginBottom: 18, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div>
+                <span style={{ color: "#5cd600", fontWeight: 800 }}>Walk-in checked in — </span>
+                <span style={{ color: "#ccc" }}>{walkInSuccess.customer_name} · {walkInSuccess.service} · {walkInSuccess.barber} · </span>
+                <span style={{ color: "#5cd600", fontFamily: "monospace" }}>{walkInSuccess.booking_code}</span>
+              </div>
+              <button onClick={() => setWalkInSuccess(null)} style={{ background: "none", border: "none", color: "#5cd600", cursor: "pointer", fontSize: 18 }}>×</button>
+            </div>
+          )}
 
           {loading ? (
             <div style={emptyBox}>Loading bookings...</div>
@@ -624,6 +647,20 @@ export default function AdminPage() {
                                 {isUpdating ? "Updating..." : STATUS_LABELS[s]}
                               </button>
                             ))}
+                          <button
+                            type="button"
+                            disabled={isUpdating}
+                            onClick={() => { setReschedulingBooking(booking); setManagingId(null); }}
+                            style={{
+                              padding: "10px 14px", borderRadius: 10,
+                              border: "1px solid #3d3000", background: "#1a1400",
+                              color: "#d4af37", fontWeight: 700, fontSize: 13,
+                              cursor: isUpdating ? "not-allowed" : "pointer",
+                              opacity: isUpdating ? 0.5 : 1,
+                            }}
+                          >
+                            Reschedule
+                          </button>
                         </div>
                       </div>
                     )}
@@ -636,6 +673,36 @@ export default function AdminPage() {
         </>
         )}
       </section>
+
+      {showWalkIn && (
+        <WalkInModal
+          shopSlug={shopSlug}
+          onClose={() => setShowWalkIn(false)}
+          onCreated={(b) => {
+            setShowWalkIn(false);
+            setWalkInSuccess(b);
+            // Reload bookings to include the new walk-in
+            fetch(`/api/${shopSlug}/admin/bookings`, { cache: "no-store" })
+              .then(r => r.json())
+              .then(data => { if (data.ok) setBookings(data.bookings || []); })
+              .catch(console.error);
+          }}
+        />
+      )}
+
+      {reschedulingBooking && (
+        <RescheduleModal
+          shopSlug={shopSlug}
+          booking={reschedulingBooking}
+          onClose={() => setReschedulingBooking(null)}
+          onRescheduled={(bookingId, newDate, newStartsAt) => {
+            setReschedulingBooking(null);
+            setBookings(prev => prev.map(b =>
+              b.id === bookingId ? { ...b, appointment_date: newDate, starts_at: newStartsAt } : b
+            ));
+          }}
+        />
+      )}
     </main>
   );
 }

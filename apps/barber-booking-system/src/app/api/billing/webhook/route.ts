@@ -8,6 +8,126 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export const config = { runtime: "nodejs" };
 
+function convertDisplayTimeTo24Hour(time: string): string | null {
+  const [clock, suffix] = time.trim().split(" ");
+  if (!clock || !suffix) return null;
+  const [rawHour, rawMinute] = clock.split(":");
+  let hour = Number(rawHour);
+  const minute = Number(rawMinute);
+  if (isNaN(hour) || isNaN(minute)) return null;
+  if (suffix.toUpperCase() === "PM" && hour !== 12) hour += 12;
+  if (suffix.toUpperCase() === "AM" && hour === 12) hour = 0;
+  return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+}
+
+function normalizePhone(raw: string): string | null {
+  const digits = raw.replace(/\D/g, "");
+  if (digits.length === 10) return `+1${digits}`;
+  if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
+  return null;
+}
+
+async function handleDepositBooking(session: Stripe.Checkout.Session) {
+  const meta = session.metadata;
+  if (!meta?.shop_id || !meta?.shop_slug) return;
+
+  // Already confirmed via redirect? Skip if booking already exists for this session
+  const { data: existing } = await supabaseServer
+    .from("bookings")
+    .select("id")
+    .eq("shop_id", meta.shop_id)
+    .eq("payment_status", "deposit_paid")
+    .eq("customer_name", meta.customer_name ?? "")
+    .eq("appointment_date", meta.date ?? "")
+    .limit(1);
+
+  // Idempotency: a recent booking for same customer+date+barber likely means redirect already ran
+  if (existing && existing.length > 0) return;
+
+  const { data: shop } = await supabaseServer
+    .from("shops").select("id, slug, timezone").eq("id", meta.shop_id).eq("active", true).single();
+  if (!shop) return;
+
+  const { data: barber } = await supabaseServer
+    .from("barbers").select("id, name, display_name, slug").eq("shop_id", shop.id).eq("slug", meta.barber_slug).eq("active", true).single();
+  if (!barber) return;
+
+  const { data: svc } = await supabaseServer
+    .from("services").select("id, name, price, duration_minutes").eq("shop_id", shop.id).eq("slug", meta.service_slug).eq("active", true).single();
+  if (!svc) return;
+
+  const time24 = convertDisplayTimeTo24Hour(meta.time ?? "");
+  if (!time24) return;
+
+  const startsAt = new Date(`${meta.date}T${time24}:00`);
+  const endsAt = new Date(startsAt.getTime() + svc.duration_minutes * 60 * 1000);
+
+  // Check overlaps
+  const { data: overlaps } = await supabaseServer
+    .from("bookings").select("id").eq("barber_id", barber.id)
+    .in("status", ["pending", "confirmed"])
+    .lt("starts_at", endsAt.toISOString()).gt("ends_at", startsAt.toISOString());
+  if (overlaps && overlaps.length > 0) return;
+
+  const { data: bookingCode } = await supabaseServer.rpc("generate_booking_code", { shop_slug: shop.slug });
+  const { data: customer } = await supabaseServer
+    .from("customers").insert({ shop_id: shop.id, full_name: meta.customer_name ?? "" }).select("id").single();
+
+  const { data: booking } = await supabaseServer
+    .from("bookings").insert({
+      booking_code: bookingCode,
+      shop_id: shop.id,
+      barber_id: barber.id,
+      service_id: svc.id,
+      customer_id: customer?.id ?? null,
+      customer_name: meta.customer_name ?? "",
+      customer_phone: meta.customer_phone ?? "",
+      customer_email: meta.customer_email || null,
+      appointment_date: meta.date,
+      starts_at: startsAt.toISOString(),
+      ends_at: endsAt.toISOString(),
+      price_snapshot: svc.price,
+      duration_snapshot_minutes: svc.duration_minutes,
+      status: "confirmed",
+      payment_status: "deposit_paid",
+      source: "shop_booking_page",
+      confirmed_at: new Date().toISOString(),
+    }).select("id, booking_code, starts_at").single();
+
+  if (!booking) return;
+
+  // Send SMS confirmation
+  const normalizedPhone = normalizePhone(meta.customer_phone ?? "");
+  if (normalizedPhone) {
+    const sid = process.env.TWILIO_ACCOUNT_SID;
+    const token = process.env.TWILIO_AUTH_TOKEN;
+    const messagingSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
+    const fromNumber = process.env.DAPPER_FROM_NUMBER;
+
+    if (sid && token && (messagingSid || fromNumber)) {
+      const dateStr = new Date(`${meta.date}T12:00:00`).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+      const timeStr = new Date(booking.starts_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: shop.timezone });
+      const rebookUrl = `https://booking.squarebidness.com/${shop.slug}/book/${barber.slug}`;
+      const body = [
+        `You're confirmed! ✂️`, ``,
+        `${meta.customer_name}`, `${svc.name}`,
+        `${dateStr} at ${timeStr}`, `Barber: ${barber.display_name || barber.name}`,
+        `Code: ${booking.booking_code}`, ``, `Book again: ${rebookUrl}`,
+      ].join("\n");
+
+      const msgParams = new URLSearchParams({ To: normalizedPhone, Body: body });
+      if (messagingSid) msgParams.set("MessagingServiceSid", messagingSid);
+      else msgParams.set("From", fromNumber!);
+      const creds = Buffer.from(`${sid}:${token}`).toString("base64");
+      fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
+        method: "POST",
+        headers: { Authorization: `Basic ${creds}`, "Content-Type": "application/x-www-form-urlencoded" },
+        body: msgParams.toString(),
+      }).catch(console.error);
+    }
+  }
+}
+
 export async function POST(req: NextRequest) {
   const body = await req.text();
   const sig = req.headers.get("stripe-signature") ?? "";
@@ -27,6 +147,13 @@ export async function POST(req: NextRequest) {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
+
+        // Deposit booking fallback — runs if redirect didn't create the booking
+        if (session.mode === "payment") {
+          await handleDepositBooking(session);
+          break;
+        }
+
         if (session.mode !== "subscription") break;
         const shopId = session.metadata?.shop_id;
         const customerId = session.customer as string;

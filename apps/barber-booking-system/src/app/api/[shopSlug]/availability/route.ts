@@ -32,6 +32,7 @@ export async function GET(
   const barberSlug = searchParams.get("barber");
   const date = searchParams.get("date"); // YYYY-MM-DD
   const durationStr = searchParams.get("duration"); // minutes
+  const excludeBookingId = searchParams.get("excludeBooking") ?? null;
 
   if (!barberSlug || !date || !durationStr) {
     return NextResponse.json({ ok: false, error: "Missing barber, date, or duration" }, { status: 400 });
@@ -113,13 +114,17 @@ export async function GET(
 
   const slotInterval: number = (rulesSetting?.value_json as { slot_interval_minutes?: number } | null)?.slot_interval_minutes ?? 30;
 
-  // Get existing bookings for this barber on this date
-  const { data: existingBookings } = await supabaseServer
+  // Get existing bookings for this barber on this date (exclude current booking when rescheduling)
+  let bookingsQuery = supabaseServer
     .from("bookings")
     .select("starts_at, ends_at")
     .eq("barber_id", barber.id)
     .eq("appointment_date", date)
     .in("status", ["pending", "confirmed"]);
+
+  if (excludeBookingId) bookingsQuery = bookingsQuery.neq("id", excludeBookingId);
+
+  const { data: existingBookings } = await bookingsQuery;
 
   // Parse existing bookings into minute ranges
   const bookedRanges = (existingBookings ?? []).map((b) => {
