@@ -7,6 +7,7 @@ import { EVENT_CATEGORIES } from "../../../../../lib/constants";
 import NavLogo from "../../../../../components/NavLogo";
 import RefundButton from "../../../../../components/RefundButton";
 import TierEditor from "../../../../../components/TierEditor";
+import EmailBlastForm from "../../../../../components/EmailBlastForm";
 
 export const revalidate = 0;
 
@@ -15,10 +16,10 @@ export default async function ManageEventPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ waitlist_notified?: string }>;
+  searchParams: Promise<{ waitlist_notified?: string; blast_sent?: string }>;
 }) {
   const { id } = await params;
-  const { waitlist_notified } = await searchParams;
+  const { waitlist_notified, blast_sent } = await searchParams;
 
   // Auth
   const cookieStore = await cookies();
@@ -69,6 +70,12 @@ export default async function ManageEventPage({
     .order("created_at", { ascending: true });
 
   const waitlist = (waitlistEntries ?? []) as any[];
+
+  const { count: checkedInCount } = await supabaseServer
+    .from("tickets")
+    .select("id", { count: "exact", head: true })
+    .eq("event_id", event.id)
+    .eq("status", "checked_in");
 
   return (
     <div style={{ minHeight: "100vh" }}>
@@ -133,6 +140,11 @@ export default async function ManageEventPage({
                 {totalCapacity > 0 ? Math.round((totalSold / totalCapacity) * 100) : 0}%
               </p>
               <p style={{ color: "#555", fontSize: "0.8rem" }}>filled</p>
+            </div>
+            <div className="card" style={{ textAlign: "center" }}>
+              <p style={{ color: "#a1a1aa", fontSize: 11, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 6 }}>Checked In</p>
+              <p style={{ fontSize: "2rem", fontWeight: 950, color: "#60a5fa" }}>{checkedInCount ?? 0}</p>
+              <p style={{ color: "#555", fontSize: "0.8rem" }}>of {totalSold} sold</p>
             </div>
           </div>
 
@@ -202,6 +214,14 @@ export default async function ManageEventPage({
                 ))}
               </div>
             )}
+          </div>
+
+          {/* Email Blast */}
+          <div className="card" style={{ marginBottom: 24 }}>
+            <p style={{ color: "#a1a1aa", fontSize: 11, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 14 }}>
+              📣 Email Attendees
+            </p>
+            <EmailBlastForm eventId={event.id} recipientCount={orderList.filter((o: any) => o.status === "paid").length} />
           </div>
 
           {/* Waitlist */}

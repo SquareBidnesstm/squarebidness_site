@@ -206,6 +206,53 @@ export async function sendOrganizerWelcome(params: SendOrganizerWelcomeParams) {
   });
 }
 
+// ─── Organizer Event Blast ────────────────────────────────────────────────────
+
+interface SendEventBlastParams {
+  organizerName: string;
+  eventTitle: string;
+  eventSlug: string;
+  subject: string;
+  message: string;
+  recipients: { email: string; name: string }[];
+}
+
+export async function sendEventBlast(params: SendEventBlastParams): Promise<number> {
+  if (!process.env.RESEND_API_KEY) return 0;
+  const eventUrl = `https://events.squarebidness.com/events/${params.eventSlug}`;
+  let sent = 0;
+  for (const r of params.recipients) {
+    try {
+      await resend.emails.send({
+        from: "SB Events <tickets@squarebidness.com>",
+        to: r.email,
+        subject: params.subject,
+        html: emailShell(`
+          <h1 style="font-size:22px;font-weight:900;letter-spacing:-0.04em;margin:0 0 6px;">${params.subject}</h1>
+          <p style="color:#555;font-size:12px;margin:0 0 24px;">From ${params.organizerName} · re: ${params.eventTitle}</p>
+          <div style="background:#0a0a0a;border:1px solid #1d1d1f;border-radius:14px;padding:20px;margin-bottom:24px;white-space:pre-line;font-size:15px;line-height:1.65;color:#d4d4d8;">
+            ${params.message.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>")}
+          </div>
+          <div style="text-align:center;">
+            <a href="${eventUrl}"
+               style="display:inline-block;background:#ef4444;color:#fff;font-weight:900;font-size:14px;padding:12px 28px;border-radius:999px;text-decoration:none;">
+              View Event →
+            </a>
+          </div>
+          <p style="color:#333;font-size:11px;text-align:center;margin-top:20px;">
+            You're receiving this because you bought a ticket to ${params.eventTitle}.
+          </p>
+        `),
+      });
+      sent++;
+    } catch {
+      // non-fatal — log and continue
+      console.error(`Blast failed for ${r.email}`);
+    }
+  }
+  return sent;
+}
+
 // ─── Waitlist Notification ────────────────────────────────────────────────────
 
 interface SendWaitlistNotificationParams {
