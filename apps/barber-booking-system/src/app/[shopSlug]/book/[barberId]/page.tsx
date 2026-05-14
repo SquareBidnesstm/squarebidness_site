@@ -20,7 +20,7 @@ export default async function BookingPage({
 
   const { data: barber } = await supabaseServer
     .from("barbers")
-    .select("slug, name, display_name, role")
+    .select("id, slug, name, display_name, role")
     .eq("shop_id", shop.id)
     .eq("slug", barberId)
     .eq("active", true)
@@ -35,16 +35,36 @@ export default async function BookingPage({
     .eq("active", true)
     .order("sort_order");
 
+  // Load barber-specific price overrides and bio in parallel
+  const [{ data: overrideSetting }, { data: bioSetting }] = await Promise.all([
+    supabaseServer
+      .from("shop_settings")
+      .select("value_json")
+      .eq("shop_id", shop.id)
+      .eq("key", `barber_price_overrides_${barber.id}`)
+      .single(),
+    supabaseServer
+      .from("shop_settings")
+      .select("value_json")
+      .eq("shop_id", shop.id)
+      .eq("key", `barber_bio_${barber.id}`)
+      .single(),
+  ]);
+
+  const priceOverrides = (overrideSetting?.value_json as Record<string, number> | null) ?? {};
+  const barberBio = (bioSetting?.value_json as { bio?: string } | null)?.bio ?? null;
+
   return (
     <BookingForm
       shopSlug={shopSlug}
       shopName={shop.name}
       barberSlug={barberId}
       barberName={barber.display_name || barber.name}
+      barberBio={barberBio}
       services={(services ?? []).map((s) => ({
         id: s.slug,
         name: s.name,
-        price: Number(s.price),
+        price: priceOverrides[s.id] !== undefined ? Number(priceOverrides[s.id]) : Number(s.price),
         duration_minutes: s.duration_minutes,
       }))}
     />

@@ -17,10 +17,11 @@ type Props = {
   shopName: string;
   barberSlug: string;
   barberName: string;
+  barberBio?: string | null;
   services: ServiceOption[];
 };
 
-export default function BookingForm({ shopSlug, shopName, barberSlug, barberName, services }: Props) {
+export default function BookingForm({ shopSlug, shopName, barberSlug, barberName, barberBio, services }: Props) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -254,9 +255,15 @@ export default function BookingForm({ shopSlug, shopName, barberSlug, barberName
         <h1 style={{ fontSize: 32, fontWeight: 900, marginBottom: 4 }}>
           Book with {barberName}
         </h1>
-        <p style={{ color: "#555", marginBottom: 36, fontSize: 14 }}>
-          Fill out the form below to request your appointment.
-        </p>
+        {barberBio ? (
+          <p style={{ color: "#aaa", marginBottom: 28, fontSize: 14, lineHeight: 1.6 }}>
+            {barberBio}
+          </p>
+        ) : (
+          <p style={{ color: "#555", marginBottom: 36, fontSize: 14 }}>
+            Fill out the form below to request your appointment.
+          </p>
+        )}
 
         <div style={{ display: "grid", gap: 20 }}>
           <Field label="Full Name" required>

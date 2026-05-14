@@ -48,6 +48,7 @@ type EditState = {
   name: string;
   display_name: string;
   role: string;
+  bio: string;
 };
 
 const COMMON_ROLES = [
@@ -65,10 +66,11 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editState, setEditState] = useState<EditState>({ name: "", display_name: "", role: "" });
+  const [editState, setEditState] = useState<EditState>({ name: "", display_name: "", role: "", bio: "" });
   const [saving, setSaving] = useState(false);
   const [addingNew, setAddingNew] = useState(false);
-  const [newBarber, setNewBarber] = useState<EditState>({ name: "", display_name: "", role: "Barber" });
+  const [newBarber, setNewBarber] = useState<EditState>({ name: "", display_name: "", role: "Barber", bio: "" });
+  const [barberBios, setBarberBios] = useState<Record<string, string>>({});
   const [addingSaving, setAddingSaving] = useState(false);
   const [hoursOpen, setHoursOpen] = useState<string | null>(null);
   const [barberHours, setBarberHours] = useState<Record<string, HourRow[]>>({});
@@ -101,6 +103,12 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
       if (data.ok) {
         setBarbers(data.barbers);
         setBarberLimit(data.barberLimit ?? 0);
+        // Load bios for all barbers
+        const biosRes = await fetch(`/api/${shopSlug}/admin/barbers/bios`);
+        if (biosRes.ok) {
+          const biosData = await biosRes.json();
+          if (biosData.ok) setBarberBios(biosData.bios ?? {});
+        }
       } else {
         setError(data.error || "Failed to load barbers.");
       }
@@ -154,25 +162,33 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
 
   function startEdit(b: Barber) {
     setEditingId(b.id);
-    setEditState({ name: b.name, display_name: b.display_name || b.name, role: b.role });
+    setEditState({ name: b.name, display_name: b.display_name || b.name, role: b.role, bio: barberBios[b.id] ?? "" });
     setAddingNew(false);
     setPinOpenId(null);
   }
 
   async function saveEdit(id: string) {
     setSaving(true);
-    const res = await fetch(`/api/${shopSlug}/admin/barbers/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: editState.name.trim(),
-        display_name: editState.display_name.trim() || editState.name.trim(),
-        role: editState.role,
+    const [res] = await Promise.all([
+      fetch(`/api/${shopSlug}/admin/barbers/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: editState.name.trim(),
+          display_name: editState.display_name.trim() || editState.name.trim(),
+          role: editState.role,
+        }),
       }),
-    });
+      fetch(`/api/${shopSlug}/admin/barbers/${id}/bio`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bio: editState.bio.trim() }),
+      }),
+    ]);
     const data = await res.json();
     if (data.ok) {
       setBarbers((prev) => prev.map((b) => (b.id === id ? { ...data.barber, has_pin: b.has_pin } : b)));
+      setBarberBios((prev) => ({ ...prev, [id]: editState.bio.trim() }));
       setEditingId(null);
     }
     setSaving(false);
@@ -392,7 +408,7 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
             >
               {isEditing ? (
                 <div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 160px", gap: 12, marginBottom: 14 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 160px", gap: 12, marginBottom: 12 }}>
                     <div>
                       <div style={labelStyle}>Full Name</div>
                       <input
@@ -422,6 +438,16 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
                         ))}
                       </select>
                     </div>
+                  </div>
+                  <div style={{ marginBottom: 14 }}>
+                    <div style={labelStyle}>Bio <span style={{ color: "#555", fontWeight: 400 }}>(shown on booking page · max 500 chars)</span></div>
+                    <textarea
+                      value={editState.bio}
+                      onChange={(e) => setEditState((p) => ({ ...p, bio: e.target.value.slice(0, 500) }))}
+                      rows={3}
+                      placeholder="Short bio shown to customers on the booking page…"
+                      style={{ ...inputStyle, resize: "vertical" }}
+                    />
                   </div>
                   <div style={{ display: "flex", gap: 10 }}>
                     <button

@@ -9,6 +9,8 @@ import BillingTab from "./BillingTab";
 import WalkInModal from "./WalkInModal";
 import RescheduleModal from "./RescheduleModal";
 import BlockTimeModal from "./BlockTimeModal";
+import ClientsTab from "./ClientsTab";
+import SmsBlastModal from "./SmsBlastModal";
 
 type BookingStatus =
   | "pending"
@@ -82,7 +84,7 @@ export default function AdminPage() {
   const shopSlug = params.shopSlug as string;
   const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<"bookings" | "barbers" | "services" | "hours" | "billing">("bookings");
+  const [activeTab, setActiveTab] = useState<"bookings" | "clients" | "barbers" | "services" | "hours" | "billing">("bookings");
   const [shopName, setShopName] = useState("");
   const [bookings, setBookings] = useState<AdminBooking[]>([]);
   const [loading, setLoading] = useState(true);
@@ -97,6 +99,7 @@ export default function AdminPage() {
   const [loggingOut, setLoggingOut] = useState(false);
   const [showWalkIn, setShowWalkIn] = useState(false);
   const [showBlockTime, setShowBlockTime] = useState(false);
+  const [showSmsBlast, setShowSmsBlast] = useState(false);
   const [reschedulingBooking, setReschedulingBooking] = useState<AdminBooking | null>(null);
   const [walkInSuccess, setWalkInSuccess] = useState<{ booking_code: string; customer_name: string; barber: string; service: string } | null>(null);
 
@@ -293,7 +296,7 @@ export default function AdminPage() {
 
         {/* Tab nav */}
         <div style={{ display: "flex", gap: 8, marginBottom: 28 }}>
-          {(["bookings", "barbers", "services", "hours", "billing"] as const).map((tab) => (
+          {(["bookings", "clients", "barbers", "services", "hours", "billing"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -314,7 +317,9 @@ export default function AdminPage() {
           ))}
         </div>
 
-        {activeTab === "barbers" ? (
+        {activeTab === "clients" ? (
+          <ClientsTab shopSlug={shopSlug} />
+        ) : activeTab === "barbers" ? (
           <BarbersTab shopSlug={shopSlug} />
         ) : activeTab === "services" ? (
           <ServicesTab shopSlug={shopSlug} />
@@ -424,6 +429,20 @@ export default function AdminPage() {
             <h2 style={{ margin: 0, fontSize: 30, fontWeight: 900 }}>Bookings</h2>
             <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
               <div style={{ color: "#8f8f8f", fontSize: 14 }}>{filteredBookings.length} shown</div>
+              <a
+                href={`/api/${shopSlug}/admin/calendar.ics`}
+                download
+                style={{ ...secondaryButton, textDecoration: "none", display: "inline-flex", alignItems: "center" } as React.CSSProperties}
+              >
+                📅 Export .ics
+              </a>
+              <button
+                type="button"
+                onClick={() => setShowSmsBlast(true)}
+                style={secondaryButton}
+              >
+                📲 SMS Blast
+              </button>
               <button
                 type="button"
                 onClick={() => setShowBlockTime(true)}
@@ -744,6 +763,7 @@ export default function AdminPage() {
       )}
 
       {showBlockTime && <BlockTimeModal shopSlug={shopSlug} onClose={() => setShowBlockTime(false)} />}
+      {showSmsBlast && <SmsBlastModal shopSlug={shopSlug} onClose={() => setShowSmsBlast(false)} />}
 
       {forfeitPrompt && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", zIndex: 999, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>

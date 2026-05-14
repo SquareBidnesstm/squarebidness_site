@@ -36,11 +36,22 @@ export async function POST(
     return NextResponse.json({ ok: false, error: "Deposits not enabled for this shop." }, { status: 400 });
   }
 
+  const { data: barber } = await supabaseServer
+    .from("barbers").select("id").eq("shop_id", shop.id).eq("slug", barber_id).eq("active", true).single();
+
   const { data: svc } = await supabaseServer
     .from("services").select("id, name, price, duration_minutes").eq("shop_id", shop.id).eq("slug", service).eq("active", true).single();
   if (!svc) return NextResponse.json({ ok: false, error: "Service not found." }, { status: 404 });
 
-  const servicePrice = Number(svc.price);
+  // Apply barber-specific price override if one exists
+  let servicePrice = Number(svc.price);
+  if (barber) {
+    const { data: overrideSetting } = await supabaseServer
+      .from("shop_settings").select("value_json")
+      .eq("shop_id", shop.id).eq("key", `barber_price_overrides_${barber.id}`).single();
+    const overrides = (overrideSetting?.value_json as Record<string, number> | null) ?? {};
+    if (overrides[svc.id] !== undefined) servicePrice = Number(overrides[svc.id]);
+  }
   const depositAmount = depositConfig.type === "percent"
     ? Math.round((servicePrice * depositConfig.amount) / 100)
     : depositConfig.amount;
