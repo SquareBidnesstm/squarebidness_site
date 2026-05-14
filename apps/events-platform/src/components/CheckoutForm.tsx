@@ -8,6 +8,8 @@ interface Tier {
   price: number;
   quantity: number;
   quantity_sold: number;
+  groupMinQty: number | null;
+  groupDiscountPct: number | null;
 }
 
 interface PromoResult {
@@ -22,10 +24,12 @@ export default function CheckoutForm({
   eventSlug,
   eventId,
   tiers,
+  refCode,
 }: {
   eventSlug: string;
   eventId: string;
   tiers: Tier[];
+  refCode?: string | null;
 }) {
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [promoCode, setPromoCode] = useState("");
@@ -36,8 +40,16 @@ export default function CheckoutForm({
 
   const availableTiers = tiers.filter(t => t.quantity - t.quantity_sold > 0);
 
+  function effectivePrice(tier: Tier, qty: number): number {
+    if (tier.groupMinQty && tier.groupDiscountPct && qty >= tier.groupMinQty) {
+      return tier.price * (1 - tier.groupDiscountPct / 100);
+    }
+    return tier.price;
+  }
+
   const subtotal = availableTiers.reduce((sum, t) => {
-    return sum + (Number(t.price) * (quantities[t.id] ?? 0));
+    const qty = quantities[t.id] ?? 0;
+    return sum + (effectivePrice(t, qty) * qty);
   }, 0);
 
   const totalQty = Object.values(quantities).reduce((s, q) => s + q, 0);
@@ -80,6 +92,7 @@ export default function CheckoutForm({
       <input type="hidden" name="eventSlug" value={eventSlug} />
       {promo && <input type="hidden" name="promoId" value={promo.promoId} />}
       {promo && <input type="hidden" name="promoCode" value={promoCode} />}
+      {refCode && <input type="hidden" name="refCode" value={refCode} />}
 
       {/* Tier selectors */}
       <div style={{ display: "grid", gap: 10, marginBottom: 16 }}>
@@ -90,8 +103,24 @@ export default function CheckoutForm({
               <div>
                 <label htmlFor={`qty_${tier.id}`} style={{ fontSize: "0.9rem", fontWeight: 700 }}>{tier.name}</label>
                 {tier.description && <p style={{ color: "#71717a", fontSize: "0.78rem", margin: "2px 0 0" }}>{tier.description}</p>}
-                <p style={{ color: "#fff", fontSize: "0.85rem", fontWeight: 900, marginTop: 2 }}>
-                  {Number(tier.price) === 0 ? "Free" : `$${Number(tier.price).toFixed(2)}`}
+                {tier.groupMinQty && tier.groupDiscountPct && (
+                  <p style={{ color: "#facc15", fontSize: "0.72rem", fontWeight: 800, margin: "2px 0 0" }}>
+                    Buy {tier.groupMinQty}+ save {tier.groupDiscountPct}%
+                  </p>
+                )}
+                <p style={{ fontSize: "0.85rem", fontWeight: 900, marginTop: 2 }}>
+                  {(() => {
+                    const qty = quantities[tier.id] ?? 0;
+                    const ep = effectivePrice(tier, qty);
+                    if (tier.price === 0) return <span style={{ color: "#fff" }}>Free</span>;
+                    if (ep < tier.price) return (
+                      <>
+                        <span style={{ color: "#facc15" }}>${ep.toFixed(2)}</span>
+                        <span style={{ color: "#555", textDecoration: "line-through", marginLeft: 6, fontSize: "0.78rem" }}>${tier.price.toFixed(2)}</span>
+                      </>
+                    );
+                    return <span style={{ color: "#fff" }}>${tier.price.toFixed(2)}</span>;
+                  })()}
                 </p>
               </div>
               <select

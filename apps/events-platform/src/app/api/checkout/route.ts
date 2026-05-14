@@ -14,6 +14,7 @@ export async function POST(req: NextRequest) {
   const buyerEmail = formData.get("buyerEmail") as string;
   const buyerPhone = formData.get("buyerPhone") as string | null;
   const promoId = formData.get("promoId") as string | null;
+  const refCode = (formData.get("refCode") as string | null)?.trim() || null;
 
   if (!eventSlug || !buyerName || !buyerEmail) {
     return NextResponse.json({ ok: false, error: "Missing required fields" }, { status: 400 });
@@ -53,7 +54,12 @@ export async function POST(req: NextRequest) {
 
     tierSelections.push({ tierId: tier.id, qty });
 
-    const priceCents = Math.round(Number(tier.price) * 100);
+    // Apply group discount if threshold met
+    let unitPrice = Number(tier.price);
+    if (tier.group_min_qty && tier.group_discount_pct && qty >= tier.group_min_qty) {
+      unitPrice = unitPrice * (1 - Number(tier.group_discount_pct) / 100);
+    }
+    const priceCents = Math.round(unitPrice * 100);
 
     if (priceCents > 0) {
       lineItems.push({
@@ -145,6 +151,7 @@ export async function POST(req: NextRequest) {
       platform_fee: totalPlatformFeeCents / 100,
       total: lineItems.reduce((s, li) => s + ((li.price_data as any).unit_amount * (li.quantity ?? 1)) / 100, 0),
       status: "pending",
+      ref_code: refCode,
     })
     .select()
     .single();

@@ -158,6 +158,8 @@ export default async function ManageEventPage({
               price: Number(t.price),
               quantity: t.quantity,
               quantity_sold: t.quantity_sold,
+              groupMinQty: t.group_min_qty ?? null,
+              groupDiscountPct: t.group_discount_pct ? Number(t.group_discount_pct) : null,
             }))} />
           </div>
 

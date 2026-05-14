@@ -6,7 +6,7 @@ import { sendBuyerSMS } from "../../../lib/notifications/sms";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { eventId, tierId, name, email, phone, qty, promoId } = body;
+  const { eventId, tierId, name, email, phone, qty, promoId, refCode } = body;
 
   if (!eventId || !tierId || !name || !email || !qty) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -52,6 +52,7 @@ export async function POST(req: NextRequest) {
       buyer_phone: phone?.trim() || null,
       total: 0,
       status: "paid",
+      ref_code: refCode?.trim() || null,
     })
     .select()
     .single();

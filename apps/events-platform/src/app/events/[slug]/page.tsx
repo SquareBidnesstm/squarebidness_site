@@ -57,10 +57,13 @@ export async function generateMetadata({
 
 export default async function EventPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ ref?: string }>;
 }) {
   const { slug } = await params;
+  const { ref: refCode } = await searchParams;
 
   const { data: event } = await supabaseServer
     .from("events")
@@ -229,6 +232,7 @@ export default async function EventPage({
                 isFreeEvent ? (
                   <FreeRSVPForm
                     eventId={event.id}
+                    refCode={refCode}
                     tiers={tiers.filter((t: any) => (t.quantity - t.quantity_sold) > 0).map((t: any) => ({
                       id: t.id,
                       name: t.name,
@@ -242,6 +246,7 @@ export default async function EventPage({
                     <CheckoutForm
                       eventSlug={event.slug}
                       eventId={event.id}
+                      refCode={refCode}
                       tiers={tiers.filter((t: any) => (t.quantity - t.quantity_sold) > 0).map((t: any) => ({
                         id: t.id,
                         name: t.name,
@@ -249,6 +254,8 @@ export default async function EventPage({
                         price: Number(t.price),
                         quantity: t.quantity,
                         quantity_sold: t.quantity_sold,
+                        groupMinQty: t.group_min_qty ?? null,
+                        groupDiscountPct: t.group_discount_pct ? Number(t.group_discount_pct) : null,
                       }))}
                     />
                   </div>

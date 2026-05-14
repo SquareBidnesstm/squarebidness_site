@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
   if (!organizer) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();
-  const { tierId, name, description, price, quantity } = body;
+  const { tierId, name, description, price, quantity, groupMinQty, groupDiscountPct } = body;
 
   if (!tierId || !name) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
 
@@ -43,6 +43,8 @@ export async function POST(req: NextRequest) {
     name: name.trim(),
     description: description?.trim() || null,
     quantity: newQty,
+    group_min_qty: groupMinQty ? parseInt(groupMinQty) : null,
+    group_discount_pct: groupDiscountPct ? parseFloat(groupDiscountPct) : null,
   };
 
   // Only allow price edits if no tickets sold yet

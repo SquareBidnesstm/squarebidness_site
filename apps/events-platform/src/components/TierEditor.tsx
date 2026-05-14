@@ -10,6 +10,8 @@ type Tier = {
   price: number;
   quantity: number;
   quantity_sold: number;
+  groupMinQty?: number | null;
+  groupDiscountPct?: number | null;
 };
 
 function TierRow({ tier }: { tier: Tier }) {
@@ -18,6 +20,8 @@ function TierRow({ tier }: { tier: Tier }) {
   const [description, setDescription] = useState(tier.description ?? "");
   const [price, setPrice] = useState(String(tier.price));
   const [quantity, setQuantity] = useState(String(tier.quantity));
+  const [groupMinQty, setGroupMinQty] = useState(tier.groupMinQty ? String(tier.groupMinQty) : "");
+  const [groupDiscountPct, setGroupDiscountPct] = useState(tier.groupDiscountPct ? String(tier.groupDiscountPct) : "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -31,7 +35,7 @@ function TierRow({ tier }: { tier: Tier }) {
       const res = await fetch("/api/organizer/events/tiers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tierId: tier.id, name, description, price, quantity }),
+        body: JSON.stringify({ tierId: tier.id, name, description, price, quantity, groupMinQty: groupMinQty || null, groupDiscountPct: groupDiscountPct || null }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? "Failed to save"); return; }
@@ -56,6 +60,9 @@ function TierRow({ tier }: { tier: Tier }) {
           <div>
             <p style={{ fontWeight: 800 }}>{tier.name}</p>
             {tier.description && <p style={{ color: "#555", fontSize: "0.8rem", marginTop: 2 }}>{tier.description}</p>}
+            {tier.groupMinQty && tier.groupDiscountPct && (
+              <p style={{ color: "#facc15", fontSize: "0.75rem", marginTop: 2 }}>Buy {tier.groupMinQty}+ save {tier.groupDiscountPct}%</p>
+            )}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <div style={{ textAlign: "right" }}>
@@ -104,6 +111,18 @@ function TierRow({ tier }: { tier: Tier }) {
             </div>
           </div>
           <p style={{ color: "#333", fontSize: "0.75rem" }}>Min capacity: {tier.quantity_sold} (already sold)</p>
+          {Number(tier.price) > 0 && (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+              <div>
+                <p style={{ color: "#555", fontSize: "0.7rem", fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>Group min qty</p>
+                <input value={groupMinQty} onChange={e => setGroupMinQty(e.target.value)} type="number" min="2" placeholder="e.g. 4" style={inputStyle} />
+              </div>
+              <div>
+                <p style={{ color: "#555", fontSize: "0.7rem", fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>Discount %</p>
+                <input value={groupDiscountPct} onChange={e => setGroupDiscountPct(e.target.value)} type="number" min="1" max="99" step="0.01" placeholder="e.g. 10" style={inputStyle} />
+              </div>
+            </div>
+          )}
           <div style={{ display: "flex", gap: 8 }}>
             <button
               onClick={handleSave}

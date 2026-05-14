@@ -6,9 +6,11 @@ import { useRouter } from "next/navigation";
 export default function FreeRSVPForm({
   eventId,
   tiers,
+  refCode,
 }: {
   eventId: string;
   tiers: { id: string; name: string; description?: string; quantity: number; quantity_sold: number }[];
+  refCode?: string | null;
 }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -61,7 +63,7 @@ export default function FreeRSVPForm({
       const res = await fetch("/api/rsvp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ eventId, tierId, name: name.trim(), email: email.trim(), phone: phone.trim(), qty: q, promoId }),
+        body: JSON.stringify({ eventId, tierId, name: name.trim(), email: email.trim(), phone: phone.trim(), qty: q, promoId, refCode }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? "Something went wrong."); return; }

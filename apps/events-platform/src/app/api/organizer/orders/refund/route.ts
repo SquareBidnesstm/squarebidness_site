@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { cookies } from "next/headers";
 import { supabaseServer } from "../../../../../lib/supabase/server";
 import { computeOrganizerSessionToken } from "../../../../../lib/auth";
+import { sendWaitlistNotification } from "../../../../../lib/notifications/email";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2026-04-22.dahlia" as any,
@@ -68,10 +69,41 @@ export async function POST(req: NextRequest) {
     .eq("id", orderId);
 
   // Mark all tickets for this order cancelled
-  await supabaseServer
+  const { data: cancelledTickets } = await supabaseServer
     .from("tickets")
     .update({ status: "cancelled" })
-    .eq("order_id", orderId);
+    .eq("order_id", orderId)
+    .select("id");
+
+  const freedCount = cancelledTickets?.length ?? 0;
+
+  // Auto-notify waitlist: notify first N people (matching freed ticket count)
+  if (freedCount > 0) {
+    const eventId = order.event_id;
+    const { data: event } = await supabaseServer
+      .from("events")
+      .select("title, slug")
+      .eq("id", eventId)
+      .single();
+
+    if (event) {
+      const { data: waitlist } = await supabaseServer
+        .from("waitlist")
+        .select("id, name, email")
+        .eq("event_id", eventId)
+        .order("created_at", { ascending: true })
+        .limit(freedCount);
+
+      for (const entry of waitlist ?? []) {
+        sendWaitlistNotification({
+          email: entry.email,
+          name: entry.name,
+          eventTitle: event.title,
+          eventSlug: event.slug,
+        }).catch(() => {});
+      }
+    }
+  }
 
   return NextResponse.json({ ok: true });
 }
