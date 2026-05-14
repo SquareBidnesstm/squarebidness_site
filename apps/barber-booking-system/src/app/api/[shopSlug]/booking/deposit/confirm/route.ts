@@ -104,6 +104,18 @@ export async function GET(
 
   if (!booking) return NextResponse.redirect(new URL(`/${shopSlug}`, req.url));
 
+  // Record the deposit payment so it survives reschedules
+  const depositAmountCents = session.amount_total ?? 0;
+  await supabaseServer.from("payments").insert({
+    booking_id: booking.id,
+    shop_id: shop.id,
+    amount: (depositAmountCents / 100).toFixed(2),
+    payment_type: "deposit",
+    provider: "stripe",
+    provider_payment_id: session.payment_intent as string ?? null,
+    status: "succeeded",
+  });
+
   // Send SMS
   const normalizedPhone = normalizePhone(bookingData.customer_phone);
   if (normalizedPhone) {

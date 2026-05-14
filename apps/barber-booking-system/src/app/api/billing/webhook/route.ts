@@ -96,6 +96,18 @@ async function handleDepositBooking(session: Stripe.Checkout.Session) {
 
   if (!booking) return;
 
+  // Record the deposit payment
+  const depositAmountCents = session.amount_total ?? 0;
+  await supabaseServer.from("payments").insert({
+    booking_id: booking.id,
+    shop_id: shop.id,
+    amount: (depositAmountCents / 100).toFixed(2),
+    payment_type: "deposit",
+    provider: "stripe",
+    provider_payment_id: session.payment_intent as string ?? null,
+    status: "succeeded",
+  });
+
   // Send SMS confirmation
   const normalizedPhone = normalizePhone(meta.customer_phone ?? "");
   if (normalizedPhone) {

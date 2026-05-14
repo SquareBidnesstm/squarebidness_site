@@ -49,6 +49,13 @@ export async function GET(
         name,
         duration_minutes,
         price
+      ),
+      payments (
+        id,
+        amount,
+        payment_type,
+        provider,
+        status
       )
     `)
     .eq("shop_id", shop.id)

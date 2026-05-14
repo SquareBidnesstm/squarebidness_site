@@ -95,6 +95,7 @@ export async function PATCH(
         appointment_date: date,
         starts_at: startsAt.toISOString(),
         ends_at: endsAt.toISOString(),
+        reminder_sent_at: null, // clear so reminder fires for the new date
       })
       .eq("id", id)
       .select("id, booking_code, customer_name, customer_phone, appointment_date, starts_at")

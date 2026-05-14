@@ -37,6 +37,7 @@ type AdminBooking = {
     duration_minutes: number;
     price: number;
   } | null;
+  payments: { id: string; amount: number; payment_type: string; provider: string; status: string }[] | null;
 };
 
 function formatMoney(value: number) {
@@ -595,6 +596,25 @@ export default function AdminPage() {
                           <span style={{ color: "#666" }}>Ends at: </span>
                           {formatTime(booking.ends_at)}
                         </div>
+                        {booking.payments && booking.payments.length > 0 && (
+                          <div style={{ marginTop: 4, paddingTop: 8, borderTop: "1px solid #1a1a1a" }}>
+                            <div style={{ color: "#666", marginBottom: 4 }}>Payments:</div>
+                            {booking.payments.map(p => (
+                              <div key={p.id} style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                                <span style={{ color: p.status === "succeeded" ? "#5cd600" : "#ff9955", fontWeight: 700 }}>
+                                  {formatMoney(Number(p.amount))}
+                                </span>
+                                <span style={{ color: "#666", textTransform: "capitalize" }}>{p.payment_type} · {p.provider}</span>
+                                <span style={{ color: p.status === "succeeded" ? "#4a8800" : "#664400", fontSize: 12 }}>{p.status}</span>
+                              </div>
+                            ))}
+                            {booking.payment_status === "deposit_paid" && (
+                              <div style={{ color: "#d4af37", fontSize: 13, marginTop: 4 }}>
+                                Balance due: {formatMoney(Math.max(0, Number(booking.services?.price ?? 0) - booking.payments.filter(p => p.status === "succeeded").reduce((s, p) => s + Number(p.amount), 0)))}
+                              </div>
+                            )}
+                          </div>
+                        )}
                         <div>
                           <span style={{ color: "#666" }}>Created: </span>
                           {new Date(booking.created_at).toLocaleString()}
