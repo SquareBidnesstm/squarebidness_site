@@ -3,7 +3,7 @@ import { supabaseServer } from "../../../../../lib/supabase/server";
 import { checkActiveSubscription } from "../../../../../lib/auth";
 import { sendPushToBarber, sendPushToShopAdmins } from "../../../../../lib/push";
 import { sendConfirmationEmail } from "../../../../../lib/email";
-import { normalizePhone, convertDisplayTimeTo24Hour } from "../../../../../lib/utils";
+import { normalizePhone, convertDisplayTimeTo24Hour, checkRateLimit, recordFailedAttempt } from "../../../../../lib/utils";
 
 type CreateBookingPayload = {
   barber_id?: string;
@@ -109,6 +109,21 @@ export async function POST(
 ) {
   try {
     const { shopSlug } = await params;
+
+    // Rate limit: 10 booking attempts per 15 min per IP per shop
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+      ?? req.headers.get("x-real-ip")
+      ?? "unknown";
+    const rlKey = `booking:${shopSlug}:${ip}`;
+    recordFailedAttempt(rlKey); // count every attempt
+    const { limited, retryAfterSeconds } = checkRateLimit(rlKey);
+    if (limited) {
+      return NextResponse.json(
+        { ok: false, error: `Too many booking attempts. Try again in ${Math.ceil(retryAfterSeconds / 60)} min.` },
+        { status: 429, headers: { "Retry-After": String(retryAfterSeconds) } }
+      );
+    }
+
     const body = (await req.json()) as CreateBookingPayload;
 
     if (!body.barber_id) return NextResponse.json({ ok: false, error: "Missing barber_id" }, { status: 400 });
@@ -121,6 +136,20 @@ export async function POST(
       body.date && /^\d{4}-\d{2}-\d{2}$/.test(body.date)
         ? body.date
         : getTodayDateString();
+
+    // Reject past dates (allow today)
+    const todayStr = getTodayDateString();
+    if (appointmentDate < todayStr) {
+      return NextResponse.json({ ok: false, error: "Cannot book appointments in the past." }, { status: 400 });
+    }
+
+    // Enforce max 90-day window
+    const requestedDate = new Date(`${appointmentDate}T12:00:00`);
+    const maxAllowed = new Date();
+    maxAllowed.setDate(maxAllowed.getDate() + 90);
+    if (requestedDate > maxAllowed) {
+      return NextResponse.json({ ok: false, error: "Bookings can only be made up to 90 days in advance." }, { status: 400 });
+    }
 
     const time24 = convertDisplayTimeTo24Hour(body.time);
     if (!time24) return NextResponse.json({ ok: false, error: "Invalid time format" }, { status: 400 });

@@ -47,6 +47,7 @@ export async function POST(
   );
 
   let refunded = false;
+  let refundFailed = false;
   if (depositPayment && refundDeposit && depositPayment.provider_payment_id) {
     try {
       await stripe.refunds.create({ payment_intent: depositPayment.provider_payment_id });
@@ -55,6 +56,22 @@ export async function POST(
       refunded = true;
     } catch (e) {
       console.error("Self-cancel refund failed:", e);
+      // Mark as refund_failed so admin can see it and retry manually
+      await supabaseServer
+        .from("bookings")
+        .update({ payment_status: "refund_failed" })
+        .eq("id", booking.id);
+      refundFailed = true;
+
+      // Notify shop admin via push
+      const shop = booking.shops as any;
+      if (shop?.id) {
+        sendPushToShopAdmins(shop.id, {
+          title: "⚠️ Refund Failed",
+          body: `Deposit refund for ${booking.customer_name} failed — action required in Stripe dashboard.`,
+          url: `/${shop.slug}/admin`,
+        }).catch(console.error);
+      }
     }
   }
 
@@ -111,6 +128,7 @@ export async function POST(
   return NextResponse.json({
     ok: true,
     refunded,
+    refundFailed,
     refundAmount: depositPayment ? Number(depositPayment.amount) : 0,
     forfeitReason: !refundDeposit ? `Cancellations within ${FORFEIT_WINDOW_HOURS}h of the appointment forfeit the deposit.` : null,
   });

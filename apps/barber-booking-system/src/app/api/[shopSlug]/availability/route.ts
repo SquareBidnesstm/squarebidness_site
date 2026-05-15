@@ -42,8 +42,14 @@ export async function GET(
     return NextResponse.json({ ok: false, error: "Invalid date format" }, { status: 400 });
   }
 
-  // Enforce max 90-day booking window
+  // Enforce past-date and max 90-day booking window
   const requestedDate = new Date(`${date}T12:00:00`);
+  const todayUTC = new Date();
+  todayUTC.setUTCHours(0, 0, 0, 0);
+  const yesterdayUTC = new Date(todayUTC.getTime() - 1); // anything before today
+  if (requestedDate < yesterdayUTC) {
+    return NextResponse.json({ ok: false, closed: true, slots: [], error: "Cannot book appointments in the past." });
+  }
   const maxAllowed = new Date();
   maxAllowed.setDate(maxAllowed.getDate() + 90);
   if (requestedDate > maxAllowed) {

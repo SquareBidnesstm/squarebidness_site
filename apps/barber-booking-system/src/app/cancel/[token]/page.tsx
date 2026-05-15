@@ -23,7 +23,7 @@ export default function CancelPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [cancelling, setCancelling] = useState(false);
-  const [result, setResult] = useState<{ refunded: boolean; refundAmount: number; forfeitReason: string | null } | null>(null);
+  const [result, setResult] = useState<{ refunded: boolean; refundFailed: boolean; refundAmount: number; forfeitReason: string | null } | null>(null);
 
   useEffect(() => {
     fetch(`/api/cancel/${token}`)
@@ -67,6 +67,10 @@ export default function CancelPage() {
         {result.refunded && result.refundAmount > 0 ? (
           <p style={{ color: "#5cd600" }}>
             Your ${result.refundAmount.toFixed(2)} deposit has been refunded. Allow 5–10 business days.
+          </p>
+        ) : result.refundFailed ? (
+          <p style={{ color: "#ff9955" }}>
+            Your appointment was cancelled, but there was an issue processing your refund. The shop has been notified and will contact you shortly.
           </p>
         ) : result.forfeitReason ? (
           <p style={{ color: "#ff9955" }}>{result.forfeitReason}</p>
