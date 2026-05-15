@@ -11,6 +11,7 @@ import RescheduleModal from "./RescheduleModal";
 import BlockTimeModal from "./BlockTimeModal";
 import ClientsTab from "./ClientsTab";
 import SmsBlastModal from "./SmsBlastModal";
+import SettingsTab from "./SettingsTab";
 
 type BookingStatus =
   | "pending"
@@ -84,7 +85,7 @@ export default function AdminPage() {
   const shopSlug = params.shopSlug as string;
   const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<"bookings" | "clients" | "barbers" | "services" | "hours" | "billing">("bookings");
+  const [activeTab, setActiveTab] = useState<"bookings" | "clients" | "barbers" | "services" | "hours" | "billing" | "settings">("bookings");
   const [shopName, setShopName] = useState("");
   const [bookings, setBookings] = useState<AdminBooking[]>([]);
   const [loading, setLoading] = useState(true);
@@ -296,7 +297,7 @@ export default function AdminPage() {
 
         {/* Tab nav */}
         <div style={{ display: "flex", gap: 8, marginBottom: 28 }}>
-          {(["bookings", "clients", "barbers", "services", "hours", "billing"] as const).map((tab) => (
+          {(["bookings", "clients", "barbers", "services", "hours", "billing", "settings"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -327,6 +328,8 @@ export default function AdminPage() {
           <HoursTab shopSlug={shopSlug} />
         ) : activeTab === "billing" ? (
           <BillingTab shopSlug={shopSlug} />
+        ) : activeTab === "settings" ? (
+          <SettingsTab shopSlug={shopSlug} />
         ) : (
         <>
         <div

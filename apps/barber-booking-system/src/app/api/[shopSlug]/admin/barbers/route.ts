@@ -32,7 +32,7 @@ export async function GET(
 
   const { data: barbers, error } = await supabaseServer
     .from("barbers")
-    .select("id, slug, name, display_name, role, active, sort_order")
+    .select("id, slug, name, display_name, role, active, sort_order, photo_url")
     .eq("shop_id", shop.id)
     .order("sort_order");
 
@@ -187,7 +187,7 @@ export async function POST(
       active: true,
       sort_order: nextOrder,
     })
-    .select("id, slug, name, display_name, role, active, sort_order")
+    .select("id, slug, name, display_name, role, active, sort_order, photo_url")
     .single();
 
   if (error || !barber) {

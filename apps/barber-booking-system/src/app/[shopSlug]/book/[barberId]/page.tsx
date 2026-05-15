@@ -11,7 +11,7 @@ export default async function BookingPage({
 
   const { data: shop } = await supabaseServer
     .from("shops")
-    .select("id, name, city, state")
+    .select("id, name, city, state, logo_url")
     .eq("slug", shopSlug)
     .eq("active", true)
     .single();
@@ -20,7 +20,7 @@ export default async function BookingPage({
 
   const { data: barber } = await supabaseServer
     .from("barbers")
-    .select("id, slug, name, display_name, role")
+    .select("id, slug, name, display_name, role, photo_url")
     .eq("shop_id", shop.id)
     .eq("slug", barberId)
     .eq("active", true)
@@ -58,8 +58,10 @@ export default async function BookingPage({
     <BookingForm
       shopSlug={shopSlug}
       shopName={shop.name}
+      shopLogoUrl={(shop as any).logo_url ?? null}
       barberSlug={barberId}
       barberName={barber.display_name || barber.name}
+      barberPhotoUrl={(barber as any).photo_url ?? null}
       barberBio={barberBio}
       services={(services ?? []).map((s) => ({
         id: s.slug,

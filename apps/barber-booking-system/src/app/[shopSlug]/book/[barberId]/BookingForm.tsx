@@ -15,13 +15,15 @@ type TimeSlot = { time: string; label: string };
 type Props = {
   shopSlug: string;
   shopName: string;
+  shopLogoUrl?: string | null;
   barberSlug: string;
   barberName: string;
+  barberPhotoUrl?: string | null;
   barberBio?: string | null;
   services: ServiceOption[];
 };
 
-export default function BookingForm({ shopSlug, shopName, barberSlug, barberName, barberBio, services }: Props) {
+export default function BookingForm({ shopSlug, shopName, shopLogoUrl, barberSlug, barberName, barberPhotoUrl, barberBio, services }: Props) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -241,20 +243,24 @@ export default function BookingForm({ shopSlug, shopName, barberSlug, barberName
           ← Back
         </Link>
 
-        <div
-          style={{
-            color: "#d4af37",
-            fontSize: 12,
-            letterSpacing: "0.18em",
-            textTransform: "uppercase",
-            marginBottom: 8,
-          }}
-        >
-          {shopName}
+        <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
+          {shopLogoUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={shopLogoUrl} alt={shopName} style={{ width: 48, height: 48, borderRadius: 10, objectFit: "cover", flexShrink: 0 }} />
+          )}
+          {barberPhotoUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={barberPhotoUrl} alt={barberName} style={{ width: 48, height: 48, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />
+          )}
+          <div>
+            <div style={{ color: "#d4af37", fontSize: 12, letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: 2 }}>
+              {shopName}
+            </div>
+            <h1 style={{ fontSize: 28, fontWeight: 900, margin: 0 }}>
+              Book with {barberName}
+            </h1>
+          </div>
         </div>
-        <h1 style={{ fontSize: 32, fontWeight: 900, marginBottom: 4 }}>
-          Book with {barberName}
-        </h1>
         {barberBio ? (
           <p style={{ color: "#aaa", marginBottom: 28, fontSize: 14, lineHeight: 1.6 }}>
             {barberBio}

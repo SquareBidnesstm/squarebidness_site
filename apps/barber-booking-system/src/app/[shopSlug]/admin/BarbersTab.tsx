@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -37,6 +37,7 @@ type Barber = {
   active: boolean;
   sort_order: number;
   has_pin: boolean;
+  photo_url?: string | null;
 };
 
 type BarberPerms = {
@@ -76,6 +77,10 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
   const [barberHours, setBarberHours] = useState<Record<string, HourRow[]>>({});
   const [hoursSaving, setHoursSaving] = useState(false);
   const [hoursSaved, setHoursSaved] = useState<string | null>(null);
+
+  // Photo upload state
+  const [uploadingPhotoId, setUploadingPhotoId] = useState<string | null>(null);
+  const photoInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   // PIN state
   const [pinOpenId, setPinOpenId] = useState<string | null>(null);
@@ -299,6 +304,23 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
     });
   }
 
+  async function uploadBarberPhoto(barberId: string, file: File) {
+    setUploadingPhotoId(barberId);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("type", "barber_photo");
+      fd.append("barber_id", barberId);
+      const res = await fetch(`/api/${shopSlug}/admin/upload`, { method: "POST", body: fd });
+      const data = await res.json();
+      if (data.ok) {
+        setBarbers((prev) => prev.map((b) => b.id === barberId ? { ...b, photo_url: data.url } : b));
+      }
+    } finally {
+      setUploadingPhotoId(null);
+    }
+  }
+
   if (loading) return <div style={emptyBox}>Loading barbers...</div>;
   if (error) return <div style={{ ...emptyBox, color: "#ffb3b3", borderColor: "#532323" }}>{error}</div>;
 
@@ -465,6 +487,39 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
               ) : (
                 <div>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                      {/* Photo avatar */}
+                      <div
+                        onClick={() => photoInputRefs.current[b.id]?.click()}
+                        title="Click to upload photo"
+                        style={{
+                          width: 52, height: 52, borderRadius: "50%",
+                          background: "#1a1a1a", border: "1px solid #2a2a2a",
+                          overflow: "hidden", flexShrink: 0, cursor: "pointer",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          position: "relative",
+                        }}
+                      >
+                        {uploadingPhotoId === b.id ? (
+                          <span style={{ color: "#555", fontSize: 11 }}>…</span>
+                        ) : b.photo_url ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={b.photo_url} alt={b.display_name || b.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        ) : (
+                          <span style={{ color: "#444", fontSize: 20 }}>📷</span>
+                        )}
+                      </div>
+                      <input
+                        ref={(el) => { photoInputRefs.current[b.id] = el; }}
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/gif"
+                        style={{ display: "none" }}
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) uploadBarberPhoto(b.id, f);
+                          e.target.value = "";
+                        }}
+                      />
                     <div>
                       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
                         <span style={{ fontSize: 18, fontWeight: 700 }}>
@@ -505,6 +560,7 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
                         </button>
                       </div>
                     </div>
+                    </div>{/* end photo+name flex */}
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                       <button onClick={() => startEdit(b)} style={secondaryButton}>
                         Edit

@@ -66,7 +66,7 @@ export default async function ShopLanding({
 
   const { data: shop } = await supabaseServer
     .from("shops")
-    .select("id, name, city, state")
+    .select("id, name, city, state, logo_url")
     .eq("slug", shopSlug)
     .eq("active", true)
     .single();
@@ -95,7 +95,7 @@ export default async function ShopLanding({
 
   const { data: barbers } = await supabaseServer
     .from("barbers")
-    .select("slug, name, display_name, role")
+    .select("slug, name, display_name, role, photo_url")
     .eq("shop_id", shop.id)
     .eq("active", true)
     .order("sort_order");
@@ -113,6 +113,14 @@ export default async function ShopLanding({
       }}
     >
       <div style={{ textAlign: "center", marginBottom: 48, maxWidth: 560 }}>
+        {(shop as any).logo_url && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={(shop as any).logo_url}
+            alt={shop.name}
+            style={{ width: 80, height: 80, borderRadius: 16, objectFit: "cover", marginBottom: 20 }}
+          />
+        )}
         <div
           style={{
             color: "#d4af37",
@@ -151,19 +159,33 @@ export default async function ShopLanding({
                 cursor: "pointer",
               }}
             >
-              <div>
-                <div style={{ fontSize: 18, fontWeight: 700, color: "#ffffff" }}>
-                  {b.display_name || b.name}
-                </div>
-                <div
-                  style={{
-                    fontSize: 13,
-                    color: "#d4af37",
-                    marginTop: 3,
-                    letterSpacing: "0.05em",
-                  }}
-                >
-                  {b.role}
+              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                {(b as any).photo_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={(b as any).photo_url}
+                    alt={b.display_name || b.name}
+                    style={{ width: 48, height: 48, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }}
+                  />
+                ) : (
+                  <div style={{ width: 48, height: 48, borderRadius: "50%", background: "#1a1a1a", border: "1px solid #2a2a2a", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <span style={{ color: "#444", fontSize: 20 }}>✂️</span>
+                  </div>
+                )}
+                <div>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: "#ffffff" }}>
+                    {b.display_name || b.name}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 13,
+                      color: "#d4af37",
+                      marginTop: 3,
+                      letterSpacing: "0.05em",
+                    }}
+                  >
+                    {b.role}
+                  </div>
                 </div>
               </div>
               <div style={{ color: "#444", fontSize: 20 }}>→</div>
