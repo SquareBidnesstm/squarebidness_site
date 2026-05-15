@@ -226,7 +226,7 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
     const data = await res.json();
     if (data.ok) {
       setBarbers((prev) => [...prev, { ...data.barber, has_pin: false }]);
-      setNewBarber({ name: "", display_name: "", role: "Barber" });
+      setNewBarber({ name: "", display_name: "", role: "Barber", bio: "" });
       setAddingNew(false);
     } else {
       alert(data.error || "Could not add barber.");
