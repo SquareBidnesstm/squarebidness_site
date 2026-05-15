@@ -199,6 +199,21 @@ export async function POST(
       return NextResponse.json({ ok: false, error: "Invalid appointment time" }, { status: 400 });
     }
 
+    // Enforce minimum lead time (read from booking_rules, default 2 hours)
+    const { data: rulesSetting } = await supabaseServer
+      .from("shop_settings").select("value_json")
+      .eq("shop_id", shop.id).eq("key", "booking_rules").single();
+    const minLeadMinutes: number =
+      (rulesSetting?.value_json as { min_lead_time_minutes?: number } | null)?.min_lead_time_minutes ?? 120;
+    const minLeadMs = minLeadMinutes * 60 * 1000;
+    if (startsAt.getTime() - Date.now() < minLeadMs) {
+      const hrs = Math.round(minLeadMinutes / 60);
+      return NextResponse.json(
+        { ok: false, error: `Bookings must be made at least ${hrs} hour${hrs !== 1 ? "s" : ""} in advance.` },
+        { status: 400 }
+      );
+    }
+
     const endsAt = new Date(startsAt.getTime() + service.duration_minutes * 60 * 1000);
 
     const { data: overlaps } = await supabaseServer

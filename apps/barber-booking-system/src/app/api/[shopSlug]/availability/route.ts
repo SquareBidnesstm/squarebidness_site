@@ -126,7 +126,9 @@ export async function GET(
     .eq("key", "booking_rules")
     .single();
 
-  const slotInterval: number = (rulesSetting?.value_json as { slot_interval_minutes?: number } | null)?.slot_interval_minutes ?? 30;
+  const rules = rulesSetting?.value_json as { slot_interval_minutes?: number; min_lead_time_minutes?: number } | null;
+  const slotInterval: number = rules?.slot_interval_minutes ?? 30;
+  const minLeadMinutes: number = rules?.min_lead_time_minutes ?? 120; // default 2 hours
 
   // Get existing bookings for this barber on this date (exclude current booking when rescheduling)
   let bookingsQuery = supabaseServer
@@ -178,7 +180,7 @@ export async function GET(
   const nowUTC = new Date();
   const todayStr = `${nowUTC.getUTCFullYear()}-${String(nowUTC.getUTCMonth() + 1).padStart(2, "0")}-${String(nowUTC.getUTCDate()).padStart(2, "0")}`;
   const isToday = date === todayStr;
-  const nowMinutes = isToday ? nowUTC.getUTCHours() * 60 + nowUTC.getUTCMinutes() + 30 : 0; // +30 min lead time
+  const nowMinutes = isToday ? nowUTC.getUTCHours() * 60 + nowUTC.getUTCMinutes() + minLeadMinutes : 0;
 
   const slots: { time: string; label: string }[] = [];
 

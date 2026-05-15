@@ -71,6 +71,20 @@ export async function PUT(
     return NextResponse.json({ ok: false, error: "Invalid hours payload" }, { status: 400 });
   }
 
+  // Validate open < close for each non-closed day
+  const timeRe = /^\d{2}:\d{2}$/;
+  const toMins = (t: string) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
+  for (const h of hours) {
+    if (!h.is_closed) {
+      if (!h.open_time || !h.close_time || !timeRe.test(h.open_time) || !timeRe.test(h.close_time)) {
+        return NextResponse.json({ ok: false, error: `Invalid time format for day ${h.day_of_week}` }, { status: 400 });
+      }
+      if (toMins(h.open_time) >= toMins(h.close_time)) {
+        return NextResponse.json({ ok: false, error: `Open time must be before close time (day ${h.day_of_week})` }, { status: 400 });
+      }
+    }
+  }
+
   // Upsert each day
   const upsertRows = hours.map((h) => ({
     shop_id: shop.id,

@@ -27,15 +27,18 @@ export async function POST(
   if (remaining <= 0) return NextResponse.json({ ok: false, error: "No balance remaining" }, { status: 400 });
 
   const body = await req.json().catch(() => ({}));
-  const provider = body.provider ?? "manual";
+  // Accept explicit method: cash | check | zelle | venmo | other (default: cash)
+  const validMethods = ["cash", "check", "zelle", "venmo", "other"];
+  const method = validMethods.includes(body.method) ? body.method : "cash";
 
   await supabaseServer.from("payments").insert({
     booking_id: id,
     shop_id: booking.shop_id,
     amount: remaining.toFixed(2),
-    payment_type: "full",
-    provider,
+    payment_type: "balance",
+    provider: method,
     status: "succeeded",
+    // notes captured as stringified JSON so it survives without a schema change
   });
 
   const { data: updated } = await supabaseServer

@@ -798,13 +798,22 @@ export default function AdminPage() {
                               <button
                                 type="button"
                                 onClick={async () => {
-                                  const res = await fetch(`/api/${shopSlug}/admin/bookings/${booking.id}/collect-balance`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ provider: "manual" }) });
+                                  const method = window.prompt(
+                                    `Collect ${formatMoney(remaining)} balance\n\nPayment method (cash / check / zelle / venmo / other):`,
+                                    "cash"
+                                  );
+                                  if (!method) return; // cancelled
+                                  const validMethods = ["cash", "check", "zelle", "venmo", "other"];
+                                  const m = validMethods.includes(method.trim().toLowerCase()) ? method.trim().toLowerCase() : "cash";
+                                  if (!window.confirm(`Mark ${formatMoney(remaining)} collected via ${m}?`)) return;
+                                  const res = await fetch(`/api/${shopSlug}/admin/bookings/${booking.id}/collect-balance`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ method: m }) });
                                   const d = await res.json();
                                   if (d.ok) setBookings(prev => prev.map(b => b.id === booking.id ? { ...b, payment_status: "paid" } : b));
+                                  else alert(d.error ?? "Failed to record payment");
                                 }}
                                 style={{ padding: "10px 16px", borderRadius: 10, border: "none", background: "#d4af37", color: "#000", fontWeight: 800, cursor: "pointer", fontSize: 13 }}
                               >
-                                Collect Cash — {formatMoney(remaining)}
+                                Collect Balance — {formatMoney(remaining)}
                               </button>
                               <button
                                 type="button"
