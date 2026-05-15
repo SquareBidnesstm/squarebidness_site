@@ -271,14 +271,40 @@ export default function AdminPage() {
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-              {shopLogoUrl && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={shopLogoUrl}
-                  alt={shopName}
-                  style={{ width: 32, height: 32, borderRadius: 8, objectFit: "cover", flexShrink: 0 }}
-                />
-              )}
+              {/* Clickable logo upload */}
+              <div
+                onClick={() => {
+                  const input = document.createElement("input");
+                  input.type = "file";
+                  input.accept = "image/jpeg,image/png,image/webp,image/gif";
+                  input.onchange = async () => {
+                    const file = input.files?.[0];
+                    if (!file) return;
+                    const fd = new FormData();
+                    fd.append("file", file);
+                    fd.append("type", "shop_logo");
+                    const res = await fetch(`/api/${shopSlug}/admin/upload`, { method: "POST", body: fd });
+                    const data = await res.json();
+                    if (data.ok) setShopLogoUrl(data.url);
+                  };
+                  input.click();
+                }}
+                title={shopLogoUrl ? "Click to change logo" : "Click to add shop logo"}
+                style={{
+                  width: 36, height: 36, borderRadius: 8, flexShrink: 0,
+                  cursor: "pointer", overflow: "hidden",
+                  border: shopLogoUrl ? "none" : "1.5px dashed #3a3a3a",
+                  background: shopLogoUrl ? "transparent" : "#111",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}
+              >
+                {shopLogoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={shopLogoUrl} alt={shopName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                ) : (
+                  <span style={{ fontSize: 16, opacity: 0.4 }}>🖼</span>
+                )}
+              </div>
               <div
                 style={{
                   color: "#d4af37",
