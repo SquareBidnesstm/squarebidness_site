@@ -42,6 +42,14 @@ export async function GET(
     return NextResponse.json({ ok: false, error: "Invalid date format" }, { status: 400 });
   }
 
+  // Enforce max 90-day booking window
+  const requestedDate = new Date(`${date}T12:00:00`);
+  const maxAllowed = new Date();
+  maxAllowed.setDate(maxAllowed.getDate() + 90);
+  if (requestedDate > maxAllowed) {
+    return NextResponse.json({ ok: false, closed: true, slots: [], error: "Bookings can only be made up to 90 days in advance." });
+  }
+
   const duration = parseInt(durationStr);
   if (isNaN(duration) || duration < 1) {
     return NextResponse.json({ ok: false, error: "Invalid duration" }, { status: 400 });

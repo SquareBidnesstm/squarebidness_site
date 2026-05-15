@@ -323,7 +323,7 @@ export default function BarberPage() {
                   fd.append("barber_slug", barberSlug);
                   const res = await fetch(`/api/${shopSlug}/barbers/${barberSlug}/photo`, { method: "POST", body: fd });
                   const data = await res.json();
-                  if (data.ok) setBarberPhotoUrl(data.url);
+                  if (data.ok) setBarberPhotoUrl(`${data.url}?v=${Date.now()}`);
                 };
                 input.click();
               }}

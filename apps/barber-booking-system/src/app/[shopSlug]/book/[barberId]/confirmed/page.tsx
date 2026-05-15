@@ -11,6 +11,18 @@ function ConfirmedContent() {
   const shopSlug = params.shopSlug as string;
   const barberSlug = params.barberId as string;
 
+  const startsAt = searchParams.get("starts");
+  const endsAt = searchParams.get("ends");
+  const serviceName = searchParams.get("service");
+  const barberName = searchParams.get("barber");
+
+  const calendarUrl = (() => {
+    if (!startsAt || !endsAt) return null;
+    const fmt = (d: string) => new Date(d).toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+    const title = encodeURIComponent(`${serviceName ?? "Appointment"}${barberName ? ` with ${barberName}` : ""}`);
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${fmt(startsAt)}/${fmt(endsAt)}&details=${encodeURIComponent(`Booking code: ${code}`)}`;
+  })();
+
   return (
     <main
       style={{
@@ -54,6 +66,28 @@ function ConfirmedContent() {
             {code}
           </div>
         </div>
+
+        {calendarUrl && (
+          <a
+            href={calendarUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: "block",
+              textAlign: "center",
+              padding: "12px 20px",
+              borderRadius: 10,
+              border: "1px solid #2a2a2a",
+              background: "#0d0d0d",
+              color: "#aaa",
+              fontSize: 14,
+              textDecoration: "none",
+              marginBottom: 16,
+            }}
+          >
+            📅 Add to Google Calendar
+          </a>
+        )}
 
         <div
           style={{

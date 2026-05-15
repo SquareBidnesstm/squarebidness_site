@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { supabaseServer } from "../../../../lib/supabase/server";
 import { normalizePhone, convertDisplayTimeTo24Hour } from "../../../../lib/utils";
+import { sendConfirmationEmail } from "../../../../lib/email";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2026-04-22.dahlia",
@@ -25,7 +26,7 @@ async function handleDepositBooking(session: Stripe.Checkout.Session) {
   }
 
   const { data: shop } = await supabaseServer
-    .from("shops").select("id, slug, timezone").eq("id", meta.shop_id).eq("active", true).single();
+    .from("shops").select("id, slug, name, timezone").eq("id", meta.shop_id).eq("active", true).single();
   if (!shop) return;
 
   const { data: barber } = await supabaseServer
@@ -63,6 +64,7 @@ async function handleDepositBooking(session: Stripe.Checkout.Session) {
       customer_name: meta.customer_name ?? "",
       customer_phone: meta.customer_phone ?? "",
       customer_email: meta.customer_email || null,
+      client_notes: meta.client_notes || null,
       appointment_date: meta.date,
       starts_at: startsAt.toISOString(),
       ends_at: endsAt.toISOString(),
@@ -117,6 +119,22 @@ async function handleDepositBooking(session: Stripe.Checkout.Session) {
         body: msgParams.toString(),
       }).catch(console.error);
     }
+  }
+
+  // Send email confirmation (non-blocking)
+  if (meta.customer_email) {
+    sendConfirmationEmail({
+      to: meta.customer_email,
+      customerName: meta.customer_name ?? "",
+      shopName: (shop as any).name ?? shop.slug,
+      barberName: barber.display_name || barber.name,
+      serviceName: svc.name,
+      appointmentDate: meta.date ?? "",
+      startsAt: booking.starts_at,
+      bookingCode: booking.booking_code,
+      timezone: shop.timezone,
+      cancelToken: (booking as any).cancel_token ?? null,
+    }).catch((err) => console.error("WEBHOOK EMAIL ERROR:", err instanceof Error ? err.message : err));
   }
 }
 

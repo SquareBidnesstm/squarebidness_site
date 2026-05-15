@@ -3,27 +3,9 @@ import Stripe from "stripe";
 import { supabaseServer } from "../../../../../../lib/supabase/server";
 import { sendPushToBarber, sendPushToShopAdmins } from "../../../../../../lib/push";
 import { sendConfirmationEmail } from "../../../../../../lib/email";
+import { normalizePhone, convertDisplayTimeTo24Hour } from "../../../../../../lib/utils";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-04-22.dahlia" });
-
-function convertDisplayTimeTo24Hour(time: string): string | null {
-  const [clock, suffix] = time.trim().split(" ");
-  if (!clock || !suffix) return null;
-  const [rawHour, rawMinute] = clock.split(":");
-  let hour = Number(rawHour);
-  const minute = Number(rawMinute);
-  if (isNaN(hour) || isNaN(minute)) return null;
-  if (suffix.toUpperCase() === "PM" && hour !== 12) hour += 12;
-  if (suffix.toUpperCase() === "AM" && hour === 12) hour = 0;
-  return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
-}
-
-function normalizePhone(raw: string): string | null {
-  const digits = raw.replace(/\D/g, "");
-  if (digits.length === 10) return `+1${digits}`;
-  if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
-  return null;
-}
 
 export async function GET(
   req: NextRequest,
@@ -46,7 +28,8 @@ export async function GET(
 
   const bookingData = JSON.parse(decodeURIComponent(dataParam)) as {
     barber_id: string; customer_name: string; customer_phone: string;
-    customer_email?: string; service: string; time: string; date: string;
+    customer_email?: string; client_notes?: string | null;
+    service: string; time: string; date: string;
   };
 
   const { data: shop } = await supabaseServer
@@ -92,6 +75,7 @@ export async function GET(
       customer_name: bookingData.customer_name,
       customer_phone: bookingData.customer_phone,
       customer_email: bookingData.customer_email || null,
+      client_notes: bookingData.client_notes || null,
       appointment_date: bookingData.date,
       starts_at: startsAt.toISOString(),
       ends_at: endsAt.toISOString(),
@@ -192,5 +176,12 @@ export async function GET(
   sendPushToBarber(barber.id, { title: "New Booking (Deposit Paid)", body: pushBody, url: `/${shopSlug}/admin` }).catch(console.error);
   sendPushToShopAdmins(shop.id, { title: "New Booking (Deposit Paid)", body: pushBody, url: `/${shopSlug}/admin` }).catch(console.error);
 
-  return NextResponse.redirect(new URL(`/${shopSlug}/book/${bookingData.barber_id}/confirmed?code=${booking.booking_code}`, req.url));
+  const calParams = new URLSearchParams({
+    code: booking.booking_code,
+    starts: booking.starts_at,
+    ends: endsAt.toISOString(),
+    service: svc.name,
+    barber: barber.display_name || barber.name,
+  });
+  return NextResponse.redirect(new URL(`/${shopSlug}/book/${bookingData.barber_id}/confirmed?${calParams.toString()}`, req.url));
 }

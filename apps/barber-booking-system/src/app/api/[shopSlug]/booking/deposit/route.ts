@@ -14,11 +14,19 @@ export async function POST(
   const body = await req.json();
   const {
     barber_id, customer_name, customer_phone, customer_email,
-    service, time, date,
+    client_notes, service, time, date,
   } = body;
 
   if (!barber_id || !customer_name || !customer_phone || !service || !time || !date) {
     return NextResponse.json({ ok: false, error: "Missing required fields." }, { status: 400 });
+  }
+
+  // Enforce max 90-day booking window
+  const requestedDate = new Date(`${date}T12:00:00`);
+  const maxAllowed = new Date();
+  maxAllowed.setDate(maxAllowed.getDate() + 90);
+  if (isNaN(requestedDate.getTime()) || requestedDate > maxAllowed) {
+    return NextResponse.json({ ok: false, error: "Bookings can only be made up to 90 days in advance." }, { status: 400 });
   }
 
   const { data: shop } = await supabaseServer
@@ -66,7 +74,9 @@ export async function POST(
 
   // Encode booking data in success URL so the webhook-free path works via redirect
   const bookingData = encodeURIComponent(JSON.stringify({
-    barber_id, customer_name, customer_phone, customer_email, service, time, date,
+    barber_id, customer_name, customer_phone, customer_email,
+    client_notes: client_notes ?? null,
+    service, time, date,
   }));
 
   const session = await stripe.checkout.sessions.create({
@@ -92,6 +102,7 @@ export async function POST(
       customer_name,
       customer_phone,
       customer_email: customer_email ?? "",
+      client_notes: (client_notes ?? "").slice(0, 500), // Stripe metadata 500-char limit
       date,
       time,
     },

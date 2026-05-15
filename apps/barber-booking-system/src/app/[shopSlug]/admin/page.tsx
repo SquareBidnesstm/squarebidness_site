@@ -360,7 +360,7 @@ export default function AdminPage() {
                     fd.append("type", "shop_logo");
                     const res = await fetch(`/api/${shopSlug}/admin/upload`, { method: "POST", body: fd });
                     const data = await res.json();
-                    if (data.ok) setShopLogoUrl(data.url);
+                    if (data.ok) setShopLogoUrl(`${data.url}?v=${Date.now()}`);
                   };
                   input.click();
                 }}
