@@ -15,7 +15,7 @@ export async function GET(
 
   const { data: shop, error: shopError } = await supabaseServer
     .from("shops")
-    .select("id, name, slug")
+    .select("id, name, slug, logo_url")
     .eq("slug", shopSlug)
     .single();
 
@@ -67,7 +67,7 @@ export async function GET(
 
   return NextResponse.json({
     ok: true,
-    shop: { name: shop.name, slug: shop.slug },
+    shop: { name: shop.name, slug: shop.slug, logo_url: shop.logo_url ?? null },
     bookings: data || [],
   });
 }

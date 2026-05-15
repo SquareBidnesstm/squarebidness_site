@@ -88,6 +88,7 @@ export default function AdminPage() {
 
   const [activeTab, setActiveTab] = useState<"bookings" | "clients" | "barbers" | "services" | "hours" | "deposits" | "billing" | "settings">("bookings");
   const [shopName, setShopName] = useState("");
+  const [shopLogoUrl, setShopLogoUrl] = useState<string | null>(null);
   const [bookings, setBookings] = useState<AdminBooking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -121,6 +122,7 @@ export default function AdminPage() {
           return;
         }
         if (data.shop?.name) setShopName(data.shop.name);
+        if (data.shop?.logo_url) setShopLogoUrl(data.shop.logo_url);
         setBookings(data.bookings || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unexpected error");
@@ -268,16 +270,25 @@ export default function AdminPage() {
               alignItems: "flex-start",
             }}
           >
-            <div
-              style={{
-                color: "#d4af37",
-                fontSize: 12,
-                letterSpacing: "0.22em",
-                textTransform: "uppercase",
-                marginBottom: 10,
-              }}
-            >
-              {shopName || shopSlug}
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+              {shopLogoUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={shopLogoUrl}
+                  alt={shopName}
+                  style={{ width: 32, height: 32, borderRadius: 8, objectFit: "cover", flexShrink: 0 }}
+                />
+              )}
+              <div
+                style={{
+                  color: "#d4af37",
+                  fontSize: 12,
+                  letterSpacing: "0.22em",
+                  textTransform: "uppercase",
+                }}
+              >
+                {shopName || shopSlug}
+              </div>
             </div>
             <button
               type="button"
