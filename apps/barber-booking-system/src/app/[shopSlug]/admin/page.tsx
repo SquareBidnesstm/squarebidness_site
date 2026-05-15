@@ -6,6 +6,7 @@ import ServicesTab from "./ServicesTab";
 import BarbersTab from "./BarbersTab";
 import HoursTab from "./HoursTab";
 import BillingTab from "./BillingTab";
+import DepositsTab from "./DepositsTab";
 import WalkInModal from "./WalkInModal";
 import RescheduleModal from "./RescheduleModal";
 import BlockTimeModal from "./BlockTimeModal";
@@ -85,7 +86,7 @@ export default function AdminPage() {
   const shopSlug = params.shopSlug as string;
   const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<"bookings" | "clients" | "barbers" | "services" | "hours" | "billing" | "settings">("bookings");
+  const [activeTab, setActiveTab] = useState<"bookings" | "clients" | "barbers" | "services" | "hours" | "deposits" | "billing" | "settings">("bookings");
   const [shopName, setShopName] = useState("");
   const [bookings, setBookings] = useState<AdminBooking[]>([]);
   const [loading, setLoading] = useState(true);
@@ -297,7 +298,7 @@ export default function AdminPage() {
 
         {/* Tab nav */}
         <div style={{ display: "flex", gap: 8, marginBottom: 28 }}>
-          {(["bookings", "clients", "barbers", "services", "hours", "billing", "settings"] as const).map((tab) => (
+          {(["bookings", "clients", "barbers", "services", "hours", "deposits", "billing", "settings"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -326,6 +327,8 @@ export default function AdminPage() {
           <ServicesTab shopSlug={shopSlug} />
         ) : activeTab === "hours" ? (
           <HoursTab shopSlug={shopSlug} />
+        ) : activeTab === "deposits" ? (
+          <DepositsTab shopSlug={shopSlug} />
         ) : activeTab === "billing" ? (
           <BillingTab shopSlug={shopSlug} />
         ) : activeTab === "settings" ? (
