@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { supabaseServer } from "../../../../lib/supabase/server";
+import { normalizePhone, convertDisplayTimeTo24Hour } from "../../../../lib/utils";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2026-04-22.dahlia",
@@ -8,41 +9,20 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export const config = { runtime: "nodejs" };
 
-function convertDisplayTimeTo24Hour(time: string): string | null {
-  const [clock, suffix] = time.trim().split(" ");
-  if (!clock || !suffix) return null;
-  const [rawHour, rawMinute] = clock.split(":");
-  let hour = Number(rawHour);
-  const minute = Number(rawMinute);
-  if (isNaN(hour) || isNaN(minute)) return null;
-  if (suffix.toUpperCase() === "PM" && hour !== 12) hour += 12;
-  if (suffix.toUpperCase() === "AM" && hour === 12) hour = 0;
-  return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
-}
-
-function normalizePhone(raw: string): string | null {
-  const digits = raw.replace(/\D/g, "");
-  if (digits.length === 10) return `+1${digits}`;
-  if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
-  return null;
-}
-
 async function handleDepositBooking(session: Stripe.Checkout.Session) {
   const meta = session.metadata;
   if (!meta?.shop_id || !meta?.shop_slug) return;
 
-  // Already confirmed via redirect? Skip if booking already exists for this session
-  const { data: existing } = await supabaseServer
-    .from("bookings")
-    .select("id")
-    .eq("shop_id", meta.shop_id)
-    .eq("payment_status", "deposit_paid")
-    .eq("customer_name", meta.customer_name ?? "")
-    .eq("appointment_date", meta.date ?? "")
-    .limit(1);
-
-  // Idempotency: a recent booking for same customer+date+barber likely means redirect already ran
-  if (existing && existing.length > 0) return;
+  // Idempotency: check by payment_intent ID — globally unique, immune to name/date collisions
+  const paymentIntentId = session.payment_intent as string | null;
+  if (paymentIntentId) {
+    const { data: existingPayment } = await supabaseServer
+      .from("payments")
+      .select("id")
+      .eq("provider_payment_id", paymentIntentId)
+      .limit(1);
+    if (existingPayment && existingPayment.length > 0) return;
+  }
 
   const { data: shop } = await supabaseServer
     .from("shops").select("id, slug, timezone").eq("id", meta.shop_id).eq("active", true).single();

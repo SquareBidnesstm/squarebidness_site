@@ -106,6 +106,14 @@ export default function AdminPage() {
   const [loggingOut, setLoggingOut] = useState(false);
   const [pushEnabled, setPushEnabled] = useState(false);
   const [pushLoading, setPushLoading] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 700);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
   const [showWalkIn, setShowWalkIn] = useState(false);
   const [showBlockTime, setShowBlockTime] = useState(false);
   const [showSmsBlast, setShowSmsBlast] = useState(false);
@@ -323,7 +331,7 @@ export default function AdminPage() {
         minHeight: "100vh",
         background: "#050505",
         color: "#ffffff",
-        padding: "48px 24px",
+        padding: isMobile ? "24px 16px" : "48px 24px",
       }}
     >
       <section style={{ maxWidth: 1280, margin: "0 auto" }}>
@@ -333,6 +341,8 @@ export default function AdminPage() {
               display: "flex",
               justifyContent: "space-between",
               alignItems: "flex-start",
+              flexWrap: "wrap",
+              gap: 12,
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
@@ -412,7 +422,7 @@ export default function AdminPage() {
         </div>
 
         {/* Tab nav */}
-        <div style={{ display: "flex", gap: 8, marginBottom: 28 }}>
+        <div style={{ display: "flex", gap: 8, marginBottom: 28, flexWrap: "wrap" }}>
           {(["bookings", "clients", "barbers", "services", "hours", "deposits", "billing", "settings"] as const).map((tab) => (
             <button
               key={tab}
@@ -453,7 +463,7 @@ export default function AdminPage() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+            gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, minmax(0, 1fr))",
             gap: 16,
             marginBottom: 16,
           }}
@@ -471,7 +481,7 @@ export default function AdminPage() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+            gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, minmax(0, 1fr))",
             gap: 16,
             marginBottom: 24,
           }}
@@ -493,7 +503,7 @@ export default function AdminPage() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "1.3fr 200px 200px auto",
+              gridTemplateColumns: isMobile ? "1fr" : "1.3fr 200px 200px auto",
               gap: 14,
               marginBottom: 24,
               alignItems: "center",
@@ -541,14 +551,15 @@ export default function AdminPage() {
           <div
             style={{
               display: "flex",
-              alignItems: "center",
+              alignItems: isMobile ? "flex-start" : "center",
+              flexDirection: isMobile ? "column" : "row",
               justifyContent: "space-between",
               gap: 16,
               marginBottom: 18,
             }}
           >
             <h2 style={{ margin: 0, fontSize: 30, fontWeight: 900 }}>Bookings</h2>
-            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+            <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
               <div style={{ color: "#8f8f8f", fontSize: 14 }}>{filteredBookings.length} shown</div>
               <a
                 href={`/api/${shopSlug}/admin/calendar.ics`}
@@ -626,7 +637,7 @@ export default function AdminPage() {
                     <div
                       style={{
                         display: "grid",
-                        gridTemplateColumns: "1fr auto",
+                        gridTemplateColumns: isMobile ? "1fr" : "1fr auto",
                         gap: 18,
                         alignItems: "center",
                       }}
