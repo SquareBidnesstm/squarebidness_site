@@ -51,7 +51,7 @@
       min-height:100dvh;
       display:grid;
       place-items:center;
-      padding:calc(18px + env(safe-area-inset-top)) 18px calc(18px + env(safe-area-inset-bottom));
+      padding:calc(14px + env(safe-area-inset-top)) 14px calc(14px + env(safe-area-inset-bottom));
       overflow-x:hidden;
     }
 
@@ -61,20 +61,24 @@
     }
 
     .shell{
-      width:min(310px,calc(100vw - 40px));
-      max-width:calc(100vw - 36px);
+      width:min(100%,362px);
+      max-width:calc(100vw - 28px);
+      min-width:0;
       display:grid;
       gap:14px;
     }
 
     .card{
+      width:100%;
+      min-width:0;
       border:1px solid var(--line);
       border-radius:28px;
       background:
         radial-gradient(circle at top,rgba(255,255,255,.08),transparent 32%),
         linear-gradient(180deg,#090909,#030303);
       box-shadow:var(--shadow);
-      padding:14px;
+      padding:18px;
+      overflow:hidden;
     }
 
     .brand{
@@ -90,6 +94,10 @@
       border-radius:14px;
     }
 
+    .brand div{
+      min-width:0;
+    }
+
     .brand strong{
       display:block;
       font-size:1.06rem;
@@ -101,12 +109,13 @@
       color:var(--muted);
       font-size:.9rem;
       margin-top:1px;
+      overflow-wrap:anywhere;
     }
 
     .qr-box{
       border-radius:24px;
       background:#fff;
-      padding:16px;
+      padding:18px;
     }
 
     .qr-box img{
@@ -119,8 +128,8 @@
     .actions{
       display:grid;
       grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:9px;
-      margin-top:14px;
+      gap:10px;
+      margin-top:16px;
     }
 
     .btn{
@@ -136,7 +145,6 @@
       font-weight:950;
       line-height:1.1;
       min-width:0;
-      font-size:clamp(.9rem,4vw,1rem);
       overflow-wrap:anywhere;
     }
 
@@ -162,6 +170,13 @@
     @media(max-width:600px){
       body{place-items:start}
       .shell{margin-left:0;margin-right:auto}
+    }
+
+    @media(max-width:420px){
+      .card{padding:16px}
+      .brand span{font-size:.84rem}
+      .qr-box{padding:14px;border-radius:20px}
+      .btn{font-size:.92rem;padding:0 10px}
     }
   </style>
 </head>
