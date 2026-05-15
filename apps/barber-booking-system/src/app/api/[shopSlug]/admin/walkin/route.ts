@@ -21,7 +21,7 @@ export async function POST(
   }
 
   const body = await req.json();
-  const { barber_id, service_id, customer_name, customer_phone } = body;
+  const { barber_id, service_id, customer_name, customer_phone, client_notes } = body;
 
   if (!barber_id || !service_id) {
     return NextResponse.json({ ok: false, error: "Barber and service are required" }, { status: 400 });
@@ -63,6 +63,7 @@ export async function POST(
       customer_id: customer?.id ?? null,
       customer_name: name,
       customer_phone: customer_phone || null,
+      client_notes: client_notes || null,
       appointment_date: appointmentDate,
       starts_at: startsAt.toISOString(),
       ends_at: endsAt.toISOString(),

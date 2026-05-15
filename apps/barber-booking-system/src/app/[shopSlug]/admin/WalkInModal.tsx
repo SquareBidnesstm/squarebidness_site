@@ -22,6 +22,7 @@ export default function WalkInModal({ shopSlug, onClose, onCreated }: Props) {
   const [serviceId, setServiceId] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
+  const [clientNotes, setClientNotes] = useState("");
 
   useEffect(() => {
     async function load() {
@@ -51,7 +52,7 @@ export default function WalkInModal({ shopSlug, onClose, onCreated }: Props) {
       const res = await fetch(`/api/${shopSlug}/admin/walkin`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ barber_id: barberId, service_id: serviceId, customer_name: customerName, customer_phone: customerPhone }),
+        body: JSON.stringify({ barber_id: barberId, service_id: serviceId, customer_name: customerName, customer_phone: customerPhone, client_notes: clientNotes.trim() || null }),
       });
       const data = await res.json();
       if (!res.ok || !data.ok) { setError(data.error ?? "Failed to create walk-in"); return; }
@@ -112,6 +113,17 @@ export default function WalkInModal({ shopSlug, onClose, onCreated }: Props) {
                 onChange={e => setCustomerPhone(e.target.value)}
                 placeholder="(555) 555-5555"
                 style={inputStyle}
+              />
+            </div>
+
+            <div>
+              <label style={labelStyle}>Notes (optional)</label>
+              <textarea
+                value={clientNotes}
+                onChange={e => setClientNotes(e.target.value)}
+                placeholder="Any special requests or notes…"
+                rows={3}
+                style={{ ...inputStyle, resize: "vertical" }}
               />
             </div>
 
