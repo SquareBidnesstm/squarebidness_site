@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../../lib/supabase/server";
 import { normalizePhone } from "../../../../lib/utils";
+import { isSmsOptedOut } from "../../../../lib/sms-opt-out";
 
 export const runtime = "nodejs";
 
@@ -55,6 +56,7 @@ export async function GET(req: NextRequest) {
     const service = booking.services as any;
     const normalizedPhone = normalizePhone(booking.customer_phone ?? "");
     if (!normalizedPhone || !shop || !barber || !service) continue;
+    if (await isSmsOptedOut(normalizedPhone)) continue;
 
     const dateStr = new Date(`${booking.appointment_date}T12:00:00`).toLocaleDateString("en-US", {
       weekday: "long", month: "long", day: "numeric",

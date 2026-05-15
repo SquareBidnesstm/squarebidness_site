@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../../../lib/supabase/server";
 import { verifyAdminSession } from "../../../../../lib/auth";
 import { normalizePhone } from "../../../../../lib/utils";
+import { isSmsOptedOut } from "../../../../../lib/sms-opt-out";
 
 export async function POST(
   req: NextRequest,
@@ -72,6 +73,18 @@ export async function POST(
 
   if (uniquePhones.size === 0) {
     return NextResponse.json({ ok: false, error: "No recipients found for this audience" }, { status: 400 });
+  }
+
+  // Filter out phones that have opted out of SMS
+  const optOutChecks = await Promise.all(
+    Array.from(uniquePhones).map(async (phone) => ({ phone, optedOut: await isSmsOptedOut(phone) }))
+  );
+  for (const { phone, optedOut } of optOutChecks) {
+    if (optedOut) uniquePhones.delete(phone);
+  }
+
+  if (uniquePhones.size === 0) {
+    return NextResponse.json({ ok: false, error: "All recipients have opted out of SMS" }, { status: 400 });
   }
 
   const shopBookingUrl = `https://booking.squarebidness.com/${shopSlug}`;

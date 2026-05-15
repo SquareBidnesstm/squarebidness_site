@@ -3,6 +3,7 @@ import { supabaseServer } from "../../../../../lib/supabase/server";
 import { verifyAdminSession, checkActiveSubscription } from "../../../../../lib/auth";
 import { sendPushToBarber, sendPushToShopAdmins } from "../../../../../lib/push";
 import { normalizePhone } from "../../../../../lib/utils";
+import { isSmsOptedOut } from "../../../../../lib/sms-opt-out";
 
 function getTodayString() {
   const now = new Date();
@@ -83,9 +84,10 @@ export async function POST(
     );
   }
 
-  // Send SMS if phone provided
+  // Send SMS if phone provided and not opted out
   const normalizedPhone = normalizePhone(customer_phone ?? "");
-  if (normalizedPhone) {
+  const optedOut = normalizedPhone ? await isSmsOptedOut(normalizedPhone) : false;
+  if (normalizedPhone && !optedOut) {
     const sid = process.env.TWILIO_ACCOUNT_SID;
     const token = process.env.TWILIO_AUTH_TOKEN;
     const messagingSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
