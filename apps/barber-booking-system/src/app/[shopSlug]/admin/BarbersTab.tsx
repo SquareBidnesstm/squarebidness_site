@@ -49,7 +49,7 @@ type EditState = {
   name: string;
   display_name: string;
   role: string;
-  bio: string;
+  bio?: string;
 };
 
 const COMMON_ROLES = [
@@ -226,7 +226,7 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
     const data = await res.json();
     if (data.ok) {
       setBarbers((prev) => [...prev, { ...data.barber, has_pin: false }]);
-      setNewBarber({ name: "", display_name: "", role: "Barber", bio: "" });
+      setNewBarber({ name: "", display_name: "", role: "Barber" });
       setAddingNew(false);
     } else {
       alert(data.error || "Could not add barber.");
