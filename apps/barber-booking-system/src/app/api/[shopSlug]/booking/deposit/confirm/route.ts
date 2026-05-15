@@ -50,7 +50,7 @@ export async function GET(
   };
 
   const { data: shop } = await supabaseServer
-    .from("shops").select("id, slug, timezone").eq("slug", shopSlug).eq("active", true).single();
+    .from("shops").select("id, slug, name, timezone").eq("slug", shopSlug).eq("active", true).single();
   if (!shop) return NextResponse.redirect(new URL(`/${shopSlug}`, req.url));
 
   const { data: barber } = await supabaseServer

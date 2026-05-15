@@ -1,13 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../../../lib/supabase/server";
 import { verifyAdminSession, checkActiveSubscription } from "../../../../../lib/auth";
-
-function normalizePhone(raw: string): string | null {
-  const digits = raw.replace(/\D/g, "");
-  if (digits.length === 10) return `+1${digits}`;
-  if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
-  return null;
-}
+import { sendPushToBarber, sendPushToShopAdmins } from "../../../../../lib/push";
+import { normalizePhone } from "../../../../../lib/utils";
 
 function getTodayString() {
   const now = new Date();
@@ -120,6 +115,17 @@ export async function POST(
       }).catch(console.error);
     }
   }
+
+  // Push notifications to barber and shop admins
+  const apptStr = new Date(booking.starts_at).toLocaleString("en-US", {
+    weekday: "short", month: "short", day: "numeric",
+    hour: "numeric", minute: "2-digit", timeZone: shop.timezone ?? "America/New_York",
+  });
+  const pushTitle = "Walk-in Booking";
+  const pushBody = `${name} — ${service.name} at ${apptStr}`;
+  const pushUrl = `/${shopSlug}/admin`;
+  sendPushToBarber(barber.id, { title: pushTitle, body: pushBody, url: pushUrl }).catch(console.error);
+  sendPushToShopAdmins(shop.id, { title: pushTitle, body: pushBody, url: pushUrl }).catch(console.error);
 
   return NextResponse.json({
     ok: true,

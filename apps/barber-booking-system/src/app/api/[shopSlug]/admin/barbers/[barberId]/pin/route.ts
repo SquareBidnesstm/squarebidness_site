@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../../../../../lib/supabase/server";
 import { verifyAdminSession } from "../../../../../../../lib/auth";
+import { hashPin } from "../../../../../../../lib/utils";
 
 export async function POST(
   req: NextRequest,
@@ -38,19 +39,20 @@ export async function POST(
   const body = await req.json().catch(() => ({}));
   const pin = String(body.pin || "").trim();
 
-  if (!pin || pin.length < 4 || pin.length > 12 || !/^\d+$/.test(pin)) {
+  if (!pin || !/^\d{4}$/.test(pin)) {
     return NextResponse.json(
-      { ok: false, error: "PIN must be 4–12 digits." },
+      { ok: false, error: "PIN must be exactly 4 digits." },
       { status: 400 }
     );
   }
 
   const key = `barber_auth_${barberId}`;
+  const { hash, salt } = await hashPin(pin);
 
   const { error } = await supabaseServer
     .from("shop_settings")
     .upsert(
-      { shop_id: shop.id, key, value_json: { pin } },
+      { shop_id: shop.id, key, value_json: { pin_hash: hash, pin_salt: salt } },
       { onConflict: "shop_id,key" }
     );
 

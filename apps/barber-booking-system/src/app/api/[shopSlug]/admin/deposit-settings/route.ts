@@ -7,8 +7,7 @@ export async function GET(
   { params }: { params: Promise<{ shopSlug: string }> }
 ) {
   const { shopSlug } = await params;
-  const authed = await verifyAdminSession(req, shopSlug);
-  if (!authed) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+  // GET is intentionally public — the booking form needs deposit config
 
   const { data: shop } = await supabaseServer.from("shops").select("id").eq("slug", shopSlug).single();
   if (!shop) return NextResponse.json({ ok: false, error: "Not found" }, { status: 404 });

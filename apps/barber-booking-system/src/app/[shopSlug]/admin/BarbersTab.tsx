@@ -246,8 +246,8 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
   async function savePin(barberId: string) {
     setPinError("");
     setPinSuccess("");
-    if (!pinInput || !/^\d{4,12}$/.test(pinInput)) {
-      setPinError("PIN must be 4–12 digits.");
+    if (!pinInput || !/^\d{4}$/.test(pinInput)) {
+      setPinError("PIN must be exactly 4 digits.");
       return;
     }
     setPinSaving(true);

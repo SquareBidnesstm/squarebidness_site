@@ -35,20 +35,44 @@ export async function POST(
     if (!authed) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
 
-  const { error } = await supabaseServer
-    .from("push_subscriptions")
-    .upsert(
-      {
+  let upsertError: { message: string } | null = null;
+
+  if (barberId !== null) {
+    // Barber — safe to upsert on (barber_id, endpoint)
+    const { error } = await supabaseServer
+      .from("push_subscriptions")
+      .upsert(
+        {
+          shop_id: shop.id,
+          barber_id: barberId,
+          endpoint: subscription.endpoint,
+          p256dh: subscription.keys.p256dh,
+          auth: subscription.keys.auth,
+        },
+        { onConflict: "barber_id,endpoint" }
+      );
+    upsertError = error;
+  } else {
+    // Admin (barber_id = null) — NULL != NULL in SQL unique constraints, so delete + insert
+    await supabaseServer
+      .from("push_subscriptions")
+      .delete()
+      .eq("shop_id", shop.id)
+      .is("barber_id", null)
+      .eq("endpoint", subscription.endpoint);
+    const { error } = await supabaseServer
+      .from("push_subscriptions")
+      .insert({
         shop_id: shop.id,
-        barber_id: barberId,
+        barber_id: null,
         endpoint: subscription.endpoint,
         p256dh: subscription.keys.p256dh,
         auth: subscription.keys.auth,
-      },
-      { onConflict: "barber_id,endpoint" }
-    );
+      });
+    upsertError = error;
+  }
 
-  if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+  if (upsertError) return NextResponse.json({ ok: false, error: upsertError.message }, { status: 500 });
 
   return NextResponse.json({ ok: true });
 }

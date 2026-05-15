@@ -27,12 +27,19 @@ export default function BookingForm({ shopSlug, shopName, shopLogoUrl, barberSlu
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [notes, setNotes] = useState("");
   const [date, setDate] = useState(() => getTodayDateString());
   const [service, setService] = useState("");
   const [time, setTime] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [confirmed, setConfirmed] = useState<{ code: string } | null>(null);
+  const [confirmed, setConfirmed] = useState<{
+    code: string;
+    startsAt?: string;
+    endsAt?: string;
+    barber?: string;
+    service?: string;
+  } | null>(null);
 
   const [slots, setSlots] = useState<TimeSlot[]>([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
@@ -99,6 +106,7 @@ export default function BookingForm({ shopSlug, shopName, shopLogoUrl, barberSlu
       customer_name: name,
       customer_phone: phone,
       customer_email: email || null,
+      client_notes: notes.trim() || null,
       service,
       time: slots.find((s) => s.time === time)?.label ?? time,
       date,
@@ -138,7 +146,13 @@ export default function BookingForm({ shopSlug, shopName, shopLogoUrl, barberSlu
 
     if (res.ok) {
       const data = await res.json();
-      setConfirmed({ code: data.booking?.booking_code || "—" });
+      setConfirmed({
+        code: data.booking?.booking_code || "—",
+        startsAt: data.booking?.starts_at,
+        endsAt: data.booking?.ends_at,
+        barber: data.barber,
+        service: data.service,
+      });
     } else {
       const data = await res.json().catch(() => null);
       setError(data?.error || "Error booking appointment. Try again.");
@@ -189,6 +203,34 @@ export default function BookingForm({ shopSlug, shopName, shopLogoUrl, barberSlu
               {confirmed.code}
             </div>
           </div>
+          {/* Add to Calendar */}
+          {confirmed?.startsAt && confirmed?.endsAt && (() => {
+            const fmt = (d: string) => new Date(d).toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+            const title = encodeURIComponent(`${confirmed.service ?? "Appointment"} with ${confirmed.barber ?? "Barber"}`);
+            const calUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${fmt(confirmed.startsAt)}/${fmt(confirmed.endsAt)}&details=${encodeURIComponent(`Booking code: ${confirmed.code}`)}`;
+            return (
+              <a
+                href={calUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: "block",
+                  textAlign: "center",
+                  padding: "12px 20px",
+                  borderRadius: 10,
+                  border: "1px solid #2a2a2a",
+                  background: "#0d0d0d",
+                  color: "#aaa",
+                  fontSize: 14,
+                  textDecoration: "none",
+                  marginBottom: 16,
+                }}
+              >
+                📅 Add to Google Calendar
+              </a>
+            );
+          })()}
+
           {/* Add to home screen prompt */}
           <div style={{ background: "linear-gradient(180deg,rgba(212,175,55,.1),rgba(255,255,255,.03))", border: "1px solid rgba(212,175,55,.25)", borderRadius: 16, padding: "18px 20px", marginBottom: 20, textAlign: "left" }}>
             <strong style={{ display: "block", fontSize: "1rem", marginBottom: 6, color: "#fff" }}>📲 Add SB Booking to your home screen</strong>
@@ -206,6 +248,7 @@ export default function BookingForm({ shopSlug, shopName, shopLogoUrl, barberSlu
               setName("");
               setPhone("");
               setEmail("");
+              setNotes("");
               setDate(getTodayDateString());
               setService("");
               setTime("");
@@ -298,6 +341,16 @@ export default function BookingForm({ shopSlug, shopName, shopLogoUrl, barberSlu
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@email.com"
               style={fieldStyle}
+            />
+          </Field>
+
+          <Field label="Notes" hint="optional">
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Anything your barber should know (style, allergies, etc.)"
+              rows={3}
+              style={{ ...fieldStyle, resize: "vertical" }}
             />
           </Field>
 

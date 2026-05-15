@@ -3,12 +3,14 @@ import { supabaseServer } from "../../../../../lib/supabase/server";
 import { checkActiveSubscription } from "../../../../../lib/auth";
 import { sendPushToBarber, sendPushToShopAdmins } from "../../../../../lib/push";
 import { sendConfirmationEmail } from "../../../../../lib/email";
+import { normalizePhone, convertDisplayTimeTo24Hour } from "../../../../../lib/utils";
 
 type CreateBookingPayload = {
   barber_id?: string;
   customer_name?: string;
   customer_phone?: string;
   customer_email?: string | null;
+  client_notes?: string | null;
   service?: string;
   time?: string;
   date?: string;
@@ -17,26 +19,6 @@ type CreateBookingPayload = {
 function getTodayDateString() {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-}
-
-function convertDisplayTimeTo24Hour(time: string) {
-  const [clock, suffix] = time.trim().split(" ");
-  if (!clock || !suffix) return null;
-  const [rawHour, rawMinute] = clock.split(":");
-  let hour = Number(rawHour);
-  const minute = Number(rawMinute);
-  if (Number.isNaN(hour) || Number.isNaN(minute)) return null;
-  const upper = suffix.toUpperCase();
-  if (upper === "PM" && hour !== 12) hour += 12;
-  if (upper === "AM" && hour === 12) hour = 0;
-  return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
-}
-
-function normalizePhone(raw: string): string | null {
-  const digits = raw.replace(/\D/g, "");
-  if (digits.length === 10) return `+1${digits}`;
-  if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
-  return null;
 }
 
 async function sendConfirmationSMS({
@@ -145,7 +127,7 @@ export async function POST(
 
     const { data: shop, error: shopError } = await supabaseServer
       .from("shops")
-      .select("id, slug, timezone")
+      .select("id, slug, name, timezone")
       .eq("slug", shopSlug)
       .eq("active", true)
       .single();
@@ -228,6 +210,7 @@ export async function POST(
         customer_name: body.customer_name,
         customer_phone: body.customer_phone,
         customer_email: body.customer_email || null,
+        client_notes: body.client_notes || null,
         appointment_date: appointmentDate,
         starts_at: startsAt.toISOString(),
         ends_at: endsAt.toISOString(),

@@ -16,6 +16,7 @@ type Booking = {
   ends_at: string;
   status: BookingStatus;
   payment_status: string;
+  price_snapshot: number | null;
   client_notes: string | null;
   services: { name: string; duration_minutes: number; price: number } | null;
 };
@@ -91,6 +92,7 @@ export default function BarberPage() {
   const router = useRouter();
 
   const [barberName, setBarberName] = useState("");
+  const [barberPhotoUrl, setBarberPhotoUrl] = useState<string | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [perms, setPerms] = useState<Perms>({ can_edit_hours: false, can_edit_prices: false });
   const [loading, setLoading] = useState(true);
@@ -128,6 +130,7 @@ export default function BarberPage() {
           return;
         }
         setBarberName(data.barberName || barberSlug);
+        if (data.barberPhotoUrl) setBarberPhotoUrl(data.barberPhotoUrl);
         setBookings(data.bookings || []);
         setPerms(data.perms ?? { can_edit_hours: false, can_edit_prices: false });
       } catch {
@@ -286,7 +289,7 @@ export default function BarberPage() {
     const confirmed = bookings.filter((b) => b.status === "confirmed").length;
     const completedRevenue = bookings
       .filter((b) => b.status === "completed")
-      .reduce((s, b) => s + Number(b.services?.price || 0), 0);
+      .reduce((s, b) => s + Number(b.price_snapshot ?? b.services?.price ?? 0), 0);
     return {
       total: bookings.length,
       confirmed,
@@ -303,12 +306,50 @@ export default function BarberPage() {
 
         {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28 }}>
-          <div>
-            <div style={{ color: "#d4af37", fontSize: 12, letterSpacing: "0.22em", textTransform: "uppercase", marginBottom: 10 }}>
-              My Schedule
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            {/* Clickable photo upload */}
+            <div
+              onClick={() => {
+                const input = document.createElement("input");
+                input.type = "file";
+                input.accept = "image/jpeg,image/png,image/webp,image/gif";
+                input.onchange = async () => {
+                  const file = input.files?.[0];
+                  if (!file) return;
+                  const fd = new FormData();
+                  fd.append("file", file);
+                  fd.append("type", "barber_photo");
+                  // Need barber id — get from admin upload endpoint via barber slug
+                  fd.append("barber_slug", barberSlug);
+                  const res = await fetch(`/api/${shopSlug}/barbers/${barberSlug}/photo`, { method: "POST", body: fd });
+                  const data = await res.json();
+                  if (data.ok) setBarberPhotoUrl(data.url);
+                };
+                input.click();
+              }}
+              title={barberPhotoUrl ? "Click to change photo" : "Click to add your photo"}
+              style={{
+                width: 56, height: 56, borderRadius: "50%", flexShrink: 0,
+                cursor: "pointer", overflow: "hidden",
+                border: barberPhotoUrl ? "2px solid #d4af37" : "2px dashed #3a3a3a",
+                background: barberPhotoUrl ? "transparent" : "#111",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}
+            >
+              {barberPhotoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={barberPhotoUrl} alt={barberName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              ) : (
+                <span style={{ fontSize: 22, opacity: 0.35 }}>📷</span>
+              )}
             </div>
-            <h1 style={{ fontSize: 44, fontWeight: 900, margin: 0 }}>{barberName || barberSlug}</h1>
-            <p style={{ color: "#666", fontSize: 15, marginTop: 8 }}>Your appointments only.</p>
+            <div>
+              <div style={{ color: "#d4af37", fontSize: 12, letterSpacing: "0.22em", textTransform: "uppercase", marginBottom: 10 }}>
+                My Schedule
+              </div>
+              <h1 style={{ fontSize: 44, fontWeight: 900, margin: 0 }}>{barberName || barberSlug}</h1>
+              <p style={{ color: "#666", fontSize: 15, marginTop: 8 }}>Your appointments only.</p>
+            </div>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             {"Notification" in (typeof window !== "undefined" ? window : {}) && (

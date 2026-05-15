@@ -1,13 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../../../lib/supabase/server";
 import { verifyAdminSession } from "../../../../../lib/auth";
-
-function normalizePhone(raw: string): string | null {
-  const digits = raw.replace(/\D/g, "");
-  if (digits.length === 10) return `+1${digits}`;
-  if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
-  return null;
-}
+import { normalizePhone } from "../../../../../lib/utils";
 
 export async function POST(
   req: NextRequest,
@@ -87,12 +81,14 @@ export async function POST(
   let sent = 0;
   let failed = 0;
 
-  // Send sequentially to avoid rate limiting
-  for (const phone of uniquePhones) {
+  // Send in parallel batches of 10 to balance speed vs. Twilio rate limits
+  const BATCH_SIZE = 10;
+  const phones = Array.from(uniquePhones);
+
+  async function sendOne(phone: string): Promise<boolean> {
     const msgParams = new URLSearchParams({ To: phone, Body: fullMessage });
     if (messagingSid) msgParams.set("MessagingServiceSid", messagingSid);
     else msgParams.set("From", fromNumber!);
-
     try {
       const res = await fetch(
         `https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`,
@@ -102,10 +98,16 @@ export async function POST(
           body: msgParams.toString(),
         }
       );
-      if (res.ok) sent++; else failed++;
+      return res.ok;
     } catch {
-      failed++;
+      return false;
     }
+  }
+
+  for (let i = 0; i < phones.length; i += BATCH_SIZE) {
+    const batch = phones.slice(i, i + BATCH_SIZE);
+    const results = await Promise.all(batch.map(sendOne));
+    for (const ok of results) { if (ok) sent++; else failed++; }
   }
 
   return NextResponse.json({ ok: true, sent, failed, total: uniquePhones.size });

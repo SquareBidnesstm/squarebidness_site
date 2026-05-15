@@ -32,6 +32,7 @@ type AdminBooking = {
   ends_at: string;
   status: BookingStatus;
   payment_status: "unpaid" | "deposit_paid" | "paid" | "refunded";
+  price_snapshot: number | null;
   source: string | null;
   client_notes: string | null;
   created_at: string;
@@ -53,10 +54,11 @@ function formatDate(dateStr: string) {
   return new Date(`${dateStr}T12:00:00`).toLocaleDateString();
 }
 
-function formatTime(dateTime: string) {
+function formatTime(dateTime: string, timezone?: string) {
   return new Date(dateTime).toLocaleTimeString([], {
     hour: "numeric",
     minute: "2-digit",
+    ...(timezone ? { timeZone: timezone } : {}),
   });
 }
 
@@ -89,6 +91,8 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<"bookings" | "clients" | "barbers" | "services" | "hours" | "deposits" | "billing" | "settings">("bookings");
   const [shopName, setShopName] = useState("");
   const [shopLogoUrl, setShopLogoUrl] = useState<string | null>(null);
+  const [shopTimezone, setShopTimezone] = useState("America/New_York");
+  const [allBarbers, setAllBarbers] = useState<{ slug: string; name: string }[]>([]);
   const [bookings, setBookings] = useState<AdminBooking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -100,6 +104,8 @@ export default function AdminPage() {
   const [managingId, setManagingId] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [pushEnabled, setPushEnabled] = useState(false);
+  const [pushLoading, setPushLoading] = useState(false);
   const [showWalkIn, setShowWalkIn] = useState(false);
   const [showBlockTime, setShowBlockTime] = useState(false);
   const [showSmsBlast, setShowSmsBlast] = useState(false);
@@ -123,6 +129,7 @@ export default function AdminPage() {
         }
         if (data.shop?.name) setShopName(data.shop.name);
         if (data.shop?.logo_url) setShopLogoUrl(data.shop.logo_url);
+        if (data.shop?.timezone) setShopTimezone(data.shop.timezone);
         setBookings(data.bookings || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unexpected error");
@@ -137,6 +144,55 @@ export default function AdminPage() {
     setLoggingOut(true);
     await fetch(`/api/${shopSlug}/admin/logout`, { method: "POST" });
     router.push(`/${shopSlug}/admin/login`);
+  }
+
+  // Check admin push state on mount
+  useEffect(() => {
+    if (typeof window === "undefined" || !("Notification" in window)) return;
+    if (Notification.permission === "granted") {
+      navigator.serviceWorker.ready.then((reg) => {
+        reg.pushManager.getSubscription().then((sub) => {
+          if (sub) setPushEnabled(true);
+        });
+      }).catch(() => {});
+    }
+  }, []);
+
+  async function toggleAdminPush() {
+    if (!("Notification" in window) || !("serviceWorker" in navigator)) return;
+    setPushLoading(true);
+    try {
+      const reg = await navigator.serviceWorker.register("/sw.js");
+      await navigator.serviceWorker.ready;
+      if (pushEnabled) {
+        const sub = await reg.pushManager.getSubscription();
+        if (sub) {
+          await fetch(`/api/${shopSlug}/push-subscribe`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ endpoint: sub.endpoint }),
+          });
+          await sub.unsubscribe();
+        }
+        setPushEnabled(false);
+      } else {
+        const permission = await Notification.requestPermission();
+        if (permission !== "granted") { setPushLoading(false); return; }
+        const sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+        });
+        await fetch(`/api/${shopSlug}/push-subscribe`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ subscription: sub.toJSON() }),
+        });
+        setPushEnabled(true);
+      }
+    } catch (e) {
+      console.error("Admin push toggle error:", e);
+    }
+    setPushLoading(false);
   }
 
   const [forfeitPrompt, setForfeitPrompt] = useState<{ bookingId: string; status: BookingStatus } | null>(null);
@@ -169,15 +225,24 @@ export default function AdminPage() {
     [shopSlug]
   );
 
-  const uniqueBarbers = useMemo(() => {
-    const map = new Map<string, string>();
-    bookings.forEach((b) => {
-      const slug = b.barbers?.slug;
-      const name = b.barbers?.display_name || b.barbers?.name;
-      if (slug && name) map.set(slug, name);
-    });
-    return Array.from(map.entries()).map(([slug, name]) => ({ slug, name }));
-  }, [bookings]);
+  // Load all barbers from API (not derived from bookings — ensures filter always shows everyone)
+  useEffect(() => {
+    fetch(`/api/${shopSlug}/admin/barbers`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.ok && Array.isArray(d.barbers)) {
+          setAllBarbers(
+            d.barbers
+              .filter((b: { active: boolean }) => b.active)
+              .map((b: { slug: string; name: string; display_name: string | null }) => ({
+                slug: b.slug,
+                name: b.display_name || b.name,
+              }))
+          );
+        }
+      })
+      .catch(() => {});
+  }, [shopSlug]);
 
   const filteredBookings = useMemo(() => {
     return bookings
@@ -234,18 +299,18 @@ export default function AdminPage() {
       (b) => b.appointment_date === today
     ).length;
     const bookedRevenue = bookings.reduce(
-      (sum, b) => sum + Number(b.services?.price || 0),
+      (sum, b) => sum + Number(b.price_snapshot || 0),
       0
     );
     const completedRevenue = bookings
       .filter((b) => b.status === "completed")
-      .reduce((sum, b) => sum + Number(b.services?.price || 0), 0);
+      .reduce((sum, b) => sum + Number(b.price_snapshot || 0), 0);
     const todayBookedRevenue = bookings
       .filter((b) => b.appointment_date === today)
-      .reduce((sum, b) => sum + Number(b.services?.price || 0), 0);
+      .reduce((sum, b) => sum + Number(b.price_snapshot || 0), 0);
     const todayCompletedRevenue = bookings
       .filter((b) => b.appointment_date === today && b.status === "completed")
-      .reduce((sum, b) => sum + Number(b.services?.price || 0), 0);
+      .reduce((sum, b) => sum + Number(b.price_snapshot || 0), 0);
     return {
       total, confirmed, completed, todayCount,
       bookedRevenue, completedRevenue, todayBookedRevenue, todayCompletedRevenue,
@@ -316,14 +381,27 @@ export default function AdminPage() {
                 {shopName || shopSlug}
               </div>
             </div>
-            <button
-              type="button"
-              onClick={handleLogout}
-              disabled={loggingOut}
-              style={secondaryButton}
-            >
-              {loggingOut ? "Signing out..." : "Sign out"}
-            </button>
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              {"Notification" in (typeof window !== "undefined" ? window : {}) && (
+                <button
+                  type="button"
+                  onClick={toggleAdminPush}
+                  disabled={pushLoading}
+                  title={pushEnabled ? "Disable push notifications" : "Enable push notifications"}
+                  style={{ ...secondaryButton, fontSize: 18, padding: "8px 12px" }}
+                >
+                  {pushLoading ? "…" : pushEnabled ? "🔔" : "🔕"}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={handleLogout}
+                disabled={loggingOut}
+                style={secondaryButton}
+              >
+                {loggingOut ? "Signing out..." : "Sign out"}
+              </button>
+            </div>
           </div>
           <h1 style={{ fontSize: 52, lineHeight: 1.05, fontWeight: 900, margin: 0 }}>
             Admin Dashboard
@@ -433,7 +511,7 @@ export default function AdminPage() {
               style={inputStyle}
             >
               <option value="all">All barbers</option>
-              {uniqueBarbers.map((b) => (
+              {allBarbers.map((b) => (
                 <option key={b.slug} value={b.slug}>
                   {b.name}
                 </option>
@@ -595,7 +673,7 @@ export default function AdminPage() {
                         >
                           <span>{booking.booking_code}</span>
                           <span>{formatDate(booking.appointment_date)}</span>
-                          <span>{formatTime(booking.starts_at)}</span>
+                          <span>{formatTime(booking.starts_at, shopTimezone)}</span>
                           <span>{booking.customer_phone || "—"}</span>
                           <span>{booking.source || "—"}</span>
                         </div>

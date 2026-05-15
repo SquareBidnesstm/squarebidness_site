@@ -21,7 +21,7 @@ export async function generateMetadata({
 
   const { data: shop } = await supabaseServer
     .from("shops")
-    .select("id, name, city, state")
+    .select("id, name, city, state, logo_url")
     .eq("slug", shopSlug)
     .eq("active", true)
     .single();
@@ -39,6 +39,10 @@ export async function generateMetadata({
   const typeLabel = SHOP_TYPE_LABELS[shopType] ?? "Appointment Booking";
   const url = `https://booking.squarebidness.com/${shopSlug}`;
 
+  const ogImages = (shop as any).logo_url
+    ? [{ url: (shop as any).logo_url, width: 512, height: 512, alt: shop.name }]
+    : [];
+
   return {
     title: `${shop.name} — Book an Appointment`,
     description: `Book your appointment at ${shop.name} in ${shop.city}, ${shop.state}. ${typeLabel} powered by SquareBidness.`,
@@ -48,11 +52,13 @@ export async function generateMetadata({
       url,
       siteName: "SquareBidness",
       type: "website",
+      ...(ogImages.length > 0 ? { images: ogImages } : {}),
     },
     twitter: {
       card: "summary_large_image",
       title: shop.name,
       description: `Book your appointment at ${shop.name} — ${shop.city}, ${shop.state}`,
+      ...(ogImages.length > 0 ? { images: [ogImages[0].url] } : {}),
     },
   };
 }
@@ -71,10 +77,12 @@ export default async function ShopLanding({
     .eq("active", true)
     .single();
 
+  if (!shop) notFound();
+
   const { data: shopTypeSetting } = await supabaseServer
     .from("shop_settings")
     .select("value_json")
-    .eq("shop_id", shop?.id ?? "")
+    .eq("shop_id", shop.id)
     .eq("key", "shop_type")
     .single();
 
@@ -90,8 +98,6 @@ export default async function ShopLanding({
   };
 
   const label = specialistLabel[shopType] ?? "specialist";
-
-  if (!shop) notFound();
 
   const { data: barbers } = await supabaseServer
     .from("barbers")
@@ -113,10 +119,10 @@ export default async function ShopLanding({
       }}
     >
       <div style={{ textAlign: "center", marginBottom: 48, maxWidth: 560 }}>
-        {(shop as any).logo_url && (
+        {shop.logo_url && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={(shop as any).logo_url}
+            src={shop.logo_url}
             alt={shop.name}
             style={{ width: 80, height: 80, borderRadius: 16, objectFit: "cover", marginBottom: 20 }}
           />

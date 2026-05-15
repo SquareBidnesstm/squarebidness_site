@@ -15,7 +15,7 @@ export async function GET(
 
   const { data: shop, error: shopError } = await supabaseServer
     .from("shops")
-    .select("id, name, slug, logo_url")
+    .select("id, name, slug, logo_url, timezone")
     .eq("slug", shopSlug)
     .single();
 
@@ -36,6 +36,7 @@ export async function GET(
       ends_at,
       status,
       payment_status,
+      price_snapshot,
       source,
       client_notes,
       created_at,
@@ -67,7 +68,7 @@ export async function GET(
 
   return NextResponse.json({
     ok: true,
-    shop: { name: shop.name, slug: shop.slug, logo_url: shop.logo_url ?? null },
+    shop: { name: shop.name, slug: shop.slug, logo_url: shop.logo_url ?? null, timezone: shop.timezone ?? "America/New_York" },
     bookings: data || [],
   });
 }
