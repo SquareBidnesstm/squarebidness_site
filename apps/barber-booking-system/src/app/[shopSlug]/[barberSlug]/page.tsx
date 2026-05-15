@@ -683,7 +683,7 @@ function EarningsTab({ bookings }: { bookings: Booking[] }) {
   const completed = bookings.filter((b) => b.status === "completed");
 
   function rev(list: Booking[]) {
-    return list.reduce((s, b) => s + Number(b.services?.price || 0), 0);
+    return list.reduce((s, b) => s + Number(b.price_snapshot ?? b.services?.price ?? 0), 0);
   }
 
   const totalEarned = rev(completed);
@@ -694,7 +694,7 @@ function EarningsTab({ bookings }: { bookings: Booking[] }) {
   const bySvc = new Map<string, { name: string; count: number; revenue: number }>();
   for (const b of completed) {
     const name = b.services?.name ?? "Unknown";
-    const price = Number(b.services?.price || 0);
+    const price = Number(b.price_snapshot ?? b.services?.price ?? 0);
     const existing = bySvc.get(name);
     if (existing) { existing.count++; existing.revenue += price; }
     else bySvc.set(name, { name, count: 1, revenue: price });
@@ -707,7 +707,7 @@ function EarningsTab({ bookings }: { bookings: Booking[] }) {
   for (const b of completed) {
     const d = b.appointment_date;
     if (new Date(`${d}T12:00:00`) >= cutoff) {
-      last30[d] = (last30[d] ?? 0) + Number(b.services?.price || 0);
+      last30[d] = (last30[d] ?? 0) + Number(b.price_snapshot ?? b.services?.price ?? 0);
     }
   }
 

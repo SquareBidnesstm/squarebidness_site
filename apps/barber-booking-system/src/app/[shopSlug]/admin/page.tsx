@@ -319,9 +319,16 @@ export default function AdminPage() {
     const todayCompletedRevenue = bookings
       .filter((b) => b.appointment_date === today && b.status === "completed")
       .reduce((sum, b) => sum + Number(b.price_snapshot || 0), 0);
+    // Actual cash/card collected — sum of succeeded payments across all bookings
+    const collectedRevenue = bookings.reduce((sum, b) => {
+      return sum + (b.payments ?? [])
+        .filter((p) => p.status === "succeeded")
+        .reduce((s, p) => s + Number(p.amount), 0);
+    }, 0);
     return {
       total, confirmed, completed, todayCount,
       bookedRevenue, completedRevenue, todayBookedRevenue, todayCompletedRevenue,
+      collectedRevenue,
     };
   }, [bookings, today]);
 
@@ -487,7 +494,7 @@ export default function AdminPage() {
           }}
         >
           <StatCard label="Total Booked" value={formatMoney(stats.bookedRevenue)} />
-          <StatCard label="Earned (Completed)" value={formatMoney(stats.completedRevenue)} gold />
+          <StatCard label="Collected (Payments)" value={formatMoney(stats.collectedRevenue)} gold />
           <StatCard label="Today Booked" value={formatMoney(stats.todayBookedRevenue)} />
           <StatCard label="Today Earned" value={formatMoney(stats.todayCompletedRevenue)} gold />
         </div>
