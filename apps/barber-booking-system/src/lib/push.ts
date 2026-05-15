@@ -1,16 +1,24 @@
 import webpush from "web-push";
 import { supabaseServer } from "./supabase/server";
 
-webpush.setVapidDetails(
-  "mailto:support@squarebidness.com",
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
-);
+// Lazy-initialize so build doesn't crash when VAPID vars are absent
+let _vapidSet = false;
+function ensureVapid(): boolean {
+  if (_vapidSet) return true;
+  const pub = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  const priv = process.env.VAPID_PRIVATE_KEY;
+  if (!pub || !priv) return false;
+  webpush.setVapidDetails("mailto:support@squarebidness.com", pub, priv);
+  _vapidSet = true;
+  return true;
+}
 
 export async function sendPushToBarber(
   barberId: string,
   payload: { title: string; body: string; url?: string }
 ) {
+  if (!ensureVapid()) return;
+
   const { data: subs } = await supabaseServer
     .from("push_subscriptions")
     .select("id, endpoint, p256dh, auth")
@@ -44,6 +52,8 @@ export async function sendPushToShopAdmins(
   shopId: string,
   payload: { title: string; body: string; url?: string }
 ) {
+  if (!ensureVapid()) return;
+
   const { data: subs } = await supabaseServer
     .from("push_subscriptions")
     .select("id, endpoint, p256dh, auth")
