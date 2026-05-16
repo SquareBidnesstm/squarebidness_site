@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
-import { cookies } from "next/headers";
 import { supabaseServer } from "../../../../../lib/supabase/server";
-import { computeOrganizerSessionToken } from "../../../../../lib/auth";
+import { getVerifiedOrganizerSlug } from "../../../../../lib/auth";
 import { sendEventCancellationNotice } from "../../../../../lib/notifications/email";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -11,13 +10,8 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(req: NextRequest) {
   // Auth
-  const cookieStore = await cookies();
-  const session = cookieStore.getAll().find((c) => c.name.startsWith("org_session_"));
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const organizerSlug = session.name.replace("org_session_", "");
-  const expected = await computeOrganizerSessionToken(organizerSlug);
-  if (session.value !== expected) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const organizerSlug = await getVerifiedOrganizerSlug(req);
+  if (!organizerSlug) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { data: organizer } = await supabaseServer
     .from("organizers")

@@ -1,21 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { supabaseServer } from "../../../../lib/supabase/server";
-import { computeOrganizerSessionToken } from "../../../../lib/auth";
+import { getVerifiedOrganizerSlug } from "../../../../lib/auth";
 
-async function getOrganizer() {
-  const cookieStore = await cookies();
-  const session = cookieStore.getAll().find(c => c.name.startsWith("org_session_"));
-  if (!session) return null;
-  const slug = session.name.replace("org_session_", "");
-  const expected = await computeOrganizerSessionToken(slug);
-  if (session.value !== expected) return null;
+async function getOrganizer(req: Request) {
+  const slug = await getVerifiedOrganizerSlug(req);
+  if (!slug) return null;
   const { data } = await supabaseServer.from("organizers").select("id").eq("slug", slug).single();
   return data;
 }
 
-export async function GET() {
-  const org = await getOrganizer();
+export async function GET(req: NextRequest) {
+  const org = await getOrganizer(req);
   if (!org) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { data } = await supabaseServer
@@ -28,7 +23,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const org = await getOrganizer();
+  const org = await getOrganizer(req);
   if (!org) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { name, eventId } = await req.json();

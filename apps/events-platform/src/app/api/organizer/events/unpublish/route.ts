@@ -1,17 +1,10 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { supabaseServer } from "../../../../../lib/supabase/server";
-import { computeOrganizerSessionToken } from "../../../../../lib/auth";
+import { getVerifiedOrganizerSlug } from "../../../../../lib/auth";
 
 export async function POST(req: Request) {
-  const cookieStore = await cookies();
-  const allCookies = cookieStore.getAll();
-  const sessionCookie = allCookies.find((c) => c.name.startsWith("org_session_"));
-  if (!sessionCookie) return NextResponse.redirect(new URL("/organizer/login", req.url));
-
-  const organizerSlug = sessionCookie.name.replace("org_session_", "");
-  const expectedToken = await computeOrganizerSessionToken(organizerSlug);
-  if (sessionCookie.value !== expectedToken) return NextResponse.redirect(new URL("/organizer/login", req.url));
+  const organizerSlug = await getVerifiedOrganizerSlug(req);
+  if (!organizerSlug) return NextResponse.redirect(new URL("/organizer/login", req.url));
 
   const { data: organizer } = await supabaseServer.from("organizers").select("id").eq("slug", organizerSlug).single();
   if (!organizer) return NextResponse.redirect(new URL("/organizer/login", req.url));

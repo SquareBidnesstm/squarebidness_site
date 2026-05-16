@@ -4,10 +4,9 @@
 // =========================================================
 
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import Stripe from "stripe";
 import { supabaseServer } from "../../../../lib/supabase/server";
-import { computeOrganizerSessionToken } from "../../../../lib/auth";
+import { getVerifiedOrganizerSlug } from "../../../../lib/auth";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2026-04-22.dahlia" as any,
@@ -15,18 +14,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function GET(req: Request) {
   // Identify organizer from session cookie
-  const cookieStore = await cookies();
-  const allCookies = cookieStore.getAll();
-  const sessionCookie = allCookies.find((c) => c.name.startsWith("org_session_"));
+  const organizerSlug = await getVerifiedOrganizerSlug(req);
 
-  if (!sessionCookie) {
-    return NextResponse.redirect(new URL("/organizer/login", req.url));
-  }
-
-  const organizerSlug = sessionCookie.name.replace("org_session_", "");
-  const expectedToken = await computeOrganizerSessionToken(organizerSlug);
-
-  if (sessionCookie.value !== expectedToken) {
+  if (!organizerSlug) {
     return NextResponse.redirect(new URL("/organizer/login", req.url));
   }
 

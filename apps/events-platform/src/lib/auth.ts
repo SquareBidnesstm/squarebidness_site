@@ -63,6 +63,29 @@ export async function verifyOrganizerSession(
   return mac === expected;
 }
 
+/**
+ * Reads the org_session_* cookie from the request, verifies the HMAC + timestamp,
+ * and returns the organizerSlug on success, or null on failure.
+ * Use this in organizer-protected API routes instead of manual token comparison.
+ */
+export async function getVerifiedOrganizerSlug(req: Request): Promise<string | null> {
+  const cookieHeader = req.headers.get("cookie") ?? "";
+  const sessionEntry = cookieHeader
+    .split(";")
+    .map((c) => c.trim())
+    .find((c) => c.startsWith("org_session_"));
+  if (!sessionEntry) return null;
+
+  const eqIdx = sessionEntry.indexOf("=");
+  if (eqIdx === -1) return null;
+  const cookieName = sessionEntry.slice(0, eqIdx);
+  const organizerSlug = cookieName.replace("org_session_", "");
+  if (!organizerSlug) return null;
+
+  const verified = await verifyOrganizerSession(req, organizerSlug);
+  return verified ? organizerSlug : null;
+}
+
 // ── Admin (Marcus) session ───────────────────────────────
 
 export async function computeAdminSessionToken(): Promise<string> {
