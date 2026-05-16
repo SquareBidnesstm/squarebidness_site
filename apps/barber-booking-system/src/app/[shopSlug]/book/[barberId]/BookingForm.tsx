@@ -45,6 +45,9 @@ export default function BookingForm({ shopSlug, shopName, shopLogoUrl, barberSlu
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [shopClosed, setShopClosed] = useState(false);
   const [depositInfo, setDepositInfo] = useState<{ enabled: boolean; amount: number; type: "fixed" | "percent" } | null>(null);
+  const [serverDepositAmount, setServerDepositAmount] = useState<number | null>(null);
+  // Unique key per form session — prevents duplicate bookings on network retry
+  const [idempotencyKey] = useState(() => crypto.randomUUID());
 
   const selectedService = services.find((s) => s.id === service);
 
@@ -125,6 +128,8 @@ export default function BookingForm({ shopSlug, shopName, shopLogoUrl, barberSlu
     const data = await res.json().catch(() => null);
     setLoading(false);
     if (res.ok && data?.url) {
+      // Use server-confirmed deposit amount for display accuracy
+      if (data.depositAmount != null) setServerDepositAmount(Number(data.depositAmount));
       window.location.href = data.url;
     } else {
       setError(data?.error || "Could not start deposit. Try booking without deposit.");
@@ -138,7 +143,7 @@ export default function BookingForm({ shopSlug, shopName, shopLogoUrl, barberSlu
 
     const res = await fetch(`/api/${shopSlug}/bookings/create`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "Idempotency-Key": idempotencyKey },
       body: JSON.stringify(bookingPayload()),
     });
 
@@ -443,9 +448,11 @@ export default function BookingForm({ shopSlug, shopName, shopLogoUrl, barberSlu
             color: "#aaa",
           }}>
             <span style={{ color: "#d4af37", fontWeight: 700 }}>
-              ${depositInfo.type === "percent"
-                ? ((selectedService ? selectedService.price * depositInfo.amount / 100 : 0).toFixed(2))
-                : depositInfo.amount.toFixed(2)} deposit required
+              ${serverDepositAmount != null
+                ? serverDepositAmount.toFixed(2)
+                : depositInfo.type === "percent"
+                  ? ((selectedService ? selectedService.price * depositInfo.amount / 100 : 0).toFixed(2))
+                  : depositInfo.amount.toFixed(2)} deposit required
             </span>
             {" "}— holds your spot. Pay the rest at your appointment.
           </div>

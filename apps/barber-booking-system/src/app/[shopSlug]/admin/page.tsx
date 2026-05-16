@@ -107,13 +107,27 @@ export default function AdminPage() {
   const [pushEnabled, setPushEnabled] = useState(false);
   const [pushLoading, setPushLoading] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [showFilters, setShowFilters] = useState(true);
+  const [hoursConfigured, setHoursConfigured] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 700);
+    const check = () => {
+      const mobile = window.innerWidth < 700;
+      setIsMobile(mobile);
+      if (mobile) setShowFilters(false); // start collapsed on mobile
+    };
     check();
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, []);
+
+  // Check if shop hours are configured
+  useEffect(() => {
+    fetch(`/api/${shopSlug}/admin/hours`)
+      .then(r => r.json())
+      .then(d => setHoursConfigured(Array.isArray(d.hours) && d.hours.length > 0))
+      .catch(() => setHoursConfigured(null));
+  }, [shopSlug]);
   const [showWalkIn, setShowWalkIn] = useState(false);
   const [showBlockTime, setShowBlockTime] = useState(false);
   const [showSmsBlast, setShowSmsBlast] = useState(false);
@@ -467,6 +481,26 @@ export default function AdminPage() {
           <SettingsTab shopSlug={shopSlug} />
         ) : (
         <>
+        {/* Hours not configured warning */}
+        {hoursConfigured === false && (
+          <div style={{
+            marginBottom: 20, padding: "14px 18px", borderRadius: 12,
+            background: "#1a0d00", border: "1px solid #5a3000",
+            display: "flex", alignItems: "center", gap: 10,
+          }}>
+            <span style={{ fontSize: 18 }}>⚠️</span>
+            <span style={{ color: "#ff9955", fontSize: 14 }}>
+              <strong>No shop hours configured.</strong> Customers won&apos;t see any available booking slots.{" "}
+              <button
+                onClick={() => setActiveTab("hours")}
+                style={{ background: "none", border: "none", color: "#d4af37", fontWeight: 700, cursor: "pointer", padding: 0, fontSize: 14 }}
+              >
+                Set hours →
+              </button>
+            </span>
+          </div>
+        )}
+
         <div
           style={{
             display: "grid",
@@ -507,6 +541,25 @@ export default function AdminPage() {
             padding: 24,
           }}
         >
+          {/* Mobile filter toggle */}
+          {isMobile && (
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <button
+                type="button"
+                onClick={() => setShowFilters(v => !v)}
+                style={{ ...secondaryButton, fontSize: 13, padding: "8px 14px" }}
+              >
+                {showFilters ? "▲ Hide Filters" : "▼ Filters"}{
+                  [barberFilter !== "all", statusFilter !== "all", showTodayOnly].filter(Boolean).length > 0
+                    ? ` (${[barberFilter !== "all", statusFilter !== "all", showTodayOnly].filter(Boolean).length} active)`
+                    : ""
+                }
+              </button>
+              <span style={{ color: "#666", fontSize: 13 }}>{filteredBookings.length} shown</span>
+            </div>
+          )}
+
+          {(!isMobile || showFilters) && (
           <div
             style={{
               display: "grid",
@@ -554,6 +607,7 @@ export default function AdminPage() {
               Today Only
             </button>
           </div>
+          )}
 
           <div
             style={{

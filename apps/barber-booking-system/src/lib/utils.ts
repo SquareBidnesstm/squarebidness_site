@@ -35,6 +35,24 @@ export function clearFailedAttempts(key: string): void {
   _failMap.delete(key);
 }
 
+// ---------------------------------------------------------------------------
+// Idempotency cache — prevents duplicate bookings on network retry.
+// Keys expire after 10 minutes. Keyed by client-supplied Idempotency-Key header.
+// ---------------------------------------------------------------------------
+const _idempotencyMap = new Map<string, { body: unknown; expiresAt: number }>();
+const IDEMPOTENCY_TTL_MS = 10 * 60 * 1000;
+
+export function getIdempotentResponse(key: string): unknown | null {
+  const now = Date.now();
+  const entry = _idempotencyMap.get(key);
+  if (!entry || now > entry.expiresAt) { _idempotencyMap.delete(key); return null; }
+  return entry.body;
+}
+
+export function storeIdempotentResponse(key: string, body: unknown): void {
+  _idempotencyMap.set(key, { body, expiresAt: Date.now() + IDEMPOTENCY_TTL_MS });
+}
+
 export function normalizePhone(raw: string): string | null {
   const digits = raw.replace(/\D/g, "");
   if (digits.length === 10) return `+1${digits}`;

@@ -3,7 +3,7 @@ import { supabaseServer } from "../../../../../lib/supabase/server";
 import { checkActiveSubscription } from "../../../../../lib/auth";
 import { sendPushToBarber, sendPushToShopAdmins } from "../../../../../lib/push";
 import { sendConfirmationEmail } from "../../../../../lib/email";
-import { normalizePhone, convertDisplayTimeTo24Hour, checkRateLimit, recordFailedAttempt } from "../../../../../lib/utils";
+import { normalizePhone, convertDisplayTimeTo24Hour, checkRateLimit, recordFailedAttempt, getIdempotentResponse, storeIdempotentResponse } from "../../../../../lib/utils";
 
 type CreateBookingPayload = {
   barber_id?: string;
@@ -109,6 +109,13 @@ export async function POST(
 ) {
   try {
     const { shopSlug } = await params;
+
+    // Idempotency: return cached response for duplicate requests within 10 min
+    const idempotencyKey = req.headers.get("idempotency-key");
+    if (idempotencyKey) {
+      const cached = getIdempotentResponse(idempotencyKey);
+      if (cached) return NextResponse.json(cached);
+    }
 
     // Rate limit: 10 booking attempts per 15 min per IP per shop
     const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
@@ -318,7 +325,9 @@ export async function POST(
     sendPushToBarber(barber.id, { title: pushTitle, body: pushBody, url: pushUrl }).catch(console.error);
     sendPushToShopAdmins(shop.id, { title: pushTitle, body: pushBody, url: pushUrl }).catch(console.error);
 
-    return NextResponse.json({ ok: true, booking, barber: barber.display_name || barber.name, service: service.name });
+    const responseBody = { ok: true, booking, barber: barber.display_name || barber.name, service: service.name };
+    if (idempotencyKey) storeIdempotentResponse(idempotencyKey, responseBody);
+    return NextResponse.json(responseBody);
   } catch (error) {
     return NextResponse.json(
       { ok: false, error: error instanceof Error ? error.message : "Unknown error" },
