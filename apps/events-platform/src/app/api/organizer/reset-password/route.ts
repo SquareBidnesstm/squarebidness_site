@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../../lib/supabase/server";
+import { isSafeOrigin, checkRateLimit, recordAttempt } from "../../../../lib/utils";
 
 async function hashPassword(password: string): Promise<string> {
   const salt = crypto.getRandomValues(new Uint8Array(16));
@@ -16,6 +17,25 @@ async function hashPassword(password: string): Promise<string> {
 }
 
 export async function POST(req: NextRequest) {
+  // CSRF origin check
+  if (!isSafeOrigin(req)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  // Rate limit: 10 per 15 min per IP
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    req.headers.get("x-real-ip") ??
+    "unknown";
+  recordAttempt(`reset_pw:${ip}`);
+  const { limited, retryAfterSeconds } = checkRateLimit(`reset_pw:${ip}`, 10);
+  if (limited) {
+    return NextResponse.json(
+      { error: `Too many requests. Try again in ${Math.ceil(retryAfterSeconds / 60)} min.` },
+      { status: 429 }
+    );
+  }
+
   const { token, password } = await req.json();
 
   if (!token || !password) {

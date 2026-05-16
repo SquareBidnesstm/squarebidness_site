@@ -3,6 +3,8 @@ import Stripe from "stripe";
 import { supabaseServer } from "../../../../lib/supabase/server";
 import { normalizePhone, convertDisplayTimeTo24Hour } from "../../../../lib/utils";
 import { sendConfirmationEmail } from "../../../../lib/email";
+import { sendPushToBarber, sendPushToShopAdmins } from "../../../../lib/push";
+import { isSmsOptedOut } from "../../../../lib/sms-opt-out";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2026-04-22.dahlia",
@@ -50,7 +52,8 @@ async function handleDepositBooking(session: Stripe.Checkout.Session) {
     .lt("starts_at", endsAt.toISOString()).gt("ends_at", startsAt.toISOString());
   if (overlaps && overlaps.length > 0) return;
 
-  const { data: bookingCode } = await supabaseServer.rpc("generate_booking_code", { shop_slug: shop.slug });
+  const { data: rpcCode } = await supabaseServer.rpc("generate_booking_code", { shop_slug: shop.slug });
+  const bookingCode = rpcCode ?? `${shop.slug.slice(0, 2).toUpperCase()}-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
   const { data: customer } = await supabaseServer
     .from("customers").insert({ shop_id: shop.id, full_name: meta.customer_name ?? "" }).select("id").single();
 
@@ -90,9 +93,10 @@ async function handleDepositBooking(session: Stripe.Checkout.Session) {
     status: "succeeded",
   });
 
-  // Send SMS confirmation
+  // Send SMS confirmation (skip if customer opted out)
   const normalizedPhone = normalizePhone(meta.customer_phone ?? "");
-  if (normalizedPhone) {
+  const webhookSmsOptedOut = normalizedPhone ? await isSmsOptedOut(normalizedPhone) : true;
+  if (normalizedPhone && !webhookSmsOptedOut) {
     const sid = process.env.TWILIO_ACCOUNT_SID;
     const token = process.env.TWILIO_AUTH_TOKEN;
     const messagingSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
@@ -251,6 +255,48 @@ export async function POST(req: NextRequest) {
           .from("subscriptions")
           .update({ status: "past_due" })
           .eq("stripe_customer_id", customerId);
+        break;
+      }
+
+      case "checkout.session.expired": {
+        const session = event.data.object as Stripe.Checkout.Session;
+        // Only handle deposit sessions (subscription checkouts don't need cleanup)
+        if (session.mode !== "payment") break;
+        const meta = session.metadata;
+        // Balance-payment links have payment_type=balance — those aren't abandoned bookings
+        if (!meta?.shop_id || !meta?.customer_name || meta?.payment_type === "balance") break;
+
+        console.warn("ABANDONED DEPOSIT SESSION:", {
+          sessionId: session.id,
+          shop: meta.shop_slug,
+          customer: meta.customer_name,
+          phone: meta.customer_phone,
+          date: meta.date,
+          time: meta.time,
+          service: meta.service_slug,
+          barber: meta.barber_slug,
+        });
+
+        // Push shop admins + barber so they can follow up with the customer
+        const { data: shop } = await supabaseServer
+          .from("shops").select("id").eq("id", meta.shop_id).single();
+        if (shop) {
+          const { data: barber } = await supabaseServer
+            .from("barbers").select("id").eq("shop_id", shop.id).eq("slug", meta.barber_slug).single();
+          const pushBody = `${meta.customer_name} didn't complete their deposit for ${meta.date} at ${meta.time}`;
+          if (barber) {
+            sendPushToBarber(barber.id, {
+              title: "Abandoned Deposit Checkout",
+              body: pushBody,
+              url: `/${meta.shop_slug}/admin`,
+            }).catch(console.error);
+          }
+          sendPushToShopAdmins(shop.id, {
+            title: "Abandoned Deposit Checkout",
+            body: pushBody,
+            url: `/${meta.shop_slug}/admin`,
+          }).catch(console.error);
+        }
         break;
       }
 

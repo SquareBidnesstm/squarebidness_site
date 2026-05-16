@@ -29,20 +29,27 @@ export async function POST(req: NextRequest) {
   const { name, eventId } = await req.json();
   if (!name?.trim()) return NextResponse.json({ error: "Name required" }, { status: 400 });
 
-  // Generate unique code
-  const code = `REF-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
+  // Generate unique code — retry up to 3 times on 23505 unique-violation collision
+  let data = null;
+  let lastError: any = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const code = `REF-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
+    const { data: inserted, error } = await supabaseServer
+      .from("referral_codes")
+      .insert({
+        organizer_id: org.id,
+        event_id: eventId || null,
+        code,
+        name: name.trim(),
+      })
+      .select()
+      .single();
 
-  const { data, error } = await supabaseServer
-    .from("referral_codes")
-    .insert({
-      organizer_id: org.id,
-      event_id: eventId || null,
-      code,
-      name: name.trim(),
-    })
-    .select()
-    .single();
+    if (!error) { data = inserted; break; }
+    lastError = error;
+    if (error.code !== "23505") break; // non-collision error — don't retry
+  }
 
-  if (error) return NextResponse.json({ error: "Failed to create" }, { status: 500 });
+  if (!data) return NextResponse.json({ error: "Failed to create" }, { status: 500 });
   return NextResponse.json({ code: data });
 }

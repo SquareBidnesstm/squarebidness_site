@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../../lib/supabase/server";
 import { sendBuyerConfirmation } from "../../../../lib/notifications/email";
-import { checkRateLimit, recordAttempt } from "../../../../lib/utils";
+import { checkRateLimit, recordAttempt, isSafeOrigin } from "../../../../lib/utils";
 
 export async function POST(req: NextRequest) {
+  // CSRF origin check
+  if (!isSafeOrigin(req)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   // Rate limit: 5 resends per 15 min per IP (prevents email spam)
   const ip =
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
@@ -20,6 +25,7 @@ export async function POST(req: NextRequest) {
 
   const formData = await req.formData();
   const orderId = formData.get("orderId") as string;
+  const buyerEmail = (formData.get("buyerEmail") as string | null)?.trim().toLowerCase();
 
   if (!orderId) {
     return NextResponse.json({ error: "Missing orderId" }, { status: 400 });
@@ -34,6 +40,11 @@ export async function POST(req: NextRequest) {
 
   if (!order) {
     return NextResponse.redirect(new URL(`/orders/${orderId}?resend=error`, req.url), 303);
+  }
+
+  // Verify the requester owns this order — prevents unauthenticated email spam
+  if (!buyerEmail || buyerEmail !== order.buyer_email.trim().toLowerCase()) {
+    return NextResponse.redirect(new URL(`/orders/${orderId}?resend=unauthorized`, req.url), 303);
   }
 
   const ev = order.events as any;

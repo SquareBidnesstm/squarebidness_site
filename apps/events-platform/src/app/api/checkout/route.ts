@@ -2,12 +2,32 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { supabaseServer } from "../../../lib/supabase/server";
 import { PLATFORM_FEE_BASE_CENTS, PLATFORM_FEE_PCT, PLATFORM_URL } from "../../../lib/constants";
+import { isSafeOrigin, checkRateLimit, recordAttempt } from "../../../lib/utils";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2026-04-22.dahlia" as any,
 });
 
 export async function POST(req: NextRequest) {
+  // CSRF origin check
+  if (!isSafeOrigin(req)) {
+    return NextResponse.json({ ok: false, error: "Forbidden" }, { status: 403 });
+  }
+
+  // Rate limit: 20 per 15 min per IP
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    req.headers.get("x-real-ip") ??
+    "unknown";
+  recordAttempt(`checkout:${ip}`);
+  const { limited, retryAfterSeconds } = checkRateLimit(`checkout:${ip}`, 20);
+  if (limited) {
+    return NextResponse.json(
+      { ok: false, error: `Too many requests. Try again in ${Math.ceil(retryAfterSeconds / 60)} min.` },
+      { status: 429 }
+    );
+  }
+
   const formData = await req.formData();
   const eventSlug = formData.get("eventSlug") as string;
   const buyerName = formData.get("buyerName") as string;
@@ -18,6 +38,18 @@ export async function POST(req: NextRequest) {
 
   if (!eventSlug || !buyerName || !buyerEmail) {
     return NextResponse.json({ ok: false, error: "Missing required fields" }, { status: 400 });
+  }
+
+  // Input length / format validation (M3)
+  if (buyerName.length > 100) {
+    return NextResponse.json({ ok: false, error: "Name is too long (max 100 characters)" }, { status: 400 });
+  }
+  if (buyerEmail.length > 200) {
+    return NextResponse.json({ ok: false, error: "Email is too long (max 200 characters)" }, { status: 400 });
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(buyerEmail)) {
+    return NextResponse.json({ ok: false, error: "Invalid email address" }, { status: 400 });
   }
 
   // Load event + tiers + organizer
@@ -135,20 +167,24 @@ export async function POST(req: NextRequest) {
     }, 0);
   }
 
-  // Add platform fee line item if applicable
-  const totalQty = tierSelections.reduce((s, t) => s + t.qty, 0);
+  // Add platform fee as a single line item (quantity: 1, unit_amount: total fee).
+  // Using per-ticket rounding (Math.round(total/qty) * qty) can lose 1 cent; a single
+  // line item for the exact total amount avoids that and aligns with how Stripe's
+  // application_fee_amount is tracked anyway.
   if (totalPlatformFeeCents > 0) {
     lineItems.push({
       price_data: {
         currency: "usd",
         product_data: { name: "Square Bidness Platform Fee" },
-        unit_amount: Math.round(totalPlatformFeeCents / totalQty),
+        unit_amount: totalPlatformFeeCents,
       },
-      quantity: totalQty,
+      quantity: 1,
     });
   }
 
-  // Store pending order metadata in Supabase
+  // Generate order code inline (not via DB function): the DB generate_order_code()
+  // function requires a round-trip before creating the Stripe session, adding latency.
+  // Collisions are extremely unlikely and caught by the UNIQUE constraint on order_code.
   const orderCode = `SBE-${Date.now().toString(36).toUpperCase()}`;
 
   const { data: order, error: orderError } = await supabaseServer
@@ -200,16 +236,11 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  // Update order with Stripe session ID
+  // Update order with Stripe session ID and promo ID (promo uses incremented at payment completion)
   await supabaseServer
     .from("orders")
-    .update({ stripe_session_id: session.id })
+    .update({ stripe_session_id: session.id, promo_id: promoId ?? null })
     .eq("id", order.id);
-
-  // Increment promo uses
-  if (promoId && discountAmountCents > 0) {
-    await supabaseServer.rpc("increment_promo_uses", { promo_id: promoId });
-  }
 
   return NextResponse.redirect(session.url!, { status: 303 });
 }

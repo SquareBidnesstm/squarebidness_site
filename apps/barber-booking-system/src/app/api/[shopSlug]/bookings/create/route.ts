@@ -4,6 +4,7 @@ import { checkActiveSubscription } from "../../../../../lib/auth";
 import { sendPushToBarber, sendPushToShopAdmins } from "../../../../../lib/push";
 import { sendConfirmationEmail } from "../../../../../lib/email";
 import { normalizePhone, convertDisplayTimeTo24Hour, checkRateLimit, recordFailedAttempt, getIdempotentResponse, storeIdempotentResponse } from "../../../../../lib/utils";
+import { isSmsOptedOut } from "../../../../../lib/sms-opt-out";
 
 type CreateBookingPayload = {
   barber_id?: string;
@@ -284,7 +285,8 @@ export async function POST(
     }
 
     const normalizedPhone = normalizePhone(body.customer_phone);
-    if (normalizedPhone) {
+    const createSmsOptedOut = normalizedPhone ? await isSmsOptedOut(normalizedPhone) : true;
+    if (normalizedPhone && !createSmsOptedOut) {
       sendConfirmationSMS({
         to: normalizedPhone,
         customerName: body.customer_name,

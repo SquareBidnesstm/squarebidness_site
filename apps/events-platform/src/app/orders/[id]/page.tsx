@@ -1,3 +1,10 @@
+// NOTE (L3 — ownership check): This order page is intentionally public/shareable —
+// buyers share the link to show their ticket at the door. QR codes are only rendered
+// when the order has been paid (status check below) and the ticket_code itself acts
+// as the single-use credential. If stricter access control is required in future,
+// add an `email` query-param check against `order.buyer_email` and hide QR codes
+// for mismatches, showing only basic confirmation info instead.
+
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { supabaseServer } from "../../../lib/supabase/server";
@@ -12,7 +19,7 @@ export default async function OrderConfirmationPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ resend?: string }>;
+  searchParams: Promise<{ resend?: string; }>;
 }) {
   const { id } = await params;
   const { resend } = await searchParams;
@@ -155,6 +162,7 @@ export default async function OrderConfirmationPage({
                       <TicketTransferForm
                         ticketCode={ticket.ticket_code}
                         tierName={ticket.tier_name || "General Admission"}
+                        buyerEmail={order.buyer_email}
                       />
                     )}
                   </div>
@@ -188,8 +196,12 @@ export default async function OrderConfirmationPage({
                 {resend === "error" && (
                   <p style={{ color: "#ef4444", fontSize: "0.85rem", marginBottom: 10 }}>Failed to send email. Please try again.</p>
                 )}
+                {resend === "unauthorized" && (
+                  <p style={{ color: "#ef4444", fontSize: "0.85rem", marginBottom: 10 }}>Email address did not match this order.</p>
+                )}
                 <form action="/api/orders/resend-email" method="POST" style={{ display: "inline" }}>
                   <input type="hidden" name="orderId" value={order.id} />
+                  <input type="hidden" name="buyerEmail" value={order.buyer_email} />
                   <button type="submit" className="btn btn--ghost" style={{ fontSize: "0.85rem", minHeight: 36, padding: "0 16px" }}>
                     📧 Resend confirmation email
                   </button>

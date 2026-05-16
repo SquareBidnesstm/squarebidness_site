@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../../../lib/supabase/server";
 import { verifyAdminSession } from "../../../../../lib/auth";
+import { isSmsOptedOut } from "../../../../../lib/sms-opt-out";
 
 const VALID_STATUSES = [
   "pending",
@@ -55,11 +56,16 @@ export async function PATCH(
       return NextResponse.json({ ok: false, error: "Reschedule requires date and time" }, { status: 400 });
     }
 
-    // Fetch the booking + service duration + shop timezone
+    // Fetch the booking + service duration + shop timezone (scoped to this shop)
+    const { data: shopForReschedule } = await supabaseServer
+      .from("shops").select("id").eq("slug", shopSlug).eq("active", true).single();
+    if (!shopForReschedule) return NextResponse.json({ ok: false, error: "Shop not found" }, { status: 404 });
+
     const { data: booking } = await supabaseServer
       .from("bookings")
       .select(`id, barber_id, customer_name, customer_phone, booking_code, services ( duration_minutes ), shops ( id, slug, timezone )`)
       .eq("id", id)
+      .eq("shop_id", shopForReschedule.id)
       .single();
 
     if (!booking) return NextResponse.json({ ok: false, error: "Booking not found" }, { status: 404 });
@@ -105,9 +111,10 @@ export async function PATCH(
       return NextResponse.json({ ok: false, error: updateError?.message || "Update failed" }, { status: 500 });
     }
 
-    // Notify customer by SMS
+    // Notify customer by SMS (skip if opted out)
     const normalizedPhone = normalizePhone(updated.customer_phone ?? "");
-    if (normalizedPhone && shop?.timezone) {
+    const adminRescheduleOptedOut = normalizedPhone ? await isSmsOptedOut(normalizedPhone) : true;
+    if (normalizedPhone && !adminRescheduleOptedOut && shop?.timezone) {
       const sid = process.env.TWILIO_ACCOUNT_SID;
       const token = process.env.TWILIO_AUTH_TOKEN;
       const messagingSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
@@ -156,10 +163,15 @@ export async function PATCH(
   if (status === "cancelled") updateFields.cancelled_at = now;
   if (status === "completed") updateFields.completed_at = now;
 
+  const { data: shopForStatus } = await supabaseServer
+    .from("shops").select("id").eq("slug", shopSlug).eq("active", true).single();
+  if (!shopForStatus) return NextResponse.json({ ok: false, error: "Shop not found" }, { status: 404 });
+
   const { data, error } = await supabaseServer
     .from("bookings")
     .update(updateFields)
     .eq("id", id)
+    .eq("shop_id", shopForStatus.id)
     .select("id, status, booking_code, payment_status, customer_phone, customer_name, shop_id")
     .single();
 

@@ -1,13 +1,22 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { cookies } from "next/headers";
+import Stripe from "stripe";
 import { supabaseServer } from "../../../lib/supabase/server";
 import { getVerifiedOrganizerSlugFromHeader } from "../../../lib/auth";
 import NavLogo from "../../../components/NavLogo";
 
 export const revalidate = 0;
 
-export default async function OrganizerDashboardPage() {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: "2026-04-22.dahlia" as any,
+});
+
+export default async function OrganizerDashboardPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ stripe?: string; [key: string]: string | string[] | undefined }>;
+}) {
   const cookieStore = await cookies();
   const cookieHeader = cookieStore.getAll().map((c) => `${c.name}=${c.value}`).join("; ");
   const organizerSlug = await getVerifiedOrganizerSlugFromHeader(cookieHeader);
@@ -20,6 +29,23 @@ export default async function OrganizerDashboardPage() {
     .single();
 
   if (!organizer) redirect("/organizer/login");
+
+  // When Stripe redirects back after onboarding, flip stripe_onboarding_complete if verified
+  const resolvedParams = searchParams ? await searchParams : {};
+  if (resolvedParams.stripe === "connected" && organizer.stripe_account_id && !organizer.stripe_onboarding_complete) {
+    try {
+      const account = await stripe.accounts.retrieve(organizer.stripe_account_id);
+      if (account.details_submitted) {
+        await supabaseServer
+          .from("organizers")
+          .update({ stripe_onboarding_complete: true })
+          .eq("id", organizer.id);
+        organizer.stripe_onboarding_complete = true;
+      }
+    } catch {
+      // Non-critical — flag will be set on next visit through the connect route
+    }
+  }
 
   const { data: events } = await supabaseServer
     .from("events")

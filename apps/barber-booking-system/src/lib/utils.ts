@@ -1,21 +1,32 @@
 // Shared utilities — used across multiple API routes
 
 // ---------------------------------------------------------------------------
-// Simple in-memory rate limiter for PIN login (per serverless instance).
-// Limits: 5 failed attempts per 15 min window per key.
+// Simple in-memory rate limiter (per serverless instance / process).
+//
+// ⚠️  PRODUCTION NOTE: Because Next.js on Vercel runs each serverless function
+// in its own isolated process, this Map is NOT shared across concurrent
+// instances.  A determined attacker can bypass the limit by hitting different
+// cold-started instances in parallel.  For stronger guarantees, back the
+// counters with an edge KV store (e.g. Vercel KV / Upstash Redis).  For the
+// current traffic volume this in-process guard is a meaningful speed-bump
+// against naive automated clients.
 // ---------------------------------------------------------------------------
+
+// --- Failed-attempt limiter (used for PIN login) ---------------------------
 const _failMap = new Map<string, { count: number; resetAt: number }>();
 const MAX_FAILS = 5;
 const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 
-export function checkRateLimit(key: string): { limited: boolean; retryAfterSeconds: number } {
+/** Check whether `key` has exceeded its max-fails limit (default 5/15 min). */
+export function checkRateLimit(key: string, maxAttempts?: number): { limited: boolean; retryAfterSeconds: number } {
+  const limit = maxAttempts ?? MAX_FAILS;
   const now = Date.now();
   const entry = _failMap.get(key);
   if (!entry || now > entry.resetAt) {
     // Fresh window
     return { limited: false, retryAfterSeconds: 0 };
   }
-  if (entry.count >= MAX_FAILS) {
+  if (entry.count >= limit) {
     return { limited: true, retryAfterSeconds: Math.ceil((entry.resetAt - now) / 1000) };
   }
   return { limited: false, retryAfterSeconds: 0 };
@@ -29,6 +40,15 @@ export function recordFailedAttempt(key: string): void {
   } else {
     entry.count++;
   }
+}
+
+/**
+ * Record every request (not just failures) against a key — used by public
+ * endpoints such as availability, deposit, cancel, and reschedule where we
+ * want to cap total throughput rather than only failed attempts.
+ */
+export function recordAttempt(key: string): void {
+  recordFailedAttempt(key);
 }
 
 export function clearFailedAttempts(key: string): void {

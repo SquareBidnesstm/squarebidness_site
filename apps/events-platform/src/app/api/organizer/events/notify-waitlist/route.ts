@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../../../lib/supabase/server";
 import { getVerifiedOrganizerSlug } from "../../../../../lib/auth";
 import { sendWaitlistNotification } from "../../../../../lib/notifications/email";
+import { PLATFORM_URL } from "../../../../../lib/constants";
 
 export async function POST(req: NextRequest) {
   const organizerSlug = await getVerifiedOrganizerSlug(req);
@@ -27,10 +28,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
+  // Only fetch entries that have not already been notified
   const { data: waitlist } = await supabaseServer
     .from("waitlist")
     .select("id, name, email")
     .eq("event_id", eventId)
+    .is("notified_at", null)
     .order("created_at", { ascending: true });
 
   const entries = waitlist ?? [];
@@ -44,6 +47,11 @@ export async function POST(req: NextRequest) {
         eventTitle: event.title,
         eventSlug: event.slug,
       });
+      // Mark as notified to prevent re-sending on future calls
+      await supabaseServer
+        .from("waitlist")
+        .update({ notified_at: new Date().toISOString() })
+        .eq("id", entry.id);
       sent++;
     } catch {
       // continue on individual failures
@@ -51,7 +59,7 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.redirect(
-    new URL(`/organizer/dashboard/events/${eventId}?waitlist_notified=${sent}`, req.url),
+    new URL(`/organizer/dashboard/events/${eventId}?waitlist_notified=${sent}`, PLATFORM_URL),
     303
   );
 }

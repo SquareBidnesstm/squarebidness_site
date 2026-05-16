@@ -20,16 +20,76 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
+  // ── Helper: decrement quantity_sold for tier selections stored in metadata ──
+  async function decrementTierSelections(tierSelectionsJson: string | null | undefined) {
+    if (!tierSelectionsJson) return;
+    let selections: { tierId: string; qty: number }[] = [];
+    try { selections = JSON.parse(tierSelectionsJson); } catch { return; }
+    for (const { tierId, qty } of selections) {
+      const { data: tierData } = await supabaseServer
+        .from("ticket_tiers")
+        .select("quantity_sold")
+        .eq("id", tierId)
+        .single();
+      if (!tierData) continue;
+      const newSold = Math.max(0, tierData.quantity_sold - qty);
+      // Optimistic lock: only decrement if quantity_sold hasn't changed under us
+      await supabaseServer
+        .from("ticket_tiers")
+        .update({ quantity_sold: newSold })
+        .eq("id", tierId)
+        .eq("quantity_sold", tierData.quantity_sold);
+    }
+  }
+
+  // ── Checkout session expired: cancel pending order + restore capacity ──────
+  if (event.type === "checkout.session.expired") {
+    const expiredSession = event.data.object as Stripe.Checkout.Session;
+    const expiredOrderId = expiredSession.metadata?.order_id;
+    if (expiredOrderId) {
+      // Mark the order cancelled (only if still pending to avoid double-processing)
+      const { data: cancelledOrder } = await supabaseServer
+        .from("orders")
+        .update({ status: "cancelled" })
+        .eq("id", expiredOrderId)
+        .eq("status", "pending")
+        .select("id")
+        .single();
+
+      // Only decrement capacity if we actually transitioned the order (idempotency)
+      if (cancelledOrder) {
+        // tier_selections live on the payment_intent metadata
+        const piId = expiredSession.payment_intent as string | null;
+        let tierSelectionsJson: string | null = null;
+        if (piId) {
+          try {
+            const pi = await stripe.paymentIntents.retrieve(piId);
+            tierSelectionsJson = pi.metadata?.tier_selections ?? null;
+          } catch { /* payment intent may not exist if session expired before auth */ }
+        }
+        await decrementTierSelections(tierSelectionsJson);
+      }
+    }
+    return NextResponse.json({ ok: true });
+  }
+
   // ── Payment failed: clean up stuck pending orders ──────
   if (event.type === "payment_intent.payment_failed") {
     const pi = event.data.object as Stripe.PaymentIntent;
     const orderId = pi.metadata?.order_id;
     if (orderId) {
-      await supabaseServer
+      const { data: cancelledOrder } = await supabaseServer
         .from("orders")
         .update({ status: "cancelled" })
         .eq("id", orderId)
-        .eq("status", "pending");
+        .eq("status", "pending")
+        .select("id")
+        .single();
+
+      // Decrement capacity only if we transitioned the order
+      if (cancelledOrder) {
+        await decrementTierSelections(pi.metadata?.tier_selections ?? null);
+      }
     }
     return NextResponse.json({ ok: true });
   }
@@ -120,27 +180,79 @@ export async function POST(req: NextRequest) {
       }
 
       for (let i = 0; i < qty; i++) {
-        const ticketCode = `TKT-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
-        const qrDataUrl = await generateQRDataURL(ticketCode);
-
-        await supabaseServer.from("tickets").insert({
-          ticket_code: ticketCode,
-          order_id: order.id,
-          event_id: order.event_id,
-          tier_id: tierId,
-          tier_name: tierData.name ?? "",
-          buyer_name: order.buyer_name,
-          buyer_email: order.buyer_email,
-          price_snapshot: tierData.price ?? 0,
-          qr_code: qrDataUrl,
-          status: "valid",
-        });
+        let inserted = false;
+        let ticketCode = "";
+        let qrDataUrl = "";
+        for (let attempt = 0; attempt < 3; attempt++) {
+          ticketCode = `TKT-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+          qrDataUrl = await generateQRDataURL(ticketCode);
+          const { error: insertErr } = await supabaseServer.from("tickets").insert({
+            ticket_code: ticketCode,
+            order_id: order.id,
+            event_id: order.event_id,
+            tier_id: tierId,
+            tier_name: tierData.name ?? "",
+            buyer_name: order.buyer_name,
+            buyer_email: order.buyer_email,
+            price_snapshot: tierData.price ?? 0,
+            qr_code: qrDataUrl,
+            status: "valid",
+          });
+          if (!insertErr) { inserted = true; break; }
+          if (insertErr.code !== "23505") {
+            console.error("Ticket insert error:", insertErr);
+            break;
+          }
+          // 23505 = unique_violation on ticket_code — retry with new code
+        }
+        if (!inserted) continue;
 
         issuedTickets.push({
           ticketCode,
           tierName: tierData.name ?? "Ticket",
           qrDataUrl,
         });
+      }
+    }
+
+    // Increment referral uses counter with optimistic lock to prevent lost updates
+    if (order.ref_code) {
+      const { data: refRow } = await supabaseServer
+        .from("referral_codes")
+        .select("id, uses")
+        .eq("code", order.ref_code)
+        .single();
+      if (refRow) {
+        await supabaseServer
+          .from("referral_codes")
+          .update({ uses: (refRow.uses ?? 0) + 1 })
+          .eq("id", refRow.id)
+          .eq("uses", refRow.uses); // optimistic lock — retry not needed at this volume
+      }
+    }
+
+    // Increment promo uses now that payment is confirmed (not at session creation).
+    // Re-check the live max_uses cap here as a second guard against over-redemption
+    // (the first check happened at checkout session creation in /api/checkout).
+    if (order.promo_id) {
+      try {
+        const { data: livePromo } = await supabaseServer
+          .from("promo_codes")
+          .select("uses, max_uses")
+          .eq("id", order.promo_id)
+          .single();
+        const underLimit =
+          !livePromo ||
+          livePromo.max_uses === null ||
+          livePromo.uses < livePromo.max_uses;
+        if (underLimit) {
+          await supabaseServer.rpc("increment_promo_uses", { promo_id: order.promo_id });
+        } else {
+          console.error("Promo max_uses already reached for order", order.id, "— skipping increment");
+        }
+      } catch {
+        // non-critical — log and continue
+        console.error("Failed to increment promo uses for order", order.id);
       }
     }
 

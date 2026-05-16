@@ -10,13 +10,19 @@ async function hmacHex(secret: string, message: string): Promise<string> {
   return Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+function requireAppSecret(): string {
+  const secret = process.env.APP_SECRET;
+  if (!secret) throw new Error("APP_SECRET environment variable is not set. Cannot issue or verify session tokens.");
+  return secret;
+}
+
 // Token format: "{issuedAt}.{hmac}" — issuedAt is Unix ms timestamp
 export async function computeBarberSessionToken(
   shopSlug: string,
   barberSlug: string,
   issuedAt = Date.now()
 ): Promise<string> {
-  const secret = process.env.APP_SECRET ?? "";
+  const secret = requireAppSecret();
   const hash = await hmacHex(secret, `barber:${shopSlug}:${barberSlug}:${issuedAt}`);
   return `${issuedAt}.${hash}`;
 }
@@ -50,7 +56,7 @@ export async function verifyBarberSession(
 
 // Token format: "{issuedAt}.{hmac}" — issuedAt is Unix ms timestamp
 export async function computeSessionToken(shopSlug: string, issuedAt = Date.now()): Promise<string> {
-  const secret = process.env.APP_SECRET ?? "";
+  const secret = requireAppSecret();
   const hash = await hmacHex(secret, `admin:${shopSlug}:${issuedAt}`);
   return `${issuedAt}.${hash}`;
 }
@@ -66,7 +72,7 @@ export async function checkActiveSubscription(shopId: string): Promise<boolean> 
     .from("subscriptions")
     .select("status, plan")
     .eq("shop_id", shopId)
-    .single();
+    .maybeSingle(); // .single() throws PGRST116 if no row; .maybeSingle() returns null safely
   if (!data) return false;
   return data.status === "active" && data.plan !== "free";
 }

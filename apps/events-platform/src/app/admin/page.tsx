@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { supabaseServer } from "../../lib/supabase/server";
 import { verifyAdminSession } from "../../lib/auth";
 import NavLogo from "../../components/NavLogo";
-import { FeaturedToggle, OrganizerActiveToggle, RefulfillButton } from "../../components/AdminToggles";
+import { FeaturedToggle, OrganizerActiveToggle, RefulfillButton, RetryRefundButton } from "../../components/AdminToggles";
 
 export const revalidate = 0;
 
@@ -37,6 +37,8 @@ export default async function AdminDashboardPage() {
       .select("id, title, slug, status, starts_at, city, state, is_featured, organizer_id, organizers ( name )")
       .order("starts_at", { ascending: false })
       .limit(50),
+    // NOTE: Analytics stats (revenue, charts) reflect only the most recent 200 orders.
+    // For accurate lifetime totals, replace this with a separate aggregate/count query.
     supabaseServer
       .from("orders")
       .select("id, order_code, status, total, platform_fee, buyer_name, buyer_email, created_at, ref_code, events ( title )")
@@ -151,6 +153,11 @@ export default async function AdminDashboardPage() {
               <p style={{ color: "#555", fontSize: "0.75rem" }}>completed</p>
             </div>
           </div>
+
+          {/* Analytics note — stats below reflect the most recent 200 orders only */}
+          <p style={{ color: "#555", fontSize: "0.75rem", marginBottom: 12 }}>
+            ⚠ Analytics reflect the most recent 200 orders. Revenue totals above may undercount for high-volume events.
+          </p>
 
           {/* ANALYTICS */}
           <h2 style={{ fontSize: "1.1rem", fontWeight: 950, letterSpacing: "-0.04em", marginBottom: 16 }}>Analytics</h2>
@@ -364,31 +371,48 @@ export default async function AdminDashboardPage() {
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ borderBottom: "1px solid #111" }}>
-                  {["Order", "Event", "Buyer", "Total", "Platform", "Status", "Date"].map(h => (
+                  {["Order", "Event", "Buyer", "Total", "Platform", "Status", "Date", "Action"].map(h => (
                     <th key={h} style={{ padding: "10px 16px", textAlign: "left", color: "#555", fontSize: 11, fontWeight: 900, letterSpacing: "0.1em", textTransform: "uppercase" }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {(orders ?? []).map((order: any) => (
-                  <tr key={order.id} style={{ borderBottom: "1px solid #0a0a0a" }}>
+                  <tr key={order.id} style={{ borderBottom: "1px solid #0a0a0a", background: order.status === "refund_failed" ? "rgba(239,68,68,0.04)" : "transparent" }}>
                     <td style={{ padding: "12px 16px", fontFamily: "monospace", fontSize: "0.8rem", color: "#a1a1aa" }}>{order.order_code}</td>
                     <td style={{ padding: "12px 16px", fontSize: "0.85rem" }}>{order.events?.title}</td>
                     <td style={{ padding: "12px 16px", fontSize: "0.85rem", color: "#a1a1aa" }}>{order.buyer_name}</td>
                     <td style={{ padding: "12px 16px", fontWeight: 800 }}>${Number(order.total).toFixed(2)}</td>
                     <td style={{ padding: "12px 16px", color: "#22c55e", fontWeight: 800 }}>${Number(order.platform_fee).toFixed(2)}</td>
                     <td style={{ padding: "12px 16px" }}>
-                      <span className={`badge ${order.status === "paid" ? "badge--green" : order.status === "cancelled" ? "badge--red" : "badge--gray"}`}>
-                        {order.status}
-                      </span>
+                      {order.status === "refund_failed" ? (
+                        <span style={{
+                          display: "inline-block", fontSize: "0.7rem", fontWeight: 900,
+                          padding: "2px 8px", borderRadius: 99,
+                          background: "#2d0000", color: "#ef4444",
+                          border: "1px solid #7f1d1d",
+                          textTransform: "uppercase",
+                        }}>
+                          refund failed
+                        </span>
+                      ) : (
+                        <span className={`badge ${order.status === "paid" ? "badge--green" : order.status === "cancelled" ? "badge--red" : "badge--gray"}`}>
+                          {order.status}
+                        </span>
+                      )}
                     </td>
                     <td style={{ padding: "12px 16px", color: "#555", fontSize: "0.8rem" }}>
                       {new Date(order.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                     </td>
+                    <td style={{ padding: "12px 16px" }}>
+                      {order.status === "refund_failed" && (
+                        <RetryRefundButton orderId={order.id} orderCode={order.order_code} />
+                      )}
+                    </td>
                   </tr>
                 ))}
                 {!orders?.length && (
-                  <tr><td colSpan={7} style={{ padding: 24, textAlign: "center", color: "#555" }}>No orders yet.</td></tr>
+                  <tr><td colSpan={8} style={{ padding: 24, textAlign: "center", color: "#555" }}>No orders yet.</td></tr>
                 )}
               </tbody>
             </table>

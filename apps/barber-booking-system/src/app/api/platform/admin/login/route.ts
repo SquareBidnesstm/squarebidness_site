@@ -1,7 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
+import { checkRateLimit, recordFailedAttempt, clearFailedAttempts } from "../../../../../lib/utils";
+
+async function hmacHex(secret: string, message: string): Promise<string> {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw", enc.encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false, ["sign"]
+  );
+  const sig = await crypto.subtle.sign("HMAC", key, enc.encode(message));
+  return Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
 
 export async function POST(req: NextRequest) {
-  const { pin } = await req.json();
+  // Rate limiting — 5 attempts per 15 min per IP
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
+  const rlKey = `platform_admin:${ip}`;
+  const { limited, retryAfterSeconds } = checkRateLimit(rlKey, 5);
+  if (limited) {
+    return NextResponse.json(
+      { ok: false, error: `Too many attempts. Try again in ${Math.ceil(retryAfterSeconds / 60)} min.` },
+      { status: 429 }
+    );
+  }
+
+  const { pin } = await req.json().catch(() => ({}));
   const platformPin = process.env.PLATFORM_PIN;
 
   if (!platformPin) {
@@ -9,15 +32,18 @@ export async function POST(req: NextRequest) {
   }
 
   if (!pin || pin !== platformPin) {
+    recordFailedAttempt(rlKey);
     return NextResponse.json({ ok: false, error: "Invalid PIN." }, { status: 401 });
   }
 
-  // Simple session token: HMAC of "platform" using APP_SECRET
+  clearFailedAttempts(rlKey);
+
+  // Timestamped token: HMAC of "platform-admin:{issuedAt}" — rotates every login,
+  // expires after 12 hours (verified in verifyPlatformSession in shops/route.ts).
   const secret = process.env.APP_SECRET ?? "";
-  const enc = new TextEncoder();
-  const key = await crypto.subtle.importKey("raw", enc.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-  const sig = await crypto.subtle.sign("HMAC", key, enc.encode("platform-admin"));
-  const token = Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, "0")).join("");
+  const issuedAt = Date.now().toString();
+  const mac = await hmacHex(secret, `platform-admin:${issuedAt}`);
+  const token = `${issuedAt}.${mac}`;
 
   const res = NextResponse.json({ ok: true });
   res.cookies.set("platform_session", token, {

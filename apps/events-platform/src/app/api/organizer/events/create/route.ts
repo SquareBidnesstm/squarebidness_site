@@ -56,6 +56,13 @@ export async function POST(req: Request) {
       );
     }
 
+    // Validate cover_image_url — must be https:// to prevent javascript: URIs
+    if (coverImageUrl && !coverImageUrl.startsWith("https://")) {
+      return NextResponse.redirect(
+        new URL("/organizer/dashboard/new-event?error=invalid_image_url", req.url)
+      );
+    }
+
     // Validate dates
     const startsMs = new Date(startsAt).getTime();
     const endsMs = new Date(endsAt).getTime();

@@ -10,10 +10,15 @@ export async function POST(
   const authed = await verifyAdminSession(req, shopSlug);
   if (!authed) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
 
+  const { data: shop } = await supabaseServer
+    .from("shops").select("id").eq("slug", shopSlug).eq("active", true).single();
+  if (!shop) return NextResponse.json({ ok: false, error: "Shop not found" }, { status: 404 });
+
   const { data: booking } = await supabaseServer
     .from("bookings")
     .select("id, shop_id, payment_status, price_snapshot, payments(amount, payment_type, status)")
     .eq("id", id)
+    .eq("shop_id", shop.id)
     .single();
 
   if (!booking) return NextResponse.json({ ok: false, error: "Booking not found" }, { status: 404 });

@@ -69,7 +69,7 @@ export default async function PayoutsPage() {
 
   // Available + pending balance in USD
   const available = (balance?.available ?? []).find((b) => b.currency === "usd");
-  const pending = (balance?.pending ?? []).find((b) => b.currency === "b");
+  const pending = (balance?.pending ?? []).find((b) => b.currency === "usd");
   const pendingUsd = (balance?.pending ?? []).find((b) => b.currency === "usd");
 
   // Fetch platform payout totals from our DB

@@ -27,6 +27,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
+  // Input length / format validation
+  if (typeof name === "string" && name.length > 100) {
+    return NextResponse.json({ error: "Name is too long (max 100 characters)" }, { status: 400 });
+  }
+  if (typeof email === "string" && email.length > 200) {
+    return NextResponse.json({ error: "Email is too long (max 200 characters)" }, { status: 400 });
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (typeof email === "string" && !emailRegex.test(email)) {
+    return NextResponse.json({ error: "Invalid email address" }, { status: 400 });
+  }
+
   // Verify event is free
   const { data: event } = await supabaseServer
     .from("events")
@@ -65,7 +77,8 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Generate order code
+  // Generate order code inline (not via DB function): avoids an extra DB round-trip
+  // before issuing tickets. Collisions are caught by the UNIQUE constraint on order_code.
   const orderCode = `RSV-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`;
 
   // Create order
@@ -92,21 +105,32 @@ export async function POST(req: NextRequest) {
   const issuedTickets: { ticketCode: string; tierName: string; qrDataUrl: string }[] = [];
 
   for (let i = 0; i < qty; i++) {
-    const ticketCode = `TKT-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
-    const qrDataUrl = await generateQRDataURL(ticketCode);
-
-    await supabaseServer.from("tickets").insert({
-      ticket_code: ticketCode,
-      order_id: order.id,
-      event_id: eventId,
-      tier_id: tierId,
-      tier_name: tier.name,
-      buyer_name: order.buyer_name,
-      buyer_email: order.buyer_email,
-      price_snapshot: 0,
-      qr_code: qrDataUrl,
-      status: "valid",
-    });
+    let inserted = false;
+    let ticketCode = "";
+    let qrDataUrl = "";
+    for (let attempt = 0; attempt < 3; attempt++) {
+      ticketCode = `TKT-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+      qrDataUrl = await generateQRDataURL(ticketCode);
+      const { error: insertErr } = await supabaseServer.from("tickets").insert({
+        ticket_code: ticketCode,
+        order_id: order.id,
+        event_id: eventId,
+        tier_id: tierId,
+        tier_name: tier.name,
+        buyer_name: order.buyer_name,
+        buyer_email: order.buyer_email,
+        price_snapshot: 0,
+        qr_code: qrDataUrl,
+        status: "valid",
+      });
+      if (!insertErr) { inserted = true; break; }
+      if (insertErr.code !== "23505") {
+        console.error("Ticket insert error:", insertErr);
+        break;
+      }
+      // 23505 = unique_violation on ticket_code — retry with new code
+    }
+    if (!inserted) continue;
 
     issuedTickets.push({ ticketCode, tierName: tier.name, qrDataUrl });
   }
@@ -148,9 +172,21 @@ export async function POST(req: NextRequest) {
     }).catch((err) => console.error("RSVP SMS error:", err));
   }
 
-  // Track promo code usage
+  // Track promo code usage — only if the promo belongs to this event (or is global)
   if (promoId) {
-    try { await supabaseServer.rpc("increment_promo_uses", { promo_id: promoId }); } catch { /* non-critical */ }
+    try {
+      const { data: promo } = await supabaseServer
+        .from("promo_codes")
+        .select("id, event_id")
+        .eq("id", promoId)
+        .single();
+      // Allow global promos (event_id IS NULL) and promos scoped to this event
+      if (promo && (promo.event_id === null || promo.event_id === eventId)) {
+        await supabaseServer.rpc("increment_promo_uses", { promo_id: promoId });
+      } else {
+        console.error("RSVP: promoId", promoId, "does not belong to event", eventId, "— skipping increment");
+      }
+    } catch { /* non-critical */ }
   }
 
   return NextResponse.json({ ok: true, orderId: order.id, orderCode: order.order_code });

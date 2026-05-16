@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { supabaseServer } from "../../../../../lib/supabase/server";
 import { getVerifiedOrganizerSlug } from "../../../../../lib/auth";
 import { sendWaitlistNotification } from "../../../../../lib/notifications/email";
+import { CANCELLATION_FEE_PERCENT } from "../../../../../lib/constants";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2026-04-22.dahlia" as any,
@@ -28,7 +29,7 @@ export async function POST(req: NextRequest) {
   // Fetch order — verify it belongs to this organizer's event
   const { data: order } = await supabaseServer
     .from("orders")
-    .select("*, events ( organizer_id )")
+    .select("*, events ( organizer_id, refund_policy, starts_at )")
     .eq("id", orderId)
     .single();
 
@@ -41,6 +42,27 @@ export async function POST(req: NextRequest) {
 
   if (order.status !== "paid") {
     return NextResponse.json({ error: "Only paid orders can be refunded" }, { status: 400 });
+  }
+
+  // Enforce refund policy
+  // CANCELLATION_FEE_PERCENT is available if needed for partial-refund logic in the future
+  void CANCELLATION_FEE_PERCENT;
+  const refundPolicy: string | null = event?.refund_policy ?? null;
+  if (refundPolicy === "no_refunds") {
+    return NextResponse.json(
+      { error: "This event's refund policy does not allow refunds." },
+      { status: 400 }
+    );
+  }
+  if (refundPolicy === "up_to_24h") {
+    const startsAt = event?.starts_at ? new Date(event.starts_at).getTime() : null;
+    const hoursUntilEvent = startsAt ? (startsAt - Date.now()) / (1000 * 60 * 60) : null;
+    if (hoursUntilEvent !== null && hoursUntilEvent < 24) {
+      return NextResponse.json(
+        { error: "This event's refund policy only allows refunds more than 24 hours before the event." },
+        { status: 400 }
+      );
+    }
   }
 
   // Issue Stripe refund
@@ -86,6 +108,7 @@ export async function POST(req: NextRequest) {
         .from("waitlist")
         .select("id, name, email")
         .eq("event_id", eventId)
+        .is("notified_at", null)
         .order("created_at", { ascending: true })
         .limit(freedCount);
 

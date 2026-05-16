@@ -13,6 +13,10 @@ export async function PATCH(
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
 
+  const { data: shop } = await supabaseServer
+    .from("shops").select("id").eq("slug", shopSlug).eq("active", true).single();
+  if (!shop) return NextResponse.json({ ok: false, error: "Shop not found" }, { status: 404 });
+
   const body = await req.json();
   const updates: Record<string, unknown> = {};
 
@@ -29,6 +33,7 @@ export async function PATCH(
     .from("services")
     .update(updates)
     .eq("id", serviceId)
+    .eq("shop_id", shop.id)
     .select("id, slug, name, duration_minutes, price, deposit_eligible, deposit_amount, active, sort_order")
     .single();
 
@@ -50,10 +55,15 @@ export async function DELETE(
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
 
+  const { data: shopDel } = await supabaseServer
+    .from("shops").select("id").eq("slug", shopSlug).eq("active", true).single();
+  if (!shopDel) return NextResponse.json({ ok: false, error: "Shop not found" }, { status: 404 });
+
   const { error } = await supabaseServer
     .from("services")
     .update({ active: false })
-    .eq("id", serviceId);
+    .eq("id", serviceId)
+    .eq("shop_id", shopDel.id);
 
   if (error) {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });

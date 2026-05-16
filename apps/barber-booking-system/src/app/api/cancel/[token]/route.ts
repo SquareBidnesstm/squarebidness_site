@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { supabaseServer } from "../../../../lib/supabase/server";
 import { sendPushToBarber, sendPushToShopAdmins } from "../../../../lib/push";
+import { checkRateLimit, recordAttempt } from "../../../../lib/utils";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-04-22.dahlia" });
 
@@ -13,6 +14,14 @@ export async function POST(
   { params }: { params: Promise<{ token: string }> }
 ) {
   const { token } = await params;
+
+  // Rate limit: 10 cancel attempts per 15 min per IP
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
+  recordAttempt(`cancel:${ip}`);
+  const { limited } = checkRateLimit(`cancel:${ip}`, 10);
+  if (limited) {
+    return NextResponse.json({ ok: false, error: "Too many requests. Please wait before trying again." }, { status: 429 });
+  }
 
   const { data: booking } = await supabaseServer
     .from("bookings")

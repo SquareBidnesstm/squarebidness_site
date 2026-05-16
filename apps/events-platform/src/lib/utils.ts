@@ -1,6 +1,12 @@
 // ---------------------------------------------------------------------------
 // In-memory rate limiter — limits failed attempts per key.
 // Designed for serverless (per-instance), provides best-effort defense.
+//
+// LIMITATION: This map lives in the Node.js process heap. In a serverless
+// environment (Vercel, AWS Lambda) each cold start creates a fresh map, so
+// counts reset on every new instance and limits are not enforced across
+// concurrent instances. For production scale or stricter enforcement, replace
+// this with a shared atomic store such as Upstash Redis (ioredis + @upstash/ratelimit).
 // ---------------------------------------------------------------------------
 const _failMap = new Map<string, { count: number; resetAt: number }>();
 const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
@@ -61,7 +67,14 @@ export function isSafeOrigin(req: Request): boolean {
     }
   }
 
-  // No origin or referer — allow server-to-server calls (API clients, curl, tests)
-  // In production you may want to return false here for stricter enforcement
-  return true;
+  // No origin or referer — fail closed to prevent CSRF from clients that strip headers.
+  // Exception: allow in local development so curl/Postman testing works without friction.
+  if (process.env.NODE_ENV === "development") return true;
+
+  // Also allow requests bearing a valid CRON_SECRET bearer token (server-to-server).
+  const authHeader = req.headers.get("authorization") ?? "";
+  const cronSecret = process.env.CRON_SECRET;
+  if (cronSecret && authHeader === `Bearer ${cronSecret}`) return true;
+
+  return false;
 }

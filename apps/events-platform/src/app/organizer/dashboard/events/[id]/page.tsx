@@ -5,8 +5,8 @@ import { supabaseServer } from "../../../../../lib/supabase/server";
 import { getVerifiedOrganizerSlugFromHeader } from "../../../../../lib/auth";
 import { EVENT_CATEGORIES } from "../../../../../lib/constants";
 import NavLogo from "../../../../../components/NavLogo";
-import RefundButton from "../../../../../components/RefundButton";
 import TierEditor from "../../../../../components/TierEditor";
+import OrdersList from "../../../../../components/OrdersList";
 import EmailBlastForm from "../../../../../components/EmailBlastForm";
 import CancelEventButton from "../../../../../components/CancelEventButton";
 import PushBlastButton from "../../../../../components/PushBlastButton";
@@ -52,14 +52,21 @@ export default async function ManageEventPage({
   const revenue = tiers.reduce((s: number, t: any) => s + (Number(t.price) * t.quantity_sold), 0);
   const categoryLabel = EVENT_CATEGORIES.find(c => c.value === event.category)?.label ?? event.category;
 
-  const { data: orders } = await supabaseServer
+  const { data: orders, count: ordersTotal } = await supabaseServer
     .from("orders")
-    .select("id, order_code, buyer_name, buyer_email, total, status, created_at")
+    .select("id, order_code, buyer_name, buyer_email, total, status, created_at", { count: "exact" })
     .eq("event_id", event.id)
     .order("created_at", { ascending: false })
-    .limit(100);
+    .range(0, 19);
 
   const orderList = (orders ?? []) as any[];
+
+  // Count all paid orders for email blast (not limited by page size)
+  const { count: paidOrderCount } = await supabaseServer
+    .from("orders")
+    .select("id", { count: "exact", head: true })
+    .eq("event_id", event.id)
+    .eq("status", "paid");
 
   const { data: waitlistEntries } = await supabaseServer
     .from("waitlist")
@@ -167,56 +174,13 @@ export default async function ManageEventPage({
           {/* Orders */}
           <div className="card" style={{ marginBottom: 24 }}>
             <p style={{ color: "#a1a1aa", fontSize: 11, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 14 }}>
-              Orders ({orderList.length})
+              Orders ({ordersTotal ?? 0})
             </p>
-            {orderList.length === 0 ? (
-              <p style={{ color: "#555", fontSize: "0.9rem" }}>No orders yet.</p>
-            ) : (
-              <div style={{ display: "grid", gap: 8 }}>
-                {orderList.map((order: any) => (
-                  <div key={order.id} style={{
-                    display: "flex", justifyContent: "space-between", alignItems: "center",
-                    padding: "12px 14px", background: "#050505", borderRadius: 10,
-                    border: "1px solid #1d1d1f", gap: 12, flexWrap: "wrap",
-                  }}>
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
-                        <p style={{ fontWeight: 800, fontSize: "0.9rem", fontFamily: "monospace" }}>{order.order_code}</p>
-                        <span style={{
-                          fontSize: "0.7rem", fontWeight: 900, padding: "2px 8px", borderRadius: 99,
-                          background: order.status === "paid" ? "#0a2a0a" : order.status === "cancelled" ? "#1a0a0a" : "#1a1a0a",
-                          color: order.status === "paid" ? "#22c55e" : order.status === "cancelled" ? "#ef4444" : "#eab308",
-                          border: `1px solid ${order.status === "paid" ? "#166534" : order.status === "cancelled" ? "#7f1d1d" : "#713f12"}`,
-                          textTransform: "uppercase",
-                        }}>
-                          {order.status}
-                        </span>
-                      </div>
-                      <p style={{ color: "#a1a1aa", fontSize: "0.8rem" }}>{order.buyer_name} · {order.buyer_email}</p>
-                      <p style={{ color: "#555", fontSize: "0.75rem" }}>
-                        {new Date(order.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                      </p>
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
-                      <p style={{ fontWeight: 900, color: "#22c55e", fontSize: "0.95rem" }}>
-                        ${Number(order.total).toFixed(2)}
-                      </p>
-                      {order.status === "paid" && (
-                        <RefundButton
-                          orderId={order.id}
-                          orderCode={order.order_code}
-                          buyerName={order.buyer_name}
-                          total={Number(order.total)}
-                        />
-                      )}
-                      {order.status === "cancelled" && (
-                        <span style={{ fontSize: "0.75rem", color: "#555" }}>Refunded</span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            <OrdersList
+              eventId={event.id}
+              initialOrders={orderList}
+              initialTotal={ordersTotal ?? 0}
+            />
           </div>
 
           {/* Email Blast */}
@@ -224,7 +188,7 @@ export default async function ManageEventPage({
             <p style={{ color: "#a1a1aa", fontSize: 11, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 14 }}>
               📣 Email Attendees
             </p>
-            <EmailBlastForm eventId={event.id} recipientCount={orderList.filter((o: any) => o.status === "paid").length} />
+            <EmailBlastForm eventId={event.id} recipientCount={paidOrderCount ?? 0} />
           </div>
 
           {/* Push Notifications */}
@@ -291,7 +255,7 @@ export default async function ManageEventPage({
             <CancelEventButton
               eventId={event.id}
               eventTitle={event.title}
-              paidOrderCount={orderList.filter((o: any) => o.status === "paid").length}
+              paidOrderCount={paidOrderCount ?? 0}
             />
           )}
 

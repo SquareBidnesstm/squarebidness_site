@@ -11,6 +11,7 @@ export async function GET(req: NextRequest) {
     .from("organizers")
     .select("id, name, email, email_verified")
     .eq("verification_token", token)
+    .eq("email_verified", false)
     .single();
 
   if (!organizer) {

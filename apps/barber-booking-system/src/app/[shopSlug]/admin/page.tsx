@@ -31,7 +31,7 @@ type AdminBooking = {
   starts_at: string;
   ends_at: string;
   status: BookingStatus;
-  payment_status: "unpaid" | "deposit_paid" | "paid" | "refunded";
+  payment_status: "unpaid" | "deposit_paid" | "paid" | "refunded" | "refund_failed";
   price_snapshot: number | null;
   source: string | null;
   client_notes: string | null;
@@ -94,12 +94,33 @@ export default function AdminPage() {
   const [shopTimezone, setShopTimezone] = useState("America/New_York");
   const [allBarbers, setAllBarbers] = useState<{ slug: string; name: string }[]>([]);
   const [bookings, setBookings] = useState<AdminBooking[]>([]);
+  const [bookingsPage, setBookingsPage] = useState(1);
+  const [bookingsHasMore, setBookingsHasMore] = useState(false);
+  const [bookingsLoadingMore, setBookingsLoadingMore] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  // Date range for bookings fetch (default: last 90 days → today)
+  const [dateFrom, setDateFrom] = useState<string>(() => {
+    const d = new Date(); d.setDate(d.getDate() - 90);
+    return d.toISOString().slice(0, 10);
+  });
+  const [dateTo, setDateTo] = useState<string>(() => new Date().toISOString().slice(0, 10));
   const [search, setSearch] = useState("");
-  const [barberFilter, setBarberFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [showTodayOnly, setShowTodayOnly] = useState(false);
+  const filterKey = `admin_filters_${shopSlug}`;
+  const [barberFilter, setBarberFilter] = useState<string>(() => {
+    try { return JSON.parse(localStorage.getItem(filterKey) ?? "{}").barberFilter ?? "all"; } catch { return "all"; }
+  });
+  const [statusFilter, setStatusFilter] = useState<string>(() => {
+    try { return JSON.parse(localStorage.getItem(filterKey) ?? "{}").statusFilter ?? "all"; } catch { return "all"; }
+  });
+  const [showTodayOnly, setShowTodayOnly] = useState<boolean>(() => {
+    try { return JSON.parse(localStorage.getItem(filterKey) ?? "{}").showTodayOnly ?? false; } catch { return false; }
+  });
+
+  // Persist filters to localStorage whenever they change
+  useEffect(() => {
+    try { localStorage.setItem(filterKey, JSON.stringify({ barberFilter, statusFilter, showTodayOnly })); } catch {}
+  }, [filterKey, barberFilter, statusFilter, showTodayOnly]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [managingId, setManagingId] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
@@ -141,7 +162,10 @@ export default function AdminPage() {
       try {
         setLoading(true);
         setError("");
-        const res = await fetch(`/api/${shopSlug}/admin/bookings`, {
+        const params = new URLSearchParams({ page: "1" });
+        if (dateFrom) params.set("date_from", dateFrom);
+        if (dateTo) params.set("date_to", dateTo);
+        const res = await fetch(`/api/${shopSlug}/admin/bookings?${params}`, {
           cache: "no-store",
         });
         const data = await res.json();
@@ -153,6 +177,8 @@ export default function AdminPage() {
         if (data.shop?.logo_url) setShopLogoUrl(data.shop.logo_url);
         if (data.shop?.timezone) setShopTimezone(data.shop.timezone);
         setBookings(data.bookings || []);
+        setBookingsPage(1);
+        setBookingsHasMore(data.pagination?.has_more ?? false);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unexpected error");
       } finally {
@@ -160,7 +186,27 @@ export default function AdminPage() {
       }
     }
     loadBookings();
-  }, [shopSlug]);
+  }, [shopSlug, dateFrom, dateTo]);
+
+  async function loadMoreBookings() {
+    if (bookingsLoadingMore || !bookingsHasMore) return;
+    setBookingsLoadingMore(true);
+    try {
+      const nextPage = bookingsPage + 1;
+      const params = new URLSearchParams({ page: String(nextPage) });
+      if (dateFrom) params.set("date_from", dateFrom);
+      if (dateTo) params.set("date_to", dateTo);
+      const res = await fetch(`/api/${shopSlug}/admin/bookings?${params}`, { cache: "no-store" });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        setBookings((prev) => [...prev, ...(data.bookings || [])]);
+        setBookingsPage(nextPage);
+        setBookingsHasMore(data.pagination?.has_more ?? false);
+      }
+    } finally {
+      setBookingsLoadingMore(false);
+    }
+  }
 
   async function handleLogout() {
     setLoggingOut(true);
@@ -621,6 +667,25 @@ export default function AdminPage() {
           >
             <h2 style={{ margin: 0, fontSize: 30, fontWeight: 900 }}>Bookings</h2>
             <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+              {/* Date range filter */}
+              <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "#9a9a9a" }}>
+                From
+                <input
+                  type="date"
+                  value={dateFrom}
+                  onChange={e => setDateFrom(e.target.value)}
+                  style={{ background: "#111", border: "1px solid #333", color: "#fff", borderRadius: 8, padding: "4px 8px", fontSize: 13 }}
+                />
+              </label>
+              <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "#9a9a9a" }}>
+                To
+                <input
+                  type="date"
+                  value={dateTo}
+                  onChange={e => setDateTo(e.target.value)}
+                  style={{ background: "#111", border: "1px solid #333", color: "#fff", borderRadius: 8, padding: "4px 8px", fontSize: 13 }}
+                />
+              </label>
               <div style={{ color: "#8f8f8f", fontSize: 14 }}>{filteredBookings.length} shown</div>
               <a
                 href={`/api/${shopSlug}/admin/calendar.ics`}
@@ -689,8 +754,12 @@ export default function AdminPage() {
                     key={booking.id}
                     id={`booking-${booking.id}`}
                     style={{
-                      border: "1px solid #232323",
-                      background: "#070707",
+                      border: booking.payment_status === "refund_failed"
+                        ? "1.5px solid #c0392b"
+                        : "1px solid #232323",
+                      background: booking.payment_status === "refund_failed"
+                        ? "#140a0a"
+                        : "#070707",
                       borderRadius: 22,
                       padding: 18,
                     }}
@@ -720,7 +789,18 @@ export default function AdminPage() {
                           <span style={{ ...darkPill, ...statusStyle }}>
                             {STATUS_LABELS[booking.status]}
                           </span>
-                          <span style={darkPill}>{booking.payment_status}</span>
+                          {booking.payment_status === "refund_failed" ? (
+                            <span style={{
+                              ...darkPill,
+                              background: "#c0392b",
+                              color: "#fff",
+                              fontWeight: 700,
+                            }}>
+                              ⚠️ Refund Failed — Action Required
+                            </span>
+                          ) : (
+                            <span style={darkPill}>{booking.payment_status}</span>
+                          )}
                         </div>
 
                         <div
@@ -964,6 +1044,28 @@ export default function AdminPage() {
               })}
             </div>
           )}
+
+          {/* Load more — shows when API has more pages beyond the current date window */}
+          {bookingsHasMore && (
+            <div style={{ textAlign: "center", marginTop: 18 }}>
+              <button
+                onClick={loadMoreBookings}
+                disabled={bookingsLoadingMore}
+                style={{
+                  background: "#1a1a1a",
+                  color: bookingsLoadingMore ? "#555" : "#d4af37",
+                  border: "1px solid #2b2b2b",
+                  borderRadius: 12,
+                  padding: "12px 28px",
+                  fontWeight: 700,
+                  fontSize: 14,
+                  cursor: bookingsLoadingMore ? "not-allowed" : "pointer",
+                }}
+              >
+                {bookingsLoadingMore ? "Loading…" : "Load more bookings"}
+              </button>
+            </div>
+          )}
         </div>
         </>
         )}
@@ -977,9 +1079,15 @@ export default function AdminPage() {
             setShowWalkIn(false);
             setWalkInSuccess(b);
             // Reload bookings to include the new walk-in
-            fetch(`/api/${shopSlug}/admin/bookings`, { cache: "no-store" })
+            fetch(`/api/${shopSlug}/admin/bookings?page=1`, { cache: "no-store" })
               .then(r => r.json())
-              .then(data => { if (data.ok) setBookings(data.bookings || []); })
+              .then(data => {
+                if (data.ok) {
+                  setBookings(data.bookings || []);
+                  setBookingsPage(1);
+                  setBookingsHasMore(data.pagination?.has_more ?? false);
+                }
+              })
               .catch(console.error);
           }}
         />

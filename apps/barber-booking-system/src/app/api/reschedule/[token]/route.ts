@@ -1,24 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../../lib/supabase/server";
-
-function normalizePhone(raw: string): string | null {
-  const digits = raw.replace(/\D/g, "");
-  if (digits.length === 10) return `+1${digits}`;
-  if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
-  return null;
-}
-
-function convertDisplayTimeTo24Hour(time: string): string | null {
-  const [clock, suffix] = time.trim().split(" ");
-  if (!clock || !suffix) return null;
-  const [rawHour, rawMinute] = clock.split(":");
-  let hour = Number(rawHour);
-  const minute = Number(rawMinute);
-  if (isNaN(hour) || isNaN(minute)) return null;
-  if (suffix.toUpperCase() === "PM" && hour !== 12) hour += 12;
-  if (suffix.toUpperCase() === "AM" && hour === 12) hour = 0;
-  return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
-}
+import { isSmsOptedOut } from "../../../../lib/sms-opt-out";
+import { checkRateLimit, recordAttempt, normalizePhone, convertDisplayTimeTo24Hour } from "../../../../lib/utils";
+import { sendConfirmationEmail } from "../../../../lib/email";
 
 // GET — return booking info for the reschedule page
 export async function GET(
@@ -68,6 +52,15 @@ export async function POST(
   { params }: { params: Promise<{ token: string }> }
 ) {
   const { token } = await params;
+
+  // Rate limit: 10 reschedule attempts per 15 min per IP
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
+  recordAttempt(`reschedule:${ip}`);
+  const { limited } = checkRateLimit(`reschedule:${ip}`, 10);
+  if (limited) {
+    return NextResponse.json({ ok: false, error: "Too many requests. Please wait before trying again." }, { status: 429 });
+  }
+
   const body = await req.json().catch(() => ({}));
   const { date, time } = body as { date?: string; time?: string };
 
@@ -77,7 +70,7 @@ export async function POST(
 
   const { data: booking } = await supabaseServer
     .from("bookings")
-    .select(`id, status, customer_name, customer_phone, payment_status,
+    .select(`id, status, customer_name, customer_phone, customer_email, cancel_token, payment_status,
       shops(id, slug, timezone, name),
       barbers(id, name, display_name, slug),
       services(id, name, duration_minutes, slug)`)
@@ -94,12 +87,43 @@ export async function POST(
   const barber = booking.barbers as any;
   const service = booking.services as any;
 
+  // Validate date format
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return NextResponse.json({ ok: false, error: "Invalid date format." }, { status: 400 });
+  }
+
+  // Enforce 90-day booking window (same constraint as create/deposit routes)
+  const requestedDate = new Date(`${date}T12:00:00`);
+  const maxAllowed = new Date();
+  maxAllowed.setDate(maxAllowed.getDate() + 90);
+  if (isNaN(requestedDate.getTime()) || requestedDate > maxAllowed) {
+    return NextResponse.json({ ok: false, error: "Reschedules can only be made up to 90 days in advance." }, { status: 400 });
+  }
+
   const time24 = convertDisplayTimeTo24Hour(time);
   if (!time24) return NextResponse.json({ ok: false, error: "Invalid time format." }, { status: 400 });
 
   const startsAt = new Date(`${date}T${time24}:00`);
   if (isNaN(startsAt.getTime())) {
     return NextResponse.json({ ok: false, error: "Invalid date/time." }, { status: 400 });
+  }
+
+  // Enforce min lead time — same policy as the booking create route
+  const { data: rulesSetting } = await supabaseServer
+    .from("shop_settings")
+    .select("value_json")
+    .eq("shop_id", shop.id)
+    .eq("key", "booking_rules")
+    .single();
+  const rules = rulesSetting?.value_json as { min_lead_time_minutes?: number } | null;
+  const minLeadMinutes = rules?.min_lead_time_minutes ?? 120;
+  const minLeadMs = minLeadMinutes * 60 * 1000;
+  if (startsAt.getTime() - Date.now() < minLeadMs) {
+    const hrs = Math.round(minLeadMinutes / 60);
+    return NextResponse.json(
+      { ok: false, error: `Reschedules must be at least ${hrs} hour${hrs !== 1 ? "s" : ""} in advance.` },
+      { status: 400 }
+    );
   }
 
   const endsAt = new Date(startsAt.getTime() + service.duration_minutes * 60 * 1000);
@@ -142,9 +166,10 @@ export async function POST(
     })
     .eq("id", booking.id);
 
-  // Send confirmation SMS
+  // Send confirmation SMS (skip if opted out)
   const normalizedPhone = normalizePhone(booking.customer_phone ?? "");
-  if (normalizedPhone) {
+  const rescheduleOptedOut = normalizedPhone ? await isSmsOptedOut(normalizedPhone) : true;
+  if (normalizedPhone && !rescheduleOptedOut) {
     const sid = process.env.TWILIO_ACCOUNT_SID;
     const twilioToken = process.env.TWILIO_AUTH_TOKEN;
     const messagingSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
@@ -180,6 +205,23 @@ export async function POST(
         body: msgParams.toString(),
       }).catch(console.error);
     }
+  }
+
+  // Email confirmation (non-blocking)
+  const customerEmail = (booking as any).customer_email as string | null;
+  if (customerEmail) {
+    sendConfirmationEmail({
+      to: customerEmail,
+      customerName: booking.customer_name,
+      shopName: shop.name,
+      barberName: barber.display_name || barber.name,
+      serviceName: service.name,
+      appointmentDate: date,
+      startsAt: startsAt.toISOString(),
+      bookingCode: "", // rescheduled — no new code issued
+      timezone: shop.timezone,
+      cancelToken: (booking as any).cancel_token ?? null,
+    }).catch((err) => console.error("RESCHEDULE EMAIL ERROR:", err instanceof Error ? err.message : err));
   }
 
   return NextResponse.json({

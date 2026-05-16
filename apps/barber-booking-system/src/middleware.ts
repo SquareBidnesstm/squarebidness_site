@@ -1,12 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { computeSessionToken, sessionCookieName, computeBarberSessionToken, barberSessionCookieName } from "./lib/auth";
 
-async function computePlatformToken(): Promise<string> {
-  const secret = process.env.APP_SECRET ?? "";
+async function verifyPlatformCookie(cookie: string): Promise<boolean> {
+  const secret = process.env.APP_SECRET;
+  if (!secret) return false; // misconfigured — deny all platform access rather than allow with empty key
+  const dotIdx = cookie.indexOf(".");
+  if (dotIdx === -1) return false; // old format — reject
+  const issuedAt = cookie.slice(0, dotIdx);
+  const mac = cookie.slice(dotIdx + 1);
+  const issuedAtMs = Number(issuedAt);
+  if (!issuedAtMs || Date.now() - issuedAtMs > 12 * 60 * 60 * 1000) return false; // 12h expiry
   const enc = new TextEncoder();
   const key = await crypto.subtle.importKey("raw", enc.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-  const sig = await crypto.subtle.sign("HMAC", key, enc.encode("platform-admin"));
-  return Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, "0")).join("");
+  const sig = await crypto.subtle.sign("HMAC", key, enc.encode(`platform-admin:${issuedAt}`));
+  const expected = Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, "0")).join("");
+  return mac === expected;
 }
 
 const RESERVED_SLUGS = new Set(["admin", "book", "onboard", "login", "api", "_next", "platform", "favicon.ico"]);
@@ -19,8 +27,7 @@ export async function middleware(req: NextRequest) {
     if (pathname === "/platform/login") return NextResponse.next();
     const cookie = req.cookies.get("platform_session")?.value;
     if (!cookie) return NextResponse.redirect(new URL("/platform/login", req.url));
-    const expected = await computePlatformToken();
-    if (cookie !== expected) return NextResponse.redirect(new URL("/platform/login", req.url));
+    if (!(await verifyPlatformCookie(cookie))) return NextResponse.redirect(new URL("/platform/login", req.url));
     return NextResponse.next();
   }
 
@@ -33,7 +40,14 @@ export async function middleware(req: NextRequest) {
     const cookieName = sessionCookieName(shopSlug);
     const cookie = req.cookies.get(cookieName)?.value;
     if (!cookie) return NextResponse.redirect(new URL(`/${shopSlug}/admin/login`, req.url));
-    const expected = await computeSessionToken(shopSlug);
+    // Parse issuedAt from the "{issuedAt}.{hmac}" token format before recomputing
+    const adminDotIdx = cookie.indexOf(".");
+    if (adminDotIdx === -1) return NextResponse.redirect(new URL(`/${shopSlug}/admin/login`, req.url));
+    const adminIssuedAt = Number(cookie.slice(0, adminDotIdx));
+    if (!adminIssuedAt || Date.now() - adminIssuedAt > 30 * 24 * 60 * 60 * 1000) {
+      return NextResponse.redirect(new URL(`/${shopSlug}/admin/login`, req.url));
+    }
+    const expected = await computeSessionToken(shopSlug, adminIssuedAt);
     if (cookie !== expected) return NextResponse.redirect(new URL(`/${shopSlug}/admin/login`, req.url));
     return NextResponse.next();
   }
@@ -55,7 +69,14 @@ export async function middleware(req: NextRequest) {
     const cookieName = barberSessionCookieName(shopSlug, barberSlug);
     const cookie = req.cookies.get(cookieName)?.value;
     if (!cookie) return NextResponse.redirect(new URL(`/${shopSlug}/${barberSlug}/login`, req.url));
-    const expected = await computeBarberSessionToken(shopSlug, barberSlug);
+    // Parse issuedAt from the "{issuedAt}.{hmac}" token format before recomputing
+    const barberDotIdx = cookie.indexOf(".");
+    if (barberDotIdx === -1) return NextResponse.redirect(new URL(`/${shopSlug}/${barberSlug}/login`, req.url));
+    const barberIssuedAt = Number(cookie.slice(0, barberDotIdx));
+    if (!barberIssuedAt || Date.now() - barberIssuedAt > 30 * 24 * 60 * 60 * 1000) {
+      return NextResponse.redirect(new URL(`/${shopSlug}/${barberSlug}/login`, req.url));
+    }
+    const expected = await computeBarberSessionToken(shopSlug, barberSlug, barberIssuedAt);
     if (cookie !== expected) return NextResponse.redirect(new URL(`/${shopSlug}/${barberSlug}/login`, req.url));
   }
 

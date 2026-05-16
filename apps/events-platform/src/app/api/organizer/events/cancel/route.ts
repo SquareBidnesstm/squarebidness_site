@@ -58,46 +58,57 @@ export async function POST(req: NextRequest) {
   let failedCount = 0;
 
   for (const order of paidOrders) {
-    let refunded = false;
+    try {
+      let refunded = false;
 
-    // Issue Stripe refund
-    if (order.stripe_payment_intent_id) {
-      try {
-        await stripe.refunds.create({
-          payment_intent: order.stripe_payment_intent_id,
-          reverse_transfer: true,       // debit organizer's connected account
-          refund_application_fee: true, // full refund to buyer on cancellation — organizer's fault
-        });
-        refunded = true;
-        refundedCount++;
-      } catch (err: any) {
-        console.error(`Refund failed for order ${order.id}:`, err.message);
-        failedCount++;
+      // Issue Stripe refund
+      if (order.stripe_payment_intent_id) {
+        try {
+          await stripe.refunds.create({
+            payment_intent: order.stripe_payment_intent_id,
+            reverse_transfer: true,       // debit organizer's connected account
+            refund_application_fee: true, // full refund to buyer on cancellation — organizer's fault
+          });
+          refunded = true;
+          refundedCount++;
+        } catch (err: any) {
+          console.error(`Refund failed for order ${order.id}:`, err.message);
+          failedCount++;
+          // Mark the order as refund_failed so it surfaces for manual resolution
+          await supabaseServer
+            .from("orders")
+            .update({ status: "refund_failed" })
+            .eq("id", order.id);
+          continue; // skip the cancellation mark below so status stays refund_failed
+        }
       }
+
+      // Mark order cancelled
+      await supabaseServer
+        .from("orders")
+        .update({ status: "cancelled" })
+        .eq("id", order.id);
+
+      // Mark tickets cancelled
+      await supabaseServer
+        .from("tickets")
+        .update({ status: "cancelled" })
+        .eq("order_id", order.id);
+
+      // Email buyer
+      sendEventCancellationNotice({
+        buyerName: order.buyer_name,
+        buyerEmail: order.buyer_email,
+        eventTitle: event.title,
+        eventDate,
+        orderCode: order.order_code,
+        total: Number(order.total),
+        refunded,
+      }).catch((err) => console.error("Cancellation email error:", err));
+    } catch (err: any) {
+      console.error(`Unexpected error processing order ${order.id}:`, err.message);
+      failedCount++;
     }
-
-    // Mark order cancelled
-    await supabaseServer
-      .from("orders")
-      .update({ status: "cancelled" })
-      .eq("id", order.id);
-
-    // Mark tickets cancelled
-    await supabaseServer
-      .from("tickets")
-      .update({ status: "cancelled" })
-      .eq("order_id", order.id);
-
-    // Email buyer
-    sendEventCancellationNotice({
-      buyerName: order.buyer_name,
-      buyerEmail: order.buyer_email,
-      eventTitle: event.title,
-      eventDate,
-      orderCode: order.order_code,
-      total: Number(order.total),
-      refunded,
-    }).catch((err) => console.error("Cancellation email error:", err));
   }
 
   return NextResponse.json({

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { supabaseServer } from "../../../../../lib/supabase/server";
 import { checkActiveSubscription } from "../../../../../lib/auth";
+import { checkRateLimit, recordAttempt } from "../../../../../lib/utils";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-04-22.dahlia" });
 
@@ -10,6 +11,14 @@ export async function POST(
   { params }: { params: Promise<{ shopSlug: string }> }
 ) {
   const { shopSlug } = await params;
+
+  // Rate limit: 10 deposit sessions per 15 min per IP
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
+  recordAttempt(`deposit:${ip}`);
+  const { limited } = checkRateLimit(`deposit:${ip}`, 10);
+  if (limited) {
+    return NextResponse.json({ ok: false, error: "Too many requests. Please try again later." }, { status: 429 });
+  }
 
   const body = await req.json();
   const {
@@ -52,6 +61,10 @@ export async function POST(
 
   const { data: barber } = await supabaseServer
     .from("barbers").select("id").eq("shop_id", shop.id).eq("slug", barber_id).eq("active", true).single();
+  // BC-2: Must guard here — if barber is null, Stripe checkout would be created for a
+  // non-existent barber. The webhook/confirm route would then silently abandon booking
+  // creation, leaving the customer charged with no appointment.
+  if (!barber) return NextResponse.json({ ok: false, error: "Barber not found or no longer active." }, { status: 404 });
 
   const { data: svc } = await supabaseServer
     .from("services").select("id, name, price, duration_minutes").eq("shop_id", shop.id).eq("slug", service).eq("active", true).single();
@@ -72,13 +85,6 @@ export async function POST(
 
   const origin = req.headers.get("origin") || "https://booking.squarebidness.com";
 
-  // Encode booking data in success URL so the webhook-free path works via redirect
-  const bookingData = encodeURIComponent(JSON.stringify({
-    barber_id, customer_name, customer_phone, customer_email,
-    client_notes: client_notes ?? null,
-    service, time, date,
-  }));
-
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
     line_items: [{
@@ -92,7 +98,8 @@ export async function POST(
       },
       quantity: 1,
     }],
-    success_url: `${origin}/api/${shopSlug}/booking/deposit/confirm?session_id={CHECKOUT_SESSION_ID}&data=${bookingData}`,
+    // Booking data read from metadata on success — no sensitive data in URL
+    success_url: `${origin}/api/${shopSlug}/booking/deposit/confirm?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${origin}/${shopSlug}/book/${barber_id}`,
     metadata: {
       shop_id: shop.id,

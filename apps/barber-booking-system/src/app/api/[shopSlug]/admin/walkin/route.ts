@@ -4,6 +4,7 @@ import { verifyAdminSession, checkActiveSubscription } from "../../../../../lib/
 import { sendPushToBarber, sendPushToShopAdmins } from "../../../../../lib/push";
 import { normalizePhone } from "../../../../../lib/utils";
 import { isSmsOptedOut } from "../../../../../lib/sms-opt-out";
+import { sendConfirmationEmail } from "../../../../../lib/email";
 
 function getTodayString() {
   const now = new Date();
@@ -29,7 +30,7 @@ export async function POST(
   }
 
   const { data: shop } = await supabaseServer
-    .from("shops").select("id, slug, timezone").eq("slug", shopSlug).eq("active", true).single();
+    .from("shops").select("id, slug, name, timezone").eq("slug", shopSlug).eq("active", true).single();
   if (!shop) return NextResponse.json({ ok: false, error: "Shop not found" }, { status: 404 });
 
   const hasActivePlan = await checkActiveSubscription(shop.id);
@@ -49,7 +50,8 @@ export async function POST(
   const startsAt = new Date();
   const endsAt = new Date(startsAt.getTime() + service.duration_minutes * 60 * 1000);
 
-  const { data: bookingCode } = await supabaseServer.rpc("generate_booking_code", { shop_slug: shop.slug });
+  const { data: rpcCode } = await supabaseServer.rpc("generate_booking_code", { shop_slug: shop.slug });
+  const bookingCode = rpcCode ?? `${shopSlug.slice(0, 2).toUpperCase()}-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 
   const name = customer_name?.trim() || "Walk-in";
   const { data: customer } = await supabaseServer
@@ -74,7 +76,7 @@ export async function POST(
       payment_status: "unpaid",
       source: "walk_in",
       confirmed_at: new Date().toISOString(),
-    }).select("id, booking_code, customer_name, starts_at").single();
+    }).select("id, booking_code, customer_name, starts_at, cancel_token").single();
 
   if (bookingError || !booking) {
     const isOverlap = (bookingError as any)?.code === "23P01";
@@ -117,6 +119,23 @@ export async function POST(
         body: msgParams.toString(),
       }).catch(console.error);
     }
+  }
+
+  // Email confirmation if customer provided email
+  const customerEmail = (body.customer_email as string | undefined)?.trim() || null;
+  if (customerEmail) {
+    sendConfirmationEmail({
+      to: customerEmail,
+      customerName: name,
+      shopName: shop.name,
+      barberName: barber.display_name || barber.name,
+      serviceName: service.name,
+      appointmentDate: appointmentDate,
+      startsAt: booking.starts_at,
+      bookingCode: booking.booking_code,
+      timezone: shop.timezone,
+      cancelToken: (booking as any).cancel_token ?? null,
+    }).catch((err) => console.error("WALKIN EMAIL ERROR:", err instanceof Error ? err.message : err));
   }
 
   // Push notifications to barber and shop admins

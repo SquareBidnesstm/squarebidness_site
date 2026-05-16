@@ -57,11 +57,23 @@ export async function GET(req: Request) {
       });
       stripeAccountId = account.id;
 
-      // Save the account ID
+      // Save the account ID; flip onboarding flag if already fully submitted
       await supabaseServer
         .from("organizers")
-        .update({ stripe_account_id: stripeAccountId })
+        .update({
+          stripe_account_id: stripeAccountId,
+          stripe_onboarding_complete: account.details_submitted ?? false,
+        })
         .eq("id", organizer.id);
+    } else {
+      // Account already exists — check if it's fully onboarded and update flag if so
+      const account = await stripe.accounts.retrieve(stripeAccountId);
+      if (account.details_submitted) {
+        await supabaseServer
+          .from("organizers")
+          .update({ stripe_onboarding_complete: true })
+          .eq("id", organizer.id);
+      }
     }
 
     // Create an account link for onboarding

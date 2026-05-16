@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../../lib/supabase/server";
+import { getVerifiedOrganizerSlug } from "../../../../lib/auth";
 import { checkRateLimit, recordAttempt } from "../../../../lib/utils";
 
 export async function POST(req: NextRequest) {
+  // Auth: only verified organizers may process check-ins
+  const organizerSlug = await getVerifiedOrganizerSlug(req);
+  if (!organizerSlug) {
+    return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: 401 });
+  }
+
   // Rate limit: 60 scans per 15 min per IP (allows active scanning while blocking brute force)
   const ip =
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
@@ -25,12 +32,21 @@ export async function POST(req: NextRequest) {
 
   const { data: ticket } = await supabaseServer
     .from("tickets")
-    .select("*, ticket_tiers ( name )")
+    .select("*, ticket_tiers ( name ), events ( organizer_id, organizers ( slug ) )")
     .eq("ticket_code", ticketCode.trim().toUpperCase())
     .single();
 
   if (!ticket) {
     return NextResponse.json({ ok: false, message: "Ticket not found" });
+  }
+
+  // Ownership check: only the event's organizer may check in tickets
+  const eventOrganizer = (ticket as any).events?.organizers;
+  const eventOrganizerSlug = Array.isArray(eventOrganizer)
+    ? eventOrganizer[0]?.slug
+    : eventOrganizer?.slug;
+  if (eventOrganizerSlug !== organizerSlug) {
+    return NextResponse.json({ ok: false, message: "Forbidden" }, { status: 403 });
   }
 
   if (ticket.status === "checked_in") {

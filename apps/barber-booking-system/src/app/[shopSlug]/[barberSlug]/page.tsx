@@ -93,6 +93,7 @@ export default function BarberPage() {
 
   const [barberName, setBarberName] = useState("");
   const [barberPhotoUrl, setBarberPhotoUrl] = useState<string | null>(null);
+  const [shopTimezone, setShopTimezone] = useState("America/Chicago");
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [perms, setPerms] = useState<Perms>({ can_edit_hours: false, can_edit_prices: false });
   const [loading, setLoading] = useState(true);
@@ -131,6 +132,7 @@ export default function BarberPage() {
         }
         setBarberName(data.barberName || barberSlug);
         if (data.barberPhotoUrl) setBarberPhotoUrl(data.barberPhotoUrl);
+        if (data.timezone) setShopTimezone(data.timezone);
         setBookings(data.bookings || []);
         setPerms(data.perms ?? { can_edit_hours: false, can_edit_prices: false });
       } catch {
@@ -489,7 +491,7 @@ export default function BarberPage() {
 
         {/* ── EARNINGS TAB ── */}
         {activeTab === "earnings" && (
-          <EarningsTab bookings={bookings} />
+          <EarningsTab bookings={bookings} timezone={shopTimezone} />
         )}
 
         {/* ── HOURS TAB ── */}
@@ -673,12 +675,26 @@ const emptyBox: React.CSSProperties = {
   background: "#070707",
 };
 
-function EarningsTab({ bookings }: { bookings: Booking[] }) {
-  const now = new Date();
-  const startOfWeek = new Date(now);
-  startOfWeek.setDate(now.getDate() - now.getDay());
-  startOfWeek.setHours(0, 0, 0, 0);
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+function EarningsTab({ bookings, timezone }: { bookings: Booking[]; timezone: string }) {
+  const tz = timezone || "America/Chicago";
+
+  // Get "today" as YYYY-MM-DD in the shop's timezone
+  const nowInTz = new Date().toLocaleDateString("en-CA", { timeZone: tz }); // en-CA gives YYYY-MM-DD
+  const [y, mo, d] = nowInTz.split("-").map(Number);
+
+  // Start of current month (YYYY-MM-01) in shop tz
+  const monthStart = `${y}-${String(mo).padStart(2, "0")}-01`;
+
+  // Start of current week (Sunday) in shop tz — treat the date as UTC to get correct day-of-week
+  const nowDateUTC = new Date(Date.UTC(y, mo - 1, d));
+  const dowSunday = nowDateUTC.getUTCDay(); // 0=Sun
+  const weekStartUTC = new Date(Date.UTC(y, mo - 1, d - dowSunday));
+  const weekStart = weekStartUTC.toISOString().slice(0, 10); // YYYY-MM-DD
+
+  // Get an appointment's date in the shop timezone for comparison
+  function apptDateInTz(isoStr: string) {
+    return new Date(isoStr).toLocaleDateString("en-CA", { timeZone: tz });
+  }
 
   const completed = bookings.filter((b) => b.status === "completed");
 
@@ -687,8 +703,8 @@ function EarningsTab({ bookings }: { bookings: Booking[] }) {
   }
 
   const totalEarned = rev(completed);
-  const weekEarned = rev(completed.filter((b) => new Date(b.starts_at) >= startOfWeek));
-  const monthEarned = rev(completed.filter((b) => new Date(b.starts_at) >= startOfMonth));
+  const weekEarned = rev(completed.filter((b) => apptDateInTz(b.starts_at) >= weekStart));
+  const monthEarned = rev(completed.filter((b) => apptDateInTz(b.starts_at) >= monthStart));
 
   // By service
   const bySvc = new Map<string, { name: string; count: number; revenue: number }>();
@@ -703,11 +719,12 @@ function EarningsTab({ bookings }: { bookings: Booking[] }) {
 
   // Last 30 days by day for a simple trend
   const last30: Record<string, number> = {};
-  const cutoff = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const cutoffUTC = new Date(Date.UTC(y, mo - 1, d - 30));
+  const cutoffStr = cutoffUTC.toISOString().slice(0, 10); // YYYY-MM-DD
   for (const b of completed) {
-    const d = b.appointment_date;
-    if (new Date(`${d}T12:00:00`) >= cutoff) {
-      last30[d] = (last30[d] ?? 0) + Number(b.price_snapshot ?? b.services?.price ?? 0);
+    const apptDate = apptDateInTz(b.starts_at);
+    if (apptDate >= cutoffStr) {
+      last30[apptDate] = (last30[apptDate] ?? 0) + Number(b.price_snapshot ?? b.services?.price ?? 0);
     }
   }
 

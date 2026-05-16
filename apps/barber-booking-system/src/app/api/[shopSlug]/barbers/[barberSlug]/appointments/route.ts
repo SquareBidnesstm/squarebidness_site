@@ -15,7 +15,7 @@ export async function GET(
 
   const { data: shop } = await supabaseServer
     .from("shops")
-    .select("id")
+    .select("id, timezone")
     .eq("slug", shopSlug)
     .eq("active", true)
     .single();
@@ -82,6 +82,7 @@ export async function GET(
     ok: true,
     barberName: barber.display_name || barber.name,
     barberPhotoUrl: barber.photo_url ?? null,
+    timezone: shop.timezone ?? "America/Chicago",
     bookings: bookings ?? [],
     perms,
   });

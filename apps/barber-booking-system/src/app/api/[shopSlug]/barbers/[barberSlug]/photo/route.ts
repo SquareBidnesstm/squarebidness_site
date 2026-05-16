@@ -48,7 +48,9 @@ export async function POST(
   }
 
   const { data: urlData } = supabaseServer.storage.from("shop-assets").getPublicUrl(path);
-  const publicUrl = urlData.publicUrl;
+  // Append a cache-busting timestamp so browsers immediately display the new
+  // photo rather than serving a stale version from their cache.
+  const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
 
   await supabaseServer.from("barbers").update({ photo_url: publicUrl }).eq("id", barber.id);
 

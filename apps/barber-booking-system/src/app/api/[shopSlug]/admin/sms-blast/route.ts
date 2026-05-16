@@ -40,14 +40,16 @@ export async function POST(
     return NextResponse.json({ ok: false, error: "SMS not configured" }, { status: 500 });
   }
 
-  // Build audience query
+  // Build audience query — hard cap at 5 000 rows to prevent unbounded fetches
+  const RECIPIENT_CAP = 5_000;
   const now = new Date();
   let phoneQuery = supabaseServer
     .from("bookings")
     .select("customer_phone")
     .eq("shop_id", shop.id)
     .not("customer_phone", "is", null)
-    .neq("status", "cancelled");
+    .neq("status", "cancelled")
+    .limit(RECIPIENT_CAP + 1); // +1 so we can detect when the cap was hit
 
   if (audience === "upcoming") {
     phoneQuery = phoneQuery
@@ -60,9 +62,11 @@ export async function POST(
     const cutoff = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
     phoneQuery = phoneQuery.gte("starts_at", cutoff.toISOString()).lte("starts_at", now.toISOString());
   }
-  // default "all" = no extra filter
+  // default "all" = no extra filter beyond the cap
 
-  const { data: phoneRows } = await phoneQuery;
+  const { data: rawPhoneRows } = await phoneQuery;
+  const cappedAt = rawPhoneRows && rawPhoneRows.length > RECIPIENT_CAP;
+  const phoneRows = cappedAt ? rawPhoneRows!.slice(0, RECIPIENT_CAP) : rawPhoneRows;
 
   // Deduplicate phones
   const uniquePhones = new Set<string>();
@@ -123,5 +127,11 @@ export async function POST(
     for (const ok of results) { if (ok) sent++; else failed++; }
   }
 
-  return NextResponse.json({ ok: true, sent, failed, total: uniquePhones.size });
+  return NextResponse.json({
+    ok: true,
+    sent,
+    failed,
+    total: uniquePhones.size,
+    ...(cappedAt ? { warning: `Recipient list was capped at ${RECIPIENT_CAP}. Use a narrower audience filter to reach remaining customers.` } : {}),
+  });
 }

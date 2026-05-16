@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../lib/supabase/server";
 
+// Protect onboard with a shared platform secret so only the internal
+// onboarding wizard (or Marcus) can create new shops.
+function verifyOnboardSecret(req: NextRequest): boolean {
+  const secret = process.env.ONBOARD_SECRET;
+  if (!secret) return false; // If env var not set, deny all
+  const auth = req.headers.get("authorization") ?? "";
+  return auth === `Bearer ${secret}`;
+}
+
 type OnboardPayload = {
   shopType?: string;
   shopName?: string;
@@ -74,6 +83,11 @@ function nameToSlug(name: string): string {
 }
 
 export async function POST(req: NextRequest) {
+  // Gate: requires Authorization: Bearer <ONBOARD_SECRET>
+  if (!verifyOnboardSecret(req)) {
+    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const body = (await req.json()) as OnboardPayload;
 

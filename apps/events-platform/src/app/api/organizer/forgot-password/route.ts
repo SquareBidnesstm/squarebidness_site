@@ -2,10 +2,30 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { supabaseServer } from "../../../../lib/supabase/server";
 import { PLATFORM_URL } from "../../../../lib/constants";
+import { isSafeOrigin, checkRateLimit, recordAttempt } from "../../../../lib/utils";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: NextRequest) {
+  // CSRF origin check
+  if (!isSafeOrigin(req)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  // Rate limit: 5 per 15 min per IP
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    req.headers.get("x-real-ip") ??
+    "unknown";
+  recordAttempt(`forgot_pw:${ip}`);
+  const { limited, retryAfterSeconds } = checkRateLimit(`forgot_pw:${ip}`, 5);
+  if (limited) {
+    return NextResponse.json(
+      { error: `Too many requests. Try again in ${Math.ceil(retryAfterSeconds / 60)} min.` },
+      { status: 429 }
+    );
+  }
+
   const { email } = await req.json();
   if (!email) return NextResponse.json({ error: "Email required" }, { status: 400 });
 
@@ -33,6 +53,7 @@ export async function POST(req: NextRequest) {
     from: "SB Events <tickets@squarebidness.com>",
     to: organizer.email,
     subject: "Reset your SB Events password",
+    headers: { "List-Unsubscribe": "<mailto:unsubscribe@squarebidness.com>" },
     html: `
       <div style="background:#000;color:#fff;font-family:sans-serif;padding:40px 24px;max-width:480px;margin:0 auto;">
         <p style="font-size:1.5rem;font-weight:900;margin-bottom:8px;">Reset your password</p>

@@ -49,6 +49,30 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Validate event date ordering: ends_at must be after starts_at
+  const startsAtDate = new Date(starts_at);
+  const endsAtDate = new Date(ends_at);
+  if (isNaN(startsAtDate.getTime()) || isNaN(endsAtDate.getTime())) {
+    return NextResponse.redirect(
+      new URL(`/organizer/dashboard/events/${eventId}/edit?error=invalid_dates`, req.url),
+      303
+    );
+  }
+  if (endsAtDate <= startsAtDate) {
+    return NextResponse.redirect(
+      new URL(`/organizer/dashboard/events/${eventId}/edit?error=ends_before_starts`, req.url),
+      303
+    );
+  }
+
+  // Validate cover_image_url — must be https:// to prevent javascript: URIs
+  if (cover_image_url && !cover_image_url.startsWith("https://")) {
+    return NextResponse.redirect(
+      new URL(`/organizer/dashboard/events/${eventId}/edit?error=invalid_image_url`, req.url),
+      303
+    );
+  }
+
   const validCategory = EVENT_CATEGORIES.find((c) => c.value === category);
 
   await supabaseServer

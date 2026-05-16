@@ -72,6 +72,10 @@ export async function sendConfirmationEmail({
 </body>
 </html>`;
 
+  // List-Unsubscribe headers let email clients (Gmail, Apple Mail, etc.) surface
+  // a one-click unsubscribe button, improving deliverability and CTIA compliance.
+  const unsubscribeEmail = `mailto:unsubscribe@squarebidness.com?subject=Unsubscribe&body=${encodeURIComponent(to)}`;
+
   await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
@@ -83,6 +87,10 @@ export async function sendConfirmationEmail({
       to: [to],
       subject: `Confirmed: ${serviceName} with ${barberName} — ${dateStr}`,
       html,
+      headers: {
+        "List-Unsubscribe": `<${unsubscribeEmail}>`,
+        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+      },
     }),
   });
 }

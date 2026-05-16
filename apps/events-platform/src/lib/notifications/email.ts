@@ -18,6 +18,8 @@ function emailShell(body: string): string {
     <p style="color:#2a2a2a;font-size:11px;text-align:center;margin-top:40px;border-top:1px solid #111;padding-top:20px;">
       © ${new Date().getFullYear()} Square Bidness Events &nbsp;·&nbsp;
       <a href="https://events.squarebidness.com" style="color:#444;">events.squarebidness.com</a>
+      &nbsp;·&nbsp;
+      <a href="mailto:unsubscribe@squarebidness.com" style="color:#444;">Unsubscribe</a>
     </p>
   </div>
 </body>
@@ -109,6 +111,11 @@ function buildBuyerEmailHtml(p: SendBuyerConfirmationParams): string {
   `);
 }
 
+const UNSUBSCRIBE_HEADERS = {
+  "List-Unsubscribe": "<mailto:unsubscribe@squarebidness.com>",
+  "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+};
+
 export async function sendBuyerConfirmation(params: SendBuyerConfirmationParams) {
   if (!process.env.RESEND_API_KEY) {
     console.warn("RESEND_API_KEY not set — skipping email");
@@ -119,6 +126,7 @@ export async function sendBuyerConfirmation(params: SendBuyerConfirmationParams)
     to: params.buyerEmail,
     subject: `🎟️ You're going to ${params.eventTitle} — ${params.orderCode}`,
     html: buildBuyerEmailHtml(params),
+    headers: UNSUBSCRIBE_HEADERS,
   });
 }
 
@@ -140,6 +148,7 @@ export async function sendOrganizerSaleNotification(params: SendOrganizerSalePar
     from: "SB Events <tickets@squarebidness.com>",
     to: params.organizerEmail,
     subject: `🎟️ ${params.ticketCount} ticket${params.ticketCount !== 1 ? "s" : ""} sold — ${params.eventTitle}`,
+    headers: UNSUBSCRIBE_HEADERS,
     html: emailShell(`
       <h1 style="font-size:22px;font-weight:900;margin:0 0 6px;">New Sale 🎉</h1>
       <p style="color:#a1a1aa;margin:0 0 24px;">Hey ${params.organizerName}, someone just bought tickets.</p>
@@ -172,6 +181,7 @@ export async function sendOrganizerWelcome(params: SendOrganizerWelcomeParams) {
     from: "SB Events <tickets@squarebidness.com>",
     to: params.organizerEmail,
     subject: `Welcome to SB Events, ${params.organizerName}! 🎟️`,
+    headers: UNSUBSCRIBE_HEADERS,
     html: emailShell(`
       <h1 style="font-size:26px;font-weight:900;letter-spacing:-0.04em;margin:0 0 8px;">Welcome, ${params.organizerName}! 🎉</h1>
       <p style="color:#a1a1aa;font-size:15px;margin:0 0 28px;line-height:1.6;">
@@ -227,6 +237,7 @@ export async function sendEventBlast(params: SendEventBlastParams): Promise<numb
         from: "SB Events <tickets@squarebidness.com>",
         to: r.email,
         subject: params.subject,
+        headers: UNSUBSCRIBE_HEADERS,
         html: emailShell(`
           <h1 style="font-size:22px;font-weight:900;letter-spacing:-0.04em;margin:0 0 6px;">${params.subject}</h1>
           <p style="color:#555;font-size:12px;margin:0 0 24px;">From ${params.organizerName} · re: ${params.eventTitle}</p>
@@ -280,6 +291,7 @@ export async function sendEventCancellationNotice(params: SendEventCancellationP
     from: "SB Events <tickets@squarebidness.com>",
     to: params.buyerEmail,
     subject: `Event cancelled: ${params.eventTitle}`,
+    headers: UNSUBSCRIBE_HEADERS,
     html: emailShell(`
       <div style="text-align:center;margin-bottom:28px;">
         <div style="display:inline-block;background:#1a0a0a;border:1px solid #7f1d1d;border-radius:999px;padding:8px 20px;margin-bottom:14px;">
@@ -308,12 +320,50 @@ export async function sendEventCancellationNotice(params: SendEventCancellationP
   });
 }
 
+// ─── Ticket Transfer Notice (to original holder) ──────────────────────────────
+
+interface SendTicketTransferNoticeParams {
+  originalEmail: string;
+  originalName: string;
+  newName: string;
+  newEmail: string;
+  ticketCode: string;
+  tierName: string;
+  eventTitle: string;
+}
+
+export async function sendTicketTransferNotice(params: SendTicketTransferNoticeParams) {
+  if (!process.env.RESEND_API_KEY) return;
+  await resend.emails.send({
+    from: "SB Events <tickets@squarebidness.com>",
+    to: params.originalEmail,
+    subject: `Your ticket to ${params.eventTitle} has been transferred`,
+    headers: UNSUBSCRIBE_HEADERS,
+    html: emailShell(`
+      <h1 style="font-size:22px;font-weight:900;letter-spacing:-0.04em;margin:0 0 8px;">Ticket Transferred</h1>
+      <p style="color:#a1a1aa;font-size:15px;margin:0 0 24px;line-height:1.6;">
+        Hi ${params.originalName}, your <strong style="color:#fff;">${params.tierName}</strong> ticket
+        to <strong style="color:#fff;">${params.eventTitle}</strong> has been successfully transferred.
+      </p>
+      <div style="background:#0a0a0a;border:1px solid #1d1d1f;border-radius:14px;padding:20px;margin-bottom:24px;">
+        <p style="color:#a1a1aa;font-size:13px;margin:0 0 6px;">Ticket: <strong style="color:#fff;font-family:monospace;">${params.ticketCode}</strong></p>
+        <p style="color:#a1a1aa;font-size:13px;margin:0;">Transferred to: <strong style="color:#fff;">${params.newName}</strong> (${params.newEmail})</p>
+      </div>
+      <p style="color:#555;font-size:13px;text-align:center;">
+        If you didn't request this transfer, please contact support at
+        <a href="https://events.squarebidness.com" style="color:#a1a1aa;">events.squarebidness.com</a>.
+      </p>
+    `),
+  });
+}
+
 export async function sendWaitlistNotification(params: SendWaitlistNotificationParams) {
   if (!process.env.RESEND_API_KEY) return;
   await resend.emails.send({
     from: "SB Events <tickets@squarebidness.com>",
     to: params.email,
     subject: `Tickets available — ${params.eventTitle}`,
+    headers: UNSUBSCRIBE_HEADERS,
     html: emailShell(`
       <h1 style="font-size:24px;font-weight:900;letter-spacing:-0.04em;margin:0 0 8px;">Good news, ${params.name}! 🎟️</h1>
       <p style="color:#a1a1aa;font-size:15px;margin:0 0 24px;line-height:1.6;">

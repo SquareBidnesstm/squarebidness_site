@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../../lib/supabase/server";
+import { checkRateLimit, recordAttempt } from "../../../../lib/utils";
 
 // Convert "HH:MM" to total minutes from midnight
 function timeToMinutes(t: string): number {
@@ -27,6 +28,15 @@ export async function GET(
   { params }: { params: Promise<{ shopSlug: string }> }
 ) {
   const { shopSlug } = await params;
+
+  // Rate limit: 60 checks per 15 min per IP (prevents slot scraping)
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
+  recordAttempt(`avail:${ip}`);
+  const { limited } = checkRateLimit(`avail:${ip}`, 60);
+  if (limited) {
+    return NextResponse.json({ ok: false, error: "Too many requests." }, { status: 429 });
+  }
+
   const { searchParams } = new URL(req.url);
 
   const barberSlug = searchParams.get("barber");

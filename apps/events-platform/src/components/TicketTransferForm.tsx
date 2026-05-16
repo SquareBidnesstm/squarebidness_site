@@ -5,9 +5,11 @@ import { useState } from "react";
 export default function TicketTransferForm({
   ticketCode,
   tierName,
+  buyerEmail,
 }: {
   ticketCode: string;
   tierName: string;
+  buyerEmail: string;
 }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
@@ -23,7 +25,7 @@ export default function TicketTransferForm({
       const res = await fetch("/api/tickets/transfer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ticketCode, newName: name, newEmail: email }),
+        body: JSON.stringify({ ticketCode, currentEmail: buyerEmail, newName: name, newEmail: email }),
       });
       const data = await res.json();
       if (!res.ok) setResult({ error: data.error ?? "Transfer failed" });

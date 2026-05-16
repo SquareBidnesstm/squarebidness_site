@@ -194,7 +194,7 @@ create table if not exists public.bookings (
     check (status in ('pending', 'confirmed', 'completed', 'cancelled', 'no_show')),
 
   payment_status text not null default 'unpaid'
-    check (payment_status in ('unpaid', 'deposit_paid', 'paid', 'refunded')),
+    check (payment_status in ('unpaid', 'deposit_paid', 'paid', 'refunded', 'refund_failed')),
 
   source text default 'shop_booking_page',
   internal_notes text,

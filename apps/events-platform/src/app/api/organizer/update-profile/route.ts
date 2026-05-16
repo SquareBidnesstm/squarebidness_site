@@ -25,6 +25,14 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Validate logo_url — must be https:// to prevent javascript: URIs
+  if (logo_url && !logo_url.startsWith("https://")) {
+    return NextResponse.redirect(
+      new URL("/organizer/dashboard/profile?error=invalid_logo_url", req.url),
+      303
+    );
+  }
+
   const { error } = await supabaseServer
     .from("organizers")
     .update({ name, bio, logo_url })

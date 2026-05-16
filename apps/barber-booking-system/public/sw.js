@@ -3,7 +3,7 @@ self.addEventListener("push", (event) => {
   let data = {};
   try { data = event.data.json(); } catch { data = { title: "New Booking", body: event.data.text() }; }
 
-  const title = data.title || "SquareBidness";
+  const title = data.title || "Booking";
   const options = {
     body: data.body || "",
     icon: "/booking-192.png",

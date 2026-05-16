@@ -1,25 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../../../lib/supabase/server";
-import { verifyOrganizerSession } from "../../../../../lib/auth";
+import { getVerifiedOrganizerSlug } from "../../../../../lib/auth";
 import { sendEventBlast } from "../../../../../lib/notifications/email";
 
 export async function POST(req: NextRequest) {
-  const { eventId, subject, message } = await req.json();
-  if (!eventId || !subject?.trim() || !message?.trim()) {
-    return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
-  }
-
-  // Auth
-  const cookieHeader = req.headers.get("cookie") ?? "";
-  const sessionCookie = cookieHeader
-    .split(";")
-    .map((c) => c.trim())
-    .find((c) => c.startsWith("org_session_"));
-  if (!sessionCookie) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const organizerSlug = sessionCookie.split("=")[0].replace("org_session_", "");
-  const authed = await verifyOrganizerSession(req, organizerSlug);
-  if (!authed) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // Auth — check before parsing body so unauthenticated callers get a fast 401
+  // without consuming the request body (avoids unnecessary JSON parsing work).
+  const organizerSlug = await getVerifiedOrganizerSlug(req);
+  if (!organizerSlug) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { data: organizer } = await supabaseServer
     .from("organizers")
@@ -27,6 +15,11 @@ export async function POST(req: NextRequest) {
     .eq("slug", organizerSlug)
     .single();
   if (!organizer) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { eventId, subject, message } = await req.json();
+  if (!eventId || !subject?.trim() || !message?.trim()) {
+    return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+  }
 
   // Verify ownership
   const { data: event } = await supabaseServer
