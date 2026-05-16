@@ -11,6 +11,7 @@ import {
   organizerSessionCookieName,
 } from "../../../../lib/auth";
 import { PLATFORM_URL } from "../../../../lib/constants";
+import { checkRateLimit, recordAttempt, isSafeOrigin } from "../../../../lib/utils";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -52,6 +53,26 @@ async function hashPassword(password: string): Promise<string> {
 
 export async function POST(req: Request) {
   try {
+    // CSRF origin check
+    if (!isSafeOrigin(req)) {
+      return NextResponse.redirect(
+        new URL("/organizer/signup?error=server_error", req.url)
+      );
+    }
+
+    // Rate limit: 5 signups per 15 min per IP (prevent account spam)
+    const ip =
+      (req as any).headers?.get?.("x-forwarded-for")?.split(",")[0]?.trim() ??
+      (req as any).headers?.get?.("x-real-ip") ??
+      "unknown";
+    recordAttempt(`org_signup:${ip}`);
+    const { limited, retryAfterSeconds } = checkRateLimit(`org_signup:${ip}`, 5);
+    if (limited) {
+      return NextResponse.redirect(
+        new URL(`/organizer/signup?error=too_many_attempts&retry=${Math.ceil(retryAfterSeconds / 60)}`, req.url)
+      );
+    }
+
     const formData = await req.formData();
     const name = (formData.get("name") as string | null)?.trim() ?? "";
     const email = (formData.get("email") as string | null)?.trim().toLowerCase() ?? "";
