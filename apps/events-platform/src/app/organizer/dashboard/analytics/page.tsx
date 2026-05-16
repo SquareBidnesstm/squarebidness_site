@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { supabaseServer } from "../../../../lib/supabase/server";
-import { computeOrganizerSessionToken } from "../../../../lib/auth";
+import { getVerifiedOrganizerSlugFromHeader } from "../../../../lib/auth";
 import NavLogo from "../../../../components/NavLogo";
 
 export const revalidate = 0;
@@ -22,13 +22,9 @@ function startOfWeek(d: Date): Date {
 export default async function AnalyticsPage() {
   // Auth
   const cookieStore = await cookies();
-  const allCookies = cookieStore.getAll();
-  const sessionCookie = allCookies.find((c) => c.name.startsWith("org_session_"));
-  if (!sessionCookie) redirect("/organizer/login");
-
-  const organizerSlug = sessionCookie.name.replace("org_session_", "");
-  const expectedToken = await computeOrganizerSessionToken(organizerSlug);
-  if (sessionCookie.value !== expectedToken) redirect("/organizer/login");
+  const cookieHeader = cookieStore.getAll().map((c) => `${c.name}=${c.value}`).join("; ");
+  const organizerSlug = await getVerifiedOrganizerSlugFromHeader(cookieHeader);
+  if (!organizerSlug) redirect("/organizer/login");
 
   const { data: organizer } = await supabaseServer
     .from("organizers")

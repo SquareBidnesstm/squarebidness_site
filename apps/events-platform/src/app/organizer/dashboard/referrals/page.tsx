@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { supabaseServer } from "../../../../lib/supabase/server";
-import { computeOrganizerSessionToken } from "../../../../lib/auth";
+import { getVerifiedOrganizerSlugFromHeader } from "../../../../lib/auth";
 import NavLogo from "../../../../components/NavLogo";
 import ReferralManager from "../../../../components/ReferralManager";
 
@@ -12,11 +12,9 @@ const BASE_URL = "https://events.squarebidness.com";
 
 export default async function ReferralsPage() {
   const cookieStore = await cookies();
-  const session = cookieStore.getAll().find(c => c.name.startsWith("org_session_"));
-  if (!session) redirect("/organizer/login");
-  const slug = session.name.replace("org_session_", "");
-  const expected = await computeOrganizerSessionToken(slug);
-  if (session.value !== expected) redirect("/organizer/login");
+  const cookieHeader = cookieStore.getAll().map((c) => `${c.name}=${c.value}`).join("; ");
+  const slug = await getVerifiedOrganizerSlugFromHeader(cookieHeader);
+  if (!slug) redirect("/organizer/login");
 
   const { data: organizer } = await supabaseServer
     .from("organizers").select("id, name").eq("slug", slug).single();

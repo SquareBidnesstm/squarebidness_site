@@ -86,6 +86,22 @@ export async function getVerifiedOrganizerSlug(req: Request): Promise<string | n
   return verified ? organizerSlug : null;
 }
 
+/**
+ * Server-component helper: verifies the organizer session from a raw cookie
+ * header string (built with cookieStore.getAll().map(...).join("; ")).
+ * Returns the verified organizerSlug or null.
+ *
+ * Usage in server components:
+ *   const cookieStore = await cookies();
+ *   const cookieHeader = cookieStore.getAll().map(c => `${c.name}=${c.value}`).join("; ");
+ *   const slug = await getVerifiedOrganizerSlugFromHeader(cookieHeader);
+ *   if (!slug) redirect("/organizer/login");
+ */
+export async function getVerifiedOrganizerSlugFromHeader(cookieHeader: string): Promise<string | null> {
+  const req = new Request("https://placeholder", { headers: { cookie: cookieHeader } });
+  return getVerifiedOrganizerSlug(req);
+}
+
 // ── Admin (Marcus) session ───────────────────────────────
 
 export async function computeAdminSessionToken(): Promise<string> {
