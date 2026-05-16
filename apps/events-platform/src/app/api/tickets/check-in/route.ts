@@ -1,7 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../../lib/supabase/server";
+import { checkRateLimit, recordAttempt } from "../../../../lib/utils";
 
 export async function POST(req: NextRequest) {
+  // Rate limit: 60 scans per 15 min per IP (allows active scanning while blocking brute force)
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    req.headers.get("x-real-ip") ??
+    "unknown";
+  recordAttempt(`checkin:${ip}`);
+  const { limited, retryAfterSeconds } = checkRateLimit(`checkin:${ip}`, 60);
+  if (limited) {
+    return NextResponse.json(
+      { ok: false, message: `Too many requests. Try again in ${Math.ceil(retryAfterSeconds / 60)} min.` },
+      { status: 429 }
+    );
+  }
+
   const { ticketCode } = await req.json();
 
   if (!ticketCode) {

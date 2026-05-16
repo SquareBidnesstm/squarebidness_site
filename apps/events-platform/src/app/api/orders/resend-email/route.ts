@@ -1,8 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../../lib/supabase/server";
 import { sendBuyerConfirmation } from "../../../../lib/notifications/email";
+import { checkRateLimit, recordAttempt } from "../../../../lib/utils";
 
 export async function POST(req: NextRequest) {
+  // Rate limit: 5 resends per 15 min per IP (prevents email spam)
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    req.headers.get("x-real-ip") ??
+    "unknown";
+  recordAttempt(`resend_email:${ip}`);
+  const { limited, retryAfterSeconds } = checkRateLimit(`resend_email:${ip}`, 5);
+  if (limited) {
+    return NextResponse.redirect(
+      new URL(`/orders?error=too_many_requests&retry=${Math.ceil(retryAfterSeconds / 60)}`, req.url),
+      303
+    );
+  }
+
   const formData = await req.formData();
   const orderId = formData.get("orderId") as string;
 
