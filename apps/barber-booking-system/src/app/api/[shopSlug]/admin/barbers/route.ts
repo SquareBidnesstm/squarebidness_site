@@ -161,19 +161,23 @@ export async function POST(
 
   const nextOrder = (existing?.sort_order ?? 0) + 1;
 
-  // Generate a unique slug
+  // Generate a unique slug (capped at 20 attempts to prevent infinite loop on network errors)
   let baseSlug = nameToSlug(name.trim()) || `barber-${nextOrder}`;
   let slug = baseSlug;
-  let attempt = 1;
-  while (true) {
+  let attempts = 0;
+  while (attempts++ < 20) {
     const { data: conflict } = await supabaseServer
       .from("barbers")
       .select("id")
       .eq("shop_id", shop.id)
       .eq("slug", slug)
-      .single();
+      .maybeSingle();
     if (!conflict) break;
-    slug = `${baseSlug}-${attempt++}`;
+    if (attempts >= 20) {
+      slug = `${baseSlug}-${Math.random().toString(36).slice(2, 7)}`;
+      break;
+    }
+    slug = `${baseSlug}-${attempts}`;
   }
 
   const { data: barber, error } = await supabaseServer

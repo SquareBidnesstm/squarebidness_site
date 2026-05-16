@@ -118,5 +118,9 @@ export async function POST(
     },
   });
 
+  if (!session.url) {
+    return NextResponse.json({ ok: false, error: "Could not create checkout session." }, { status: 500 });
+  }
+
   return NextResponse.json({ ok: true, url: session.url, depositAmount });
 }

@@ -60,8 +60,13 @@ export async function POST(
   if (depositPayment && refundDeposit && depositPayment.provider_payment_id) {
     try {
       await stripe.refunds.create({ payment_intent: depositPayment.provider_payment_id });
-      await supabaseServer.from("payments").update({ status: "refunded" }).eq("id", depositPayment.id);
-      await supabaseServer.from("bookings").update({ payment_status: "refunded" }).eq("id", booking.id);
+      // Refund succeeded — update DB records. Log failures but don't crash.
+      try {
+        await supabaseServer.from("payments").update({ status: "refunded" }).eq("id", depositPayment.id);
+        await supabaseServer.from("bookings").update({ payment_status: "refunded" }).eq("id", booking.id);
+      } catch (dbErr) {
+        console.error("Self-cancel DB update after refund failed:", dbErr);
+      }
       refunded = true;
     } catch (e) {
       console.error("Self-cancel refund failed:", e);

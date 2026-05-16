@@ -215,19 +215,24 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Increment referral uses counter with optimistic lock to prevent lost updates
+    // Increment referral uses counter with optimistic lock + retry to prevent lost updates
     if (order.ref_code) {
-      const { data: refRow } = await supabaseServer
-        .from("referral_codes")
-        .select("id, uses")
-        .eq("code", order.ref_code)
-        .single();
-      if (refRow) {
-        await supabaseServer
+      let retries = 0;
+      while (retries < 3) {
+        const { data: refRow } = await supabaseServer
+          .from("referral_codes")
+          .select("id, uses")
+          .eq("code", order.ref_code)
+          .single();
+        if (!refRow) break;
+        const { data: updated } = await supabaseServer
           .from("referral_codes")
           .update({ uses: (refRow.uses ?? 0) + 1 })
           .eq("id", refRow.id)
-          .eq("uses", refRow.uses); // optimistic lock — retry not needed at this volume
+          .eq("uses", refRow.uses) // optimistic lock: only update if uses hasn't changed
+          .select("id");
+        if (updated && updated.length > 0) break; // success
+        retries++;
       }
     }
 

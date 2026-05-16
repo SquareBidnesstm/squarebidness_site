@@ -76,7 +76,7 @@ export async function sendConfirmationEmail({
   // a one-click unsubscribe button, improving deliverability and CTIA compliance.
   const unsubscribeEmail = `mailto:unsubscribe@squarebidness.com?subject=Unsubscribe&body=${encodeURIComponent(to)}`;
 
-  await fetch("https://api.resend.com/emails", {
+  const resendResponse = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -93,4 +93,7 @@ export async function sendConfirmationEmail({
       },
     }),
   });
+  if (!resendResponse.ok) {
+    throw new Error(`Resend API error: ${resendResponse.status}`);
+  }
 }

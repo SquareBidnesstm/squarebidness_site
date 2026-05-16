@@ -147,8 +147,12 @@ export async function POST(req: NextRequest) {
             const share = i === lineItems.length - 1
               ? remaining
               : Math.round((itemTotal / (lineItems.reduce((s: number, l: any) => s + l.price_data.unit_amount * l.quantity, 0))) * discountAmountCents);
-            const newUnit = Math.max(0, li.price_data.unit_amount - Math.round(share / li.quantity));
-            remaining -= (li.price_data.unit_amount - newUnit) * li.quantity;
+            // Clamp per-unit discount so unit_amount never goes negative
+            const maxShareForItem = li.price_data.unit_amount * li.quantity;
+            const clampedShare = Math.min(share, maxShareForItem);
+            const newUnit = Math.max(0, li.price_data.unit_amount - Math.round(clampedShare / li.quantity));
+            const actualReduction = (li.price_data.unit_amount - newUnit) * li.quantity;
+            remaining -= actualReduction;
             li.price_data.unit_amount = newUnit;
           }
         }

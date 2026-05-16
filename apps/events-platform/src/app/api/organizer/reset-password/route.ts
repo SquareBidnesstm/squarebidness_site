@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
     .from("organizers")
     .select("id, reset_token, reset_token_expires_at")
     .eq("reset_token", token)
-    .single();
+    .maybeSingle();
 
   if (!organizer) {
     return NextResponse.json({ error: "Invalid or expired reset link" }, { status: 400 });

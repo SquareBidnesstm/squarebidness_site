@@ -95,31 +95,34 @@ export async function POST(req: NextRequest) {
   const freedCount = cancelledTickets?.length ?? 0;
 
   // Auto-notify waitlist: notify first N people (matching freed ticket count)
-  if (freedCount > 0) {
-    const eventId = order.event_id;
-    const { data: event } = await supabaseServer
-      .from("events")
-      .select("title, slug")
-      .eq("id", eventId)
-      .single();
+  // Early return if no capacity was freed — no point querying the waitlist
+  if (freedCount <= 0) {
+    return NextResponse.json({ ok: true });
+  }
 
-    if (event) {
-      const { data: waitlist } = await supabaseServer
-        .from("waitlist")
-        .select("id, name, email")
-        .eq("event_id", eventId)
-        .is("notified_at", null)
-        .order("created_at", { ascending: true })
-        .limit(freedCount);
+  const eventId = order.event_id;
+  const { data: eventDetails } = await supabaseServer
+    .from("events")
+    .select("title, slug")
+    .eq("id", eventId)
+    .single();
 
-      for (const entry of waitlist ?? []) {
-        sendWaitlistNotification({
-          email: entry.email,
-          name: entry.name,
-          eventTitle: event.title,
-          eventSlug: event.slug,
-        }).catch(() => {});
-      }
+  if (eventDetails) {
+    const { data: waitlist } = await supabaseServer
+      .from("waitlist")
+      .select("id, name, email")
+      .eq("event_id", eventId)
+      .is("notified_at", null)
+      .order("created_at", { ascending: true })
+      .limit(freedCount);
+
+    for (const entry of waitlist ?? []) {
+      sendWaitlistNotification({
+        email: entry.email,
+        name: entry.name,
+        eventTitle: eventDetails.title,
+        eventSlug: eventDetails.slug,
+      }).catch(() => {});
     }
   }
 

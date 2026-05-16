@@ -229,38 +229,60 @@ interface SendEventBlastParams {
 
 export async function sendEventBlast(params: SendEventBlastParams): Promise<number> {
   if (!process.env.RESEND_API_KEY) return 0;
+
+  // Hard cap to prevent accidental runaway blasts
+  const MAX_RECIPIENTS = 2000;
+  let recipients = params.recipients;
+  if (recipients.length > MAX_RECIPIENTS) {
+    console.warn(`sendEventBlast: recipient count ${recipients.length} exceeds cap of ${MAX_RECIPIENTS}; truncating.`);
+    recipients = recipients.slice(0, MAX_RECIPIENTS);
+  }
+
   const eventUrl = `https://events.squarebidness.com/events/${params.eventSlug}`;
   let sent = 0;
-  for (const r of params.recipients) {
-    try {
-      await resend.emails.send({
-        from: "SB Events <tickets@squarebidness.com>",
-        to: r.email,
-        subject: params.subject,
-        headers: UNSUBSCRIBE_HEADERS,
-        html: emailShell(`
-          <h1 style="font-size:22px;font-weight:900;letter-spacing:-0.04em;margin:0 0 6px;">${params.subject}</h1>
-          <p style="color:#555;font-size:12px;margin:0 0 24px;">From ${params.organizerName} · re: ${params.eventTitle}</p>
-          <div style="background:#0a0a0a;border:1px solid #1d1d1f;border-radius:14px;padding:20px;margin-bottom:24px;white-space:pre-line;font-size:15px;line-height:1.65;color:#d4d4d8;">
-            ${params.message.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>")}
-          </div>
-          <div style="text-align:center;">
-            <a href="${eventUrl}"
-               style="display:inline-block;background:#ef4444;color:#fff;font-weight:900;font-size:14px;padding:12px 28px;border-radius:999px;text-decoration:none;">
-              View Event →
-            </a>
-          </div>
-          <p style="color:#333;font-size:11px;text-align:center;margin-top:20px;">
-            You're receiving this because you bought a ticket to ${params.eventTitle}.
-          </p>
-        `),
-      });
-      sent++;
-    } catch {
-      // non-fatal — log and continue
-      console.error(`Blast failed for ${r.email}`);
-    }
+
+  // Build the HTML body once (same for every recipient in this blast)
+  const buildHtml = (r: { email: string; name: string }) => emailShell(`
+    <h1 style="font-size:22px;font-weight:900;letter-spacing:-0.04em;margin:0 0 6px;">${params.subject}</h1>
+    <p style="color:#555;font-size:12px;margin:0 0 24px;">From ${params.organizerName} · re: ${params.eventTitle}</p>
+    <div style="background:#0a0a0a;border:1px solid #1d1d1f;border-radius:14px;padding:20px;margin-bottom:24px;white-space:pre-line;font-size:15px;line-height:1.65;color:#d4d4d8;">
+      ${params.message.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>")}
+    </div>
+    <div style="text-align:center;">
+      <a href="${eventUrl}"
+         style="display:inline-block;background:#ef4444;color:#fff;font-weight:900;font-size:14px;padding:12px 28px;border-radius:999px;text-decoration:none;">
+        View Event →
+      </a>
+    </div>
+    <p style="color:#333;font-size:11px;text-align:center;margin-top:20px;">
+      You're receiving this because you bought a ticket to ${params.eventTitle}.
+    </p>
+  `);
+
+  // Process in batches of 50 to avoid sequential timeout on large lists
+  const BATCH_SIZE = 50;
+  for (let i = 0; i < recipients.length; i += BATCH_SIZE) {
+    const batch = recipients.slice(i, i + BATCH_SIZE);
+    const results = await Promise.all(
+      batch.map(async (r) => {
+        try {
+          await resend.emails.send({
+            from: "SB Events <tickets@squarebidness.com>",
+            to: r.email,
+            subject: params.subject,
+            headers: UNSUBSCRIBE_HEADERS,
+            html: buildHtml(r),
+          });
+          return 1;
+        } catch {
+          console.error(`Blast failed for ${r.email}`);
+          return 0;
+        }
+      })
+    );
+    sent += results.reduce((a, b) => a + b, 0);
   }
+
   return sent;
 }
 

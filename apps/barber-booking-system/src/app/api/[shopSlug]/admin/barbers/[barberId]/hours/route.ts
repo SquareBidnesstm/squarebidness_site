@@ -87,6 +87,14 @@ export async function DELETE(
   const authed = await verifyAdminSession(req, shopSlug);
   if (!authed) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
 
+  const { data: shop } = await supabaseServer.from("shops").select("id").eq("slug", shopSlug).single();
+  if (!shop) return NextResponse.json({ ok: false, error: "Shop not found" }, { status: 404 });
+
+  // Verify the barber belongs to this shop
+  const { data: barber } = await supabaseServer
+    .from("barbers").select("id").eq("id", barberId).eq("shop_id", shop.id).single();
+  if (!barber) return NextResponse.json({ ok: false, error: "Barber not found" }, { status: 404 });
+
   // Clear custom hours — barber reverts to shop hours
   await supabaseServer.from("barber_hours").delete().eq("barber_id", barberId);
 

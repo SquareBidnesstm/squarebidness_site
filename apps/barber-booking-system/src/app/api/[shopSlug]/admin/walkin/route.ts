@@ -50,6 +50,22 @@ export async function POST(
   const startsAt = new Date();
   const endsAt = new Date(startsAt.getTime() + service.duration_minutes * 60 * 1000);
 
+  // Overlap check — same guard used in bookings/create/route.ts
+  const { data: overlaps } = await supabaseServer
+    .from("bookings")
+    .select("id")
+    .eq("barber_id", barber.id)
+    .in("status", ["pending", "confirmed"])
+    .lt("starts_at", endsAt.toISOString())
+    .gt("ends_at", startsAt.toISOString());
+
+  if (overlaps && overlaps.length > 0) {
+    return NextResponse.json(
+      { ok: false, error: "That barber has an existing booking at this time." },
+      { status: 409 }
+    );
+  }
+
   const { data: rpcCode } = await supabaseServer.rpc("generate_booking_code", { shop_slug: shop.slug });
   const bookingCode = rpcCode ?? `${shopSlug.slice(0, 2).toUpperCase()}-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 

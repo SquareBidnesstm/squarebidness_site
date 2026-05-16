@@ -59,7 +59,9 @@ export async function GET(
     `)
     .eq("shop_id", shop.id)
     .eq("barber_id", barber.id)
-    .order("starts_at", { ascending: false });
+    .gte("appointment_date", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10))
+    .order("starts_at", { ascending: false })
+    .limit(500);
 
   if (error) {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });

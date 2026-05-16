@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     .from("organizers")
     .select("id, name, email")
     .eq("email", email.trim().toLowerCase())
-    .single();
+    .maybeSingle();
 
   // Always return ok to prevent email enumeration
   if (!organizer) return NextResponse.json({ ok: true });

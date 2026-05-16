@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../lib/supabase/server";
+import { hashPin } from "../../../lib/utils";
 
 // Protect onboard with a shared platform secret so only the internal
 // onboarding wizard (or Marcus) can create new shops.
@@ -200,11 +201,13 @@ export async function POST(req: NextRequest) {
       DEFAULT_HOURS.map((h) => ({ shop_id: shop.id, ...h }))
     );
 
+    const { hash: pin_hash, salt: pin_salt } = await hashPin(pin);
+
     await supabaseServer.from("shop_settings").insert([
       {
         shop_id: shop.id,
         key: "admin_auth",
-        value_json: { pin },
+        value_json: { pin_hash, pin_salt },
       },
       {
         shop_id: shop.id,

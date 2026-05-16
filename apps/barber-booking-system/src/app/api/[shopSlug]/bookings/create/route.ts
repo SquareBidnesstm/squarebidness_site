@@ -277,10 +277,13 @@ export async function POST(
       .single();
 
     if (bookingError || !booking) {
-      const isOverlap = (bookingError as any)?.code === "23P01";
+      const errCode = (bookingError as any)?.code;
+      if (errCode === "23P01" || errCode === "23505") {
+        return NextResponse.json({ ok: false, error: "That time slot was just taken. Please pick another time." }, { status: 409 });
+      }
       return NextResponse.json(
-        { ok: false, error: isOverlap ? "That time slot was just taken. Please pick another time." : (bookingError?.message || "Could not create booking") },
-        { status: isOverlap ? 409 : 500 }
+        { ok: false, error: bookingError?.message || "Could not create booking" },
+        { status: 500 }
       );
     }
 

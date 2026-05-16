@@ -48,10 +48,12 @@ export async function GET(req: NextRequest) {
     .from("subscriptions")
     .select("shop_id, plan, status, current_period_end");
 
-  // Get booking counts per shop
+  // Get booking counts per shop (last 90 days, capped at 5000 rows)
   const { data: bookingCounts } = await supabaseServer
     .from("bookings")
-    .select("shop_id, status, price_snapshot");
+    .select("shop_id, status, price_snapshot")
+    .gte("created_at", new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString())
+    .limit(5000);
 
   type SubRow = { shop_id: string; plan: string; status: string; current_period_end: string | null };
   const subMap = new Map((subscriptions ?? []).map((s) => [s.shop_id, s as SubRow]));

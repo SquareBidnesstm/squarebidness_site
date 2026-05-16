@@ -10,7 +10,7 @@ export async function isSmsOptedOut(phone: string): Promise<boolean> {
     .from("sms_opt_outs")
     .select("opted_out")
     .eq("phone", phone)
-    .single();
+    .maybeSingle();
   return data?.opted_out === true;
 }
 

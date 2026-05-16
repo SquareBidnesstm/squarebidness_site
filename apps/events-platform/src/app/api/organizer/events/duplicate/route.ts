@@ -35,14 +35,20 @@ export async function POST(req: NextRequest) {
   const baseSlug = slugify(`${event.title}-copy`);
   let slug = baseSlug;
   let suffix = 2;
-  while (true) {
-    const { data: existing } = await supabaseServer
+  let attempts = 0;
+  while (attempts++ < 20) {
+    const { data: existing, error } = await supabaseServer
       .from("events")
       .select("id")
       .eq("slug", slug)
       .maybeSingle();
+    if (error && !existing) break; // network/DB error — stop looping, use current slug
     if (!existing) break;
     slug = `${baseSlug}-${suffix++}`;
+  }
+  // After 20 attempts without finding a free slug, append a random 4-char suffix
+  if (attempts > 20) {
+    slug = `${slug}-${Math.random().toString(36).slice(2, 6)}`;
   }
 
   const { data: newEvent, error } = await supabaseServer

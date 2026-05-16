@@ -137,6 +137,13 @@ export async function POST(req: Request) {
 
     if (error || !organizer) {
       console.error("Signup DB error:", error);
+      // Handle race condition where another request inserted the same email between our
+      // SELECT and INSERT (unique violation on the email column).
+      if (error?.code === "23505") {
+        return NextResponse.redirect(
+          new URL("/organizer/signup?error=email_exists", req.url)
+        );
+      }
       return NextResponse.redirect(
         new URL("/organizer/signup?error=db_error", req.url)
       );
