@@ -124,15 +124,27 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // Recalculate platform fee based on final (possibly discounted) unit prices.
+  // This ensures the fee tracks the actual amount charged, not the pre-discount price.
+  if (discountAmountCents > 0 && totalPlatformFeeCents > 0) {
+    totalPlatformFeeCents = lineItems.reduce((acc, li: any) => {
+      if (li.price_data.unit_amount > 0) {
+        return acc + (PLATFORM_FEE_BASE_CENTS + Math.round(li.price_data.unit_amount * PLATFORM_FEE_PCT)) * (li.quantity ?? 1);
+      }
+      return acc;
+    }, 0);
+  }
+
   // Add platform fee line item if applicable
+  const totalQty = tierSelections.reduce((s, t) => s + t.qty, 0);
   if (totalPlatformFeeCents > 0) {
     lineItems.push({
       price_data: {
         currency: "usd",
         product_data: { name: "Square Bidness Platform Fee" },
-        unit_amount: totalPlatformFeeCents / tierSelections.reduce((s, t) => s + t.qty, 0),
+        unit_amount: Math.round(totalPlatformFeeCents / totalQty),
       },
-      quantity: tierSelections.reduce((s, t) => s + t.qty, 0),
+      quantity: totalQty,
     });
   }
 

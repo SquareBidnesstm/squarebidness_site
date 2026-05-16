@@ -5,9 +5,29 @@
 
 import { NextResponse } from "next/server";
 import { computeAdminSessionToken } from "../../../../lib/auth";
+import { checkRateLimit, recordAttempt, clearAttempts, isSafeOrigin } from "../../../../lib/utils";
 
 export async function POST(req: Request) {
   try {
+    // CSRF origin check
+    if (!isSafeOrigin(req)) {
+      return NextResponse.redirect(new URL("/admin/login?error=invalid", req.url));
+    }
+
+    // Rate limit: 10 attempts per 15 min per IP
+    const ip =
+      (req as any).headers?.get?.("x-forwarded-for")?.split(",")[0]?.trim() ??
+      (req as any).headers?.get?.("x-real-ip") ??
+      "unknown";
+    const rlKey = `admin_login:${ip}`;
+    recordAttempt(rlKey);
+    const { limited, retryAfterSeconds } = checkRateLimit(rlKey, 10);
+    if (limited) {
+      return NextResponse.redirect(
+        new URL(`/admin/login?error=too_many_attempts&retry=${Math.ceil(retryAfterSeconds / 60)}`, req.url)
+      );
+    }
+
     const formData = await req.formData();
     const password = (formData.get("password") as string) ?? "";
 
@@ -26,18 +46,24 @@ export async function POST(req: Request) {
     const a = encoder.encode(password);
     const b = encoder.encode(adminPassword);
 
-    if (a.length !== b.length) {
-      return NextResponse.redirect(new URL("/admin/login?error=invalid", req.url));
-    }
+    // Pad shorter buffer so length leak doesn't reveal password length
+    const maxLen = Math.max(a.length, b.length);
+    const aPadded = new Uint8Array(maxLen);
+    const bPadded = new Uint8Array(maxLen);
+    aPadded.set(a);
+    bPadded.set(b);
 
-    let diff = 0;
-    for (let i = 0; i < a.length; i++) {
-      diff |= a[i] ^ b[i];
+    let diff = a.length !== b.length ? 1 : 0;
+    for (let i = 0; i < maxLen; i++) {
+      diff |= aPadded[i] ^ bPadded[i];
     }
 
     if (diff !== 0) {
       return NextResponse.redirect(new URL("/admin/login?error=invalid", req.url));
     }
+
+    // Successful login — clear rate limit counter
+    clearAttempts(rlKey);
 
     const token = await computeAdminSessionToken();
     const res = NextResponse.redirect(new URL("/admin", req.url));
@@ -46,7 +72,7 @@ export async function POST(req: Request) {
       secure: true,
       sameSite: "lax",
       path: "/",
-      maxAge: 60 * 60 * 12, // 12 hours
+      maxAge: 60 * 60 * 24 * 7, // 7 days
     });
 
     return res;

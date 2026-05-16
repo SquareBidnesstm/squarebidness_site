@@ -9,6 +9,7 @@ import {
   computeOrganizerSessionToken,
   organizerSessionCookieName,
 } from "../../../../lib/auth";
+import { checkRateLimit, recordAttempt, clearAttempts, isSafeOrigin } from "../../../../lib/utils";
 
 async function verifyPassword(
   password: string,
@@ -43,6 +44,27 @@ async function verifyPassword(
 
 export async function POST(req: Request) {
   try {
+    // CSRF origin check
+    if (!isSafeOrigin(req)) {
+      return NextResponse.redirect(
+        new URL("/organizer/login?error=invalid_credentials", req.url)
+      );
+    }
+
+    // Rate limit: 10 attempts per 15 min per IP
+    const ip =
+      (req as any).headers?.get?.("x-forwarded-for")?.split(",")[0]?.trim() ??
+      (req as any).headers?.get?.("x-real-ip") ??
+      "unknown";
+    const rlKey = `org_login:${ip}`;
+    recordAttempt(rlKey);
+    const { limited, retryAfterSeconds } = checkRateLimit(rlKey, 10);
+    if (limited) {
+      return NextResponse.redirect(
+        new URL(`/organizer/login?error=too_many_attempts&retry=${Math.ceil(retryAfterSeconds / 60)}`, req.url)
+      );
+    }
+
     const formData = await req.formData();
     const email = (formData.get("email") as string | null)?.trim().toLowerCase() ?? "";
     const password = (formData.get("password") as string | null) ?? "";
@@ -83,6 +105,9 @@ export async function POST(req: Request) {
         new URL("/organizer/login?error=invalid_credentials", req.url)
       );
     }
+
+    // Successful login — clear rate limit counter
+    clearAttempts(rlKey);
 
     // Set session cookie
     const token = await computeOrganizerSessionToken(organizer.slug);

@@ -101,15 +101,21 @@ export async function POST(req: NextRequest) {
       if (!updated) {
         // Race condition — another purchase took the last spots, auto-refund
         console.error(`Oversell prevented for tier ${tierId}, order ${order.id}`);
+        let refundOk = false;
         if (order.stripe_payment_intent_id) {
-          await stripe.refunds.create({
+          refundOk = await stripe.refunds.create({
               payment_intent: order.stripe_payment_intent_id,
               reverse_transfer: true,
               refund_application_fee: true, // oversell is platform's fault — full refund
             })
-            .catch((e) => console.error("Auto-refund failed:", e));
+            .then(() => true)
+            .catch((e) => { console.error("Auto-refund failed:", e); return false; });
         }
-        await supabaseServer.from("orders").update({ status: "cancelled" }).eq("id", order.id);
+        // Mark order cancelled; if refund failed, surface it for manual resolution
+        await supabaseServer
+          .from("orders")
+          .update({ status: refundOk ? "cancelled" : "refund_failed" })
+          .eq("id", order.id);
         return NextResponse.json({ ok: true });
       }
 

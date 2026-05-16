@@ -12,7 +12,7 @@ async function hashPassword(password: string): Promise<string> {
   );
   const saltHex = Array.from(salt).map((b) => b.toString(16).padStart(2, "0")).join("");
   const hashHex = Array.from(new Uint8Array(bits)).map((b) => b.toString(16).padStart(2, "0")).join("");
-  return `${saltHex}:${hashHex}`;
+  return `pbkdf2:${saltHex}:${hashHex}`;
 }
 
 export async function POST(req: NextRequest) {

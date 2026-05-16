@@ -3,12 +3,13 @@ import { supabaseServer } from "../../../../lib/supabase/server";
 import { generateQRDataURL } from "../../../../lib/qr";
 
 export async function POST(req: NextRequest) {
-  const { ticketCode, newName, newEmail } = await req.json();
+  const { ticketCode, currentEmail, newName, newEmail } = await req.json();
 
-  if (!ticketCode || !newName?.trim() || !newEmail?.trim()) {
+  if (!ticketCode || !currentEmail?.trim() || !newName?.trim() || !newEmail?.trim()) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
+  const cleanCurrentEmail = currentEmail.trim().toLowerCase();
   const cleanEmail = newEmail.trim().toLowerCase();
   const cleanName = newName.trim();
 
@@ -23,7 +24,13 @@ export async function POST(req: NextRequest) {
   if (ticket.status !== "valid") {
     return NextResponse.json({ error: ticket.status === "checked_in" ? "This ticket has already been used." : "This ticket cannot be transferred." }, { status: 400 });
   }
-  if (ticket.buyer_email === cleanEmail) {
+
+  // Verify the requester is the current ticket holder
+  if (ticket.buyer_email !== cleanCurrentEmail) {
+    return NextResponse.json({ error: "The email provided does not match the current ticket holder." }, { status: 403 });
+  }
+
+  if (cleanCurrentEmail === cleanEmail) {
     return NextResponse.json({ error: "Transfer email must be different from the current holder." }, { status: 400 });
   }
 
