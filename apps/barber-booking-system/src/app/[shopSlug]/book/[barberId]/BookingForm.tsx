@@ -23,6 +23,11 @@ type Props = {
   services: ServiceOption[];
 };
 
+// Shape of data saved in localStorage for returning customers
+type SavedCustomer = { name: string; phone: string; email: string; lastService: string };
+
+const LS_KEY = (shopSlug: string) => `sbb_customer_${shopSlug}`;
+
 export default function BookingForm({ shopSlug, shopName, shopLogoUrl, barberSlug, barberName, barberPhotoUrl, barberBio, services }: Props) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -49,7 +54,46 @@ export default function BookingForm({ shopSlug, shopName, shopLogoUrl, barberSlu
   // Unique key per form session — prevents duplicate bookings on network retry
   const [idempotencyKey] = useState(() => crypto.randomUUID());
 
+  // Returning-customer pre-fill
+  const [savedCustomer, setSavedCustomer] = useState<SavedCustomer | null>(null);
+  const [showReturnBanner, setShowReturnBanner] = useState(false);
+
   const selectedService = services.find((s) => s.id === service);
+
+  // On mount: check localStorage for returning customer info
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(LS_KEY(shopSlug));
+      if (raw) {
+        const parsed: SavedCustomer = JSON.parse(raw);
+        if (parsed.name && parsed.phone) {
+          setSavedCustomer(parsed);
+          setShowReturnBanner(true);
+        }
+      }
+    } catch { /* localStorage unavailable (private mode, etc.) */ }
+  }, [shopSlug]);
+
+  // Apply saved customer info when they accept the pre-fill prompt
+  function applySavedCustomer() {
+    if (!savedCustomer) return;
+    setName(savedCustomer.name);
+    setPhone(savedCustomer.phone);
+    setEmail(savedCustomer.email ?? "");
+    if (savedCustomer.lastService && services.some((s) => s.id === savedCustomer.lastService)) {
+      setService(savedCustomer.lastService);
+    }
+    setShowReturnBanner(false);
+  }
+
+  // Persist customer info after a successful booking
+  function persistCustomerInfo() {
+    try {
+      const data: SavedCustomer = { name, phone, email, lastService: service };
+      localStorage.setItem(LS_KEY(shopSlug), JSON.stringify(data));
+      setSavedCustomer(data);
+    } catch { /* ignore write errors */ }
+  }
 
   // Fetch deposit settings once on load
   useEffect(() => {
@@ -151,6 +195,7 @@ export default function BookingForm({ shopSlug, shopName, shopLogoUrl, barberSlu
 
     if (res.ok) {
       const data = await res.json();
+      persistCustomerInfo();
       setConfirmed({
         code: data.booking?.booking_code || "—",
         startsAt: data.booking?.starts_at,
@@ -249,14 +294,18 @@ export default function BookingForm({ shopSlug, shopName, shopLogoUrl, barberSlu
 
           <button
             onClick={() => {
+              // Keep personal info from saved customer — only reset appointment details
               setConfirmed(null);
-              setName("");
-              setPhone("");
-              setEmail("");
               setNotes("");
               setDate(getTodayDateString());
-              setService("");
+              // Pre-select the same service they just booked
+              if (savedCustomer?.lastService && services.some((s) => s.id === savedCustomer.lastService)) {
+                setService(savedCustomer.lastService);
+              } else {
+                setService("");
+              }
               setTime("");
+              setError("");
             }}
             style={{
               padding: "12px 24px",
@@ -268,7 +317,7 @@ export default function BookingForm({ shopSlug, shopName, shopLogoUrl, barberSlu
               cursor: "pointer",
             }}
           >
-            Book Another
+            Book Again
           </button>
         </div>
       </main>
@@ -317,6 +366,53 @@ export default function BookingForm({ shopSlug, shopName, shopLogoUrl, barberSlu
           <p style={{ color: "#555", marginBottom: 36, fontSize: 14 }}>
             Fill out the form below to request your appointment.
           </p>
+        )}
+
+        {/* Welcome back banner — shown to returning customers */}
+        {showReturnBanner && savedCustomer && (
+          <div style={{
+            marginBottom: 24,
+            padding: "14px 16px",
+            background: "linear-gradient(135deg, #0d0900, #1a1200)",
+            border: "1px solid rgba(212,175,55,0.35)",
+            borderRadius: 12,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 12,
+          }}>
+            <div>
+              <div style={{ color: "#d4af37", fontWeight: 700, fontSize: 14, marginBottom: 2 }}>
+                Welcome back, {savedCustomer.name.split(" ")[0]}! ✂️
+              </div>
+              <div style={{ color: "#888", fontSize: 12 }}>
+                Use your saved info to book faster.
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+              <button
+                onClick={applySavedCustomer}
+                style={{
+                  padding: "8px 14px", borderRadius: 8,
+                  background: "#d4af37", color: "#000",
+                  fontWeight: 700, fontSize: 13, border: "none", cursor: "pointer",
+                }}
+              >
+                Use Saved
+              </button>
+              <button
+                onClick={() => setShowReturnBanner(false)}
+                style={{
+                  padding: "8px 10px", borderRadius: 8,
+                  background: "transparent", color: "#555",
+                  fontSize: 13, border: "1px solid #2a2a2a", cursor: "pointer",
+                }}
+                aria-label="Dismiss"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
         )}
 
         <div style={{ display: "grid", gap: 20 }}>
