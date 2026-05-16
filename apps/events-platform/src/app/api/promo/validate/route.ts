@@ -1,7 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../../lib/supabase/server";
+import { checkRateLimit, recordAttempt } from "../../../../lib/utils";
 
 export async function POST(req: NextRequest) {
+  // Rate limit: 20 promo lookups per 15 min per IP (prevents enumeration)
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    req.headers.get("x-real-ip") ??
+    "unknown";
+  recordAttempt(`promo:${ip}`);
+  const { limited, retryAfterSeconds } = checkRateLimit(`promo:${ip}`, 20);
+  if (limited) {
+    return NextResponse.json(
+      { error: `Too many requests. Try again in ${Math.ceil(retryAfterSeconds / 60)} min.` },
+      { status: 429 }
+    );
+  }
+
   const { code, eventId, subtotal } = await req.json();
   if (!code || !eventId) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
 

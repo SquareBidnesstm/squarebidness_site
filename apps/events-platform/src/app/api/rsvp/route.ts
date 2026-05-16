@@ -3,8 +3,23 @@ import { supabaseServer } from "../../../lib/supabase/server";
 import { generateQRDataURL } from "../../../lib/qr";
 import { sendBuyerConfirmation } from "../../../lib/notifications/email";
 import { sendBuyerSMS } from "../../../lib/notifications/sms";
+import { checkRateLimit, recordAttempt } from "../../../lib/utils";
 
 export async function POST(req: NextRequest) {
+  // Rate limit: 5 RSVPs per 15 min per IP
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    req.headers.get("x-real-ip") ??
+    "unknown";
+  recordAttempt(`rsvp:${ip}`);
+  const { limited, retryAfterSeconds } = checkRateLimit(`rsvp:${ip}`, 5);
+  if (limited) {
+    return NextResponse.json(
+      { error: `Too many requests. Try again in ${Math.ceil(retryAfterSeconds / 60)} min.` },
+      { status: 429 }
+    );
+  }
+
   const body = await req.json();
   const { eventId, tierId, name, email, phone, qty, promoId, refCode } = body;
 
@@ -32,10 +47,22 @@ export async function POST(req: NextRequest) {
   if (!tier) return NextResponse.json({ error: "Tier not found" }, { status: 404 });
   if (Number(tier.price) > 0) return NextResponse.json({ error: "This tier requires payment" }, { status: 400 });
 
-  // Check capacity
-  const spotsLeft = tier.quantity - tier.quantity_sold;
-  if (spotsLeft < qty) {
-    return NextResponse.json({ error: `Only ${spotsLeft} spot${spotsLeft !== 1 ? "s" : ""} left` }, { status: 400 });
+  // Atomically reserve capacity: only increment if sufficient spots remain.
+  // Uses an optimistic lte guard so concurrent RSVPs can't oversell.
+  const { data: reserved } = await supabaseServer
+    .from("ticket_tiers")
+    .update({ quantity_sold: tier.quantity_sold + qty })
+    .eq("id", tierId)
+    .lte("quantity_sold", tier.quantity - qty)
+    .select("id")
+    .single();
+
+  if (!reserved) {
+    const spotsLeft = tier.quantity - tier.quantity_sold;
+    return NextResponse.json(
+      { error: spotsLeft > 0 ? `Only ${spotsLeft} spot${spotsLeft !== 1 ? "s" : ""} left` : "Sorry, this tier is sold out." },
+      { status: 409 }
+    );
   }
 
   // Generate order code
@@ -83,12 +110,6 @@ export async function POST(req: NextRequest) {
 
     issuedTickets.push({ ticketCode, tierName: tier.name, qrDataUrl });
   }
-
-  // Update quantity_sold
-  await supabaseServer
-    .from("ticket_tiers")
-    .update({ quantity_sold: tier.quantity_sold + qty })
-    .eq("id", tierId);
 
   // Format event date/time
   const eventDate = event.starts_at

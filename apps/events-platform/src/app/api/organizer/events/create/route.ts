@@ -56,6 +56,25 @@ export async function POST(req: Request) {
       );
     }
 
+    // Validate dates
+    const startsMs = new Date(startsAt).getTime();
+    const endsMs = new Date(endsAt).getTime();
+    if (isNaN(startsMs) || isNaN(endsMs)) {
+      return NextResponse.redirect(
+        new URL("/organizer/dashboard/new-event?error=invalid_dates", req.url)
+      );
+    }
+    if (startsMs <= Date.now()) {
+      return NextResponse.redirect(
+        new URL("/organizer/dashboard/new-event?error=date_in_past", req.url)
+      );
+    }
+    if (endsMs <= startsMs) {
+      return NextResponse.redirect(
+        new URL("/organizer/dashboard/new-event?error=end_before_start", req.url)
+      );
+    }
+
     // Generate unique slug
     let eventSlug = slugify(title);
     const { data: slugCheck } = await supabaseServer
