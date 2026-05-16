@@ -1,11 +1,13 @@
 -- =========================================================
 -- BARBER BOOKING SYSTEM
--- PRODUCTION STARTER SCHEMA
+-- PRODUCTION STARTER SCHEMA — reflects migrations 001-006
 -- Shared-account multi-barber shop model
 -- =========================================================
 
 -- Optional extension
 create extension if not exists pgcrypto;
+-- Required for no-overlap exclusion constraint (003)
+create extension if not exists btree_gist;
 
 -- =========================================================
 -- SHOPS
@@ -22,6 +24,7 @@ create table if not exists public.shops (
   timezone text not null default 'America/Chicago',
   booking_base_path text default '/book',
   require_deposit boolean not null default false,
+  logo_url text,              -- 004
   active boolean not null default true,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -41,6 +44,7 @@ create table if not exists public.barbers (
   phone text,
   email text,
   bio text,
+  photo_url text,             -- 004
   active boolean not null default true,
   sort_order integer not null default 0,
   created_at timestamptz not null default now(),
@@ -201,10 +205,21 @@ create table if not exists public.bookings (
   cancelled_at timestamptz,
   completed_at timestamptz,
 
+  -- Cancellation tracking (001)
+  cancel_token uuid default gen_random_uuid() unique,
+  cancelled_by text check (cancelled_by in ('admin', 'client', 'system')),
+
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
 
-  constraint valid_booking_time check (starts_at < ends_at)
+  constraint valid_booking_time check (starts_at < ends_at),
+
+  -- No-overlap: prevents double-booking at DB level (003)
+  -- Requires btree_gist extension
+  exclude using gist (
+    barber_id with =,
+    tstzrange(starts_at, ends_at, '[)') with &&
+  ) where (status in ('pending', 'confirmed'))
 );
 
 -- =========================================================
@@ -217,9 +232,9 @@ create table if not exists public.payments (
   shop_id uuid not null references public.shops(id) on delete cascade,
   amount numeric(10,2) not null check (amount >= 0),
   payment_type text not null
-    check (payment_type in ('deposit', 'full', 'refund')),
+    check (payment_type in ('deposit', 'full', 'balance', 'refund')),
   provider text not null default 'manual'
-    check (provider in ('manual', 'stripe', 'square', 'cashapp', 'other')),
+    check (provider in ('manual', 'stripe', 'square', 'cashapp', 'cash', 'check', 'zelle', 'venmo', 'other')),
   provider_payment_id text,
   status text not null default 'pending'
     check (status in ('pending', 'succeeded', 'failed', 'refunded')),
@@ -239,6 +254,39 @@ create table if not exists public.shop_settings (
   updated_at timestamptz not null default now(),
   constraint unique_shop_setting_key unique (shop_id, key)
 );
+
+-- =========================================================
+-- PUSH SUBSCRIPTIONS (002)
+-- Web Push subscriptions for barber + admin notifications
+-- =========================================================
+create table if not exists public.push_subscriptions (
+  id         uuid primary key default gen_random_uuid(),
+  barber_id  uuid references public.barbers(id) on delete cascade,
+  shop_id    uuid references public.shops(id) on delete cascade,
+  endpoint   text not null,
+  p256dh     text not null,
+  auth       text not null,
+  created_at timestamptz not null default now(),
+  unique(barber_id, endpoint)
+);
+
+alter table public.push_subscriptions enable row level security;
+create policy if not exists "service_role_all" on public.push_subscriptions
+  for all to service_role using (true) with check (true);
+
+-- =========================================================
+-- SMS OPT-OUTS (005)
+-- Global STOP/UNSTOP tracking for Twilio compliance
+-- =========================================================
+create table if not exists public.sms_opt_outs (
+  phone      text primary key,  -- E.164 e.g. +15551234567
+  opted_out  boolean not null default true,
+  updated_at timestamptz not null default now()
+);
+
+comment on table public.sms_opt_outs is
+  'Tracks phones that have opted out (STOP) or back in (UNSTOP/START). '
+  'Opt-out is global, not per-shop, because Twilio applies STOP to the sender number.';
 
 -- =========================================================
 -- INDEXES
@@ -264,6 +312,9 @@ create index if not exists idx_bookings_status on public.bookings(status);
 create index if not exists idx_bookings_payment_status on public.bookings(payment_status);
 create index if not exists idx_payments_booking_id on public.payments(booking_id);
 create index if not exists idx_shop_settings_shop_id on public.shop_settings(shop_id);
+create index if not exists idx_push_subscriptions_barber_id on public.push_subscriptions(barber_id);
+create index if not exists idx_push_subscriptions_shop_id on public.push_subscriptions(shop_id);
+create index if not exists idx_bookings_cancel_token on public.bookings(cancel_token);
 
 -- =========================================================
 -- UPDATED_AT TRIGGER FUNCTION
