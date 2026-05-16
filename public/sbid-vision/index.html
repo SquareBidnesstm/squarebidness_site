@@ -1,0 +1,620 @@
+<!-- /public/sbid-vision/index.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <title>Square Bidness ID — Digital Identity Infrastructure</title>
+  <meta name="description" content="A visual layout for Square Bidness digital identity infrastructure: operators, events, booking, payments, media, QR, analytics, and commerce connected under one ecosystem." />
+  <link rel="canonical" href="https://www.squarebidness.com/sbid-vision/" />
+
+  <meta name="theme-color" content="#050505" />
+  <meta name="robots" content="noindex,follow" />
+
+  <style>
+    :root{
+      --bg:#050505;
+      --panel:#0c0c0f;
+      --panel2:#111116;
+      --text:#f5f5f5;
+      --muted:#9ca3af;
+      --line:rgba(255,255,255,.11);
+      --gold:#d6b44c;
+      --green:#21c45a;
+      --red:#ef4444;
+      --blue:#60a5fa;
+      --radius:24px;
+      --shadow:0 30px 90px rgba(0,0,0,.55);
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      background:
+        radial-gradient(900px 500px at 50% -10%, rgba(214,180,76,.16), transparent 65%),
+        radial-gradient(700px 420px at 10% 10%, rgba(96,165,250,.08), transparent 60%),
+        #050505;
+      color:var(--text);
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Arial,sans-serif;
+    }
+
+    a{color:inherit;text-decoration:none}
+
+    .wrap{
+      max-width:1180px;
+      margin:0 auto;
+      padding:34px 18px 70px;
+    }
+
+    .top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:46px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .logo{
+      width:42px;
+      height:42px;
+      border-radius:12px;
+      display:grid;
+      place-items:center;
+      background:#111;
+      border:1px solid var(--line);
+      box-shadow:0 10px 28px rgba(0,0,0,.45);
+      font-weight:900;
+      color:var(--gold);
+      letter-spacing:-.04em;
+    }
+
+    .brand strong{
+      display:block;
+      font-size:.95rem;
+      letter-spacing:.03em;
+    }
+
+    .brand span{
+      display:block;
+      color:var(--muted);
+      font-size:.78rem;
+      margin-top:2px;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.04);
+      color:var(--muted);
+      font-size:.78rem;
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+
+    .dot{
+      width:8px;
+      height:8px;
+      border-radius:99px;
+      background:var(--green);
+      box-shadow:0 0 0 5px rgba(33,196,90,.13);
+    }
+
+    .hero{
+      text-align:center;
+      max-width:960px;
+      margin:0 auto 46px;
+    }
+
+    .kicker{
+      color:var(--gold);
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      font-size:.78rem;
+      font-weight:900;
+      margin-bottom:12px;
+    }
+
+    h1{
+      margin:0;
+      font-size:clamp(2.6rem,7vw,6.4rem);
+      line-height:.93;
+      letter-spacing:-.075em;
+    }
+
+    .sub{
+      max-width:740px;
+      margin:20px auto 0;
+      color:var(--muted);
+      font-size:clamp(1rem,1.5vw,1.18rem);
+      line-height:1.65;
+    }
+
+    .map{
+      position:relative;
+      margin-top:42px;
+      padding:26px;
+      border-radius:var(--radius);
+      border:1px solid var(--line);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.018)),
+        var(--panel);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .map::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(90deg, transparent 0 23%, rgba(255,255,255,.04) 23.2% 23.4%, transparent 23.6%),
+        linear-gradient(90deg, transparent 0 49%, rgba(255,255,255,.04) 49.2% 49.4%, transparent 49.6%),
+        linear-gradient(90deg, transparent 0 75%, rgba(255,255,255,.04) 75.2% 75.4%, transparent 75.6%);
+      pointer-events:none;
+    }
+
+    .system-grid{
+      position:relative;
+      display:grid;
+      grid-template-columns:1fr 1.3fr 1fr;
+      gap:18px;
+      align-items:center;
+      z-index:1;
+    }
+
+    .stack{
+      display:grid;
+      gap:14px;
+    }
+
+    .node{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.035);
+      border-radius:18px;
+      padding:16px;
+    }
+
+    .node small{
+      display:block;
+      color:var(--gold);
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      font-weight:900;
+      font-size:.66rem;
+      margin-bottom:7px;
+    }
+
+    .node strong{
+      display:block;
+      font-size:1rem;
+      margin-bottom:5px;
+    }
+
+    .node p{
+      margin:0;
+      color:var(--muted);
+      font-size:.86rem;
+      line-height:1.45;
+    }
+
+    .core{
+      text-align:center;
+      border-radius:28px;
+      padding:28px 22px;
+      background:
+        radial-gradient(480px 220px at 50% 0%, rgba(214,180,76,.18), transparent 70%),
+        rgba(0,0,0,.5);
+      border:1px solid rgba(214,180,76,.32);
+      box-shadow:0 20px 70px rgba(214,180,76,.06);
+    }
+
+    .core-badge{
+      display:inline-flex;
+      padding:7px 12px;
+      border-radius:999px;
+      border:1px solid rgba(214,180,76,.45);
+      color:var(--gold);
+      font-size:.7rem;
+      font-weight:900;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      margin-bottom:14px;
+    }
+
+    .core h2{
+      margin:0;
+      font-size:clamp(2rem,4vw,4rem);
+      letter-spacing:-.06em;
+      line-height:.94;
+    }
+
+    .core p{
+      margin:16px auto 0;
+      color:var(--muted);
+      max-width:420px;
+      line-height:1.6;
+    }
+
+    .id-card{
+      margin:24px auto 0;
+      max-width:390px;
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:22px;
+      background:linear-gradient(180deg,#16161b,#09090b);
+      padding:18px;
+      text-align:left;
+    }
+
+    .id-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:18px;
+    }
+
+    .avatar{
+      width:56px;
+      height:56px;
+      border-radius:16px;
+      background:linear-gradient(135deg,#27272a,#080808);
+      border:1px solid rgba(255,255,255,.12);
+      display:grid;
+      place-items:center;
+      color:var(--gold);
+      font-weight:900;
+    }
+
+    .verify{
+      font-size:.7rem;
+      color:#22c55e;
+      border:1px solid rgba(34,197,94,.35);
+      padding:6px 9px;
+      border-radius:999px;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+
+    .id-card h3{
+      margin:0;
+      font-size:1.55rem;
+      letter-spacing:-.03em;
+    }
+
+    .id-card .handle{
+      color:var(--muted);
+      margin-top:3px;
+      font-size:.9rem;
+    }
+
+    .actions{
+      margin-top:18px;
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:8px;
+    }
+
+    .action{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.04);
+      border-radius:14px;
+      padding:10px 8px;
+      text-align:center;
+      font-size:.72rem;
+      color:var(--muted);
+      font-weight:800;
+    }
+
+    .lanes{
+      margin-top:36px;
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:14px;
+    }
+
+    .lane{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.035);
+      border-radius:18px;
+      padding:16px;
+      min-height:142px;
+    }
+
+    .lane-icon{
+      width:34px;
+      height:34px;
+      border-radius:11px;
+      display:grid;
+      place-items:center;
+      margin-bottom:12px;
+      background:rgba(214,180,76,.12);
+      color:var(--gold);
+      font-weight:900;
+    }
+
+    .lane strong{
+      display:block;
+      margin-bottom:8px;
+    }
+
+    .lane p{
+      margin:0;
+      color:var(--muted);
+      font-size:.86rem;
+      line-height:1.45;
+    }
+
+    .examples{
+      margin-top:26px;
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:14px;
+    }
+
+    .example{
+      border:1px solid var(--line);
+      background:var(--panel2);
+      border-radius:20px;
+      padding:18px;
+    }
+
+    .example .label{
+      color:var(--muted);
+      font-size:.76rem;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      font-weight:900;
+      margin-bottom:8px;
+    }
+
+    .example h3{
+      margin:0 0 8px;
+      font-size:1.25rem;
+    }
+
+    .example p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.5;
+      font-size:.9rem;
+    }
+
+    .flow{
+      margin-top:26px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.025);
+      border-radius:22px;
+      padding:20px;
+    }
+
+    .flow h2{
+      margin:0 0 16px;
+      font-size:1.25rem;
+      letter-spacing:-.02em;
+    }
+
+    .flow-row{
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:10px;
+    }
+
+    .step{
+      border:1px solid var(--line);
+      background:#08080a;
+      border-radius:16px;
+      padding:14px;
+      text-align:center;
+      color:var(--muted);
+      font-size:.82rem;
+      font-weight:750;
+      min-height:84px;
+      display:grid;
+      place-items:center;
+    }
+
+    .step b{
+      color:#fff;
+      display:block;
+      margin-bottom:4px;
+    }
+
+    .footer-note{
+      margin-top:26px;
+      text-align:center;
+      color:var(--muted);
+      line-height:1.6;
+    }
+
+    @media(max-width:900px){
+      .system-grid,
+      .lanes,
+      .examples,
+      .flow-row{
+        grid-template-columns:1fr;
+      }
+
+      .map{
+        padding:18px;
+      }
+
+      .top{
+        align-items:flex-start;
+        flex-direction:column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header class="top">
+      <div class="brand">
+        <div class="logo">SB</div>
+        <div>
+          <strong>Square Bidness Infrastructure</strong>
+          <span>Digital identity • booking • events • commerce</span>
+        </div>
+      </div>
+
+      <div class="pill"><span class="dot"></span> Platform Operator Mode</div>
+    </header>
+
+    <section class="hero">
+      <div class="kicker">Identity-As-Infrastructure</div>
+      <h1>Every operator gets a digital body.</h1>
+      <p class="sub">
+        Square Bidness is not just making websites. The platform gives independent operators,
+        creators, venues, restaurants, and service providers a verified digital identity connected
+        to booking, tickets, payments, media, QR codes, analytics, and commerce.
+      </p>
+    </section>
+
+    <section class="map" aria-label="Square Bidness ID ecosystem map">
+      <div class="system-grid">
+        <div class="stack">
+          <div class="node">
+            <small>Identity</small>
+            <strong>SB ID Profile</strong>
+            <p>/u/naee-doll/ • /u/jarvis/ • /u/qwnetta/</p>
+          </div>
+
+          <div class="node">
+            <small>Visibility</small>
+            <strong>LinkMe + QR</strong>
+            <p>One scan opens booking, tickets, socials, media, and offers.</p>
+          </div>
+
+          <div class="node">
+            <small>Trust</small>
+            <strong>Verified Operator</strong>
+            <p>Square Bidness confirms the operator, business, or public lane.</p>
+          </div>
+        </div>
+
+        <div class="core">
+          <div class="core-badge">Square Bidness ID</div>
+          <h2>One identity. Multiple platforms.</h2>
+          <p>
+            The profile becomes the hub. Events, booking, media, commerce, payments,
+            analytics, and automation all connect back to the same verified identity.
+          </p>
+
+          <div class="id-card">
+            <div class="id-top">
+              <div class="avatar">ND</div>
+              <div class="verify">Verified</div>
+            </div>
+
+            <h3>Naee Doll</h3>
+            <div class="handle">sbid://naee-doll</div>
+
+            <div class="actions">
+              <div class="action">Book</div>
+              <div class="action">Media</div>
+              <div class="action">Events</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stack">
+          <div class="node">
+            <small>Commerce</small>
+            <strong>Payments + Deposits</strong>
+            <p>Stripe checkout, deposits, tickets, subscriptions, and payouts.</p>
+          </div>
+
+          <div class="node">
+            <small>Operations</small>
+            <strong>Dashboards</strong>
+            <p>Organizer login, booking admin, kitchen view, event control.</p>
+          </div>
+
+          <div class="node">
+            <small>Data</small>
+            <strong>Analytics + Intent</strong>
+            <p>Track clicks, demand, booking intent, tickets, and repeat activity.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="lanes">
+        <div class="lane">
+          <div class="lane-icon">1</div>
+          <strong>Events Platform</strong>
+          <p>Organizers, venues, performers, tickets, QR check-in, and event discovery.</p>
+        </div>
+
+        <div class="lane">
+          <div class="lane-icon">2</div>
+          <strong>Booking Platform</strong>
+          <p>Barbers, nail techs, stylists, beauty pros, deposits, and schedules.</p>
+        </div>
+
+        <div class="lane">
+          <div class="lane-icon">3</div>
+          <strong>Creator Profiles</strong>
+          <p>Models, artists, DJs, riders, influencers, media, booking, and brand identity.</p>
+        </div>
+
+        <div class="lane">
+          <div class="lane-icon">4</div>
+          <strong>Operator Commerce</strong>
+          <p>Food ordering, merch, deposits, invoices, digital products, and local demand.</p>
+        </div>
+      </div>
+
+      <div class="examples">
+        <div class="example">
+          <div class="label">Example Node</div>
+          <h3>Naee Doll</h3>
+          <p>Public identity, modeling, media, booking, Roblox/digital world, and LinkMe.</p>
+        </div>
+
+        <div class="example">
+          <div class="label">Example Node</div>
+          <h3>Chocolate City</h3>
+          <p>Venue identity, VIP sections, events, send-drink flow, and nightlife commerce.</p>
+        </div>
+
+        <div class="example">
+          <div class="label">Example Node</div>
+          <h3>Delish / Puffs</h3>
+          <p>Restaurant identity, paid ordering, kitchen screens, SMS, and operational control.</p>
+        </div>
+      </div>
+
+      <div class="flow">
+        <h2>How the identity flow works</h2>
+
+        <div class="flow-row">
+          <div class="step"><span><b>1. Create ID</b>SB profile + verified lane</span></div>
+          <div class="step"><span><b>2. Attach Tools</b>Booking, events, media, payments</span></div>
+          <div class="step"><span><b>3. Publish QR</b>Cards, flyers, reels, signs</span></div>
+          <div class="step"><span><b>4. Capture Demand</b>Clicks, orders, deposits, tickets</span></div>
+          <div class="step"><span><b>5. Grow Operator</b>Analytics + automation + repeat sales</span></div>
+        </div>
+      </div>
+    </section>
+
+    <p class="footer-note">
+      This is the platform direction: independent operators do not just need a website.
+      They need a digital identity that can take action.
+    </p>
+  </div>
+</body>
+</html>
