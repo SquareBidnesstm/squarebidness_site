@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 };
 
 const SERVICES = [
-  { emoji: "✂️", title: "Barbershops", desc: "Let walk-ins book online. Manage multiple barbers, chairs, and schedules from one dashboard." },
+  { emoji: "💈", title: "Barbershops", desc: "Let walk-ins book online. Manage multiple barbers, chairs, and schedules from one dashboard." },
   { emoji: "💇🏿", title: "Hair Stylists", desc: "Take appointments around the clock. Show your portfolio, services, and pricing in one link." },
   { emoji: "💅🏽", title: "Nail Technicians", desc: "Fill your nail table every day. Clients pick their tech, service, and time — you just show up." },
   { emoji: "👁️", title: "Lash Artists", desc: "Book fills, new sets, and removals online. Automated reminders keep clients coming back." },
