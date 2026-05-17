@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
   // Rate limiting — 5 attempts per 15 min per IP
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
   const rlKey = `platform_admin:${ip}`;
-  const { limited, retryAfterSeconds } = checkRateLimit(rlKey, 5);
+  const { limited, retryAfterSeconds } = await checkRateLimit(rlKey, 5);
   if (limited) {
     return NextResponse.json(
       { ok: false, error: `Too many attempts. Try again in ${Math.ceil(retryAfterSeconds / 60)} min.` },

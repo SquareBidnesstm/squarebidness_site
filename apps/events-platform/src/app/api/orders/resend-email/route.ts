@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     req.headers.get("x-real-ip") ??
     "unknown";
   recordAttempt(`resend_email:${ip}`);
-  const { limited, retryAfterSeconds } = checkRateLimit(`resend_email:${ip}`, 5);
+  const { limited, retryAfterSeconds } = await checkRateLimit(`resend_email:${ip}`, 5);
   if (limited) {
     return NextResponse.redirect(
       new URL(`/orders?error=too_many_requests&retry=${Math.ceil(retryAfterSeconds / 60)}`, req.url),

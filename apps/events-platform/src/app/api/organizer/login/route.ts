@@ -58,7 +58,7 @@ export async function POST(req: Request) {
       "unknown";
     const rlKey = `org_login:${ip}`;
     recordAttempt(rlKey);
-    const { limited, retryAfterSeconds } = checkRateLimit(rlKey, 10);
+    const { limited, retryAfterSeconds } = await checkRateLimit(rlKey, 10);
     if (limited) {
       return NextResponse.redirect(
         new URL(`/organizer/login?error=too_many_attempts&retry=${Math.ceil(retryAfterSeconds / 60)}`, req.url)

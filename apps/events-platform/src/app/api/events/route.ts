@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
     req.headers.get("x-real-ip") ??
     "unknown";
   recordAttempt(`events_list:${ip}`);
-  const { limited, retryAfterSeconds } = checkRateLimit(`events_list:${ip}`, 20);
+  const { limited, retryAfterSeconds } = await checkRateLimit(`events_list:${ip}`, 20);
   if (limited) {
     return NextResponse.json(
       { error: `Too many requests. Try again in ${Math.ceil(retryAfterSeconds / 60)} min.` },

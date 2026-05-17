@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     req.headers.get("x-real-ip") ??
     "unknown";
   recordAttempt(`rsvp:${ip}`);
-  const { limited, retryAfterSeconds } = checkRateLimit(`rsvp:${ip}`, 5);
+  const { limited, retryAfterSeconds } = await checkRateLimit(`rsvp:${ip}`, 5);
   if (limited) {
     return NextResponse.json(
       { error: `Too many requests. Try again in ${Math.ceil(retryAfterSeconds / 60)} min.` },

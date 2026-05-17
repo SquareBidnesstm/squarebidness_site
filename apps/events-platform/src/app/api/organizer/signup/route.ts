@@ -66,7 +66,7 @@ export async function POST(req: Request) {
       (req as any).headers?.get?.("x-real-ip") ??
       "unknown";
     recordAttempt(`org_signup:${ip}`);
-    const { limited, retryAfterSeconds } = checkRateLimit(`org_signup:${ip}`, 5);
+    const { limited, retryAfterSeconds } = await checkRateLimit(`org_signup:${ip}`, 5);
     if (limited) {
       return NextResponse.redirect(
         new URL(`/organizer/signup?error=too_many_attempts&retry=${Math.ceil(retryAfterSeconds / 60)}`, req.url)

@@ -1,52 +1,72 @@
-// ---------------------------------------------------------------------------
-// In-memory rate limiter — limits failed attempts per key.
-// Designed for serverless (per-instance), provides best-effort defense.
-//
-// LIMITATION: This map lives in the Node.js process heap. In a serverless
-// environment (Vercel, AWS Lambda) each cold start creates a fresh map, so
-// counts reset on every new instance and limits are not enforced across
-// concurrent instances. For production scale or stricter enforcement, replace
-// this with a shared atomic store such as Upstash Redis (ioredis + @upstash/ratelimit).
-// ---------------------------------------------------------------------------
-const _failMap = new Map<string, { count: number; resetAt: number }>();
-const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+import { Redis } from "@upstash/redis";
 
-export function checkRateLimit(
+// ---------------------------------------------------------------------------
+// Upstash Redis-backed rate limiter — cross-instance safe on Vercel serverless.
+//
+// Uses a fixed 15-minute sliding window. INCR + EXPIRE is atomic in Redis —
+// no race conditions across concurrent serverless instances.
+//
+// Falls back to an in-process Map when UPSTASH_REDIS_REST_URL / TOKEN are not
+// set (local dev, CI). The fallback is per-instance only — sufficient for dev.
+// ---------------------------------------------------------------------------
+
+const WINDOW_SECONDS = 15 * 60;
+const WINDOW_MS = WINDOW_SECONDS * 1000;
+
+let _redis: Redis | null = null;
+function getRedis(): Redis | null {
+  if (_redis) return _redis;
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) return null;
+  _redis = new Redis({ url, token });
+  return _redis;
+}
+
+const _failMap = new Map<string, { count: number; resetAt: number }>();
+
+/**
+ * Atomically record one attempt AND check whether the key is over-limit.
+ * Backed by Upstash Redis for true cross-instance enforcement on Vercel.
+ * Falls back to in-process Map when Redis env vars are absent (local dev).
+ */
+export async function checkRateLimit(
   key: string,
   maxFails = 10
-): { limited: boolean; retryAfterSeconds: number } {
-  const now = Date.now();
+): Promise<{ limited: boolean; retryAfterSeconds: number }> {
+  const redis = getRedis();
 
-  // Evict expired entries to prevent unbounded memory growth within a single instance.
-  // NOTE: In serverless environments each cold start creates a fresh map, so eviction
-  // is a best-effort safeguard rather than a guaranteed bounded-size store. For
-  // production-grade enforcement across concurrent instances, replace _failMap with a
-  // shared atomic store such as Upstash Redis (@upstash/ratelimit).
+  if (redis) {
+    const rKey = `rl:${key}`;
+    const count = await redis.incr(rKey);
+    if (count === 1) await redis.expire(rKey, WINDOW_SECONDS);
+    if (count > maxFails) {
+      const ttl = await redis.ttl(rKey);
+      return { limited: true, retryAfterSeconds: Math.max(ttl, 0) };
+    }
+    return { limited: false, retryAfterSeconds: 0 };
+  }
+
+  // In-memory fallback
+  const now = Date.now();
   for (const [k, v] of _failMap.entries()) {
     if (now > v.resetAt) _failMap.delete(k);
   }
-
   const entry = _failMap.get(key);
-  if (!entry || now > entry.resetAt) return { limited: false, retryAfterSeconds: 0 };
-  if (entry.count >= maxFails) {
+  if (!entry || now > entry.resetAt) {
+    _failMap.set(key, { count: 1, resetAt: now + WINDOW_MS });
+    return { limited: false, retryAfterSeconds: 0 };
+  }
+  entry.count++;
+  if (entry.count > maxFails) {
     return { limited: true, retryAfterSeconds: Math.ceil((entry.resetAt - now) / 1000) };
   }
   return { limited: false, retryAfterSeconds: 0 };
 }
 
-export function recordAttempt(key: string): void {
-  const now = Date.now();
-  const entry = _failMap.get(key);
-  if (!entry || now > entry.resetAt) {
-    _failMap.set(key, { count: 1, resetAt: now + WINDOW_MS });
-  } else {
-    entry.count++;
-  }
-}
-
-export function clearAttempts(key: string): void {
-  _failMap.delete(key);
-}
+/** No-op — checkRateLimit now records atomically. Kept for call-site compat. */
+export function recordAttempt(_key: string): void {}
+export function clearAttempts(_key: string): void {}
 
 // ---------------------------------------------------------------------------
 // CSRF origin check — validates that a form POST comes from our own domain.

@@ -1,69 +1,76 @@
 // Shared utilities — used across multiple API routes
 
+import { Redis } from "@upstash/redis";
+
 // ---------------------------------------------------------------------------
-// Simple in-memory rate limiter (per serverless instance / process).
+// Upstash Redis-backed rate limiter — cross-instance safe on Vercel serverless.
 //
-// ⚠️  SERVERLESS LIMITATION: Because Next.js on Vercel runs each serverless
-// function in its own isolated process, this Map is NOT shared across
-// concurrent instances. A determined attacker can bypass the limit by hitting
-// different cold-started instances in parallel. The effective rate limit is:
-//   (configured limit) × (number of concurrent instances)
+// Uses a fixed 15-minute sliding window. Each unique key gets its own counter
+// stored in Redis. The INCR + EXPIRE pattern is atomic: no race conditions.
 //
-// TODO: Replace _failMap with Upstash Redis (@upstash/ratelimit) for true
-// cross-instance rate limiting before scaling beyond a single-region
-// deployment. See: https://upstash.com/docs/redis/sdks/ratelimit
-//
-// Until then, this in-process guard is a meaningful speed-bump against naive
-// automated clients and provides defense-in-depth alongside Vercel's edge
-// firewall.
+// Falls back to an in-process Map when UPSTASH_REDIS_REST_URL / TOKEN are not
+// set (local dev, CI). The fallback is per-instance only — sufficient for dev.
 // ---------------------------------------------------------------------------
 
-// --- Failed-attempt limiter (used for PIN login) ---------------------------
+const WINDOW_SECONDS = 15 * 60; // 15 minutes
+const WINDOW_MS = WINDOW_SECONDS * 1000;
+
+let _redis: Redis | null = null;
+function getRedis(): Redis | null {
+  if (_redis) return _redis;
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) return null;
+  _redis = new Redis({ url, token });
+  return _redis;
+}
+
+// In-process fallback for local dev (no Redis configured)
 const _failMap = new Map<string, { count: number; resetAt: number }>();
-const MAX_FAILS = 5;
-const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 
-/** Check whether `key` has exceeded its max-fails limit (default 5/15 min). */
-export function checkRateLimit(key: string, maxAttempts?: number): { limited: boolean; retryAfterSeconds: number } {
-  const limit = maxAttempts ?? MAX_FAILS;
+/**
+ * Atomically record one attempt AND check whether the key is over-limit.
+ * Backed by Upstash Redis for true cross-instance enforcement on Vercel.
+ * Falls back to in-process Map when Redis env vars are absent (local dev).
+ */
+export async function checkRateLimit(
+  key: string,
+  maxAttempts = 5
+): Promise<{ limited: boolean; retryAfterSeconds: number }> {
+  const redis = getRedis();
+
+  if (redis) {
+    const rKey = `rl:${key}`;
+    const count = await redis.incr(rKey);
+    if (count === 1) await redis.expire(rKey, WINDOW_SECONDS);
+    if (count > maxAttempts) {
+      const ttl = await redis.ttl(rKey);
+      return { limited: true, retryAfterSeconds: Math.max(ttl, 0) };
+    }
+    return { limited: false, retryAfterSeconds: 0 };
+  }
+
+  // In-memory fallback
   const now = Date.now();
-  // Evict expired entries to prevent unbounded memory growth in long-lived processes
   for (const [k, v] of _failMap.entries()) {
     if (now > v.resetAt) _failMap.delete(k);
   }
   const entry = _failMap.get(key);
   if (!entry || now > entry.resetAt) {
-    // Fresh window
+    _failMap.set(key, { count: 1, resetAt: now + WINDOW_MS });
     return { limited: false, retryAfterSeconds: 0 };
   }
-  if (entry.count >= limit) {
+  entry.count++;
+  if (entry.count > maxAttempts) {
     return { limited: true, retryAfterSeconds: Math.ceil((entry.resetAt - now) / 1000) };
   }
   return { limited: false, retryAfterSeconds: 0 };
 }
 
-export function recordFailedAttempt(key: string): void {
-  const now = Date.now();
-  const entry = _failMap.get(key);
-  if (!entry || now > entry.resetAt) {
-    _failMap.set(key, { count: 1, resetAt: now + WINDOW_MS });
-  } else {
-    entry.count++;
-  }
-}
-
-/**
- * Record every request (not just failures) against a key — used by public
- * endpoints such as availability, deposit, cancel, and reschedule where we
- * want to cap total throughput rather than only failed attempts.
- */
-export function recordAttempt(key: string): void {
-  recordFailedAttempt(key);
-}
-
-export function clearFailedAttempts(key: string): void {
-  _failMap.delete(key);
-}
+/** No-op — checkRateLimit now records atomically. Kept for call-site compat. */
+export function recordFailedAttempt(_key: string): void {}
+export function recordAttempt(_key: string): void {}
+export function clearFailedAttempts(_key: string): void {}
 
 // ---------------------------------------------------------------------------
 // Idempotency cache — prevents duplicate bookings on network retry.

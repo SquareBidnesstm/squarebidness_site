@@ -123,7 +123,7 @@ export async function POST(
       ?? req.headers.get("x-real-ip")
       ?? "unknown";
     const rlKey = `booking:${shopSlug}:${ip}`;
-    const { limited, retryAfterSeconds } = checkRateLimit(rlKey);
+    const { limited, retryAfterSeconds } = await checkRateLimit(rlKey);
     if (limited) {
       return NextResponse.json(
         { ok: false, error: `Too many booking attempts. Try again in ${Math.ceil(retryAfterSeconds / 60)} min.` },

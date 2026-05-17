@@ -15,7 +15,7 @@ export async function POST(
   // Rate limit: 10 deposit sessions per 15 min per IP
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
   recordAttempt(`deposit:${ip}`);
-  const { limited } = checkRateLimit(`deposit:${ip}`, 10);
+  const { limited } = await checkRateLimit(`deposit:${ip}`, 10);
   if (limited) {
     return NextResponse.json({ ok: false, error: "Too many requests. Please try again later." }, { status: 429 });
   }

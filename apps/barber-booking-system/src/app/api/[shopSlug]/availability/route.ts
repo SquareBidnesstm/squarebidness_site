@@ -32,7 +32,7 @@ export async function GET(
   // Rate limit: 60 checks per 15 min per IP (prevents slot scraping)
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
   recordAttempt(`avail:${ip}`);
-  const { limited } = checkRateLimit(`avail:${ip}`, 60);
+  const { limited } = await checkRateLimit(`avail:${ip}`, 60);
   if (limited) {
     return NextResponse.json({ ok: false, error: "Too many requests." }, { status: 429 });
   }

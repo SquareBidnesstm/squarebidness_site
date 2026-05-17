@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     req.headers.get("x-real-ip") ??
     "unknown";
   recordAttempt(`notif_subscribe:${ip}`);
-  const { limited, retryAfterSeconds } = checkRateLimit(`notif_subscribe:${ip}`, 20);
+  const { limited, retryAfterSeconds } = await checkRateLimit(`notif_subscribe:${ip}`, 20);
   if (limited) {
     return NextResponse.json(
       { error: `Too many requests. Try again in ${Math.ceil(retryAfterSeconds / 60)} min.` },

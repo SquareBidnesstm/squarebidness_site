@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
   // Per-event push blast rate limit: max 3 blasts per 15-min window
   const blastKey = `push_blast:${eventId}`;
   recordAttempt(blastKey);
-  const { limited } = checkRateLimit(blastKey, 3);
+  const { limited } = await checkRateLimit(blastKey, 3);
   if (limited) {
     return NextResponse.json(
       { error: "Push blast rate limit reached. Try again later." },

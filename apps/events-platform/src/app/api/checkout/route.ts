@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     req.headers.get("x-real-ip") ??
     "unknown";
   recordAttempt(`checkout:${ip}`);
-  const { limited, retryAfterSeconds } = checkRateLimit(`checkout:${ip}`, 20);
+  const { limited, retryAfterSeconds } = await checkRateLimit(`checkout:${ip}`, 20);
   if (limited) {
     return NextResponse.json(
       { ok: false, error: `Too many requests. Try again in ${Math.ceil(retryAfterSeconds / 60)} min.` },

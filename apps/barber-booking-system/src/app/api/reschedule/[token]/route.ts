@@ -56,7 +56,7 @@ export async function POST(
   // BC-4: Per-token rate limit — 5 attempts per 15 min per token
   const tokenKey = `reschedule:tok:${token}`;
   recordAttempt(tokenKey);
-  const { limited: tokenLimited } = checkRateLimit(tokenKey, 5);
+  const { limited: tokenLimited } = await checkRateLimit(tokenKey, 5);
   if (tokenLimited) {
     return NextResponse.json({ ok: false, error: "Too many attempts. Try again later." }, { status: 429 });
   }
@@ -64,7 +64,7 @@ export async function POST(
   // Rate limit: 10 reschedule attempts per 15 min per IP
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
   recordAttempt(`reschedule:${ip}`);
-  const { limited } = checkRateLimit(`reschedule:${ip}`, 10);
+  const { limited } = await checkRateLimit(`reschedule:${ip}`, 10);
   if (limited) {
     return NextResponse.json({ ok: false, error: "Too many requests. Please wait before trying again." }, { status: 429 });
   }

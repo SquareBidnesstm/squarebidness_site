@@ -17,7 +17,7 @@ export async function POST(
 
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
   const rlKey = `barber:${shopSlug}:${barberSlug}:${ip}`;
-  const { limited, retryAfterSeconds } = checkRateLimit(rlKey);
+  const { limited, retryAfterSeconds } = await checkRateLimit(rlKey);
   if (limited) {
     return NextResponse.json(
       { ok: false, error: `Too many attempts. Try again in ${retryAfterSeconds}s.` },
