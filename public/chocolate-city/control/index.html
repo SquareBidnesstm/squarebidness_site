@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Chocolate City Control Room</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="application-name" content="CC Control" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="CC Control" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#080504" />
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/chocolate-city/assets/cc-icon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/chocolate-city/assets/cc-icon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/chocolate-city/assets/cc-icon-180.png">
+  <link rel="manifest" href="/chocolate-city/admin/manifest.json">
+
+  <style>
+    :root{
+      --bg:#080504;
+      --panel:#150c09;
+      --gold:#d7a84f;
+      --gold2:#f5d58a;
+      --text:#fff7ea;
+      --muted:#c7a983;
+      --line:rgba(245,213,138,.22);
+      --danger:#7a1e1e;
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:Arial,Helvetica,sans-serif;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(215,168,79,.18), transparent 34rem),
+        linear-gradient(180deg,#090504,#170b07);
+      color:var(--text);
+      padding:20px;
+    }
+
+    a{color:inherit}
+
+    .shell{
+      width:min(980px,100%);
+      margin:0 auto;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:24px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
+      text-decoration:none;
+    }
+
+    .brand img{
+      width:58px;
+      height:58px;
+      border-radius:50%;
+      object-fit:cover;
+      flex:0 0 auto;
+    }
+
+    .brand span{
+      display:block;
+      font-weight:900;
+      font-size:18px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .brand small{
+      display:block;
+      margin-top:4px;
+      color:var(--muted);
+      font-weight:800;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:44px;
+      padding:0 16px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      color:var(--muted);
+      font-weight:900;
+      text-decoration:none;
+      background:rgba(255,255,255,.04);
+      white-space:nowrap;
+    }
+
+    .hero{
+      border:1px solid var(--line);
+      border-radius:30px;
+      background:rgba(21,12,9,.9);
+      padding:28px;
+      box-shadow:0 26px 70px rgba(0,0,0,.45);
+      margin-bottom:16px;
+    }
+
+    .kicker{
+      margin:0 0 8px;
+      color:var(--gold2);
+      text-transform:uppercase;
+      letter-spacing:.18em;
+      font-size:12px;
+      font-weight:900;
+    }
+
+    h1{
+      margin:0;
+      font-size:clamp(38px,8vw,76px);
+      line-height:.95;
+      letter-spacing:-.07em;
+      color:var(--gold2);
+    }
+
+    .lead{
+      margin:14px 0 0;
+      max-width:64ch;
+      color:var(--muted);
+      font-size:18px;
+      line-height:1.45;
+      font-weight:800;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:14px;
+    }
+
+    .card{
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      gap:18px;
+      min-height:170px;
+      padding:20px;
+      border:1px solid var(--line);
+      border-radius:24px;
+      background:rgba(9,5,4,.84);
+      text-decoration:none;
+      transition:transform .16s ease, border-color .16s ease, background .16s ease;
+    }
+
+    .card:hover{
+      transform:translateY(-2px);
+      border-color:rgba(245,213,138,.48);
+      background:rgba(30,17,12,.92);
+    }
+
+    .card strong{
+      display:block;
+      font-size:26px;
+      letter-spacing:-.04em;
+    }
+
+    .card span{
+      display:block;
+      color:var(--muted);
+      line-height:1.35;
+      font-weight:800;
+    }
+
+    .card em{
+      color:var(--gold2);
+      font-style:normal;
+      font-weight:900;
+    }
+
+    .primary{
+      background:linear-gradient(135deg,#d7a84f,#f5d58a);
+      color:#180b05;
+    }
+
+    .primary span,
+    .primary em{
+      color:#3b210d;
+    }
+
+    .danger{
+      border-color:rgba(217,74,74,.35);
+      background:rgba(122,30,30,.26);
+    }
+
+    .note{
+      margin:18px auto 0;
+      color:var(--muted);
+      text-align:center;
+      font-weight:800;
+    }
+
+    @media(max-width:720px){
+      body{padding:14px}
+
+      .topbar{
+        align-items:flex-start;
+        flex-direction:column;
+      }
+
+      .pill{
+        width:100%;
+      }
+
+      .hero{
+        padding:22px;
+      }
+
+      .grid{
+        grid-template-columns:1fr;
+      }
+
+      .card{
+        min-height:140px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="/chocolate-city/">
+        <img src="/chocolate-city/assets/cc-icon-192.png" alt="Chocolate City Lounge logo">
+        <span>
+          Chocolate City Lounge LLC
+          <small>Private control room</small>
+        </span>
+      </a>
+
+      <a class="pill" href="/chocolate-city/">Public Lounge</a>
+    </header>
+
+    <section class="hero">
+      <p class="kicker">Admin access</p>
+      <h1>Control Room</h1>
+      <p class="lead">
+        Quick private links for the Chocolate City team. Save this page to the phone home screen for fast weekend access.
+      </p>
+    </section>
+
+    <section class="grid" aria-label="Chocolate City private links">
+      <a class="card primary" href="/chocolate-city/admin/">
+        <strong>Admin Dashboard</strong>
+        <span>Update public message, Friday status, VIP status, and load bookings.</span>
+        <em>Open admin</em>
+      </a>
+
+      <a class="card primary" href="/chocolate-city/door/">
+        <strong>Door VIP</strong>
+        <span>Scan VIP QR codes or verify guests by name at the door.</span>
+        <em>Open door check</em>
+      </a>
+
+      <a class="card" href="/chocolate-city/vip/">
+        <strong>Reserve VIP</strong>
+        <span>Open the guest-facing VIP checkout lane.</span>
+        <em>Open VIP page</em>
+      </a>
+
+      <a class="card" href="/chocolate-city/send-drink/">
+        <strong>Send a Drink</strong>
+        <span>Open the public drink credit checkout page.</span>
+        <em>Open drink page</em>
+      </a>
+
+      <a class="card" href="/chocolate-city/drinks/">
+        <strong>Drink Screen</strong>
+        <span>View active drink credits waiting for redemption.</span>
+        <em>Open display</em>
+      </a>
+
+      <a class="card" href="/chocolate-city/drinks/clear/">
+        <strong>Redeem Drinks</strong>
+        <span>Clear redeemed drink credits with the admin token.</span>
+        <em>Open redemption</em>
+      </a>
+
+      <a class="card" href="/chocolate-city/ready/">
+        <strong>VIP Ready Screen</strong>
+        <span>Load the VIP booking list for staff review.</span>
+        <em>Open ready list</em>
+      </a>
+
+      <a class="card danger" href="/chocolate-city/complete/">
+        <strong>Sold Out Page</strong>
+        <span>Use when all VIP sections are confirmed for the night.</span>
+        <em>Open complete page</em>
+      </a>
+    </section>
+
+    <p class="note">Private page. Not indexed. Share only with staff who need access.</p>
+  </main>
+</body>
+</html>
