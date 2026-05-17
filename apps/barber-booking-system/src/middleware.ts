@@ -61,10 +61,8 @@ export async function middleware(req: NextRequest) {
 
     if (RESERVED_SLUGS.has(shopSlug) || RESERVED_SLUGS.has(barberSlug)) return NextResponse.next();
 
-    if (rest === "/login" || rest === "") {
-      // Allow login page through, but protect root barber page
-      if (rest === "/login") return NextResponse.next();
-    }
+    // Allow the login page through; all other paths (including root "") require auth
+    if (rest === "/login") return NextResponse.next();
 
     const cookieName = barberSessionCookieName(shopSlug, barberSlug);
     const cookie = req.cookies.get(cookieName)?.value;

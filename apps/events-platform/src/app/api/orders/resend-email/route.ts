@@ -42,9 +42,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.redirect(new URL(`/orders/${orderId}?resend=error`, req.url), 303);
   }
 
-  // Verify the requester owns this order — prevents unauthenticated email spam
+  // Verify the requester owns this order — prevents unauthenticated email spam.
+  // Use the same redirect as not-found so callers cannot distinguish a valid
+  // order ID from an invalid one (prevents order enumeration).
   if (!buyerEmail || buyerEmail !== order.buyer_email.trim().toLowerCase()) {
-    return NextResponse.redirect(new URL(`/orders/${orderId}?resend=unauthorized`, req.url), 303);
+    return NextResponse.redirect(new URL(`/orders/${orderId}?resend=error`, req.url), 303);
   }
 
   const ev = order.events as any;
@@ -78,7 +80,8 @@ export async function POST(req: NextRequest) {
       coverImageUrl: ev?.cover_image_url ?? null,
       eventSlug: ev?.slug ?? undefined,
     });
-  } catch {
+  } catch (err) {
+    console.error("[resend-email] Failed to resend confirmation email:", err);
     return NextResponse.redirect(new URL(`/orders/${orderId}?resend=error`, req.url), 303);
   }
 

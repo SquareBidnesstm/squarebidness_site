@@ -56,6 +56,14 @@ export async function POST(req: Request) {
       );
     }
 
+    // Validate recurrence_rule against known values to prevent arbitrary strings in DB
+    const VALID_RECURRENCE_RULES = ["weekly", "biweekly", "monthly"];
+    if (recurrenceRule && !VALID_RECURRENCE_RULES.includes(recurrenceRule)) {
+      return NextResponse.redirect(
+        new URL("/organizer/dashboard/new-event?error=invalid_recurrence_rule", req.url)
+      );
+    }
+
     // Validate cover_image_url — must be https:// to prevent javascript: URIs
     if (coverImageUrl && !coverImageUrl.startsWith("https://")) {
       return NextResponse.redirect(
@@ -145,6 +153,17 @@ export async function POST(req: Request) {
     for (let i = 0; i < totalOccurrences; i++) {
       const occurrenceStartsAt = i === 0 ? startsIso : addOffset(startsIso, recurrenceRule!, i);
       const occurrenceEndsAt = i === 0 ? endsIso : addOffset(endsIso, recurrenceRule!, i);
+
+      // Validate that each occurrence (beyond the first) doesn't land in the past.
+      // The first occurrence is already validated above. Skip rather than hard-fail
+      // to tolerate benign timezone drift near the boundary.
+      if (i > 0) {
+        const occurrenceStart = new Date(occurrenceStartsAt);
+        if (occurrenceStart.getTime() <= Date.now()) {
+          console.warn(`Skipping past recurrence occurrence: ${occurrenceStartsAt}`);
+          continue; // skip this occurrence, continue loop
+        }
+      }
 
       // Each occurrence after the first is always draft
       const occurrenceStatus = i === 0 ? status : "draft";

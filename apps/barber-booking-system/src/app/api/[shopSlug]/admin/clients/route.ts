@@ -25,7 +25,9 @@ export async function GET(
     .not("customer_phone", "is", null);
 
   if (search) {
-    query = query.or(`customer_name.ilike.%${search}%,customer_phone.ilike.%${search}%`);
+    // Escape PostgREST ILIKE wildcard characters to prevent unintended pattern expansion
+    const safeSearch = search.replace(/\\/g, "\\\\").replace(/%/g, "\\%").replace(/_/g, "\\_");
+    query = query.or(`customer_name.ilike.%${safeSearch}%,customer_phone.ilike.%${safeSearch}%`);
   }
 
   const { data: rows, error } = await query.order("starts_at", { ascending: false });

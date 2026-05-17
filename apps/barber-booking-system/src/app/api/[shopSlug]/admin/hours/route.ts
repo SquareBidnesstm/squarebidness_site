@@ -30,7 +30,8 @@ export async function GET(
     .order("day_of_week");
 
   if (error) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    console.error("[admin/hours GET] DB error:", error);
+    return NextResponse.json({ ok: false, error: "An unexpected error occurred. Please try again." }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true, hours: hours ?? [] });
@@ -99,7 +100,8 @@ export async function PUT(
     .upsert(upsertRows, { onConflict: "shop_id,day_of_week" });
 
   if (error) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    console.error("[admin/hours PUT] DB error:", error);
+    return NextResponse.json({ ok: false, error: "An unexpected error occurred. Please try again." }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true });

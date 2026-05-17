@@ -8,6 +8,17 @@
 
 const MAX_TOKEN_AGE_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
+/** Constant-time string comparison to prevent HMAC timing side-channels. */
+function timingSafeEqual(a: string, b: string): boolean {
+  const enc = new TextEncoder();
+  const aB = enc.encode(a);
+  const bB = enc.encode(b);
+  if (aB.length !== bB.length) return false;
+  let diff = 0;
+  for (let i = 0; i < aB.length; i++) diff |= aB[i] ^ bB[i];
+  return diff === 0;
+}
+
 function requireAppSecret(): string {
   const secret = process.env.APP_SECRET;
   if (!secret) throw new Error("APP_SECRET environment variable is required but not set.");
@@ -66,7 +77,7 @@ export async function verifyOrganizerSession(
   if (!issuedAtMs || Date.now() - issuedAtMs > MAX_TOKEN_AGE_MS) return false;
 
   const expected = await hmacHex(secret, `organizer:${organizerSlug}:${issuedAt}`);
-  return mac === expected;
+  return timingSafeEqual(mac, expected);
 }
 
 /**
@@ -140,5 +151,5 @@ export async function verifyAdminSession(req: Request): Promise<boolean> {
   if (!issuedAtMs || Date.now() - issuedAtMs > MAX_TOKEN_AGE_MS) return false;
 
   const expected = await hmacHex(secret, `sbe:admin:${issuedAt}`);
-  return mac === expected;
+  return timingSafeEqual(mac, expected);
 }

@@ -5,7 +5,17 @@
 
 import { NextResponse } from "next/server";
 import { computeAdminSessionToken } from "../../../../lib/auth";
-import { checkRateLimit, recordAttempt, clearAttempts, isSafeOrigin } from "../../../../lib/utils";
+import { checkRateLimit, recordAttempt, isSafeOrigin } from "../../../../lib/utils";
+
+function timingSafeStringEqual(a: string, b: string): boolean {
+  const enc = new TextEncoder();
+  const aB = enc.encode(a);
+  const bB = enc.encode(b);
+  if (aB.length !== bB.length) return false;
+  let diff = 0;
+  for (let i = 0; i < aB.length; i++) diff |= aB[i] ^ bB[i];
+  return diff === 0;
+}
 
 export async function POST(req: Request) {
   try {
@@ -42,28 +52,12 @@ export async function POST(req: Request) {
     }
 
     // Constant-time comparison to prevent timing attacks
-    const encoder = new TextEncoder();
-    const a = encoder.encode(password);
-    const b = encoder.encode(adminPassword);
-
-    // Pad shorter buffer so length leak doesn't reveal password length
-    const maxLen = Math.max(a.length, b.length);
-    const aPadded = new Uint8Array(maxLen);
-    const bPadded = new Uint8Array(maxLen);
-    aPadded.set(a);
-    bPadded.set(b);
-
-    let diff = a.length !== b.length ? 1 : 0;
-    for (let i = 0; i < maxLen; i++) {
-      diff |= aPadded[i] ^ bPadded[i];
-    }
-
-    if (diff !== 0) {
+    if (!timingSafeStringEqual(password, adminPassword)) {
       return NextResponse.redirect(new URL("/admin/login?error=invalid", req.url));
     }
 
-    // Successful login — clear rate limit counter
-    clearAttempts(rlKey);
+    // Successful login — do NOT clear rate limit counter; let the window expire
+    // naturally so attackers cannot use deliberate successes to reset the counter.
 
     const token = await computeAdminSessionToken();
     const res = NextResponse.redirect(new URL("/admin", req.url));

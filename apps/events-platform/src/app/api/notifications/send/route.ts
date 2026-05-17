@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import webpush from "web-push";
 import { supabaseServer } from "../../../../lib/supabase/server";
 import { getVerifiedOrganizerSlug } from "../../../../lib/auth";
+import { checkRateLimit, recordAttempt } from "../../../../lib/utils";
 
 webpush.setVapidDetails(
   "mailto:events@squarebidness.com",
@@ -20,6 +21,17 @@ export async function POST(req: NextRequest) {
 
   const { eventId, title, body } = await req.json();
   if (!eventId || !title) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+
+  // Per-event push blast rate limit: max 3 blasts per 15-min window
+  const blastKey = `push_blast:${eventId}`;
+  recordAttempt(blastKey);
+  const { limited } = checkRateLimit(blastKey, 3);
+  if (limited) {
+    return NextResponse.json(
+      { error: "Push blast rate limit reached. Try again later." },
+      { status: 429 }
+    );
+  }
 
   // Verify ownership
   const { data: event } = await supabaseServer

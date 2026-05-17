@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../../lib/supabase/server";
 import { generateQRDataURL } from "../../../../lib/qr";
-import { sendTicketTransferNotice } from "../../../../lib/notifications/email";
+import { sendTicketTransferNotice, sendTicketTransferReceived } from "../../../../lib/notifications/email";
 import { checkRateLimit, recordAttempt, isSafeOrigin } from "../../../../lib/utils";
 
 export async function POST(req: NextRequest) {
@@ -86,6 +86,16 @@ export async function POST(req: NextRequest) {
     ticketCode: ticket.ticket_code,
     tierName: ticket.tier_name ?? "Ticket",
     eventTitle,
+  }).catch(() => {});
+
+  // Notify the new holder with their ticket code and QR code — non-blocking
+  sendTicketTransferReceived({
+    newName: cleanName,
+    newEmail: cleanEmail,
+    ticketCode: ticket.ticket_code,
+    tierName: ticket.tier_name ?? "Ticket",
+    eventTitle,
+    qrDataUrl: newQr,
   }).catch(() => {});
 
   return NextResponse.json({ ok: true, newEmail: cleanEmail });

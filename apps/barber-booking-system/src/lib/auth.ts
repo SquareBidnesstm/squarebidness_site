@@ -1,6 +1,19 @@
 // Max server-side token age: 30 days (safety net — cookie maxAge is the primary expiry)
 const MAX_TOKEN_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 
+// Constant-time string comparison — prevents timing side-channel attacks on HMAC tokens.
+// HMAC outputs are always fixed-length hex (64 chars for SHA-256), so the length branch
+// is never reached in practice, but is included for correctness.
+function timingSafeEqual(a: string, b: string): boolean {
+  const enc = new TextEncoder();
+  const aB = enc.encode(a);
+  const bB = enc.encode(b);
+  if (aB.length !== bB.length) return false;
+  let diff = 0;
+  for (let i = 0; i < aB.length; i++) diff |= aB[i] ^ bB[i];
+  return diff === 0;
+}
+
 async function hmacHex(secret: string, message: string): Promise<string> {
   const enc = new TextEncoder();
   const key = await crypto.subtle.importKey(
@@ -51,7 +64,7 @@ export async function verifyBarberSession(
   if (isNaN(issuedAt) || Date.now() - issuedAt > MAX_TOKEN_AGE_MS) return false;
 
   const expected = await computeBarberSessionToken(shopSlug, barberSlug, issuedAt);
-  return value === expected;
+  return timingSafeEqual(value, expected);
 }
 
 // Token format: "{issuedAt}.{hmac}" — issuedAt is Unix ms timestamp
@@ -98,5 +111,5 @@ export async function verifyAdminSession(
   if (isNaN(issuedAt) || Date.now() - issuedAt > MAX_TOKEN_AGE_MS) return false;
 
   const expected = await computeSessionToken(shopSlug, issuedAt);
-  return value === expected;
+  return timingSafeEqual(value, expected);
 }

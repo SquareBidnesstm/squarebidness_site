@@ -42,6 +42,11 @@ export async function POST(req: NextRequest) {
   const refund_policy = (formData.get("refund_policy") as string) || "no_refunds";
   const refund_policy_notes = (formData.get("refund_policy_notes") as string)?.trim() || null;
 
+  const VALID_REFUND_POLICIES = ["no_refunds", "up_to_24h", "full_refund"] as const;
+  if (refund_policy && !VALID_REFUND_POLICIES.includes(refund_policy as (typeof VALID_REFUND_POLICIES)[number])) {
+    return NextResponse.json({ error: "Invalid refund policy." }, { status: 400 });
+  }
+
   if (!title || !starts_at || !ends_at) {
     return NextResponse.redirect(
       new URL(`/organizer/dashboard/events/${eventId}/edit?error=missing`, req.url),

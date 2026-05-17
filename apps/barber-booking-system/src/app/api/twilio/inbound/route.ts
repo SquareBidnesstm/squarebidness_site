@@ -55,7 +55,9 @@ export async function POST(req: NextRequest) {
   // Validate Twilio signature when auth token is configured
   if (authToken) {
     const signature = req.headers.get("x-twilio-signature") ?? "";
-    const url = `https://booking.squarebidness.com/api/twilio/inbound`;
+    const proto = req.headers.get("x-forwarded-proto") ?? "https";
+    const host = req.headers.get("host") ?? "booking.squarebidness.com";
+    const url = `${proto}://${host}/api/twilio/inbound`;
     const valid = await validateTwilioSignature(authToken, signature, url, params);
     if (!valid) {
       return new NextResponse(TWIML_EMPTY, { status: 403, headers: { "Content-Type": "text/xml" } });

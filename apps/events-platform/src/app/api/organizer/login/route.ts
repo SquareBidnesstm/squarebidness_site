@@ -9,7 +9,7 @@ import {
   computeOrganizerSessionToken,
   organizerSessionCookieName,
 } from "../../../../lib/auth";
-import { checkRateLimit, recordAttempt, clearAttempts, isSafeOrigin } from "../../../../lib/utils";
+import { checkRateLimit, recordAttempt, isSafeOrigin } from "../../../../lib/utils";
 
 async function verifyPassword(
   password: string,
@@ -106,8 +106,8 @@ export async function POST(req: Request) {
       );
     }
 
-    // Successful login — clear rate limit counter
-    clearAttempts(rlKey);
+    // Successful login — do NOT clear rate limit counter; let the window expire
+    // naturally so attackers cannot use deliberate successes to reset the counter.
 
     // Set session cookie
     const token = await computeOrganizerSessionToken(organizer.slug);

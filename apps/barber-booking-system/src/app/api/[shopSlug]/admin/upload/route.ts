@@ -39,15 +39,29 @@ export async function POST(
     return NextResponse.json({ ok: false, error: "barber_id required for barber_photo" }, { status: 400 });
   }
 
-  // Validate mime type
-  const allowed = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-  if (!allowed.includes(file.type)) {
-    return NextResponse.json({ ok: false, error: "File must be JPEG, PNG, WebP, or GIF" }, { status: 400 });
-  }
-
-  // Max 5MB
+  // Max 5MB — check before reading into memory
   if (file.size > 5 * 1024 * 1024) {
     return NextResponse.json({ ok: false, error: "File must be under 5MB" }, { status: 400 });
+  }
+
+  // Read buffer once; use it for both magic-byte validation and the storage upload
+  const arrayBuffer = await file.arrayBuffer();
+  const bytes = new Uint8Array(arrayBuffer).slice(0, 8);
+
+  // Validate MIME type via magic bytes — do not trust the client-supplied Content-Type
+  const MAGIC: Record<string, number[][]> = {
+    "image/jpeg": [[0xFF, 0xD8, 0xFF]],
+    "image/png":  [[0x89, 0x50, 0x4E, 0x47]],
+    "image/webp": [[0x52, 0x49, 0x46, 0x46]], // RIFF....WEBP — full WEBP check below
+    "image/gif":  [[0x47, 0x49, 0x46, 0x38]],
+  };
+
+  const isValidType = Object.entries(MAGIC).some(([mime, sigs]) =>
+    mime === file.type && sigs.some((sig) => sig.every((b, i) => bytes[i] === b))
+  );
+
+  if (!isValidType) {
+    return NextResponse.json({ ok: false, error: "Invalid file type. Only JPEG, PNG, WebP, and GIF are allowed." }, { status: 400 });
   }
 
   const ext = file.type.split("/")[1].replace("jpeg", "jpg");
@@ -55,7 +69,6 @@ export async function POST(
     ? `shops/${shop.id}/logo.${ext}`
     : `shops/${shop.id}/barbers/${barberId}.${ext}`;
 
-  const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
 
   const { error: uploadError } = await supabaseServer.storage

@@ -393,6 +393,48 @@ export async function sendTicketTransferNotice(params: SendTicketTransferNoticeP
   });
 }
 
+// ─── Ticket Transfer Received Notice (to new holder) ─────────────────────────
+
+interface SendTicketTransferReceivedParams {
+  newName: string;
+  newEmail: string;
+  ticketCode: string;
+  tierName: string;
+  eventTitle: string;
+  qrDataUrl: string;
+}
+
+export async function sendTicketTransferReceived(params: SendTicketTransferReceivedParams) {
+  if (!process.env.RESEND_API_KEY) return;
+  await resend.emails.send({
+    from: "SB Events <tickets@squarebidness.com>",
+    to: params.newEmail,
+    subject: `You received a ticket to ${params.eventTitle}`,
+    headers: UNSUBSCRIBE_HEADERS,
+    html: emailShell(`
+      <div style="text-align:center;margin-bottom:28px;">
+        <div style="display:inline-block;background:#0a2a0a;border:1px solid #166534;border-radius:999px;padding:8px 20px;margin-bottom:14px;">
+          <span style="color:#22c55e;font-size:13px;font-weight:900;letter-spacing:0.04em;">✓ &nbsp;Ticket Received</span>
+        </div>
+        <h1 style="font-size:24px;font-weight:900;letter-spacing:-0.04em;margin:0 0 6px;">You're going!<br/><span style="color:#ef4444;">${escHtml(params.eventTitle)}</span></h1>
+        <p style="color:#71717a;margin:8px 0 0;font-size:14px;">A ticket has been transferred to you.</p>
+      </div>
+      <div style="background:#0d0d0d;border:1px solid #1e1e1e;border-radius:14px;padding:24px 20px;margin-bottom:24px;text-align:center;">
+        <p style="color:#ef4444;font-size:10px;font-weight:900;letter-spacing:0.14em;text-transform:uppercase;margin:0 0 6px;">${escHtml(params.tierName)}</p>
+        <p style="color:#fff;font-family:'Courier New',monospace;font-size:14px;letter-spacing:0.06em;margin:0 0 18px;background:#111;display:inline-block;padding:6px 14px;border-radius:6px;">${escHtml(params.ticketCode)}</p>
+        ${params.qrDataUrl ? `
+        <div style="background:#fff;border-radius:12px;padding:12px;display:inline-block;margin-bottom:10px;">
+          <img src="${escHtml(params.qrDataUrl)}" alt="QR Code" width="168" height="168" style="display:block;border-radius:4px;" />
+        </div>` : ""}
+        <p style="color:#555;font-size:11px;margin:8px 0 0;">Show this QR code at the door</p>
+      </div>
+      <p style="color:#555;font-size:13px;text-align:center;">
+        Questions? Visit <a href="https://events.squarebidness.com" style="color:#a1a1aa;">events.squarebidness.com</a>.
+      </p>
+    `),
+  });
+}
+
 export async function sendWaitlistNotification(params: SendWaitlistNotificationParams) {
   if (!process.env.RESEND_API_KEY) return;
   await resend.emails.send({

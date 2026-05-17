@@ -86,7 +86,8 @@ export async function GET(
   const { data, error, count } = await query;
 
   if (error) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    console.error("[admin/bookings GET] DB error:", error);
+    return NextResponse.json({ ok: false, error: "An unexpected error occurred. Please try again." }, { status: 500 });
   }
 
   return NextResponse.json({

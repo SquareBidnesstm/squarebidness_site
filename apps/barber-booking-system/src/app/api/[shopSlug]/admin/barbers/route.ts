@@ -37,7 +37,8 @@ export async function GET(
     .order("sort_order");
 
   if (error) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    console.error("[admin/barbers GET] DB error:", error);
+    return NextResponse.json({ ok: false, error: "An unexpected error occurred. Please try again." }, { status: 500 });
   }
 
   // Fetch PIN presence for each barber
@@ -195,7 +196,21 @@ export async function POST(
     .single();
 
   if (error || !barber) {
-    return NextResponse.json({ ok: false, error: error?.message || "Could not create barber." }, { status: 500 });
+    console.error("[admin/barbers POST] DB insert error:", error);
+    return NextResponse.json({ ok: false, error: "An unexpected error occurred. Please try again." }, { status: 500 });
+  }
+
+  // Re-count after insert to catch concurrent violations (TOCTOU guard)
+  const { count: newCount } = await supabaseServer
+    .from("barbers")
+    .select("id", { count: "exact", head: true })
+    .eq("shop_id", shop.id)
+    .eq("active", true);
+
+  if (newCount !== null && newCount > barberLimit) {
+    // Rollback — deactivate the just-inserted barber
+    await supabaseServer.from("barbers").update({ active: false }).eq("id", barber.id);
+    return NextResponse.json({ ok: false, error: "Barber limit reached for your plan." }, { status: 400 });
   }
 
   // Auto-assign all active services to this new barber
