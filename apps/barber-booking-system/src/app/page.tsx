@@ -99,7 +99,7 @@ export default function PlatformLanding() {
         {/* HERO */}
         <header style={{ padding: "clamp(60px, 10vw, 100px) 24px clamp(50px, 8vw, 80px)", textAlign: "center", background: "radial-gradient(circle at 50% 0%, rgba(212,175,55,.07), transparent 60%), #050505" }}>
           <p style={{ color: "#d4af37", fontSize: 11, fontWeight: 900, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 20 }}>
-            Free · No Credit Card Required
+            First Month Free
           </p>
           <h1 style={{ fontSize: "clamp(2.2rem, 6vw, 4rem)", fontWeight: 950, letterSpacing: "-0.05em", lineHeight: 1.05, marginBottom: 20, maxWidth: 760, margin: "0 auto 20px" }}>
             The Online Booking App for Barbers, Nail Techs & Hair Stylists
