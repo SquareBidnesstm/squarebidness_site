@@ -3,13 +3,19 @@
 // ---------------------------------------------------------------------------
 // Simple in-memory rate limiter (per serverless instance / process).
 //
-// ⚠️  PRODUCTION NOTE: Because Next.js on Vercel runs each serverless function
-// in its own isolated process, this Map is NOT shared across concurrent
-// instances.  A determined attacker can bypass the limit by hitting different
-// cold-started instances in parallel.  For stronger guarantees, back the
-// counters with an edge KV store (e.g. Vercel KV / Upstash Redis).  For the
-// current traffic volume this in-process guard is a meaningful speed-bump
-// against naive automated clients.
+// ⚠️  SERVERLESS LIMITATION: Because Next.js on Vercel runs each serverless
+// function in its own isolated process, this Map is NOT shared across
+// concurrent instances. A determined attacker can bypass the limit by hitting
+// different cold-started instances in parallel. The effective rate limit is:
+//   (configured limit) × (number of concurrent instances)
+//
+// TODO: Replace _failMap with Upstash Redis (@upstash/ratelimit) for true
+// cross-instance rate limiting before scaling beyond a single-region
+// deployment. See: https://upstash.com/docs/redis/sdks/ratelimit
+//
+// Until then, this in-process guard is a meaningful speed-bump against naive
+// automated clients and provides defense-in-depth alongside Vercel's edge
+// firewall.
 // ---------------------------------------------------------------------------
 
 // --- Failed-attempt limiter (used for PIN login) ---------------------------
@@ -21,6 +27,10 @@ const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 export function checkRateLimit(key: string, maxAttempts?: number): { limited: boolean; retryAfterSeconds: number } {
   const limit = maxAttempts ?? MAX_FAILS;
   const now = Date.now();
+  // Evict expired entries to prevent unbounded memory growth in long-lived processes
+  for (const [k, v] of _failMap.entries()) {
+    if (now > v.resetAt) _failMap.delete(k);
+  }
   const entry = _failMap.get(key);
   if (!entry || now > entry.resetAt) {
     // Fresh window

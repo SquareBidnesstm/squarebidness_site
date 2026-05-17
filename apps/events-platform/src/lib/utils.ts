@@ -16,6 +16,16 @@ export function checkRateLimit(
   maxFails = 10
 ): { limited: boolean; retryAfterSeconds: number } {
   const now = Date.now();
+
+  // Evict expired entries to prevent unbounded memory growth within a single instance.
+  // NOTE: In serverless environments each cold start creates a fresh map, so eviction
+  // is a best-effort safeguard rather than a guaranteed bounded-size store. For
+  // production-grade enforcement across concurrent instances, replace _failMap with a
+  // shared atomic store such as Upstash Redis (@upstash/ratelimit).
+  for (const [k, v] of _failMap.entries()) {
+    if (now > v.resetAt) _failMap.delete(k);
+  }
+
   const entry = _failMap.get(key);
   if (!entry || now > entry.resetAt) return { limited: false, retryAfterSeconds: 0 };
   if (entry.count >= maxFails) {

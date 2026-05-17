@@ -210,9 +210,10 @@ export async function PATCH(
       }
       // If not refunding, deposit is forfeited — no action needed, stays as deposit_paid
 
-      // SMS notify customer
+      // BC-5: SMS notify customer — skip if opted out
       const normalizedPhone = normalizePhone(data.customer_phone ?? "");
-      if (normalizedPhone) {
+      const optedOut = normalizedPhone ? await isSmsOptedOut(normalizedPhone) : true;
+      if (normalizedPhone && !optedOut) {
         const sid = process.env.TWILIO_ACCOUNT_SID;
         const token = process.env.TWILIO_AUTH_TOKEN;
         const messagingSid = process.env.TWILIO_MESSAGING_SERVICE_SID;

@@ -57,7 +57,7 @@ async function handleDepositBooking(session: Stripe.Checkout.Session) {
   const { data: customer } = await supabaseServer
     .from("customers").insert({ shop_id: shop.id, full_name: meta.customer_name ?? "" }).select("id").single();
 
-  const { data: booking } = await supabaseServer
+  const { data: booking, error: bookingInsertError } = await supabaseServer
     .from("bookings").insert({
       booking_code: bookingCode,
       shop_id: shop.id,
@@ -79,7 +79,21 @@ async function handleDepositBooking(session: Stripe.Checkout.Session) {
       confirmed_at: new Date().toISOString(),
     }).select("id, booking_code, starts_at").single();
 
-  if (!booking) return;
+  if (!booking) {
+    // BC-2: Exclusion constraint violation means a concurrent request already created
+    // a booking for this slot. The webhook cannot issue a refund (the confirm route is
+    // responsible), but we must not proceed with recording a duplicate payment row.
+    const errCode = (bookingInsertError as any)?.code;
+    if (errCode === "23P01" || errCode === "23505") {
+      console.error("Webhook booking insert conflict (23P01/23505) — slot already taken:", {
+        paymentIntent: session.payment_intent,
+        shopSlug: meta.shop_slug,
+        date: meta.date,
+        time: meta.time,
+      });
+    }
+    return;
+  }
 
   // Record the deposit payment
   const depositAmountCents = session.amount_total ?? 0;

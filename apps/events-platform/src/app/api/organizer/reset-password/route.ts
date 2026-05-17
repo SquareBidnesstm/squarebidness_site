@@ -45,10 +45,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Password must be at least 8 characters" }, { status: 400 });
   }
 
+  // Hash the incoming raw token before querying — the DB stores only the hash
+  const hashBuf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(token));
+  const tokenHash = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, "0")).join("");
+
   const { data: organizer } = await supabaseServer
     .from("organizers")
     .select("id, reset_token, reset_token_expires_at")
-    .eq("reset_token", token)
+    .eq("reset_token", tokenHash)
     .maybeSingle();
 
   if (!organizer) {

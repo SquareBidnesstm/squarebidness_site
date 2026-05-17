@@ -15,6 +15,14 @@ export async function POST(
 ) {
   const { token } = await params;
 
+  // BC-4: Per-token rate limit — 5 attempts per 15 min per token
+  const tokenKey = `cancel:tok:${token}`;
+  recordAttempt(tokenKey);
+  const { limited: tokenLimited } = checkRateLimit(tokenKey, 5);
+  if (tokenLimited) {
+    return NextResponse.json({ ok: false, error: "Too many attempts. Try again later." }, { status: 429 });
+  }
+
   // Rate limit: 10 cancel attempts per 15 min per IP
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
   recordAttempt(`cancel:${ip}`);

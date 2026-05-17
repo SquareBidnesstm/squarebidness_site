@@ -79,6 +79,14 @@ export async function POST(req: NextRequest) {
     const qty = parseInt(formData.get(`tier_${tier.id}`) as string ?? "0");
     if (qty <= 0) continue;
 
+    const MAX_PER_TIER = 10;
+    if (qty > MAX_PER_TIER) {
+      return NextResponse.json(
+        { ok: false, error: `Maximum ${MAX_PER_TIER} tickets per tier per order.` },
+        { status: 400 }
+      );
+    }
+
     const available = tier.quantity - tier.quantity_sold;
     if (qty > available) {
       return NextResponse.json({ ok: false, error: `Not enough tickets for ${tier.name}` }, { status: 400 });
@@ -214,31 +222,38 @@ export async function POST(req: NextRequest) {
   }
 
   // Create Stripe Checkout Session via Connect
-  const session = await stripe.checkout.sessions.create({
-    mode: "payment",
-    line_items: lineItems,
-    success_url: `${PLATFORM_URL}/orders/${order.id}?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${PLATFORM_URL}/events/${eventSlug}?cancelled=1`,
-    customer_email: buyerEmail,
-    allow_promotion_codes: false,
-    payment_intent_data: {
-      application_fee_amount: totalPlatformFeeCents,
-      transfer_data: {
-        destination: organizer.stripe_account_id,
+  let session: Stripe.Checkout.Session;
+  try {
+    session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      line_items: lineItems,
+      success_url: `${PLATFORM_URL}/orders/${order.id}?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${PLATFORM_URL}/events/${eventSlug}?cancelled=1`,
+      customer_email: buyerEmail,
+      allow_promotion_codes: false,
+      payment_intent_data: {
+        application_fee_amount: totalPlatformFeeCents,
+        transfer_data: {
+          destination: organizer.stripe_account_id,
+        },
+        metadata: {
+          order_id: order.id,
+          order_code: orderCode,
+          event_slug: eventSlug,
+          buyer_name: buyerName,
+          tier_selections: JSON.stringify(tierSelections),
+        },
       },
       metadata: {
         order_id: order.id,
-        order_code: orderCode,
         event_slug: eventSlug,
-        buyer_name: buyerName,
-        tier_selections: JSON.stringify(tierSelections),
       },
-    },
-    metadata: {
-      order_id: order.id,
-      event_slug: eventSlug,
-    },
-  });
+    });
+  } catch (err) {
+    console.error("Stripe checkout session creation failed:", err);
+    await supabaseServer.from("orders").update({ status: "cancelled" }).eq("id", order.id);
+    return NextResponse.json({ ok: false, error: "Could not create payment session. Please try again." }, { status: 500 });
+  }
 
   // Update order with Stripe session ID and promo ID (promo uses incremented at payment completion)
   await supabaseServer

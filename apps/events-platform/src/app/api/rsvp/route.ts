@@ -21,9 +21,16 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { eventId, tierId, name, email, phone, qty, promoId, refCode } = body;
+  const { eventId, tierId, name, email, phone, promoId, refCode } = body;
 
-  if (!eventId || !tierId || !name || !email || !qty) {
+  // Strict qty validation — must be a positive integer no greater than 10
+  const rawQty = body.qty;
+  const qty = typeof rawQty === "number" ? Math.floor(rawQty) : parseInt(String(rawQty ?? ""), 10);
+  if (!Number.isInteger(qty) || qty < 1 || qty > 10) {
+    return NextResponse.json({ error: "qty must be a whole number between 1 and 10." }, { status: 400 });
+  }
+
+  if (!eventId || !tierId || !name || !email) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 

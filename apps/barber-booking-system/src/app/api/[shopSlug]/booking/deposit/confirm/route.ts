@@ -26,6 +26,19 @@ export async function GET(
     return NextResponse.redirect(new URL(`/${shopSlug}`, req.url));
   }
 
+  // BC-3: Idempotency guard — if this payment_intent was already recorded, the booking
+  // was already created (e.g. page refresh or duplicate redirect). Redirect to confirmed.
+  if (session.payment_intent) {
+    const { data: existingPayment } = await supabaseServer
+      .from("payments")
+      .select("id")
+      .eq("provider_payment_id", session.payment_intent as string)
+      .maybeSingle();
+    if (existingPayment) {
+      return NextResponse.redirect(new URL(`/${shopSlug}/book?confirmed=1&returning=1`, req.url));
+    }
+  }
+
   // All booking data lives in Stripe-controlled metadata — no URL tampering possible
   const meta = session.metadata;
   if (!meta?.shop_id || !meta?.barber_slug || !meta?.service_slug || !meta?.date || !meta?.time) {
@@ -91,11 +104,18 @@ export async function GET(
     .select("id, booking_code, starts_at, cancel_token").single();
 
   if (!booking) {
-    const isOverlap = (bookingError as any)?.code === "23P01";
-    const dest = isOverlap
-      ? `/${shopSlug}/book?overlap=1`
-      : `/${shopSlug}`;
-    return NextResponse.redirect(new URL(dest, req.url));
+    // BC-2: A concurrent request won the exclusion-constraint race. The customer was
+    // charged but no booking was created — issue a refund immediately.
+    const errCode = (bookingError as any)?.code;
+    if (errCode === "23P01" || errCode === "23505") {
+      try {
+        await stripe.refunds.create({ payment_intent: session.payment_intent as string });
+      } catch (refundErr) {
+        console.error("Refund failed after booking conflict:", refundErr);
+      }
+      return NextResponse.redirect(new URL(`/${shopSlug}/book?conflict=1&refunded=1`, req.url));
+    }
+    return NextResponse.redirect(new URL(`/${shopSlug}`, req.url));
   }
 
   // Record the deposit payment so it survives reschedules

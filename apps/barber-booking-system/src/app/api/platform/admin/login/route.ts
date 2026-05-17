@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, recordFailedAttempt, clearFailedAttempts } from "../../../../../lib/utils";
 
+function requireAppSecret(): string {
+  const secret = process.env.APP_SECRET;
+  if (!secret) throw new Error("APP_SECRET environment variable is not set. Cannot issue platform session tokens.");
+  return secret;
+}
+
 async function hmacHex(secret: string, message: string): Promise<string> {
   const enc = new TextEncoder();
   const key = await crypto.subtle.importKey(
@@ -40,7 +46,7 @@ export async function POST(req: NextRequest) {
 
   // Timestamped token: HMAC of "platform-admin:{issuedAt}" — rotates every login,
   // expires after 12 hours (verified in verifyPlatformSession in shops/route.ts).
-  const secret = process.env.APP_SECRET ?? "";
+  const secret = requireAppSecret();
   const issuedAt = Date.now().toString();
   const mac = await hmacHex(secret, `platform-admin:${issuedAt}`);
   const token = `${issuedAt}.${mac}`;

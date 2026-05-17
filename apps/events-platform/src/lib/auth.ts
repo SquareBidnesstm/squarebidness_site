@@ -8,6 +8,12 @@
 
 const MAX_TOKEN_AGE_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
+function requireAppSecret(): string {
+  const secret = process.env.APP_SECRET;
+  if (!secret) throw new Error("APP_SECRET environment variable is required but not set.");
+  return secret;
+}
+
 async function hmacHex(secret: string, message: string): Promise<string> {
   const enc = new TextEncoder();
   const key = await crypto.subtle.importKey(
@@ -26,7 +32,7 @@ async function hmacHex(secret: string, message: string): Promise<string> {
 // ── Organizer session ────────────────────────────────────
 
 export async function computeOrganizerSessionToken(organizerSlug: string): Promise<string> {
-  const secret = process.env.APP_SECRET ?? "";
+  const secret = requireAppSecret();
   const issuedAt = Date.now().toString();
   const mac = await hmacHex(secret, `organizer:${organizerSlug}:${issuedAt}`);
   return `${issuedAt}.${mac}`;
@@ -40,7 +46,7 @@ export async function verifyOrganizerSession(
   req: Request,
   organizerSlug: string
 ): Promise<boolean> {
-  const secret = process.env.APP_SECRET ?? "";
+  const secret = requireAppSecret();
   const cookieHeader = req.headers.get("cookie") ?? "";
   const cookieName = organizerSessionCookieName(organizerSlug);
   const match = cookieHeader
@@ -105,14 +111,14 @@ export async function getVerifiedOrganizerSlugFromHeader(cookieHeader: string): 
 // ── Admin (Marcus) session ───────────────────────────────
 
 export async function computeAdminSessionToken(): Promise<string> {
-  const secret = process.env.APP_SECRET ?? "";
+  const secret = requireAppSecret();
   const issuedAt = Date.now().toString();
   const mac = await hmacHex(secret, `sbe:admin:${issuedAt}`);
   return `${issuedAt}.${mac}`;
 }
 
 export async function verifyAdminSession(req: Request): Promise<boolean> {
-  const secret = process.env.APP_SECRET ?? "";
+  const secret = requireAppSecret();
   const cookieHeader = req.headers.get("cookie") ?? "";
   const match = cookieHeader
     .split(";")

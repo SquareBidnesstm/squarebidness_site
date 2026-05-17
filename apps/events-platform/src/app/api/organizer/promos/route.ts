@@ -35,6 +35,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
   }
 
+  // Validate that event_id (if provided) belongs to this organizer
+  if (event_id) {
+    const { data: ownedEvent } = await supabaseServer
+      .from("events")
+      .select("id")
+      .eq("id", event_id)
+      .eq("organizer_id", org.id)
+      .maybeSingle();
+    if (!ownedEvent) {
+      return NextResponse.json({ error: "Event not found or does not belong to you." }, { status: 403 });
+    }
+  }
+
   const { data, error } = await supabaseServer
     .from("promo_codes")
     .insert({

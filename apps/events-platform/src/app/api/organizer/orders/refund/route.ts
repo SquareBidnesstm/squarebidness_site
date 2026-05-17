@@ -65,14 +65,17 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // Issue Stripe refund
+  // Issue Stripe refund — idempotency key prevents duplicate refunds on retries
   if (order.stripe_payment_intent_id) {
     try {
-      await stripe.refunds.create({
-        payment_intent: order.stripe_payment_intent_id,
-        reverse_transfer: true,        // debit organizer's connected account, not platform
-        refund_application_fee: false, // platform keeps the $1/ticket fee
-      });
+      await stripe.refunds.create(
+        {
+          payment_intent: order.stripe_payment_intent_id,
+          reverse_transfer: true,        // debit organizer's connected account, not platform
+          refund_application_fee: false, // platform keeps the $1/ticket fee
+        },
+        { idempotencyKey: `refund-${orderId}` }
+      );
     } catch (err: any) {
       console.error("Stripe refund error:", err);
       return NextResponse.json({ error: err.message ?? "Stripe refund failed" }, { status: 500 });
@@ -85,14 +88,38 @@ export async function POST(req: NextRequest) {
     .update({ status: "cancelled" })
     .eq("id", orderId);
 
-  // Mark all tickets for this order cancelled
+  // Mark all tickets for this order cancelled — select tier_id to decrement quantity_sold
   const { data: cancelledTickets } = await supabaseServer
     .from("tickets")
     .update({ status: "cancelled" })
     .eq("order_id", orderId)
-    .select("id");
+    .select("id, tier_id");
 
   const freedCount = cancelledTickets?.length ?? 0;
+
+  // Decrement quantity_sold for each affected tier (with optimistic lock)
+  if (cancelledTickets && cancelledTickets.length > 0) {
+    const tierCounts = new Map<string, number>();
+    for (const ticket of cancelledTickets) {
+      if (ticket.tier_id) {
+        tierCounts.set(ticket.tier_id, (tierCounts.get(ticket.tier_id) ?? 0) + 1);
+      }
+    }
+    for (const [tierId, count] of tierCounts.entries()) {
+      const { data: tier } = await supabaseServer
+        .from("ticket_tiers")
+        .select("quantity_sold")
+        .eq("id", tierId)
+        .maybeSingle();
+      if (tier && typeof tier.quantity_sold === "number") {
+        await supabaseServer
+          .from("ticket_tiers")
+          .update({ quantity_sold: Math.max(0, tier.quantity_sold - count) })
+          .eq("id", tierId)
+          .eq("quantity_sold", tier.quantity_sold); // optimistic lock
+      }
+    }
+  }
 
   // Auto-notify waitlist: notify first N people (matching freed ticket count)
   // Early return if no capacity was freed — no point querying the waitlist

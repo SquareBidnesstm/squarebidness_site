@@ -24,12 +24,18 @@ export async function POST(
   if (!booking) return NextResponse.json({ ok: false, error: "Booking not found" }, { status: 404 });
   if (booking.payment_status === "paid") return NextResponse.json({ ok: false, error: "Already paid in full" }, { status: 400 });
 
+  // BH-6: Validate price_snapshot before computing remaining balance
+  const totalPrice = Number(booking.price_snapshot);
+  if (!Number.isFinite(totalPrice) || totalPrice <= 0) {
+    return NextResponse.json({ error: "Invalid booking price." }, { status: 400 });
+  }
+
   const totalPaid = (booking.payments as any[] ?? [])
     .filter((p: any) => p.status === "succeeded")
     .reduce((sum: number, p: any) => sum + Number(p.amount), 0);
 
-  const remaining = Number(booking.price_snapshot) - totalPaid;
-  if (remaining <= 0) return NextResponse.json({ ok: false, error: "No balance remaining" }, { status: 400 });
+  const remaining = Math.max(0, totalPrice - totalPaid);
+  if (remaining <= 0) return NextResponse.json({ error: "No balance remaining on this booking." }, { status: 400 });
 
   const body = await req.json().catch(() => ({}));
   // Accept explicit method: cash | check | zelle | venmo | other (default: cash)

@@ -61,14 +61,17 @@ export async function POST(req: NextRequest) {
     try {
       let refunded = false;
 
-      // Issue Stripe refund
+      // Issue Stripe refund — idempotency key prevents duplicate refunds on retries
       if (order.stripe_payment_intent_id) {
         try {
-          await stripe.refunds.create({
-            payment_intent: order.stripe_payment_intent_id,
-            reverse_transfer: true,       // debit organizer's connected account
-            refund_application_fee: true, // full refund to buyer on cancellation — organizer's fault
-          });
+          await stripe.refunds.create(
+            {
+              payment_intent: order.stripe_payment_intent_id,
+              reverse_transfer: true,       // debit organizer's connected account
+              refund_application_fee: true, // full refund to buyer on cancellation — organizer's fault
+            },
+            { idempotencyKey: `refund-event-${eventId}-order-${order.id}` }
+          );
           refunded = true;
           refundedCount++;
         } catch (err: any) {

@@ -38,15 +38,18 @@ export async function POST(req: NextRequest) {
   // Always return ok to prevent email enumeration
   if (!organizer) return NextResponse.json({ ok: true });
 
-  // Generate a secure random token
+  // Generate a secure random token — store only the SHA-256 hash in the DB
   const rawToken = crypto.randomUUID();
+  const hashBuf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(rawToken));
+  const tokenHash = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, "0")).join("");
   const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
   await supabaseServer
     .from("organizers")
-    .update({ reset_token: rawToken, reset_token_expires_at: expires.toISOString() })
+    .update({ reset_token: tokenHash, reset_token_expires_at: expires.toISOString() })
     .eq("id", organizer.id);
 
+  // Send rawToken in the email link — only the hash is persisted
   const resetUrl = `${PLATFORM_URL}/organizer/reset-password?token=${rawToken}`;
 
   await resend.emails.send({

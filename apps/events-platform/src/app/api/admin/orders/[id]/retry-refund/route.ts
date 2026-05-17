@@ -33,11 +33,14 @@ export async function POST(
   }
 
   try {
-    await stripe.refunds.create({
-      payment_intent: order.stripe_payment_intent_id,
-      reverse_transfer: true,
-      refund_application_fee: true,
-    });
+    await stripe.refunds.create(
+      {
+        payment_intent: order.stripe_payment_intent_id,
+        reverse_transfer: true,
+        refund_application_fee: true,
+      },
+      { idempotencyKey: `refund-${id}` }
+    );
 
     await supabaseServer
       .from("orders")

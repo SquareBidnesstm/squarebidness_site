@@ -29,6 +29,19 @@ export async function POST(req: NextRequest) {
   const { name, eventId } = await req.json();
   if (!name?.trim()) return NextResponse.json({ error: "Name required" }, { status: 400 });
 
+  // Validate that eventId (if provided) belongs to this organizer
+  if (eventId) {
+    const { data: ownedEvent } = await supabaseServer
+      .from("events")
+      .select("id")
+      .eq("id", eventId)
+      .eq("organizer_id", org.id)
+      .maybeSingle();
+    if (!ownedEvent) {
+      return NextResponse.json({ error: "Event not found or does not belong to you." }, { status: 403 });
+    }
+  }
+
   // Generate unique code — retry up to 3 times on 23505 unique-violation collision
   let data = null;
   let lastError: any = null;

@@ -38,6 +38,13 @@ export async function POST(
     return NextResponse.json({ ok: false, error: "Bookings can only be made up to 90 days in advance." }, { status: 400 });
   }
 
+  // BH-7: Reject past dates
+  const todayUTC = new Date();
+  todayUTC.setUTCHours(0, 0, 0, 0);
+  if (requestedDate < todayUTC) {
+    return NextResponse.json({ ok: false, error: "Cannot book a date in the past." }, { status: 400 });
+  }
+
   const { data: shop } = await supabaseServer
     .from("shops").select("id, name, slug, timezone").eq("slug", shopSlug).eq("active", true).single();
   if (!shop) return NextResponse.json({ ok: false, error: "Shop not found" }, { status: 404 });

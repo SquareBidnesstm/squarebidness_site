@@ -91,6 +91,15 @@ export async function DELETE(
     .from("shops").select("id").eq("slug", shopSlug).eq("active", true).single();
   if (!shop) return NextResponse.json({ ok: false, error: "Shop not found" }, { status: 404 });
 
+  // BH-2: Require authentication before deleting — same pattern as POST handler.
+  if (barber_slug) {
+    const authed = await verifyBarberSession(req, shopSlug, barber_slug);
+    if (!authed) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+  } else {
+    const authed = await verifyAdminSession(req, shopSlug);
+    if (!authed) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+  }
+
   let deleteQuery = supabaseServer
     .from("push_subscriptions")
     .delete()

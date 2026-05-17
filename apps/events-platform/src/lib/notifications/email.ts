@@ -2,6 +2,17 @@ import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+/** Escape user-supplied strings before interpolating into HTML templates. */
+function escHtml(s: string | null | undefined): string {
+  if (!s) return "";
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 const LOGO = `<a href="https://events.squarebidness.com" style="text-decoration:none;display:inline-block;">
   <img src="https://events.squarebidness.com/events-192.png" alt="SB Events" width="48" height="48" style="border-radius:11px;display:block;margin:0 auto 6px;" />
   <p style="color:#a1a1aa;font-size:9px;font-weight:900;letter-spacing:0.22em;text-transform:uppercase;margin:0;text-align:center;">Square Bidness Events</p>
@@ -54,35 +65,38 @@ interface SendBuyerConfirmationParams {
 function buildBuyerEmailHtml(p: SendBuyerConfirmationParams): string {
   const ticketsHtml = p.tickets.map((t) => `
     <div style="background:#0d0d0d;border:1px solid #1e1e1e;border-radius:14px;padding:24px 20px;margin-bottom:14px;text-align:center;">
-      <p style="color:#ef4444;font-size:10px;font-weight:900;letter-spacing:0.14em;text-transform:uppercase;margin:0 0 6px;">${t.tierName}</p>
-      <p style="color:#fff;font-family:'Courier New',monospace;font-size:14px;letter-spacing:0.06em;margin:0 0 18px;background:#111;display:inline-block;padding:6px 14px;border-radius:6px;">${t.ticketCode}</p>
+      <p style="color:#ef4444;font-size:10px;font-weight:900;letter-spacing:0.14em;text-transform:uppercase;margin:0 0 6px;">${escHtml(t.tierName)}</p>
+      <p style="color:#fff;font-family:'Courier New',monospace;font-size:14px;letter-spacing:0.06em;margin:0 0 18px;background:#111;display:inline-block;padding:6px 14px;border-radius:6px;">${escHtml(t.ticketCode)}</p>
       ${t.qrDataUrl ? `
       <div style="background:#fff;border-radius:12px;padding:12px;display:inline-block;margin-bottom:10px;">
-        <img src="${t.qrDataUrl}" alt="QR Code" width="168" height="168" style="display:block;border-radius:4px;" />
+        <img src="${escHtml(t.qrDataUrl)}" alt="QR Code" width="168" height="168" style="display:block;border-radius:4px;" />
       </div>` : ""}
       <p style="color:#555;font-size:11px;margin:8px 0 0;">Show this QR code at the door</p>
     </div>
   `).join("");
 
-  const location = [p.venueName, p.city, p.state].filter(Boolean).join(", ");
-  const eventUrl = p.eventSlug ? `https://events.squarebidness.com/events/${p.eventSlug}` : "https://events.squarebidness.com";
+  const location = [p.venueName, p.city, p.state].filter(Boolean).map(escHtml).join(", ");
+  // eventSlug and orderId are internal IDs — still escape for defense-in-depth
+  const safeEventSlug = encodeURIComponent(p.eventSlug ?? "");
+  const safeOrderId = encodeURIComponent(p.orderId);
+  const eventUrl = p.eventSlug ? `https://events.squarebidness.com/events/${safeEventSlug}` : "https://events.squarebidness.com";
 
   return emailShell(`
     <!-- Cover -->
-    ${p.coverImageUrl ? `<div style="margin-bottom:24px;border-radius:14px;overflow:hidden;"><img src="${p.coverImageUrl}" alt="${p.eventTitle}" width="528" style="width:100%;display:block;" /></div>` : ""}
+    ${p.coverImageUrl ? `<div style="margin-bottom:24px;border-radius:14px;overflow:hidden;"><img src="${escHtml(p.coverImageUrl)}" alt="${escHtml(p.eventTitle)}" width="528" style="width:100%;display:block;" /></div>` : ""}
 
     <!-- Confirmation badge -->
     <div style="text-align:center;margin-bottom:28px;">
       <div style="display:inline-block;background:#0a2a0a;border:1px solid #166534;border-radius:999px;padding:8px 20px;margin-bottom:14px;">
         <span style="color:#22c55e;font-size:13px;font-weight:900;letter-spacing:0.04em;">✓ &nbsp;Order Confirmed</span>
       </div>
-      <h1 style="font-size:26px;font-weight:900;letter-spacing:-0.04em;margin:0 0 6px;line-height:1.1;">You're going!<br/><span style="color:#ef4444;">${p.eventTitle}</span></h1>
-      <p style="color:#71717a;margin:8px 0 0;font-size:14px;">Order <strong style="color:#fff;font-family:monospace;">${p.orderCode}</strong></p>
+      <h1 style="font-size:26px;font-weight:900;letter-spacing:-0.04em;margin:0 0 6px;line-height:1.1;">You're going!<br/><span style="color:#ef4444;">${escHtml(p.eventTitle)}</span></h1>
+      <p style="color:#71717a;margin:8px 0 0;font-size:14px;">Order <strong style="color:#fff;font-family:monospace;">${escHtml(p.orderCode)}</strong></p>
     </div>
 
     <!-- Event details -->
     <div style="background:#0a0a0a;border:1px solid #1d1d1f;border-radius:14px;padding:20px;margin-bottom:24px;">
-      <p style="color:#a1a1aa;font-size:13px;margin:0 0 6px;">📅 <strong style="color:#fff;">${p.eventDate}</strong> at ${p.eventTime}</p>
+      <p style="color:#a1a1aa;font-size:13px;margin:0 0 6px;">📅 <strong style="color:#fff;">${escHtml(p.eventDate)}</strong> at ${escHtml(p.eventTime)}</p>
       ${location ? `<p style="color:#a1a1aa;font-size:13px;margin:0;">📍 ${location}</p>` : ""}
     </div>
 
@@ -100,7 +114,7 @@ function buildBuyerEmailHtml(p: SendBuyerConfirmationParams): string {
 
     <!-- CTA -->
     <div style="text-align:center;margin-bottom:8px;">
-      <a href="https://events.squarebidness.com/orders/${p.orderId}"
+      <a href="https://events.squarebidness.com/orders/${safeOrderId}"
          style="display:inline-block;background:#ef4444;color:#fff;font-weight:900;font-size:15px;padding:14px 32px;border-radius:999px;text-decoration:none;letter-spacing:-0.02em;">
         View My Tickets →
       </a>
@@ -151,12 +165,12 @@ export async function sendOrganizerSaleNotification(params: SendOrganizerSalePar
     headers: UNSUBSCRIBE_HEADERS,
     html: emailShell(`
       <h1 style="font-size:22px;font-weight:900;margin:0 0 6px;">New Sale 🎉</h1>
-      <p style="color:#a1a1aa;margin:0 0 24px;">Hey ${params.organizerName}, someone just bought tickets.</p>
+      <p style="color:#a1a1aa;margin:0 0 24px;">Hey ${escHtml(params.organizerName)}, someone just bought tickets.</p>
       <div style="background:#0a0a0a;border:1px solid #1d1d1f;border-radius:14px;padding:20px;margin-bottom:24px;">
-        <p style="font-weight:900;font-size:16px;margin:0 0 12px;">${params.eventTitle}</p>
-        <p style="color:#a1a1aa;font-size:13px;margin:0 0 4px;">Buyer: <strong style="color:#fff;">${params.buyerName}</strong></p>
+        <p style="font-weight:900;font-size:16px;margin:0 0 12px;">${escHtml(params.eventTitle)}</p>
+        <p style="color:#a1a1aa;font-size:13px;margin:0 0 4px;">Buyer: <strong style="color:#fff;">${escHtml(params.buyerName)}</strong></p>
         <p style="color:#a1a1aa;font-size:13px;margin:0 0 4px;">Tickets: <strong style="color:#fff;">${params.ticketCount}</strong></p>
-        <p style="color:#a1a1aa;font-size:13px;margin:0 0 12px;">Order: <strong style="color:#fff;font-family:monospace;">${params.orderCode}</strong></p>
+        <p style="color:#a1a1aa;font-size:13px;margin:0 0 12px;">Order: <strong style="color:#fff;font-family:monospace;">${escHtml(params.orderCode)}</strong></p>
         <p style="color:#22c55e;font-weight:900;font-size:22px;margin:0;">+$${params.total.toFixed(2)}</p>
       </div>
       <a href="https://events.squarebidness.com/organizer/dashboard"
@@ -183,7 +197,7 @@ export async function sendOrganizerWelcome(params: SendOrganizerWelcomeParams) {
     subject: `Welcome to SB Events, ${params.organizerName}! 🎟️`,
     headers: UNSUBSCRIBE_HEADERS,
     html: emailShell(`
-      <h1 style="font-size:26px;font-weight:900;letter-spacing:-0.04em;margin:0 0 8px;">Welcome, ${params.organizerName}! 🎉</h1>
+      <h1 style="font-size:26px;font-weight:900;letter-spacing:-0.04em;margin:0 0 8px;">Welcome, ${escHtml(params.organizerName)}! 🎉</h1>
       <p style="color:#a1a1aa;font-size:15px;margin:0 0 28px;line-height:1.6;">
         Your organizer account is verified and ready to go. Let's get your first event live.
       </p>
@@ -204,7 +218,7 @@ export async function sendOrganizerWelcome(params: SendOrganizerWelcomeParams) {
       </div>
 
       <div style="text-align:center;">
-        <a href="${params.dashboardUrl}"
+        <a href="${escHtml(params.dashboardUrl)}"
            style="display:inline-block;background:#ef4444;color:#fff;font-weight:900;font-size:15px;padding:14px 36px;border-radius:999px;text-decoration:none;">
           Go to Your Dashboard →
         </a>
@@ -238,15 +252,15 @@ export async function sendEventBlast(params: SendEventBlastParams): Promise<numb
     recipients = recipients.slice(0, MAX_RECIPIENTS);
   }
 
-  const eventUrl = `https://events.squarebidness.com/events/${params.eventSlug}`;
+  const eventUrl = `https://events.squarebidness.com/events/${encodeURIComponent(params.eventSlug)}`;
   let sent = 0;
 
   // Build the HTML body once (same for every recipient in this blast)
-  const buildHtml = (r: { email: string; name: string }) => emailShell(`
-    <h1 style="font-size:22px;font-weight:900;letter-spacing:-0.04em;margin:0 0 6px;">${params.subject}</h1>
-    <p style="color:#555;font-size:12px;margin:0 0 24px;">From ${params.organizerName} · re: ${params.eventTitle}</p>
+  const buildHtml = (_r: { email: string; name: string }) => emailShell(`
+    <h1 style="font-size:22px;font-weight:900;letter-spacing:-0.04em;margin:0 0 6px;">${escHtml(params.subject)}</h1>
+    <p style="color:#555;font-size:12px;margin:0 0 24px;">From ${escHtml(params.organizerName)} · re: ${escHtml(params.eventTitle)}</p>
     <div style="background:#0a0a0a;border:1px solid #1d1d1f;border-radius:14px;padding:20px;margin-bottom:24px;white-space:pre-line;font-size:15px;line-height:1.65;color:#d4d4d8;">
-      ${params.message.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>")}
+      ${params.message.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;").replace(/\n/g, "<br>")}
     </div>
     <div style="text-align:center;">
       <a href="${eventUrl}"
@@ -255,7 +269,7 @@ export async function sendEventBlast(params: SendEventBlastParams): Promise<numb
       </a>
     </div>
     <p style="color:#333;font-size:11px;text-align:center;margin-top:20px;">
-      You're receiving this because you bought a ticket to ${params.eventTitle}.
+      You're receiving this because you bought a ticket to ${escHtml(params.eventTitle)}.
     </p>
   `);
 
@@ -319,14 +333,14 @@ export async function sendEventCancellationNotice(params: SendEventCancellationP
         <div style="display:inline-block;background:#1a0a0a;border:1px solid #7f1d1d;border-radius:999px;padding:8px 20px;margin-bottom:14px;">
           <span style="color:#ef4444;font-size:13px;font-weight:900;letter-spacing:0.04em;">Event Cancelled</span>
         </div>
-        <h1 style="font-size:24px;font-weight:900;letter-spacing:-0.04em;margin:0 0 8px;">Hi ${params.buyerName},</h1>
+        <h1 style="font-size:24px;font-weight:900;letter-spacing:-0.04em;margin:0 0 8px;">Hi ${escHtml(params.buyerName)},</h1>
         <p style="color:#a1a1aa;font-size:15px;margin:0;line-height:1.6;">
-          We're sorry to let you know that <strong style="color:#fff;">${params.eventTitle}</strong> on <strong style="color:#fff;">${params.eventDate}</strong> has been cancelled by the organizer.
+          We're sorry to let you know that <strong style="color:#fff;">${escHtml(params.eventTitle)}</strong> on <strong style="color:#fff;">${escHtml(params.eventDate)}</strong> has been cancelled by the organizer.
         </p>
       </div>
 
       <div style="background:#0a0a0a;border:1px solid #1d1d1f;border-radius:14px;padding:20px;margin-bottom:24px;">
-        <p style="color:#a1a1aa;font-size:13px;margin:0 0 6px;">Order <strong style="color:#fff;font-family:monospace;">${params.orderCode}</strong></p>
+        <p style="color:#a1a1aa;font-size:13px;margin:0 0 6px;">Order <strong style="color:#fff;font-family:monospace;">${escHtml(params.orderCode)}</strong></p>
         ${params.refunded && params.total > 0
           ? `<p style="color:#22c55e;font-size:14px;font-weight:900;margin:0;">✓ Refund of $${params.total.toFixed(2)} has been issued to your original payment method. Allow 5–10 business days.</p>`
           : params.total === 0
@@ -364,12 +378,12 @@ export async function sendTicketTransferNotice(params: SendTicketTransferNoticeP
     html: emailShell(`
       <h1 style="font-size:22px;font-weight:900;letter-spacing:-0.04em;margin:0 0 8px;">Ticket Transferred</h1>
       <p style="color:#a1a1aa;font-size:15px;margin:0 0 24px;line-height:1.6;">
-        Hi ${params.originalName}, your <strong style="color:#fff;">${params.tierName}</strong> ticket
-        to <strong style="color:#fff;">${params.eventTitle}</strong> has been successfully transferred.
+        Hi ${escHtml(params.originalName)}, your <strong style="color:#fff;">${escHtml(params.tierName)}</strong> ticket
+        to <strong style="color:#fff;">${escHtml(params.eventTitle)}</strong> has been successfully transferred.
       </p>
       <div style="background:#0a0a0a;border:1px solid #1d1d1f;border-radius:14px;padding:20px;margin-bottom:24px;">
-        <p style="color:#a1a1aa;font-size:13px;margin:0 0 6px;">Ticket: <strong style="color:#fff;font-family:monospace;">${params.ticketCode}</strong></p>
-        <p style="color:#a1a1aa;font-size:13px;margin:0;">Transferred to: <strong style="color:#fff;">${params.newName}</strong> (${params.newEmail})</p>
+        <p style="color:#a1a1aa;font-size:13px;margin:0 0 6px;">Ticket: <strong style="color:#fff;font-family:monospace;">${escHtml(params.ticketCode)}</strong></p>
+        <p style="color:#a1a1aa;font-size:13px;margin:0;">Transferred to: <strong style="color:#fff;">${escHtml(params.newName)}</strong> (${escHtml(params.newEmail)})</p>
       </div>
       <p style="color:#555;font-size:13px;text-align:center;">
         If you didn't request this transfer, please contact support at
@@ -387,12 +401,12 @@ export async function sendWaitlistNotification(params: SendWaitlistNotificationP
     subject: `Tickets available — ${params.eventTitle}`,
     headers: UNSUBSCRIBE_HEADERS,
     html: emailShell(`
-      <h1 style="font-size:24px;font-weight:900;letter-spacing:-0.04em;margin:0 0 8px;">Good news, ${params.name}! 🎟️</h1>
+      <h1 style="font-size:24px;font-weight:900;letter-spacing:-0.04em;margin:0 0 8px;">Good news, ${escHtml(params.name)}! 🎟️</h1>
       <p style="color:#a1a1aa;font-size:15px;margin:0 0 24px;line-height:1.6;">
-        A ticket to <strong style="color:#fff;">${params.eventTitle}</strong> just opened up. Grab it before it's gone — waitlist spots go fast.
+        A ticket to <strong style="color:#fff;">${escHtml(params.eventTitle)}</strong> just opened up. Grab it before it's gone — waitlist spots go fast.
       </p>
       <div style="text-align:center;">
-        <a href="https://events.squarebidness.com/events/${params.eventSlug}"
+        <a href="https://events.squarebidness.com/events/${encodeURIComponent(params.eventSlug)}"
            style="display:inline-block;background:#ef4444;color:#fff;font-weight:900;font-size:15px;padding:14px 36px;border-radius:999px;text-decoration:none;">
           Get Your Ticket →
         </a>

@@ -97,9 +97,17 @@ export async function POST(req: NextRequest) {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
     const orderId = session.metadata?.order_id;
-    const tierSelections = session.payment_intent
-      ? (await stripe.paymentIntents.retrieve(session.payment_intent as string)).metadata?.tier_selections
-      : null;
+
+    // Retrieve PaymentIntent once — reused for tier_selections and platform_payouts below
+    let paymentIntent: Stripe.PaymentIntent | null = null;
+    if (session.payment_intent) {
+      try {
+        paymentIntent = await stripe.paymentIntents.retrieve(session.payment_intent as string);
+      } catch (err) {
+        console.error("Failed to retrieve PaymentIntent:", err);
+      }
+    }
+    const tierSelections = paymentIntent?.metadata?.tier_selections ?? null;
 
     if (!orderId) return NextResponse.json({ ok: true });
 
@@ -163,11 +171,14 @@ export async function POST(req: NextRequest) {
         console.error(`Oversell prevented for tier ${tierId}, order ${order.id}`);
         let refundOk = false;
         if (order.stripe_payment_intent_id) {
-          refundOk = await stripe.refunds.create({
-              payment_intent: order.stripe_payment_intent_id,
-              reverse_transfer: true,
-              refund_application_fee: true, // oversell is platform's fault — full refund
-            })
+          refundOk = await stripe.refunds.create(
+              {
+                payment_intent: order.stripe_payment_intent_id,
+                reverse_transfer: true,
+                refund_application_fee: true, // oversell is platform's fault — full refund
+              },
+              { idempotencyKey: `refund-${order.id}` }
+            )
             .then(() => true)
             .catch((e) => { console.error("Auto-refund failed:", e); return false; });
         }
@@ -261,16 +272,18 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Track platform payout
-    if (session.payment_intent) {
-      const pi = await stripe.paymentIntents.retrieve(session.payment_intent as string);
-      if (pi.application_fee_amount && pi.application_fee_amount > 0) {
+    // Track platform payout — use the already-retrieved paymentIntent; wrap in try-catch
+    // so a transient error here does not prevent the webhook from returning 200
+    try {
+      if (paymentIntent && paymentIntent.application_fee_amount && paymentIntent.application_fee_amount > 0) {
         await supabaseServer.from("platform_payouts").insert({
           order_id: orderId,
-          amount_cents: pi.application_fee_amount,
+          amount_cents: paymentIntent.application_fee_amount,
           status: "paid",
         });
       }
+    } catch (err) {
+      console.error("Failed to insert platform_payouts record:", err);
     }
 
     // Format event date/time for notifications
