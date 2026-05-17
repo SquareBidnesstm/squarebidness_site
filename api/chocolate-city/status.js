@@ -18,12 +18,12 @@ async function redis(command, ...args) {
 
 const DEFAULT_STATE = {
   fridayOpen: false,
-  fridayText: "Chocolate City is closed May 15–17 and reopens May 22–24 at 30065 North Café Line Rd.",
-  weekendStatus: "Closed May 15–17",
+  fridayText: "Chocolate City reopens May 22–24 at 30065 North Café Line Rd.",
+  weekendStatus: "Reopening May 22–24",
   eventTitle: "Chocolate City Reopens May 22–24",
   eventNote: "Reopening May 22–24 with the music, vibes, and grown-folk energy Albany loves.",
   vipStatus: "Only 2 VIP sections available per night. First come. Paid in full online.",
-  announcement: "Schedule Update • Closed May 15–17 • Reopening May 22–24",
+  announcement: "Reopening Weekend • May 22–24 • VIP sections available now",
   updatedAt: new Date().toISOString()
 };
 
@@ -66,6 +66,6 @@ export default async function handler(req, res) {
 
     return res.status(405).json({ ok: false, error: "Method not allowed" });
   } catch (err) {
-    return res.status(500).json({ ok: false, error: err.message });
+    return res.status(500).json({ ok: false, error: "Unable to load Chocolate City status." });
   }
 }

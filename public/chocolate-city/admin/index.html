@@ -4,11 +4,18 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Chocolate City Admin</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="application-name" content="CC Admin" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="CC Admin" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#080504" />
 
   <link rel="icon" type="image/png" sizes="32x32" href="/chocolate-city/assets/cc-icon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/chocolate-city/assets/cc-icon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/chocolate-city/assets/cc-icon-180.png">
-<link rel="manifest" href="/chocolate-city/manifest.json">
+<link rel="manifest" href="/chocolate-city/admin/manifest.json">
 
   <style>
     :root{
@@ -200,7 +207,7 @@
     <span>Chocolate City Lounge LLC</span>
   </a>
 
-  <a class="back-link" href="/chocolate-city/">Back to Lounge</a>
+  <a class="back-link" href="/chocolate-city/door/">Door VIP</a>
 </header>
   
   <main class="wrap">
@@ -222,7 +229,7 @@
 
         <div>
           <label>Weekend Status</label>
-          <input id="weekendStatus" value="Closed May 15–17" />
+          <input id="weekendStatus" value="Reopening May 22–24" />
         </div>
       </div>
 
@@ -230,7 +237,7 @@
       <input id="eventTitle" value="Chocolate City Reopens May 22–24" />
 
       <label>Friday Message</label>
-      <input id="fridayText" value="Chocolate City is closed May 15–17 and reopens May 22–24 at 30065 North Café Line Rd." />
+      <input id="fridayText" value="Chocolate City reopens May 22–24 at 30065 North Café Line Rd." />
 
       <label>Event Note</label>
       <textarea id="eventNote">Reopening May 22–24 with the music, vibes, and grown-folk energy Albany loves.</textarea>
@@ -238,7 +245,7 @@
       <label>VIP Status</label>
       <textarea id="vipStatus">Only 2 VIP sections available per night. First come. Paid in full online.</textarea>
       <label>Announcement</label>
-      <textarea id="announcement">Schedule Update • Closed May 15–17 • Reopening May 22–24</textarea>
+      <textarea id="announcement">Reopening Weekend • May 22–24 • VIP sections available now</textarea>
 
       <button onclick="saveStatus()">Save Chocolate City Updates</button>
       <button type="button" onclick="loadBookings()">Load VIP Bookings</button>
@@ -306,9 +313,7 @@
       fridayOpen,
       weekendStatus: document.getElementById("weekendStatus").value.trim(),
       eventTitle: document.getElementById("eventTitle").value.trim(),
-      fridayText: fridayOpen
-        ? "Friday is open this week from 7PM – 2AM."
-        : "Friday — select nights only.",
+      fridayText: document.getElementById("fridayText").value.trim(),
       eventNote: document.getElementById("eventNote").value.trim(),
       vipStatus: document.getElementById("vipStatus").value.trim(),
       announcement: document.getElementById("announcement").value.trim()
@@ -371,6 +376,8 @@
       box.innerHTML = data.bookings.map(b => `
         <div class="booking-card">
           <strong>${escapeHtml(b.packageName || "VIP Section")}</strong>
+          ${b.needsReview ? "<div><strong>Manual Review Needed</strong></div>" : ""}
+          <div>VIP Night: ${escapeHtml(b.eventLabel || b.eventDate || "—")}</div>
           <div>Owner: ${escapeHtml(b.customerName || "—")}</div>
           <div>Phone: ${escapeHtml(b.customerPhone || "—")}</div>
           <div>Paid Amount: $${escapeHtml(String(b.deposit || b.fullPrice || 0))}</div>
@@ -393,8 +400,11 @@
       return;
     }
 
-    const confirmed = confirm("Reset VIP inventory? This clears all current VIP bookings from availability.");
-    if(!confirmed) return;
+    const confirmed = prompt("Type RESET to clear every VIP booking for May 22, May 23, and May 24.");
+    if(confirmed !== "RESET"){
+      status.textContent = "VIP reset canceled.";
+      return;
+    }
 
     status.textContent = "Resetting VIP inventory...";
 
@@ -415,8 +425,8 @@
         return;
       }
 
-      status.textContent = "VIP inventory reset. Sections are available again.";
-      box.innerHTML = "<p>VIP inventory cleared.</p>";
+      status.textContent = "VIP inventory reset. All May 22–24 sections are available again.";
+      box.innerHTML = "<p>VIP inventory cleared for all reopening dates.</p>";
     }catch(err){
       status.textContent = "Reset failed. Check API/env vars.";
     }

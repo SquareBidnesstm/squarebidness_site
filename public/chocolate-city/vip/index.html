@@ -215,6 +215,29 @@
   backdrop-filter:blur(10px);
 }
 
+.date-picker{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+  margin-top:14px;
+}
+
+.date-option{
+  min-height:50px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  font-weight:900;
+  cursor:pointer;
+}
+
+.date-option.is-active{
+  border-color:rgba(215,168,79,.7);
+  background:rgba(215,168,79,.18);
+  color:var(--gold2);
+}
+
     .vip-grid{
       display:grid;
       grid-template-columns:repeat(3,1fr);
@@ -335,6 +358,7 @@
     @media(max-width:900px){
       .vip-grid{grid-template-columns:1fr}
       .hero{padding:26px}
+      .date-picker{grid-template-columns:1fr}
     }
   </style>
 </head>
@@ -359,6 +383,12 @@
   <div class="status">
     <div class="pill" id="fridayPill">Friday — Select Nights Only</div>
     <div class="pill" id="vipCountPill">Checking sections...</div>
+  </div>
+
+  <div class="date-picker" aria-label="Choose VIP night">
+    <button class="date-option is-active" type="button" data-event-date="2026-05-22">Friday May 22</button>
+    <button class="date-option" type="button" data-event-date="2026-05-23">Saturday May 23</button>
+    <button class="date-option" type="button" data-event-date="2026-05-24">Sunday May 24</button>
   </div>
 
   <div class="notice" id="vipAvailability">
@@ -434,6 +464,7 @@
 </section>
 
     <p class="fineprint">
+      Choose Friday, Saturday, or Sunday before checkout.
       Screenshot your confirmation after checkout and show it at the door.
       Staff verifies all paid VIP reservations on arrival.
     </p>
@@ -443,21 +474,31 @@
     </footer>
   </main>
 <script>
+let selectedVipDate = "2026-05-22";
+
 async function loadVipAvailability(){
   const box = document.getElementById("vipAvailability");
   const buttons = document.querySelectorAll(".vip-btn");
   const countPill = document.getElementById("vipCountPill");
 
   try{
-    const res = await fetch("/api/chocolate-city/vip-availability/", { cache:"no-store" });
+    const res = await fetch(`/api/chocolate-city/vip-availability/?eventDate=${encodeURIComponent(selectedVipDate)}`, { cache:"no-store" });
     const data = await res.json();
 
     if(!data.ok) throw new Error("Availability unavailable");
 
+    buttons.forEach(btn => {
+      btn.disabled = false;
+      btn.textContent = btn.dataset.defaultText || btn.textContent;
+
+      const card = btn.closest(".vip-card");
+      if(card) card.classList.remove("sold");
+    });
+
     // SOLD OUT STATE
     if(data.soldOut || data.remaining <= 0){
-      box.textContent = "VIP sections are sold out for this night.";
-      if(countPill) countPill.textContent = "VIP Sold Out";
+      box.textContent = `${data.eventLabel || "Selected night"} VIP sections are sold out.`;
+      if(countPill) countPill.textContent = `${data.eventLabel || "Night"} Sold Out`;
 
       buttons.forEach(btn => {
         btn.disabled = true;
@@ -472,16 +513,24 @@ async function loadVipAvailability(){
 
     // LAST SECTION PRESSURE
     if(data.remaining === 1){
-      box.textContent = "1 VIP section remaining — last section available.";
-      if(countPill) countPill.textContent = "1 Section Left";
+      box.textContent = `${data.eventLabel || "Selected night"}: 1 VIP section remaining — last section available.`;
+      if(countPill) countPill.textContent = `${data.eventLabel || "Night"}: 1 Left`;
     } else {
-      box.textContent = `${data.remaining} of 2 VIP sections available.`;
-      if(countPill) countPill.textContent = `${data.remaining} Sections Available`;
+      box.textContent = `${data.eventLabel || "Selected night"}: ${data.remaining} of 2 VIP sections available.`;
+      if(countPill) countPill.textContent = `${data.eventLabel || "Night"}: ${data.remaining} Available`;
     }
 
   }catch(err){
-    box.textContent = "VIP availability will be confirmed before checkout.";
-    if(countPill) countPill.textContent = "Availability Pending";
+    box.textContent = "VIP availability is temporarily unavailable. Please check again shortly.";
+    if(countPill) countPill.textContent = "Unavailable";
+
+    buttons.forEach(btn => {
+      btn.disabled = true;
+      btn.textContent = "Unavailable";
+
+      const card = btn.closest(".vip-card");
+      if(card) card.classList.add("sold");
+    });
   }
 }
 
@@ -504,7 +553,7 @@ async function reserveVip(packageId, button){
     const res = await fetch("/api/chocolate-city/vip-checkout/", {
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({ packageId, customerName })
+      body:JSON.stringify({ packageId, customerName, eventDate: selectedVipDate })
     });
 
     const data = await res.json();
@@ -548,8 +597,19 @@ async function loadStatus(){
 
 // EVENTS
 document.querySelectorAll(".vip-btn").forEach(button => {
+  button.dataset.defaultText = button.textContent;
   button.addEventListener("click", () => {
     reserveVip(button.dataset.package, button);
+  });
+});
+
+document.querySelectorAll(".date-option").forEach(button => {
+  button.addEventListener("click", () => {
+    selectedVipDate = button.dataset.eventDate || "2026-05-22";
+    document.querySelectorAll(".date-option").forEach(btn => {
+      btn.classList.toggle("is-active", btn === button);
+    });
+    loadVipAvailability();
   });
 });
 

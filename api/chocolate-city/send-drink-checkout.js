@@ -1,5 +1,13 @@
 import Stripe from "stripe";
 
+function cleanMetadataValue(value, maxLength = 120) {
+  return String(value || "")
+    .replace(/[^\w .,'@()+-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, maxLength);
+}
+
 const OPTIONS = {
   drink_10: {
     name: "$10 Drink Credit",
@@ -40,10 +48,10 @@ export default async function handler(req, res) {
       return res.status(400).json({ ok: false, error: "Invalid drink option" });
     }
 
-    const recipientName = String(body.recipientName || "").trim();
-    const recipientPhone = String(body.recipientPhone || "").trim();
-    const senderName = String(body.senderName || "").trim();
-    const message = String(body.message || "").trim();
+    const recipientName = cleanMetadataValue(body.recipientName, 80);
+    const recipientPhone = cleanMetadataValue(body.recipientPhone, 32);
+    const senderName = cleanMetadataValue(body.senderName, 80);
+    const message = cleanMetadataValue(body.message, 180);
 
     if (!recipientName) {
       return res.status(400).json({ ok: false, error: "Recipient name required" });
@@ -90,6 +98,6 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ ok: true, url: session.url });
   } catch (err) {
-    return res.status(500).json({ ok: false, error: err.message });
+    return res.status(500).json({ ok: false, error: "Unable to start drink checkout." });
   }
 }
