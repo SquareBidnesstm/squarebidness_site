@@ -1,0 +1,526 @@
+<!-- FILE: /public/phomatic/book/lookup/index.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <link rel="preconnect" href="https://www.googletagmanager.com">
+  <link rel="preconnect" href="https://www.google-analytics.com">
+  <script defer src="/scripts/ga.js"></script>
+  <script defer src="/scripts/sb-analytics.js"></script>
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <title>My Bookings | Pho-Matic Photography</title>
+  <meta name="description" content="Look up your Pho-Matic Photography appointments by phone, email, or booking code." />
+  <link rel="canonical" href="https://www.squarebidness.com/phomatic/book/lookup/" />
+
+  <meta name="sb:build" content="v20260517-phomatic-lookup" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="robots" content="noindex,nofollow" />
+
+  <link rel="stylesheet" href="/styles/style.css" />
+  <link rel="stylesheet" href="/styles/phomatic.min.css" />
+
+  <!-- Pho-Matic icons -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/phomatic/assets/icons/pho-favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="48x48" href="/phomatic/assets/icons/pho-favicon-48.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/phomatic/assets/icons/pho-favicon-16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/phomatic/assets/icons/pho-icon-180.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/phomatic/assets/icons/pho-icon-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="/phomatic/assets/icons/pho-icon-512.png" />
+  <link rel="manifest" href="/phomatic/manifest.webmanifest" />
+
+  <style>
+    :root{
+      --pm-bg:#070707; --pm-panel:#0b0b0b; --pm-panel2:#0f1113;
+      --pm-line:#1f1f1f; --pm-line2:#242426;
+      --pm-text:#e7e7ea; --pm-muted:#b9bcc5; --pm-dim:#8b8f98;
+      --pm-gold:#c9a227; --pm-goldSoft:rgba(201,162,39,.12);
+      --pm-shadow:0 12px 36px rgba(0,0,0,.45);
+      --pm-radius:16px;
+    }
+    body.theme-dark{background:var(--pm-bg);color:var(--pm-text);margin:0;font-family:system-ui,sans-serif;}
+
+    .pm-topbar{
+      position:sticky;top:0;z-index:50;
+      background:rgba(7,7,7,.72);
+      backdrop-filter:saturate(120%) blur(10px);
+      border-bottom:1px solid rgba(255,255,255,.06);
+    }
+    .pm-topbar__inner{
+      max-width:1100px;margin:0 auto;padding:.85rem 1rem;
+      display:flex;align-items:center;justify-content:space-between;gap:1rem;
+    }
+    .pm-brand{display:flex;align-items:center;gap:.65rem;min-width:0;text-decoration:none;color:#fff;}
+    .pm-brand__mark{
+      width:36px;height:36px;border-radius:10px;overflow:hidden;
+      border:1px solid rgba(255,255,255,.10);
+      background:radial-gradient(600px 240px at 30% 10%, rgba(201,162,39,.18), transparent 60%);
+      box-shadow:0 10px 22px rgba(0,0,0,.35);
+      display:grid;place-items:center;
+    }
+    .pm-brand__text{display:flex;flex-direction:column;min-width:0;line-height:1.1}
+    .pm-brand__text strong{font-size:.92rem;font-weight:950;white-space:nowrap;}
+    .pm-brand__text small{color:var(--pm-dim);font-size:.72rem;white-space:nowrap;}
+
+    .pm-nav{display:flex;gap:.55rem;flex-wrap:wrap;justify-content:flex-end}
+    .pm-nav a{
+      text-decoration:none;color:#fff;font-weight:950;font-size:.78rem;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.04);
+      padding:.45rem .7rem;border-radius:999px;
+    }
+    .pm-nav a:hover{background:rgba(255,255,255,.08);}
+
+    .pm-cta{
+      display:inline-flex;align-items:center;justify-content:center;
+      border-radius:999px;padding:.62rem 1.05rem;text-decoration:none;
+      font-weight:950;letter-spacing:.01em;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.05); color:#fff;
+    }
+    .pm-cta:hover{background:rgba(255,255,255,.09);}
+    .pm-cta--gold{background:rgba(201,162,39,.16);border-color:rgba(201,162,39,.55);}
+    .pm-cta--gold:hover{background:rgba(201,162,39,.22);}
+
+    .pm-linkpill{
+      background:#151516;border:1px solid var(--pm-line2);
+      border-radius:999px;padding:.5rem .85rem;
+      font-size:.8rem;color:#fff;text-decoration:none;font-weight:900;
+    }
+    .pm-linkpill:hover{background:#1f1f1f;}
+
+    /* Hero */
+    .pm-hero{
+      border-bottom:1px solid var(--pm-line);
+      background:
+        radial-gradient(1200px 520px at 30% 10%, rgba(201,162,39,.08), transparent 60%),
+        var(--pm-bg);
+    }
+    .pm-hero__inner{max-width:700px;margin:0 auto;padding:1.6rem 1rem;}
+    .pm-badge{
+      display:inline-flex;align-items:center;gap:.45rem;
+      background:var(--pm-goldSoft);border:1px solid rgba(201,162,39,.45);
+      border-radius:999px;padding:.35rem .75rem;
+      font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;
+      color:#fff;font-weight:950;
+    }
+    .pm-hero h1{font-size:clamp(1.8rem,3vw,2.4rem);font-weight:950;margin:.7rem 0 .35rem;letter-spacing:-.02em;}
+    .pm-hero p{margin:0;color:var(--pm-muted);font-size:.97rem;line-height:1.6}
+
+    /* Page */
+    .page-wrap{max-width:700px;margin:0 auto;padding:1.6rem 1rem 5rem;display:grid;gap:1rem;}
+
+    /* Lookup card */
+    .lookup-card{
+      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0));
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:var(--pm-radius);
+      padding:1.2rem;
+      box-shadow:var(--pm-shadow);
+    }
+
+    /* Method tabs */
+    .lookup-tabs{display:flex;gap:.5rem;margin-bottom:1.1rem;}
+    .lookup-tab{
+      flex:1;text-align:center;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.10);
+      color:var(--pm-dim);font-weight:950;font-size:.82rem;
+      border-radius:999px;padding:.45rem .7rem;
+      cursor:pointer;transition:all .15s;
+    }
+    .lookup-tab.active{
+      background:rgba(201,162,39,.15);
+      border-color:rgba(201,162,39,.5);
+      color:var(--pm-gold);
+    }
+
+    /* Form */
+    .lookup-field label{
+      display:block;font-size:.82rem;font-weight:950;
+      color:var(--pm-muted);margin-bottom:.4rem;
+    }
+    .lookup-field input{
+      width:100%;box-sizing:border-box;
+      background:#0f0f11;border:1px solid rgba(255,255,255,.14);
+      border-radius:10px;padding:.65rem .9rem;
+      color:var(--pm-text);font-size:.95rem;font-family:inherit;
+      outline:none;transition:border-color .15s;
+    }
+    .lookup-field input:focus{border-color:rgba(201,162,39,.5);}
+
+    .lookup-btn{
+      margin-top:1rem;
+      display:flex;align-items:center;justify-content:center;gap:.5rem;
+      width:100%;padding:.7rem;
+      background:rgba(201,162,39,.16);
+      border:1px solid rgba(201,162,39,.5);
+      border-radius:999px;
+      color:#fff;font-weight:950;font-size:.92rem;font-family:inherit;
+      cursor:pointer;transition:background .15s;
+    }
+    .lookup-btn:hover:not(:disabled){background:rgba(201,162,39,.26);}
+    .lookup-btn:disabled{opacity:.5;cursor:not-allowed;}
+
+    .lookup-spinner{
+      width:16px;height:16px;border:2px solid rgba(255,255,255,.2);
+      border-top-color:#fff;border-radius:50%;
+      animation:spin .7s linear infinite;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* Results */
+    .results-wrap{display:grid;gap:.85rem;}
+
+    .booking-card{
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:14px;padding:1rem;
+    }
+    .booking-card-header{
+      display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;
+      margin-bottom:.75rem;
+    }
+    .booking-svc-name{font-weight:950;font-size:1rem;}
+    .booking-datetime{color:var(--pm-muted);font-size:.88rem;margin-top:.2rem;}
+
+    .status-badge{
+      border-radius:999px;padding:.28rem .65rem;
+      font-size:.75rem;font-weight:950;white-space:nowrap;
+      flex-shrink:0;
+    }
+    .status-confirmed{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.4);color:#4ade80;}
+    .status-pending{background:rgba(250,204,21,.12);border:1px solid rgba(250,204,21,.4);color:#fde047;}
+    .status-cancelled{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.4);color:#f87171;}
+    .status-completed{background:rgba(156,163,175,.1);border:1px solid rgba(156,163,175,.3);color:#9ca3af;}
+
+    .booking-code{
+      font-family:'Courier New',Courier,monospace;
+      font-size:.88rem;color:var(--pm-gold);font-weight:950;
+      background:rgba(201,162,39,.1);
+      border-radius:6px;padding:.2rem .5rem;
+      display:inline-block;
+    }
+    .booking-balance{
+      font-size:.88rem;color:var(--pm-muted);margin-top:.5rem;
+    }
+    .booking-balance strong{color:var(--pm-text);}
+
+    .cancel-btn{
+      margin-top:.85rem;
+      background:rgba(239,68,68,.1);
+      border:1px solid rgba(239,68,68,.3);
+      color:#f87171;font-weight:950;font-size:.82rem;
+      border-radius:999px;padding:.4rem .85rem;
+      cursor:pointer;font-family:inherit;
+      transition:background .15s;
+    }
+    .cancel-btn:hover{background:rgba(239,68,68,.2);}
+
+    /* Empty state */
+    .lookup-empty{
+      text-align:center;padding:2.5rem 1rem;
+      color:var(--pm-dim);
+    }
+    .lookup-empty h3{color:var(--pm-text);margin:0 0 .5rem;font-weight:950;}
+
+    /* Error */
+    .lookup-error{
+      background:rgba(220,50,50,.1);
+      border:1px solid rgba(220,50,50,.3);
+      border-radius:10px;padding:.75rem 1rem;
+      color:#f87171;font-size:.88rem;margin-top:.75rem;
+    }
+
+    /* Modal */
+    .modal-overlay{
+      display:none;position:fixed;inset:0;
+      background:rgba(0,0,0,.7);z-index:200;
+      place-items:center;padding:1rem;
+    }
+    .modal-overlay.active{display:grid;}
+    .modal-box{
+      background:#111113;border:1px solid rgba(255,255,255,.12);
+      border-radius:var(--pm-radius);padding:1.5rem;
+      max-width:420px;width:100%;
+      box-shadow:0 24px 64px rgba(0,0,0,.6);
+    }
+    .modal-box h3{margin:0 0 .75rem;font-size:1.1rem;font-weight:950;}
+    .modal-box p{color:var(--pm-muted);font-size:.9rem;line-height:1.55;margin:0 0 1.25rem;}
+    .modal-actions{display:flex;gap:.65rem;}
+    .modal-cancel-confirm{
+      flex:1;background:rgba(239,68,68,.15);
+      border:1px solid rgba(239,68,68,.4);
+      color:#f87171;font-weight:950;font-size:.9rem;
+      border-radius:999px;padding:.6rem;
+      cursor:pointer;font-family:inherit;transition:background .15s;
+    }
+    .modal-cancel-confirm:hover{background:rgba(239,68,68,.25);}
+    .modal-dismiss{
+      flex:1;background:rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.12);
+      color:var(--pm-muted);font-weight:950;font-size:.9rem;
+      border-radius:999px;padding:.6rem;
+      cursor:pointer;font-family:inherit;transition:background .15s;
+    }
+    .modal-dismiss:hover{background:rgba(255,255,255,.1);color:#fff;}
+  </style>
+</head>
+
+<body class="theme-dark">
+  <!-- TOP BAR -->
+  <div class="pm-topbar">
+    <div class="pm-topbar__inner">
+      <a class="pm-brand" href="/phomatic/" aria-label="Pho-Matic Home">
+        <div class="pm-brand__mark" aria-hidden="true">
+          <img src="/phomatic/assets/icons/pho-icon-192.png" alt="" width="36" height="36"
+               decoding="async" loading="eager"
+               style="display:block;width:100%;height:100%;object-fit:contain;" />
+        </div>
+        <div class="pm-brand__text">
+          <strong>Pho-Matic Photography</strong>
+          <small>My Bookings · Gieno Smith</small>
+        </div>
+      </a>
+      <nav class="pm-nav" aria-label="Pho-Matic navigation">
+        <a href="/phomatic/">Home</a>
+        <a href="/phomatic/portfolio/">Portfolio</a>
+        <a href="/phomatic/about/">About</a>
+        <a href="/phomatic/book/" aria-current="page">Book</a>
+        <a href="https://www.instagram.com/datpholife" target="_blank" rel="me noopener">Instagram</a>
+      </nav>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <header class="pm-hero">
+    <div class="pm-hero__inner">
+      <span class="pm-badge">Appointment Lookup</span>
+      <h1>My Bookings</h1>
+      <p>Look up your appointments by phone number, email, or booking code.</p>
+    </div>
+  </header>
+
+  <main>
+    <div class="page-wrap">
+
+      <!-- Lookup form -->
+      <div class="lookup-card">
+        <div class="lookup-tabs" role="tablist" aria-label="Lookup method">
+          <button class="lookup-tab active" role="tab" aria-selected="true" onclick="setMethod('phone', this)">Phone</button>
+          <button class="lookup-tab" role="tab" aria-selected="false" onclick="setMethod('email', this)">Email</button>
+          <button class="lookup-tab" role="tab" aria-selected="false" onclick="setMethod('code', this)">Booking Code</button>
+        </div>
+
+        <div class="lookup-field">
+          <label id="input-label" for="lookup-input">Phone number</label>
+          <input type="tel" id="lookup-input" placeholder="(504) 555-0100"
+                 autocomplete="tel"
+                 onkeydown="if(event.key==='Enter')doLookup()" />
+        </div>
+
+        <button class="lookup-btn" id="lookup-btn" onclick="doLookup()">Find My Bookings</button>
+        <div id="lookup-error" style="display:none;"></div>
+      </div>
+
+      <!-- Results area -->
+      <div id="results-area" style="display:none;"></div>
+
+    </div>
+  </main>
+
+  <!-- Cancel confirmation modal -->
+  <div class="modal-overlay" id="cancel-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-box">
+      <h3 id="modal-title">Cancel this booking?</h3>
+      <p>Are you sure you want to cancel? <strong>Cancellations within 48 hours are non-refundable.</strong> Otherwise, your deposit will be refunded within 5–7 business days.</p>
+      <div class="modal-actions">
+        <button class="modal-dismiss" onclick="closeModal()">Keep My Booking</button>
+        <button class="modal-cancel-confirm" id="modal-confirm-btn" onclick="confirmCancel()">Yes, Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer style="background:#0b0b0b;border-top:1px solid #1a1a1a;padding:2.2rem 1rem;text-align:center;">
+    <div style="max-width:1100px;margin:0 auto;">
+      <p style="color:#a1a1aa;font-size:.9rem;line-height:1.6;margin:0;">
+        © <span id="year"></span> <strong>Pho-Matic Photography</strong> — by Gieno Smith · Hammond, Louisiana
+      </p>
+      <p style="margin:.75rem 0 0;display:flex;justify-content:center;gap:.6rem;flex-wrap:wrap;">
+        <a class="pm-linkpill" href="/phomatic/">Home</a>
+        <a class="pm-linkpill" href="/phomatic/portfolio/">Portfolio</a>
+        <a class="pm-linkpill" href="/phomatic/about/">About</a>
+        <a class="pm-linkpill" href="/phomatic/book/">Book</a>
+        <a class="pm-linkpill" href="https://www.instagram.com/datpholife" target="_blank" rel="me noopener noreferrer">@datpholife</a>
+      </p>
+      <p style="margin:.85rem 0 0;color:#6b7280;font-size:.85rem;">
+        Powered by <a href="https://lab.squarebidness.com/linkme/" target="_blank" rel="noopener noreferrer" style="color:#c9a227;text-decoration:underline;font-weight:950;">Square Bidness Tech Lab</a>
+      </p>
+    </div>
+  </footer>
+
+  <script>
+  document.getElementById("year").textContent = new Date().getFullYear();
+
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  let currentMethod = 'phone';
+  let pendingCancelToken = null;
+  let pendingCancelId = null;
+
+  const methodConfig = {
+    phone: { label: 'Phone number', placeholder: '(504) 555-0100', type: 'tel', autocomplete: 'tel' },
+    email: { label: 'Email address', placeholder: 'you@example.com', type: 'email', autocomplete: 'email' },
+    code:  { label: 'Booking code', placeholder: 'e.g. PM-ABC123', type: 'text', autocomplete: 'off' },
+  };
+
+  function setMethod(method, btn) {
+    currentMethod = method;
+    document.querySelectorAll('.lookup-tab').forEach(t => {
+      t.classList.remove('active');
+      t.setAttribute('aria-selected', 'false');
+    });
+    btn.classList.add('active');
+    btn.setAttribute('aria-selected', 'true');
+
+    const cfg = methodConfig[method];
+    const input = document.getElementById('lookup-input');
+    document.getElementById('input-label').textContent = cfg.label;
+    input.placeholder = cfg.placeholder;
+    input.type = cfg.type;
+    input.autocomplete = cfg.autocomplete;
+    input.value = '';
+    document.getElementById('lookup-error').style.display = 'none';
+    document.getElementById('results-area').style.display = 'none';
+  }
+
+  async function doLookup() {
+    const val = document.getElementById('lookup-input').value.trim();
+    if (!val) { document.getElementById('lookup-input').focus(); return; }
+
+    const btn = document.getElementById('lookup-btn');
+    const errEl = document.getElementById('lookup-error');
+    const resultsEl = document.getElementById('results-area');
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="lookup-spinner"></span> Searching...';
+    errEl.style.display = 'none';
+    resultsEl.style.display = 'none';
+
+    const params = new URLSearchParams();
+    params.set(currentMethod, val);
+
+    try {
+      const res = await fetch('/api/phomatic/booking/lookup?' + params.toString());
+      if (!res.ok) throw new Error('Lookup failed');
+      const data = await res.json();
+      renderResults(data.bookings || []);
+    } catch (err) {
+      errEl.className = 'lookup-error';
+      errEl.style.display = 'block';
+      errEl.textContent = 'Unable to find bookings right now. Please try again.';
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = 'Find My Bookings';
+    }
+  }
+
+  function statusBadge(status) {
+    const map = {
+      confirmed: 'status-confirmed',
+      pending: 'status-pending',
+      cancelled: 'status-cancelled',
+      completed: 'status-completed',
+    };
+    const cls = map[status] || 'status-pending';
+    const label = status ? status.charAt(0).toUpperCase() + status.slice(1) : 'Unknown';
+    return `<span class="status-badge ${cls}">${label}</span>`;
+  }
+
+  function formatDateDisplay(str) {
+    if (!str) return '—';
+    const [y,m,d] = str.split('-').map(Number);
+    return MONTHS[m-1] + ' ' + d + ', ' + y;
+  }
+
+  function renderResults(bookings) {
+    const el = document.getElementById('results-area');
+    el.style.display = 'block';
+
+    if (!bookings.length) {
+      el.innerHTML = `
+        <div class="lookup-empty">
+          <h3>No bookings found</h3>
+          <p>We couldn't find any bookings with that information.</p>
+          <a class="pm-cta pm-cta--gold" href="/phomatic/book/" style="margin-top:1rem;">Book a Session</a>
+        </div>`;
+      return;
+    }
+
+    const cards = bookings.map(b => {
+      const balance = b.balanceDue ? `<div class="booking-balance">Balance due at session: <strong>$${(b.balanceDue/100).toFixed(0)}</strong></div>` : '';
+      const cancelBtn = (b.status === 'confirmed' || b.status === 'pending')
+        ? `<button class="cancel-btn" onclick="openCancelModal('${b.id}','${b.cancelToken || ''}')">Cancel this booking</button>`
+        : '';
+      return `
+        <div class="booking-card">
+          <div class="booking-card-header">
+            <div>
+              <div class="booking-svc-name">${b.serviceName || '—'}</div>
+              <div class="booking-datetime">${formatDateDisplay(b.date)}${b.time ? ' at ' + b.time : ''}</div>
+            </div>
+            ${statusBadge(b.status)}
+          </div>
+          <div><span class="booking-code">${b.bookingCode || '—'}</span></div>
+          ${balance}
+          ${cancelBtn}
+        </div>`;
+    }).join('');
+
+    el.innerHTML = `<div class="results-wrap">${cards}</div>`;
+  }
+
+  function openCancelModal(bookingId, cancelToken) {
+    pendingCancelId = bookingId;
+    pendingCancelToken = cancelToken;
+    document.getElementById('cancel-modal').classList.add('active');
+  }
+
+  function closeModal() {
+    pendingCancelId = null;
+    pendingCancelToken = null;
+    document.getElementById('cancel-modal').classList.remove('active');
+  }
+
+  async function confirmCancel() {
+    const btn = document.getElementById('modal-confirm-btn');
+    btn.disabled = true;
+    btn.textContent = 'Cancelling...';
+
+    try {
+      const res = await fetch('/api/phomatic/booking/cancel', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ id: pendingCancelId, cancel_token: pendingCancelToken }),
+      });
+      if (!res.ok) throw new Error('Cancel failed');
+      closeModal();
+      // Re-run lookup to refresh results
+      await doLookup();
+    } catch {
+      btn.disabled = false;
+      btn.textContent = 'Yes, Cancel';
+      alert('Unable to cancel right now. Please try again or contact us.');
+    }
+  }
+
+  // Close modal on overlay click
+  document.getElementById('cancel-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+  </script>
+</body>
+</html>
