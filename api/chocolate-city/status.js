@@ -18,9 +18,9 @@ async function redis(command, ...args) {
 
 const DEFAULT_STATE = {
   fridayOpen: false,
-  fridayText: "Chocolate City reopens May 22–24 at 30065 North Café Line Rd.",
+  fridayText: "Friday is open this week from 7PM – 2AM.",
   weekendStatus: "Reopening May 22–24",
-  eventTitle: "Chocolate City Reopens May 22–24",
+  eventTitle: "All Roads Lead to Chocolate City",
   eventNote: "Reopening May 22–24 with the music, vibes, and grown-folk energy Albany loves.",
   vipStatus: "Only 2 VIP sections available per night. First come. Paid in full online.",
   announcement: "Reopening Weekend • May 22–24 • VIP sections available now",
