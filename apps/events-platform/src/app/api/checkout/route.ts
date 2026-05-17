@@ -53,12 +53,14 @@ export async function POST(req: NextRequest) {
   }
 
   // Load event + tiers + organizer
+  // Use maybeSingle so a missing or unpublished slug returns null cleanly
+  // instead of a PGRST116 error that pollutes Supabase error logs.
   const { data: event } = await supabaseServer
     .from("events")
     .select("*, organizers ( stripe_account_id ), ticket_tiers ( * )")
     .eq("slug", eventSlug)
     .eq("status", "published")
-    .single();
+    .maybeSingle();
 
   if (!event) {
     return NextResponse.json({ ok: false, error: "Event not found" }, { status: 404 });

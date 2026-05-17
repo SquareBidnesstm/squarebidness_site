@@ -76,15 +76,18 @@ export async function verifyOrganizerSession(
  */
 export async function getVerifiedOrganizerSlug(req: Request): Promise<string | null> {
   const cookieHeader = req.headers.get("cookie") ?? "";
-  const sessionEntry = cookieHeader
-    .split(";")
-    .map((c) => c.trim())
-    .find((c) => c.startsWith("org_session_"));
-  if (!sessionEntry) return null;
+  const cookies = cookieHeader.split(";").map((c) => c.trim());
 
+  // Collect all org_session_* cookies — if more than one is present the
+  // identity is ambiguous (user may manage multiple organizer accounts) so
+  // we refuse to guess and force re-authentication instead.
+  const orgCookies = cookies.filter((c) => c.startsWith("org_session_"));
+  if (orgCookies.length !== 1) return null;
+
+  const sessionEntry = orgCookies[0];
   const eqIdx = sessionEntry.indexOf("=");
   if (eqIdx === -1) return null;
-  const cookieName = sessionEntry.slice(0, eqIdx);
+  const cookieName = sessionEntry.slice(0, eqIdx).trim();
   const organizerSlug = cookieName.replace("org_session_", "");
   if (!organizerSlug) return null;
 

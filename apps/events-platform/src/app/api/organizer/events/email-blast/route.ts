@@ -21,6 +21,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
+  if (subject.length > 200) {
+    return NextResponse.json({ error: "Subject must be 200 characters or fewer." }, { status: 400 });
+  }
+  if (message.length > 5000) {
+    return NextResponse.json({ error: "Message must be 5,000 characters or fewer." }, { status: 400 });
+  }
+
   // Verify ownership
   const { data: event } = await supabaseServer
     .from("events")

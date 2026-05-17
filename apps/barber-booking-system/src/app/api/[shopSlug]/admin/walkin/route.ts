@@ -138,7 +138,9 @@ export async function POST(
   }
 
   // Email confirmation if customer provided email
-  const customerEmail = (body.customer_email as string | undefined)?.trim() || null;
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const rawEmail = (body.customer_email as string | undefined)?.trim() || null;
+  const customerEmail = rawEmail && EMAIL_RE.test(rawEmail) ? rawEmail : null;
   if (customerEmail) {
     sendConfirmationEmail({
       to: customerEmail,

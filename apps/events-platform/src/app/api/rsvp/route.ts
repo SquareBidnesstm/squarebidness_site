@@ -3,9 +3,14 @@ import { supabaseServer } from "../../../lib/supabase/server";
 import { generateQRDataURL } from "../../../lib/qr";
 import { sendBuyerConfirmation } from "../../../lib/notifications/email";
 import { sendBuyerSMS } from "../../../lib/notifications/sms";
-import { checkRateLimit, recordAttempt } from "../../../lib/utils";
+import { checkRateLimit, isSafeOrigin, recordAttempt } from "../../../lib/utils";
 
 export async function POST(req: NextRequest) {
+  // CSRF origin check
+  if (!isSafeOrigin(req)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   // Rate limit: 5 RSVPs per 15 min per IP
   const ip =
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??

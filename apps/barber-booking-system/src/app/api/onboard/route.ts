@@ -104,8 +104,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: "At least one barber with a name is required." }, { status: 400 });
     }
 
-    if (pin.length < 4) {
-      return NextResponse.json({ ok: false, error: "PIN must be at least 4 digits." }, { status: 400 });
+    if (!/^\d{4}$/.test(pin)) {
+      return NextResponse.json({ ok: false, error: "PIN must be exactly 4 digits." }, { status: 400 });
     }
 
     const cleanSlug = slug.toLowerCase().replace(/[^a-z0-9-]/g, "").replace(/^-|-$/g, "");
@@ -117,7 +117,7 @@ export async function POST(req: NextRequest) {
       .from("shops")
       .select("id")
       .eq("slug", cleanSlug)
-      .single();
+      .maybeSingle();
 
     if (existing) {
       return NextResponse.json(

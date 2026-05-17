@@ -17,20 +17,27 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { subscription, orderId } = await req.json();
+  const { subscription, orderId, buyer_email } = await req.json();
   if (!subscription?.endpoint || !orderId) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
   }
 
-  // Verify order exists
+  if (!buyer_email) {
+    return NextResponse.json({ error: "buyer_email is required." }, { status: 400 });
+  }
+
+  // Verify order exists and that the supplied email matches the order's buyer
+  // to prevent any caller who knows an order ID from hijacking push notifications.
   const { data: order } = await supabaseServer
     .from("orders")
-    .select("id, event_id")
+    .select("id, event_id, buyer_email")
     .eq("id", orderId)
     .eq("status", "paid")
-    .single();
+    .maybeSingle();
 
-  if (!order) return NextResponse.json({ error: "Order not found" }, { status: 404 });
+  if (!order || order.buyer_email.toLowerCase() !== (buyer_email as string).trim().toLowerCase()) {
+    return NextResponse.json({ error: "Order not found or email does not match." }, { status: 403 });
+  }
 
   // Upsert subscription — endpoint is the unique key
   await supabaseServer

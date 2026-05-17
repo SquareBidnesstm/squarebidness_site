@@ -123,7 +123,6 @@ export async function POST(
       ?? req.headers.get("x-real-ip")
       ?? "unknown";
     const rlKey = `booking:${shopSlug}:${ip}`;
-    recordFailedAttempt(rlKey); // count every attempt
     const { limited, retryAfterSeconds } = checkRateLimit(rlKey);
     if (limited) {
       return NextResponse.json(
@@ -131,6 +130,7 @@ export async function POST(
         { status: 429, headers: { "Retry-After": String(retryAfterSeconds) } }
       );
     }
+    recordFailedAttempt(rlKey); // record attempt only after confirming not yet limited
 
     const body = (await req.json()) as CreateBookingPayload;
 

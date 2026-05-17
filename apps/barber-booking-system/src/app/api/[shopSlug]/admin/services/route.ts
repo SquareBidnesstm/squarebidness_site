@@ -17,7 +17,7 @@ export async function GET(
     .from("shops")
     .select("id")
     .eq("slug", shopSlug)
-    .single();
+    .maybeSingle();
 
   if (!shop) {
     return NextResponse.json({ ok: false, error: "Shop not found" }, { status: 404 });
@@ -51,7 +51,7 @@ export async function POST(
     .from("shops")
     .select("id")
     .eq("slug", shopSlug)
-    .single();
+    .maybeSingle();
 
   if (!shop) {
     return NextResponse.json({ ok: false, error: "Shop not found" }, { status: 404 });
@@ -72,7 +72,7 @@ export async function POST(
     .eq("shop_id", shop.id)
     .order("sort_order", { ascending: false })
     .limit(1)
-    .single();
+    .maybeSingle();
 
   const nextOrder = (maxOrder?.sort_order ?? 0) + 1;
 

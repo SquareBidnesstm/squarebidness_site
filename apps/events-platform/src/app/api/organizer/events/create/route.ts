@@ -116,10 +116,24 @@ export async function POST(req: Request) {
     for (let n = 1; n <= 3; n++) {
       const tierName = (formData.get(`tier_${n}_name`) as string)?.trim();
       if (!tierName) continue;
+      const price = parseFloat(formData.get(`tier_${n}_price`) as string) || 0;
+      const quantity = parseInt(formData.get(`tier_${n}_quantity`) as string) || 0;
+
+      if (!Number.isFinite(price) || price < 0 || price > 100_000) {
+        return NextResponse.redirect(
+          new URL("/organizer/dashboard/new-event?error=invalid_tier_price", req.url)
+        );
+      }
+      if (!Number.isInteger(quantity) || quantity < 1 || quantity > 100_000) {
+        return NextResponse.redirect(
+          new URL("/organizer/dashboard/new-event?error=invalid_tier_quantity", req.url)
+        );
+      }
+
       tierPayload.push({
         name: tierName,
-        price: parseFloat(formData.get(`tier_${n}_price`) as string) || 0,
-        quantity: parseInt(formData.get(`tier_${n}_quantity`) as string) || 0,
+        price,
+        quantity,
         description: (formData.get(`tier_${n}_description`) as string)?.trim() || null,
         sort_order: n,
       });
@@ -141,32 +155,51 @@ export async function POST(req: Request) {
         if (slugCheck) occurrenceSlug = `${occurrenceSlug}-${Date.now().toString(36)}`;
       }
 
-      const { data: ev, error: evErr } = await supabaseServer
+      const eventData = {
+        organizer_id: organizer.id,
+        title: totalOccurrences > 1 ? `${title} (${i + 1}/${totalOccurrences})` : title,
+        category,
+        description,
+        cover_image_url: coverImageUrl,
+        starts_at: occurrenceStartsAt,
+        ends_at: occurrenceEndsAt,
+        venue_name: venueName,
+        address,
+        city,
+        state,
+        zip,
+        location_notes: locationNotes,
+        status: occurrenceStatus,
+        is_public: occurrenceStatus === "published",
+        refund_policy: refundPolicy,
+        refund_policy_notes: refundPolicyNotes,
+        recurrence_group_id: recurrenceGroupId,
+        recurrence_rule: recurrenceRule,
+      };
+
+      let { data: ev, error: evErr } = await supabaseServer
         .from("events")
-        .insert({
-          organizer_id: organizer.id,
-          title: totalOccurrences > 1 ? `${title} (${i + 1}/${totalOccurrences})` : title,
-          slug: occurrenceSlug,
-          category,
-          description,
-          cover_image_url: coverImageUrl,
-          starts_at: occurrenceStartsAt,
-          ends_at: occurrenceEndsAt,
-          venue_name: venueName,
-          address,
-          city,
-          state,
-          zip,
-          location_notes: locationNotes,
-          status: occurrenceStatus,
-          is_public: occurrenceStatus === "published",
-          refund_policy: refundPolicy,
-          refund_policy_notes: refundPolicyNotes,
-          recurrence_group_id: recurrenceGroupId,
-          recurrence_rule: recurrenceRule,
-        })
+        .insert({ ...eventData, slug: occurrenceSlug })
         .select("id")
         .single();
+
+      if (evErr?.code === "23505") {
+        // Slug collision from a concurrent insert — append a random suffix and retry once.
+        const retrySlug = `${occurrenceSlug}-${Math.random().toString(36).slice(2, 6)}`;
+        const { data: retryEv, error: retryErr } = await supabaseServer
+          .from("events")
+          .insert({ ...eventData, slug: retrySlug })
+          .select("id")
+          .single();
+        if (retryErr) {
+          console.error("Failed to insert recurring event occurrence after slug-collision retry:", retryErr);
+          if (i === 0) return NextResponse.redirect(new URL("/organizer/dashboard/new-event?error=db_error", req.url));
+          // Non-first occurrence: log and skip rather than aborting the whole request.
+          continue;
+        }
+        ev = retryEv;
+        evErr = null;
+      }
 
       if (evErr || !ev) {
         console.error("Event create error:", evErr);

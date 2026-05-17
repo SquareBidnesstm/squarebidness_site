@@ -17,7 +17,7 @@ export async function GET(
     .from("shops")
     .select("id")
     .eq("slug", shopSlug)
-    .single();
+    .maybeSingle();
 
   if (!shop) {
     return NextResponse.json({ ok: false, error: "Shop not found" }, { status: 404 });
@@ -51,7 +51,7 @@ export async function PUT(
     .from("shops")
     .select("id")
     .eq("slug", shopSlug)
-    .single();
+    .maybeSingle();
 
   if (!shop) {
     return NextResponse.json({ ok: false, error: "Shop not found" }, { status: 404 });

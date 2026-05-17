@@ -7,15 +7,24 @@ export async function GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get("token");
   if (!token) return NextResponse.redirect(new URL("/organizer/login?error=invalid_token", req.url));
 
+  // Use maybeSingle so a missing row (token not found, or already verified)
+  // returns null instead of throwing PGRST116 into Supabase error logs.
   const { data: organizer } = await supabaseServer
     .from("organizers")
     .select("id, name, email, email_verified")
     .eq("verification_token", token)
-    .eq("email_verified", false)
-    .single();
+    .maybeSingle();
 
   if (!organizer) {
+    // Token not found at all — genuinely invalid or expired.
     return NextResponse.redirect(new URL("/organizer/login?error=invalid_token", req.url));
+  }
+
+  if (organizer.email_verified) {
+    // Token matched but email is already verified — e.g. a double-click on the link.
+    // Redirect to dashboard with a friendly "already verified" flag rather than
+    // showing a confusing "invalid token" error.
+    return NextResponse.redirect(new URL("/organizer/dashboard?verified=already", req.url));
   }
 
   await supabaseServer
@@ -24,13 +33,11 @@ export async function GET(req: NextRequest) {
     .eq("id", organizer.id);
 
   // Send welcome email on first verification only
-  if (!organizer.email_verified) {
-    sendOrganizerWelcome({
-      organizerEmail: organizer.email,
-      organizerName: organizer.name,
-      dashboardUrl: `${PLATFORM_URL}/organizer/dashboard`,
-    }).catch(() => {});
-  }
+  sendOrganizerWelcome({
+    organizerEmail: organizer.email,
+    organizerName: organizer.name,
+    dashboardUrl: `${PLATFORM_URL}/organizer/dashboard`,
+  }).catch(() => {});
 
   return NextResponse.redirect(new URL("/organizer/dashboard?verified=1", req.url));
 }

@@ -23,7 +23,7 @@ export async function GET(
   }
 
   const { data: shop } = await supabaseServer
-    .from("shops").select("id, name, timezone").eq("slug", shopSlug).eq("active", true).single();
+    .from("shops").select("id, name, timezone").eq("slug", shopSlug).eq("active", true).maybeSingle();
   if (!shop) return new NextResponse("Shop not found", { status: 404 });
 
   // Optional barber filter
@@ -37,7 +37,7 @@ export async function GET(
 
   if (barberSlug) {
     const { data: barber } = await supabaseServer
-      .from("barbers").select("id").eq("shop_id", shop.id).eq("slug", barberSlug).single();
+      .from("barbers").select("id").eq("shop_id", shop.id).eq("slug", barberSlug).maybeSingle();
     if (barber) query = query.eq("barber_id", barber.id);
   }
 

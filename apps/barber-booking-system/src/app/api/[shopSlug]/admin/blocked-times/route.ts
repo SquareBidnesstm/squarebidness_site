@@ -10,7 +10,7 @@ export async function GET(
   const authed = await verifyAdminSession(req, shopSlug);
   if (!authed) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
 
-  const { data: shop } = await supabaseServer.from("shops").select("id").eq("slug", shopSlug).single();
+  const { data: shop } = await supabaseServer.from("shops").select("id").eq("slug", shopSlug).maybeSingle();
   if (!shop) return NextResponse.json({ ok: false, error: "Not found" }, { status: 404 });
 
   const { searchParams } = new URL(req.url);
@@ -39,7 +39,7 @@ export async function POST(
   const authed = await verifyAdminSession(req, shopSlug);
   if (!authed) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
 
-  const { data: shop } = await supabaseServer.from("shops").select("id").eq("slug", shopSlug).single();
+  const { data: shop } = await supabaseServer.from("shops").select("id").eq("slug", shopSlug).maybeSingle();
   if (!shop) return NextResponse.json({ ok: false, error: "Not found" }, { status: 404 });
 
   const body = await req.json();

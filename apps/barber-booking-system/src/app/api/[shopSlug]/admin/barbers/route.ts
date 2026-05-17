@@ -24,7 +24,7 @@ export async function GET(
     .from("shops")
     .select("id")
     .eq("slug", shopSlug)
-    .single();
+    .maybeSingle();
 
   if (!shop) {
     return NextResponse.json({ ok: false, error: "Shop not found" }, { status: 404 });
@@ -60,14 +60,14 @@ export async function GET(
     .from("subscriptions")
     .select("plan, status")
     .eq("shop_id", shop.id)
-    .single();
+    .maybeSingle();
 
   const { data: limitSetting } = await supabaseServer
     .from("shop_settings")
     .select("value_json")
     .eq("shop_id", shop.id)
     .eq("key", "barber_limit")
-    .single();
+    .maybeSingle();
 
   const activePlan = sub?.status === "active" ? sub?.plan : "free";
   const defaultLimit = activePlan === "pro" ? 10 : activePlan === "solo" ? 1 : 0;
@@ -97,7 +97,7 @@ export async function POST(
     .from("shops")
     .select("id")
     .eq("slug", shopSlug)
-    .single();
+    .maybeSingle();
 
   if (!shop) {
     return NextResponse.json({ ok: false, error: "Shop not found" }, { status: 404 });
@@ -108,7 +108,7 @@ export async function POST(
     .from("subscriptions")
     .select("plan, status")
     .eq("shop_id", shop.id)
-    .single();
+    .maybeSingle();
 
   // Check for custom limit in shop_settings (platform admin can override)
   const { data: limitSetting } = await supabaseServer
@@ -116,7 +116,7 @@ export async function POST(
     .select("value_json")
     .eq("shop_id", shop.id)
     .eq("key", "barber_limit")
-    .single();
+    .maybeSingle();
 
   const activePlan = sub?.status === "active" ? sub?.plan : "free";
   const defaultLimit = activePlan === "pro" ? 10 : activePlan === "solo" ? 1 : 0;
@@ -157,7 +157,7 @@ export async function POST(
     .eq("shop_id", shop.id)
     .order("sort_order", { ascending: false })
     .limit(1)
-    .single();
+    .maybeSingle();
 
   const nextOrder = (existing?.sort_order ?? 0) + 1;
 
