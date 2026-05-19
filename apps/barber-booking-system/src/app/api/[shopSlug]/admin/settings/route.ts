@@ -12,7 +12,7 @@ export async function GET(
   if (!authed) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
 
   const { data: shop } = await supabaseServer
-    .from("shops").select("id, logo_url").eq("slug", shopSlug).eq("active", true).single();
+    .from("shops").select("id, logo_url, manual_approval").eq("slug", shopSlug).eq("active", true).single();
   if (!shop) return NextResponse.json({ ok: false, error: "Shop not found" }, { status: 404 });
 
   const { data: typeSetting } = await supabaseServer
@@ -26,6 +26,7 @@ export async function GET(
     shop_id: shop.id,
     logo_url: shop.logo_url ?? null,
     shop_type: shopType,
+    manual_approval: shop.manual_approval ?? false,
   });
 }
 
@@ -53,6 +54,16 @@ export async function POST(
       { shop_id: shop.id, key: "shop_type", value_json: { type: body.shop_type } },
       { onConflict: "shop_id,key" }
     );
+  }
+
+  if (body.manual_approval !== undefined) {
+    if (typeof body.manual_approval !== "boolean") {
+      return NextResponse.json({ ok: false, error: "manual_approval must be boolean" }, { status: 400 });
+    }
+    await supabaseServer
+      .from("shops")
+      .update({ manual_approval: body.manual_approval })
+      .eq("id", shop.id);
   }
 
   return NextResponse.json({ ok: true });

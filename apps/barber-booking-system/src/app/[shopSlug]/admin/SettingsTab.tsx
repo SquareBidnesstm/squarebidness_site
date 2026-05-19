@@ -105,6 +105,11 @@ export default function SettingsTab({ shopSlug }: { shopSlug: string }) {
   const [savingType, setSavingType] = useState(false);
   const [typeMsg, setTypeMsg] = useState("");
 
+  // Manual approval toggle
+  const [manualApproval, setManualApproval] = useState(false);
+  const [savingApproval, setSavingApproval] = useState(false);
+  const [approvalMsg, setApprovalMsg] = useState("");
+
   useEffect(() => {
     loadSettings();
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -117,6 +122,28 @@ export default function SettingsTab({ shopSlug }: { shopSlug: string }) {
       setLogoUrl(data.logo_url ?? null);
       setShopId(data.shop_id ?? "");
       setShopType(data.shop_type ?? "barbershop");
+      setManualApproval(data.manual_approval ?? false);
+    }
+  }
+
+  async function saveManualApproval(value: boolean) {
+    setSavingApproval(true);
+    setApprovalMsg("");
+    setManualApproval(value);
+    try {
+      const res = await fetch(`/api/${shopSlug}/admin/settings`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ manual_approval: value }),
+      });
+      const data = await res.json();
+      setApprovalMsg(data.ok ? (value ? "Manual approval on" : "Auto-confirm on") : (data.error ?? "Failed"));
+    } catch {
+      setManualApproval(!value); // revert on error
+      setApprovalMsg("Failed");
+    } finally {
+      setSavingApproval(false);
+      setTimeout(() => setApprovalMsg(""), 3000);
     }
   }
 
@@ -215,6 +242,91 @@ export default function SettingsTab({ shopSlug }: { shopSlug: string }) {
         {typeMsg && (
           <div style={{ marginTop: 8, fontSize: 13, color: typeMsg === "Saved!" ? "#4ade80" : "#f87171" }}>
             {typeMsg}
+          </div>
+        )}
+      </Section>
+
+      <Section title="Booking Approvals">
+        <div
+          style={{
+            background: "#0d0d0d",
+            border: "1px solid #2a2a2a",
+            borderRadius: 12,
+            padding: "20px 22px",
+          }}
+        >
+          {/* Toggle row */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "#fff", marginBottom: 4 }}>
+                Manual approval
+              </div>
+              <div style={{ fontSize: 12, color: "#666", lineHeight: 1.5 }}>
+                {manualApproval
+                  ? "New bookings wait for your reply via SMS before confirming."
+                  : "New bookings confirm instantly — no action needed from you."}
+              </div>
+            </div>
+            <button
+              onClick={() => !savingApproval && saveManualApproval(!manualApproval)}
+              disabled={savingApproval}
+              aria-pressed={manualApproval}
+              style={{
+                flexShrink: 0,
+                width: 52,
+                height: 28,
+                borderRadius: 14,
+                border: "none",
+                background: manualApproval ? "#d4af37" : "#2a2a2a",
+                cursor: savingApproval ? "not-allowed" : "pointer",
+                position: "relative",
+                transition: "background 0.2s",
+                opacity: savingApproval ? 0.6 : 1,
+              }}
+            >
+              <span
+                style={{
+                  position: "absolute",
+                  top: 3,
+                  left: manualApproval ? 26 : 3,
+                  width: 22,
+                  height: 22,
+                  borderRadius: "50%",
+                  background: "#fff",
+                  transition: "left 0.2s",
+                  boxShadow: "0 1px 4px rgba(0,0,0,0.4)",
+                }}
+              />
+            </button>
+          </div>
+
+          {/* How it works callout — only visible when ON */}
+          {manualApproval && (
+            <div
+              style={{
+                marginTop: 18,
+                padding: "14px 16px",
+                background: "rgba(212,175,55,0.06)",
+                border: "1px solid rgba(212,175,55,0.18)",
+                borderRadius: 8,
+                fontSize: 12,
+                color: "#aaa",
+                lineHeight: 1.7,
+              }}
+            >
+              <div style={{ color: "#d4af37", fontWeight: 700, marginBottom: 6 }}>How it works</div>
+              <div>1. Client books → you get an SMS with their details.</div>
+              <div>2. Reply <strong style={{ color: "#fff" }}>CONFIRM</strong> to approve, <strong style={{ color: "#fff" }}>DECLINE</strong> to reject, or a time like <strong style={{ color: "#fff" }}>2:30 PM</strong> to counter-propose.</div>
+              <div>3. If you propose an alt time, the client gets an SMS and replies <strong style={{ color: "#fff" }}>YES</strong> or <strong style={{ color: "#fff" }}>NO</strong>.</div>
+              <div style={{ marginTop: 8, color: "#555" }}>
+                Make sure your barber profile has a phone number saved — that&apos;s where approval texts are sent.
+              </div>
+            </div>
+          )}
+        </div>
+        {approvalMsg && (
+          <div style={{ marginTop: 10, fontSize: 13, color: approvalMsg.includes("Failed") ? "#f87171" : "#4ade80" }}>
+            {approvalMsg}
           </div>
         )}
       </Section>

@@ -17,6 +17,31 @@ type CreateBookingPayload = {
   date?: string;
 };
 
+/** Send a raw SMS body to a single E.164 phone number (fire-and-forget helper). */
+async function sendSmsRaw(to: string, body: string) {
+  const sid = process.env.TWILIO_ACCOUNT_SID;
+  const token = process.env.TWILIO_AUTH_TOKEN;
+  const messagingSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
+  const fromNumber = process.env.DAPPER_FROM_NUMBER;
+  if (!sid || !token || (!messagingSid && !fromNumber)) return;
+
+  const msgParams = new URLSearchParams({ To: to, Body: body });
+  if (messagingSid) {
+    msgParams.set("MessagingServiceSid", messagingSid);
+  } else {
+    msgParams.set("From", fromNumber!);
+  }
+
+  await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
+    method: "POST",
+    headers: {
+      Authorization: `Basic ${Buffer.from(`${sid}:${token}`).toString("base64")}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: msgParams.toString(),
+  });
+}
+
 function getTodayDateString() {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
@@ -164,7 +189,7 @@ export async function POST(
 
     const { data: shop, error: shopError } = await supabaseServer
       .from("shops")
-      .select("id, slug, name, timezone")
+      .select("id, slug, name, timezone, manual_approval")
       .eq("slug", shopSlug)
       .eq("active", true)
       .single();
@@ -180,7 +205,7 @@ export async function POST(
 
     const { data: barber, error: barberError } = await supabaseServer
       .from("barbers")
-      .select("id, slug, name, display_name")
+      .select("id, slug, name, display_name, phone")
       .eq("shop_id", shop.id)
       .eq("slug", body.barber_id)
       .eq("active", true)
@@ -228,7 +253,7 @@ export async function POST(
       .from("bookings")
       .select("id")
       .eq("barber_id", barber.id)
-      .in("status", ["pending", "confirmed"])
+      .in("status", ["pending", "confirmed", "pending_approval", "counter_proposed"])
       .lt("starts_at", endsAt.toISOString())
       .gt("ends_at", startsAt.toISOString());
 
@@ -251,6 +276,8 @@ export async function POST(
       .select("id")
       .single();
 
+    const useManualApproval = !!(shop as any).manual_approval;
+
     const { data: booking, error: bookingError } = await supabaseServer
       .from("bookings")
       .insert({
@@ -268,10 +295,10 @@ export async function POST(
         ends_at: endsAt.toISOString(),
         price_snapshot: service.price,
         duration_snapshot_minutes: service.duration_minutes,
-        status: "confirmed",
+        status: useManualApproval ? "pending_approval" : "confirmed",
         payment_status: "unpaid",
         source: "shop_booking_page",
-        confirmed_at: new Date().toISOString(),
+        confirmed_at: useManualApproval ? null : new Date().toISOString(),
       })
       .select("id, booking_code, customer_name, starts_at, ends_at, status, cancel_token")
       .single();
@@ -289,42 +316,90 @@ export async function POST(
 
     const normalizedPhone = normalizePhone(body.customer_phone);
     const createSmsOptedOut = normalizedPhone ? await isSmsOptedOut(normalizedPhone) : true;
-    if (normalizedPhone && !createSmsOptedOut) {
-      sendConfirmationSMS({
-        to: normalizedPhone,
-        customerName: body.customer_name,
-        barberName: barber.display_name || barber.name,
-        barberSlug: barber.slug,
-        shopSlug,
-        serviceName: service.name,
-        appointmentDate,
-        startsAt: booking.starts_at,
-        bookingCode: booking.booking_code,
-        timezone: shop.timezone,
-        cancelToken: booking.cancel_token ?? null,
-      }).catch((err) =>
-        console.error("SMS ERROR:", err instanceof Error ? err.message : err)
-      );
-    }
 
-    // Send email confirmation if address provided (non-blocking)
-    if (body.customer_email) {
-      sendConfirmationEmail({
-        to: body.customer_email,
-        customerName: body.customer_name,
-        shopName: shop.name ?? shopSlug,
-        barberName: barber.display_name || barber.name,
-        serviceName: service.name,
-        appointmentDate,
-        startsAt: booking.starts_at,
-        bookingCode: booking.booking_code,
-        timezone: shop.timezone,
-        cancelToken: booking.cancel_token ?? null,
-      }).catch((err) => console.error("EMAIL ERROR:", err instanceof Error ? err.message : err));
+    if (useManualApproval) {
+      // ── Manual approval path ──────────────────────────────────────────────
+      // Tell the client we received their request
+      if (normalizedPhone && !createSmsOptedOut) {
+        sendSmsRaw(
+          normalizedPhone,
+          [
+            `Request received! ✂️`,
+            ``,
+            `${body.customer_name}`,
+            `${service.name}`,
+            new Date(`${appointmentDate}T12:00:00`).toLocaleDateString("en-US", {
+              weekday: "long", month: "long", day: "numeric",
+            }) + ` at ${body.time}`,
+            `Barber: ${barber.display_name || barber.name}`,
+            ``,
+            `We'll confirm your appointment shortly.`,
+          ].join("\n")
+        ).catch((err) => console.error("APPROVAL SMS CLIENT ERROR:", err instanceof Error ? err.message : err));
+      }
+
+      // Notify the barber with reply instructions
+      const barberPhone = normalizePhone((barber as any).phone ?? "");
+      if (barberPhone) {
+        const dateLabel = new Date(`${appointmentDate}T12:00:00`).toLocaleDateString("en-US", {
+          weekday: "short", month: "short", day: "numeric",
+        });
+        sendSmsRaw(
+          barberPhone,
+          [
+            `New booking request! ✂️`,
+            ``,
+            `${service.name}`,
+            `${dateLabel} at ${body.time}`,
+            `Client: ${body.customer_name}`,
+            body.client_notes ? `Note: ${body.client_notes}` : null,
+            ``,
+            `Reply:`,
+            `CONFIRM — approve this time`,
+            `DECLINE — reject request`,
+            `Or suggest a time (e.g. 11:00 AM)`,
+          ].filter(Boolean).join("\n")
+        ).catch((err) => console.error("APPROVAL SMS BARBER ERROR:", err instanceof Error ? err.message : err));
+      }
+    } else {
+      // ── Auto-confirm path ─────────────────────────────────────────────────
+      if (normalizedPhone && !createSmsOptedOut) {
+        sendConfirmationSMS({
+          to: normalizedPhone,
+          customerName: body.customer_name,
+          barberName: barber.display_name || barber.name,
+          barberSlug: barber.slug,
+          shopSlug,
+          serviceName: service.name,
+          appointmentDate,
+          startsAt: booking.starts_at,
+          bookingCode: booking.booking_code,
+          timezone: shop.timezone,
+          cancelToken: booking.cancel_token ?? null,
+        }).catch((err) =>
+          console.error("SMS ERROR:", err instanceof Error ? err.message : err)
+        );
+      }
+
+      // Send email confirmation if address provided (non-blocking)
+      if (body.customer_email) {
+        sendConfirmationEmail({
+          to: body.customer_email,
+          customerName: body.customer_name,
+          shopName: shop.name ?? shopSlug,
+          barberName: barber.display_name || barber.name,
+          serviceName: service.name,
+          appointmentDate,
+          startsAt: booking.starts_at,
+          bookingCode: booking.booking_code,
+          timezone: shop.timezone,
+          cancelToken: booking.cancel_token ?? null,
+        }).catch((err) => console.error("EMAIL ERROR:", err instanceof Error ? err.message : err));
+      }
     }
 
     // Fire push notifications (non-blocking)
-    const pushTitle = "New Booking";
+    const pushTitle = useManualApproval ? "Booking Request" : "New Booking";
     const pushBody = `${body.customer_name} — ${service.name} on ${appointmentDate}`;
     const pushUrl = `/${shopSlug}/admin`;
     sendPushToBarber(barber.id, { title: pushTitle, body: pushBody, url: pushUrl }).catch(console.error);
