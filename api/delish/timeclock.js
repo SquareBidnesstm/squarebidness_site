@@ -295,6 +295,20 @@ function summarizeShifts(shifts) {
   };
 }
 
+function summarizeLabor(shifts, active, timestamp = nowIso()) {
+  const activeRows = (active || []).map(shift => {
+    const clockInAt = shift.clockInAt;
+    return {
+      ...shift,
+      durationMinutes: diffMinutes(clockInAt, timestamp),
+      durationHours: minutesToHours(diffMinutes(clockInAt, timestamp)),
+      dateCentral: getCentralDateKey(clockInAt)
+    };
+  });
+
+  return summarizeShifts([...(shifts || []), ...activeRows]);
+}
+
 function buildShiftUpdate(shift, clockInAt, clockOutAt) {
   const minutes = diffMinutes(clockInAt, clockOutAt);
 
@@ -353,18 +367,38 @@ async function buildState(date) {
   ]);
   const payrollTurnIns = await getPayrollTurnIns();
 
+  const active = activeArrayFromMap(activeMap);
   const filteredShifts = filterShiftsByDate(shifts, date);
+  const activeForDate = date
+    ? active.filter(shift => getCentralDateKey(shift.clockInAt) === date)
+    : active;
+
+  return {
+    ok: true,
+    employees: employeeNames(employees),
+    active,
+    recent,
+    shifts: filteredShifts,
+    summary: summarizeShifts(filteredShifts),
+    laborSummary: summarizeLabor(filteredShifts, activeForDate),
+    payrollTurnIns: Object.values(payrollTurnIns)
+      .sort((a, b) => String(b.periodEnd || "").localeCompare(String(a.periodEnd || "")))
+      .slice(0, 12)
+  };
+}
+
+async function buildPublicState() {
+  const [employees, activeMap, recent] = await Promise.all([
+    getEmployees(),
+    getActiveMap(),
+    getRecentPunches()
+  ]);
 
   return {
     ok: true,
     employees: employeeNames(employees),
     active: activeArrayFromMap(activeMap),
-    recent,
-    shifts: filteredShifts,
-    summary: summarizeShifts(filteredShifts),
-    payrollTurnIns: Object.values(payrollTurnIns)
-      .sort((a, b) => String(b.periodEnd || "").localeCompare(String(a.periodEnd || "")))
-      .slice(0, 12)
+    recent
   };
 }
 
@@ -380,6 +414,15 @@ function requireManager(pin) {
     err.status = 401;
     throw err;
   }
+}
+
+function getManagerPinFromRequest(req, body = {}) {
+  return (
+    req.headers?.["x-delish-manager-pin"] ||
+    req.headers?.["x-manager-pin"] ||
+    body.managerPin ||
+    ""
+  );
 }
 
 function csvCell(value) {
@@ -413,10 +456,10 @@ function shiftsToCsv(shifts) {
   return [header, ...rows].map(row => row.map(csvCell).join(",")).join("\n");
 }
 
-async function sendCsv(req, res) {
-  requireManager(req.query?.managerPin);
+async function sendCsv(req, res, body = {}) {
+  requireManager(getManagerPinFromRequest(req, body));
 
-  const date = String(req.query?.date || "").trim();
+  const date = String(body.date || req.query?.date || "").trim();
   const shifts = filterShiftsByDate(await getShifts(), date);
   const csv = shiftsToCsv(shifts);
   const suffix = date || "all";
@@ -433,7 +476,12 @@ export default async function handler(req, res) {
         return sendCsv(req, res);
       }
 
-      return send(res, 200, await buildState(String(req.query?.date || "").trim()));
+      if (String(req.query?.mode || "") === "admin") {
+        requireManager(getManagerPinFromRequest(req));
+        return send(res, 200, await buildState(String(req.query?.date || "").trim()));
+      }
+
+      return send(res, 200, await buildPublicState());
     }
 
     if (req.method !== "POST") {
@@ -443,6 +491,10 @@ export default async function handler(req, res) {
 
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
     const action = String(body.action || "").trim();
+
+    if (action === "export_csv") {
+      return sendCsv(req, res, body);
+    }
 
     if (action === "clock_in") {
       const name = normalizeEmployeeName(body.name);
@@ -494,7 +546,7 @@ export default async function handler(req, res) {
       });
 
       return send(res, 200, {
-        ...(await buildState()),
+        ...(await buildPublicState()),
         message: `${name} clocked in.`
       });
     }
@@ -544,7 +596,7 @@ export default async function handler(req, res) {
       }
 
       return send(res, 200, {
-        ...(await buildState()),
+        ...(await buildPublicState()),
         message: `${name} clocked out.`,
         shift: completed,
         payrollTurnIn

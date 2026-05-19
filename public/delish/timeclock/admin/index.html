@@ -7,7 +7,6 @@
   <meta name="description" content="Delish time clock admin." />
   <meta name="robots" content="noindex,nofollow" />
   <meta name="theme-color" content="#111111" />
-  <link rel="stylesheet" href="/styles/global.css" />
   <meta name="sb:build" content="2026-04-14-01" />
 
 <meta name="apple-mobile-web-app-title" content="Delish Time Clock" />
@@ -764,14 +763,6 @@
       return (els.managerPin.value || "").trim();
     }
 
-    function buildCsvUrl(date = els.date.value) {
-      const qs = new URLSearchParams();
-      qs.set("mode", "csv");
-      if (date) qs.set("date", date);
-      qs.set("managerPin", getManagerPin());
-      return `${API_URL}?${qs.toString()}`;
-    }
-
     function getSalesValue() {
       return Number(els.sales.value || 0);
     }
@@ -807,12 +798,13 @@
     }
 
     async function fetchSales(date) {
-      if (!date) return { grossSales: 0, orderCount: 0 };
+      if (!date) return { grossSales: 0, orderCount: 0, failed: false };
 
       try {
-        return await fetchJson(`/api/delish/sales-summary/?date=${encodeURIComponent(date)}&t=${Date.now()}`);
+        const data = await fetchJson(`/api/delish/sales-summary/?date=${encodeURIComponent(date)}&t=${Date.now()}`);
+        return { ...data, failed: false };
       } catch {
-        return { grossSales: 0, orderCount: 0 };
+        return { grossSales: 0, orderCount: 0, failed: true };
       }
     }
 
@@ -953,7 +945,7 @@
 
   
 function renderStats(data, selectedDate, salesData = {}) {
-  const totalHours = Number(data.summary?.totalHours ?? 0);
+  const totalHours = Number(data.laborSummary?.totalHours ?? data.summary?.totalHours ?? 0);
   const totalShifts = Number(data.summary?.totalShifts ?? 0);
   const activeCount = (data.active || []).length;
   const grossSales = Number(salesData.grossSales || 0);
@@ -980,6 +972,11 @@ function renderStats(data, selectedDate, salesData = {}) {
   }
 
   els.sales.value = grossSales ? grossSales.toFixed(2) : "";
+
+  if (salesData.failed) {
+    setStatus("Labor loaded, but sales summary did not load. Refresh before reading labor cost.", "warn");
+    return;
+  }
 
   if (grossSales <= 0 && totalHours > 0) {
     setStatus("Labor is tracking, but no paid sales found for this day yet.", "warn");
@@ -1039,14 +1036,24 @@ function renderStats(data, selectedDate, salesData = {}) {
     saveLocalControls();
 
     const date = els.date.value;
+    const managerPin = getManagerPin();
+
+    if (!managerPin) {
+      setStatus("Enter manager PIN, then load admin.", "warn");
+      return;
+    }
+
     els.now.textContent = centralNowLabel();
 
     const qs = new URLSearchParams();
+    qs.set("mode", "admin");
     if (date) qs.set("date", date);
     qs.set("t", Date.now());
 
     const [data, salesData] = await Promise.all([
-      fetchJson(`${API_URL}?${qs.toString()}`),
+      fetchJson(`${API_URL}?${qs.toString()}`, {
+        headers: { "x-delish-manager-pin": managerPin }
+      }),
       fetchSales(date)
     ]);
 
@@ -1059,7 +1066,7 @@ function renderStats(data, selectedDate, salesData = {}) {
     renderEmployeeOptions(data.employees || []);
     renderLive(data.active || []);
 
-    els.csvLink.href = buildCsvUrl(date);
+    els.csvLink.href = "#";
 
    const activeCount = (data.active || []).length;
 if (activeCount >= 4) {
@@ -1202,14 +1209,52 @@ if (activeCount >= 4) {
     els.loadBtn.addEventListener("click", loadAdmin);
     els.addEmployeeBtn.addEventListener("click", addEmployee);
     els.deleteEmployeeBtn.addEventListener("click", deleteEmployee);
-    els.csvLink.addEventListener("click", (event) => {
-      if (!getManagerPin()) {
-        event.preventDefault();
+    els.csvLink.addEventListener("click", async (event) => {
+      event.preventDefault();
+
+      const managerPin = getManagerPin();
+      if (!managerPin) {
         setStatus("Manager PIN required to export CSV.", "warn");
         return;
       }
 
-      els.csvLink.href = buildCsvUrl();
+      try {
+        const date = els.date.value;
+        const res = await fetch(API_URL, {
+          method: "POST",
+          cache: "no-store",
+          headers: {
+            "Content-Type": "application/json",
+            "x-delish-manager-pin": managerPin
+          },
+          body: JSON.stringify({
+            action: "export_csv",
+            date
+          })
+        });
+
+        const text = await res.text();
+        if (!res.ok) {
+          let error = "Unable to export CSV.";
+          try {
+            error = JSON.parse(text).error || error;
+          } catch {}
+          throw new Error(error);
+        }
+
+        const blob = new Blob([text], { type: "text/csv;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `delish-timeclock-${date || "all"}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        setStatus("CSV exported.", "good");
+      } catch (err) {
+        setStatus(err.message || "Unable to export CSV.", "bad");
+      }
     });
     els.sales.setAttribute("readonly", "readonly");
 els.sales.addEventListener("focus", () => {
