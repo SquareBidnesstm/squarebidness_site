@@ -139,6 +139,11 @@ async function handleBarberReply(barberPhone: string, messageBody: string) {
 
     // ── Branch: special session vs regular ───────────────────────────────────
     if (booking.is_special_session) {
+      // Fetch shop slug once — used in both ACCEPT and DECLINE branches
+      const { data: shop } = await supabaseServer
+        .from("shops").select("slug").eq("id", barber.shop_id).single();
+      const shopSlug = shop?.slug ?? "shop";
+
       // ── ACCEPT (with optional price override) ──────────────────────────────
       const isAccept = msg === "accept" || msg === "yes" || msg === "ok" || msg === "approve";
       const customPriceCents = parseAcceptPrice(msg);
@@ -148,10 +153,22 @@ async function handleBarberReply(barberPhone: string, messageBody: string) {
           ?? barber.special_sessions_price_cents
           ?? 15000;
 
-        // Fetch shop for success URL
-        const { data: shop } = await supabaseServer
-          .from("shops").select("slug").eq("id", barber.shop_id).single();
-        const shopSlug = shop?.slug ?? "shop";
+        // C-2: Optimistic lock — claim the booking BEFORE creating the Stripe session.
+        // If 0 rows updated, another ACCEPT already won the race; ack silently.
+        const { data: claimedRows } = await supabaseServer
+          .from("bookings")
+          .update({ status: "awaiting_payment", special_session_price_cents: priceCents })
+          .eq("id", booking.id)
+          .eq("status", "pending_approval")
+          .select("id");
+
+        if (!claimedRows || claimedRows.length === 0) {
+          // Race lost — already claimed by a concurrent ACCEPT. Ack and exit.
+          await sendSms(barberPhone,
+            `Payment link already sent for ${booking.customer_name}. No action needed.`
+          ).catch(console.error);
+          return true;
+        }
 
         // Create Stripe Checkout for full payment
         const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-04-22.dahlia" });
@@ -189,14 +206,18 @@ async function handleBarberReply(barberPhone: string, messageBody: string) {
           checkoutSessionId = session.id;
         } catch (err) {
           console.error("SPECIAL SESSION: Stripe checkout error:", err instanceof Error ? err.message : err);
+          // Roll back the optimistic claim so barber can try again
+          await supabaseServer
+            .from("bookings")
+            .update({ status: "pending_approval" })
+            .eq("id", booking.id)
+            .then(({ error }) => { if (error) console.error("SPECIAL SESSION: rollback error:", error); });
           await sendSms(barberPhone, `Could not create payment link. Try replying ACCEPT again.`).catch(console.error);
           return true;
         }
 
-        // Update booking to awaiting_payment
+        // Persist the checkout session ID
         await supabaseServer.from("bookings").update({
-          status: "awaiting_payment",
-          special_session_price_cents: priceCents,
           special_session_checkout_id: checkoutSessionId,
         }).eq("id", booking.id);
 
@@ -228,9 +249,10 @@ async function handleBarberReply(barberPhone: string, messageBody: string) {
       if (msg === "decline" || msg === "no" || msg === "cancel" || msg === "reject") {
         await supabaseServer.from("bookings").update({ status: "cancelled" }).eq("id", booking.id);
         if (clientPhone) {
+          // H-2: Use shopSlug (fetched above), not barber.shop_id (a UUID)
           await sendSms(clientPhone, [
             `Sorry — your special session request wasn't accepted. ⚡`,
-            rebookBase ? `\nBook a regular appointment: ${rebookBase}/${barber.shop_id}` : "",
+            `Book a regular appointment: ${rebookBase}/${shopSlug}`,
           ].join("\n")).catch(console.error);
         }
         return true;
@@ -378,6 +400,30 @@ async function handleClientReply(clientPhone: string, messageBody: string) {
         const newEnd = new Date(newStart.getTime() + dur * 60 * 1000);
         newStartsAt = newStart.toISOString();
         newEndsAt = newEnd.toISOString();
+
+        // H-4: Overlap check — make sure the proposed counter time is still open
+        const { data: overlaps } = await supabaseServer
+          .from("bookings")
+          .select("id")
+          .eq("barber_id", booking.barber_id)
+          .in("status", ["pending", "confirmed", "pending_approval", "awaiting_payment"])
+          .neq("id", booking.id)
+          .lt("starts_at", newEnd.toISOString())
+          .gt("ends_at", newStart.toISOString());
+
+        if (overlaps && overlaps.length > 0) {
+          await sendSms(clientPhone, [
+            `Sorry — that time is no longer available. ✂️`,
+            ``,
+            `Reply NO to cancel, or contact us to reschedule.`,
+          ].join("\n")).catch(console.error);
+          if (barberPhone) {
+            await sendSms(barberPhone,
+              `${booking.customer_name} tried to accept ${counterTime} but it's now taken. Please contact them directly.`
+            ).catch(console.error);
+          }
+          return true;
+        }
       }
     }
 
@@ -462,22 +508,27 @@ async function handleClientReply(clientPhone: string, messageBody: string) {
 export async function POST(req: NextRequest) {
   const authToken = process.env.TWILIO_AUTH_TOKEN;
 
+  // C-1: Refuse to accept ANY inbound webhook without a configured auth token.
+  // A missing token means we cannot validate signatures — treat as misconfiguration.
+  if (!authToken) {
+    console.error("[twilio/inbound] TWILIO_AUTH_TOKEN is not set — rejecting webhook (misconfiguration)");
+    return new NextResponse(TWIML_EMPTY, { status: 500, headers: { "Content-Type": "text/xml" } });
+  }
+
   const body = await req.text();
   const params: Record<string, string> = {};
   for (const [k, v] of new URLSearchParams(body)) {
     params[k] = v;
   }
 
-  // Validate Twilio signature when auth token is configured
-  if (authToken) {
-    const signature = req.headers.get("x-twilio-signature") ?? "";
-    const proto = req.headers.get("x-forwarded-proto") ?? "https";
-    const host = req.headers.get("host") ?? "booking.squarebidness.com";
-    const url = `${proto}://${host}/api/twilio/inbound`;
-    const valid = await validateTwilioSignature(authToken, signature, url, params);
-    if (!valid) {
-      return new NextResponse(TWIML_EMPTY, { status: 403, headers: { "Content-Type": "text/xml" } });
-    }
+  // Always validate Twilio signature
+  const signature = req.headers.get("x-twilio-signature") ?? "";
+  const proto = req.headers.get("x-forwarded-proto") ?? "https";
+  const host = req.headers.get("host") ?? "booking.squarebidness.com";
+  const url = `${proto}://${host}/api/twilio/inbound`;
+  const valid = await validateTwilioSignature(authToken, signature, url, params);
+  if (!valid) {
+    return new NextResponse(TWIML_EMPTY, { status: 403, headers: { "Content-Type": "text/xml" } });
   }
 
   const from = params["From"] ?? "";

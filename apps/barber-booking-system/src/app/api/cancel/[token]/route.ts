@@ -53,10 +53,15 @@ export async function POST(
   const refundDeposit = hoursUntil >= FORFEIT_WINDOW_HOURS;
 
   // Cancel the booking
-  await supabaseServer
+  const { error: cancelError } = await supabaseServer
     .from("bookings")
     .update({ status: "cancelled", cancelled_at: now.toISOString(), cancelled_by: "client" })
     .eq("id", booking.id);
+
+  if (cancelError) {
+    console.error("Self-cancel update failed:", cancelError);
+    return NextResponse.json({ ok: false, error: "Could not cancel booking. Please try again." }, { status: 500 });
+  }
 
   // Handle deposit
   const depositPayment = (booking.payments as any[] ?? []).find(

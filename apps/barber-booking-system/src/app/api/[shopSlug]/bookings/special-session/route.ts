@@ -144,8 +144,13 @@ export async function POST(
 
   // Parse requested time → starts_at
   const parsed = parseSmsTime(requested_time);
-  const h24 = parsed?.h24 ?? "00:00";  // fall back to midnight if unparseable
-  const startsAt = new Date(`${requested_date}T${h24}:00`);
+  if (!parsed) {
+    return NextResponse.json(
+      { ok: false, error: "Could not parse requested time. Try formats like '11 PM', 'midnight', '3:00 AM', or '23:30'." },
+      { status: 400 }
+    );
+  }
+  const startsAt = new Date(`${requested_date}T${parsed.h24}:00`);
   const endsAt = new Date(startsAt.getTime() + svc.duration_minutes * 60 * 1000);
 
   // Generate booking code

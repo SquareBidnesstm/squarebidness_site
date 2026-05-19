@@ -139,7 +139,7 @@ export async function POST(
     // Idempotency: return cached response for duplicate requests within 10 min
     const idempotencyKey = req.headers.get("idempotency-key");
     if (idempotencyKey) {
-      const cached = getIdempotentResponse(idempotencyKey);
+      const cached = await getIdempotentResponse(idempotencyKey);
       if (cached) return NextResponse.json(cached);
     }
 
@@ -406,7 +406,7 @@ export async function POST(
     sendPushToShopAdmins(shop.id, { title: pushTitle, body: pushBody, url: pushUrl }).catch(console.error);
 
     const responseBody = { ok: true, booking, barber: barber.display_name || barber.name, service: service.name };
-    if (idempotencyKey) storeIdempotentResponse(idempotencyKey, responseBody);
+    if (idempotencyKey) await storeIdempotentResponse(idempotencyKey, responseBody);
     return NextResponse.json(responseBody);
   } catch (error) {
     return NextResponse.json(

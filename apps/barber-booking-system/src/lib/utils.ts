@@ -75,19 +75,34 @@ export function clearFailedAttempts(_key: string): void {}
 // ---------------------------------------------------------------------------
 // Idempotency cache — prevents duplicate bookings on network retry.
 // Keys expire after 10 minutes. Keyed by client-supplied Idempotency-Key header.
+// Backed by Upstash Redis so it works correctly across Vercel serverless cold starts.
+// Falls back to in-process Map for local dev when Redis env vars are absent.
 // ---------------------------------------------------------------------------
+const IDEMPOTENCY_TTL_SECONDS = 10 * 60; // 10 minutes
 const _idempotencyMap = new Map<string, { body: unknown; expiresAt: number }>();
-const IDEMPOTENCY_TTL_MS = 10 * 60 * 1000;
 
-export function getIdempotentResponse(key: string): unknown | null {
+export async function getIdempotentResponse(key: string): Promise<unknown | null> {
+  const redis = getRedis();
+  if (redis) {
+    const raw = await redis.get<string>(`idem:${key}`).catch(() => null);
+    if (!raw) return null;
+    try { return JSON.parse(raw); } catch { return raw; }
+  }
+  // In-memory fallback
   const now = Date.now();
   const entry = _idempotencyMap.get(key);
   if (!entry || now > entry.expiresAt) { _idempotencyMap.delete(key); return null; }
   return entry.body;
 }
 
-export function storeIdempotentResponse(key: string, body: unknown): void {
-  _idempotencyMap.set(key, { body, expiresAt: Date.now() + IDEMPOTENCY_TTL_MS });
+export async function storeIdempotentResponse(key: string, body: unknown): Promise<void> {
+  const redis = getRedis();
+  if (redis) {
+    await redis.set(`idem:${key}`, JSON.stringify(body), { ex: IDEMPOTENCY_TTL_SECONDS }).catch(console.error);
+    return;
+  }
+  // In-memory fallback
+  _idempotencyMap.set(key, { body, expiresAt: Date.now() + IDEMPOTENCY_TTL_SECONDS * 1000 });
 }
 
 export function normalizePhone(raw: string): string | null {

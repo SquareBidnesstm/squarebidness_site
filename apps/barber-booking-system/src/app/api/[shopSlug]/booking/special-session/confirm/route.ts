@@ -65,20 +65,28 @@ export async function GET(
 
   if (!booking) return NextResponse.redirect(fallback);
 
-  // Already confirmed (duplicate redirect guard)
+  // Already confirmed (simple duplicate redirect guard — catches refresh before DB write)
   if (booking.status === "confirmed") {
     return NextResponse.redirect(new URL(`/${shopSlug}/book?special=confirmed&code=${booking.booking_code}`, req.url));
   }
 
-  // Confirm the booking
-  const { error: updateError } = await supabaseServer
+  // Confirm the booking — conditional on status=awaiting_payment so only one concurrent
+  // request wins. If 0 rows updated, a simultaneous redirect already confirmed it.
+  const { data: updatedRows, error: updateError } = await supabaseServer
     .from("bookings")
     .update({ status: "confirmed", payment_status: "paid", confirmed_at: new Date().toISOString() })
-    .eq("id", booking.id);
+    .eq("id", booking.id)
+    .eq("status", "awaiting_payment")
+    .select("id");
 
   if (updateError) {
     console.error("[special-session/confirm] Update error:", updateError);
     return NextResponse.redirect(fallback);
+  }
+
+  // Another request won the race — redirect to confirmation without double-notifying
+  if (!updatedRows || updatedRows.length === 0) {
+    return NextResponse.redirect(new URL(`/${shopSlug}/book?special=confirmed&code=${booking.booking_code}`, req.url));
   }
 
   // Record payment
@@ -91,7 +99,7 @@ export async function GET(
     provider: "stripe",
     provider_payment_id: session.payment_intent as string ?? null,
     status: "succeeded",
-  }).catch(console.error);
+  }).then(({ error }) => { if (error) console.error("[special-session/confirm] Payment insert error:", error); });
 
   // Fetch barber + shop for notifications
   const [{ data: barber }, { data: shop }] = await Promise.all([
