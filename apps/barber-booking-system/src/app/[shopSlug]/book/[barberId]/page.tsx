@@ -20,7 +20,7 @@ export default async function BookingPage({
 
   const { data: barber } = await supabaseServer
     .from("barbers")
-    .select("id, slug, name, display_name, role, photo_url")
+    .select("id, slug, name, display_name, role, photo_url, special_sessions_enabled, special_sessions_price_cents")
     .eq("shop_id", shop.id)
     .eq("slug", barberId)
     .eq("active", true)
@@ -63,6 +63,12 @@ export default async function BookingPage({
       barberName={barber.display_name || barber.name}
       barberPhotoUrl={(barber as any).photo_url ?? null}
       barberBio={barberBio}
+      specialSessionsEnabled={!!(barber as any).special_sessions_enabled}
+      specialSessionsDefaultPrice={
+        (barber as any).special_sessions_price_cents
+          ? Math.round((barber as any).special_sessions_price_cents / 100)
+          : 150
+      }
       services={(services ?? []).map((s) => ({
         id: s.slug,
         name: s.name,

@@ -30,14 +30,16 @@ export async function PATCH(
   if (body.display_name !== undefined) updates.display_name = body.display_name;
   if (body.role !== undefined) updates.role = body.role;
   if (body.active !== undefined) updates.active = body.active;
-  if (body.phone !== undefined) updates.phone = body.phone; // E.164 e.g. +15551234567 or ""
+  if (body.phone !== undefined) updates.phone = body.phone;
+  if (body.special_sessions_enabled !== undefined) updates.special_sessions_enabled = body.special_sessions_enabled;
+  if (body.special_sessions_price_cents !== undefined) updates.special_sessions_price_cents = body.special_sessions_price_cents;
 
   const { data: barber, error } = await supabaseServer
     .from("barbers")
     .update(updates)
     .eq("id", barberId)
     .eq("shop_id", shop.id)
-    .select("id, slug, name, display_name, role, phone, active, sort_order")
+    .select("id, slug, name, display_name, role, phone, special_sessions_enabled, special_sessions_price_cents, active, sort_order")
     .single();
 
   if (error || !barber) {

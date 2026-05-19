@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import Stripe from "stripe";
 import { supabaseServer } from "../../../../lib/supabase/server";
 import { normalizePhone } from "../../../../lib/utils";
 import { smsOptOut, smsOptIn, STOP_KEYWORDS, START_KEYWORDS } from "../../../../lib/sms-opt-out";
@@ -97,15 +98,19 @@ function fmtDate(isoDate: string): string {
   });
 }
 
+// ─── Parse an ACCEPT price from "accept $150" / "accept 150" ─────────────────
+function parseAcceptPrice(msg: string): number | null {
+  const m = msg.match(/^accept\s*\$?(\d+(?:\.\d{1,2})?)$/i);
+  if (!m) return null;
+  const dollars = parseFloat(m[1]);
+  return isNaN(dollars) || dollars < 1 ? null : Math.round(dollars * 100);
+}
+
 // ─── Handle barber reply to a pending_approval booking ───────────────────────
-async function handleBarberReply(
-  barberPhone: string,
-  messageBody: string
-) {
-  // Find this barber's record
+async function handleBarberReply(barberPhone: string, messageBody: string) {
   const { data: barbers } = await supabaseServer
     .from("barbers")
-    .select("id, name, display_name, shop_id")
+    .select("id, slug, name, display_name, shop_id, special_sessions_price_cents")
     .eq("phone", barberPhone)
     .eq("active", true)
     .limit(5);
@@ -113,11 +118,10 @@ async function handleBarberReply(
   if (!barbers || barbers.length === 0) return false;
 
   for (const barber of barbers) {
-    // Look for the most recent pending_approval booking for this barber
     const { data: rows } = await supabaseServer
       .from("bookings")
       .select(
-        "id, booking_code, customer_name, customer_phone, appointment_date, starts_at, ends_at, service_id, cancel_token"
+        "id, booking_code, customer_name, customer_phone, appointment_date, starts_at, ends_at, service_id, cancel_token, is_special_session"
       )
       .eq("barber_id", barber.id)
       .eq("status", "pending_approval")
@@ -130,11 +134,116 @@ async function handleBarberReply(
     const clientPhone = normalizePhone(booking.customer_phone ?? "");
     const barberName = barber.display_name || barber.name;
     const rebookBase = "https://booking.squarebidness.com";
-    const cancelUrl = booking.cancel_token
-      ? `${rebookBase}/cancel/${booking.cancel_token}`
-      : null;
-
+    const cancelUrl = booking.cancel_token ? `${rebookBase}/cancel/${booking.cancel_token}` : null;
     const msg = messageBody.trim().toLowerCase();
+
+    // ── Branch: special session vs regular ───────────────────────────────────
+    if (booking.is_special_session) {
+      // ── ACCEPT (with optional price override) ──────────────────────────────
+      const isAccept = msg === "accept" || msg === "yes" || msg === "ok" || msg === "approve";
+      const customPriceCents = parseAcceptPrice(msg);
+
+      if (isAccept || customPriceCents !== null) {
+        const priceCents = customPriceCents
+          ?? barber.special_sessions_price_cents
+          ?? 15000;
+
+        // Fetch shop for success URL
+        const { data: shop } = await supabaseServer
+          .from("shops").select("slug").eq("id", barber.shop_id).single();
+        const shopSlug = shop?.slug ?? "shop";
+
+        // Create Stripe Checkout for full payment
+        const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-04-22.dahlia" });
+        const { data: svc } = await supabaseServer
+          .from("services").select("name").eq("id", booking.service_id).single();
+
+        const dateLabel = fmtDate(booking.appointment_date);
+        const timeLabel = new Date(booking.starts_at).toLocaleTimeString("en-US", {
+          hour: "numeric", minute: "2-digit",
+        });
+        const priceDollars = (priceCents / 100).toFixed(2);
+
+        let checkoutUrl = "";
+        let checkoutSessionId = "";
+        try {
+          const session = await stripe.checkout.sessions.create({
+            mode: "payment",
+            line_items: [{
+              price_data: {
+                currency: "usd",
+                unit_amount: priceCents,
+                product_data: {
+                  name: `Special Session ⚡ — ${svc?.name ?? "Service"}`,
+                  description: `${booking.customer_name} · ${dateLabel} at ${timeLabel}`,
+                },
+              },
+              quantity: 1,
+            }],
+            success_url: `https://booking.squarebidness.com/api/${shopSlug}/booking/special-session/confirm?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `https://booking.squarebidness.com/${shopSlug}`,
+            metadata: { booking_id: booking.id, shop_slug: shopSlug },
+            expires_at: Math.floor(Date.now() / 1000) + 86400, // 24 hrs
+          });
+          checkoutUrl = session.url ?? "";
+          checkoutSessionId = session.id;
+        } catch (err) {
+          console.error("SPECIAL SESSION: Stripe checkout error:", err instanceof Error ? err.message : err);
+          await sendSms(barberPhone, `Could not create payment link. Try replying ACCEPT again.`).catch(console.error);
+          return true;
+        }
+
+        // Update booking to awaiting_payment
+        await supabaseServer.from("bookings").update({
+          status: "awaiting_payment",
+          special_session_price_cents: priceCents,
+          special_session_checkout_id: checkoutSessionId,
+        }).eq("id", booking.id);
+
+        // SMS to client with payment link
+        if (clientPhone) {
+          await sendSms(clientPhone, [
+            `Special session accepted! ⚡`,
+            ``,
+            `${booking.customer_name}`,
+            `${svc?.name ?? "Service"} — ${dateLabel} at ${timeLabel}`,
+            `Barber: ${barberName}`,
+            ``,
+            `Full payment: $${priceDollars}`,
+            `Pay to confirm (link expires in 24 hrs):`,
+            checkoutUrl,
+            cancelUrl ? `\nCancel instead: ${cancelUrl}` : null,
+          ].filter(Boolean).join("\n")).catch(console.error);
+        }
+
+        // Ack barber
+        await sendSms(barberPhone,
+          `Payment link sent to ${booking.customer_name} for $${priceDollars}. Waiting for payment.`
+        ).catch(console.error);
+
+        return true;
+      }
+
+      // ── DECLINE ────────────────────────────────────────────────────────────
+      if (msg === "decline" || msg === "no" || msg === "cancel" || msg === "reject") {
+        await supabaseServer.from("bookings").update({ status: "cancelled" }).eq("id", booking.id);
+        if (clientPhone) {
+          await sendSms(clientPhone, [
+            `Sorry — your special session request wasn't accepted. ⚡`,
+            rebookBase ? `\nBook a regular appointment: ${rebookBase}/${barber.shop_id}` : "",
+          ].join("\n")).catch(console.error);
+        }
+        return true;
+      }
+
+      // Unrecognized — prompt
+      await sendSms(barberPhone,
+        `Reply ACCEPT (or ACCEPT $200 for custom price) or DECLINE for ${booking.customer_name}'s special session request.`
+      ).catch(console.error);
+      return true;
+    }
+
+    // ── Regular pending_approval (manual approval flow) ──────────────────────
 
     // ── CONFIRM / YES ────────────────────────────────────────────────────────
     if (msg === "confirm" || msg === "yes" || msg === "ok" || msg === "approve") {
@@ -143,46 +252,35 @@ async function handleBarberReply(
         .update({ status: "confirmed", confirmed_at: new Date().toISOString() })
         .eq("id", booking.id);
 
-      // Confirm SMS to client
       if (clientPhone) {
         const dateLabel = fmtDate(booking.appointment_date);
         const timeLabel = new Date(booking.starts_at).toLocaleTimeString("en-US", {
           hour: "numeric", minute: "2-digit",
         });
-        await sendSms(
-          clientPhone,
-          [
-            `You're confirmed! ✂️`,
-            ``,
-            `${booking.customer_name}`,
-            `${dateLabel} at ${timeLabel}`,
-            `Barber: ${barberName}`,
-            `Code: ${booking.booking_code}`,
-            cancelUrl ? `\nCancel: ${cancelUrl}` : null,
-          ].filter(Boolean).join("\n")
-        ).catch(console.error);
+        await sendSms(clientPhone, [
+          `You're confirmed! ✂️`,
+          ``,
+          `${booking.customer_name}`,
+          `${dateLabel} at ${timeLabel}`,
+          `Barber: ${barberName}`,
+          `Code: ${booking.booking_code}`,
+          cancelUrl ? `\nCancel: ${cancelUrl}` : null,
+        ].filter(Boolean).join("\n")).catch(console.error);
       }
       return true;
     }
 
     // ── DECLINE / NO / CANCEL ────────────────────────────────────────────────
     if (msg === "decline" || msg === "no" || msg === "cancel" || msg === "reject") {
-      await supabaseServer
-        .from("bookings")
-        .update({ status: "cancelled" })
-        .eq("id", booking.id);
-
+      await supabaseServer.from("bookings").update({ status: "cancelled" }).eq("id", booking.id);
       if (clientPhone) {
-        await sendSms(
-          clientPhone,
-          [
-            `Sorry — your booking request wasn't accepted. ✂️`,
-            ``,
-            booking.cancel_token
-              ? `Book another time: ${rebookBase}/cancel/${booking.cancel_token}`
-              : `Visit us to book again.`,
-          ].join("\n")
-        ).catch(console.error);
+        await sendSms(clientPhone, [
+          `Sorry — your booking request wasn't accepted. ✂️`,
+          ``,
+          booking.cancel_token
+            ? `Book another time: ${rebookBase}/cancel/${booking.cancel_token}`
+            : `Visit us to book again.`,
+        ].join("\n")).catch(console.error);
       }
       return true;
     }
@@ -195,37 +293,29 @@ async function handleBarberReply(
         .update({ status: "counter_proposed", counter_time: parsed.display })
         .eq("id", booking.id);
 
-      // Tell the client about the counter-proposal
       if (clientPhone) {
         const dateLabel = fmtDate(booking.appointment_date);
         const originalTime = new Date(booking.starts_at).toLocaleTimeString("en-US", {
           hour: "numeric", minute: "2-digit",
         });
-        await sendSms(
-          clientPhone,
-          [
-            `Update on your booking request ✂️`,
-            ``,
-            `${barberName} can't do ${originalTime} on ${dateLabel}.`,
-            `They proposed ${parsed.display} instead.`,
-            ``,
-            `Reply YES to accept or NO to cancel.`,
-          ].join("\n")
-        ).catch(console.error);
+        await sendSms(clientPhone, [
+          `Update on your booking request ✂️`,
+          ``,
+          `${barberName} can't do ${originalTime} on ${dateLabel}.`,
+          `They proposed ${parsed.display} instead.`,
+          ``,
+          `Reply YES to accept or NO to cancel.`,
+        ].join("\n")).catch(console.error);
       }
 
-      // Ack to barber
-      await sendSms(
-        barberPhone,
+      await sendSms(barberPhone,
         `Counter-proposal sent to ${booking.customer_name} for ${parsed.display}. Waiting for their reply.`
       ).catch(console.error);
-
       return true;
     }
 
-    // Reply not recognized — prompt barber
-    await sendSms(
-      barberPhone,
+    // Reply not recognized
+    await sendSms(barberPhone,
       `Reply CONFIRM, DECLINE, or a time (e.g. 2:00 PM) for ${booking.customer_name}'s booking request.`
     ).catch(console.error);
     return true;

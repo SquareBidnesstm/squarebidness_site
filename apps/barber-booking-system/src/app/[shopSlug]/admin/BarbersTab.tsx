@@ -35,6 +35,8 @@ type Barber = {
   display_name: string;
   role: string;
   phone?: string | null;
+  special_sessions_enabled?: boolean;
+  special_sessions_price_cents?: number;
   active: boolean;
   sort_order: number;
   has_pin: boolean;
@@ -51,7 +53,9 @@ type EditState = {
   display_name: string;
   role: string;
   bio?: string;
-  phone?: string; // raw 10 digits (no country code) for the input field
+  phone?: string;
+  special_sessions_enabled?: boolean;
+  special_sessions_price?: string; // dollar display, e.g. "150"
 };
 
 /** Strip +1 / +country code for display in the +1 prefix input */
@@ -200,6 +204,10 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
       role: b.role,
       bio: barberBios[b.id] ?? "",
       phone: phoneToInput(b.phone),
+      special_sessions_enabled: b.special_sessions_enabled ?? false,
+      special_sessions_price: b.special_sessions_price_cents
+        ? String(Math.round(b.special_sessions_price_cents / 100))
+        : "150",
     });
     setAddingNew(false);
     setPinOpenId(null);
@@ -212,6 +220,9 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
     // Only save phone if blank (clearing) or valid 10-digit US number
     const phonePayload = rawDigits.length === 0 ? "" : rawDigits.length === 10 ? e164 : undefined;
 
+    const priceRaw = parseInt(editState.special_sessions_price ?? "150", 10);
+    const priceCents = isNaN(priceRaw) || priceRaw < 1 ? 15000 : priceRaw * 100;
+
     const [res] = await Promise.all([
       fetch(`/api/${shopSlug}/admin/barbers/${id}`, {
         method: "PATCH",
@@ -221,6 +232,8 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
           display_name: editState.display_name.trim() || editState.name.trim(),
           role: editState.role,
           ...(phonePayload !== undefined ? { phone: phonePayload } : {}),
+          special_sessions_enabled: editState.special_sessions_enabled ?? false,
+          special_sessions_price_cents: priceCents,
         }),
       }),
       fetch(`/api/${shopSlug}/admin/barbers/${id}/bio`, {
@@ -548,6 +561,72 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
                         : null;
                     })()}
                   </div>
+
+                  {/* ── Special Sessions ─────────────────────────────── */}
+                  <div style={{ background: "#0a0a0a", border: "1px solid #1e1e1e", borderRadius: 10, padding: "16px 18px", marginBottom: 16 }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: editState.special_sessions_enabled ? 14 : 0 }}>
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: "#fff", marginBottom: 2 }}>
+                          ⚡ Special Sessions
+                        </div>
+                        <div style={{ fontSize: 11, color: "#555" }}>
+                          Off-hours bookings at a premium rate — client pays in full via Stripe
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setEditState((p) => ({ ...p, special_sessions_enabled: !p.special_sessions_enabled }))}
+                        aria-pressed={editState.special_sessions_enabled}
+                        style={{
+                          flexShrink: 0, width: 46, height: 26, borderRadius: 13, border: "none",
+                          background: editState.special_sessions_enabled ? "#d4af37" : "#2a2a2a",
+                          cursor: "pointer", position: "relative", transition: "background 0.2s",
+                        }}
+                      >
+                        <span style={{
+                          position: "absolute", top: 3,
+                          left: editState.special_sessions_enabled ? 22 : 3,
+                          width: 20, height: 20, borderRadius: "50%", background: "#fff",
+                          transition: "left 0.2s",
+                        }} />
+                      </button>
+                    </div>
+
+                    {editState.special_sessions_enabled && (
+                      <div>
+                        <div style={{ fontSize: 12, color: "#666", fontWeight: 600, marginBottom: 6 }}>
+                          Default price <span style={{ color: "#555", fontWeight: 400 }}>(client pays this in full)</span>
+                        </div>
+                        <div style={{ display: "flex", alignItems: "stretch" }}>
+                          <div style={{
+                            padding: "10px 12px",
+                            background: "#1a1a1a",
+                            border: "1px solid #2a2a2a",
+                            borderRight: "none",
+                            borderRadius: "8px 0 0 8px",
+                            color: "#d4af37",
+                            fontSize: 15,
+                            fontWeight: 700,
+                            flexShrink: 0,
+                            display: "flex",
+                            alignItems: "center",
+                          }}>$</div>
+                          <input
+                            type="number"
+                            min="1"
+                            value={editState.special_sessions_price ?? "150"}
+                            onChange={(e) => setEditState((p) => ({ ...p, special_sessions_price: e.target.value }))}
+                            placeholder="150"
+                            style={{ ...inputStyle, borderRadius: "0 8px 8px 0", flex: 1, width: "auto" }}
+                          />
+                        </div>
+                        <div style={{ fontSize: 11, color: "#555", marginTop: 5 }}>
+                          You can override this per-booking when you reply via SMS (e.g. ACCEPT $200)
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
                   <div style={{ display: "flex", gap: 10 }}>
                     <button
                       onClick={() => saveEdit(b.id)}
@@ -636,7 +715,7 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
                           {copied === b.slug ? "Copied!" : "Copy link"}
                         </button>
                       </div>
-                      <div style={{ marginTop: 5, display: "flex", alignItems: "center", gap: 8 }}>
+                      <div style={{ marginTop: 5, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                         {b.phone ? (
                           <span style={{ fontSize: 12, color: "#5cd600", fontFamily: "monospace" }}>
                             📱 {fmtPhoneDisplay(b.phone)}
@@ -646,6 +725,11 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
                             No approval phone
                           </span>
                         )}
+                        {b.special_sessions_enabled ? (
+                          <span style={{ fontSize: 11, color: "#d4af37", background: "rgba(212,175,55,0.08)", border: "1px solid rgba(212,175,55,0.25)", borderRadius: 999, padding: "2px 8px", fontWeight: 700 }}>
+                            ⚡ Special Sessions ${b.special_sessions_price_cents ? Math.round(b.special_sessions_price_cents / 100) : 150}
+                          </span>
+                        ) : null}
                       </div>
                     </div>
                     </div>{/* end photo+name flex */}

@@ -20,6 +20,8 @@ type Props = {
   barberName: string;
   barberPhotoUrl?: string | null;
   barberBio?: string | null;
+  specialSessionsEnabled?: boolean;
+  specialSessionsDefaultPrice?: number;
   services: ServiceOption[];
 };
 
@@ -28,7 +30,7 @@ type SavedCustomer = { name: string; phone: string; email: string; lastService: 
 
 const LS_KEY = (shopSlug: string) => `sbb_customer_${shopSlug}`;
 
-export default function BookingForm({ shopSlug, shopName, shopLogoUrl, barberSlug, barberName, barberPhotoUrl, barberBio, services }: Props) {
+export default function BookingForm({ shopSlug, shopName, shopLogoUrl, barberSlug, barberName, barberPhotoUrl, barberBio, specialSessionsEnabled, specialSessionsDefaultPrice = 150, services }: Props) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -53,6 +55,16 @@ export default function BookingForm({ shopSlug, shopName, shopLogoUrl, barberSlu
   const [serverDepositAmount, setServerDepositAmount] = useState<number | null>(null);
   // Unique key per form session — prevents duplicate bookings on network retry
   const [idempotencyKey] = useState(() => crypto.randomUUID());
+
+  // ── Special Session state ──────────────────────────────────────────────────
+  const [ssOpen, setSsOpen] = useState(false);
+  const [ssService, setSsService] = useState("");
+  const [ssDate, setSsDate] = useState(() => getTodayDateString());
+  const [ssTime, setSsTime] = useState("");
+  const [ssNotes, setSsNotes] = useState("");
+  const [ssLoading, setSsLoading] = useState(false);
+  const [ssError, setSsError] = useState("");
+  const [ssSent, setSsSent] = useState(false);
 
   // Returning-customer pre-fill
   const [savedCustomer, setSavedCustomer] = useState<SavedCustomer | null>(null);
@@ -206,6 +218,48 @@ export default function BookingForm({ shopSlug, shopName, shopLogoUrl, barberSlu
     } else {
       const data = await res.json().catch(() => null);
       setError(data?.error || "Error booking appointment. Try again.");
+    }
+  }
+
+  async function handleSpecialSession() {
+    if (!ssService || !ssDate || !ssTime.trim()) {
+      setSsError("Service, date, and preferred time are required.");
+      return;
+    }
+    const clientName = name.trim() || "";
+    const clientPhone = phone.trim() || "";
+    if (!clientName || !clientPhone) {
+      setSsError("Please fill in your name and phone number above first.");
+      return;
+    }
+    setSsLoading(true);
+    setSsError("");
+    try {
+      const res = await fetch(`/api/${shopSlug}/bookings/special-session`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          barber_id: barberSlug,
+          customer_name: clientName,
+          customer_phone: clientPhone,
+          customer_email: email || null,
+          service: ssService,
+          requested_date: ssDate,
+          requested_time: ssTime.trim(),
+          client_notes: ssNotes.trim() || null,
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.ok) {
+        setSsSent(true);
+        setSsOpen(false);
+      } else {
+        setSsError(data?.error || "Could not send request. Try again.");
+      }
+    } catch {
+      setSsError("Network error. Try again.");
+    } finally {
+      setSsLoading(false);
     }
   }
 
@@ -608,6 +662,172 @@ export default function BookingForm({ shopSlug, shopName, shopLogoUrl, barberSlu
         <p style={{ color: "#555", fontSize: 13, marginTop: 14, textAlign: "center" }}>
           You&apos;ll receive a text confirmation after booking.
         </p>
+
+        {/* ── Special Sessions Panel ──────────────────────────────────────────── */}
+        {specialSessionsEnabled && (
+          <div style={{ marginTop: 40 }}>
+            <div style={{
+              borderTop: "1px solid #1a1a1a",
+              paddingTop: 32,
+            }}>
+              {ssSent ? (
+                <div style={{
+                  padding: "20px 22px",
+                  background: "linear-gradient(135deg, rgba(212,175,55,0.08), rgba(212,175,55,0.03))",
+                  border: "1px solid rgba(212,175,55,0.25)",
+                  borderRadius: 14,
+                  textAlign: "center",
+                }}>
+                  <div style={{ fontSize: 28, marginBottom: 10 }}>⚡</div>
+                  <div style={{ fontWeight: 800, fontSize: 16, color: "#fff", marginBottom: 6 }}>
+                    Request sent!
+                  </div>
+                  <div style={{ color: "#888", fontSize: 13, lineHeight: 1.6 }}>
+                    {barberName} will text you with confirmation and a payment link shortly.
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {/* Collapsed trigger */}
+                  {!ssOpen && (
+                    <button
+                      onClick={() => setSsOpen(true)}
+                      style={{
+                        width: "100%",
+                        padding: "16px 20px",
+                        background: "#080808",
+                        border: "1px solid #2a2a2a",
+                        borderRadius: 12,
+                        color: "#fff",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: 12,
+                        textAlign: "left",
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 3 }}>
+                          ⚡ Request a Special Session
+                        </div>
+                        <div style={{ fontSize: 12, color: "#666" }}>
+                          Need late night, early AM, or a time outside normal hours?
+                          Starting at ${specialSessionsDefaultPrice} · Paid in full
+                        </div>
+                      </div>
+                      <span style={{ color: "#d4af37", fontSize: 18, flexShrink: 0 }}>+</span>
+                    </button>
+                  )}
+
+                  {/* Expanded form */}
+                  {ssOpen && (
+                    <div style={{
+                      background: "#080808",
+                      border: "1px solid rgba(212,175,55,0.2)",
+                      borderRadius: 14,
+                      padding: "22px 20px",
+                    }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
+                        <div>
+                          <div style={{ fontSize: 16, fontWeight: 800, color: "#fff" }}>⚡ Special Session</div>
+                          <div style={{ fontSize: 12, color: "#666", marginTop: 2 }}>
+                            Starting at ${specialSessionsDefaultPrice} · Full payment required · {barberName} approves each request
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => { setSsOpen(false); setSsError(""); }}
+                          style={{ background: "none", border: "none", color: "#555", fontSize: 18, cursor: "pointer", padding: 4 }}
+                        >✕</button>
+                      </div>
+
+                      <div style={{ display: "grid", gap: 16 }}>
+                        <Field label="Service" required>
+                          <select
+                            value={ssService}
+                            onChange={(e) => setSsService(e.target.value)}
+                            style={fieldStyle}
+                          >
+                            <option value="">Select service</option>
+                            {services.map((s) => (
+                              <option key={s.id} value={s.id}>
+                                {s.name} ({s.duration_minutes} min)
+                              </option>
+                            ))}
+                          </select>
+                        </Field>
+
+                        <Field label="Date" required>
+                          <input
+                            type="date"
+                            value={ssDate}
+                            min={getTodayDateString()}
+                            onChange={(e) => setSsDate(e.target.value)}
+                            style={fieldStyle}
+                          />
+                        </Field>
+
+                        <Field label="Preferred Time" required>
+                          <input
+                            value={ssTime}
+                            onChange={(e) => setSsTime(e.target.value)}
+                            placeholder="e.g. 11 PM, midnight, 5:30 AM"
+                            style={fieldStyle}
+                          />
+                          <div style={{ fontSize: 11, color: "#555", marginTop: 4 }}>
+                            Any time works — your barber will confirm availability.
+                          </div>
+                        </Field>
+
+                        <Field label="Notes" hint="optional">
+                          <textarea
+                            value={ssNotes}
+                            onChange={(e) => setSsNotes(e.target.value)}
+                            placeholder="Occasion, style details, anything your barber should know…"
+                            rows={2}
+                            style={{ ...fieldStyle, resize: "vertical" }}
+                          />
+                        </Field>
+                      </div>
+
+                      {!name.trim() || !phone.trim() ? (
+                        <div style={{ marginTop: 14, padding: "10px 14px", background: "#1a0a00", border: "1px solid #3a2000", borderRadius: 8, fontSize: 13, color: "#ff9955" }}>
+                          Fill in your name and phone above first.
+                        </div>
+                      ) : null}
+
+                      <button
+                        onClick={handleSpecialSession}
+                        disabled={ssLoading || !name.trim() || !phone.trim()}
+                        style={{
+                          marginTop: 18,
+                          width: "100%",
+                          padding: "14px 20px",
+                          background: ssLoading ? "#a88d20" : "#d4af37",
+                          color: "#000",
+                          fontWeight: 800,
+                          fontSize: 15,
+                          border: "none",
+                          borderRadius: 10,
+                          cursor: ssLoading || !name.trim() || !phone.trim() ? "not-allowed" : "pointer",
+                          opacity: !name.trim() || !phone.trim() ? 0.5 : 1,
+                        }}
+                      >
+                        {ssLoading ? "Sending…" : "Send Request ⚡"}
+                      </button>
+
+                      {ssError && (
+                        <div style={{ marginTop: 10, fontSize: 13, color: "#ff7070", textAlign: "center" }}>
+                          {ssError}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </section>
     </main>
   );
