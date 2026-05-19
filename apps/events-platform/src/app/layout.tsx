@@ -55,6 +55,9 @@ export const metadata: Metadata = {
     images: ["/events-meta-1200x630.png"],
   },
   alternates: { canonical: "https://events.squarebidness.com" },
+  other: {
+    "fb:app_id": "802680062853443",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -61,6 +61,9 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://booking.squarebidness.com",
   },
+  other: {
+    "fb:app_id": "802680062853443",
+  },
 };
 
 export default function RootLayout({
