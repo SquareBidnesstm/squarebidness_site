@@ -216,6 +216,57 @@
       color:#ffe5b8;
     }
     .window-pill.warn::before{ background:#f59e0b; }
+    .labor-control{
+      display:grid;
+      gap:14px;
+    }
+    .labor-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+    }
+    .labor-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-start;
+      max-width:100%;
+    }
+    .labor-actions .button-link,
+    .labor-actions button{
+      min-width:0;
+    }
+    .labor-rate{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 180px;
+      gap:12px;
+      align-items:end;
+    }
+    .labor-rate label{
+      display:block;
+      color:var(--muted);
+      font-size:.82rem;
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      margin-bottom:6px;
+    }
+    .labor-rate input{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:var(--panel2);
+      color:var(--text);
+      padding:13px 14px;
+      font:inherit;
+      font-weight:900;
+    }
+    .labor-rate input:focus{
+      outline:2px solid rgba(215,174,114,.46);
+      outline-offset:2px;
+    }
     .topline{
       display:flex;
       justify-content:space-between;
@@ -265,13 +316,17 @@
   margin-top:3px;
 }
 
-@media (max-width: 800px){
-  .pickup-window-list{
-    grid-template-columns:1fr;
-  }
-}
     @media (max-width: 800px){
-      .row,.item-list,.window-grid{grid-template-columns:1fr}
+      .pickup-window-list{
+        grid-template-columns:1fr;
+      }
+    }
+    @media (max-width: 800px){
+      .row,.item-list,.window-grid,.labor-rate{grid-template-columns:1fr}
+      .labor-actions .button-link,
+      .labor-actions button{
+        flex:1 1 100%;
+      }
     }
   </style>
 </head>
@@ -291,6 +346,49 @@
           <button class="btn-secondary" id="clearTokenBtn">Clear Token</button>
         </div>
       </div>
+    </div>
+
+    <div class="card labor-control">
+      <div class="labor-head">
+        <div>
+          <h2>Labor Control</h2>
+          <p>Track clock-ins, labor hours, estimated labor cost, and payroll-ready exports.</p>
+        </div>
+        <div class="labor-actions">
+          <a class="button-link btn-primary" href="/delish/timeclock/admin/">Open Labor Control</a>
+          <a class="button-link btn-secondary" href="/delish/timeclock/">Open Time Clock</a>
+          <button class="btn-secondary" id="refreshLaborBtn" type="button">Refresh Labor</button>
+        </div>
+      </div>
+
+      <div class="window-grid">
+        <div class="window-panel">
+          <div class="window-label">Active Now</div>
+          <div class="window-value" id="laborActive">Loading</div>
+        </div>
+        <div class="window-panel">
+          <div class="window-label">Today Hours</div>
+          <div class="window-value" id="laborHours">Loading</div>
+        </div>
+        <div class="window-panel">
+          <div class="window-label">Estimated Labor Cost</div>
+          <div class="window-value" id="laborCost">Loading</div>
+        </div>
+        <div class="window-panel">
+          <div class="window-label">Labor % of Sales</div>
+          <div class="window-value" id="laborPercent">Loading</div>
+        </div>
+      </div>
+
+      <div class="labor-rate">
+        <div>
+          <label for="laborRateInput">Average hourly labor rate</label>
+          <p class="muted" style="margin:0;">Local estimate only. Adjust this number on the admin device when wages change.</p>
+        </div>
+        <input id="laborRateInput" type="number" min="0" step="0.25" value="12.00" inputmode="decimal" />
+      </div>
+
+      <div class="status" id="laborStatusBox">Loading labor control...</div>
     </div>
 
     <div class="card">
@@ -402,6 +500,7 @@
 
   <script>
     const TOKEN_KEY = "delish_operator_token";
+    const LABOR_RATE_KEY = "delish_admin_average_labor_rate";
     const statusBox = document.getElementById("statusBox");
     const tokenStatus = document.getElementById("tokenStatus");
     const windowStatusBox = document.getElementById("windowStatusBox");
@@ -409,6 +508,13 @@
     const windowMode = document.getElementById("windowMode");
     const windowNow = document.getElementById("windowNow");
     const windowHours = document.getElementById("windowHours");
+    const laborActive = document.getElementById("laborActive");
+    const laborHours = document.getElementById("laborHours");
+    const laborCost = document.getElementById("laborCost");
+    const laborPercent = document.getElementById("laborPercent");
+    const laborRateInput = document.getElementById("laborRateInput");
+    const laborStatusBox = document.getElementById("laborStatusBox");
+    const refreshLaborBtn = document.getElementById("refreshLaborBtn");
     const pickupWindowList = document.getElementById("pickupWindowList");
 const pickupWindowStatusBox = document.getElementById("pickupWindowStatusBox");
 const savePickupWindowsBtn = document.getElementById("savePickupWindowsBtn");
@@ -470,6 +576,12 @@ const reloadPickupWindowsBtn = document.getElementById("reloadPickupWindowsBtn")
       if (!windowStatusBox) return;
       windowStatusBox.textContent = text;
       windowStatusBox.className = "status" + (tone ? ` ${tone}` : "");
+    }
+
+    function setLaborStatus(text, tone = "") {
+      if (!laborStatusBox) return;
+      laborStatusBox.textContent = text;
+      laborStatusBox.className = "status" + (tone ? ` ${tone}` : "");
     }
 
     function setPickupWindowStatus(text, tone = "") {
@@ -580,6 +692,104 @@ async function savePickupWindows() {
       if (hour === 0) hour = 12;
 
       return `${hour}:${minute} ${suffix}`;
+    }
+
+    function formatMoney(value) {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD"
+      }).format(Number(value || 0));
+    }
+
+    function minutesSince(iso) {
+      const start = new Date(iso).getTime();
+      if (!Number.isFinite(start)) return 0;
+      return Math.max(0, Math.round((Date.now() - start) / 60000));
+    }
+
+    function getCentralDateKey(date = new Date()) {
+      const parts = new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/Chicago",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+      }).formatToParts(date);
+
+      const map = {};
+      for (const part of parts) {
+        if (part.type !== "literal") map[part.type] = part.value;
+      }
+
+      return `${map.year}-${map.month}-${map.day}`;
+    }
+
+    function loadSavedLaborRate() {
+      let saved = "";
+      try {
+        saved = localStorage.getItem(LABOR_RATE_KEY) || "";
+      } catch {}
+
+      const rate = Number(saved);
+      if (Number.isFinite(rate) && rate > 0 && laborRateInput) {
+        laborRateInput.value = rate.toFixed(2);
+      }
+    }
+
+    function saveLaborRate() {
+      const rate = Math.max(0, Number(laborRateInput?.value || 0));
+      try {
+        localStorage.setItem(LABOR_RATE_KEY, String(rate));
+      } catch {}
+      return rate;
+    }
+
+    async function fetchJson(url) {
+      const res = await fetch(url, { cache: "no-store" });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok || data.ok === false) {
+        throw new Error(data.error || "Request failed.");
+      }
+
+      return data;
+    }
+
+    async function loadLaborSnapshot() {
+      if (!laborActive || !laborHours || !laborCost || !laborPercent) return;
+
+      setLaborStatus("Loading labor control...");
+
+      const today = getCentralDateKey();
+      const rate = saveLaborRate();
+      const [timeclock, sales] = await Promise.all([
+        fetchJson(`/api/delish/timeclock/?date=${encodeURIComponent(today)}&t=${Date.now()}`),
+        fetchJson(`/api/delish/sales-summary/?date=${encodeURIComponent(today)}&t=${Date.now()}`)
+          .catch(() => ({ ok: false, orderCount: 0, grossSales: 0 }))
+      ]);
+
+      const activeRows = Array.isArray(timeclock.active) ? timeclock.active : [];
+      const activeCount = activeRows.length;
+      const completedMinutes = Number(timeclock.summary?.totalMinutes || 0);
+      const activeMinutes = activeRows.reduce((sum, shift) => sum + minutesSince(shift.clockInAt), 0);
+      const totalHours = Math.round(((completedMinutes + activeMinutes) / 60) * 100) / 100;
+      const estimatedCost = totalHours * rate;
+      const grossSales = Number(sales.grossSales || 0);
+      const percent = grossSales > 0 ? (estimatedCost / grossSales) * 100 : null;
+
+      laborActive.textContent = `${activeCount}`;
+      laborHours.textContent = `${totalHours.toFixed(2)} hrs`;
+      laborCost.textContent = formatMoney(estimatedCost);
+      laborPercent.textContent = percent === null ? "No sales yet" : `${percent.toFixed(1)}%`;
+
+      if (sales.ok === false) {
+        setLaborStatus("Labor loaded. Sales summary was unavailable, so labor % is waiting on sales data.");
+        return;
+      }
+
+      setLaborStatus(
+        `Labor snapshot for ${today}: ${sales.orderCount || 0} paid orders, ${formatMoney(grossSales)} sales.`,
+        "good"
+      );
     }
 
     function formatCentralNow(parts) {
@@ -811,6 +1021,15 @@ reloadPickupWindowsBtn?.addEventListener("click", () => {
     setPickupWindowStatus(err.message || "Reload failed.", "bad")
   );
 });
+    refreshLaborBtn?.addEventListener("click", () => {
+      loadLaborSnapshot().catch(err => setLaborStatus(err.message || "Labor refresh failed.", "bad"));
+    });
+    laborRateInput?.addEventListener("change", () => {
+      loadLaborSnapshot().catch(err => setLaborStatus(err.message || "Labor refresh failed.", "bad"));
+    });
+    laborRateInput?.addEventListener("blur", () => {
+      loadLaborSnapshot().catch(err => setLaborStatus(err.message || "Labor refresh failed.", "bad"));
+    });
     document.getElementById("refreshWindowBtn").addEventListener("click", () => {
       loadOrderingWindow().catch(err => setWindowStatus(err.message || "Window check failed.", "bad"));
     });
@@ -820,7 +1039,15 @@ reloadPickupWindowsBtn?.addEventListener("click", () => {
     });
 
     updateTokenStatus();
+    loadSavedLaborRate();
     bindMutualExclusion();
+    loadLaborSnapshot().catch((err) => {
+      console.error(err);
+      setLaborStatus(err.message || "Unable to load labor control.", "bad");
+    });
+    setInterval(() => {
+      loadLaborSnapshot().catch(() => {});
+    }, 60000);
     loadOrderingWindow().catch((err) => {
       console.error(err);
       setWindowStatus(err.message || "Unable to load ordering window.", "bad");
