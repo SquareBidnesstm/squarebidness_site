@@ -32,7 +32,7 @@ export async function GET(
 
   const { data: barbers, error } = await supabaseServer
     .from("barbers")
-    .select("id, slug, name, display_name, role, active, sort_order, photo_url")
+    .select("id, slug, name, display_name, role, phone, active, sort_order, photo_url")
     .eq("shop_id", shop.id)
     .order("sort_order");
 

@@ -34,6 +34,7 @@ type Barber = {
   name: string;
   display_name: string;
   role: string;
+  phone?: string | null;
   active: boolean;
   sort_order: number;
   has_pin: boolean;
@@ -50,7 +51,33 @@ type EditState = {
   display_name: string;
   role: string;
   bio?: string;
+  phone?: string; // raw 10 digits (no country code) for the input field
 };
+
+/** Strip +1 / +country code for display in the +1 prefix input */
+function phoneToInput(e164: string | null | undefined): string {
+  if (!e164) return "";
+  const digits = e164.replace(/\D/g, "");
+  // strip leading 1 if 11 digits
+  return digits.length === 11 && digits.startsWith("1") ? digits.slice(1) : digits;
+}
+
+/** Format raw digits to E.164 +1XXXXXXXXXX (US only). Returns "" if invalid. */
+function inputToE164(raw: string): string {
+  const digits = raw.replace(/\D/g, "");
+  if (digits.length === 10) return `+1${digits}`;
+  if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
+  return digits.length === 0 ? "" : ""; // blank clears; partial = don't save
+}
+
+/** Render a 10-digit US number as (XXX) XXX-XXXX for display */
+function fmtPhoneDisplay(e164: string | null | undefined): string {
+  if (!e164) return "";
+  const d = e164.replace(/\D/g, "");
+  const ten = d.length === 11 && d.startsWith("1") ? d.slice(1) : d;
+  if (ten.length !== 10) return e164;
+  return `(${ten.slice(0, 3)}) ${ten.slice(3, 6)}-${ten.slice(6)}`;
+}
 
 const COMMON_ROLES = [
   "Barber", "Head Barber", "Master Barber", "Apprentice",
@@ -167,13 +194,24 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
 
   function startEdit(b: Barber) {
     setEditingId(b.id);
-    setEditState({ name: b.name, display_name: b.display_name || b.name, role: b.role, bio: barberBios[b.id] ?? "" });
+    setEditState({
+      name: b.name,
+      display_name: b.display_name || b.name,
+      role: b.role,
+      bio: barberBios[b.id] ?? "",
+      phone: phoneToInput(b.phone),
+    });
     setAddingNew(false);
     setPinOpenId(null);
   }
 
   async function saveEdit(id: string) {
     setSaving(true);
+    const e164 = inputToE164(editState.phone ?? "");
+    const rawDigits = (editState.phone ?? "").replace(/\D/g, "");
+    // Only save phone if blank (clearing) or valid 10-digit US number
+    const phonePayload = rawDigits.length === 0 ? "" : rawDigits.length === 10 ? e164 : undefined;
+
     const [res] = await Promise.all([
       fetch(`/api/${shopSlug}/admin/barbers/${id}`, {
         method: "PATCH",
@@ -182,18 +220,19 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
           name: editState.name.trim(),
           display_name: editState.display_name.trim() || editState.name.trim(),
           role: editState.role,
+          ...(phonePayload !== undefined ? { phone: phonePayload } : {}),
         }),
       }),
       fetch(`/api/${shopSlug}/admin/barbers/${id}/bio`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bio: editState.bio.trim() }),
+        body: JSON.stringify({ bio: (editState.bio ?? "").trim() }),
       }),
     ]);
     const data = await res.json();
     if (data.ok) {
       setBarbers((prev) => prev.map((b) => (b.id === id ? { ...data.barber, has_pin: b.has_pin } : b)));
-      setBarberBios((prev) => ({ ...prev, [id]: editState.bio.trim() }));
+      setBarberBios((prev) => ({ ...prev, [id]: (editState.bio ?? "").trim() }));
       setEditingId(null);
     }
     setSaving(false);
@@ -471,6 +510,44 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
                       style={{ ...inputStyle, resize: "vertical" }}
                     />
                   </div>
+                  <div style={{ marginBottom: 16 }}>
+                    <div style={labelStyle}>
+                      Approval SMS Phone <span style={{ color: "#555", fontWeight: 400 }}>(used for manual booking approval texts)</span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "stretch" }}>
+                      <div style={{
+                        padding: "10px 12px",
+                        background: "#1a1a1a",
+                        border: "1px solid #2a2a2a",
+                        borderRight: "none",
+                        borderRadius: "8px 0 0 8px",
+                        color: "#666",
+                        fontSize: 15,
+                        fontWeight: 700,
+                        flexShrink: 0,
+                        display: "flex",
+                        alignItems: "center",
+                      }}>
+                        +1
+                      </div>
+                      <input
+                        value={editState.phone ?? ""}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/[^\d\s\-().]/g, "").slice(0, 14);
+                          setEditState((p) => ({ ...p, phone: val }));
+                        }}
+                        placeholder="555 867 5309"
+                        inputMode="tel"
+                        style={{ ...inputStyle, borderRadius: "0 8px 8px 0", flex: 1 }}
+                      />
+                    </div>
+                    {(() => {
+                      const digits = (editState.phone ?? "").replace(/\D/g, "");
+                      return digits.length > 0 && digits.length !== 10
+                        ? <div style={{ fontSize: 11, color: "#ff9955", marginTop: 4 }}>Enter 10 digits (area code + number)</div>
+                        : null;
+                    })()}
+                  </div>
                   <div style={{ display: "flex", gap: 10 }}>
                     <button
                       onClick={() => saveEdit(b.id)}
@@ -541,7 +618,7 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
                           </span>
                         )}
                       </div>
-                      <div style={{ color: "#666", fontSize: 13, display: "flex", alignItems: "center", gap: 10 }}>
+                      <div style={{ color: "#666", fontSize: 13, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
                         <span>{b.role}</span>
                         <span style={{ color: "#333" }}>·</span>
                         <a
@@ -558,6 +635,17 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
                         >
                           {copied === b.slug ? "Copied!" : "Copy link"}
                         </button>
+                      </div>
+                      <div style={{ marginTop: 5, display: "flex", alignItems: "center", gap: 8 }}>
+                        {b.phone ? (
+                          <span style={{ fontSize: 12, color: "#5cd600", fontFamily: "monospace" }}>
+                            📱 {fmtPhoneDisplay(b.phone)}
+                          </span>
+                        ) : (
+                          <span style={{ fontSize: 11, color: "#664400", background: "#1a0d00", border: "1px solid #331500", borderRadius: 999, padding: "2px 8px", fontWeight: 600 }}>
+                            No approval phone
+                          </span>
+                        )}
                       </div>
                     </div>
                     </div>{/* end photo+name flex */}
