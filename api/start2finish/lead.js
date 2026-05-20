@@ -19,6 +19,13 @@ export default async function handler(req, res) {
   const messagingSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
   const fromNumber   = process.env.DAPPER_FROM_NUMBER;
   const DEANTE_PHONE = "+13186122114";
+  const DALE_PHONE   = "+13185428050";
+
+  // Commercial inquiries route to Dale (MDW Investments); all others go to Deante
+  const { lane, commercial_type } = req.body || {};
+  const isCommercial = lane === "commercial" || inquiry_type === "commercial";
+  const operatorPhone = isCommercial ? DALE_PHONE : DEANTE_PHONE;
+  const operatorName  = isCommercial ? "Dale (MDW)" : "Deante";
 
   if (!accountSid || !authToken || (!messagingSid && !fromNumber)) {
     console.error("[start2finish/lead] Missing Twilio env vars");
@@ -33,6 +40,7 @@ export default async function handler(req, res) {
 
   // Label the inquiry type nicely
   const typeLabel =
+    isCommercial              ? "🏢 Commercial Inquiry" :
     inquiry_type === "buy"    ? "🏠 Buy a House" :
     inquiry_type === "sell"   ? "🏡 Sell My House" :
     inquiry_type === "rental" ? "🔑 Rental Inquiry" :
@@ -59,24 +67,28 @@ export default async function handler(req, res) {
 
   try {
     // ── SMS to Deante ─────────────────────────────────────────────────────────
-    const deanteMsg = [
+    const operatorMsg = [
       `📋 New Lead — Start2Finish`,
       ``,
       `Type: ${typeLabel}`,
       `Name: ${name}`,
       `Phone: ${customerPhone ?? phone}`,
-      city        ? `City: ${city}`           : null,
-      service     ? `Service: ${service}`     : null,
-      timeline    ? `Timeline: ${timeline}`   : null,
-      description ? `Details: ${description}` : null,
+      city             ? `City: ${city}`                   : null,
+      commercial_type  ? `Commercial Type: ${commercial_type}` : null,
+      service          ? `Service: ${service}`             : null,
+      timeline         ? `Timeline: ${timeline}`           : null,
+      description      ? `Details: ${description}`         : null,
       ``,
       `Reply directly to reach them.`,
     ].filter(Boolean).join("\n");
 
-    await sendSms(DEANTE_PHONE, deanteMsg);
+    await sendSms(operatorPhone, operatorMsg);
 
     // ── Confirmation SMS to customer ─────────────────────────────────────────
     if (customerPhone) {
+      const contactLine = isCommercial
+        ? `Questions? Call/Text Dale: (318) 542-8050`
+        : `Questions? Call/Text: (318) 612-2114`;
       const isEstimate = !inquiry_type || inquiry_type === "estimate";
       const customerMsg = isEstimate
         ? [
@@ -85,15 +97,15 @@ export default async function handler(req, res) {
             `Start2Finish received your estimate request.`,
             `Deante will call or text you back shortly.`,
             ``,
-            `Questions? Call/Text: (318) 612-2114`,
+            contactLine,
           ].join("\n")
         : [
             `Hi ${name}!`,
             ``,
             `Start2Finish received your inquiry.`,
-            `We'll be in touch with you shortly.`,
+            `${operatorName} will be in touch with you shortly.`,
             ``,
-            `Questions? Call/Text: (318) 612-2114`,
+            contactLine,
           ].join("\n");
 
       await sendSms(customerPhone, customerMsg).catch(console.error);
