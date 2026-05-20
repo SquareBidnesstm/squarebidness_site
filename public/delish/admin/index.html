@@ -137,6 +137,64 @@
     .actions-spacer{
       flex:1 1 22px;
     }
+    .admin-hub{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+      margin-top:16px;
+    }
+    .admin-link{
+      min-height:86px;
+      padding:16px;
+      border-radius:18px;
+      border:1px solid var(--line);
+      background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.018));
+      color:var(--text);
+      text-decoration:none;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      gap:5px;
+    }
+    .admin-link strong{
+      font-size:1.02rem;
+      line-height:1.15;
+    }
+    .admin-link span{
+      color:var(--muted);
+      font-size:.86rem;
+      line-height:1.35;
+    }
+    .admin-link.primary{
+      border-color:rgba(215,174,114,.5);
+      background:linear-gradient(180deg,rgba(215,174,114,.18),rgba(215,174,114,.06));
+    }
+    .control-section{
+      scroll-margin-top:18px;
+    }
+    .section-heading{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:14px;
+    }
+    .section-heading h2{
+      margin-bottom:4px;
+    }
+    .section-kicker{
+      margin:0;
+      color:var(--muted);
+    }
+    .compact-actions{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+      margin-top:12px;
+    }
+    .save-panel{
+      background:linear-gradient(180deg,rgba(24,24,27,.96),rgba(18,18,20,.96));
+    }
     .status{
       margin-top:12px;
       padding:12px 14px;
@@ -322,7 +380,7 @@
       }
     }
     @media (max-width: 800px){
-      .row,.item-list,.window-grid,.labor-rate{grid-template-columns:1fr}
+      .row,.item-list,.window-grid,.labor-rate,.admin-hub,.compact-actions{grid-template-columns:1fr}
       .labor-actions .button-link,
       .labor-actions button{
         flex:1 1 100%;
@@ -332,13 +390,13 @@
 </head>
 <body>
   <div class="wrap">
-    <div class="card">
+    <div class="card" id="top">
       <div class="topline">
         <div class="brandRow">
           <img class="brandMark" src="/delish/assets/delish-logo-mark-512.png" alt="Delish logo" loading="eager" decoding="async" />
           <div>
-            <h1>Delish Admin v1</h1>
-            <p>Live menu controls for kitchen-side operators.</p>
+            <h1>Delish Control Center</h1>
+            <p>Kitchen controls, ordering windows, labor, sold-out items, and customer messages.</p>
           </div>
         </div>
         <div class="token-row">
@@ -346,9 +404,44 @@
           <button class="btn-secondary" id="clearTokenBtn">Clear Token</button>
         </div>
       </div>
+
+      <div class="admin-hub" aria-label="Delish admin quick links">
+        <a class="admin-link primary" href="#labor-control">
+          <strong>Labor Control</strong>
+          <span>Timeclock, labor cost, hours, and payroll export.</span>
+        </a>
+        <a class="admin-link" href="#pickup-window-times">
+          <strong>Pickup Window Times</strong>
+          <span>Enable or disable customer pickup windows.</span>
+        </a>
+        <a class="admin-link" href="#section-toggles">
+          <strong>Menu Section Toggles</strong>
+          <span>Lagniappe, drinks, and extra sides on/off.</span>
+        </a>
+        <a class="admin-link" href="#turn-off-items">
+          <strong>Turn Off Items</strong>
+          <span>Hide items completely and block checkout.</span>
+        </a>
+        <a class="admin-link" href="#mark-soldout-items">
+          <strong>Mark Sold Out</strong>
+          <span>Keep items visible but stop new orders.</span>
+        </a>
+        <a class="admin-link" href="#base-item-toggle-control">
+          <strong>Base Item Control</strong>
+          <span>Disable rice, dressing, or mashed potato bases.</span>
+        </a>
+        <a class="admin-link" href="#ordering-window">
+          <strong>Ordering Window</strong>
+          <span>Live open/closed status, health, and operator tools.</span>
+        </a>
+        <a class="admin-link" href="#customer-banner">
+          <strong>Customer Banner</strong>
+          <span>Post the live message shown on the order page.</span>
+        </a>
+      </div>
     </div>
 
-    <div class="card labor-control">
+    <div class="card labor-control control-section" id="labor-control">
       <div class="labor-head">
         <div>
           <h2>Labor Control</h2>
@@ -388,10 +481,39 @@
         <input id="laborRateInput" type="number" min="0" step="0.25" value="12.00" inputmode="decimal" />
       </div>
 
+      <div class="labor-rate">
+        <div>
+          <label for="laborManualSalesInput">Manual daily sales fallback</label>
+          <p class="muted" style="margin:0;">Used only if live order sales do not load.</p>
+        </div>
+        <input id="laborManualSalesInput" type="number" min="0" step="0.01" placeholder="Daily sales" inputmode="decimal" />
+      </div>
+
       <div class="status" id="laborStatusBox">Loading labor control...</div>
     </div>
 
-    <div class="card">
+    <div class="card control-section" id="pickup-window-times">
+      <div class="section-heading">
+        <div>
+          <h2>Pickup Window Controls</h2>
+          <p class="section-kicker">Checked windows are available to customers. Unchecked windows are hidden from checkout and blocked on the backend.</p>
+        </div>
+        <a class="button-link btn-secondary" href="#top">Top</a>
+      </div>
+
+      <div class="pickup-window-list" id="pickupWindowList">
+        <div class="muted">Loading pickup windows...</div>
+      </div>
+
+      <div class="actions">
+        <button class="btn-primary" id="savePickupWindowsBtn">Save Pickup Windows</button>
+        <button class="btn-secondary" id="reloadPickupWindowsBtn">Reload Pickup Windows</button>
+      </div>
+
+      <div class="status" id="pickupWindowStatusBox">Ready.</div>
+    </div>
+
+    <div class="card control-section" id="ordering-window">
       <div class="topline">
         <div>
           <h2>Ordering Window Checker</h2>
@@ -406,24 +528,6 @@
           <a class="button-link btn-flash" href="/delish/admin/flashsale/">Flash Sale</a>
         </div>
       </div>
-
-      <div class="card">
-  <h2>Pickup Window Controls</h2>
-  <p class="muted">
-    Checked windows are available to customers. Unchecked windows are hidden from checkout and blocked on the backend.
-  </p>
-
-  <div class="pickup-window-list" id="pickupWindowList">
-    <div class="muted">Loading pickup windows...</div>
-  </div>
-
-  <div class="actions">
-    <button class="btn-primary" id="savePickupWindowsBtn">Save Pickup Windows</button>
-    <button class="btn-secondary" id="reloadPickupWindowsBtn">Reload Pickup Windows</button>
-  </div>
-
-  <div class="status" id="pickupWindowStatusBox">Ready.</div>
-</div>
 
       <div class="window-grid">
         <div class="window-panel">
@@ -448,8 +552,14 @@
 
     </div>
 
-    <div class="card">
-      <h2>Sections</h2>
+    <div class="card control-section" id="section-toggles">
+      <div class="section-heading">
+        <div>
+          <h2>Menu Section Toggles</h2>
+          <p class="section-kicker">Fast section-level control. Turn a whole lane on or off.</p>
+        </div>
+        <a class="button-link btn-secondary" href="#top">Top</a>
+      </div>
       <div class="row">
         <div class="toggle">
           <label for="lagniappeToggle">Lagniappe</label>
@@ -466,25 +576,25 @@
       </div>
     </div>
 
-    <div class="card">
+    <div class="card control-section" id="turn-off-items">
       <h2>Turn Off Individual Items</h2>
       <p class="muted">Checked items are hidden from Delish and blocked in checkout. This list resets every day at midnight.</p>
       <div class="item-list" id="itemsOffList"></div>
     </div>
 
-    <div class="card">
+    <div class="card control-section" id="mark-soldout-items">
       <h2>Mark Individual Items Sold Out</h2>
       <p class="muted">Checked items stay visible on Delish but show Sold Out and cannot be ordered. This list resets every day at midnight.</p>
       <div class="item-list" id="itemsSoldOutList"></div>
     </div>
 
-    <div class="card">
+    <div class="card control-section" id="base-item-toggle-control">
       <h2>Mark Base Options Sold Out</h2>
       <p class="muted">Checked bases are disabled on plate choices and blocked in checkout. This list resets every day at midnight.</p>
       <div class="item-list" id="basesSoldOutList"></div>
     </div>
 
-    <div class="card">
+    <div class="card control-section save-panel" id="customer-banner">
       <h2>Customer Banner Message</h2>
       <p class="muted">Optional live message shown at the top of the Delish order page.</p>
       <textarea id="customerMessage" placeholder="Example: Black Eyed Peas sold out for today."></textarea>
@@ -501,6 +611,7 @@
   <script>
     const TOKEN_KEY = "delish_operator_token";
     const LABOR_RATE_KEY = "delish_admin_average_labor_rate";
+    const LABOR_MANUAL_SALES_KEY = "delish_admin_manual_sales";
     const statusBox = document.getElementById("statusBox");
     const tokenStatus = document.getElementById("tokenStatus");
     const windowStatusBox = document.getElementById("windowStatusBox");
@@ -513,6 +624,7 @@
     const laborCost = document.getElementById("laborCost");
     const laborPercent = document.getElementById("laborPercent");
     const laborRateInput = document.getElementById("laborRateInput");
+    const laborManualSalesInput = document.getElementById("laborManualSalesInput");
     const laborStatusBox = document.getElementById("laborStatusBox");
     const refreshLaborBtn = document.getElementById("refreshLaborBtn");
     const pickupWindowList = document.getElementById("pickupWindowList");
@@ -743,6 +855,30 @@ async function savePickupWindows() {
       return rate;
     }
 
+    function loadSavedManualSales() {
+      let saved = "";
+      try {
+        saved = localStorage.getItem(LABOR_MANUAL_SALES_KEY) || "";
+      } catch {}
+
+      const amount = Number(saved);
+      if (Number.isFinite(amount) && amount > 0 && laborManualSalesInput) {
+        laborManualSalesInput.value = amount.toFixed(2);
+      }
+    }
+
+    function saveManualSales() {
+      const amount = Math.max(0, Number(laborManualSalesInput?.value || 0));
+      try {
+        if (amount > 0) {
+          localStorage.setItem(LABOR_MANUAL_SALES_KEY, String(amount));
+        } else {
+          localStorage.removeItem(LABOR_MANUAL_SALES_KEY);
+        }
+      } catch {}
+      return amount;
+    }
+
     async function fetchJson(url, options = {}) {
       const res = await fetch(url, {
         cache: "no-store",
@@ -789,7 +925,10 @@ async function savePickupWindows() {
         ? Number(timeclock.laborSummary.totalHours || 0)
         : Math.round(((completedMinutes + activeMinutes) / 60) * 100) / 100;
       const estimatedCost = totalHours * rate;
-      const grossSales = Number(sales.grossSales || 0);
+      const liveGrossSales = Number(sales.grossSales || 0);
+      const manualGrossSales = saveManualSales();
+      const usingManualSales = sales.ok === false && manualGrossSales > 0;
+      const grossSales = usingManualSales ? manualGrossSales : liveGrossSales;
       const percent = grossSales > 0 ? (estimatedCost / grossSales) * 100 : null;
 
       laborActive.textContent = `${activeCount}`;
@@ -798,7 +937,12 @@ async function savePickupWindows() {
       laborPercent.textContent = percent === null ? "No sales yet" : `${percent.toFixed(1)}%`;
 
       if (sales.ok === false) {
-        setLaborStatus("Labor loaded. Sales summary was unavailable, so labor % is waiting on sales data.");
+        setLaborStatus(
+          usingManualSales
+            ? `Labor loaded. Live sales unavailable, using manual sales of ${formatMoney(manualGrossSales)}.`
+            : "Labor loaded. Sales summary was unavailable, so labor % is waiting on sales data.",
+          "warn"
+        );
         return;
       }
 
@@ -1051,6 +1195,12 @@ reloadPickupWindowsBtn?.addEventListener("click", () => {
     laborRateInput?.addEventListener("blur", () => {
       loadLaborSnapshot().catch(err => setLaborStatus(err.message || "Labor refresh failed.", "bad"));
     });
+    laborManualSalesInput?.addEventListener("change", () => {
+      loadLaborSnapshot().catch(err => setLaborStatus(err.message || "Labor refresh failed.", "bad"));
+    });
+    laborManualSalesInput?.addEventListener("blur", () => {
+      loadLaborSnapshot().catch(err => setLaborStatus(err.message || "Labor refresh failed.", "bad"));
+    });
     document.getElementById("refreshWindowBtn").addEventListener("click", () => {
       loadOrderingWindow().catch(err => setWindowStatus(err.message || "Window check failed.", "bad"));
     });
@@ -1061,6 +1211,7 @@ reloadPickupWindowsBtn?.addEventListener("click", () => {
 
     updateTokenStatus();
     loadSavedLaborRate();
+    loadSavedManualSales();
     bindMutualExclusion();
     loadLaborSnapshot().catch((err) => {
       console.error(err);

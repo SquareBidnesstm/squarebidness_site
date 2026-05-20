@@ -716,6 +716,7 @@
       payrollTurnIns: [],
       summary: { employees: [], totalHours: 0, totalShifts: 0 }
     };
+    let currentSalesData = { grossSales: 0, orderCount: 0, failed: false };
 
     function centralNowLabel() {
       return new Intl.DateTimeFormat("en-US", {
@@ -948,8 +949,11 @@ function renderStats(data, selectedDate, salesData = {}) {
   const totalHours = Number(data.laborSummary?.totalHours ?? data.summary?.totalHours ?? 0);
   const totalShifts = Number(data.summary?.totalShifts ?? 0);
   const activeCount = (data.active || []).length;
-  const grossSales = Number(salesData.grossSales || 0);
-  const orderCount = Number(salesData.orderCount || 0);
+  const liveGrossSales = Number(salesData.grossSales || 0);
+  const manualGrossSales = Math.max(0, Number(els.sales.value || 0));
+  const usingManualSales = salesData.failed && manualGrossSales > 0;
+  const grossSales = usingManualSales ? manualGrossSales : liveGrossSales;
+  const orderCount = salesData.failed ? 0 : Number(salesData.orderCount || 0);
 
   const hourlyRate = getHourlyRate();
   const laborDollars = totalHours * hourlyRate;
@@ -971,10 +975,16 @@ function renderStats(data, selectedDate, salesData = {}) {
     els.statOrdersPerHour.textContent = ordersPerLaborHour.toFixed(2);
   }
 
-  els.sales.value = grossSales ? grossSales.toFixed(2) : "";
+  if (!salesData.failed) {
+    els.sales.value = grossSales ? grossSales.toFixed(2) : "";
+  }
 
   if (salesData.failed) {
-    setStatus("Labor loaded, but sales summary did not load. Refresh before reading labor cost.", "warn");
+    if (usingManualSales) {
+      setStatus("Live order sales did not load. Manual sales are being used.", "warn");
+    } else {
+      setStatus("Live order sales did not load. Enter daily sales manually to calculate labor cost.", "warn");
+    }
     return;
   }
 
@@ -1058,6 +1068,7 @@ function renderStats(data, selectedDate, salesData = {}) {
     ]);
 
     currentData = data;
+    currentSalesData = salesData;
 
     renderStats(data, date, salesData);
     renderEmployeeTotals(data.summary);
@@ -1256,14 +1267,22 @@ if (activeCount >= 4) {
         setStatus(err.message || "Unable to export CSV.", "bad");
       }
     });
-    els.sales.setAttribute("readonly", "readonly");
-els.sales.addEventListener("focus", () => {
-  setStatus("Sales is now pulled from Delish order data.", "good");
-});
+    els.sales.addEventListener("focus", () => {
+      if (currentSalesData.failed) {
+        setStatus("Enter daily sales manually while live order sales is unavailable.", "warn");
+      } else {
+        setStatus("Sales is pulled from Delish order data. Manual entry is used only if live sales fails.", "good");
+      }
+    });
+    els.sales.addEventListener("input", () => {
+      saveLocalControls();
+      if (currentSalesData.failed) {
+        renderStats(currentData, els.date.value, currentSalesData);
+      }
+    });
     els.hourlyRate.addEventListener("input", async () => {
   saveLocalControls();
-  const salesData = await fetchSales(els.date.value);
-  renderStats(currentData, els.date.value, salesData);
+  renderStats(currentData, els.date.value, currentSalesData);
 });
     restoreLocalControls();
     els.date.value = centralDateInputValue();
