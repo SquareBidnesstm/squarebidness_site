@@ -162,6 +162,7 @@
   </main>
 
   <script>
+    const TOKEN_KEY = "delish_operator_token";
     const overallStatus = document.getElementById("overallStatus");
     const checkedAt = document.getElementById("checkedAt");
     const summary = document.getElementById("summary");
@@ -171,6 +172,19 @@
     const ordersBox = document.getElementById("ordersBox");
     const checksEl = document.getElementById("checks");
     const refreshBtn = document.getElementById("refreshBtn");
+
+    function getSavedToken() {
+      try {
+        return localStorage.getItem(TOKEN_KEY) || "";
+      } catch {
+        return "";
+      }
+    }
+
+    function operatorHeaders() {
+      const token = getSavedToken();
+      return token ? { "x-operator-token": token.trim() } : {};
+    }
 
     function escapeHtml(value) {
       return String(value || "")
@@ -247,7 +261,10 @@
       refreshBtn.textContent = "Checking...";
 
       try {
-        const res = await fetch(`/api/delish/health-check/?t=${Date.now()}`, { cache: "no-store" });
+        const res = await fetch(`/api/delish/health-check/?t=${Date.now()}`, {
+          cache: "no-store",
+          headers: operatorHeaders()
+        });
         const data = await res.json();
         render(data);
       } catch (error) {

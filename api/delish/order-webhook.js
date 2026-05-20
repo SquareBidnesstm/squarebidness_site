@@ -45,10 +45,32 @@ function formatItems(items) {
     .join("\n");
 }
 
+function isAuthorized(req) {
+  const token = process.env.DELISH_LEGACY_ORDER_WEBHOOK_TOKEN;
+
+  if (!token) return false;
+
+  const headerToken = String(req.headers["x-delish-webhook-token"] || "");
+  const authHeader = String(req.headers.authorization || "");
+  const bearerToken = authHeader.startsWith("Bearer ")
+    ? authHeader.slice("Bearer ".length)
+    : "";
+
+  return headerToken === token || bearerToken === token;
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ ok: false });
+  }
+
+  if (!isAuthorized(req)) {
+    const status = process.env.DELISH_LEGACY_ORDER_WEBHOOK_TOKEN ? 401 : 410;
+    return res.status(status).json({
+      ok: false,
+      error: "Legacy order webhook disabled.",
+    });
   }
 
   try {

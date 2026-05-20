@@ -764,6 +764,11 @@
       return (els.managerPin.value || "").trim();
     }
 
+    function operatorHeaders() {
+      const token = getManagerPin();
+      return token ? { "x-operator-token": token } : {};
+    }
+
     function getSalesValue() {
       return Number(els.sales.value || 0);
     }
@@ -802,7 +807,9 @@
       if (!date) return { grossSales: 0, orderCount: 0, failed: false };
 
       try {
-        const data = await fetchJson(`/api/delish/sales-summary/?date=${encodeURIComponent(date)}&t=${Date.now()}`);
+        const data = await fetchJson(`/api/delish/sales-summary/?date=${encodeURIComponent(date)}&t=${Date.now()}`, {
+          headers: operatorHeaders()
+        });
         return { ...data, failed: false };
       } catch {
         return { grossSales: 0, orderCount: 0, failed: true };

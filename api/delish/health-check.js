@@ -5,6 +5,7 @@ import {
   DEFAULT_PICKUP_WINDOWS,
   getDisabledPickupWindows,
 } from "../_lib/delish-pickup-windows.js";
+import { requireDelishOperatorAuth } from "../_lib/delish-operator-auth.js";
 
 const REDIS_URL = process.env.DELISH_UPSTASH_REDIS_REST_URL;
 const REDIS_TOKEN = process.env.DELISH_UPSTASH_REDIS_REST_TOKEN;
@@ -42,6 +43,8 @@ export default async function handler(req, res) {
     res.setHeader("Allow", "GET");
     return res.status(405).json({ ok: false, error: "Method not allowed." });
   }
+
+  if (!requireDelishOperatorAuth(req, res)) return;
 
   const checks = [];
   const details = {};

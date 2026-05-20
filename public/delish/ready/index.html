@@ -350,6 +350,21 @@
   </div>
 
   <script>
+    const OPERATOR_TOKEN_KEY = "delish_operator_token";
+
+    function getSavedOperatorToken() {
+      try {
+        return localStorage.getItem(OPERATOR_TOKEN_KEY) || "";
+      } catch {
+        return "";
+      }
+    }
+
+    function operatorHeaders() {
+      const token = getSavedOperatorToken();
+      return token ? { "x-operator-token": token.trim() } : {};
+    }
+
     let lastIds = [];
 
     function escapeHtml(str) {
@@ -462,7 +477,8 @@
     async function loadReadyOrders() {
       try {
         const res = await fetch(`/api/delish/ready-orders/?t=${Date.now()}`, {
-          cache: "no-store"
+          cache: "no-store",
+          headers: operatorHeaders()
         });
 
         const data = await res.json();

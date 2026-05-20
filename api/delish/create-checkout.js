@@ -329,6 +329,41 @@ function buildShortOrderSummary(items = []) {
     .slice(0, 500);
 }
 
+function duplicateItemKey(item = {}) {
+  return [
+    item.id,
+    item.baseId,
+    item.baseName,
+    item.side1Id,
+    item.side1Name,
+    item.side2Id,
+    item.side2Name,
+  ]
+    .map((value) => String(value || "").trim())
+    .join("|");
+}
+
+function aggregateDuplicateItems(items = []) {
+  const itemMap = new Map();
+
+  for (const item of items) {
+    const key = duplicateItemKey(item);
+    const qty = Math.max(1, Number(item?.qty || 1));
+    const existing = itemMap.get(key);
+
+    if (existing) {
+      existing.qty += qty;
+    } else {
+      itemMap.set(key, {
+        ...item,
+        qty,
+      });
+    }
+  }
+
+  return Array.from(itemMap.values());
+}
+
 function safeMeta(value, max = 500) {
   return String(value || "").slice(0, max);
 }
@@ -530,7 +565,8 @@ export default async function handler(req, res) {
     const menuOverrides = await getDelishMenuOverrides();
     const flashSale = await getDelishFlashSale();
     const flashSaleMap = buildFlashSaleMap(flashSale);
-    const requestedItemIds = body.items.map((item) => String(item.id || "").trim());
+    const requestedItems = aggregateDuplicateItems(body.items);
+    const requestedItemIds = requestedItems.map((item) => String(item.id || "").trim());
     const isFlashSaleOrder =
       flashSaleMap.size > 0 &&
       requestedItemIds.length > 0 &&
@@ -595,7 +631,7 @@ export default async function handler(req, res) {
 // Replace the return block inside the .map() in cleanItems
 // ------------------------------------------------------------
  
-    const cleanItems = body.items
+    const cleanItems = requestedItems
       .map((item) => {
         const id = String(item.id || "").trim();
         const rawQty = Math.max(1, Number(item.qty || 1));
@@ -641,7 +677,7 @@ export default async function handler(req, res) {
       });
     }
 
-    if (cleanItems.length !== body.items.length) {
+    if (cleanItems.length !== requestedItems.length) {
       return res.status(403).json({
         ok: false,
         error: "ITEM_NOT_AVAILABLE",

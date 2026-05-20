@@ -290,6 +290,24 @@
   </div>
 
   <script>
+    const OPERATOR_TOKEN_KEY = "delish_operator_token";
+
+    function getSavedOperatorToken() {
+      try {
+        return localStorage.getItem(OPERATOR_TOKEN_KEY) || "";
+      } catch {
+        return "";
+      }
+    }
+
+    function operatorHeaders(extra = {}) {
+      const token = getSavedOperatorToken();
+      return {
+        ...extra,
+        ...(token ? { "x-operator-token": token.trim() } : {})
+      };
+    }
+
     function escapeHtml(value) {
       return String(value ?? "")
         .replace(/&/g, "&amp;")
@@ -344,9 +362,7 @@
       try {
         const res = await fetch("/api/delish/clear-catering-request/", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
+          headers: operatorHeaders({ "Content-Type": "application/json" }),
           body: JSON.stringify({ id, action: "restore" })
         });
 
@@ -431,7 +447,8 @@
       try {
         const res = await fetch("/api/delish/catering-orders/?view=cleared", {
           method: "GET",
-          cache: "no-store"
+          cache: "no-store",
+          headers: operatorHeaders()
         });
 
         const data = await res.json();
@@ -451,7 +468,7 @@
         statusBar.textContent = `${orders.length} cleared request${orders.length === 1 ? "" : "s"} loaded.`;
         ordersEl.innerHTML = orders.map(renderOrderCard).join("");
       } catch (error) {
-        statusBar.textContent = "Unable to load cleared requests right now.";
+        statusBar.textContent = error.message || "Unable to load cleared requests right now.";
         ordersEl.innerHTML = `<div class="empty">There was a problem loading the cleared request archive.</div>`;
         console.error("DELISH CLEARED CATERING PAGE ERROR:", error);
       }

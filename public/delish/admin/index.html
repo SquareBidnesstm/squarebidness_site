@@ -910,10 +910,13 @@ async function savePickupWindows() {
       const timeclockOptions = token
         ? { headers: { "x-delish-manager-pin": token } }
         : {};
+      const salesOptions = token
+        ? { headers: { "x-operator-token": token } }
+        : {};
 
       const [timeclock, sales] = await Promise.all([
         fetchJson(timeclockUrl, timeclockOptions),
-        fetchJson(`/api/delish/sales-summary/?date=${encodeURIComponent(today)}&t=${Date.now()}`)
+        fetchJson(`/api/delish/sales-summary/?date=${encodeURIComponent(today)}&t=${Date.now()}`, salesOptions)
           .catch(() => ({ ok: false, orderCount: 0, grossSales: 0 }))
       ]);
 

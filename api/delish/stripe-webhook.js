@@ -152,19 +152,38 @@ async function retryOnce(label, fn) {
     }
   }
 }
+
+async function acquireProcessingGuard(sessionId, eventId) {
+  const lockKey = `delish:stripe:processing:${sessionId}`;
+  const lockValue = `${eventId || "event"}:${Date.now()}`;
+
+  const result = await redis.set(lockKey, lockValue, {
+    nx: true,
+    ex: 60 * 10,
+  });
+
+  return result === "OK" || result === true;
+}
+
+async function releaseProcessingGuard(sessionId) {
+  if (!sessionId) return;
+  await redis.del(`delish:stripe:processing:${sessionId}`);
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).send("Method not allowed");
   }
 
-  let failureContext = {
+	  let failureContext = {
     sessionId: "",
     customerName: "",
     customerPhone: "",
     pickupWindow: "",
-    total: "",
-  };
+	    total: "",
+	  };
+  let processingGuardSessionId = "";
 
   try {
     const sig = req.headers["stripe-signature"];
@@ -199,6 +218,19 @@ export default async function handler(req, res) {
   if (alreadyProcessed) {
     return res.status(200).json({ received: true, duplicate: true });
   }
+
+	  const guardAcquired = await acquireProcessingGuard(sessionId, event.id);
+	  if (!guardAcquired) {
+    const existingOrderId = await redis.get(`delish:order:by-session:${sessionId}`);
+
+    return res.status(200).json({
+      received: true,
+      duplicate: true,
+      inProgress: !existingOrderId,
+      orderId: existingOrderId || undefined,
+    });
+	  }
+  processingGuardSessionId = sessionId;
 
   // determine type first
   const isCateringDeposit =
@@ -421,23 +453,30 @@ No catering record found in Redis. Reconcile manually.`,
  
 
  // mark processed LAST
-await redis.set(`delish:stripe:session:${sessionId}`, {
-  processedAt: new Date().toISOString(),
-  eventType: event.type,
-  orderId: order.id,
-  orderNumber: order.orderNumber,
-});
-     
-   return res.status(200).json({ received: true });
+	await redis.set(`delish:stripe:session:${sessionId}`, {
+	  processedAt: new Date().toISOString(),
+	  eventType: event.type,
+	  orderId: order.id,
+	  orderNumber: order.orderNumber,
+	});
+  processingGuardSessionId = "";
+	     
+	   return res.status(200).json({ received: true });
 }
 
 // handle any other Stripe event safely
 return res.status(200).json({ received: true, ignored: event.type });
 
-} catch (error) {
-  console.error("DELISH STRIPE WEBHOOK ERROR:", error);
+	} catch (error) {
+	  console.error("DELISH STRIPE WEBHOOK ERROR:", error);
 
   try {
+    await releaseProcessingGuard(processingGuardSessionId);
+  } catch (releaseError) {
+    console.error("DELISH STRIPE WEBHOOK GUARD RELEASE ERROR:", releaseError);
+  }
+
+	  try {
     const alertTo = normalizeUsPhone(process.env.DELISH_FAILURE_ALERT_TO || "");
 
     if (alertTo) {

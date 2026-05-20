@@ -1,3 +1,5 @@
+import { requireDelishOperatorAuth } from "../_lib/delish-operator-auth.js";
+
 export const config = {
   runtime: "nodejs"
 };
@@ -153,6 +155,8 @@ export default async function handler(req, res) {
         error: "Method not allowed."
       });
     }
+
+    if (!requireDelishOperatorAuth(req, res)) return;
 
     const date = String(req.query.date || "").trim();
 
