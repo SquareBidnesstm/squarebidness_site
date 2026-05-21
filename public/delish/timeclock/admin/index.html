@@ -143,6 +143,23 @@
       cursor:pointer;
     }
 
+    .admin-access {
+      display:grid;
+      grid-template-columns:minmax(240px, 360px) minmax(0, 1fr);
+      align-items:stretch;
+      gap:12px;
+    }
+
+    .admin-access input {
+      width:100%;
+    }
+
+    .admin-access .status {
+      margin:0;
+      padding:0 18px;
+      font-weight:800;
+    }
+
     .primary {
       background:linear-gradient(180deg,#d4a24c,#b78028) !important;
       color:#111 !important;
@@ -433,11 +450,16 @@
       .toolbar button,
       .toolbar a,
       .manager-grid input,
+      .manager-grid .status,
       .employee-grid input,
       .employee-grid select,
       .employee-grid button {
         width:100%;
         justify-content:center;
+      }
+
+      .admin-access {
+        grid-template-columns:1fr;
       }
     }
 
@@ -468,7 +490,10 @@
         <div class="time-chip" id="centralNow">Central Time</div>
       </div>
 
-      <div class="status" id="statusBox">Ready.</div>
+      <div class="manager-grid admin-access">
+        <input id="managerPin" type="password" inputmode="numeric" placeholder="Manager PIN" />
+        <div class="status warn" id="statusBox">Enter manager PIN, then load admin.</div>
+      </div>
 
       <div class="toolbar">
         <input id="dateFilter" type="date" />
@@ -477,10 +502,6 @@
         <button id="loadBtn" class="primary">Load Day</button>
         <a id="csvLink" href="/api/delish/timeclock/?mode=csv" target="_blank" rel="noopener">Export CSV</a>
         <a href="/delish/timeclock/">Open Time Clock</a>
-      </div>
-
-      <div class="manager-grid">
-        <input id="managerPin" type="password" inputmode="numeric" placeholder="Manager PIN" />
       </div>
 
       <div class="grid">
