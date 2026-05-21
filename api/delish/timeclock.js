@@ -202,6 +202,12 @@ function findEmployeeByName(employees, name) {
   );
 }
 
+function findEmployeeByPin(employees, pin) {
+  const target = String(pin || "").trim();
+  if (!target) return null;
+  return employees.find(emp => String(emp?.pin || "").trim() === target) || null;
+}
+
 async function getActiveMap() {
   const raw = await redis("GET", ACTIVE_KEY);
   return parseJson(raw, {});
@@ -497,19 +503,21 @@ export default async function handler(req, res) {
     }
 
     if (action === "clock_in") {
-      const name = normalizeEmployeeName(body.name);
       const pin = String(body.pin || "").trim();
       const device = normalizeDevice(body.device);
 
-      if (!name || !pin) {
-        return send(res, 400, { ok: false, error: "Name and PIN required." });
+      if (!pin) {
+        return send(res, 400, { ok: false, error: "Employee number required." });
       }
 
       const employees = await getEmployees();
-      const employee = findEmployeeByName(employees, name);
+      const employee = body.name
+        ? findEmployeeByName(employees, body.name)
+        : findEmployeeByPin(employees, pin);
+      const name = normalizeEmployeeName(employee?.name || body.name);
 
       if (!employee || String(employee.pin || "") !== pin) {
-        return send(res, 401, { ok: false, error: "Invalid PIN." });
+        return send(res, 401, { ok: false, error: "Employee number not found." });
       }
 
       const hour = new Date().toLocaleString("en-US", {
@@ -552,15 +560,21 @@ export default async function handler(req, res) {
     }
 
     if (action === "clock_out") {
-      const name = normalizeEmployeeName(body.name);
       const pin = String(body.pin || "").trim();
       const device = normalizeDevice(body.device);
 
+      if (!pin) {
+        return send(res, 400, { ok: false, error: "Employee number required." });
+      }
+
       const employees = await getEmployees();
-      const employee = findEmployeeByName(employees, name);
+      const employee = body.name
+        ? findEmployeeByName(employees, body.name)
+        : findEmployeeByPin(employees, pin);
+      const name = normalizeEmployeeName(employee?.name || body.name);
 
       if (!employee || String(employee.pin || "") !== pin) {
-        return send(res, 401, { ok: false, error: "Invalid PIN." });
+        return send(res, 401, { ok: false, error: "Employee number not found." });
       }
 
       const activeMap = await getActiveMap();
@@ -600,6 +614,31 @@ export default async function handler(req, res) {
         message: `${name} clocked out.`,
         shift: completed,
         payrollTurnIn
+      });
+    }
+
+    if (action === "lookup_employee") {
+      const pin = String(body.pin || "").trim();
+      if (!pin) {
+        return send(res, 400, { ok: false, error: "Employee number required." });
+      }
+
+      const employees = await getEmployees();
+      const employee = findEmployeeByPin(employees, pin);
+
+      if (!employee) {
+        return send(res, 404, { ok: false, error: "Employee number not found." });
+      }
+
+      const name = normalizeEmployeeName(employee.name);
+      const activeMap = await getActiveMap();
+
+      return send(res, 200, {
+        ok: true,
+        employee: {
+          name,
+          clockedIn: !!activeMap[name]
+        }
       });
     }
 
