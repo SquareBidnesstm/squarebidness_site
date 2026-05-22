@@ -340,19 +340,9 @@
         </div>
       </a>
       <div class="nav-cta">
-        <a class="btn btn-primary btn-sm"
-           href="tel:+13182062460"
-           aria-label="Call Jamey at Elite Home Maintenance"
-           data-sb-action="ehm_call_click"
-           data-sb-component="topbar">
-          📞 Call Jamey
-        </a>
-        <a class="btn btn-secondary btn-sm"
-           href="sms:+13182062460"
-           aria-label="Text Elite Home Maintenance"
-           data-sb-action="ehm_text_click"
-           data-sb-component="topbar">
-          Text
+        <a class="btn btn-primary btn-sm" href="#lead-form"
+           data-sb-action="ehm_nav_cta" data-sb-component="topbar" data-sb-label="Get Estimate">
+          🔧 Get Estimate
         </a>
       </div>
     </div>
@@ -398,6 +388,11 @@
                   <label for="f-phone">Phone Number *</label>
                   <input id="f-phone" name="phone" type="tel" placeholder="(318) 555-0100" autocomplete="tel" required />
                 </div>
+              </div>
+
+              <div class="form-field">
+                <label for="f-email">Email <span style="font-weight:400;text-transform:none">(optional)</span></label>
+                <input id="f-email" name="email" type="email" placeholder="you@example.com" autocomplete="email" />
               </div>
 
               <div class="form-field">
@@ -449,11 +444,7 @@
           <div class="form-success" id="form-success" aria-live="polite">
             <div class="check">✅</div>
             <h3>Request Sent!</h3>
-            <p>
-              Jamey will call or text you back shortly.<br><br>
-              Need to talk now?<br>
-              <a href="tel:+13182062460" style="color:var(--accent);font-weight:700">(318) 206-2460</a>
-            </p>
+            <p>Jamey will review your request and reach out shortly.<br><br>Check your texts — you'll get a confirmation.</p>
           </div>
         </div>
       </section>
@@ -546,12 +537,6 @@
         Subfloor · Bathroom · Water Damage · Property Prep
       </div>
       <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;">
-        <a href="tel:+13182062460"
-           data-sb-action="ehm_call_click"
-           data-sb-component="footer">
-          (318) 206-2460
-        </a>
-        <span style="color:rgba(255,255,255,.15)">·</span>
         <span>© <span id="year"></span> Elite Home Maintenance</span>
         <span style="color:rgba(255,255,255,.15)">·</span>
         <a href="https://lab.squarebidness.com/" target="_blank" rel="noopener noreferrer"
@@ -578,6 +563,7 @@
 
       const name         = document.getElementById("f-name").value.trim();
       const phone        = document.getElementById("f-phone").value.trim();
+      const email        = document.getElementById("f-email").value.trim();
       const service      = document.getElementById("f-service").value;
       const property_type = document.getElementById("f-property").value;
       const description  = document.getElementById("f-desc").value.trim();
@@ -593,7 +579,7 @@
         const res = await fetch("/api/elite-home-maintenance/lead", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, phone, service, property_type, description, zip }),
+          body: JSON.stringify({ name, phone, email, service, property_type, description, zip }),
         });
         const data = await res.json().catch(() => ({}));
 
@@ -603,12 +589,12 @@
           if (typeof sbTrack === "function") sbTrack("ehm_lead_submitted", { service, property_type, zip });
           if (typeof gtag === "function") gtag("event", "generate_lead", { event_category: "elite-home-maintenance", service, zip });
         } else {
-          showError(data.error || "Something went wrong. Please call (318) 206-2460 directly.");
+          showError(data.error || "Something went wrong. Use the Get Estimate button to try again.");
           submitBtn.disabled = false;
           submitBtn.textContent = "🔧 Request Free Estimate";
         }
       } catch {
-        showError("Network error. Please call or text (318) 206-2460.");
+        showError("Network error. Please try again in a moment.");
         submitBtn.disabled = false;
         submitBtn.textContent = "🔧 Request Free Estimate";
       }

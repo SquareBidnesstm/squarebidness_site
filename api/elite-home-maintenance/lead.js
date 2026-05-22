@@ -1,6 +1,7 @@
 // POST /api/elite-home-maintenance/lead
 // Receives service request form submissions from elite-home-maintenance landing page.
-// Texts Jamey the lead details and sends a confirmation text to the customer.
+// Texts Jamey the lead details, emails Jamey.metoyer@yahoo.com,
+// and sends a confirmation text to the customer.
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -8,7 +9,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ ok: false, error: "Method not allowed." });
   }
 
-  const { name, phone, service, property_type, description, zip } = req.body || {};
+  const { name, phone, email, service, property_type, description, zip } = req.body || {};
 
   if (!name || !phone) {
     return res.status(400).json({ ok: false, error: "Name and phone are required." });
@@ -18,7 +19,11 @@ export default async function handler(req, res) {
   const authToken    = process.env.TWILIO_AUTH_TOKEN;
   const messagingSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
   const fromNumber   = process.env.DAPPER_FROM_NUMBER;
-  const JAMEY_PHONE  = "+13182062460";
+  const resendKey    = process.env.RESEND_API_KEY;
+  const resendFrom   = process.env.RESEND_FROM || "Elite Home Maintenance — Square Bidness <noreply@squarebidness.com>";
+
+  const JAMEY_PHONE = "+13182062460";
+  const JAMEY_EMAIL = "Jamey.metoyer@yahoo.com";
 
   if (!accountSid || !authToken || (!messagingSid && !fromNumber)) {
     console.error("[elite-home-maintenance/lead] Missing Twilio env vars");
@@ -50,6 +55,22 @@ export default async function handler(req, res) {
     return r.ok;
   }
 
+  async function sendEmail(to, subject, text) {
+    if (!resendKey) {
+      console.warn("[elite-home-maintenance/lead] Missing RESEND_API_KEY — email skipped.");
+      return { ok: false, skipped: true };
+    }
+    const r = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${resendKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ from: resendFrom, to: [to], subject, text }),
+    });
+    return { ok: r.ok };
+  }
+
   try {
     // ── SMS to Jamey ─────────────────────────────────────────────────────────
     const jameyMsg = [
@@ -57,15 +78,39 @@ export default async function handler(req, res) {
       ``,
       `Name: ${name}`,
       `Phone: ${customerPhone ?? phone}`,
-      service       ? `Service: ${service}`           : null,
-      property_type ? `Property: ${property_type}`    : null,
-      zip           ? `ZIP: ${zip}`                   : null,
-      description   ? `Details: ${description}`       : null,
+      email         ? `Email: ${email}`                 : null,
+      service       ? `Service: ${service}`             : null,
+      property_type ? `Property: ${property_type}`      : null,
+      zip           ? `ZIP: ${zip}`                     : null,
+      description   ? `Details: ${description}`         : null,
       ``,
       `Reply directly to reach them.`,
     ].filter(Boolean).join("\n");
 
     await sendSms(JAMEY_PHONE, jameyMsg);
+
+    // ── Email to Jamey ───────────────────────────────────────────────────────
+    const emailText = [
+      `New service request — Elite Home Maintenance`,
+      ``,
+      `Name:          ${name}`,
+      `Phone:         ${customerPhone ?? phone}`,
+      `Email:         ${email || "Not provided"}`,
+      `Service:       ${service || "Not specified"}`,
+      `Property Type: ${property_type || "Not specified"}`,
+      `ZIP:           ${zip || "Not provided"}`,
+      ``,
+      `Details:`,
+      description || "None provided.",
+      ``,
+      `Submitted via squarebidness.com/elite-home-maintenance/`,
+    ].join("\n");
+
+    await sendEmail(
+      JAMEY_EMAIL,
+      `🔧 New Estimate Request — ${name}${service ? ` (${service})` : ""}`,
+      emailText
+    ).catch((err) => console.error("[elite-home-maintenance/lead] Email error:", err));
 
     // ── Confirmation SMS to customer ─────────────────────────────────────────
     if (customerPhone) {
@@ -73,9 +118,7 @@ export default async function handler(req, res) {
         `Hi ${name}!`,
         ``,
         `Elite Home Maintenance received your repair request.`,
-        `Jamey will call or text you back shortly.`,
-        ``,
-        `Questions? Call/Text: (318) 206-2460`,
+        `Jamey will reach out shortly — keep an eye on your texts.`,
       ].join("\n");
 
       await sendSms(customerPhone, customerMsg).catch(console.error);
