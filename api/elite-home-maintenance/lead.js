@@ -22,8 +22,8 @@ export default async function handler(req, res) {
   const resendKey    = process.env.RESEND_API_KEY;
   const resendFrom   = process.env.RESEND_FROM || "Elite Home Maintenance — Square Bidness <noreply@squarebidness.com>";
 
-  const JAMEY_PHONE = "+13182062460";
-  const JAMEY_EMAIL = "Jamey.metoyer@yahoo.com";
+  const JAMEY_PHONE  = "+13182062460";
+  const JAMEY_EMAILS = ["Jamey.metoyer@yahoo.com", "Elitehomes318@gmail.com"];
 
   if (!accountSid || !authToken || (!messagingSid && !fromNumber)) {
     console.error("[elite-home-maintenance/lead] Missing Twilio env vars");
@@ -66,7 +66,7 @@ export default async function handler(req, res) {
         Authorization: `Bearer ${resendKey}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ from: resendFrom, to: [to], subject, text }),
+      body: JSON.stringify({ from: resendFrom, to: Array.isArray(to) ? to : [to], subject, text }),
     });
     return { ok: r.ok };
   }
@@ -107,7 +107,7 @@ export default async function handler(req, res) {
     ].join("\n");
 
     await sendEmail(
-      JAMEY_EMAIL,
+      JAMEY_EMAILS,
       `🔧 New Estimate Request — ${name}${service ? ` (${service})` : ""}`,
       emailText
     ).catch((err) => console.error("[elite-home-maintenance/lead] Email error:", err));
