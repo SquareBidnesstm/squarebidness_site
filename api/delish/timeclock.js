@@ -117,6 +117,30 @@ function normalizeDevice(device) {
   return String(device || "device").trim().replace(/\s+/g, " ").slice(0, 80) || "device";
 }
 
+function normalizePayRate(rate) {
+  if (rate === "" || rate === null || typeof rate === "undefined") return 0;
+  const value = Number(rate);
+  if (!Number.isFinite(value) || value < 0) return null;
+  return Math.round(value * 100) / 100;
+}
+
+function normalizeEmployeeRecord(emp) {
+  if (typeof emp === "string") {
+    return {
+      name: normalizeEmployeeName(emp),
+      pin: "",
+      hourlyRate: 0
+    };
+  }
+
+  return {
+    ...emp,
+    name: normalizeEmployeeName(emp?.name),
+    pin: String(emp?.pin || "").trim(),
+    hourlyRate: normalizePayRate(emp?.hourlyRate) ?? 0
+  };
+}
+
 function parseJson(value, fallback) {
   if (!value) return fallback;
   if (typeof value === "object") return value;
@@ -190,22 +214,33 @@ async function setEmployees(list) {
 
 function employeeNames(employees) {
   return (employees || [])
-    .map(emp => normalizeEmployeeName(emp?.name || emp))
+    .map(emp => normalizeEmployeeRecord(emp).name)
     .filter(Boolean)
     .sort((a, b) => a.localeCompare(b));
+}
+
+function employeeDetails(employees) {
+  return (employees || [])
+    .map(normalizeEmployeeRecord)
+    .filter(emp => emp.name)
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function employeeRateMap(employees) {
+  return new Map(employeeDetails(employees).map(emp => [emp.name.toLowerCase(), emp.hourlyRate]));
 }
 
 function findEmployeeByName(employees, name) {
   const target = normalizeEmployeeName(name).toLowerCase();
   return employees.find(emp =>
-    String(emp?.name || emp || "").trim().toLowerCase() === target
+    normalizeEmployeeRecord(emp).name.toLowerCase() === target
   );
 }
 
 function findEmployeeByPin(employees, pin) {
   const target = String(pin || "").trim();
   if (!target) return null;
-  return employees.find(emp => String(emp?.pin || "").trim() === target) || null;
+  return employees.find(emp => normalizeEmployeeRecord(emp).pin === target) || null;
 }
 
 async function getActiveMap() {
@@ -271,37 +306,70 @@ function filterShiftsByDateRange(shifts, startDate, endDate) {
   });
 }
 
-function summarizeShifts(shifts) {
+function shiftPayRate(shift, ratesByName) {
+  const shiftRate = normalizePayRate(shift?.hourlyRate);
+  if (shiftRate !== null && shiftRate > 0) return shiftRate;
+
+  const name = normalizeEmployeeName(shift?.name).toLowerCase();
+  return ratesByName.get(name) || 0;
+}
+
+function enrichShiftsWithPay(shifts, employees = []) {
+  const ratesByName = employeeRateMap(employees);
+
+  return (shifts || []).map(shift => {
+    const hourlyRate = shiftPayRate(shift, ratesByName);
+    const minutes = Number(shift.durationMinutes || 0);
+
+    return {
+      ...shift,
+      hourlyRate,
+      laborDollars: Math.round(((minutes / 60) * hourlyRate) * 100) / 100
+    };
+  });
+}
+
+function summarizeShifts(shifts, employees = []) {
   const byEmployee = new Map();
+  const ratesByName = employeeRateMap(employees);
 
   for (const shift of shifts || []) {
     const name = normalizeEmployeeName(shift.name);
     if (!name) continue;
 
-    const current = byEmployee.get(name) || { name, shifts: 0, minutes: 0 };
+    const minutes = Number(shift.durationMinutes || 0);
+    const hourlyRate = shiftPayRate(shift, ratesByName);
+    const current = byEmployee.get(name) || { name, shifts: 0, minutes: 0, laborDollars: 0 };
     current.shifts += 1;
-    current.minutes += Number(shift.durationMinutes || 0);
+    current.minutes += minutes;
+    current.hourlyRate = ratesByName.get(name.toLowerCase()) || hourlyRate;
+    current.laborDollars += (minutes / 60) * hourlyRate;
     byEmployee.set(name, current);
   }
 
-  const employees = Array.from(byEmployee.values())
+  const employeeRows = Array.from(byEmployee.values())
     .map(item => ({
       ...item,
-      hours: minutesToHours(item.minutes)
+      hours: minutesToHours(item.minutes),
+      laborDollars: Math.round(item.laborDollars * 100) / 100
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 
-  const totalMinutes = employees.reduce((sum, item) => sum + item.minutes, 0);
+  const totalMinutes = employeeRows.reduce((sum, item) => sum + item.minutes, 0);
+  const totalLaborDollars = Math.round(
+    employeeRows.reduce((sum, item) => sum + Number(item.laborDollars || 0), 0) * 100
+  ) / 100;
 
   return {
-    employees,
+    employees: employeeRows,
     totalMinutes,
     totalHours: minutesToHours(totalMinutes),
+    totalLaborDollars,
     totalShifts: (shifts || []).length
   };
 }
 
-function summarizeLabor(shifts, active, timestamp = nowIso()) {
+function summarizeLabor(shifts, active, employees = [], timestamp = nowIso()) {
   const activeRows = (active || []).map(shift => {
     const clockInAt = shift.clockInAt;
     return {
@@ -312,11 +380,12 @@ function summarizeLabor(shifts, active, timestamp = nowIso()) {
     };
   });
 
-  return summarizeShifts([...(shifts || []), ...activeRows]);
+  return summarizeShifts([...(shifts || []), ...activeRows], employees);
 }
 
 function buildShiftUpdate(shift, clockInAt, clockOutAt) {
   const minutes = diffMinutes(clockInAt, clockOutAt);
+  const hourlyRate = normalizePayRate(shift?.hourlyRate) || 0;
 
   return {
     ...shift,
@@ -324,6 +393,8 @@ function buildShiftUpdate(shift, clockInAt, clockOutAt) {
     clockOutAt,
     durationMinutes: minutes,
     durationHours: minutesToHours(minutes),
+    hourlyRate,
+    laborDollars: Math.round(((minutes / 60) * hourlyRate) * 100) / 100,
     dateCentral: getCentralDateKey(clockInAt)
   };
 }
@@ -340,10 +411,11 @@ async function maybeTurnInPayroll(timestamp, activeMap) {
 
   if (turnIns[periodEnd]) return turnIns[periodEnd];
 
-  const shifts = filterShiftsByDateRange(await getShifts(), periodStart, periodEnd);
+  const [shiftsAll, employees] = await Promise.all([getShifts(), getEmployees()]);
+  const shifts = filterShiftsByDateRange(shiftsAll, periodStart, periodEnd);
   if (!shifts.length) return null;
 
-  const summary = summarizeShifts(shifts);
+  const summary = summarizeShifts(shifts, employees);
   const turnIn = {
     id: `payroll_${periodEnd}`,
     status: "turned_in",
@@ -354,6 +426,7 @@ async function maybeTurnInPayroll(timestamp, activeMap) {
     trigger: "last_monday_clock_out",
     totalHours: summary.totalHours,
     totalMinutes: summary.totalMinutes,
+    totalLaborDollars: summary.totalLaborDollars,
     totalShifts: summary.totalShifts,
     employees: summary.employees
   };
@@ -374,7 +447,7 @@ async function buildState(date) {
   const payrollTurnIns = await getPayrollTurnIns();
 
   const active = activeArrayFromMap(activeMap);
-  const filteredShifts = filterShiftsByDate(shifts, date);
+  const filteredShifts = enrichShiftsWithPay(filterShiftsByDate(shifts, date), employees);
   const activeForDate = date
     ? active.filter(shift => getCentralDateKey(shift.clockInAt) === date)
     : active;
@@ -382,11 +455,12 @@ async function buildState(date) {
   return {
     ok: true,
     employees: employeeNames(employees),
+    employeeDetails: employeeDetails(employees),
     active,
     recent,
     shifts: filteredShifts,
-    summary: summarizeShifts(filteredShifts),
-    laborSummary: summarizeLabor(filteredShifts, activeForDate),
+    summary: summarizeShifts(filteredShifts, employees),
+    laborSummary: summarizeLabor(filteredShifts, activeForDate, employees),
     payrollTurnIns: Object.values(payrollTurnIns)
       .sort((a, b) => String(b.periodEnd || "").localeCompare(String(a.periodEnd || "")))
       .slice(0, 12)
@@ -444,6 +518,8 @@ function shiftsToCsv(shifts) {
     "Clock Out",
     "Minutes",
     "Hours",
+    "Hourly Rate",
+    "Labor Dollars",
     "Clock In Device",
     "Clock Out Device"
   ];
@@ -455,6 +531,8 @@ function shiftsToCsv(shifts) {
     shift.clockOutAt,
     shift.durationMinutes,
     shift.durationHours,
+    shift.hourlyRate ?? "",
+    shift.laborDollars ?? "",
     shift.clockInDevice,
     shift.clockOutDevice
   ]);
@@ -466,7 +544,8 @@ async function sendCsv(req, res, body = {}) {
   requireManager(getManagerPinFromRequest(req, body));
 
   const date = String(body.date || req.query?.date || "").trim();
-  const shifts = filterShiftsByDate(await getShifts(), date);
+  const [allShifts, employees] = await Promise.all([getShifts(), getEmployees()]);
+  const shifts = enrichShiftsWithPay(filterShiftsByDate(allShifts, date), employees);
   const csv = shiftsToCsv(shifts);
   const suffix = date || "all";
 
@@ -539,6 +618,7 @@ export default async function handler(req, res) {
       const shift = {
         id: shiftId(name, timestamp),
         name,
+        hourlyRate: normalizePayRate(employee.hourlyRate) || 0,
         clockInAt: timestamp,
         clockInDevice: device
       };
@@ -647,6 +727,7 @@ export default async function handler(req, res) {
 
       const name = normalizeEmployeeName(body.name);
       const pin = String(body.pin || "").trim();
+      const hourlyRate = normalizePayRate(body.hourlyRate);
 
       if (!name) {
         return send(res, 400, { ok: false, error: "Employee name required." });
@@ -654,6 +735,10 @@ export default async function handler(req, res) {
 
       if (!/^\d{4,8}$/.test(pin)) {
         return send(res, 400, { ok: false, error: "PIN must be 4-8 digits." });
+      }
+
+      if (hourlyRate === null) {
+        return send(res, 400, { ok: false, error: "Hourly rate must be 0 or more." });
       }
 
       const employees = await getEmployees();
@@ -666,12 +751,51 @@ export default async function handler(req, res) {
         return send(res, 409, { ok: false, error: "PIN in use." });
       }
 
-      await setEmployees([...employees, { name, pin }]);
+      await setEmployees([...employees, { name, pin, hourlyRate }]);
       await logTimeclockEvent("employee_added", name, {
         employeeName: name,
+        hourlyRate,
       });
 
       return send(res, 200, await buildState());
+    }
+
+    if (action === "update_employee_rate") {
+      requireManager(body.managerPin);
+
+      const name = normalizeEmployeeName(body.name);
+      const hourlyRate = normalizePayRate(body.hourlyRate);
+
+      if (!name) {
+        return send(res, 400, { ok: false, error: "Employee name required." });
+      }
+
+      if (hourlyRate === null) {
+        return send(res, 400, { ok: false, error: "Hourly rate must be 0 or more." });
+      }
+
+      const employees = await getEmployees();
+      const index = employees.findIndex(emp =>
+        normalizeEmployeeRecord(emp).name.toLowerCase() === name.toLowerCase()
+      );
+
+      if (index === -1) {
+        return send(res, 404, { ok: false, error: "Employee not found." });
+      }
+
+      const current = normalizeEmployeeRecord(employees[index]);
+      employees[index] = {
+        ...current,
+        hourlyRate
+      };
+
+      await setEmployees(employees);
+      await logTimeclockEvent("employee_rate_updated", name, {
+        employeeName: name,
+        hourlyRate,
+      });
+
+      return send(res, 200, await buildState(String(body.date || "").trim()));
     }
 
     if (action === "delete_employee") {
@@ -693,6 +817,66 @@ export default async function handler(req, res) {
       });
 
       return send(res, 200, await buildState());
+    }
+
+    if (action === "force_clock_out") {
+      requireManager(body.managerPin);
+
+      const name = normalizeEmployeeName(body.name);
+      const clockOutAt = String(body.clockOutAt || "").trim();
+      const device = normalizeDevice(body.device || "manager-adjustment");
+
+      if (!name || !clockOutAt) {
+        return send(res, 400, { ok: false, error: "Employee and clock out time are required." });
+      }
+
+      const activeMap = await getActiveMap();
+      const current = activeMap[name];
+
+      if (!current) {
+        return send(res, 404, { ok: false, error: "Employee is not currently clocked in." });
+      }
+
+      const clockInMs = new Date(current.clockInAt).getTime();
+      const clockOutMs = new Date(clockOutAt).getTime();
+
+      if (!Number.isFinite(clockInMs) || !Number.isFinite(clockOutMs)) {
+        return send(res, 400, { ok: false, error: "Clock out time is invalid." });
+      }
+
+      if (clockOutMs < clockInMs) {
+        return send(res, 400, { ok: false, error: "Clock out must be after clock in." });
+      }
+
+      const completed = {
+        ...buildShiftUpdate(current, current.clockInAt, clockOutAt),
+        clockOutDevice: device,
+        adjustedByManager: true
+      };
+
+      delete activeMap[name];
+
+      await setActiveMap(activeMap);
+      await pushPunch({ name, action: "clock_out", timestamp: clockOutAt, device });
+      await pushCompletedShift(completed);
+      const payrollTurnIn = await maybeTurnInPayroll(clockOutAt, activeMap);
+      await logTimeclockEvent("force_clock_out", completed.id, {
+        shift: completed,
+        employeeName: name,
+        clockOutAt,
+        device,
+      });
+
+      if (payrollTurnIn) {
+        await logTimeclockEvent("payroll_turned_in", payrollTurnIn.id, {
+          payrollTurnIn,
+        });
+      }
+
+      return send(res, 200, {
+        ...(await buildState(String(body.date || "").trim())),
+        message: `${name} force clocked out.`
+      });
     }
 
     if (action === "edit_shift") {
