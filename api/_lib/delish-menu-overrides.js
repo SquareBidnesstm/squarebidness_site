@@ -18,6 +18,17 @@ export const DEFAULT_DELISH_MENU_OVERRIDES = {
   itemsSoldOutDate: "",
   basesSoldOut: [],
   basesSoldOutDate: "",
+  limitedMenu: {
+    active: false,
+    itemId: "friday_fried_catfish",
+    name: "Catfish",
+    price: 12.99,
+    desc: "Served with Potato Salad, Green Beans, and a roll.",
+    hideSides: true,
+    blockExtraSides: true,
+    blockLagniappe: true,
+  },
+  limitedMenuDate: "",
   customerMessage: "",
   updatedAt: "",
   updatedBy: "system",
@@ -66,6 +77,11 @@ export async function getDelishMenuOverrides() {
     basesSoldOutDate === todayKey && Array.isArray(saved.basesSoldOut)
       ? saved.basesSoldOut
       : [];
+  const limitedMenuDate = String(saved.limitedMenuDate || "");
+  const savedLimitedMenu =
+    limitedMenuDate === todayKey && saved.limitedMenu && typeof saved.limitedMenu === "object"
+      ? saved.limitedMenu
+      : {};
 
   return {
     ...DEFAULT_DELISH_MENU_OVERRIDES,
@@ -81,5 +97,11 @@ export async function getDelishMenuOverrides() {
     itemsSoldOutDate: itemsSoldOut.length ? soldOutDate : todayKey,
     basesSoldOut,
     basesSoldOutDate: basesSoldOut.length ? basesSoldOutDate : todayKey,
+    limitedMenu: {
+      ...DEFAULT_DELISH_MENU_OVERRIDES.limitedMenu,
+      ...savedLimitedMenu,
+      active: savedLimitedMenu.active === true,
+    },
+    limitedMenuDate: Object.keys(savedLimitedMenu).length ? limitedMenuDate : todayKey,
   };
 }

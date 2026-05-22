@@ -258,7 +258,28 @@ function getCentralDateParts(date = new Date()) {
   };
 }
 
-function getAllowedItemsForToday(todayDay) {
+function getLimitedMenuOverride(overrides = {}) {
+  const limitedMenu = overrides?.limitedMenu;
+  return limitedMenu?.active === true ? limitedMenu : null;
+}
+
+function buildLimitedMenuItem(limitedMenu = {}) {
+  return {
+    id: String(limitedMenu.itemId || "friday_fried_catfish").trim() || "friday_fried_catfish",
+    name: String(limitedMenu.name || "Catfish").trim() || "Catfish",
+    price: Number.isFinite(Number(limitedMenu.price)) ? Number(limitedMenu.price) : 12.99,
+  };
+}
+
+function getAllowedItemsForToday(todayDay, overrides = {}) {
+  const limitedMenu = getLimitedMenuOverride(overrides);
+  if (limitedMenu) {
+    const drinkItems = (MENU_BY_DAY.everyday || []).filter((item) =>
+      String(item.id || "").startsWith("drink_")
+    );
+    return [buildLimitedMenuItem(limitedMenu), ...drinkItems];
+  }
+
   const dayItems = MENU_BY_DAY[todayDay] || [];
   const everydayItems = MENU_BY_DAY.everyday || [];
   return [...dayItems, ...everydayItems];
@@ -623,7 +644,9 @@ export default async function handler(req, res) {
       });
     }
 
-    const allowedItems = getAllowedItemsForToday(todayDay);
+    const limitedMenu = getLimitedMenuOverride(menuOverrides);
+    const limitedMenuItemId = limitedMenu ? buildLimitedMenuItem(limitedMenu).id : "";
+    const allowedItems = getAllowedItemsForToday(todayDay, menuOverrides);
     const allowedMap = buildAllowedMap(allowedItems);
 
     // ------------------------------------------------------------
@@ -640,15 +663,16 @@ export default async function handler(req, res) {
         if (!id || (!allowedMap.has(id) && !isFlashItem)) return null;
         if (!isFlashItem && !isItemAllowedForCurrentDay(id, todayDay)) return null;
         if (!isFlashItem && !isSectionEnabledBackend(id, menuOverrides)) return null;
-        if (!isFlashItem && !isItemEnabledBackend(id, menuOverrides)) return null;
-        if (!isFlashItem && isItemSoldOutBackend(id, menuOverrides)) return null;
 
         const allowed = isFlashItem ? flashSaleMap.get(id) : allowedMap.get(id);
+        const isLimitedMenuItem = !isFlashItem && limitedMenu && id === limitedMenuItemId;
+        if (!isFlashItem && !isLimitedMenuItem && !isItemEnabledBackend(id, menuOverrides)) return null;
+        if (!isFlashItem && !isLimitedMenuItem && isItemSoldOutBackend(id, menuOverrides)) return null;
         const maxQty = isFlashItem
           ? Math.max(1, Number(allowed.limit || 20))
           : 3;
         const qty = Math.min(maxQty, rawQty);
-        const baseId = String(item.baseId || "").trim();
+        const baseId = isLimitedMenuItem ? "" : String(item.baseId || "").trim();
         if (!isFlashItem && baseId && isBaseSoldOutBackend(baseId, menuOverrides)) return null;
  
         return {
@@ -660,11 +684,11 @@ export default async function handler(req, res) {
           total: qty * allowed.price,
           flashSale: allowed.flashSale === true,
           baseId,       // FIX: was missing
-          baseName: item.baseName || "",   // FIX: was missing
-          side1Id: item.side1Id || "",
-          side2Id: item.side2Id || "",
-          side1Name: item.side1Name || "",
-          side2Name: item.side2Name || "",
+          baseName: isLimitedMenuItem ? "" : item.baseName || "",   // FIX: was missing
+          side1Id: isLimitedMenuItem ? "" : item.side1Id || "",
+          side2Id: isLimitedMenuItem ? "" : item.side2Id || "",
+          side1Name: isLimitedMenuItem ? "" : item.side1Name || "",
+          side2Name: isLimitedMenuItem ? "" : item.side2Name || "",
         };
       })
       .filter(Boolean);

@@ -576,6 +576,21 @@
       </div>
     </div>
 
+    <div class="card control-section" id="limited-menu-control">
+      <h2>Limited Menu Today</h2>
+      <p class="muted">Use this when today is a one-plate day. It resets daily and checkout blocks regular menu items while active.</p>
+      <div class="row">
+        <div class="toggle">
+          <label for="limitedMenuToggle">Limited Menu</label>
+          <input type="checkbox" id="limitedMenuToggle" />
+        </div>
+        <input id="limitedMenuName" type="text" placeholder="Item name" value="Catfish" />
+        <input id="limitedMenuPrice" type="number" min="0" step="0.01" placeholder="Price" value="12.99" />
+      </div>
+      <textarea id="limitedMenuDesc" placeholder="Included sides">Served with Potato Salad, Green Beans, and a roll.</textarea>
+      <p class="muted">When active, Extra Sides and Lagniappe are turned off automatically.</p>
+    </div>
+
     <div class="card control-section" id="turn-off-items">
       <h2>Turn Off Individual Items</h2>
       <p class="muted">Checked items are hidden from Delish and blocked in checkout. This list resets every day at midnight.</p>
@@ -1112,6 +1127,10 @@ function renderSoldOutList(selected = []) {
       document.getElementById("lagniappeToggle").checked = overrides?.sections?.lagniappe !== false;
       document.getElementById("drinksToggle").checked = overrides?.sections?.drinks !== false;
       document.getElementById("extraSidesToggle").checked = overrides?.sections?.extraSides !== false;
+      document.getElementById("limitedMenuToggle").checked = overrides?.limitedMenu?.active === true;
+      document.getElementById("limitedMenuName").value = overrides?.limitedMenu?.name || "Catfish";
+      document.getElementById("limitedMenuPrice").value = Number(overrides?.limitedMenu?.price || 12.99).toFixed(2);
+      document.getElementById("limitedMenuDesc").value = overrides?.limitedMenu?.desc || "Served with Potato Salad, Green Beans, and a roll.";
       document.getElementById("customerMessage").value = overrides.customerMessage || "";
       renderItemList(Array.isArray(overrides.itemsOff) ? overrides.itemsOff : []);
       renderSoldOutList(Array.isArray(overrides.itemsSoldOut) ? overrides.itemsSoldOut : []);
@@ -1136,12 +1155,23 @@ function renderSoldOutList(selected = []) {
       const itemsOff = [...document.querySelectorAll("#itemsOffList input:checked")].map(el => el.value);
       const itemsSoldOut = [...document.querySelectorAll("#itemsSoldOutList input:checked")].map(el => el.value);
       const basesSoldOut = [...document.querySelectorAll("#basesSoldOutList input:checked")].map(el => el.value);
+      const limitedMenuActive = document.getElementById("limitedMenuToggle").checked;
 
       const payload = {
   sections: {
-    lagniappe: document.getElementById("lagniappeToggle").checked,
+    lagniappe: limitedMenuActive ? false : document.getElementById("lagniappeToggle").checked,
     drinks: document.getElementById("drinksToggle").checked,
-    extraSides: document.getElementById("extraSidesToggle").checked
+    extraSides: limitedMenuActive ? false : document.getElementById("extraSidesToggle").checked
+  },
+  limitedMenu: {
+    active: limitedMenuActive,
+    itemId: "friday_fried_catfish",
+    name: document.getElementById("limitedMenuName").value.trim() || "Catfish",
+    price: Number(document.getElementById("limitedMenuPrice").value || 12.99),
+    desc: document.getElementById("limitedMenuDesc").value.trim() || "Served with Potato Salad, Green Beans, and a roll.",
+    hideSides: true,
+    blockExtraSides: true,
+    blockLagniappe: true
   },
   itemsOff,
   itemsSoldOut,

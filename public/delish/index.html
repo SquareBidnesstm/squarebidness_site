@@ -607,6 +607,35 @@
   );
 }
 
+  function getLimitedMenuOverride() {
+    const limitedMenu = MENU_OVERRIDES?.limitedMenu;
+    return limitedMenu?.active === true ? limitedMenu : null;
+  }
+
+  function buildLimitedMenuItem(limitedMenu) {
+    return {
+      id: limitedMenu.itemId || "friday_fried_catfish",
+      name: limitedMenu.name || "Catfish",
+      price: Number(limitedMenu.price || 12.99),
+      desc: limitedMenu.desc || "Served with Potato Salad, Green Beans, and a roll.",
+      baseOptions: [],
+      sideSelectionRequired: limitedMenu.hideSides === false
+    };
+  }
+
+  function getActiveMenuForDay(day) {
+    const limitedMenu = getLimitedMenuOverride();
+    if (limitedMenu) {
+      return {
+        title: "Delish — Limited Menu",
+        note: "Today only. One plate available while supplies last.",
+        mains: [buildLimitedMenuItem(limitedMenu)]
+      };
+    }
+
+    return MENU_BY_DAY[day] || null;
+  }
+
   function isFlashSaleActiveClient() {
     return !!(FLASH_SALE && FLASH_SALE.active && Array.isArray(FLASH_SALE.items) && FLASH_SALE.items.length);
   }
@@ -876,13 +905,16 @@
 
  updateOrderingBanner(state);
 
-if (state.today && MENU_BY_DAY[state.today]) {
-  const menu = MENU_BY_DAY[state.today];
+if (state.today && getActiveMenuForDay(state.today)) {
+  const menu = getActiveMenuForDay(state.today);
+  const limitedMenu = getLimitedMenuOverride();
   menuDayTitle.textContent = menu.title;
   menuDayNote.textContent = "Order online, pickup on arrival · Alexandria, Louisiana";
   mainMenuNote.textContent = menu.note;
 
-  const visibleMains = (menu.mains || []).filter(item => isItemEnabled(item.id));
+  const visibleMains = limitedMenu
+    ? (menu.mains || [])
+    : (menu.mains || []).filter(item => isItemEnabled(item.id));
   mainMenuItems.innerHTML = visibleMains.map(item => renderMainItem(item, state.today)).join("");
 
   const visibleDrinks = isSectionEnabled("drinks")
@@ -890,7 +922,7 @@ if (state.today && MENU_BY_DAY[state.today]) {
     : [];
   drinkItems.innerHTML = visibleDrinks.map(renderDrinkItem).join("");
 
-if (isExtraSideAllowedForDay(state.today) && isSectionEnabled("extraSides")) {
+if (!limitedMenu && isExtraSideAllowedForDay(state.today) && isSectionEnabled("extraSides")) {
   renderSelectOptions(
     extraSideSelect,
     getExtraSidesForDay(state.today).filter(
@@ -914,7 +946,7 @@ if (isExtraSideAllowedForDay(state.today) && isSectionEnabled("extraSides")) {
   extraSideSelect.disabled = true;
 }
 
-  if (!isSectionEnabled("lagniappe")) {
+  if (limitedMenu || !isSectionEnabled("lagniappe")) {
   lagniappeItems.innerHTML = `
     <div class="menuNotice">
       Sorry, Lagniappe items are not available today.
@@ -970,7 +1002,7 @@ if (isExtraSideAllowedForDay(state.today) && isSectionEnabled("extraSides")) {
 }
 
   function getCurrentMainItems() {
-    const menu = MENU_BY_DAY[currentDay];
+    const menu = getActiveMenuForDay(currentDay);
     return menu && Array.isArray(menu.mains) ? menu.mains : [];
   }
 
