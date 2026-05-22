@@ -1,6 +1,7 @@
 // POST /api/jcelectrical/lead
 // Receives service request form submissions from jcelectrical landing page.
-// Texts Jarvis the lead details and sends a confirmation text to the customer.
+// Texts Jarvis the lead details, emails Electricalbuddy2011@jcelectricalservicesllc.com,
+// and sends a confirmation text to the customer.
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -8,17 +9,21 @@ export default async function handler(req, res) {
     return res.status(405).json({ ok: false, error: "Method not allowed." });
   }
 
-  const { name, phone, service, description, zip } = req.body || {};
+  const { name, phone, email, service, description, zip } = req.body || {};
 
   if (!name || !phone) {
     return res.status(400).json({ ok: false, error: "Name and phone are required." });
   }
 
-  const accountSid = process.env.TWILIO_ACCOUNT_SID;
-  const authToken  = process.env.TWILIO_AUTH_TOKEN;
+  const accountSid   = process.env.TWILIO_ACCOUNT_SID;
+  const authToken    = process.env.TWILIO_AUTH_TOKEN;
   const messagingSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
   const fromNumber   = process.env.DAPPER_FROM_NUMBER;
+  const resendKey    = process.env.RESEND_API_KEY;
+  const resendFrom   = process.env.RESEND_FROM || "JC Electrical — Square Bidness <noreply@squarebidness.com>";
+
   const JARVIS_PHONE = "+13186251120";
+  const JARVIS_EMAIL = "Electricalbuddy2011@jcelectricalservicesllc.com";
 
   if (!accountSid || !authToken || (!messagingSid && !fromNumber)) {
     console.error("[jcelectrical/lead] Missing Twilio env vars");
@@ -50,21 +55,60 @@ export default async function handler(req, res) {
     return r.ok;
   }
 
+  async function sendEmail(to, subject, text) {
+    if (!resendKey) {
+      console.warn("[jcelectrical/lead] Missing RESEND_API_KEY — email skipped.");
+      return { ok: false, skipped: true };
+    }
+    const r = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${resendKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ from: resendFrom, to: [to], subject, text }),
+    });
+    return { ok: r.ok };
+  }
+
   try {
     // ── SMS to Jarvis ────────────────────────────────────────────────────────
-    const jarvisMsg = [
+    const jarvisSms = [
       `⚡ New Lead — JC Electrical`,
       ``,
       `Name: ${name}`,
       `Phone: ${customerPhone ?? phone}`,
-      service ? `Service: ${service}` : null,
-      zip ? `ZIP: ${zip}` : null,
+      email    ? `Email: ${email}`          : null,
+      service  ? `Service: ${service}`      : null,
+      zip      ? `ZIP: ${zip}`              : null,
       description ? `Details: ${description}` : null,
       ``,
       `Reply directly to this number to reach them.`,
     ].filter(Boolean).join("\n");
 
-    await sendSms(JARVIS_PHONE, jarvisMsg);
+    await sendSms(JARVIS_PHONE, jarvisSms);
+
+    // ── Email to Jarvis ──────────────────────────────────────────────────────
+    const emailText = [
+      `New service request — JC Electrical Services LLC`,
+      ``,
+      `Name:     ${name}`,
+      `Phone:    ${customerPhone ?? phone}`,
+      `Email:    ${email || "Not provided"}`,
+      `Service:  ${service || "Not specified"}`,
+      `ZIP:      ${zip || "Not provided"}`,
+      ``,
+      `Details:`,
+      description || "None provided.",
+      ``,
+      `Submitted via squarebidness.com/jcelectrical/`,
+    ].join("\n");
+
+    await sendEmail(
+      JARVIS_EMAIL,
+      `⚡ New Estimate Request — ${name}${service ? ` (${service})` : ""}`,
+      emailText
+    ).catch((err) => console.error("[jcelectrical/lead] Email error:", err));
 
     // ── Confirmation SMS to customer ─────────────────────────────────────────
     if (customerPhone) {
@@ -72,9 +116,7 @@ export default async function handler(req, res) {
         `Hi ${name}! ⚡`,
         ``,
         `JC Electrical Services received your request.`,
-        `Jarvis will call or text you shortly at this number.`,
-        ``,
-        `Questions? Call/Text: (318) 625-1120`,
+        `Jarvis will reach out shortly — keep an eye on your texts.`,
       ].join("\n");
 
       await sendSms(customerPhone, customerMsg).catch(console.error);

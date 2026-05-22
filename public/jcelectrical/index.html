@@ -357,21 +357,9 @@
         </div>
       </div>
       <div class="nav-cta">
-        <a class="btn btn-sm primary"
-           href="tel:+13186251120"
-           aria-label="Call JC Electrical"
-           data-sb-action="jc_call_click"
-           data-sb-component="topbar"
-           data-sb-label="Call">
-          📞 Call
-        </a>
-        <a class="btn btn-sm"
-           href="sms:+13186251120"
-           aria-label="Text JC Electrical"
-           data-sb-action="jc_text_click"
-           data-sb-component="topbar"
-           data-sb-label="Text">
-          Text
+        <a class="btn btn-sm primary" href="#lead-form"
+           data-sb-action="jc_nav_cta" data-sb-component="topbar" data-sb-label="Get Estimate">
+          ⚡ Get Estimate
         </a>
       </div>
     </header>
@@ -423,6 +411,11 @@
               </div>
 
               <div class="form-field">
+                <label for="f-email">Email <span style="font-weight:400;text-transform:none">(optional)</span></label>
+                <input id="f-email" name="email" type="email" placeholder="you@example.com" autocomplete="email" />
+              </div>
+
+              <div class="form-field">
                 <label for="f-service">Service Needed</label>
                 <select id="f-service" name="service">
                   <option value="">— Select a service —</option>
@@ -461,11 +454,7 @@
           <div class="form-success" id="form-success" aria-live="polite">
             <div class="check">✅</div>
             <h3>Request Sent!</h3>
-            <p>Jarvis will call or text you back shortly.<br><br>Need to talk now?</p>
-            <a href="tel:+13186251120" class="btn primary" style="margin-top:12px;display:inline-flex;"
-               data-sb-action="jc_call_click" data-sb-component="success" data-sb-label="Call after submit">
-              📞 Call Now
-            </a>
+            <p>Jarvis will review your request and reach out shortly.<br><br>Check your texts — you'll get a confirmation.</p>
           </div>
         </div>
       </section>
@@ -585,6 +574,7 @@
 
       const name  = document.getElementById("f-name").value.trim();
       const phone = document.getElementById("f-phone").value.trim();
+      const email = document.getElementById("f-email").value.trim();
       const service = document.getElementById("f-service").value;
       const description = document.getElementById("f-desc").value.trim();
       const zip = document.getElementById("f-zip").value.trim();
@@ -599,7 +589,7 @@
         const res = await fetch("/api/jcelectrical/lead", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, phone, service, description, zip }),
+          body: JSON.stringify({ name, phone, email, service, description, zip }),
         });
 
         const data = await res.json().catch(() => ({}));
