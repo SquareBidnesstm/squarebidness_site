@@ -9,7 +9,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ ok: false, error: "Method not allowed." });
   }
 
-  const { name, phone, email, service, property_type, description, zip } = req.body || {};
+  const { name, phone, email, service, property_type, description, zip, address, urgency, timeline } = req.body || {};
 
   if (!name || !phone) {
     return res.status(400).json({ ok: false, error: "Name and phone are required." });
@@ -81,6 +81,9 @@ export default async function handler(req, res) {
       email         ? `Email: ${email}`                 : null,
       service       ? `Service: ${service}`             : null,
       property_type ? `Property: ${property_type}`      : null,
+      address       ? `Address: ${address}`             : null,
+      urgency       ? `Urgency: ${urgency}`             : null,
+      timeline      ? `Timeline: ${timeline}`           : null,
       zip           ? `ZIP: ${zip}`                     : null,
       description   ? `Details: ${description}`         : null,
       ``,
@@ -98,6 +101,9 @@ export default async function handler(req, res) {
       `Email:         ${email || "Not provided"}`,
       `Service:       ${service || "Not specified"}`,
       `Property Type: ${property_type || "Not specified"}`,
+      `Address:       ${address || "Not provided"}`,
+      `Urgency:       ${urgency || "Not specified"}`,
+      `Timeline:      ${timeline || "Not provided"}`,
       `ZIP:           ${zip || "Not provided"}`,
       ``,
       `Details:`,
