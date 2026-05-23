@@ -23,6 +23,7 @@ type Props = {
   barberBio?: string | null;
   specialSessionsEnabled?: boolean;
   specialSessionsDefaultPrice?: number;
+  initialError?: string | null;
   services: ServiceOption[];
 };
 
@@ -41,13 +42,15 @@ export default function BookingForm({ shopSlug, shopName, shopLogoUrl, barberSlu
   const [service, setService] = useState("");
   const [time, setTime] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(initialError ?? "");
   const [confirmed, setConfirmed] = useState<{
     code: string;
     startsAt?: string;
     endsAt?: string;
     barber?: string;
     service?: string;
+    status?: string;
+    cancelToken?: string | null;
   } | null>(null);
 
   const [slots, setSlots] = useState<TimeSlot[]>([]);
@@ -158,6 +161,12 @@ export default function BookingForm({ shopSlug, shopName, shopLogoUrl, barberSlu
       setError("Name, phone, date, service, and time are required.");
       return false;
     }
+    // Validate phone: must be 10 digits (US) or 11 digits starting with 1
+    const digits = phone.replace(/\D/g, "");
+    if (digits.length !== 10 && !(digits.length === 11 && digits.startsWith("1"))) {
+      setError("Please enter a valid US phone number (10 digits).");
+      return false;
+    }
     return true;
   }
 
@@ -217,6 +226,8 @@ export default function BookingForm({ shopSlug, shopName, shopLogoUrl, barberSlu
         endsAt: data.booking?.ends_at,
         barber: data.barber,
         service: data.service,
+        status: data.booking?.status,
+        cancelToken: data.booking?.cancel_token ?? null,
       });
     } else {
       const data = await res.json().catch(() => null);
@@ -268,6 +279,14 @@ export default function BookingForm({ shopSlug, shopName, shopLogoUrl, barberSlu
   }
 
   if (confirmed) {
+    const isPendingApproval = confirmed.status === "pending_approval";
+    const cancelUrl = confirmed.cancelToken
+      ? `https://booking.squarebidness.com/cancel/${confirmed.cancelToken}`
+      : null;
+    const rescheduleUrl = confirmed.cancelToken
+      ? `https://booking.squarebidness.com/reschedule/${confirmed.cancelToken}`
+      : null;
+
     return (
       <main
         style={{
@@ -281,12 +300,16 @@ export default function BookingForm({ shopSlug, shopName, shopLogoUrl, barberSlu
         }}
       >
         <div style={{ textAlign: "center", maxWidth: 440 }}>
-          <div style={{ fontSize: 48, marginBottom: 20 }}>✂️</div>
+          <div style={{ fontSize: 48, marginBottom: 20 }}>
+            {isPendingApproval ? "⏳" : "✅"}
+          </div>
           <h2 style={{ fontSize: 28, fontWeight: 900, marginBottom: 8 }}>
-            You&apos;re Confirmed!
+            {isPendingApproval ? "Request Received!" : "You’re Confirmed!"}
           </h2>
           <p style={{ color: "#888", marginBottom: 24 }}>
-            Check your phone — a confirmation text is on its way.
+            {isPendingApproval
+              ? "Your request is pending approval. We'll text you once it's confirmed."
+              : "Check your phone — a confirmation text is on its way."}
           </p>
           <div
             style={{
@@ -338,6 +361,36 @@ export default function BookingForm({ shopSlug, shopName, shopLogoUrl, barberSlu
               </a>
             );
           })()}
+
+          {/* Cancel / Reschedule links — only shown when confirmed (not pending approval) */}
+          {!isPendingApproval && (rescheduleUrl || cancelUrl) && (
+            <div style={{ display: "flex", gap: 10, justifyContent: "center", marginBottom: 20 }}>
+              {rescheduleUrl && (
+                <a
+                  href={rescheduleUrl}
+                  style={{
+                    padding: "10px 16px", borderRadius: 8,
+                    border: "1px solid #2a2a2a", background: "#0d0d0d",
+                    color: "#aaa", fontSize: 13, textDecoration: "none",
+                  }}
+                >
+                  🔄 Reschedule
+                </a>
+              )}
+              {cancelUrl && (
+                <a
+                  href={cancelUrl}
+                  style={{
+                    padding: "10px 16px", borderRadius: 8,
+                    border: "1px solid #2a2a2a", background: "#0d0d0d",
+                    color: "#aaa", fontSize: 13, textDecoration: "none",
+                  }}
+                >
+                  ✕ Cancel
+                </a>
+              )}
+            </div>
+          )}
 
           {/* Add to home screen prompt */}
           <div style={{ background: "linear-gradient(180deg,rgba(212,175,55,.1),rgba(255,255,255,.03))", border: "1px solid rgba(212,175,55,.25)", borderRadius: 16, padding: "18px 20px", marginBottom: 20, textAlign: "left" }}>
@@ -507,7 +560,7 @@ export default function BookingForm({ shopSlug, shopName, shopLogoUrl, barberSlu
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Anything your barber should know (style, allergies, etc.)"
+              placeholder="Anything your provider should know (style, allergies, preferences, etc.)"
               rows={3}
               style={{ ...fieldStyle, resize: "vertical" }}
             />

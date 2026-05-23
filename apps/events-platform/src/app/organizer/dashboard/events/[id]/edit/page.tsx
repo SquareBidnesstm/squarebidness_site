@@ -8,10 +8,12 @@ import NavLogo from "../../../../../../components/NavLogo";
 
 export const revalidate = 0;
 
+// Use UTC accessors so the displayed time matches what's stored — prevents silent
+// re-offset on every edit. The submit interceptor below converts back to UTC ISO on save.
 function toLocalDatetimeValue(isoString: string) {
   const d = new Date(isoString);
   const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}T${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
 }
 
 export default async function EditEventPage({
@@ -182,6 +184,24 @@ export default async function EditEventPage({
 
             </div>
           </form>
+
+          {/* Convert datetime-local values to UTC ISO strings before POST.
+              The input shows UTC times (matching what's stored). On submit, the browser's
+              Date constructor parses the datetime-local string as LOCAL time — so we must
+              explicitly re-interpret as UTC to avoid a double-offset. */}
+          <script dangerouslySetInnerHTML={{ __html: `
+            document.querySelector('form').addEventListener('submit', function() {
+              ['starts_at','ends_at'].forEach(function(name) {
+                var el = document.querySelector('[name=' + name + ']');
+                if (el && el.value) {
+                  // The displayed value is UTC (e.g. "2026-06-15T19:00"), so append "Z" to
+                  // prevent the browser from shifting it to local time during new Date() parse.
+                  var utcStr = el.value.includes('Z') ? el.value : el.value + 'Z';
+                  el.value = new Date(utcStr).toISOString();
+                }
+              });
+            });
+          ` }} />
         </div>
       </main>
     </div>

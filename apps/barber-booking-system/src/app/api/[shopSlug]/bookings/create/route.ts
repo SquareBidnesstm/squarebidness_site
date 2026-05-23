@@ -271,7 +271,7 @@ export async function POST(
       .from("bookings")
       .select("id")
       .eq("barber_id", barber.id)
-      .in("status", ["pending", "confirmed", "pending_approval", "counter_proposed"])
+      .in("status", ["pending", "confirmed", "pending_approval", "counter_proposed", "awaiting_payment"])
       .lt("starts_at", endsAt.toISOString())
       .gt("ends_at", startsAt.toISOString());
 

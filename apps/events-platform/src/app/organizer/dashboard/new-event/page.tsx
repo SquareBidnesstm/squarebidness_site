@@ -224,6 +224,24 @@ export default async function NewEventPage({
               </button>
             </div>
           </form>
+
+          {/* Convert datetime-local values to UTC ISO strings before POST.
+              Without this, the server (UTC) would misread the organizer's local time as UTC,
+              storing the wrong time (e.g. 2pm Central becomes 2pm UTC = 9am Central displayed). */}
+          <script dangerouslySetInnerHTML={{ __html: `
+            document.querySelector('form').addEventListener('submit', function() {
+              var starts = document.querySelector('[name=starts_at]');
+              var ends = document.querySelector('[name=ends_at]');
+              if (starts && starts.value) {
+                var d = new Date(starts.value);
+                if (!isNaN(d.getTime())) starts.value = d.toISOString();
+              }
+              if (ends && ends.value) {
+                var d = new Date(ends.value);
+                if (!isNaN(d.getTime())) ends.value = d.toISOString();
+              }
+            });
+          ` }} />
         </div>
       </main>
     </div>

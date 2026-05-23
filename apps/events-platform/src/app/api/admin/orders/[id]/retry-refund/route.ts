@@ -39,7 +39,7 @@ export async function POST(
         reverse_transfer: true,
         refund_application_fee: true,
       },
-      { idempotencyKey: `refund-${id}` }
+      { idempotencyKey: `admin-refund-${id}` }
     );
 
     await supabaseServer

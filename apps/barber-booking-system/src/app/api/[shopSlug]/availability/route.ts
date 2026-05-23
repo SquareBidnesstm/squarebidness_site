@@ -157,7 +157,7 @@ export async function GET(
     .select("starts_at, ends_at")
     .eq("barber_id", barber.id)
     .eq("appointment_date", date)
-    .in("status", ["pending", "confirmed"]);
+    .in("status", ["pending", "confirmed", "pending_approval", "counter_proposed", "awaiting_payment"]);
 
   if (excludeBookingId) bookingsQuery = bookingsQuery.neq("id", excludeBookingId);
 

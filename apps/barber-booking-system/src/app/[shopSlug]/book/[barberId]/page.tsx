@@ -4,10 +4,13 @@ import BookingForm from "./BookingForm";
 
 export default async function BookingPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ shopSlug: string; barberId: string }>;
+  searchParams: Promise<{ conflict?: string; refunded?: string }>;
 }) {
   const { shopSlug, barberId } = await params;
+  const { conflict, refunded } = await searchParams;
 
   const { data: shop } = await supabaseServer
     .from("shops")
@@ -54,6 +57,12 @@ export default async function BookingPage({
   const priceOverrides = (overrideSetting?.value_json as Record<string, number> | null) ?? {};
   const barberBio = (bioSetting?.value_json as { bio?: string } | null)?.bio ?? null;
 
+  const initialError = conflict === "1"
+    ? refunded === "1"
+      ? "That time slot was taken — your deposit has been refunded. Please choose a different time."
+      : "That time slot was just taken by someone else. Please choose a different time."
+    : null;
+
   return (
     <BookingForm
       shopSlug={shopSlug}
@@ -69,6 +78,7 @@ export default async function BookingPage({
           ? Math.round((barber as any).special_sessions_price_cents / 100)
           : 150
       }
+      initialError={initialError}
       services={(services ?? []).map((s) => ({
         id: s.slug,
         name: s.name,

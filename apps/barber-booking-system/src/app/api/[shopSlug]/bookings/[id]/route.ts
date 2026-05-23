@@ -87,7 +87,7 @@ export async function PATCH(
       .select("id")
       .eq("barber_id", booking.barber_id)
       .neq("id", id)
-      .in("status", ["pending", "confirmed"])
+      .in("status", ["pending", "confirmed", "pending_approval", "counter_proposed", "awaiting_payment"])
       .lt("starts_at", endsAt.toISOString())
       .gt("ends_at", startsAt.toISOString());
 
@@ -206,6 +206,12 @@ export async function PATCH(
           await supabaseServer.from("bookings").update({ payment_status: "refunded" }).eq("id", id);
         } catch (e) {
           console.error("Deposit refund failed:", e);
+          // Flag as refund_failed so admin dashboard shows the issue
+          await supabaseServer.from("bookings").update({ payment_status: "refund_failed" }).eq("id", id);
+          return NextResponse.json(
+            { ok: false, error: "Booking cancelled but Stripe refund failed. Refund manually from the Stripe dashboard." },
+            { status: 500 }
+          );
         }
       }
       // If not refunding, deposit is forfeited — no action needed, stays as deposit_paid

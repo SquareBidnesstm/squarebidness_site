@@ -48,7 +48,7 @@ async function handleDepositBooking(session: Stripe.Checkout.Session) {
   // Check overlaps
   const { data: overlaps } = await supabaseServer
     .from("bookings").select("id").eq("barber_id", barber.id)
-    .in("status", ["pending", "confirmed"])
+    .in("status", ["pending", "confirmed", "pending_approval", "counter_proposed", "awaiting_payment"])
     .lt("starts_at", endsAt.toISOString()).gt("ends_at", startsAt.toISOString());
   if (overlaps && overlaps.length > 0) return;
 

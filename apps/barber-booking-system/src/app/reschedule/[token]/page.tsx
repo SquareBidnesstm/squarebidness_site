@@ -53,7 +53,7 @@ export default function ReschedulePage() {
     let cancelled = false;
     setSlotsLoading(true);
     setSelectedTime("");
-    fetch(`/api/${info.shop_slug}/availability?barber=${info.barber_slug}&date=${date}&duration=${info.service_duration}&excludeBookingId=${encodeURIComponent(token)}`)
+    fetch(`/api/${info.shop_slug}/availability?barber=${info.barber_slug}&date=${date}&duration=${info.service_duration}&excludeBooking=${encodeURIComponent(token)}`)
       .then((r) => r.json())
       .then((d) => { if (!cancelled && d.ok) setSlots(d.slots ?? []); })
       .catch(() => {})

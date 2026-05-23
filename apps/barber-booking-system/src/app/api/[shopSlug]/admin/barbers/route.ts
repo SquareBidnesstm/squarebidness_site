@@ -52,7 +52,9 @@ export async function GET(
       .in("key", barberIds.map((id) => `barber_auth_${id}`));
     for (const s of settings ?? []) {
       const bid = (s.key as string).replace("barber_auth_", "");
-      pinSet[bid] = !!(s.value_json as { pin?: string } | null)?.pin;
+      const v = s.value_json as { pin?: string; pin_hash?: string } | null;
+      // Support both legacy plaintext (pin) and hashed (pin_hash) storage
+      pinSet[bid] = !!(v?.pin || v?.pin_hash);
     }
   }
 
