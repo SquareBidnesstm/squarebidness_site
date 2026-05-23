@@ -114,7 +114,7 @@ async function handleDepositBooking(session: Stripe.Checkout.Session) {
     const sid = process.env.TWILIO_ACCOUNT_SID;
     const token = process.env.TWILIO_AUTH_TOKEN;
     const messagingSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
-    const fromNumber = process.env.DAPPER_FROM_NUMBER;
+    const fromNumber = process.env.PLATFORM_FROM_NUMBER;
 
     if (sid && token && (messagingSid || fromNumber)) {
       const dateStr = new Date(`${meta.date}T12:00:00`).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
@@ -277,6 +277,19 @@ export async function POST(req: NextRequest) {
         // Only handle deposit sessions (subscription checkouts don't need cleanup)
         if (session.mode !== "payment") break;
         const meta = session.metadata;
+
+        // Special-session payment link expired — barber sent the link, customer never paid.
+        // Revert the booking to cancelled so the slot is freed immediately.
+        if (meta?.booking_id && !meta?.shop_id) {
+          await supabaseServer
+            .from("bookings")
+            .update({ status: "cancelled", special_session_checkout_id: null })
+            .eq("id", meta.booking_id)
+            .eq("status", "awaiting_payment"); // idempotency: only act if still awaiting
+          console.warn("[webhook] Special session expired — booking cancelled:", meta.booking_id);
+          break;
+        }
+
         // Balance-payment links have payment_type=balance — those aren't abandoned bookings
         if (!meta?.shop_id || !meta?.customer_name || meta?.payment_type === "balance") break;
 

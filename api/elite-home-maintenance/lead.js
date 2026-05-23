@@ -18,7 +18,7 @@ export default async function handler(req, res) {
   const accountSid   = process.env.TWILIO_ACCOUNT_SID;
   const authToken    = process.env.TWILIO_AUTH_TOKEN;
   const messagingSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
-  const fromNumber   = process.env.DAPPER_FROM_NUMBER;
+  const fromNumber   = process.env.PLATFORM_FROM_NUMBER;
   const resendKey    = process.env.RESEND_API_KEY;
   const resendFrom   = process.env.RESEND_FROM || "Elite Home Maintenance — Square Bidness <noreply@squarebidness.com>";
 

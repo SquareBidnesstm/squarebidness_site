@@ -137,7 +137,7 @@ export async function GET(
     const sid = process.env.TWILIO_ACCOUNT_SID;
     const token = process.env.TWILIO_AUTH_TOKEN;
     const messagingSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
-    const fromNumber = process.env.DAPPER_FROM_NUMBER;
+    const fromNumber = process.env.PLATFORM_FROM_NUMBER;
 
     if (sid && token && (messagingSid || fromNumber)) {
       const dateStr = new Date(`${meta.date}T12:00:00`).toLocaleDateString("en-US", {

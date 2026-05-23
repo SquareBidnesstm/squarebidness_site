@@ -127,7 +127,7 @@ export async function POST(
   const sid = process.env.TWILIO_ACCOUNT_SID;
   const twilioToken = process.env.TWILIO_AUTH_TOKEN;
   const messagingSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
-  const fromNumber = process.env.DAPPER_FROM_NUMBER;
+  const fromNumber = process.env.PLATFORM_FROM_NUMBER;
 
   if (sid && twilioToken && (messagingSid || fromNumber) && shop?.slug) {
     const { data: shopRow } = await supabaseServer

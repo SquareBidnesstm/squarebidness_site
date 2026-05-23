@@ -118,7 +118,7 @@ export async function PATCH(
       const sid = process.env.TWILIO_ACCOUNT_SID;
       const token = process.env.TWILIO_AUTH_TOKEN;
       const messagingSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
-      const fromNumber = process.env.DAPPER_FROM_NUMBER;
+      const fromNumber = process.env.PLATFORM_FROM_NUMBER;
 
       if (sid && token && (messagingSid || fromNumber)) {
         const dateStr = new Date(`${date}T12:00:00`).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
@@ -217,7 +217,7 @@ export async function PATCH(
         const sid = process.env.TWILIO_ACCOUNT_SID;
         const token = process.env.TWILIO_AUTH_TOKEN;
         const messagingSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
-        const fromNumber = process.env.DAPPER_FROM_NUMBER;
+        const fromNumber = process.env.PLATFORM_FROM_NUMBER;
         if (sid && token && (messagingSid || fromNumber)) {
           const smsBody = status === "no_show"
             ? `Hi ${data.customer_name}, we missed you today ✂️. Your appointment has been marked as a no-show. Your deposit has been forfeited. Please contact us to rebook.`
