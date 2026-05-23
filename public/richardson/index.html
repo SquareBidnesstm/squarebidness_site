@@ -14,7 +14,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Richardson Fashion — Suits &amp; Formalwear | Hammond, LA</title>
-  <meta name="description" content="Richardson Fashion — suits, tuxedos, and formalwear in Hammond, LA. Prom, weddings, church, business, and special events. Call 985-507-1718 or request an appointment." />
+  <meta name="description" content="Richardson Fashion — suits, tuxedos, and formalwear in Hammond, LA. Prom, weddings, church, business, and special events. Request an appointment online." />
   <link rel="canonical" href="https://www.squarebidness.com/richardson/" />
   <meta name="robots" content="index,follow" />
   <meta name="theme-color" content="#000000" />
@@ -22,7 +22,7 @@
   <meta name="format-detection" content="telephone=no" />
 
   <!-- Build stamp -->
-  <meta name="sb:build" content="v20260416-richardson-prestripe-one-call-button" />
+  <meta name="sb:build" content="v20260523-richardson-form-only-api-wired" />
 
   <!-- CSS -->
   <link rel="stylesheet" href="/styles/style.css" />
@@ -619,13 +619,12 @@
         </p>
 
         <p class="rf-meta">
-          2751 W Thomas St C · Hammond, LA 70403<br>
-          <a href="tel:+19855071718">985-507-1718</a> ·
+          2751 W Thomas St C · Hammond, LA 70403 ·
           <a href="https://maps.google.com/?q=2751+W+Thomas+St+C,+Hammond,+LA+70403" target="_blank" rel="noopener">Tap for directions</a>
         </p>
 
         <div class="rf-hero-actions">
-          <a class="btn btn--gold" href="tel:+19855071718">Call the Shop</a>
+          <a class="btn btn--gold" href="#booking-request">Request Appointment</a>
         </div>
 
         <div class="rf-hero-note">
@@ -764,7 +763,7 @@
         <article class="rf-card">
           <h3>Right Now</h3>
           <ul>
-            <li>Call the shop for immediate help</li>
+            <li>Stop by the shop for immediate help</li>
             <li>Use the request form below to line up your fitting</li>
             <li>Richardson Fashion will confirm details before anything is locked in</li>
           </ul>
@@ -775,7 +774,7 @@
         <p class="rf-payment-panel__eyebrow">Pre-Stripe Ready</p>
         <h3 id="rfPaymentHeading">Online deposits coming soon</h3>
         <p id="rfPaymentCopy">
-          We’re getting Richardson Fashion set up to accept approved booking deposits and simple online payments. For now, use the appointment form below or call the shop directly.
+          We’re getting Richardson Fashion set up to accept approved booking deposits and simple online payments. For now, use the appointment form below and Derek will confirm your details directly.
         </p>
 
         <p class="rf-mini-note" id="rfPaymentNote">
@@ -791,11 +790,7 @@
       <div class="rf-form-card">
         <div id="rfStatus" class="rf-status" role="status" aria-live="polite" hidden></div>
 
-        <form id="rfForm" action="https://formspree.io/f/mykzdqjp" method="POST" novalidate>
-          <input type="hidden" name="_subject" value="Richardson Fashion — Appointment Request">
-          <input type="hidden" name="source_page" value="Richardson Fashion website">
-          <input type="hidden" name="payment_status" value="Deposit not yet collected">
-          <input type="text" name="_gotcha" style="display:none">
+        <form id="rfForm" novalidate>
 
           <div class="rf-form-grid">
             <div>
@@ -925,42 +920,57 @@
       statusEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
 
+    function val(id){ return (document.getElementById(id) || {}).value || ""; }
+
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
+
+      const name  = val("rf-name").trim();
+      const phone = val("rf-phone").trim();
+      if (!name || !phone) {
+        setStatus("error", "<strong>⚠️ Name and phone are required.</strong>");
+        return;
+      }
 
       submitBtn.disabled = true;
       const oldText = submitBtn.textContent;
       submitBtn.textContent = "Sending…";
       statusEl.hidden = true;
 
+      const payload = {
+        name,
+        phone,
+        email:          val("rf-email"),
+        event_date:     val("rf-event-date"),
+        service_type:   val("rf-service"),
+        party_size:     val("rf-party-size"),
+        referrer:       val("rf-hear"),
+        contact_method: val("rf-contact-method"),
+        best_time:      val("rf-time-window"),
+        message:        val("rf-message"),
+        source:         "richardson-website",
+      };
+
       try{
-        const formData = new FormData(form);
-        const res = await fetch(form.action, {
+        const res = await fetch("/api/richardson/lead", {
           method: "POST",
-          body: formData,
-          headers: { "Accept": "application/json" }
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
         });
 
         if (res.ok){
           form.reset();
           setStatus(
             "success",
-            "<strong>✅ Request received.</strong><br>Richardson Fashion will reach out shortly to confirm details. If you need immediate help, call or text <strong>985-507-1718</strong>."
+            "<strong>✅ Request received.</strong><br>Derek will reach out shortly to confirm your details. Keep an eye on your texts."
           );
         } else {
-          let msg = "We couldn’t send that right now. Please try again or call/text 985-507-1718.";
-          try{
-            const data = await res.json();
-            if (data && data.errors && data.errors.length){
-              msg = data.errors.map(e => e.message).join(" ");
-            }
-          } catch(_) {}
-          setStatus("error", "<strong>⚠️ Submission failed.</strong><br>" + msg);
+          setStatus("error", "<strong>⚠️ Submission failed.</strong><br>Something went wrong. Please try again in a moment.");
         }
       } catch(err){
         setStatus(
           "error",
-          "<strong>⚠️ Network error.</strong><br>Please check your connection and try again, or call/text <strong>985-507-1718</strong>."
+          "<strong>⚠️ Network error.</strong><br>Please check your connection and try again in a moment."
         );
       } finally {
         submitBtn.disabled = false;
