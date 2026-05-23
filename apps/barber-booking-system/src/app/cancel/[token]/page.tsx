@@ -10,6 +10,7 @@ type BookingInfo = {
   starts_at: string;
   customer_name: string;
   shop_name: string;
+  shop_timezone: string;
   barber_name: string;
   service_name: string;
   deposit_amount: number | null;
@@ -81,8 +82,9 @@ export default function CancelPage() {
     );
   }
 
-  const apptDate = new Date(info.starts_at).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
-  const apptTime = new Date(info.starts_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  const tz = info.shop_timezone ?? "America/New_York";
+  const apptDate = new Date(info.starts_at).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", timeZone: tz });
+  const apptTime = new Date(info.starts_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: tz });
 
   return (
     <Screen>

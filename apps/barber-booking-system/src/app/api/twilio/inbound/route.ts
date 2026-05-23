@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { supabaseServer } from "../../../../lib/supabase/server";
 import { normalizePhone } from "../../../../lib/utils";
-import { smsOptOut, smsOptIn, STOP_KEYWORDS, START_KEYWORDS } from "../../../../lib/sms-opt-out";
+import { smsOptOut, smsOptIn, isSmsOptedOut, STOP_KEYWORDS, START_KEYWORDS } from "../../../../lib/sms-opt-out";
 
 export const runtime = "nodejs";
 
@@ -34,7 +34,12 @@ async function validateTwilioSignature(
 }
 
 // ─── SMS send helper ─────────────────────────────────────────────────────────
+// Always checks sms_opt_outs before sending — respects user opt-out status.
 async function sendSms(to: string, body: string): Promise<void> {
+  // Skip send if recipient has opted out
+  const optedOut = await isSmsOptedOut(to).catch(() => false);
+  if (optedOut) return;
+
   const sid = process.env.TWILIO_ACCOUNT_SID;
   const token = process.env.TWILIO_AUTH_TOKEN;
   const messagingSid = process.env.TWILIO_MESSAGING_SERVICE_SID;

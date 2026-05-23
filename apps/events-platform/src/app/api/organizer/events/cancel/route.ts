@@ -41,6 +41,15 @@ export async function POST(req: NextRequest) {
     .update({ status: "cancelled" })
     .eq("id", eventId);
 
+  // Cancel all pending orders immediately — buyers mid-checkout should not be able
+  // to complete payment against a cancelled event. The Stripe session will expire
+  // on its own, but marking these cancelled prevents the webhook from promoting them.
+  await supabaseServer
+    .from("orders")
+    .update({ status: "cancelled" })
+    .eq("event_id", eventId)
+    .eq("status", "pending");
+
   // Fetch all paid orders for this event
   const { data: orders } = await supabaseServer
     .from("orders")

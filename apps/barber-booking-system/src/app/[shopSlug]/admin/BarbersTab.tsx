@@ -108,6 +108,9 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
   const [barberHours, setBarberHours] = useState<Record<string, HourRow[]>>({});
   const [hoursSaving, setHoursSaving] = useState(false);
   const [hoursSaved, setHoursSaved] = useState<string | null>(null);
+  // Ref to track which barber IDs have already been fetched — avoids stale-closure
+  // re-fetches when barberHours state changes recreates loadBarberHours
+  const loadedBarberIds = useRef<Set<string>>(new Set());
 
   // Photo upload state
   const [uploadingPhotoId, setUploadingPhotoId] = useState<string | null>(null);
@@ -156,15 +159,20 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
   }
 
   const loadBarberHours = useCallback(async (barberId: string) => {
-    if (barberHours[barberId]) return;
+    // Use ref instead of state to guard — avoids stale closure from barberHours in deps
+    if (loadedBarberIds.current.has(barberId)) return;
+    loadedBarberIds.current.add(barberId);
     const res = await fetch(`/api/${shopSlug}/admin/barbers/${barberId}/hours`);
     const data = await res.json();
     if (data.ok) {
       const loaded: HourRow[] = data.hours;
       const merged = DEFAULT_SHOP_HOURS.map((def) => loaded.find((h) => h.day_of_week === def.day_of_week) ?? def);
       setBarberHours((prev) => ({ ...prev, [barberId]: merged }));
+    } else {
+      // Remove from loaded set on failure so a retry is possible
+      loadedBarberIds.current.delete(barberId);
     }
-  }, [shopSlug, barberHours]);
+  }, [shopSlug]);
 
   function updateBarberHourDay(barberId: string, dayIndex: number, field: keyof HourRow, value: string | boolean | null) {
     setBarberHours((prev) => ({
@@ -193,6 +201,7 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
   async function clearBarberHours(barberId: string) {
     await fetch(`/api/${shopSlug}/admin/barbers/${barberId}/hours`, { method: "DELETE" });
     setBarberHours((prev) => { const n = { ...prev }; delete n[barberId]; return n; });
+    loadedBarberIds.current.delete(barberId); // allow re-fetch after clear
     setHoursOpen(null);
   }
 

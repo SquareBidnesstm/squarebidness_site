@@ -25,6 +25,8 @@ create table if not exists public.shops (
   booking_base_path text default '/book',
   require_deposit boolean not null default false,
   logo_url text,              -- 004
+  notification_phone text,
+  manual_approval boolean not null default false,  -- 009
   active boolean not null default true,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -45,6 +47,8 @@ create table if not exists public.barbers (
   email text,
   bio text,
   photo_url text,             -- 004
+  special_sessions_enabled boolean not null default false,    -- 010
+  special_sessions_price_cents integer not null default 15000, -- 010
   active boolean not null default true,
   sort_order integer not null default 0,
   created_at timestamptz not null default now(),
@@ -191,7 +195,8 @@ create table if not exists public.bookings (
   duration_snapshot_minutes integer not null check (duration_snapshot_minutes > 0),
 
   status text not null default 'pending'
-    check (status in ('pending', 'confirmed', 'completed', 'cancelled', 'no_show')),
+    check (status in ('pending', 'confirmed', 'completed', 'cancelled', 'no_show',
+                      'pending_approval', 'counter_proposed', 'awaiting_payment')),
 
   payment_status text not null default 'unpaid'
     check (payment_status in ('unpaid', 'deposit_paid', 'paid', 'refunded', 'refund_failed')),
@@ -209,17 +214,25 @@ create table if not exists public.bookings (
   cancel_token uuid default gen_random_uuid() unique,
   cancelled_by text check (cancelled_by in ('admin', 'client', 'system')),
 
+  -- Manual approval + counter-proposal (009)
+  counter_time text,
+
+  -- Special sessions / off-hours (010)
+  is_special_session boolean not null default false,
+  special_session_price_cents integer,
+  special_session_checkout_id text,
+
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
 
   constraint valid_booking_time check (starts_at < ends_at),
 
-  -- No-overlap: prevents double-booking at DB level (003)
+  -- No-overlap: prevents double-booking at DB level (see migration 011 for the live version)
   -- Requires btree_gist extension
   exclude using gist (
     barber_id with =,
     tstzrange(starts_at, ends_at, '[)') with &&
-  ) where (status in ('pending', 'confirmed'))
+  ) where (status in ('pending', 'confirmed', 'pending_approval', 'counter_proposed', 'awaiting_payment'))
 );
 
 -- =========================================================
@@ -315,6 +328,9 @@ create index if not exists idx_shop_settings_shop_id on public.shop_settings(sho
 create index if not exists idx_push_subscriptions_barber_id on public.push_subscriptions(barber_id);
 create index if not exists idx_push_subscriptions_shop_id on public.push_subscriptions(shop_id);
 create index if not exists idx_bookings_cancel_token on public.bookings(cancel_token);
+create index if not exists idx_bookings_special_checkout
+  on public.bookings(special_session_checkout_id)
+  where special_session_checkout_id is not null; -- 010
 
 -- =========================================================
 -- UPDATED_AT TRIGGER FUNCTION

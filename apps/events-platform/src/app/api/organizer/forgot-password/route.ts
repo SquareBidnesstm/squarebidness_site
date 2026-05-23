@@ -38,6 +38,13 @@ export async function POST(req: NextRequest) {
   // Always return ok to prevent email enumeration
   if (!organizer) return NextResponse.json({ ok: true });
 
+  // Guard: Resend must be configured or we cannot send the email at all
+  if (!process.env.RESEND_API_KEY) {
+    console.error("forgot-password: RESEND_API_KEY is not set — cannot send reset email");
+    // Return ok to prevent email enumeration, but do NOT persist a dangling token
+    return NextResponse.json({ ok: true });
+  }
+
   // Generate a secure random token — store only the SHA-256 hash in the DB
   const rawToken = crypto.randomUUID();
   const hashBuf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(rawToken));
@@ -52,22 +59,33 @@ export async function POST(req: NextRequest) {
   // Send rawToken in the email link — only the hash is persisted
   const resetUrl = `${PLATFORM_URL}/organizer/reset-password?token=${rawToken}`;
 
-  await resend.emails.send({
-    from: "SB Events <tickets@squarebidness.com>",
-    to: organizer.email,
-    subject: "Reset your SB Events password",
-    headers: { "List-Unsubscribe": "<mailto:unsubscribe@squarebidness.com>" },
-    html: `
-      <div style="background:#000;color:#fff;font-family:sans-serif;padding:40px 24px;max-width:480px;margin:0 auto;">
-        <p style="font-size:1.5rem;font-weight:900;margin-bottom:8px;">Reset your password</p>
-        <p style="color:#a1a1aa;margin-bottom:24px;">Hey ${organizer.name}, click below to reset your password. This link expires in 1 hour.</p>
-        <a href="${resetUrl}" style="display:inline-block;background:#ef4444;color:#fff;font-weight:900;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:1rem;">
-          Reset Password
-        </a>
-        <p style="color:#555;font-size:0.8rem;margin-top:24px;">If you didn't request this, ignore this email. Your password won't change.</p>
-      </div>
-    `,
-  });
+  try {
+    await resend.emails.send({
+      from: "SB Events <tickets@squarebidness.com>",
+      to: organizer.email,
+      subject: "Reset your SB Events password",
+      headers: { "List-Unsubscribe": "<mailto:unsubscribe@squarebidness.com>" },
+      html: `
+        <div style="background:#000;color:#fff;font-family:sans-serif;padding:40px 24px;max-width:480px;margin:0 auto;">
+          <p style="font-size:1.5rem;font-weight:900;margin-bottom:8px;">Reset your password</p>
+          <p style="color:#a1a1aa;margin-bottom:24px;">Hey ${organizer.name}, click below to reset your password. This link expires in 1 hour.</p>
+          <a href="${resetUrl}" style="display:inline-block;background:#ef4444;color:#fff;font-weight:900;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:1rem;">
+            Reset Password
+          </a>
+          <p style="color:#555;font-size:0.8rem;margin-top:24px;">If you didn't request this, ignore this email. Your password won't change.</p>
+        </div>
+      `,
+    });
+  } catch (emailErr) {
+    console.error("forgot-password: email send failed, rolling back token:", emailErr);
+    // Roll back the token so a dangling reset token doesn't sit in the DB
+    await supabaseServer
+      .from("organizers")
+      .update({ reset_token: null, reset_token_expires_at: null })
+      .eq("id", organizer.id);
+    // Still return ok to prevent email enumeration
+    return NextResponse.json({ ok: true });
+  }
 
   return NextResponse.json({ ok: true });
 }

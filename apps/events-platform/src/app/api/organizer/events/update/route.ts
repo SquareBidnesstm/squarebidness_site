@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
   const refund_policy = (formData.get("refund_policy") as string) || "no_refunds";
   const refund_policy_notes = (formData.get("refund_policy_notes") as string)?.trim() || null;
 
-  const VALID_REFUND_POLICIES = ["no_refunds", "up_to_24h", "full_refund"] as const;
+  const VALID_REFUND_POLICIES = ["no_refunds", "up_to_24h", "up_to_48h", "up_to_7d", "full_refund", "custom"] as const;
   if (refund_policy && !VALID_REFUND_POLICIES.includes(refund_policy as (typeof VALID_REFUND_POLICIES)[number])) {
     return NextResponse.json({ error: "Invalid refund policy." }, { status: 400 });
   }
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
 
   const validCategory = EVENT_CATEGORIES.find((c) => c.value === category);
 
-  await supabaseServer
+  const { error: updateError } = await supabaseServer
     .from("events")
     .update({
       title,
@@ -97,6 +97,14 @@ export async function POST(req: NextRequest) {
       refund_policy_notes,
     })
     .eq("id", eventId);
+
+  if (updateError) {
+    console.error("Event update failed:", updateError.message);
+    return NextResponse.redirect(
+      new URL(`/organizer/dashboard/events/${eventId}/edit?error=update_failed`, req.url),
+      303
+    );
+  }
 
   return NextResponse.redirect(
     new URL(`/organizer/dashboard/events/${eventId}`, req.url),

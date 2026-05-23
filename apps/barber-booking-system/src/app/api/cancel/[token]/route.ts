@@ -193,6 +193,7 @@ export async function GET(
       starts_at: booking.starts_at,
       customer_name: booking.customer_name,
       shop_name: (booking.shops as any)?.name,
+      shop_timezone: (booking.shops as any)?.timezone ?? "America/New_York",
       barber_name: (booking.barbers as any)?.display_name || (booking.barbers as any)?.name,
       service_name: (booking.services as any)?.name,
       deposit_amount: deposit ? Number(deposit.amount) : null,

@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS public.events (
 
   -- Refund policy (006)
   refund_policy        text NOT NULL DEFAULT 'no_refunds'
-    CHECK (refund_policy IN ('no_refunds', 'up_to_24h', 'up_to_48h', 'up_to_7d', 'custom')),
+    CHECK (refund_policy IN ('no_refunds', 'up_to_24h', 'up_to_48h', 'up_to_7d', 'full_refund', 'custom')),
   refund_policy_notes  text,
 
   -- Recurrence (006)
@@ -152,6 +152,10 @@ CREATE TABLE IF NOT EXISTS public.orders (
 
   -- Referral tracking (007)
   ref_code                  text,
+
+  -- Promo code applied at checkout (009)
+  promo_id                  uuid REFERENCES public.promo_codes(id) ON DELETE SET NULL,
+  promo_discount            numeric(10,2) DEFAULT 0.00 CHECK (promo_discount >= 0),
 
   -- Financials
   subtotal                  numeric(10,2) NOT NULL CHECK (subtotal >= 0),
@@ -331,6 +335,7 @@ CREATE INDEX IF NOT EXISTS idx_orders_organizer_id    ON public.orders(organizer
 CREATE INDEX IF NOT EXISTS idx_orders_buyer_email     ON public.orders(buyer_email);
 CREATE INDEX IF NOT EXISTS idx_orders_status          ON public.orders(status);
 CREATE INDEX IF NOT EXISTS idx_orders_ref_code        ON public.orders(ref_code) WHERE ref_code IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_orders_promo_id        ON public.orders(promo_id) WHERE promo_id IS NOT NULL;
 
 -- tickets
 CREATE INDEX IF NOT EXISTS idx_tickets_order_id       ON public.tickets(order_id);

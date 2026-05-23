@@ -30,7 +30,7 @@ export async function GET(
     query = query.or(`customer_name.ilike.%${safeSearch}%,customer_phone.ilike.%${safeSearch}%`);
   }
 
-  const { data: rows, error } = await query.order("starts_at", { ascending: false });
+  const { data: rows, error } = await query.order("starts_at", { ascending: false }).limit(5000);
   if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
 
   // Group by phone number

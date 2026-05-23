@@ -177,7 +177,7 @@ export async function POST(req: NextRequest) {
                 reverse_transfer: true,
                 refund_application_fee: true, // oversell is platform's fault — full refund
               },
-              { idempotencyKey: `refund-${order.id}` }
+              { idempotencyKey: `oversell-refund-${order.id}` }
             )
             .then(() => true)
             .catch((e) => { console.error("Auto-refund failed:", e); return false; });
@@ -216,7 +216,23 @@ export async function POST(req: NextRequest) {
           }
           // 23505 = unique_violation on ticket_code — retry with new code
         }
-        if (!inserted) continue;
+        if (!inserted) {
+          // Ticket insert failed after retries — decrement the capacity we already incremented
+          // to avoid permanently consuming a slot without issuing a ticket.
+          const { data: tierNow } = await supabaseServer
+            .from("ticket_tiers")
+            .select("quantity_sold")
+            .eq("id", tierId)
+            .single();
+          if (tierNow && typeof tierNow.quantity_sold === "number") {
+            await supabaseServer
+              .from("ticket_tiers")
+              .update({ quantity_sold: Math.max(0, tierNow.quantity_sold - 1) })
+              .eq("id", tierId);
+          }
+          console.error(`Ticket insert failed after retries for order ${order.id}, tier ${tierId} — capacity decremented`);
+          continue;
+        }
 
         issuedTickets.push({
           ticketCode,
@@ -278,6 +294,7 @@ export async function POST(req: NextRequest) {
       if (paymentIntent && paymentIntent.application_fee_amount && paymentIntent.application_fee_amount > 0) {
         await supabaseServer.from("platform_payouts").insert({
           order_id: orderId,
+          amount: (paymentIntent.application_fee_amount / 100).toFixed(2),
           amount_cents: paymentIntent.application_fee_amount,
           status: "paid",
         });
