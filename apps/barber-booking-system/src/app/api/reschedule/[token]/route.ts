@@ -78,7 +78,7 @@ export async function POST(
 
   const { data: booking } = await supabaseServer
     .from("bookings")
-    .select(`id, status, customer_name, customer_phone, customer_email, cancel_token, payment_status,
+    .select(`id, status, customer_name, customer_phone, customer_email, cancel_token, payment_status, booking_code,
       shops(id, slug, timezone, name),
       barbers(id, name, display_name, slug),
       services(id, name, duration_minutes, slug)`)
@@ -226,7 +226,7 @@ export async function POST(
       serviceName: service.name,
       appointmentDate: date,
       startsAt: startsAt.toISOString(),
-      bookingCode: "", // rescheduled — no new code issued
+      bookingCode: (booking as any).booking_code ?? "",
       timezone: shop.timezone,
       cancelToken: (booking as any).cancel_token ?? null,
     }).catch((err) => console.error("RESCHEDULE EMAIL ERROR:", err instanceof Error ? err.message : err));

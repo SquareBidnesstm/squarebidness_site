@@ -217,7 +217,7 @@ export async function POST(req: NextRequest) {
       {
         shop_id: shop.id,
         key: "booking_rules",
-        value_json: { slot_interval_minutes: 30, lead_time_minutes: 0, max_days_out: 30 },
+        value_json: { slot_interval_minutes: 30, min_lead_time_minutes: 0, max_days_out: 30 },
       },
       {
         shop_id: shop.id,

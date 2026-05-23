@@ -186,11 +186,14 @@ export async function GET(
   const openMinutes = timeToMinutes(hoursRow.open_time);
   const closeMinutes = timeToMinutes(hoursRow.close_time);
 
-  // Figure out "now" in shop-naive minutes (for filtering past slots on today)
+  // Figure out "now" in the shop's local timezone (times are stored as naive-UTC clock strings)
   const nowUTC = new Date();
-  const todayStr = `${nowUTC.getUTCFullYear()}-${String(nowUTC.getUTCMonth() + 1).padStart(2, "0")}-${String(nowUTC.getUTCDate()).padStart(2, "0")}`;
+  const shopTz = shop.timezone ?? "America/Chicago";
+  // toLocaleString in the shop's timezone gives us the local wall-clock time
+  const shopNow = new Date(nowUTC.toLocaleString("en-US", { timeZone: shopTz }));
+  const todayStr = `${shopNow.getFullYear()}-${String(shopNow.getMonth() + 1).padStart(2, "0")}-${String(shopNow.getDate()).padStart(2, "0")}`;
   const isToday = date === todayStr;
-  const nowMinutes = isToday ? nowUTC.getUTCHours() * 60 + nowUTC.getUTCMinutes() + minLeadMinutes : 0;
+  const nowMinutes = isToday ? shopNow.getHours() * 60 + shopNow.getMinutes() + minLeadMinutes : 0;
 
   const slots: { time: string; label: string }[] = [];
 

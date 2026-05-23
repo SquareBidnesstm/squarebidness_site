@@ -9,6 +9,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  // Parse form data first so we have orderId for rate-limit redirect
+  const formData = await req.formData();
+  const orderId = (formData.get("orderId") as string | null) ?? "";
+
   // Rate limit: 5 resends per 15 min per IP (prevents email spam)
   const ip =
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
@@ -17,14 +21,9 @@ export async function POST(req: NextRequest) {
   recordAttempt(`resend_email:${ip}`);
   const { limited, retryAfterSeconds } = await checkRateLimit(`resend_email:${ip}`, 5);
   if (limited) {
-    return NextResponse.redirect(
-      new URL(`/orders?error=too_many_requests&retry=${Math.ceil(retryAfterSeconds / 60)}`, req.url),
-      303
-    );
+    const dest = orderId ? `/orders/${orderId}?resend=error&retry=${Math.ceil(retryAfterSeconds / 60)}` : `/orders?error=too_many_requests`;
+    return NextResponse.redirect(new URL(dest, req.url), 303);
   }
-
-  const formData = await req.formData();
-  const orderId = formData.get("orderId") as string;
   const buyerEmail = (formData.get("buyerEmail") as string | null)?.trim().toLowerCase();
 
   if (!orderId) {

@@ -149,23 +149,27 @@ export async function POST(req: Request) {
       );
     }
 
-    // Send verification email
-    const verifyUrl = `${PLATFORM_URL}/api/organizer/verify-email?token=${verificationToken}`;
-    await resend.emails.send({
-      from: "SB Events <noreply@squarebidness.com>",
-      to: email,
-      subject: "Verify your SB Events account",
-      html: `
-        <div style="background:#000;color:#fff;font-family:sans-serif;padding:40px 24px;max-width:480px;margin:0 auto;">
-          <p style="font-size:1.5rem;font-weight:900;margin-bottom:8px;">Welcome, ${name}!</p>
-          <p style="color:#a1a1aa;margin-bottom:24px;">Click below to verify your email and activate your organizer account.</p>
-          <a href="${verifyUrl}" style="display:inline-block;background:#ef4444;color:#fff;font-weight:900;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:1rem;">
-            Verify Email
-          </a>
-          <p style="color:#555;font-size:0.8rem;margin-top:24px;">If you didn't sign up for SB Events, ignore this email.</p>
-        </div>
-      `,
-    }).catch((err) => console.error("Verification email error:", err));
+    // Send verification email — skip gracefully if RESEND_API_KEY is not configured
+    if (!process.env.RESEND_API_KEY) {
+      console.warn("[signup] RESEND_API_KEY not set — verification email skipped for", email);
+    } else {
+      const verifyUrl = `${PLATFORM_URL}/api/organizer/verify-email?token=${verificationToken}`;
+      await resend.emails.send({
+        from: "SB Events <noreply@squarebidness.com>",
+        to: email,
+        subject: "Verify your SB Events account",
+        html: `
+          <div style="background:#000;color:#fff;font-family:sans-serif;padding:40px 24px;max-width:480px;margin:0 auto;">
+            <p style="font-size:1.5rem;font-weight:900;margin-bottom:8px;">Welcome, ${name}!</p>
+            <p style="color:#a1a1aa;margin-bottom:24px;">Click below to verify your email and activate your organizer account.</p>
+            <a href="${verifyUrl}" style="display:inline-block;background:#ef4444;color:#fff;font-weight:900;padding:14px 28px;border-radius:10px;text-decoration:none;font-size:1rem;">
+              Verify Email
+            </a>
+            <p style="color:#555;font-size:0.8rem;margin-top:24px;">If you didn't sign up for SB Events, ignore this email.</p>
+          </div>
+        `,
+      }).catch((err) => console.error("Verification email error:", err));
+    }
 
     return NextResponse.redirect(
       new URL("/organizer/signup?verify=1", req.url)

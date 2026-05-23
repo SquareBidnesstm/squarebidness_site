@@ -54,12 +54,29 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
   }
+  const startsAt = event?.starts_at ? new Date(event.starts_at).getTime() : null;
+  const hoursUntilEvent = startsAt ? (startsAt - Date.now()) / (1000 * 60 * 60) : null;
+
   if (refundPolicy === "up_to_24h") {
-    const startsAt = event?.starts_at ? new Date(event.starts_at).getTime() : null;
-    const hoursUntilEvent = startsAt ? (startsAt - Date.now()) / (1000 * 60 * 60) : null;
     if (hoursUntilEvent !== null && hoursUntilEvent < 24) {
       return NextResponse.json(
         { error: "This event's refund policy only allows refunds more than 24 hours before the event." },
+        { status: 400 }
+      );
+    }
+  }
+  if (refundPolicy === "up_to_48h") {
+    if (hoursUntilEvent !== null && hoursUntilEvent < 48) {
+      return NextResponse.json(
+        { error: "This event's refund policy only allows refunds more than 48 hours before the event." },
+        { status: 400 }
+      );
+    }
+  }
+  if (refundPolicy === "up_to_7d") {
+    if (hoursUntilEvent !== null && hoursUntilEvent < 168) {
+      return NextResponse.json(
+        { error: "This event's refund policy only allows refunds more than 7 days before the event." },
         { status: 400 }
       );
     }
@@ -144,12 +161,21 @@ export async function POST(req: NextRequest) {
       .limit(freedCount);
 
     for (const entry of waitlist ?? []) {
-      sendWaitlistNotification({
-        email: entry.email,
-        name: entry.name,
-        eventTitle: eventDetails.title,
-        eventSlug: eventDetails.slug,
-      }).catch(() => {});
+      try {
+        await sendWaitlistNotification({
+          email: entry.email,
+          name: entry.name,
+          eventTitle: eventDetails.title,
+          eventSlug: eventDetails.slug,
+        });
+        // Mark notified so they aren't re-notified on future refunds or manual blasts
+        await supabaseServer
+          .from("waitlist")
+          .update({ notified_at: new Date().toISOString() })
+          .eq("id", entry.id);
+      } catch {
+        // Continue on individual failures — don't block the refund response
+      }
     }
   }
 
