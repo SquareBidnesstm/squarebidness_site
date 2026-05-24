@@ -4,13 +4,23 @@ import { supabaseServer } from "../../../../lib/supabase/server";
 import { getVerifiedOrganizerSlug } from "../../../../lib/auth";
 import { checkRateLimit, recordAttempt } from "../../../../lib/utils";
 
-webpush.setVapidDetails(
-  "mailto:events@squarebidness.com",
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
-);
+let vapidConfigured = false;
+
+function ensureVapidConfigured(): boolean {
+  if (vapidConfigured) return true;
+  const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  const privateKey = process.env.VAPID_PRIVATE_KEY;
+  if (!publicKey || !privateKey) return false;
+  webpush.setVapidDetails("mailto:events@squarebidness.com", publicKey, privateKey);
+  vapidConfigured = true;
+  return true;
+}
 
 export async function POST(req: NextRequest) {
+  if (!ensureVapidConfigured()) {
+    return NextResponse.json({ error: "Push notifications are not configured." }, { status: 503 });
+  }
+
   // Auth
   const organizerSlug = await getVerifiedOrganizerSlug(req);
   if (!organizerSlug) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
