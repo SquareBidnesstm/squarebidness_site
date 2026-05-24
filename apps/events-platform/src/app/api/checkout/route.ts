@@ -79,7 +79,13 @@ export async function POST(req: NextRequest) {
 
   for (const tier of event.ticket_tiers as any[]) {
     const qty = parseInt(formData.get(`tier_${tier.id}`) as string ?? "0");
-    if (qty <= 0) continue;
+    if (!Number.isInteger(qty) || qty < 0) {
+      return NextResponse.json(
+        { ok: false, error: `Invalid ticket quantity for ${tier.name}.` },
+        { status: 400 }
+      );
+    }
+    if (qty === 0) continue;
 
     const MAX_PER_TIER = 10;
     if (qty > MAX_PER_TIER) {
