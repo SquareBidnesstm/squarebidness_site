@@ -1,9 +1,12 @@
+import TurnstileField from "../../../components/TurnstileField";
+
 const ERROR_MESSAGES: Record<string, string> = {
   missing_fields: "Please fill in all required fields.",
   password_too_short: "Password must be at least 8 characters.",
   email_exists: "An account with this email already exists.",
   db_error: "Could not create account. Please try again.",
   server_error: "Something went wrong. Please try again.",
+  verification_failed: "Verification failed. Please try again.",
 };
 
 export default async function OrganizerSignupPage({
@@ -64,6 +67,8 @@ export default async function OrganizerSignupPage({
             <label className="label">Password</label>
             <input name="password" type="password" className="input" required minLength={8} placeholder="Min. 8 characters" />
           </div>
+
+          <TurnstileField action="organizer_signup" />
 
           <button type="submit" className="btn btn--primary btn--wide" style={{ marginTop: 4 }}>
             Create Account

@@ -12,6 +12,7 @@ import {
 } from "../../../../lib/auth";
 import { PLATFORM_URL } from "../../../../lib/constants";
 import { checkRateLimit, recordAttempt, isSafeOrigin } from "../../../../lib/utils";
+import { verifyTurnstileToken } from "../../../../lib/turnstile";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -74,6 +75,16 @@ export async function POST(req: Request) {
     }
 
     const formData = await req.formData();
+    const turnstileOk = await verifyTurnstileToken(
+      formData.get("cf-turnstile-response") as string | null,
+      ip
+    );
+    if (!turnstileOk) {
+      return NextResponse.redirect(
+        new URL("/organizer/signup?error=verification_failed", req.url)
+      );
+    }
+
     const name = (formData.get("name") as string | null)?.trim() ?? "";
     const email = (formData.get("email") as string | null)?.trim().toLowerCase() ?? "";
     const phone = (formData.get("phone") as string | null)?.trim() ?? null;

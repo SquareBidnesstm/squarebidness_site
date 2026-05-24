@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../lib/supabase/server";
 import { checkRateLimit, isSafeOrigin } from "../../../lib/utils";
+import { verifyTurnstileToken } from "../../../lib/turnstile";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -22,9 +23,14 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { eventId, email, name } = await req.json();
+  const { eventId, email, name, turnstileToken } = await req.json();
   if (!eventId || !email || !name) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+  }
+
+  const turnstileOk = await verifyTurnstileToken(turnstileToken, ip);
+  if (!turnstileOk) {
+    return NextResponse.json({ error: "Verification failed. Please try again." }, { status: 403 });
   }
 
   const cleanEventId = String(eventId).trim();

@@ -4,6 +4,7 @@ import { generateQRDataURL } from "../../../lib/qr";
 import { sendBuyerConfirmation } from "../../../lib/notifications/email";
 import { sendBuyerSMS } from "../../../lib/notifications/sms";
 import { checkRateLimit, isSafeOrigin, recordAttempt } from "../../../lib/utils";
+import { verifyTurnstileToken } from "../../../lib/turnstile";
 
 export async function POST(req: NextRequest) {
   // CSRF origin check
@@ -26,6 +27,11 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
+  const turnstileOk = await verifyTurnstileToken(body.turnstileToken, ip);
+  if (!turnstileOk) {
+    return NextResponse.json({ error: "Verification failed. Please try again." }, { status: 403 });
+  }
+
   const { eventId, tierId, name, email, phone, promoId, refCode } = body;
 
   // Strict qty validation — must be a positive integer no greater than 10

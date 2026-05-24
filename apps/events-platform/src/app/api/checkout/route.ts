@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { supabaseServer } from "../../../lib/supabase/server";
 import { PLATFORM_FEE_BASE_CENTS, PLATFORM_FEE_PCT, PLATFORM_URL } from "../../../lib/constants";
 import { isSafeOrigin, checkRateLimit, recordAttempt } from "../../../lib/utils";
+import { verifyTurnstileToken } from "../../../lib/turnstile";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2026-04-22.dahlia" as any,
@@ -29,6 +30,14 @@ export async function POST(req: NextRequest) {
   }
 
   const formData = await req.formData();
+  const turnstileOk = await verifyTurnstileToken(
+    formData.get("cf-turnstile-response") as string | null,
+    ip
+  );
+  if (!turnstileOk) {
+    return NextResponse.json({ ok: false, error: "Verification failed. Please try again." }, { status: 403 });
+  }
+
   const eventSlug = formData.get("eventSlug") as string;
   const buyerName = formData.get("buyerName") as string;
   const buyerEmail = formData.get("buyerEmail") as string;

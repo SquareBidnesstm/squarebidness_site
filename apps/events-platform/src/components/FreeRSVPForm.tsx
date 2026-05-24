@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import TurnstileField from "./TurnstileField";
 
 export default function FreeRSVPForm({
   eventId,
@@ -12,6 +13,7 @@ export default function FreeRSVPForm({
   tiers: { id: string; name: string; description?: string; quantity: number; quantity_sold: number }[];
   refCode?: string | null;
 }) {
+  const formRef = useRef<HTMLFormElement>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -58,12 +60,14 @@ export default function FreeRSVPForm({
     const selected = Object.entries(qty).find(([, q]) => q > 0);
     if (!selected) { setLoading(false); return; }
     const [tierId, q] = selected;
+    const turnstileToken =
+      formRef.current?.querySelector<HTMLInputElement>('input[name="cf-turnstile-response"]')?.value ?? "";
 
     try {
       const res = await fetch("/api/rsvp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ eventId, tierId, name: name.trim(), email: email.trim(), phone: phone.trim(), qty: q, promoId, refCode }),
+        body: JSON.stringify({ eventId, tierId, name: name.trim(), email: email.trim(), phone: phone.trim(), qty: q, promoId, refCode, turnstileToken }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? "Something went wrong."); return; }
@@ -76,7 +80,7 @@ export default function FreeRSVPForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginTop: 16 }}>
+    <form ref={formRef} onSubmit={handleSubmit} style={{ marginTop: 16 }}>
       {error && (
         <p style={{ color: "#f87171", fontSize: "0.85rem", marginBottom: 12, padding: "8px 12px", background: "#1a0a0a", borderRadius: 8, border: "1px solid #7f1d1d" }}>
           {error}
@@ -152,6 +156,9 @@ export default function FreeRSVPForm({
         {promoId && <p style={{ color: "#22c55e", fontSize: "0.82rem", marginTop: 6 }}>✓ Code accepted</p>}
       </div>
 
+      <div style={{ marginBottom: 12 }}>
+        <TurnstileField action="free_rsvp" />
+      </div>
       <button
         type="submit"
         disabled={loading || totalSelected === 0 || !name.trim() || !email.trim()}

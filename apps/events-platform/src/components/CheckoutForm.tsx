@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import TurnstileField from "./TurnstileField";
 
 interface Tier {
   id: string;
@@ -202,6 +203,9 @@ export default function CheckoutForm({
         </div>
       )}
 
+      <div style={{ marginBottom: 12 }}>
+        <TurnstileField action="paid_checkout" />
+      </div>
       <button
         type="submit"
         className="btn btn--primary btn--wide"
