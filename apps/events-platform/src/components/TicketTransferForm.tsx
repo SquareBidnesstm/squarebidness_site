@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import TurnstileField from "./TurnstileField";
 
 export default function TicketTransferForm({
   ticketCode,
@@ -11,6 +12,7 @@ export default function TicketTransferForm({
   tierName: string;
   buyerEmail: string;
 }) {
+  const formRef = useRef<HTMLFormElement>(null);
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -25,7 +27,13 @@ export default function TicketTransferForm({
       const res = await fetch("/api/tickets/transfer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ticketCode, currentEmail: buyerEmail, newName: name, newEmail: email }),
+        body: JSON.stringify({
+          ticketCode,
+          currentEmail: buyerEmail,
+          newName: name,
+          newEmail: email,
+          turnstileToken: formRef.current?.querySelector<HTMLInputElement>('input[name="cf-turnstile-response"]')?.value ?? "",
+        }),
       });
       const data = await res.json();
       if (!res.ok) setResult({ error: data.error ?? "Transfer failed" });
@@ -63,7 +71,7 @@ export default function TicketTransferForm({
           Transfer Ticket →
         </button>
       ) : (
-        <form onSubmit={handleTransfer} style={{ marginTop: 8, display: "grid", gap: 8, padding: "14px", background: "#080808", border: "1px solid #1d1d1f", borderRadius: 10 }}>
+        <form ref={formRef} onSubmit={handleTransfer} style={{ marginTop: 8, display: "grid", gap: 8, padding: "14px", background: "#080808", border: "1px solid #1d1d1f", borderRadius: 10 }}>
           <p style={{ fontWeight: 800, fontSize: "0.82rem", color: "#a1a1aa", margin: 0 }}>
             Transfer <span style={{ color: "#fff" }}>{tierName}</span>
           </p>
@@ -87,6 +95,7 @@ export default function TicketTransferForm({
           {result?.error && (
             <p style={{ color: "#ef4444", fontSize: "0.8rem", margin: 0 }}>{result.error}</p>
           )}
+          <TurnstileField action="ticket_transfer" />
           <div style={{ display: "flex", gap: 8 }}>
             <button
               type="submit"

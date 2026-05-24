@@ -8,7 +8,8 @@ export async function verifyTurnstileToken(
   remoteIp?: string | null
 ): Promise<boolean> {
   const secret = process.env.TURNSTILE_SECRET_KEY;
-  if (!secret) return true;
+  const required = process.env.TURNSTILE_REQUIRED === "true";
+  if (!secret) return !required;
   if (!token) return false;
 
   const formData = new FormData();
@@ -28,4 +29,3 @@ export async function verifyTurnstileToken(
     return false;
   }
 }
-

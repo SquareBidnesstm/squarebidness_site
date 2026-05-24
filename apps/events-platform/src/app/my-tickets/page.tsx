@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
-
-const STORAGE_KEY = "sb_tickets_email";
+import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import NavLogo from "../../components/NavLogo";
+import TurnstileField from "../../components/TurnstileField";
+
+const STORAGE_KEY = "sb_tickets_email";
 
 interface Ticket {
   id: string;
@@ -33,6 +34,7 @@ interface Order {
 }
 
 export default function MyTicketsPage() {
+  const formRef = useRef<HTMLFormElement>(null);
   const [email, setEmail] = useState("");
   const [orders, setOrders] = useState<Order[] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -58,7 +60,10 @@ export default function MyTicketsPage() {
       const res = await fetch("/api/tickets/lookup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: addr }),
+        body: JSON.stringify({
+          email: addr,
+          turnstileToken: formRef.current?.querySelector<HTMLInputElement>('input[name="cf-turnstile-response"]')?.value ?? "",
+        }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? "Something went wrong"); return; }
@@ -99,19 +104,22 @@ export default function MyTicketsPage() {
             Enter the email you used when buying tickets to find your orders.
           </p>
 
-          <form onSubmit={handleLookup} style={{ display: "flex", gap: 10, marginBottom: 32 }}>
-            <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              placeholder="your@email.com"
-              className="input"
-              required
-              style={{ flex: 1 }}
-            />
-            <button type="submit" className="btn btn--primary" disabled={loading} style={{ minHeight: 48, padding: "0 24px" }}>
-              {loading ? "…" : "Find"}
-            </button>
+          <form ref={formRef} onSubmit={handleLookup} style={{ display: "grid", gap: 10, marginBottom: 32 }}>
+            <div style={{ display: "flex", gap: 10 }}>
+              <input
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="your@email.com"
+                className="input"
+                required
+                style={{ flex: 1 }}
+              />
+              <button type="submit" className="btn btn--primary" disabled={loading} style={{ minHeight: 48, padding: "0 24px" }}>
+                {loading ? "…" : "Find"}
+              </button>
+            </div>
+            <TurnstileField action="ticket_lookup" />
           </form>
 
           {searched && (

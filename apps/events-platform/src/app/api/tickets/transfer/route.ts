@@ -3,6 +3,10 @@ import { supabaseServer } from "../../../../lib/supabase/server";
 import { generateQRDataURL } from "../../../../lib/qr";
 import { sendTicketTransferNotice, sendTicketTransferReceived } from "../../../../lib/notifications/email";
 import { checkRateLimit, recordAttempt, isSafeOrigin } from "../../../../lib/utils";
+import { verifyTurnstileToken } from "../../../../lib/turnstile";
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const ticketCodeRegex = /^TKT-[A-Z0-9-]{6,64}$/;
 
 export async function POST(req: NextRequest) {
   // CSRF origin check — ticket transfers are unauthenticated, so origin validation
@@ -25,21 +29,45 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { ticketCode, currentEmail, newName, newEmail } = await req.json();
+  const { ticketCode, currentEmail, newName, newEmail, turnstileToken } = await req.json();
 
   if (!ticketCode || !currentEmail?.trim() || !newName?.trim() || !newEmail?.trim()) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
+  const turnstileOk = await verifyTurnstileToken(turnstileToken, ip);
+  if (!turnstileOk) {
+    return NextResponse.json({ error: "Verification failed. Please try again." }, { status: 403 });
+  }
+
+  const cleanTicketCode = String(ticketCode).trim().toUpperCase();
   const cleanCurrentEmail = currentEmail.trim().toLowerCase();
   const cleanEmail = newEmail.trim().toLowerCase();
   const cleanName = newName.trim();
+
+  if (!ticketCodeRegex.test(cleanTicketCode)) {
+    return NextResponse.json({ error: "Invalid ticket code." }, { status: 400 });
+  }
+  if (!emailRegex.test(cleanCurrentEmail) || !emailRegex.test(cleanEmail)) {
+    return NextResponse.json({ error: "Invalid email address." }, { status: 400 });
+  }
+  if (!cleanName || cleanName.length > 100) {
+    return NextResponse.json({ error: "Name must be 100 characters or less." }, { status: 400 });
+  }
+
+  const ticketLimit = await checkRateLimit(`ticket_transfer:${cleanTicketCode}`, 3);
+  if (ticketLimit.limited) {
+    return NextResponse.json(
+      { error: `Too many transfer attempts for this ticket. Try again in ${Math.ceil(ticketLimit.retryAfterSeconds / 60)} min.` },
+      { status: 429 }
+    );
+  }
 
   // Fetch the ticket (and event title for the notification email)
   const { data: ticket } = await supabaseServer
     .from("tickets")
     .select("id, ticket_code, status, buyer_email, buyer_name, event_id, tier_name, order_id, events ( title )")
-    .eq("ticket_code", ticketCode.trim().toUpperCase())
+    .eq("ticket_code", cleanTicketCode)
     .single();
 
   if (!ticket) return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
