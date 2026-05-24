@@ -112,6 +112,32 @@ export function normalizePhone(raw: string): string | null {
   return null;
 }
 
+export function isValidSlug(value: unknown): value is string {
+  return typeof value === "string" && /^[a-z0-9][a-z0-9-]{0,79}$/.test(value);
+}
+
+export function cleanText(value: unknown, maxLength: number): string {
+  return typeof value === "string" ? value.trim().replace(/\s+/g, " ").slice(0, maxLength) : "";
+}
+
+export function isValidEmail(value: unknown): value is string {
+  if (typeof value !== "string" || value.length > 200) return false;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+export function isSafeOrigin(origin: string | null): boolean {
+  if (!origin) return process.env.NODE_ENV !== "production";
+
+  try {
+    const url = new URL(origin);
+    if (url.origin === "https://booking.squarebidness.com") return true;
+    if (url.hostname === "localhost" || url.hostname === "127.0.0.1") return true;
+    return process.env.VERCEL_ENV !== "production" && url.hostname.endsWith(".vercel.app");
+  } catch {
+    return false;
+  }
+}
+
 export function convertDisplayTimeTo24Hour(time: string): string | null {
   const [clock, suffix] = time.trim().split(" ");
   if (!clock || !suffix) return null;

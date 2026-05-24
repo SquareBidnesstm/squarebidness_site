@@ -3,7 +3,8 @@ import { supabaseServer } from "../../../../../lib/supabase/server";
 import { checkActiveSubscription } from "../../../../../lib/auth";
 import { sendPushToBarber, sendPushToShopAdmins } from "../../../../../lib/push";
 import { sendConfirmationEmail } from "../../../../../lib/email";
-import { normalizePhone, convertDisplayTimeTo24Hour, checkRateLimit, recordFailedAttempt, getIdempotentResponse, storeIdempotentResponse } from "../../../../../lib/utils";
+import { verifyTurnstileToken } from "../../../../../lib/turnstile";
+import { normalizePhone, convertDisplayTimeTo24Hour, checkRateLimit, recordFailedAttempt, getIdempotentResponse, storeIdempotentResponse, cleanText, isSafeOrigin, isValidEmail, isValidSlug } from "../../../../../lib/utils";
 import { isSmsOptedOut } from "../../../../../lib/sms-opt-out";
 
 type CreateBookingPayload = {
@@ -15,6 +16,7 @@ type CreateBookingPayload = {
   service?: string;
   time?: string;
   date?: string;
+  turnstileToken?: string;
 };
 
 /** Send a raw SMS body to a single E.164 phone number (fire-and-forget helper). */
@@ -135,6 +137,9 @@ export async function POST(
 ) {
   try {
     const { shopSlug } = await params;
+    if (!isValidSlug(shopSlug) || !isSafeOrigin(req.headers.get("origin"))) {
+      return NextResponse.json({ ok: false, error: "Forbidden" }, { status: 403 });
+    }
 
     // Idempotency: return cached response for duplicate requests within 10 min
     const idempotencyKey = req.headers.get("idempotency-key");
@@ -159,11 +164,24 @@ export async function POST(
 
     const body = (await req.json()) as CreateBookingPayload;
 
-    if (!body.barber_id) return NextResponse.json({ ok: false, error: "Missing barber_id" }, { status: 400 });
-    if (!body.customer_name) return NextResponse.json({ ok: false, error: "Missing customer_name" }, { status: 400 });
-    if (!body.customer_phone) return NextResponse.json({ ok: false, error: "Phone number is required" }, { status: 400 });
-    if (!body.service) return NextResponse.json({ ok: false, error: "Missing service" }, { status: 400 });
-    if (!body.time) return NextResponse.json({ ok: false, error: "Missing time" }, { status: 400 });
+    const turnstileOk = await verifyTurnstileToken(body.turnstileToken, ip);
+    if (!turnstileOk) {
+      return NextResponse.json({ ok: false, error: "Verification failed. Please try again." }, { status: 403 });
+    }
+
+    if (!isValidSlug(body.barber_id)) return NextResponse.json({ ok: false, error: "Missing barber_id" }, { status: 400 });
+    if (!isValidSlug(body.service)) return NextResponse.json({ ok: false, error: "Missing service" }, { status: 400 });
+
+    const customerName = cleanText(body.customer_name, 100);
+    const customerPhone = normalizePhone(body.customer_phone ?? "");
+    const customerEmail = body.customer_email ? cleanText(body.customer_email, 200).toLowerCase() : "";
+    const clientNotes = body.client_notes ? cleanText(body.client_notes, 500) : "";
+    const requestedTime = cleanText(body.time, 20);
+
+    if (!customerName) return NextResponse.json({ ok: false, error: "Missing customer_name" }, { status: 400 });
+    if (!customerPhone) return NextResponse.json({ ok: false, error: "Enter a valid phone number." }, { status: 400 });
+    if (customerEmail && !isValidEmail(customerEmail)) return NextResponse.json({ ok: false, error: "Enter a valid email address." }, { status: 400 });
+    if (!requestedTime) return NextResponse.json({ ok: false, error: "Missing time" }, { status: 400 });
 
     const appointmentDate =
       body.date && /^\d{4}-\d{2}-\d{2}$/.test(body.date)
@@ -184,7 +202,7 @@ export async function POST(
       return NextResponse.json({ ok: false, error: "Bookings can only be made up to 90 days in advance." }, { status: 400 });
     }
 
-    const time24 = convertDisplayTimeTo24Hour(body.time);
+    const time24 = convertDisplayTimeTo24Hour(requestedTime);
     if (!time24) return NextResponse.json({ ok: false, error: "Invalid time format" }, { status: 400 });
 
     const { data: shop, error: shopError } = await supabaseServer
@@ -272,7 +290,7 @@ export async function POST(
 
     const { data: customer } = await supabaseServer
       .from("customers")
-      .insert({ shop_id: shop.id, full_name: body.customer_name })
+      .insert({ shop_id: shop.id, full_name: customerName })
       .select("id")
       .single();
 
@@ -286,10 +304,10 @@ export async function POST(
         barber_id: barber.id,
         service_id: service.id,
         customer_id: customer?.id ?? null,
-        customer_name: body.customer_name,
-        customer_phone: body.customer_phone,
-        customer_email: body.customer_email || null,
-        client_notes: body.client_notes || null,
+        customer_name: customerName,
+        customer_phone: customerPhone,
+        customer_email: customerEmail || null,
+        client_notes: clientNotes || null,
         appointment_date: appointmentDate,
         starts_at: startsAt.toISOString(),
         ends_at: endsAt.toISOString(),
@@ -314,8 +332,8 @@ export async function POST(
       );
     }
 
-    const normalizedPhone = normalizePhone(body.customer_phone);
-    const createSmsOptedOut = normalizedPhone ? await isSmsOptedOut(normalizedPhone) : true;
+    const normalizedPhone = customerPhone;
+    const createSmsOptedOut = await isSmsOptedOut(normalizedPhone);
 
     if (useManualApproval) {
       // ── Manual approval path ──────────────────────────────────────────────
@@ -326,11 +344,11 @@ export async function POST(
           [
             `Request received! ✂️`,
             ``,
-            `${body.customer_name}`,
+            `${customerName}`,
             `${service.name}`,
             new Date(`${appointmentDate}T12:00:00`).toLocaleDateString("en-US", {
               weekday: "long", month: "long", day: "numeric",
-            }) + ` at ${body.time}`,
+            }) + ` at ${requestedTime}`,
             `Barber: ${barber.display_name || barber.name}`,
             ``,
             `We'll confirm your appointment shortly.`,
@@ -350,9 +368,9 @@ export async function POST(
             `New booking request! ✂️`,
             ``,
             `${service.name}`,
-            `${dateLabel} at ${body.time}`,
-            `Client: ${body.customer_name}`,
-            body.client_notes ? `Note: ${body.client_notes}` : null,
+            `${dateLabel} at ${requestedTime}`,
+            `Client: ${customerName}`,
+            clientNotes ? `Note: ${clientNotes}` : null,
             ``,
             `Reply:`,
             `CONFIRM — approve this time`,
@@ -366,7 +384,7 @@ export async function POST(
       if (normalizedPhone && !createSmsOptedOut) {
         sendConfirmationSMS({
           to: normalizedPhone,
-          customerName: body.customer_name,
+          customerName,
           barberName: barber.display_name || barber.name,
           barberSlug: barber.slug,
           shopSlug,
@@ -382,10 +400,10 @@ export async function POST(
       }
 
       // Send email confirmation if address provided (non-blocking)
-      if (body.customer_email) {
+      if (customerEmail) {
         sendConfirmationEmail({
-          to: body.customer_email,
-          customerName: body.customer_name,
+          to: customerEmail,
+          customerName,
           shopName: shop.name ?? shopSlug,
           barberName: barber.display_name || barber.name,
           serviceName: service.name,
@@ -400,7 +418,7 @@ export async function POST(
 
     // Fire push notifications (non-blocking)
     const pushTitle = useManualApproval ? "Booking Request" : "New Booking";
-    const pushBody = `${body.customer_name} — ${service.name} on ${appointmentDate}`;
+    const pushBody = `${customerName} — ${service.name} on ${appointmentDate}`;
     const pushUrl = `/${shopSlug}/admin`;
     sendPushToBarber(barber.id, { title: pushTitle, body: pushBody, url: pushUrl }).catch(console.error);
     sendPushToShopAdmins(shop.id, { title: pushTitle, body: pushBody, url: pushUrl }).catch(console.error);

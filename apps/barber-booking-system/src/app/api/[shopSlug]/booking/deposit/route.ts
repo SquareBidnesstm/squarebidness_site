@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { supabaseServer } from "../../../../../lib/supabase/server";
 import { checkActiveSubscription } from "../../../../../lib/auth";
-import { checkRateLimit, recordAttempt } from "../../../../../lib/utils";
+import { verifyTurnstileToken } from "../../../../../lib/turnstile";
+import { checkRateLimit, cleanText, isSafeOrigin, isValidEmail, isValidSlug, normalizePhone, recordAttempt } from "../../../../../lib/utils";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-04-22.dahlia" });
 
@@ -11,6 +12,10 @@ export async function POST(
   { params }: { params: Promise<{ shopSlug: string }> }
 ) {
   const { shopSlug } = await params;
+  const requestOrigin = req.headers.get("origin");
+  if (!isValidSlug(shopSlug) || !isSafeOrigin(requestOrigin)) {
+    return NextResponse.json({ ok: false, error: "Forbidden" }, { status: 403 });
+  }
 
   // Rate limit: 10 deposit sessions per 15 min per IP
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
@@ -23,11 +28,28 @@ export async function POST(
   const body = await req.json();
   const {
     barber_id, customer_name, customer_phone, customer_email,
-    client_notes, service, time, date,
+    client_notes, service, time, date, turnstileToken,
   } = body;
 
-  if (!barber_id || !customer_name || !customer_phone || !service || !time || !date) {
+  const turnstileOk = await verifyTurnstileToken(turnstileToken, ip);
+  if (!turnstileOk) {
+    return NextResponse.json({ ok: false, error: "Verification failed. Please try again." }, { status: 403 });
+  }
+
+  if (!isValidSlug(barber_id) || !isValidSlug(service) || !customer_name || !customer_phone || !time || !date) {
     return NextResponse.json({ ok: false, error: "Missing required fields." }, { status: 400 });
+  }
+
+  const cleanName = cleanText(customer_name, 100);
+  const cleanPhone = normalizePhone(customer_phone);
+  const cleanEmail = customer_email ? cleanText(customer_email, 200).toLowerCase() : "";
+  const cleanNotes = client_notes ? cleanText(client_notes, 500) : "";
+  const cleanTime = cleanText(time, 20);
+  if (!cleanName || !cleanPhone || !cleanTime) {
+    return NextResponse.json({ ok: false, error: "Missing required fields." }, { status: 400 });
+  }
+  if (cleanEmail && !isValidEmail(cleanEmail)) {
+    return NextResponse.json({ ok: false, error: "Enter a valid email address." }, { status: 400 });
   }
 
   // Enforce max 90-day booking window
@@ -90,7 +112,7 @@ export async function POST(
     ? Math.round((servicePrice * depositConfig.amount) / 100)
     : depositConfig.amount;
 
-  const origin = req.headers.get("origin") || "https://booking.squarebidness.com";
+  const origin = requestOrigin || "https://booking.squarebidness.com";
 
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
@@ -100,7 +122,7 @@ export async function POST(
         unit_amount: Math.round(depositAmount * 100),
         product_data: {
           name: `Deposit — ${svc.name} at ${shop.name}`,
-          description: `${customer_name} · ${date} at ${time}`,
+          description: `${cleanName} · ${date} at ${cleanTime}`,
         },
       },
       quantity: 1,
@@ -113,12 +135,12 @@ export async function POST(
       shop_slug: shopSlug,
       barber_slug: barber_id,
       service_slug: service,
-      customer_name,
-      customer_phone,
-      customer_email: customer_email ?? "",
-      client_notes: (client_notes ?? "").slice(0, 500), // Stripe metadata 500-char limit
+      customer_name: cleanName,
+      customer_phone: cleanPhone,
+      customer_email: cleanEmail,
+      client_notes: cleanNotes,
       date,
-      time,
+      time: cleanTime,
     },
     payment_intent_data: {
       metadata: { shop_id: shop.id, shop_slug: shopSlug },

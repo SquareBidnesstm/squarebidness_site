@@ -6,7 +6,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../../../lib/supabase/server";
 import { checkActiveSubscription } from "../../../../../lib/auth";
-import { normalizePhone, checkRateLimit, recordFailedAttempt } from "../../../../../lib/utils";
+import { verifyTurnstileToken } from "../../../../../lib/turnstile";
+import { normalizePhone, checkRateLimit, recordFailedAttempt, cleanText, isSafeOrigin, isValidEmail, isValidSlug } from "../../../../../lib/utils";
 import { isSmsOptedOut } from "../../../../../lib/sms-opt-out";
 
 // ─── Time parser (same logic as twilio inbound) ───────────────────────────────
@@ -69,6 +70,9 @@ export async function POST(
   { params }: { params: Promise<{ shopSlug: string }> }
 ) {
   const { shopSlug } = await params;
+  if (!isValidSlug(shopSlug) || !isSafeOrigin(req.headers.get("origin"))) {
+    return NextResponse.json({ ok: false, error: "Forbidden" }, { status: 403 });
+  }
 
   // Rate limit: 5 special session requests per 15 min per IP
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
@@ -90,10 +94,28 @@ export async function POST(
     requested_date,  // YYYY-MM-DD
     requested_time,  // free text: "11 PM", "midnight", "3 AM"
     client_notes,
+    turnstileToken,
   } = body;
 
-  if (!barber_id || !customer_name || !customer_phone || !service || !requested_date || !requested_time) {
+  const turnstileOk = await verifyTurnstileToken(turnstileToken, ip);
+  if (!turnstileOk) {
+    return NextResponse.json({ ok: false, error: "Verification failed. Please try again." }, { status: 403 });
+  }
+
+  if (!isValidSlug(barber_id) || !isValidSlug(service) || !customer_name || !customer_phone || !requested_date || !requested_time) {
     return NextResponse.json({ ok: false, error: "Missing required fields." }, { status: 400 });
+  }
+
+  const cleanName = cleanText(customer_name, 100);
+  const cleanPhone = normalizePhone(customer_phone);
+  const cleanEmail = customer_email ? cleanText(customer_email, 200).toLowerCase() : "";
+  const cleanRequestedTime = cleanText(requested_time, 40);
+  const cleanNotes = client_notes ? cleanText(client_notes, 500) : "";
+  if (!cleanName || !cleanPhone || !cleanRequestedTime) {
+    return NextResponse.json({ ok: false, error: "Missing required fields." }, { status: 400 });
+  }
+  if (cleanEmail && !isValidEmail(cleanEmail)) {
+    return NextResponse.json({ ok: false, error: "Enter a valid email address." }, { status: 400 });
   }
 
   // Validate date
@@ -143,7 +165,7 @@ export async function POST(
   if (!svc) return NextResponse.json({ ok: false, error: "Service not found." }, { status: 404 });
 
   // Parse requested time → starts_at
-  const parsed = parseSmsTime(requested_time);
+  const parsed = parseSmsTime(cleanRequestedTime);
   if (!parsed) {
     return NextResponse.json(
       { ok: false, error: "Could not parse requested time. Try formats like '11 PM', 'midnight', '3:00 AM', or '23:30'." },
@@ -160,13 +182,13 @@ export async function POST(
   // Insert customer record
   const { data: customer } = await supabaseServer
     .from("customers")
-    .insert({ shop_id: shop.id, full_name: customer_name })
+    .insert({ shop_id: shop.id, full_name: cleanName })
     .select("id")
     .single();
 
   const notesParts = [
-    `Special session requested for: ${requested_time}`,
-    client_notes?.trim() ? client_notes.trim() : null,
+    `Special session requested for: ${cleanRequestedTime}`,
+    cleanNotes || null,
   ].filter(Boolean).join("\n");
 
   // Create booking: pending_approval + is_special_session
@@ -178,9 +200,9 @@ export async function POST(
       barber_id: barber.id,
       service_id: svc.id,
       customer_id: customer?.id ?? null,
-      customer_name,
-      customer_phone,
-      customer_email: customer_email || null,
+      customer_name: cleanName,
+      customer_phone: cleanPhone,
+      customer_email: cleanEmail || null,
       client_notes: notesParts,
       appointment_date: requested_date,
       starts_at: startsAt.toISOString(),
@@ -203,17 +225,16 @@ export async function POST(
   }
 
   // ── SMS to client ────────────────────────────────────────────────────────────
-  const clientPhone = normalizePhone(customer_phone);
-  const clientOptedOut = clientPhone ? await isSmsOptedOut(clientPhone) : true;
-  if (clientPhone && !clientOptedOut) {
+  const clientOptedOut = await isSmsOptedOut(cleanPhone);
+  if (!clientOptedOut) {
     const dateLabel = new Date(`${requested_date}T12:00:00`).toLocaleDateString("en-US", {
       weekday: "long", month: "long", day: "numeric",
     });
-    sendSms(clientPhone, [
+    sendSms(cleanPhone, [
       `Special session request received! ⚡`,
       ``,
-      `${customer_name}`,
-      `${svc.name} — ${dateLabel} at ${requested_time}`,
+      `${cleanName}`,
+      `${svc.name} — ${dateLabel} at ${cleanRequestedTime}`,
       `Barber: ${barber.display_name || barber.name}`,
       ``,
       `Your barber will text you to confirm details and send a payment link.`,
@@ -233,9 +254,9 @@ export async function POST(
       `Special session request! ⚡`,
       ``,
       `${svc.name}`,
-      `${dateLabel} at ${requested_time}`,
-      `Client: ${customer_name} · ${customer_phone}`,
-      client_notes?.trim() ? `Note: ${client_notes.trim()}` : null,
+      `${dateLabel} at ${cleanRequestedTime}`,
+      `Client: ${cleanName} · ${cleanPhone}`,
+      cleanNotes ? `Note: ${cleanNotes}` : null,
       ``,
       `Reply:`,
       `ACCEPT — confirm at your default $${defaultDollars}`,

@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import TurnstileField from "../../../../components/TurnstileField";
 
 function getTodayDateString() {
   const now = new Date();
@@ -31,6 +32,7 @@ type SavedCustomer = { name: string; phone: string; email: string; lastService: 
 const LS_KEY = (shopSlug: string) => `sbb_customer_${shopSlug}`;
 
 export default function BookingForm({ shopSlug, shopName, shopLogoUrl, barberSlug, barberName, barberPhotoUrl, barberBio, specialSessionsEnabled, specialSessionsDefaultPrice = 150, services }: Props) {
+  const challengeRef = useRef<HTMLDivElement | null>(null);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -169,6 +171,7 @@ export default function BookingForm({ shopSlug, shopName, shopLogoUrl, barberSlu
       service,
       time: slots.find((s) => s.time === time)?.label ?? time,
       date,
+      turnstileToken: challengeRef.current?.querySelector<HTMLInputElement>('input[name="cf-turnstile-response"]')?.value ?? "",
     };
   }
 
@@ -247,6 +250,7 @@ export default function BookingForm({ shopSlug, shopName, shopLogoUrl, barberSlu
           requested_date: ssDate,
           requested_time: ssTime.trim(),
           client_notes: ssNotes.trim() || null,
+          turnstileToken: challengeRef.current?.querySelector<HTMLInputElement>('input[name="cf-turnstile-response"]')?.value ?? "",
         }),
       });
       const data = await res.json().catch(() => null);
@@ -608,7 +612,8 @@ export default function BookingForm({ shopSlug, shopName, shopLogoUrl, barberSlu
           </div>
         )}
 
-        <div style={{ marginTop: 30, display: "grid", gap: 10 }}>
+        <div ref={challengeRef} style={{ marginTop: 30, display: "grid", gap: 10 }}>
+          <TurnstileField action="booking_request" />
           {depositInfo?.enabled ? (
             <button
               onClick={handlePayDeposit}

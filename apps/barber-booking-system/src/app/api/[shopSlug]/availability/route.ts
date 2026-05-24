@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../../lib/supabase/server";
-import { checkRateLimit, recordAttempt } from "../../../../lib/utils";
+import { checkRateLimit, isValidSlug, recordAttempt } from "../../../../lib/utils";
 
 // Convert "HH:MM" to total minutes from midnight
 function timeToMinutes(t: string): number {
@@ -28,11 +28,14 @@ export async function GET(
   { params }: { params: Promise<{ shopSlug: string }> }
 ) {
   const { shopSlug } = await params;
+  if (!isValidSlug(shopSlug)) {
+    return NextResponse.json({ ok: false, error: "Invalid shop" }, { status: 400 });
+  }
 
-  // Rate limit: 60 checks per 15 min per IP (prevents slot scraping)
+  // Rate limit: 60 checks per 15 min per IP per shop (prevents slot scraping)
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
-  recordAttempt(`avail:${ip}`);
-  const { limited } = await checkRateLimit(`avail:${ip}`, 60);
+  recordAttempt(`avail:${shopSlug}:${ip}`);
+  const { limited } = await checkRateLimit(`avail:${shopSlug}:${ip}`, 60);
   if (limited) {
     return NextResponse.json({ ok: false, error: "Too many requests." }, { status: 429 });
   }
@@ -46,6 +49,10 @@ export async function GET(
 
   if (!barberSlug || !date || !durationStr) {
     return NextResponse.json({ ok: false, error: "Missing barber, date, or duration" }, { status: 400 });
+  }
+
+  if (!isValidSlug(barberSlug)) {
+    return NextResponse.json({ ok: false, error: "Invalid barber" }, { status: 400 });
   }
 
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
@@ -66,9 +73,13 @@ export async function GET(
     return NextResponse.json({ ok: false, closed: true, slots: [], error: "Bookings can only be made up to 90 days in advance." });
   }
 
-  const duration = parseInt(durationStr);
-  if (isNaN(duration) || duration < 1) {
+  const duration = parseInt(durationStr, 10);
+  if (isNaN(duration) || duration < 1 || duration > 480) {
     return NextResponse.json({ ok: false, error: "Invalid duration" }, { status: 400 });
+  }
+
+  if (excludeBookingId && !/^[0-9a-f-]{16,80}$/i.test(excludeBookingId)) {
+    return NextResponse.json({ ok: false, error: "Invalid exclude booking" }, { status: 400 });
   }
 
   // Get shop
