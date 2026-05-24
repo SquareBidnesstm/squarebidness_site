@@ -14,6 +14,16 @@ async function hmacHex(secret: string, message: string): Promise<string> {
   return Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+function timingSafeEqual(a: string, b: string): boolean {
+  const enc = new TextEncoder();
+  const aBytes = enc.encode(a);
+  const bBytes = enc.encode(b);
+  if (aBytes.length !== bBytes.length) return false;
+  let diff = 0;
+  for (let i = 0; i < aBytes.length; i++) diff |= aBytes[i] ^ bBytes[i];
+  return diff === 0;
+}
+
 async function verifyPlatformSession(req: NextRequest): Promise<boolean> {
   const cookie = req.cookies.get("platform_session")?.value;
   if (!cookie) return false;
@@ -27,9 +37,10 @@ async function verifyPlatformSession(req: NextRequest): Promise<boolean> {
   const issuedAtMs = Number(issuedAt);
   if (!issuedAtMs || Date.now() - issuedAtMs > MAX_PLATFORM_SESSION_MS) return false;
 
-  const secret = process.env.APP_SECRET ?? "";
+  const secret = process.env.APP_SECRET;
+  if (!secret) return false;
   const expected = await hmacHex(secret, `platform-admin:${issuedAt}`);
-  return mac === expected;
+  return timingSafeEqual(mac, expected);
 }
 
 export async function GET(req: NextRequest) {

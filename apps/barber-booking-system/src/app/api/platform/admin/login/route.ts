@@ -18,6 +18,16 @@ async function hmacHex(secret: string, message: string): Promise<string> {
   return Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+function timingSafeEqual(a: string, b: string): boolean {
+  const enc = new TextEncoder();
+  const aBytes = enc.encode(a);
+  const bBytes = enc.encode(b);
+  if (aBytes.length !== bBytes.length) return false;
+  let diff = 0;
+  for (let i = 0; i < aBytes.length; i++) diff |= aBytes[i] ^ bBytes[i];
+  return diff === 0;
+}
+
 export async function POST(req: NextRequest) {
   // Rate limiting — 5 attempts per 15 min per IP
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
@@ -31,13 +41,14 @@ export async function POST(req: NextRequest) {
   }
 
   const { pin } = await req.json().catch(() => ({}));
+  const cleanPin = String(pin ?? "").trim();
   const platformPin = process.env.PLATFORM_PIN;
 
   if (!platformPin) {
     return NextResponse.json({ ok: false, error: "Platform admin not configured." }, { status: 503 });
   }
 
-  if (!pin || pin !== platformPin) {
+  if (!cleanPin || cleanPin.length > 64 || !timingSafeEqual(cleanPin, platformPin)) {
     recordFailedAttempt(rlKey);
     return NextResponse.json({ ok: false, error: "Invalid PIN." }, { status: 401 });
   }
@@ -55,7 +66,7 @@ export async function POST(req: NextRequest) {
   res.cookies.set("platform_session", token, {
     httpOnly: true,
     secure: true,
-    sameSite: "lax",
+    sameSite: "strict",
     path: "/platform",
     maxAge: 60 * 60 * 12, // 12 hours
   });
