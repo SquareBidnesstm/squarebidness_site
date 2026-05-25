@@ -29,10 +29,11 @@ function timingSafeEqual(a: string, b: string): boolean {
 }
 
 export async function POST(req: NextRequest) {
-  // Rate limiting — 5 attempts per 15 min per IP
+  // Rate limiting — 20 attempts per 15 min per IP. Keep this high enough that
+  // owner diagnostics do not lock out the whole platform admin.
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
   const rlKey = `platform_admin:${ip}`;
-  const { limited, retryAfterSeconds } = await checkRateLimit(rlKey, 5);
+  const { limited, retryAfterSeconds } = await checkRateLimit(rlKey, 20);
   if (limited) {
     return NextResponse.json(
       { ok: false, error: `Too many attempts. Try again in ${Math.ceil(retryAfterSeconds / 60)} min.` },
