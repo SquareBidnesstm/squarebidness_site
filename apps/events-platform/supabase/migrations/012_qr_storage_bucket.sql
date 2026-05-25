@@ -21,9 +21,20 @@ VALUES (
 ON CONFLICT (id) DO NOTHING;
 
 -- Allow anonymous (unauthenticated) reads — required for public bucket serving
-CREATE POLICY IF NOT EXISTS "Public read qr-codes"
-  ON storage.objects FOR SELECT
-  USING (bucket_id = 'qr-codes');
+-- (CREATE POLICY IF NOT EXISTS is not supported before Postgres 17)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'storage'
+      AND tablename = 'objects'
+      AND policyname = 'Public read qr-codes'
+  ) THEN
+    CREATE POLICY "Public read qr-codes"
+      ON storage.objects FOR SELECT
+      USING (bucket_id = 'qr-codes');
+  END IF;
+END $$;
 
 -- Only the service role (server-side API) may write to this bucket.
 -- Supabase service-role key bypasses RLS, so no additional INSERT policy needed.
