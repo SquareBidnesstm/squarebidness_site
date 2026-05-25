@@ -64,6 +64,7 @@ export function normalizeFlashSale(input = {}) {
         .map((item) => {
           const sourceId = String(item.sourceId || "").trim();
           const name = String(item.name || "").trim();
+          const description = String(item.description || item.desc || "").trim();
           const price = normalizePrice(item.price);
           const limit = normalizeLimit(item.limit);
 
@@ -73,6 +74,7 @@ export function normalizeFlashSale(input = {}) {
             sourceId,
             flashId: `flash_${sourceId}`,
             name,
+            description: description.slice(0, 140),
             price,
             limit,
           };
@@ -82,7 +84,7 @@ export function normalizeFlashSale(input = {}) {
 
   return {
     enabled: input.enabled === true,
-    title: String(input.title || "Flash Sale").trim().slice(0, 80) || "Flash Sale",
+    title: String(input.title || "Special Items").trim().slice(0, 80) || "Special Items",
     message: String(input.message || "").trim().slice(0, 180),
     startAt: String(input.startAt || "").trim().slice(0, 20),
     endAt: String(input.endAt || "").trim().slice(0, 20),

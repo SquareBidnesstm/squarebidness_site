@@ -555,6 +555,7 @@
           <a class="button-link btn-secondary" href="/delish/operator/">Operator Controls</a>
           <a class="button-link btn-secondary" href="/delish/ready/complete/">Ready Complete</a>
           <span class="actions-spacer" aria-hidden="true"></span>
+          <a class="button-link btn-primary" href="/delish/admin/add-special-items/">Add Special Items</a>
           <a class="button-link btn-flash" href="/delish/admin/flashsale/">Flash Sale</a>
         </div>
       </div>
@@ -579,6 +580,13 @@
       </div>
 
       <div class="status" id="windowStatusBox">Checking ordering window...</div>
+
+      <div class="actions" aria-label="Ordering mode controls">
+        <button class="btn-primary" id="adminOpenBtn" type="button">Open Now</button>
+        <button class="btn-secondary" id="adminAutoBtn" type="button">Auto Mode</button>
+        <button class="btn-secondary" id="adminPause30Btn" type="button">Pause 30 Min</button>
+        <button class="btn-flash" id="adminCloseTodayBtn" type="button">Closed Today</button>
+      </div>
 
     </div>
 
@@ -1022,6 +1030,14 @@ async function savePickupWindows() {
         return `Ordering is open until ${formatTime(data.closeTime)}.`;
       }
 
+      if (data.orderingMode === "closed" || data.mode === "closed") {
+        return "Online ordering is closed today.";
+      }
+
+      if (data.orderingMode === "paused" || data.mode === "paused") {
+        return "Ordering is temporarily paused.";
+      }
+
       if (data.reason === "outside_service_window") {
         return `Auto window is ${formatTime(data.openTime)} to ${formatTime(data.closeTime)}.`;
       }
@@ -1043,8 +1059,8 @@ async function savePickupWindows() {
 
     function renderOrderingWindow(data) {
       const isOpen = !!data.openNow;
-      const isManualPause = data.orderingMode === "paused" || data.reason === "manual_closed";
-      const tone = isOpen ? "open" : (isManualPause ? "warn" : "closed");
+      const isPaused = data.orderingMode === "paused" || data.mode === "paused";
+      const tone = isOpen ? "open" : (isPaused ? "warn" : "closed");
 
       windowStatusPill.textContent = isOpen ? "Open Now" : "Closed Now";
       windowStatusPill.className = `window-pill ${tone}`;
@@ -1054,7 +1070,7 @@ async function savePickupWindows() {
         ? `${formatTime(data.openTime)} - ${formatTime(data.closeTime)}`
         : "No service window today";
 
-      setWindowStatus(buildWindowMessage(data), isOpen ? "good" : (isManualPause ? "" : "bad"));
+      setWindowStatus(buildWindowMessage(data), isOpen ? "good" : (isPaused ? "" : "bad"));
     }
 
     async function loadOrderingWindow() {
@@ -1068,6 +1084,44 @@ async function savePickupWindows() {
       }
 
       renderOrderingWindow(data);
+    }
+
+    async function postOrderingControl(payload, successMessage) {
+      let token = getSavedToken();
+
+      if (!token) {
+        token = window.prompt("Enter Delish operator token");
+        if (!token) {
+          setWindowStatus("Ordering control cancelled.");
+          return;
+        }
+        if (window.confirm("Save token on this device?")) {
+          saveToken(token.trim());
+        }
+      }
+
+      setWindowStatus("Updating ordering mode...");
+
+      const res = await fetch("/api/delish/operator-control/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-operator-token": token.trim()
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok || !data.ok) {
+        if (res.status === 401) {
+          clearToken();
+        }
+        throw new Error(data.error || "Failed to update ordering mode.");
+      }
+
+      setWindowStatus(successMessage || "Ordering mode updated.", "good");
+      await loadOrderingWindow();
     }
 
     function getSavedToken() {
@@ -1266,6 +1320,29 @@ reloadPickupWindowsBtn?.addEventListener("click", () => {
     });
     document.getElementById("refreshWindowBtn").addEventListener("click", () => {
       loadOrderingWindow().catch(err => setWindowStatus(err.message || "Window check failed.", "bad"));
+    });
+    document.getElementById("adminOpenBtn")?.addEventListener("click", () => {
+      postOrderingControl({ mode: "open" }, "Ordering forced open.").catch(err =>
+        setWindowStatus(err.message || "Open failed.", "bad")
+      );
+    });
+    document.getElementById("adminAutoBtn")?.addEventListener("click", () => {
+      postOrderingControl({ mode: "auto" }, "Ordering returned to auto mode.").catch(err =>
+        setWindowStatus(err.message || "Auto mode failed.", "bad")
+      );
+    });
+    document.getElementById("adminPause30Btn")?.addEventListener("click", () => {
+      postOrderingControl({ mode: "paused", pauseMinutes: 30 }, "Ordering paused for 30 minutes.").catch(err =>
+        setWindowStatus(err.message || "Pause failed.", "bad")
+      );
+    });
+    document.getElementById("adminCloseTodayBtn")?.addEventListener("click", () => {
+      const confirmed = window.confirm("Close customer ordering for the rest of today?");
+      if (!confirmed) return;
+
+      postOrderingControl({ mode: "closed" }, "Customer ordering is closed today.").catch(err =>
+        setWindowStatus(err.message || "Close today failed.", "bad")
+      );
     });
     document.getElementById("clearTokenBtn").addEventListener("click", () => {
       clearToken();

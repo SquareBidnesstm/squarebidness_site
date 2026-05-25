@@ -298,7 +298,7 @@ function buildFlashSaleMap(flashSale) {
       {
         id: item.flashId,
         sourceId: item.sourceId,
-        name: `FLASH SALE - ${item.name}`,
+        name: `SPECIAL - ${item.name}`,
         price: item.price,
         limit: item.limit,
         flashSale: true,
@@ -597,7 +597,9 @@ export default async function handler(req, res) {
       let message = orderingState.message || "Online ordering is closed right now.";
 
       if (orderingState.reason === "manual_closed") {
-        message = "Online ordering is currently paused.";
+        message = orderingState.orderingMode === "closed"
+          ? "Online ordering is closed today."
+          : "Online ordering is currently paused.";
       } else if (orderingState.reason === "outside_service_window") {
         message = `Ordering is available from ${orderingState.openTime} to ${orderingState.closeTime}.`;
       } else if (orderingState.reason === "sunday_not_scheduled") {
