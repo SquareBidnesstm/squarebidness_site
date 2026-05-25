@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
 
   const { pin } = await req.json().catch(() => ({}));
   const cleanPin = String(pin ?? "").trim();
-  const platformPin = process.env.PLATFORM_PIN;
+  const platformPin = process.env.PLATFORM_PIN?.trim();
 
   if (!platformPin) {
     return NextResponse.json({ ok: false, error: "Platform admin not configured." }, { status: 503 });
