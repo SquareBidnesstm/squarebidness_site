@@ -42,7 +42,7 @@ export default function BookingForm({ shopSlug, shopName, shopLogoUrl, barberSlu
   const [service, setService] = useState("");
   const [time, setTime] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(initialError ?? "");
+  const [error, setError] = useState("");
   const [confirmed, setConfirmed] = useState<{
     code: string;
     startsAt?: string;
