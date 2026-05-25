@@ -18,7 +18,8 @@ export async function GET(req: NextRequest) {
     .from("promo_codes")
     .select("*, events(title)")
     .eq("organizer_id", org.id)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(200);
 
   return NextResponse.json({ promos: data ?? [] });
 }

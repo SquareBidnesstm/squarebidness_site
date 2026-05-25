@@ -4,7 +4,7 @@ const MAX_TOKEN_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 // Constant-time string comparison — prevents timing side-channel attacks on HMAC tokens.
 // HMAC outputs are always fixed-length hex (64 chars for SHA-256), so the length branch
 // is never reached in practice, but is included for correctness.
-function timingSafeEqual(a: string, b: string): boolean {
+export function timingSafeEqual(a: string, b: string): boolean {
   const enc = new TextEncoder();
   const aB = enc.encode(a);
   const bB = enc.encode(b);
@@ -14,7 +14,7 @@ function timingSafeEqual(a: string, b: string): boolean {
   return diff === 0;
 }
 
-async function hmacHex(secret: string, message: string): Promise<string> {
+export async function hmacHex(secret: string, message: string): Promise<string> {
   const enc = new TextEncoder();
   const key = await crypto.subtle.importKey(
     "raw", enc.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]

@@ -1,31 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, recordFailedAttempt, clearFailedAttempts } from "../../../../../lib/utils";
+import { hmacHex, timingSafeEqual } from "../../../../../lib/auth";
 
 function requireAppSecret(): string {
   const secret = process.env.APP_SECRET;
   if (!secret) throw new Error("APP_SECRET environment variable is not set. Cannot issue platform session tokens.");
   return secret;
-}
-
-async function hmacHex(secret: string, message: string): Promise<string> {
-  const enc = new TextEncoder();
-  const key = await crypto.subtle.importKey(
-    "raw", enc.encode(secret),
-    { name: "HMAC", hash: "SHA-256" },
-    false, ["sign"]
-  );
-  const sig = await crypto.subtle.sign("HMAC", key, enc.encode(message));
-  return Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, "0")).join("");
-}
-
-function timingSafeEqual(a: string, b: string): boolean {
-  const enc = new TextEncoder();
-  const aBytes = enc.encode(a);
-  const bBytes = enc.encode(b);
-  if (aBytes.length !== bBytes.length) return false;
-  let diff = 0;
-  for (let i = 0; i < aBytes.length; i++) diff |= aBytes[i] ^ bBytes[i];
-  return diff === 0;
 }
 
 export async function POST(req: NextRequest) {

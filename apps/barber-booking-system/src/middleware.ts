@@ -1,31 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { computeSessionToken, sessionCookieName, computeBarberSessionToken, barberSessionCookieName } from "./lib/auth";
-
-async function verifyPlatformCookie(cookie: string): Promise<boolean> {
-  const secret = process.env.APP_SECRET;
-  if (!secret) return false; // misconfigured — deny all platform access rather than allow with empty key
-  const dotIdx = cookie.indexOf(".");
-  if (dotIdx === -1) return false; // old format — reject
-  const issuedAt = cookie.slice(0, dotIdx);
-  const mac = cookie.slice(dotIdx + 1);
-  const issuedAtMs = Number(issuedAt);
-  if (!issuedAtMs || Date.now() - issuedAtMs > 12 * 60 * 60 * 1000) return false; // 12h expiry
-  const enc = new TextEncoder();
-  const key = await crypto.subtle.importKey("raw", enc.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-  const sig = await crypto.subtle.sign("HMAC", key, enc.encode(`platform-admin:${issuedAt}`));
-  const expected = Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, "0")).join("");
-  return timingSafeEqual(mac, expected);
-}
-
-function timingSafeEqual(a: string, b: string): boolean {
-  const enc = new TextEncoder();
-  const aBytes = enc.encode(a);
-  const bBytes = enc.encode(b);
-  if (aBytes.length !== bBytes.length) return false;
-  let diff = 0;
-  for (let i = 0; i < aBytes.length; i++) diff |= aBytes[i] ^ bBytes[i];
-  return diff === 0;
-}
+import { computeSessionToken, sessionCookieName, computeBarberSessionToken, barberSessionCookieName, verifyPlatformSession, timingSafeEqual } from "./lib/auth";
 
 const RESERVED_SLUGS = new Set(["admin", "book", "onboard", "login", "api", "_next", "platform", "favicon.ico"]);
 
@@ -35,9 +9,7 @@ export async function middleware(req: NextRequest) {
   // Platform admin protection
   if (pathname.startsWith("/platform")) {
     if (pathname === "/platform/login") return NextResponse.next();
-    const cookie = req.cookies.get("platform_session")?.value;
-    if (!cookie) return NextResponse.redirect(new URL("/platform/login", req.url));
-    if (!(await verifyPlatformCookie(cookie))) return NextResponse.redirect(new URL("/platform/login", req.url));
+    if (!(await verifyPlatformSession(req))) return NextResponse.redirect(new URL("/platform/login", req.url));
     return NextResponse.next();
   }
 

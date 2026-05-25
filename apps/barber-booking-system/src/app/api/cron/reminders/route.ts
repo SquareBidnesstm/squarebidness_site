@@ -2,17 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../../lib/supabase/server";
 import { normalizePhone } from "../../../../lib/utils";
 import { isSmsOptedOut } from "../../../../lib/sms-opt-out";
+import { timingSafeEqual } from "../../../../lib/auth";
 
 export const runtime = "nodejs";
-
-function timingSafeEqual(a: string, b: string): boolean {
-  const enc = new TextEncoder();
-  const ab = enc.encode(a), bb = enc.encode(b);
-  if (ab.length !== bb.length) return false;
-  let diff = 0;
-  for (let i = 0; i < ab.length; i++) diff |= ab[i] ^ bb[i];
-  return diff === 0;
-}
 
 export async function GET(req: NextRequest) {
   // Protect with a shared secret set in CRON_SECRET env var

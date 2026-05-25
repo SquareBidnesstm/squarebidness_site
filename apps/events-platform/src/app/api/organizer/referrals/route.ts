@@ -17,7 +17,8 @@ export async function GET(req: NextRequest) {
     .from("referral_codes")
     .select("id, code, name, event_id, uses, created_at, events ( title )")
     .eq("organizer_id", org.id)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(200);
 
   return NextResponse.json({ codes: data ?? [] });
 }

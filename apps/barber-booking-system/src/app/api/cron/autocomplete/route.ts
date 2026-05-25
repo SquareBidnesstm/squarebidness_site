@@ -1,16 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../../lib/supabase/server";
+import { timingSafeEqual } from "../../../../lib/auth";
 
 export const runtime = "nodejs";
-
-function timingSafeEqual(a: string, b: string): boolean {
-  const enc = new TextEncoder();
-  const ab = enc.encode(a), bb = enc.encode(b);
-  if (ab.length !== bb.length) return false;
-  let diff = 0;
-  for (let i = 0; i < ab.length; i++) diff |= ab[i] ^ bb[i];
-  return diff === 0;
-}
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
