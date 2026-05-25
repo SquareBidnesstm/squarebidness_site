@@ -456,3 +456,33 @@ export async function sendWaitlistNotification(params: SendWaitlistNotificationP
     `),
   });
 }
+
+// ---------------------------------------------------------------------------
+// Internal security alert — sent to platform admin on first account lockout
+// ---------------------------------------------------------------------------
+
+export async function sendAccountLockoutAlert(params: {
+  email: string;
+  organizerName?: string | null;
+}): Promise<void> {
+  const adminEmail = process.env.PLATFORM_ADMIN_EMAIL;
+  if (!adminEmail || !process.env.RESEND_API_KEY) return;
+
+  await resend.emails.send({
+    from: "SB Events Security <noreply@squarebidness.com>",
+    to: adminEmail,
+    subject: `[Security] Organizer account locked: ${params.email}`,
+    html: emailShell(`
+      <h1 style="font-size:22px;font-weight:900;letter-spacing:-0.04em;margin:0 0 8px;">Account Locked 🔒</h1>
+      <p style="color:#a1a1aa;font-size:15px;margin:0 0 16px;line-height:1.6;">
+        The organizer account <strong style="color:#fff;">${escHtml(params.email)}</strong>${params.organizerName ? ` (${escHtml(params.organizerName)})` : ""} has been temporarily locked after too many failed login attempts.
+      </p>
+      <p style="color:#a1a1aa;font-size:14px;margin:0 0 12px;line-height:1.6;">
+        The lockout clears automatically after 15 minutes. If this looks like a targeted attack, consider resetting the account or contacting the organizer.
+      </p>
+      <p style="color:#555;font-size:12px;margin:0;">
+        This alert fires at most once per 15-minute lockout window.
+      </p>
+    `),
+  });
+}

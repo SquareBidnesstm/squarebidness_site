@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../../lib/supabase/server";
-import { generateQRDataURL } from "../../../../lib/qr";
+import { uploadQRToStorage } from "../../../../lib/qr";
 import { sendTicketTransferNotice, sendTicketTransferReceived } from "../../../../lib/notifications/email";
 import { checkRateLimit, recordAttempt, isSafeOrigin } from "../../../../lib/utils";
 import { verifyTurnstileToken } from "../../../../lib/turnstile";
@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
   if (!newTicketCode) {
     return NextResponse.json({ error: "Could not generate a unique ticket code. Please try again." }, { status: 500 });
   }
-  newQr = await generateQRDataURL(newTicketCode);
+  newQr = await uploadQRToStorage(newTicketCode, supabaseServer);
 
   const originalEmail = ticket.buyer_email;
   const originalName = ticket.buyer_name;

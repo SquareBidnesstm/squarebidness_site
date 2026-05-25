@@ -9,7 +9,8 @@ import {
   computeOrganizerSessionToken,
   organizerSessionCookieName,
 } from "../../../../lib/auth";
-import { checkRateLimit, recordAttempt, isSafeOrigin } from "../../../../lib/utils";
+import { checkRateLimit, recordAttempt, isSafeOrigin, clearAttempts, isFirstLockout } from "../../../../lib/utils";
+import { sendAccountLockoutAlert } from "../../../../lib/notifications/email";
 
 async function verifyPassword(
   password: string,
@@ -77,7 +78,7 @@ export async function POST(req: Request) {
 
     const { data: organizer } = await supabaseServer
       .from("organizers")
-      .select("id, slug, password_hash, active, email_verified")
+      .select("id, slug, name, password_hash, active, email_verified")
       .eq("email", email)
       .maybeSingle();
 
@@ -101,13 +102,29 @@ export async function POST(req: Request) {
 
     const valid = await verifyPassword(password, organizer.password_hash ?? "");
     if (!valid) {
+      // Per-account lockout — tracks failures by email address (cross-IP).
+      // Distinct from the IP-level counter above; both must pass.
+      const acctKey = `org_login:acct:${email}`;
+      const { limited } = await checkRateLimit(acctKey, 5);
+      if (limited) {
+        // Fire lockout-alert email exactly once per lockout window
+        const first = await isFirstLockout(acctKey);
+        if (first) {
+          sendAccountLockoutAlert({ email, organizerName: organizer.name }).catch(() => {});
+        }
+        return NextResponse.redirect(
+          new URL("/organizer/login?error=account_locked", req.url)
+        );
+      }
       return NextResponse.redirect(
         new URL("/organizer/login?error=invalid_credentials", req.url)
       );
     }
 
-    // Successful login — do NOT clear rate limit counter; let the window expire
-    // naturally so attackers cannot use deliberate successes to reset the counter.
+    // Successful login — clear per-account lockout counter so the organizer isn't
+    // penalised if they come back after having forgotten their password.
+    // (IP-level counter is intentionally left to expire naturally.)
+    clearAttempts(`org_login:acct:${email}`).catch(() => {});
 
     // Set session cookie
     const token = await computeOrganizerSessionToken(organizer.slug);

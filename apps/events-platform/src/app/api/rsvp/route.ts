@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../lib/supabase/server";
-import { generateQRDataURL } from "../../../lib/qr";
+import { uploadQRToStorage } from "../../../lib/qr";
 import { sendBuyerConfirmation } from "../../../lib/notifications/email";
 import { sendBuyerSMS } from "../../../lib/notifications/sms";
 import { checkRateLimit, isSafeOrigin, recordAttempt } from "../../../lib/utils";
@@ -128,10 +128,11 @@ export async function POST(req: NextRequest) {
   for (let i = 0; i < qty; i++) {
     let inserted = false;
     let ticketCode = "";
-    let qrDataUrl = "";
+    let qrUrl = "";
     for (let attempt = 0; attempt < 3; attempt++) {
       ticketCode = `TKT-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
-      qrDataUrl = await generateQRDataURL(ticketCode);
+      // Upload QR to Storage (falls back to data URL on error)
+      qrUrl = await uploadQRToStorage(ticketCode, supabaseServer);
       const { error: insertErr } = await supabaseServer.from("tickets").insert({
         ticket_code: ticketCode,
         order_id: order.id,
@@ -141,7 +142,7 @@ export async function POST(req: NextRequest) {
         buyer_name: order.buyer_name,
         buyer_email: order.buyer_email,
         price_snapshot: 0,
-        qr_code: qrDataUrl,
+        qr_code: qrUrl,
         status: "valid",
       });
       if (!insertErr) { inserted = true; break; }
@@ -153,7 +154,7 @@ export async function POST(req: NextRequest) {
     }
     if (!inserted) continue;
 
-    issuedTickets.push({ ticketCode, tierName: tier.name, qrDataUrl });
+    issuedTickets.push({ ticketCode, tierName: tier.name, qrDataUrl: qrUrl });
   }
 
   // Format event date/time

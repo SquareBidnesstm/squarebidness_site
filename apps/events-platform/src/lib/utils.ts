@@ -66,7 +66,45 @@ export async function checkRateLimit(
 
 /** No-op — checkRateLimit now records atomically. Kept for call-site compat. */
 export function recordAttempt(_key: string): void {}
-export function clearAttempts(_key: string): void {}
+
+/**
+ * Clear the rate-limit counter for a key (e.g., after a successful login).
+ * Also clears the "lockout notification sent" marker so a future lockout
+ * will trigger a fresh alert email.
+ * Backed by Redis DEL; falls back to in-process Map deletion.
+ */
+export async function clearAttempts(key: string): Promise<void> {
+  const redis = getRedis();
+  if (redis) {
+    await Promise.all([
+      redis.del(`rl:${key}`).catch(() => {}),
+      redis.del(`lock_notified:${key}`).catch(() => {}),
+    ]);
+  } else {
+    _failMap.delete(key);
+  }
+}
+
+/**
+ * Returns true the FIRST time an account crosses the lockout threshold —
+ * subsequent calls for the same key return false until clearAttempts() resets it.
+ * Used to send a lockout-alert email exactly once per lockout window.
+ * Uses Redis SETNX so it's safe across concurrent serverless instances.
+ */
+export async function isFirstLockout(key: string): Promise<boolean> {
+  const redis = getRedis();
+  if (redis) {
+    const notifyKey = `lock_notified:${key}`;
+    const set = await redis.setnx(notifyKey, "1").catch(() => 0);
+    if (set === 1) {
+      await redis.expire(notifyKey, WINDOW_SECONDS).catch(() => {});
+      return true;
+    }
+    return false;
+  }
+  // In-memory fallback: always notify (acceptable for local dev)
+  return true;
+}
 
 // ---------------------------------------------------------------------------
 // CSRF origin check — validates that a form POST comes from our own domain.
