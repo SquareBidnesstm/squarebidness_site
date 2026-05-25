@@ -17,13 +17,23 @@ export async function GET(req: NextRequest) {
   // returns null instead of throwing PGRST116 into Supabase error logs.
   const { data: organizer } = await supabaseServer
     .from("organizers")
-    .select("id, name, email, email_verified")
+    .select("id, name, email, email_verified, verification_token_expires_at")
     .eq("verification_token", tokenHash)
     .maybeSingle();
 
   if (!organizer) {
-    // Token not found at all — genuinely invalid or expired.
+    // Token not found at all — genuinely invalid or already used.
     return NextResponse.redirect(new URL("/organizer/login?error=invalid_token", req.url));
+  }
+
+  // Check token expiry — tokens are valid for 7 days from signup
+  if (organizer.verification_token_expires_at && new Date(organizer.verification_token_expires_at) < new Date()) {
+    // Clear the expired token so the organizer can request a new one
+    await supabaseServer
+      .from("organizers")
+      .update({ verification_token: null })
+      .eq("id", organizer.id);
+    return NextResponse.redirect(new URL("/organizer/login?error=token_expired", req.url));
   }
 
   if (organizer.email_verified) {

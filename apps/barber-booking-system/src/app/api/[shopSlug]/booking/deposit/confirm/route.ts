@@ -77,8 +77,17 @@ export async function GET(
   const bookingCode = rpcCode ?? `${shopSlug.slice(0, 2).toUpperCase()}-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 
   const customerName = meta.customer_name || "Guest";
+  const customerPhone = meta.customer_phone || null;
+  // Upsert on (shop_id, phone) to prevent duplicate customer rows per booking.
+  // Unique index idx_customers_shop_phone_unique was added in migration 014.
   const { data: customer } = await supabaseServer
-    .from("customers").insert({ shop_id: shop.id, full_name: customerName }).select("id").single();
+    .from("customers")
+    .upsert(
+      { shop_id: shop.id, full_name: customerName, phone: customerPhone },
+      { onConflict: "shop_id,phone", ignoreDuplicates: true }
+    )
+    .select("id")
+    .single();
 
   const { data: booking, error: bookingError } = await supabaseServer
     .from("bookings").insert({

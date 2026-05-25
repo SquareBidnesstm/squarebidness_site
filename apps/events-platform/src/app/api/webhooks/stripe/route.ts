@@ -272,23 +272,14 @@ export async function POST(req: NextRequest) {
     }
 
     // Increment promo uses now that payment is confirmed (not at session creation).
-    // Re-check the live max_uses cap here as a second guard against over-redemption
-    // (the first check happened at checkout session creation in /api/checkout).
+    // Atomically increment promo uses — RPC enforces max_uses guard in a single UPDATE,
+    // eliminating the TOCTOU race between the old SELECT+check+UPDATE pattern.
+    // Returns true if incremented, false if max_uses was already reached.
     if (order.promo_id) {
       try {
-        const { data: livePromo } = await supabaseServer
-          .from("promo_codes")
-          .select("uses, max_uses")
-          .eq("id", order.promo_id)
-          .single();
-        const underLimit =
-          !livePromo ||
-          livePromo.max_uses === null ||
-          livePromo.uses < livePromo.max_uses;
-        if (underLimit) {
-          await supabaseServer.rpc("increment_promo_uses", { promo_id: order.promo_id });
-        } else {
-          console.error("Promo max_uses already reached for order", order.id, "— skipping increment");
+        const { data: incremented } = await supabaseServer.rpc("increment_promo_uses", { promo_id: order.promo_id });
+        if (!incremented) {
+          console.error("Promo max_uses already reached for order", order.id, "— increment skipped (atomic guard)");
         }
       } catch {
         // non-critical — log and continue

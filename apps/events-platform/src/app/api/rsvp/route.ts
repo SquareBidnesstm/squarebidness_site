@@ -194,7 +194,8 @@ export async function POST(req: NextRequest) {
     }).catch((err) => console.error("RSVP SMS error:", err));
   }
 
-  // Track promo code usage — only if the promo belongs to this event (or is global)
+  // Track promo code usage — atomic RPC guards max_uses internally, returns false if limit hit.
+  // Post-ticket-issue so non-critical: log failures but never fail the order.
   if (promoId) {
     try {
       const { data: promo } = await supabaseServer
@@ -204,7 +205,10 @@ export async function POST(req: NextRequest) {
         .single();
       // Allow global promos (event_id IS NULL) and promos scoped to this event
       if (promo && (promo.event_id === null || promo.event_id === eventId)) {
-        await supabaseServer.rpc("increment_promo_uses", { promo_id: promoId });
+        const { data: incremented } = await supabaseServer.rpc("increment_promo_uses", { promo_id: promoId });
+        if (!incremented) {
+          console.error("RSVP: promo max_uses already reached for promo", promoId, "— increment skipped");
+        }
       } else {
         console.error("RSVP: promoId", promoId, "does not belong to event", eventId, "— skipping increment");
       }

@@ -161,6 +161,7 @@ export async function POST(req: Request) {
         active: false,
         email_verified: false,
         verification_token: verificationTokenHash,
+        verification_token_expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       })
       .select("slug")
       .single();
