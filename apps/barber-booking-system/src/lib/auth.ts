@@ -78,6 +78,31 @@ export function sessionCookieName(shopSlug: string): string {
   return `session_${shopSlug}`;
 }
 
+const MAX_PLATFORM_SESSION_MS = 12 * 60 * 60 * 1000; // 12 hours
+
+// Shared platform-admin session verifier — single source of truth used by all /api/platform/admin/** routes.
+export async function verifyPlatformSession(req: Request): Promise<boolean> {
+  const cookieHeader = req.headers.get("cookie") ?? "";
+  const match = cookieHeader
+    .split(";")
+    .map((c) => c.trim())
+    .find((c) => c.startsWith("platform_session="));
+  if (!match) return false;
+  const cookie = match.slice("platform_session=".length);
+
+  const dotIdx = cookie.indexOf(".");
+  if (dotIdx === -1) return false;
+  const issuedAt = cookie.slice(0, dotIdx);
+  const mac = cookie.slice(dotIdx + 1);
+  const issuedAtMs = Number(issuedAt);
+  if (!issuedAtMs || Date.now() - issuedAtMs > MAX_PLATFORM_SESSION_MS) return false;
+
+  const secret = process.env.APP_SECRET;
+  if (!secret) return false;
+  const expected = await hmacHex(secret, `platform-admin:${issuedAt}`);
+  return timingSafeEqual(mac, expected);
+}
+
 import { supabaseServer } from "./supabase/server";
 
 export async function checkActiveSubscription(shopId: string): Promise<boolean> {

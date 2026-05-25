@@ -45,5 +45,5 @@ export async function GET(req: NextRequest) {
     dashboardUrl: `${PLATFORM_URL}/organizer/dashboard`,
   }).catch(() => {});
 
-  return NextResponse.redirect(new URL("/organizer/dashboard?verified=1", req.url));
+  return NextResponse.redirect(new URL("/organizer/login?verified=1", req.url));
 }

@@ -66,60 +66,69 @@ export async function POST(req: NextRequest) {
   let refundedCount = 0;
   let failedCount = 0;
 
-  for (const order of paidOrders) {
-    try {
-      let refunded = false;
+  const CONCURRENCY = 5;
 
-      // Issue Stripe refund — idempotency key prevents duplicate refunds on retries
-      if (order.stripe_payment_intent_id) {
-        try {
-          await stripe.refunds.create(
-            {
-              payment_intent: order.stripe_payment_intent_id,
-              reverse_transfer: true,       // debit organizer's connected account
-              refund_application_fee: true, // full refund to buyer on cancellation — organizer's fault
-            },
-            { idempotencyKey: `refund-event-${eventId}-order-${order.id}` }
-          );
-          refunded = true;
-          refundedCount++;
-        } catch (err: any) {
-          console.error(`Refund failed for order ${order.id}:`, err.message);
-          failedCount++;
-          // Mark the order as refund_failed so it surfaces for manual resolution
-          await supabaseServer
-            .from("orders")
-            .update({ status: "refund_failed" })
-            .eq("id", order.id);
-          continue; // skip the cancellation mark below so status stays refund_failed
-        }
+  async function processOrder(order: (typeof paidOrders)[number]): Promise<void> {
+    let refunded = false;
+
+    // Issue Stripe refund — idempotency key prevents duplicate refunds on retries
+    if (order.stripe_payment_intent_id) {
+      try {
+        await stripe.refunds.create(
+          {
+            payment_intent: order.stripe_payment_intent_id,
+            reverse_transfer: true,       // debit organizer's connected account
+            refund_application_fee: true, // full refund to buyer on cancellation — organizer's fault
+          },
+          { idempotencyKey: `refund-event-${eventId}-order-${order.id}` }
+        );
+        refunded = true;
+      } catch (err: any) {
+        console.error(`Refund failed for order ${order.id}:`, err.message);
+        // Mark the order as refund_failed so it surfaces for manual resolution
+        await supabaseServer
+          .from("orders")
+          .update({ status: "refund_failed" })
+          .eq("id", order.id);
+        throw err; // propagate so the allSettled result is rejected
       }
+    }
 
-      // Mark order refunded if Stripe refund succeeded, cancelled if it was a free order
-      await supabaseServer
-        .from("orders")
-        .update({ status: refunded ? "refunded" : "cancelled" })
-        .eq("id", order.id);
+    // Mark order refunded if Stripe refund succeeded, cancelled if it was a free order
+    await supabaseServer
+      .from("orders")
+      .update({ status: refunded ? "refunded" : "cancelled" })
+      .eq("id", order.id);
 
-      // Mark tickets refunded/cancelled to match order status
-      await supabaseServer
-        .from("tickets")
-        .update({ status: refunded ? "refunded" : "cancelled" })
-        .eq("order_id", order.id);
+    // Mark tickets refunded/cancelled to match order status
+    await supabaseServer
+      .from("tickets")
+      .update({ status: refunded ? "refunded" : "cancelled" })
+      .eq("order_id", order.id);
 
-      // Email buyer
-      sendEventCancellationNotice({
-        buyerName: order.buyer_name,
-        buyerEmail: order.buyer_email,
-        eventTitle: event.title,
-        eventDate,
-        orderCode: order.order_code,
-        total: Number(order.total),
-        refunded,
-      }).catch((err) => console.error("Cancellation email error:", err));
-    } catch (err: any) {
-      console.error(`Unexpected error processing order ${order.id}:`, err.message);
-      failedCount++;
+    // Email buyer
+    sendEventCancellationNotice({
+      buyerName: order.buyer_name,
+      buyerEmail: order.buyer_email,
+      eventTitle: event.title,
+      eventDate,
+      orderCode: order.order_code,
+      total: Number(order.total),
+      refunded,
+    }).catch((err) => console.error("Cancellation email error:", err));
+  }
+
+  // Process in batches of CONCURRENCY using Promise.allSettled so one failure
+  // doesn't block the rest of the batch.
+  for (let i = 0; i < paidOrders.length; i += CONCURRENCY) {
+    const chunk = paidOrders.slice(i, i + CONCURRENCY);
+    const results = await Promise.allSettled(chunk.map((order) => processOrder(order)));
+    for (const result of results) {
+      if (result.status === "fulfilled") {
+        refundedCount++;
+      } else {
+        failedCount++;
+      }
     }
   }
 

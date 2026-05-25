@@ -23,7 +23,8 @@ export async function GET(
     .select("id, booking_code, starts_at, status, price_snapshot, services(name), barbers(name, display_name)")
     .eq("shop_id", shop.id)
     .eq("customer_phone", phone)
-    .order("starts_at", { ascending: false });
+    .order("starts_at", { ascending: false })
+    .limit(500);
 
   if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
 

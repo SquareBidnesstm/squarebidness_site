@@ -226,8 +226,8 @@ export async function POST(
     .eq("active", true);
 
   if (newCount !== null && newCount > barberLimit) {
-    // Rollback — deactivate the just-inserted barber
-    await supabaseServer.from("barbers").update({ active: false }).eq("id", barber.id);
+    // Rollback — delete the just-inserted barber (deactivating leaves a ghost row that still counts toward limits)
+    await supabaseServer.from("barbers").delete().eq("id", barber.id);
     return NextResponse.json({ ok: false, error: "Barber limit reached for your plan." }, { status: 400 });
   }
 

@@ -1,47 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../../../lib/supabase/server";
-
-const MAX_PLATFORM_SESSION_MS = 12 * 60 * 60 * 1000; // 12 hours
-
-async function hmacHex(secret: string, message: string): Promise<string> {
-  const enc = new TextEncoder();
-  const key = await crypto.subtle.importKey(
-    "raw", enc.encode(secret),
-    { name: "HMAC", hash: "SHA-256" },
-    false, ["sign"]
-  );
-  const sig = await crypto.subtle.sign("HMAC", key, enc.encode(message));
-  return Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, "0")).join("");
-}
-
-function timingSafeEqual(a: string, b: string): boolean {
-  const enc = new TextEncoder();
-  const aBytes = enc.encode(a);
-  const bBytes = enc.encode(b);
-  if (aBytes.length !== bBytes.length) return false;
-  let diff = 0;
-  for (let i = 0; i < aBytes.length; i++) diff |= aBytes[i] ^ bBytes[i];
-  return diff === 0;
-}
-
-async function verifyPlatformSession(req: NextRequest): Promise<boolean> {
-  const cookie = req.cookies.get("platform_session")?.value;
-  if (!cookie) return false;
-
-  // New format: "{issuedAt}.{hmac}" — reject legacy format
-  const dotIdx = cookie.indexOf(".");
-  if (dotIdx === -1) return false;
-
-  const issuedAt = cookie.slice(0, dotIdx);
-  const mac = cookie.slice(dotIdx + 1);
-  const issuedAtMs = Number(issuedAt);
-  if (!issuedAtMs || Date.now() - issuedAtMs > MAX_PLATFORM_SESSION_MS) return false;
-
-  const secret = process.env.APP_SECRET;
-  if (!secret) return false;
-  const expected = await hmacHex(secret, `platform-admin:${issuedAt}`);
-  return timingSafeEqual(mac, expected);
-}
+import { verifyPlatformSession } from "../../../../../lib/auth";
 
 export async function GET(req: NextRequest) {
   const authed = await verifyPlatformSession(req);

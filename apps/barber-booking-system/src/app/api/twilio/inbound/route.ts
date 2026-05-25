@@ -104,11 +104,13 @@ function fmtDate(isoDate: string): string {
 }
 
 // ─── Parse an ACCEPT price from "accept $150" / "accept 150" ─────────────────
-function parseAcceptPrice(msg: string): number | null {
+function parseAcceptPrice(msg: string): number | null | "too_high" {
   const m = msg.match(/^accept\s*\$?(\d+(?:\.\d{1,2})?)$/i);
   if (!m) return null;
   const dollars = parseFloat(m[1]);
-  return isNaN(dollars) || dollars < 1 ? null : Math.round(dollars * 100);
+  if (isNaN(dollars) || dollars < 1) return null;
+  if (dollars > 10000) return "too_high";
+  return Math.round(dollars * 100);
 }
 
 // ─── Handle barber reply to a pending_approval booking ───────────────────────
@@ -151,7 +153,14 @@ async function handleBarberReply(barberPhone: string, messageBody: string) {
 
       // ── ACCEPT (with optional price override) ──────────────────────────────
       const isAccept = msg === "accept" || msg === "yes" || msg === "ok" || msg === "approve";
-      const customPriceCents = parseAcceptPrice(msg);
+      const parsedPrice = parseAcceptPrice(msg);
+
+      if (parsedPrice === "too_high") {
+        await sendSms(barberPhone, `Price too high. Max $10,000.`).catch(console.error);
+        return true;
+      }
+
+      const customPriceCents = parsedPrice as number | null;
 
       if (isAccept || customPriceCents !== null) {
         const priceCents = customPriceCents

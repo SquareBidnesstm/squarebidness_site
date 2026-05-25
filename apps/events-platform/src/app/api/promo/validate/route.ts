@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
     .from("promo_codes")
     .select("*")
     .eq("active", true)
-    .ilike("code", cleanCode)
+    .eq("code", cleanCode)
     .or(`event_id.eq.${cleanEventId},event_id.is.null`)
     .single();
 

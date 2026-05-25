@@ -14,6 +14,11 @@ export async function GET(
   const { data: shop } = await supabaseServer.from("shops").select("id").eq("slug", shopSlug).single();
   if (!shop) return NextResponse.json({ ok: false, error: "Shop not found" }, { status: 404 });
 
+  // Verify barber belongs to this shop (prevents IDOR — admin for Shop A reading Shop B's barber hours)
+  const { data: barber } = await supabaseServer
+    .from("barbers").select("id").eq("id", barberId).eq("shop_id", shop.id).single();
+  if (!barber) return NextResponse.json({ ok: false, error: "Barber not found" }, { status: 404 });
+
   const { data: hours } = await supabaseServer
     .from("barber_hours")
     .select("day_of_week, is_closed, open_time, close_time")

@@ -12,9 +12,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export const config = { runtime: "nodejs" };
 
-async function handleDepositBooking(session: Stripe.Checkout.Session) {
+async function handleDepositBooking(session: Stripe.Checkout.Session): Promise<{ error: string; status: number } | null> {
   const meta = session.metadata;
-  if (!meta?.shop_id || !meta?.shop_slug) return;
+  if (!meta?.shop_id || !meta?.shop_slug) return null;
 
   // Idempotency: check by payment_intent ID — globally unique, immune to name/date collisions
   const paymentIntentId = session.payment_intent as string | null;
@@ -24,23 +24,23 @@ async function handleDepositBooking(session: Stripe.Checkout.Session) {
       .select("id")
       .eq("provider_payment_id", paymentIntentId)
       .limit(1);
-    if (existingPayment && existingPayment.length > 0) return;
+    if (existingPayment && existingPayment.length > 0) return null;
   }
 
   const { data: shop } = await supabaseServer
     .from("shops").select("id, slug, name, timezone").eq("id", meta.shop_id).eq("active", true).single();
-  if (!shop) return;
+  if (!shop) return null;
 
   const { data: barber } = await supabaseServer
     .from("barbers").select("id, name, display_name, slug").eq("shop_id", shop.id).eq("slug", meta.barber_slug).eq("active", true).single();
-  if (!barber) return;
+  if (!barber) return null;
 
   const { data: svc } = await supabaseServer
     .from("services").select("id, name, price, duration_minutes").eq("shop_id", shop.id).eq("slug", meta.service_slug).eq("active", true).single();
-  if (!svc) return;
+  if (!svc) return null;
 
   const time24 = convertDisplayTimeTo24Hour(meta.time ?? "");
-  if (!time24) return;
+  if (!time24) return null;
 
   const startsAt = new Date(`${meta.date}T${time24}:00`);
   const endsAt = new Date(startsAt.getTime() + svc.duration_minutes * 60 * 1000);
@@ -50,7 +50,7 @@ async function handleDepositBooking(session: Stripe.Checkout.Session) {
     .from("bookings").select("id").eq("barber_id", barber.id)
     .in("status", ["pending", "confirmed", "pending_approval", "counter_proposed", "awaiting_payment"])
     .lt("starts_at", endsAt.toISOString()).gt("ends_at", startsAt.toISOString());
-  if (overlaps && overlaps.length > 0) return;
+  if (overlaps && overlaps.length > 0) return null;
 
   const { data: rpcCode } = await supabaseServer.rpc("generate_booking_code", { shop_slug: shop.slug });
   const bookingCode = rpcCode ?? `${shop.slug.slice(0, 2).toUpperCase()}-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
@@ -81,8 +81,7 @@ async function handleDepositBooking(session: Stripe.Checkout.Session) {
 
   if (!booking) {
     // BC-2: Exclusion constraint violation means a concurrent request already created
-    // a booking for this slot. The webhook cannot issue a refund (the confirm route is
-    // responsible), but we must not proceed with recording a duplicate payment row.
+    // a booking for this slot. Refund the customer — they paid but cannot get the slot.
     const errCode = (bookingInsertError as any)?.code;
     if (errCode === "23P01" || errCode === "23505") {
       console.error("Webhook booking insert conflict (23P01/23505) — slot already taken:", {
@@ -91,8 +90,12 @@ async function handleDepositBooking(session: Stripe.Checkout.Session) {
         date: meta.date,
         time: meta.time,
       });
+      if (session.payment_intent) {
+        await stripe.refunds.create({ payment_intent: session.payment_intent as string, reason: "duplicate" }).catch(err => console.error("[webhook] refund failed:", err));
+      }
+      return { error: "Slot already booked — refund issued", status: 409 };
     }
-    return;
+    return null;
   }
 
   // Record the deposit payment
@@ -154,6 +157,7 @@ async function handleDepositBooking(session: Stripe.Checkout.Session) {
       cancelToken: (booking as any).cancel_token ?? null,
     }).catch((err) => console.error("WEBHOOK EMAIL ERROR:", err instanceof Error ? err.message : err));
   }
+  return null;
 }
 
 export async function POST(req: NextRequest) {
@@ -195,7 +199,8 @@ export async function POST(req: NextRequest) {
             await supabaseServer.from("bookings").update({ payment_status: "paid" }).eq("id", bookingId);
             break;
           }
-          await handleDepositBooking(session);
+          const depositErr = await handleDepositBooking(session);
+          if (depositErr) return NextResponse.json({ error: depositErr.error }, { status: depositErr.status });
           break;
         }
 

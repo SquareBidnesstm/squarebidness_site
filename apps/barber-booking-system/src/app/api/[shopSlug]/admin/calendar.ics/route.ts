@@ -43,7 +43,7 @@ export async function GET(
 
   // Bookings in the last 30 days + all upcoming
   const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-  query = query.gte("starts_at", cutoff).order("starts_at");
+  query = query.gte("starts_at", cutoff).order("starts_at").limit(2000);
 
   const { data: bookings } = await query;
 

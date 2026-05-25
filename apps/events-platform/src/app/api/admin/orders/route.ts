@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { supabaseServer } from "../../../../lib/supabase/server";
 import { verifyAdminSession } from "../../../../lib/auth";
-import { generateQRDataURL } from "../../../../lib/qr";
+import { uploadQRToStorage } from "../../../../lib/qr";
 import { sendBuyerConfirmation } from "../../../../lib/notifications/email";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
 
       for (let i = 0; i < qty; i++) {
         const ticketCode = `TKT-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
-        const qrDataUrl = await generateQRDataURL(ticketCode);
+        const qrDataUrl = await uploadQRToStorage(ticketCode, supabaseServer);
 
         await supabaseServer.from("tickets").insert({
           ticket_code: ticketCode,

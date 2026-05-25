@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../../../lib/supabase/server";
 import { getVerifiedOrganizerSlug } from "../../../../../lib/auth";
 import { sendEventBlast } from "../../../../../lib/notifications/email";
+import { checkRateLimit } from "../../../../../lib/utils";
 
 export async function POST(req: NextRequest) {
   // Auth — check before parsing body so unauthenticated callers get a fast 401
@@ -28,6 +29,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Message must be 5,000 characters or fewer." }, { status: 400 });
   }
 
+  // Per-event rate limit: max 3 blasts per 15 minutes per event
+  const { limited } = await checkRateLimit(`email_blast:${eventId}`, 3);
+  if (limited) {
+    return NextResponse.json(
+      { error: "Email blast rate limit reached. Max 3 blasts per event per 15 minutes." },
+      { status: 429 }
+    );
+  }
+
   // Verify ownership
   const { data: event } = await supabaseServer
     .from("events")
@@ -42,7 +52,7 @@ export async function POST(req: NextRequest) {
     .from("orders")
     .select("buyer_name, buyer_email")
     .eq("event_id", eventId)
-    .eq("status", "paid")
+    .in("status", ["paid", "completed"])
     .limit(2000);
 
   if (!orders?.length) {
