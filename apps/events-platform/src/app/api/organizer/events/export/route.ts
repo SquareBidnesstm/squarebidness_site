@@ -25,7 +25,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  // Fetch all tickets with order info
+  // Fetch tickets — cap at 10 000 rows to prevent OOM on very large events.
+  // For events exceeding this, paginated export can be added in a future iteration.
   const { data: tickets } = await supabaseServer
     .from("tickets")
     .select(`
@@ -34,7 +35,8 @@ export async function GET(req: NextRequest) {
       orders ( order_code, buyer_phone, total, created_at, ref_code )
     `)
     .eq("event_id", eventId)
-    .order("created_at", { ascending: true });
+    .order("created_at", { ascending: true })
+    .limit(10000);
 
   const rows = tickets ?? [];
 

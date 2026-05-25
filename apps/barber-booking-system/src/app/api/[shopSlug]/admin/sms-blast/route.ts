@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../../../lib/supabase/server";
 import { verifyAdminSession } from "../../../../../lib/auth";
-import { normalizePhone } from "../../../../../lib/utils";
+import { normalizePhone, checkRateLimit, recordFailedAttempt } from "../../../../../lib/utils";
 import { isSmsOptedOut } from "../../../../../lib/sms-opt-out";
 
 export async function POST(
@@ -16,6 +16,19 @@ export async function POST(
   const { data: shop } = await supabaseServer
     .from("shops").select("id, name").eq("slug", shopSlug).eq("active", true).single();
   if (!shop) return NextResponse.json({ ok: false, error: "Shop not found" }, { status: 404 });
+
+  // Per-shop rate limit: 1 blast per 15 minutes to prevent client spam
+  const blastKey = `sms_blast:${shop.id}`;
+  const { limited, retryAfterSeconds } = await checkRateLimit(blastKey, 1);
+  if (limited) {
+    const mins = Math.ceil(retryAfterSeconds / 60);
+    return NextResponse.json(
+      { ok: false, error: `SMS blast already sent recently. Try again in ${mins} minute${mins !== 1 ? "s" : ""}.` },
+      { status: 429 }
+    );
+  }
+  // Record the attempt immediately so concurrent requests are also blocked
+  recordFailedAttempt(blastKey);
 
   const body = await req.json().catch(() => ({}));
   const { message, audience } = body as {

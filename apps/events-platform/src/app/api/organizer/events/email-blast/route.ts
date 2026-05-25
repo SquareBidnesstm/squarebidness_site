@@ -37,12 +37,13 @@ export async function POST(req: NextRequest) {
     .single();
   if (!event) return NextResponse.json({ error: "Event not found" }, { status: 404 });
 
-  // Fetch unique paid buyer emails
+  // Fetch unique paid buyer emails — cap at 2000 (matches sendEventBlast MAX_RECIPIENTS)
   const { data: orders } = await supabaseServer
     .from("orders")
     .select("buyer_name, buyer_email")
     .eq("event_id", eventId)
-    .eq("status", "paid");
+    .eq("status", "paid")
+    .limit(2000);
 
   if (!orders?.length) {
     return NextResponse.json({ sent: 0 });

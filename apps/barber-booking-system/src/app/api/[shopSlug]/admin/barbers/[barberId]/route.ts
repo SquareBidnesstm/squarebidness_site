@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../../../../lib/supabase/server";
 import { verifyAdminSession } from "../../../../../../lib/auth";
+import { normalizePhone } from "../../../../../../lib/utils";
 
 export async function PATCH(
   req: NextRequest,
@@ -30,7 +31,11 @@ export async function PATCH(
   if (body.display_name !== undefined) updates.display_name = body.display_name;
   if (body.role !== undefined) updates.role = body.role;
   if (body.active !== undefined) updates.active = body.active;
-  if (body.phone !== undefined) updates.phone = body.phone;
+  if (body.phone !== undefined) {
+    // Normalize to E.164 so Twilio SMS delivery works reliably
+    const normalized = normalizePhone(String(body.phone ?? ""));
+    updates.phone = normalized ?? body.phone; // fall back to raw value if normalization fails
+  }
   if (body.special_sessions_enabled !== undefined) updates.special_sessions_enabled = body.special_sessions_enabled;
   if (body.special_sessions_price_cents !== undefined) updates.special_sessions_price_cents = body.special_sessions_price_cents;
 

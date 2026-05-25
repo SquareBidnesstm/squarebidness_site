@@ -115,6 +115,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: "Invalid slug." }, { status: 400 });
     }
 
+    // Block slugs that conflict with built-in app routes
+    const RESERVED_SLUGS = new Set([
+      "admin", "book", "onboard", "login", "api", "_next",
+      "platform", "favicon.ico", "cancel", "reschedule", "book",
+    ]);
+    if (RESERVED_SLUGS.has(cleanSlug)) {
+      return NextResponse.json(
+        { ok: false, error: `"/${cleanSlug}" is a reserved path. Please choose a different slug.` },
+        { status: 400 }
+      );
+    }
+
     const { data: existing } = await supabaseServer
       .from("shops")
       .select("id")

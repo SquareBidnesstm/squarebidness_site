@@ -21,24 +21,31 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Helper: decrement quantity_sold for tier selections stored in metadata ──
+  // Retries up to 3 times on optimistic lock conflict (another request updated
+  // quantity_sold between our SELECT and UPDATE).
   async function decrementTierSelections(tierSelectionsJson: string | null | undefined) {
     if (!tierSelectionsJson) return;
     let selections: { tierId: string; qty: number }[] = [];
     try { selections = JSON.parse(tierSelectionsJson); } catch { return; }
     for (const { tierId, qty } of selections) {
-      const { data: tierData } = await supabaseServer
-        .from("ticket_tiers")
-        .select("quantity_sold")
-        .eq("id", tierId)
-        .single();
-      if (!tierData) continue;
-      const newSold = Math.max(0, tierData.quantity_sold - qty);
-      // Optimistic lock: only decrement if quantity_sold hasn't changed under us
-      await supabaseServer
-        .from("ticket_tiers")
-        .update({ quantity_sold: newSold })
-        .eq("id", tierId)
-        .eq("quantity_sold", tierData.quantity_sold);
+      let retries = 0;
+      while (retries < 3) {
+        const { data: tierData } = await supabaseServer
+          .from("ticket_tiers")
+          .select("quantity_sold")
+          .eq("id", tierId)
+          .single();
+        if (!tierData) break;
+        const newSold = Math.max(0, tierData.quantity_sold - qty);
+        const { data: updated } = await supabaseServer
+          .from("ticket_tiers")
+          .update({ quantity_sold: newSold })
+          .eq("id", tierId)
+          .eq("quantity_sold", tierData.quantity_sold) // optimistic lock
+          .select("id");
+        if (updated && updated.length > 0) break; // success
+        retries++; // lock conflict — re-read and retry
+      }
     }
   }
 
