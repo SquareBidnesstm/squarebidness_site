@@ -1090,8 +1090,12 @@ export default function AdminPage() {
           onCreated={(b) => {
             setShowWalkIn(false);
             setWalkInSuccess(b);
-            // Reload bookings to include the new walk-in
-            fetch(`/api/${shopSlug}/admin/bookings?page=1`, { cache: "no-store" })
+            // Reload bookings with active date/barber filters so the list stays
+            // consistent with whatever the admin was viewing before the walk-in
+            const walkinParams = new URLSearchParams({ page: "1" });
+            if (dateFrom) walkinParams.set("date_from", dateFrom);
+            if (dateTo) walkinParams.set("date_to", dateTo);
+            fetch(`/api/${shopSlug}/admin/bookings?${walkinParams.toString()}`, { cache: "no-store" })
               .then(r => r.json())
               .then(data => {
                 if (data.ok) {

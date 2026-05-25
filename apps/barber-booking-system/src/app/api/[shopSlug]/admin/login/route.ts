@@ -53,7 +53,16 @@ export async function POST(
     );
   }
 
-  const sessionToken = await computeSessionToken(shopSlug);
+  let sessionToken: string;
+  try {
+    sessionToken = await computeSessionToken(shopSlug);
+  } catch (err) {
+    console.error("[admin/login] computeSessionToken failed — APP_SECRET likely missing:", err);
+    return NextResponse.json(
+      { ok: false, error: "Server misconfiguration. Contact the platform admin." },
+      { status: 500 }
+    );
+  }
   const cookieName = sessionCookieName(shopSlug);
 
   const res = NextResponse.json({ ok: true });

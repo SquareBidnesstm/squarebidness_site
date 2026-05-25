@@ -84,15 +84,28 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Transfer email must be different from the current holder." }, { status: 400 });
   }
 
-  // Generate new QR for the new owner (invalidates old QR implicitly since check-in reads ticket_code)
-  const newQr = await generateQRDataURL(ticket.ticket_code);
+  // Generate a brand-new ticket_code and QR for the new owner.
+  // The old ticket_code (and QR) must be invalidated — generating a new code means
+  // the original holder's QR can no longer scan successfully at the door.
+  let newTicketCode = "";
+  let newQr = "";
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const candidate = `TKT-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+    const { data: existing } = await supabaseServer
+      .from("tickets").select("id").eq("ticket_code", candidate).maybeSingle();
+    if (!existing) { newTicketCode = candidate; break; }
+  }
+  if (!newTicketCode) {
+    return NextResponse.json({ error: "Could not generate a unique ticket code. Please try again." }, { status: 500 });
+  }
+  newQr = await generateQRDataURL(newTicketCode);
 
   const originalEmail = ticket.buyer_email;
   const originalName = ticket.buyer_name;
 
   await supabaseServer
     .from("tickets")
-    .update({ buyer_name: cleanName, buyer_email: cleanEmail, qr_code: newQr })
+    .update({ ticket_code: newTicketCode, buyer_name: cleanName, buyer_email: cleanEmail, qr_code: newQr })
     .eq("id", ticket.id);
 
   // Audit log — non-blocking, failure is acceptable
@@ -111,16 +124,16 @@ export async function POST(req: NextRequest) {
     originalName,
     newName: cleanName,
     newEmail: cleanEmail,
-    ticketCode: ticket.ticket_code,
+    ticketCode: newTicketCode,
     tierName: ticket.tier_name ?? "Ticket",
     eventTitle,
   }).catch(() => {});
 
-  // Notify the new holder with their ticket code and QR code — non-blocking
+  // Notify the new holder with their new ticket code and QR — old code is now invalid
   sendTicketTransferReceived({
     newName: cleanName,
     newEmail: cleanEmail,
-    ticketCode: ticket.ticket_code,
+    ticketCode: newTicketCode,
     tierName: ticket.tier_name ?? "Ticket",
     eventTitle,
     qrDataUrl: newQr,

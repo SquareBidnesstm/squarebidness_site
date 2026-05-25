@@ -176,6 +176,26 @@ export async function hashPin(pin: string): Promise<{ hash: string; salt: string
   return { hash, salt };
 }
 
+// ---------------------------------------------------------------------------
+// CSRF origin check — rejects requests from disallowed origins.
+// Used on unauthenticated write endpoints (booking create, deposit, etc.)
+// ---------------------------------------------------------------------------
+const ALLOWED_BOOKING_ORIGINS = new Set([
+  "https://booking.squarebidness.com",
+  ...(process.env.NODE_ENV !== "production" ? ["http://localhost:3000", "http://localhost:3001"] : []),
+]);
+
+export function isSafeOrigin(req: Request): boolean {
+  const origin = req.headers.get("origin");
+  const referer = req.headers.get("referer");
+  if (origin) return ALLOWED_BOOKING_ORIGINS.has(origin);
+  if (referer) {
+    try { return ALLOWED_BOOKING_ORIGINS.has(new URL(referer).origin); } catch { return false; }
+  }
+  // No Origin/Referer — allow server-to-server requests (curl, webhooks, etc.)
+  return true;
+}
+
 // Returns true if pin matches stored hash/salt.
 // Also handles legacy plaintext PINs for migration (returns true + sets needsRehash).
 export async function verifyPin(

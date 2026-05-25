@@ -101,6 +101,16 @@ export async function POST(req: Request) {
       );
     }
 
+    // Per-email rate limit: 3 signup attempts per email per 15 min (defends against
+    // inbox-flooding a target address from rotating IPs)
+    recordAttempt(`org_signup:email:${email}`);
+    const emailRl = await checkRateLimit(`org_signup:email:${email}`, 3);
+    if (emailRl.limited) {
+      return NextResponse.redirect(
+        new URL("/organizer/signup?error=too_many_attempts", req.url)
+      );
+    }
+
     // Check for existing account
     const { data: existing } = await supabaseServer
       .from("organizers")
@@ -128,7 +138,16 @@ export async function POST(req: Request) {
 
     const passwordHash = await hashPassword(password);
 
-    const verificationToken = crypto.randomUUID();
+    // Generate raw token for the email link, store only the SHA-256 hash in DB.
+    // Consistent with how reset_token is handled — limits DB leak exposure.
+    const rawVerificationToken = crypto.randomUUID();
+    const verificationTokenHashBuf = await crypto.subtle.digest(
+      "SHA-256",
+      new TextEncoder().encode(rawVerificationToken)
+    );
+    const verificationTokenHash = Array.from(new Uint8Array(verificationTokenHashBuf))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
 
     const { data: organizer, error } = await supabaseServer
       .from("organizers")
@@ -141,7 +160,7 @@ export async function POST(req: Request) {
         stripe_onboarding_complete: false,
         active: false,
         email_verified: false,
-        verification_token: verificationToken,
+        verification_token: verificationTokenHash,
       })
       .select("slug")
       .single();
@@ -164,7 +183,7 @@ export async function POST(req: Request) {
     if (!process.env.RESEND_API_KEY) {
       console.warn("[signup] RESEND_API_KEY not set — verification email skipped for", email);
     } else {
-      const verifyUrl = `${PLATFORM_URL}/api/organizer/verify-email?token=${verificationToken}`;
+      const verifyUrl = `${PLATFORM_URL}/api/organizer/verify-email?token=${rawVerificationToken}`;
       await resend.emails.send({
         from: "SB Events <noreply@squarebidness.com>",
         to: email,

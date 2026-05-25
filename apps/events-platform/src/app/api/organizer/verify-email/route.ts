@@ -7,12 +7,18 @@ export async function GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get("token");
   if (!token) return NextResponse.redirect(new URL("/organizer/login?error=invalid_token", req.url));
 
+  // Hash the raw token from the URL — DB stores only the hash (consistent with reset_token)
+  const hashBuf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(token));
+  const tokenHash = Array.from(new Uint8Array(hashBuf))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+
   // Use maybeSingle so a missing row (token not found, or already verified)
   // returns null instead of throwing PGRST116 into Supabase error logs.
   const { data: organizer } = await supabaseServer
     .from("organizers")
     .select("id, name, email, email_verified")
-    .eq("verification_token", token)
+    .eq("verification_token", tokenHash)
     .maybeSingle();
 
   if (!organizer) {
