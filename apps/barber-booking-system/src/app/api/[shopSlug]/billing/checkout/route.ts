@@ -41,11 +41,14 @@ export async function POST(
   }
 
   const body = await req.json().catch(() => ({}));
-  const plan: "solo" | "pro" = body.plan === "solo" ? "solo" : "pro";
+  const plan: "solo" | "pro" | "enterprise" =
+    body.plan === "solo" ? "solo" : body.plan === "enterprise" ? "enterprise" : "pro";
 
   const priceId =
     plan === "solo"
       ? process.env.STRIPE_SOLO_PRICE_ID!
+      : plan === "enterprise"
+      ? process.env.STRIPE_ENTERPRISE_PRICE_ID!
       : process.env.STRIPE_PRO_PRICE_ID!;
 
   if (!priceId) {

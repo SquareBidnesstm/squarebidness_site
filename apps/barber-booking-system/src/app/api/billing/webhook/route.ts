@@ -210,7 +210,8 @@ export async function POST(req: NextRequest) {
         const subscriptionId = session.subscription as string;
         if (!shopId) break;
 
-        const plan = session.metadata?.plan === "solo" ? "solo" : "pro";
+        const rawPlan = session.metadata?.plan;
+        const plan = rawPlan === "solo" ? "solo" : rawPlan === "enterprise" ? "enterprise" : "pro";
 
         await supabaseServer.from("subscriptions").upsert(
           {

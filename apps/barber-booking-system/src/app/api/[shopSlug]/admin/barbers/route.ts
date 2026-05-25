@@ -73,7 +73,7 @@ export async function GET(
     .maybeSingle();
 
   const activePlan = sub?.status === "active" ? sub?.plan : "free";
-  const defaultLimit = activePlan === "pro" ? 10 : activePlan === "solo" ? 1 : 0;
+  const defaultLimit = activePlan === "enterprise" ? 10 : activePlan === "pro" ? 5 : activePlan === "solo" ? 1 : 0;
   const customLimit = (limitSetting?.value_json as { limit?: number } | null)?.limit;
   const barberLimit = customLimit ?? defaultLimit;
 
@@ -122,7 +122,7 @@ export async function POST(
     .maybeSingle();
 
   const activePlan = sub?.status === "active" ? sub?.plan : "free";
-  const defaultLimit = activePlan === "pro" ? 10 : activePlan === "solo" ? 1 : 0;
+  const defaultLimit = activePlan === "enterprise" ? 10 : activePlan === "pro" ? 5 : activePlan === "solo" ? 1 : 0;
   const customLimit = (limitSetting?.value_json as { limit?: number } | null)?.limit;
   const barberLimit = customLimit ?? defaultLimit;
 
