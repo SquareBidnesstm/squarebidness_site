@@ -288,16 +288,23 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Track platform payout — use the already-retrieved paymentIntent; wrap in try-catch
-    // so a transient error here does not prevent the webhook from returning 200
+    // Track platform payout — idempotency guard: only insert if no row exists for this order.
+    // Without this guard a Stripe webhook retry would create a duplicate payout row.
     try {
       if (paymentIntent && paymentIntent.application_fee_amount && paymentIntent.application_fee_amount > 0) {
-        await supabaseServer.from("platform_payouts").insert({
-          order_id: orderId,
-          amount: (paymentIntent.application_fee_amount / 100).toFixed(2),
-          amount_cents: paymentIntent.application_fee_amount,
-          status: "paid",
-        });
+        const { data: existingPayout } = await supabaseServer
+          .from("platform_payouts")
+          .select("id")
+          .eq("order_id", orderId)
+          .maybeSingle();
+        if (!existingPayout) {
+          await supabaseServer.from("platform_payouts").insert({
+            order_id: orderId,
+            amount: (paymentIntent.application_fee_amount / 100).toFixed(2),
+            amount_cents: paymentIntent.application_fee_amount,
+            status: "paid",
+          });
+        }
       }
     } catch (err) {
       console.error("Failed to insert platform_payouts record:", err);
@@ -367,6 +374,32 @@ export async function POST(req: NextRequest) {
         ticketCount: totalTickets,
         total: orderTotal,
       }).catch((err) => console.error("Organizer SMS error:", err));
+    }
+  }
+
+  // ── charge.refunded: mark order + tickets as refunded ────────────────────────
+  // Fires when a refund is created via Stripe dashboard or API (including organizer-initiated).
+  // This ensures DB state stays in sync with Stripe even if the refund happens outside the app.
+  if (event.type === "charge.refunded") {
+    const charge = event.data.object as Stripe.Charge;
+    const piId = typeof charge.payment_intent === "string" ? charge.payment_intent : null;
+    if (piId) {
+      const { data: refundedOrder } = await supabaseServer
+        .from("orders")
+        .update({ status: "refunded" })
+        .eq("stripe_payment_intent_id", piId)
+        .in("status", ["paid", "completed"]) // idempotency: skip if already refunded/cancelled
+        .select("id")
+        .single();
+
+      if (refundedOrder) {
+        // Mark all valid tickets on this order as refunded
+        await supabaseServer
+          .from("tickets")
+          .update({ status: "refunded" })
+          .eq("order_id", refundedOrder.id)
+          .in("status", ["valid", "checked_in"]);
+      }
     }
   }
 

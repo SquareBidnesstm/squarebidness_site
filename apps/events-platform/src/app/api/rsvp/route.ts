@@ -99,15 +99,18 @@ export async function POST(req: NextRequest) {
   // before issuing tickets. Collisions are caught by the UNIQUE constraint on order_code.
   const orderCode = `RSV-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`;
 
-  // Create order
+  // Create order — organizer_id is NOT NULL in schema, must be included
   const { data: order, error: orderErr } = await supabaseServer
     .from("orders")
     .insert({
       event_id: eventId,
+      organizer_id: event.organizer_id,
       order_code: orderCode,
       buyer_name: name.trim(),
       buyer_email: email.trim().toLowerCase(),
       buyer_phone: phone?.trim() || null,
+      subtotal: 0,
+      platform_fee: 0,
       total: 0,
       status: "paid",
       ref_code: refCode?.trim() || null,

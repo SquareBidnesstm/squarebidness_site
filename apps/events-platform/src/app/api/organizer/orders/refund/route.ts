@@ -99,19 +99,19 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // Mark order cancelled
+  // Mark order refunded (not cancelled — a refund is a distinct outcome from a cancellation)
   await supabaseServer
     .from("orders")
-    .update({ status: "cancelled" })
+    .update({ status: "refunded" })
     .eq("id", orderId);
 
-  // Mark all tickets for this order cancelled.
+  // Mark all tickets for this order refunded.
   // NOTE: trg_decrement_quantity_sold fires automatically on each ticket row update
-  // (status valid → cancelled), so we must NOT also decrement manually — that would
+  // (status valid → refunded), so we must NOT also decrement manually — that would
   // double-count and make cancelled capacity appear twice as large.
   const { data: cancelledTickets } = await supabaseServer
     .from("tickets")
-    .update({ status: "cancelled" })
+    .update({ status: "refunded" })
     .eq("order_id", orderId)
     .select("id, tier_id");
 

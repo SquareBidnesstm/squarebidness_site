@@ -424,7 +424,11 @@ $$;
 CREATE OR REPLACE FUNCTION public.decrement_tier_quantity_sold()
 RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
-  IF NEW.status IN ('cancelled', 'refunded') AND OLD.status = 'valid' THEN
+  -- Decrement when a ticket transitions from an active state (valid OR checked_in)
+  -- to cancelled/refunded. Without 'checked_in' here, scanned tickets that are later
+  -- refunded would never free their capacity slot (migration 011).
+  IF NEW.status IN ('cancelled', 'refunded')
+     AND OLD.status IN ('valid', 'checked_in') THEN
     UPDATE public.ticket_tiers
     SET quantity_sold = GREATEST(quantity_sold - 1, 0)
     WHERE id = NEW.tier_id;

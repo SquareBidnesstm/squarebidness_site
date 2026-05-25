@@ -213,8 +213,14 @@ export async function POST(req: NextRequest) {
 
   // Generate order code inline (not via DB function): the DB generate_order_code()
   // function requires a round-trip before creating the Stripe session, adding latency.
-  // Collisions are extremely unlikely and caught by the UNIQUE constraint on order_code.
-  const orderCode = `SBE-${Date.now().toString(36).toUpperCase()}`;
+  // Collisions are caught by the UNIQUE constraint on order_code. The random suffix
+  // makes concurrent checkout collisions astronomically unlikely.
+  const orderCode = `SBE-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`;
+
+  // Subtotal before platform fee line item was added
+  const subtotalCentsBeforeFee = lineItems
+    .filter((li: any) => li.price_data.product_data.name !== "Square Bidness Platform Fee")
+    .reduce((s: number, li: any) => s + li.price_data.unit_amount * (li.quantity ?? 1), 0);
 
   const { data: order, error: orderError } = await supabaseServer
     .from("orders")
@@ -225,9 +231,11 @@ export async function POST(req: NextRequest) {
       buyer_name: buyerName,
       buyer_email: buyerEmail,
       buyer_phone: buyerPhone,
-      subtotal: lineItems.reduce((s, li) => s + ((li.price_data as any).unit_amount * (li.quantity ?? 1)) / 100, 0),
+      subtotal: subtotalCentsBeforeFee / 100,
       platform_fee: totalPlatformFeeCents / 100,
-      total: lineItems.reduce((s, li) => s + ((li.price_data as any).unit_amount * (li.quantity ?? 1)) / 100, 0),
+      total: lineItems.reduce((s: number, li: any) => s + (li.price_data.unit_amount * (li.quantity ?? 1)) / 100, 0),
+      promo_id: promoId ?? null,
+      promo_discount: discountAmountCents / 100,
       status: "pending",
       ref_code: refCode,
     })
@@ -272,10 +280,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "Could not create payment session. Please try again." }, { status: 500 });
   }
 
-  // Update order with Stripe session ID and promo ID (promo uses incremented at payment completion)
+  // Update order with Stripe session ID (promo_id already set in initial insert above)
   await supabaseServer
     .from("orders")
-    .update({ stripe_session_id: session.id, promo_id: promoId ?? null })
+    .update({ stripe_session_id: session.id })
     .eq("id", order.id);
 
   return NextResponse.redirect(session.url!, { status: 303 });

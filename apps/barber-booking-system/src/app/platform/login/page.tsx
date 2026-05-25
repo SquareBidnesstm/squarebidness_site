@@ -1,13 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 export default function PlatformLoginPage() {
   const [pin, setPin] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const router = useRouter();
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -21,7 +19,8 @@ export default function PlatformLoginPage() {
       });
       const data = await res.json();
       if (data.ok) {
-        router.push("/platform");
+        // Hard redirect so the browser sends the freshly-set cookie in the next request.
+        window.location.href = "/platform";
       } else {
         setError(data.error || "Invalid PIN.");
       }

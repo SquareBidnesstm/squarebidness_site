@@ -16,10 +16,13 @@ import SettingsTab from "./SettingsTab";
 
 type BookingStatus =
   | "pending"
+  | "pending_approval"
   | "confirmed"
   | "completed"
   | "cancelled"
-  | "no_show";
+  | "no_show"
+  | "counter_proposed"
+  | "awaiting_payment";
 
 type AdminBooking = {
   id: string;
@@ -69,18 +72,24 @@ function getTodayString() {
 
 const STATUS_LABELS: Record<BookingStatus, string> = {
   pending: "Pending",
+  pending_approval: "Pending Approval",
   confirmed: "Confirmed",
   completed: "Completed",
   cancelled: "Cancelled",
   no_show: "No Show",
+  counter_proposed: "Counter Proposed",
+  awaiting_payment: "Awaiting Payment",
 };
 
 const STATUS_COLORS: Record<BookingStatus, React.CSSProperties> = {
   pending: { background: "#2b2b00", color: "#e0d000", borderColor: "#4a4a00" },
+  pending_approval: { background: "#2b1800", color: "#ffaa33", borderColor: "#4a2800" },
   confirmed: { background: "#0d2200", color: "#5cd600", borderColor: "#1e4400" },
   completed: { background: "#002233", color: "#4dcfff", borderColor: "#003344" },
   cancelled: { background: "#220000", color: "#ff5555", borderColor: "#440000" },
   no_show: { background: "#1a0a00", color: "#ff9955", borderColor: "#331500" },
+  counter_proposed: { background: "#1a001a", color: "#cc88ff", borderColor: "#330033" },
+  awaiting_payment: { background: "#001a2b", color: "#33aaff", borderColor: "#002233" },
 };
 
 export default function AdminPage() {
@@ -992,6 +1001,9 @@ export default function AdminPage() {
                               "cancelled",
                               "no_show",
                               "pending",
+                              "pending_approval",
+                              "counter_proposed",
+                              "awaiting_payment",
                             ] as BookingStatus[]
                           )
                             .filter((s) => s !== booking.status)

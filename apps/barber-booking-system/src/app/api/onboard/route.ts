@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../lib/supabase/server";
 import { hashPin } from "../../../lib/utils";
+import { sendShopSignupNotification } from "../../../lib/email";
 
 // Protect onboard with a shared platform secret so only the internal
 // onboarding wizard (or Marcus) can create new shops.
@@ -19,6 +20,7 @@ type OnboardPayload = {
   state?: string;
   timezone?: string;
   ownerName?: string;
+  ownerEmail?: string;
   barbers?: { name: string; role: string }[];
   pin?: string;
 };
@@ -92,7 +94,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = (await req.json()) as OnboardPayload;
 
-    const { shopType, shopName, slug, city, state, timezone, ownerName, barbers, pin } = body;
+    const { shopType, shopName, slug, city, state, timezone, ownerName, ownerEmail, barbers, pin } = body;
     const cleanShopType = shopType && SERVICES_BY_TYPE[shopType] ? shopType : "barbershop";
     const DEFAULT_SERVICES = SERVICES_BY_TYPE[cleanShopType];
 
@@ -232,6 +234,17 @@ export async function POST(req: NextRequest) {
       plan: "free",
       status: "free",
     });
+
+    // Fire signup notification (non-blocking — never fails the onboard response)
+    sendShopSignupNotification({
+      shopName: shop.name,
+      shopSlug: shop.slug,
+      ownerName,
+      ownerEmail: ownerEmail?.trim() || null,
+      city,
+      state,
+      shopType: cleanShopType,
+    }).catch((err) => console.error("[onboard] signup notification error:", err));
 
     return NextResponse.json({ ok: true, shopSlug: shop.slug, shopName: shop.name });
   } catch (err) {

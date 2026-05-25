@@ -95,16 +95,16 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      // Mark order cancelled
+      // Mark order refunded if Stripe refund succeeded, cancelled if it was a free order
       await supabaseServer
         .from("orders")
-        .update({ status: "cancelled" })
+        .update({ status: refunded ? "refunded" : "cancelled" })
         .eq("id", order.id);
 
-      // Mark tickets cancelled
+      // Mark tickets refunded/cancelled to match order status
       await supabaseServer
         .from("tickets")
-        .update({ status: "cancelled" })
+        .update({ status: refunded ? "refunded" : "cancelled" })
         .eq("order_id", order.id);
 
       // Email buyer

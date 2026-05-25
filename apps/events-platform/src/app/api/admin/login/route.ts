@@ -63,7 +63,7 @@ export async function POST(req: Request) {
     const res = NextResponse.redirect(new URL("/admin", req.url));
     res.cookies.set("sbe_admin_session", token, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
       maxAge: 60 * 60 * 24 * 30, // 30 days — matches HMAC token expiry window
