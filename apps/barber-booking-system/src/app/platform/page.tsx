@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 type ShopRow = {
   id: string; slug: string; name: string; city: string; state: string;
-  owner_name: string; owner_email?: string; active: boolean; created_at: string;
+  owner_name: string; active: boolean; created_at: string;
   plan: string; subscription_status: string;
   total_bookings: number; total_revenue: number; completed_revenue: number;
 };
@@ -165,10 +165,7 @@ export default function PlatformAdminPage() {
                         <div>{s.name}</div>
                         <div style={{ color: "#444", fontSize: 11, marginTop: 2 }}>/{s.slug}</div>
                       </td>
-                      <td style={{ padding: "13px 12px" }}>
-                        <div style={{ color: "#ccc" }}>{s.owner_name}</div>
-                        {s.owner_email && <div style={{ color: "#444", fontSize: 11, marginTop: 2 }}>{s.owner_email}</div>}
-                      </td>
+                      <td style={{ padding: "13px 12px", color: "#ccc" }}>{s.owner_name}</td>
                       <td style={{ padding: "13px 12px", color: "#777" }}>{s.city}, {s.state}</td>
                       <td style={{ padding: "13px 12px" }}>
                         <span style={{
