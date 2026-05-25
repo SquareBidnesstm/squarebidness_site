@@ -141,11 +141,6 @@ export async function POST(
       return NextResponse.json({ ok: false, error: "Forbidden" }, { status: 403 });
     }
 
-    // CSRF origin check — unauthenticated write endpoint; origin validation is primary CSRF defense
-    if (!isSafeOrigin(req)) {
-      return NextResponse.json({ ok: false, error: "Forbidden" }, { status: 403 });
-    }
-
     // Idempotency: return cached response for duplicate requests within 10 min
     const idempotencyKey = req.headers.get("idempotency-key");
     if (idempotencyKey) {
