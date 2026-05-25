@@ -27,7 +27,16 @@ export async function PATCH(
   const body = await req.json();
   const updates: Record<string, string | boolean> = {};
 
-  if (body.name !== undefined) updates.name = body.name;
+  if (body.name !== undefined) {
+    const trimmedName = String(body.name).trim();
+    if (/\d{7,}/.test(trimmedName) || /^\d+$/.test(trimmedName)) {
+      return NextResponse.json(
+        { ok: false, error: "Name cannot be a phone number. Enter the barber's actual name." },
+        { status: 400 }
+      );
+    }
+    updates.name = trimmedName;
+  }
   if (body.display_name !== undefined) updates.display_name = body.display_name;
   if (body.role !== undefined) updates.role = body.role;
   if (body.active !== undefined) updates.active = body.active;

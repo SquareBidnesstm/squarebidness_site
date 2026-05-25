@@ -153,6 +153,22 @@ export async function POST(
     return NextResponse.json({ ok: false, error: "Name is required." }, { status: 400 });
   }
 
+  // Reject phone numbers entered as names (7+ consecutive digits)
+  if (/\d{7,}/.test(name.trim())) {
+    return NextResponse.json(
+      { ok: false, error: "Name cannot be a phone number. Enter the barber's actual name." },
+      { status: 400 }
+    );
+  }
+
+  // Reject names that are purely numeric
+  if (/^\d+$/.test(name.trim())) {
+    return NextResponse.json(
+      { ok: false, error: "Name must contain letters." },
+      { status: 400 }
+    );
+  }
+
   // Get current max sort_order
   const { data: existing } = await supabaseServer
     .from("barbers")
