@@ -99,9 +99,12 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // ── /api/admin/** → 401 if no valid admin session (skip login) ──────────────
+  // ── /api/admin/** → 401 if no valid admin session (skip login + bearer-auth routes) ──
   if (pathname.startsWith("/api/admin/")) {
-    if (!pathname.startsWith("/api/admin/login")) {
+    // These routes handle their own auth via Bearer token (CRON_SECRET)
+    const BEARER_AUTHED = ["/api/admin/migrate-qr-codes"];
+    const isBearerAuthed = BEARER_AUTHED.some((p) => pathname.startsWith(p));
+    if (!pathname.startsWith("/api/admin/login") && !isBearerAuthed) {
       if (!hasValidAdminSessionCookie(req)) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
