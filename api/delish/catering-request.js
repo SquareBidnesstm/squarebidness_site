@@ -17,10 +17,15 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+const twilioFromNumber =
+  process.env.DELISH_TWILIO_FROM_NUMBER ||
+  process.env.TWILIO_FROM_NUMBER ||
+  "";
+
 const hasTwilio =
   process.env.TWILIO_ACCOUNT_SID &&
   process.env.TWILIO_AUTH_TOKEN &&
-  process.env.DELISH_TWILIO_FROM_NUMBER;
+  twilioFromNumber;
 
 const twilioClient = hasTwilio
   ? twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
@@ -48,6 +53,21 @@ function clean(value) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function getClientIp(req) {
+  const forwarded = req.headers["x-forwarded-for"];
+  const raw = Array.isArray(forwarded) ? forwarded[0] : forwarded;
+  return String(raw || req.socket?.remoteAddress || "unknown")
+    .split(",")[0]
+    .trim();
+}
+
+function isTruthyConsent(value) {
+  return (
+    value === true ||
+    ["yes", "on", "true", "1"].includes(String(value || "").toLowerCase())
+  );
+}
+
 function line(label, value) {
   return `${label}: ${value || "Not provided"}`;
 }
@@ -72,8 +92,9 @@ function normalizePhone(phone) {
     return `+1${digits}`;
   }
 
-  if (String(phone || "").trim().startsWith("+")) {
-    return String(phone).trim();
+  const trimmed = String(phone || "").trim();
+  if (/^\+\d{10,15}$/.test(trimmed)) {
+    return trimmed;
   }
 
   return null;
@@ -108,6 +129,27 @@ export default async function handler(req, res) {
 
     const body = req.body || {};
 
+    if (clean(body.companyWebsite)) {
+      return res.status(200).json({
+        ok: true,
+        message: "Catering request submitted successfully.",
+      });
+    }
+
+    const ip = getClientIp(req);
+    const rateKey = `delish:catering:ratelimit:${ip}`;
+    const requestCount = await redis.incr(rateKey);
+    if (requestCount === 1) {
+      await redis.expire(rateKey, 15 * 60);
+    }
+
+    if (requestCount > 5) {
+      return res.status(429).json({
+        ok: false,
+        error: "Too many catering requests. Please try again later.",
+      });
+    }
+
     if (!isValidPayload(body)) {
       return res.status(400).json({
         ok: false,
@@ -126,8 +168,11 @@ export default async function handler(req, res) {
     const id = crypto.randomUUID();
     const requestNumber = makeRequestNumber();
     const createdAt = new Date().toISOString();
+    const smsConsent = isTruthyConsent(body.smsConsent) ? "yes" : "no";
 
-    const initialStatus = hasTwilio ? "awaiting_sms_confirmation" : "new_request";
+    const initialStatus = hasTwilio && smsConsent === "yes"
+      ? "awaiting_sms_confirmation"
+      : "new_request";
 
     const record = {
       id,
@@ -137,14 +182,14 @@ export default async function handler(req, res) {
       completedAt: "",
       status: initialStatus,
 
-      verified: hasTwilio ? "no" : "unknown",
+      verified: hasTwilio && smsConsent === "yes" ? "no" : "unknown",
       verifiedAt: "",
       smsSentAt: "",
 
       customerName: clean(body.fullName),
       phone: normalizedPhone,
       email: clean(body.email),
-      smsConsent: "yes",
+      smsConsent,
 
       eventType: clean(body.eventType),
       eventDate: clean(body.eventDate),
@@ -181,8 +226,9 @@ export default async function handler(req, res) {
 
     await redis.set(`delish:catering:${id}`, record);
     await redis.lpush("delish:catering:list", id);
+    await redis.ltrim("delish:catering:list", 0, 199);
 
-    if (hasTwilio) {
+    if (hasTwilio && smsConsent === "yes") {
       await redis.set(`delish:catering:phone:${normalizedPhone}`, id);
     }
 
@@ -239,7 +285,7 @@ ${line("Submitted At", record.submittedAt)}
       try {
         await twilioClient.messages.create({
           body: `New Delish catering request ${requestNumber} from ${record.customerName} for ${record.eventDate}${record.eventTime ? ` at ${record.eventTime}` : ""}.`,
-          from: process.env.DELISH_TWILIO_FROM_NUMBER,
+          from: twilioFromNumber,
           to: process.env.TWILIO_TO_NUMBER,
         });
       } catch (smsError) {
@@ -247,11 +293,11 @@ ${line("Submitted At", record.submittedAt)}
       }
     }
 
-    if (twilioClient) {
+    if (twilioClient && smsConsent === "yes") {
       try {
         await twilioClient.messages.create({
           body: "Hey, confirming your catering request with Delish — reply YES to confirm your request.",
-          from: process.env.TWILIO_FROM_NUMBER,
+          from: twilioFromNumber,
           to: normalizedPhone,
         });
 

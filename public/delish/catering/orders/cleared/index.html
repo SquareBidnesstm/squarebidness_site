@@ -273,7 +273,7 @@
         <div class="eyebrow"><span class="dot"></span>Delish Catering Archive</div>
         <h1>Cleared Requests</h1>
         <p class="sub">
-          Requests cleared from the active catering screen are kept here so they can be restored if needed.
+          Requests cleared or completed from the active catering screen are kept here so they can be restored if needed.
         </p>
       </div>
       <button id="refreshBtn" class="refresh-btn" type="button">Refresh</button>
@@ -285,7 +285,7 @@
       <a href="/delish/catering/orders/cleared/" class="cross-link active">Cleared Requests</a>
     </div>
 
-    <div id="statusBar" class="status-bar">Loading cleared catering requests...</div>
+    <div id="statusBar" class="status-bar">Loading cleared and completed catering requests...</div>
     <section id="orders" class="orders" aria-live="polite"></section>
   </div>
 
@@ -441,7 +441,7 @@
       const ordersEl = document.getElementById("orders");
       const statusBar = document.getElementById("statusBar");
 
-      statusBar.textContent = "Loading cleared catering requests...";
+      statusBar.textContent = "Loading cleared and completed catering requests...";
       ordersEl.innerHTML = "";
 
       try {
@@ -460,12 +460,12 @@
         const orders = Array.isArray(data.orders) ? data.orders : [];
 
         if (!orders.length) {
-          statusBar.textContent = "No cleared catering requests right now.";
-          ordersEl.innerHTML = `<div class="empty">No catering requests have been cleared.</div>`;
+          statusBar.textContent = "No cleared or completed catering requests right now.";
+          ordersEl.innerHTML = `<div class="empty">No catering requests have been cleared or completed.</div>`;
           return;
         }
 
-        statusBar.textContent = `${orders.length} cleared request${orders.length === 1 ? "" : "s"} loaded.`;
+        statusBar.textContent = `${orders.length} archived request${orders.length === 1 ? "" : "s"} loaded.`;
         ordersEl.innerHTML = orders.map(renderOrderCard).join("");
       } catch (error) {
         statusBar.textContent = error.message || "Unable to load cleared requests right now.";

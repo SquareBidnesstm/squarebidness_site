@@ -11,7 +11,11 @@ const ACTIVE_STATUSES = new Set([
   "new_request",
   "awaiting_sms_confirmation",
   "verified",
+  "deposit_sent",
+  "deposit_paid",
 ]);
+
+const ARCHIVE_STATUSES = new Set(["cleared", "completed"]);
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
@@ -46,7 +50,7 @@ export default async function handler(req, res) {
     const orders = (records || []).filter(Boolean);
     const filtered =
       view === "cleared"
-        ? orders.filter((r) => r.status === "cleared")
+        ? orders.filter((r) => ARCHIVE_STATUSES.has(r.status))
         : orders.filter((r) => ACTIVE_STATUSES.has(r.status));
 
     return res.status(200).json({

@@ -49,6 +49,7 @@ export default async function handler(req, res) {
     if (action === "restore") {
       const restoredStatus =
         existing.previousStatus && existing.previousStatus !== "cleared"
+          && existing.previousStatus !== "completed"
           ? existing.previousStatus
           : RESTORE_FALLBACK_STATUS;
 
@@ -56,6 +57,14 @@ export default async function handler(req, res) {
         ...existing,
         status: restoredStatus,
         restoredAt: now,
+        updatedAt: now,
+      };
+    } else if (action === "complete") {
+      updated = {
+        ...existing,
+        previousStatus: existing.status || RESTORE_FALLBACK_STATUS,
+        status: "completed",
+        completedAt: now,
         updatedAt: now,
       };
     } else {

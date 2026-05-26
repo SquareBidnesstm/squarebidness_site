@@ -22,10 +22,15 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+const twilioFromNumber =
+  process.env.DELISH_TWILIO_FROM_NUMBER ||
+  process.env.TWILIO_FROM_NUMBER ||
+  "";
+
 const hasTwilio =
   process.env.TWILIO_ACCOUNT_SID &&
   process.env.TWILIO_AUTH_TOKEN &&
-  process.env.TWILIO_FROM_NUMBER;
+  twilioFromNumber;
 
 const twilioClient = hasTwilio
   ? twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
@@ -180,11 +185,11 @@ Delish Catering
     }
 
     // 📱 SMS (optional)
-    if (twilioClient && existing.phone) {
+    if (twilioClient && existing.phone && existing.smsConsent === "yes") {
       try {
         await twilioClient.messages.create({
           body: `Delish Catering: Your request ${existing.requestNumber} is approved. Pay your 25% deposit of $${updated.depositAmount} here: ${session.url}`,
-          from: process.env.TWILIO_FROM_NUMBER,
+          from: twilioFromNumber,
           to: existing.phone,
         });
       } catch (smsError) {

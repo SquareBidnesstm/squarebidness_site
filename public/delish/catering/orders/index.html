@@ -347,7 +347,23 @@
       cursor:pointer;
     }
 
+    .complete-btn{
+      min-height:48px;
+      padding:0 18px;
+      border:none;
+      border-radius:999px;
+      background:#204b2d;
+      color:#dff7e6;
+      font-weight:800;
+      cursor:pointer;
+    }
+
     .clear-btn[disabled]{
+      opacity:.6;
+      cursor:not-allowed;
+    }
+
+    .complete-btn[disabled]{
       opacity:.6;
       cursor:not-allowed;
     }
@@ -423,11 +439,11 @@
         <div id="summaryNew" class="summary-value">—</div>
       </div>
       <div class="summary-card">
-        <div class="summary-label">Awaiting SMS</div>
+        <div class="summary-label">Deposit Sent</div>
         <div id="summarySent" class="summary-value">—</div>
       </div>
       <div class="summary-card">
-        <div class="summary-label">Verified</div>
+        <div class="summary-label">Deposit Paid</div>
         <div id="summaryPaid" class="summary-value">—</div>
       </div>
     </section>
@@ -504,9 +520,9 @@
       document.getElementById("summaryNew").textContent =
         orders.filter((o) => o.status === "new_request").length;
       document.getElementById("summarySent").textContent =
-        orders.filter((o) => o.status === "awaiting_sms_confirmation").length;
+        orders.filter((o) => o.status === "deposit_sent").length;
       document.getElementById("summaryPaid").textContent =
-        orders.filter((o) => o.status === "verified").length;
+        orders.filter((o) => o.status === "deposit_paid").length;
     }
 
     function formatMoney(value) {
@@ -599,6 +615,40 @@
         await loadOrders();
       } catch (error) {
         if (status) status.textContent = error.message || "Unable to clear request.";
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    async function completeCatering(id) {
+      const status = document.querySelector(`[data-approve-status="${id}"]`);
+      const btn = document.querySelector(`[data-complete-btn="${id}"]`);
+      const confirmed = window.confirm("Mark this catering request complete?");
+
+      if (!confirmed) {
+        if (status) status.textContent = "Complete cancelled.";
+        return;
+      }
+
+      if (btn) btn.disabled = true;
+      if (status) status.textContent = "Marking complete...";
+
+      try {
+        const res = await fetch("/api/delish/clear-catering-request/", {
+          method: "POST",
+          headers: operatorHeaders({ "Content-Type": "application/json" }),
+          body: JSON.stringify({ id, action: "complete" })
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || "Failed to complete catering request.");
+        }
+
+        if (status) status.textContent = "Request completed.";
+        await loadOrders();
+      } catch (error) {
+        if (status) status.textContent = error.message || "Unable to complete request.";
         if (btn) btn.disabled = false;
       }
     }
@@ -700,20 +750,30 @@
           <div class="mini-status" data-deposit-preview="${escapeHtml(order.id)}">
             ${depositPreview ? `25% deposit will be $${escapeHtml(depositPreview)}.` : "Enter the full catering total. Deposit is calculated automatically."}
           </div>
-          <button
-            class="clear-btn"
-            type="button"
-            data-clear-btn="${escapeHtml(order.id)}"
-            onclick="clearCatering('${escapeHtml(order.id)}')"
-          >
-            Clear Request
-          </button>
         ` : `
           <div class="mini-status">
             ${order.status === "deposit_sent" ? "Deposit sent" : ""}
             ${order.status === "deposit_paid" ? "Deposit paid" : ""}
           </div>
         `}
+        ${order.status === "deposit_paid" ? `
+          <button
+            class="complete-btn"
+            type="button"
+            data-complete-btn="${escapeHtml(order.id)}"
+            onclick="completeCatering('${escapeHtml(order.id)}')"
+          >
+            Mark Complete
+          </button>
+        ` : ""}
+        <button
+          class="clear-btn"
+          type="button"
+          data-clear-btn="${escapeHtml(order.id)}"
+          onclick="clearCatering('${escapeHtml(order.id)}')"
+        >
+          Clear Request
+        </button>
         <div class="mini-status" data-approve-status="${escapeHtml(order.id)}"></div>
       </div>
 
