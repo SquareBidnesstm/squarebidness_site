@@ -3,11 +3,11 @@ export async function sendInstallSms({ to, body }) {
   const token = process.env.TWILIO_AUTH_TOKEN;
   const from = process.env.SB_TWILIO_FROM_NUMBER;
 
-  if (!sid || !token || !from) {
+  if (!sid || !token || !from || !to) {
     return {
       ok: false,
       skipped: true,
-      reason: "Missing Twilio env vars"
+      reason: "Missing Twilio env vars or alert recipient"
     };
   }
 

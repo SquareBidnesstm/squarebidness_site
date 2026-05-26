@@ -123,11 +123,77 @@
       color:var(--text);
       border:1px solid var(--line);
     }
+    .btn-flash{
+      background:#d93636;
+      color:#fff;
+      border:1px solid rgba(255,255,255,.12);
+    }
     .actions{
       display:flex;
       gap:10px;
       flex-wrap:wrap;
       margin-top:14px;
+    }
+    .actions-spacer{
+      flex:1 1 22px;
+    }
+    .admin-hub{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+      margin-top:16px;
+    }
+    .admin-link{
+      min-height:86px;
+      padding:16px;
+      border-radius:18px;
+      border:1px solid var(--line);
+      background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.018));
+      color:var(--text);
+      text-decoration:none;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      gap:5px;
+    }
+    .admin-link strong{
+      font-size:1.02rem;
+      line-height:1.15;
+    }
+    .admin-link span{
+      color:var(--muted);
+      font-size:.86rem;
+      line-height:1.35;
+    }
+    .admin-link.primary{
+      border-color:rgba(215,174,114,.5);
+      background:linear-gradient(180deg,rgba(215,174,114,.18),rgba(215,174,114,.06));
+    }
+    .control-section{
+      scroll-margin-top:18px;
+    }
+    .section-heading{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:14px;
+    }
+    .section-heading h2{
+      margin-bottom:4px;
+    }
+    .section-kicker{
+      margin:0;
+      color:var(--muted);
+    }
+    .compact-actions{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+      margin-top:12px;
+    }
+    .save-panel{
+      background:linear-gradient(180deg,rgba(24,24,27,.96),rgba(18,18,20,.96));
     }
     .status{
       margin-top:12px;
@@ -208,6 +274,57 @@
       color:#ffe5b8;
     }
     .window-pill.warn::before{ background:#f59e0b; }
+    .labor-control{
+      display:grid;
+      gap:14px;
+    }
+    .labor-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+    }
+    .labor-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-start;
+      max-width:100%;
+    }
+    .labor-actions .button-link,
+    .labor-actions button{
+      min-width:0;
+    }
+    .labor-rate{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 180px;
+      gap:12px;
+      align-items:end;
+    }
+    .labor-rate label{
+      display:block;
+      color:var(--muted);
+      font-size:.82rem;
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      margin-bottom:6px;
+    }
+    .labor-rate input{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:var(--panel2);
+      color:var(--text);
+      padding:13px 14px;
+      font:inherit;
+      font-weight:900;
+    }
+    .labor-rate input:focus{
+      outline:2px solid rgba(215,174,114,.46);
+      outline-offset:2px;
+    }
     .topline{
       display:flex;
       justify-content:space-between;
@@ -257,25 +374,59 @@
   margin-top:3px;
 }
 
-@media (max-width: 800px){
-  .pickup-window-list{
-    grid-template-columns:1fr;
-  }
-}
+    .back-to-top-tab{
+      position:fixed;
+      right:0;
+      bottom:96px;
+      z-index:50;
+      min-height:48px;
+      padding:12px 14px 12px 16px;
+      border-radius:16px 0 0 16px;
+      border:1px solid rgba(215,174,114,.5);
+      border-right:none;
+      background:linear-gradient(180deg,rgba(215,174,114,.96),rgba(185,132,55,.96));
+      color:#181410;
+      font-weight:950;
+      text-decoration:none;
+      box-shadow:0 12px 28px rgba(0,0,0,.36);
+      letter-spacing:.01em;
+    }
+
+    .back-to-top-tab:focus-visible{
+      outline:3px solid rgba(255,255,255,.86);
+      outline-offset:3px;
+    }
+
     @media (max-width: 800px){
-      .row,.item-list,.window-grid{grid-template-columns:1fr}
+      .pickup-window-list{
+        grid-template-columns:1fr;
+      }
+    }
+    @media (max-width: 800px){
+      .row,.item-list,.window-grid,.labor-rate,.admin-hub,.compact-actions{grid-template-columns:1fr}
+      .labor-actions .button-link,
+      .labor-actions button{
+        flex:1 1 100%;
+      }
+      .back-to-top-tab{
+        right:12px;
+        bottom:14px;
+        border-right:1px solid rgba(215,174,114,.5);
+        border-radius:999px;
+      }
     }
   </style>
 </head>
 <body>
+  <a class="back-to-top-tab" href="#top" aria-label="Back to top">Top ↑</a>
   <div class="wrap">
-    <div class="card">
+    <div class="card" id="top">
       <div class="topline">
         <div class="brandRow">
           <img class="brandMark" src="/delish/assets/delish-logo-mark-512.png" alt="Delish logo" loading="eager" decoding="async" />
           <div>
-            <h1>Delish Admin v1</h1>
-            <p>Live menu controls for kitchen-side operators.</p>
+            <h1>Delish Control Center</h1>
+            <p>Kitchen controls, ordering windows, labor, sold-out items, and customer messages.</p>
           </div>
         </div>
         <div class="token-row">
@@ -283,9 +434,116 @@
           <button class="btn-secondary" id="clearTokenBtn">Clear Token</button>
         </div>
       </div>
+
+      <div class="admin-hub" aria-label="Delish admin quick links">
+        <a class="admin-link primary" href="#labor-control">
+          <strong>Labor Control</strong>
+          <span>Timeclock, labor cost, hours, and payroll export.</span>
+        </a>
+        <a class="admin-link" href="#pickup-window-times">
+          <strong>Pickup Window Times</strong>
+          <span>Enable or disable customer pickup windows.</span>
+        </a>
+        <a class="admin-link" href="#section-toggles">
+          <strong>Menu Section Toggles</strong>
+          <span>Lagniappe, drinks, and extra sides on/off.</span>
+        </a>
+        <a class="admin-link" href="#turn-off-items">
+          <strong>Turn Off Items</strong>
+          <span>Hide items completely and block checkout.</span>
+        </a>
+        <a class="admin-link" href="#mark-soldout-items">
+          <strong>Mark Sold Out</strong>
+          <span>Keep items visible but stop new orders.</span>
+        </a>
+        <a class="admin-link" href="#base-item-toggle-control">
+          <strong>Base Item Control</strong>
+          <span>Disable rice, dressing, or mashed potato bases.</span>
+        </a>
+        <a class="admin-link" href="#ordering-window">
+          <strong>Ordering Window</strong>
+          <span>Live open/closed status, health, and operator tools.</span>
+        </a>
+        <a class="admin-link" href="#customer-banner">
+          <strong>Customer Banner</strong>
+          <span>Post the live message shown on the order page.</span>
+        </a>
+      </div>
     </div>
 
-    <div class="card">
+    <div class="card labor-control control-section" id="labor-control">
+      <div class="labor-head">
+        <div>
+          <h2>Labor Control</h2>
+          <p>Track clock-ins, labor hours, estimated labor cost, and payroll-ready exports.</p>
+        </div>
+        <div class="labor-actions">
+          <a class="button-link btn-primary" href="/delish/timeclock/admin/">Open Labor Control</a>
+          <a class="button-link btn-secondary" href="/delish/timeclock/">Open Time Clock</a>
+          <button class="btn-secondary" id="refreshLaborBtn" type="button">Refresh Labor</button>
+        </div>
+      </div>
+
+      <div class="window-grid">
+        <div class="window-panel">
+          <div class="window-label">Active Now</div>
+          <div class="window-value" id="laborActive">Loading</div>
+        </div>
+        <div class="window-panel">
+          <div class="window-label">Today Hours</div>
+          <div class="window-value" id="laborHours">Loading</div>
+        </div>
+        <div class="window-panel">
+          <div class="window-label">Estimated Labor Cost</div>
+          <div class="window-value" id="laborCost">Loading</div>
+        </div>
+        <div class="window-panel">
+          <div class="window-label">Labor % of Sales</div>
+          <div class="window-value" id="laborPercent">Loading</div>
+        </div>
+      </div>
+
+      <div class="labor-rate">
+        <div>
+          <label for="laborRateInput">Average hourly labor rate</label>
+          <p class="muted" style="margin:0;">Local estimate only. Adjust this number on the admin device when wages change.</p>
+        </div>
+        <input id="laborRateInput" type="number" min="0" step="0.25" value="12.00" inputmode="decimal" />
+      </div>
+
+      <div class="labor-rate">
+        <div>
+          <label for="laborManualSalesInput">Manual daily sales fallback</label>
+          <p class="muted" style="margin:0;">Used only if live order sales do not load.</p>
+        </div>
+        <input id="laborManualSalesInput" type="number" min="0" step="0.01" placeholder="Daily sales" inputmode="decimal" />
+      </div>
+
+      <div class="status" id="laborStatusBox">Loading labor control...</div>
+    </div>
+
+    <div class="card control-section" id="pickup-window-times">
+      <div class="section-heading">
+        <div>
+          <h2>Pickup Window Controls</h2>
+          <p class="section-kicker">Checked windows are available to customers. Unchecked windows are hidden from checkout and blocked on the backend.</p>
+        </div>
+        <a class="button-link btn-secondary" href="#top">Top</a>
+      </div>
+
+      <div class="pickup-window-list" id="pickupWindowList">
+        <div class="muted">Loading pickup windows...</div>
+      </div>
+
+      <div class="actions">
+        <button class="btn-primary" id="savePickupWindowsBtn">Save Pickup Windows</button>
+        <button class="btn-secondary" id="reloadPickupWindowsBtn">Reload Pickup Windows</button>
+      </div>
+
+      <div class="status" id="pickupWindowStatusBox">Ready.</div>
+    </div>
+
+    <div class="card control-section" id="ordering-window">
       <div class="topline">
         <div>
           <h2>Ordering Window Checker</h2>
@@ -293,28 +551,14 @@
         </div>
         <div class="actions" style="margin-top:0;">
           <button class="btn-secondary" id="refreshWindowBtn">Refresh Window</button>
+          <a class="button-link btn-secondary" href="/delish/admin/health/">Health Check</a>
           <a class="button-link btn-secondary" href="/delish/operator/">Operator Controls</a>
           <a class="button-link btn-secondary" href="/delish/ready/complete/">Ready Complete</a>
+          <span class="actions-spacer" aria-hidden="true"></span>
+          <a class="button-link btn-primary" href="/delish/admin/add-special-items/">Add Special Items</a>
+          <a class="button-link btn-flash" href="/delish/admin/flashsale/">Flash Sale</a>
         </div>
       </div>
-
-      <div class="card">
-  <h2>Pickup Window Controls</h2>
-  <p class="muted">
-    Checked windows are available to customers. Unchecked windows are hidden from checkout and blocked on the backend.
-  </p>
-
-  <div class="pickup-window-list" id="pickupWindowList">
-    <div class="muted">Loading pickup windows...</div>
-  </div>
-
-  <div class="actions">
-    <button class="btn-primary" id="savePickupWindowsBtn">Save Pickup Windows</button>
-    <button class="btn-secondary" id="reloadPickupWindowsBtn">Reload Pickup Windows</button>
-  </div>
-
-  <div class="status" id="pickupWindowStatusBox">Ready.</div>
-</div>
 
       <div class="window-grid">
         <div class="window-panel">
@@ -337,10 +581,23 @@
 
       <div class="status" id="windowStatusBox">Checking ordering window...</div>
 
+      <div class="actions" aria-label="Ordering mode controls">
+        <button class="btn-primary" id="adminOpenBtn" type="button">Open Now</button>
+        <button class="btn-secondary" id="adminAutoBtn" type="button">Auto Mode</button>
+        <button class="btn-secondary" id="adminPause30Btn" type="button">Pause 30 Min</button>
+        <button class="btn-flash" id="adminCloseTodayBtn" type="button">Closed Today</button>
+      </div>
+
     </div>
 
-    <div class="card">
-      <h2>Sections</h2>
+    <div class="card control-section" id="section-toggles">
+      <div class="section-heading">
+        <div>
+          <h2>Menu Section Toggles</h2>
+          <p class="section-kicker">Fast section-level control. Turn a whole lane on or off.</p>
+        </div>
+        <a class="button-link btn-secondary" href="#top">Top</a>
+      </div>
       <div class="row">
         <div class="toggle">
           <label for="lagniappeToggle">Lagniappe</label>
@@ -357,25 +614,40 @@
       </div>
     </div>
 
-    <div class="card">
+    <div class="card control-section" id="limited-menu-control">
+      <h2>Limited Menu Today</h2>
+      <p class="muted">Use this when today is a one-plate day. It resets daily and checkout blocks regular menu items while active.</p>
+      <div class="row">
+        <div class="toggle">
+          <label for="limitedMenuToggle">Limited Menu</label>
+          <input type="checkbox" id="limitedMenuToggle" />
+        </div>
+        <input id="limitedMenuName" type="text" placeholder="Item name" value="Catfish" />
+        <input id="limitedMenuPrice" type="number" min="0" step="0.01" placeholder="Price" value="12.99" />
+      </div>
+      <textarea id="limitedMenuDesc" placeholder="Included sides">Served with Potato Salad, Green Beans, and a roll.</textarea>
+      <p class="muted">When active, Extra Sides and Lagniappe are turned off automatically.</p>
+    </div>
+
+    <div class="card control-section" id="turn-off-items">
       <h2>Turn Off Individual Items</h2>
       <p class="muted">Checked items are hidden from Delish and blocked in checkout. This list resets every day at midnight.</p>
       <div class="item-list" id="itemsOffList"></div>
     </div>
 
-    <div class="card">
+    <div class="card control-section" id="mark-soldout-items">
       <h2>Mark Individual Items Sold Out</h2>
       <p class="muted">Checked items stay visible on Delish but show Sold Out and cannot be ordered. This list resets every day at midnight.</p>
       <div class="item-list" id="itemsSoldOutList"></div>
     </div>
 
-    <div class="card">
+    <div class="card control-section" id="base-item-toggle-control">
       <h2>Mark Base Options Sold Out</h2>
       <p class="muted">Checked bases are disabled on plate choices and blocked in checkout. This list resets every day at midnight.</p>
       <div class="item-list" id="basesSoldOutList"></div>
     </div>
 
-    <div class="card">
+    <div class="card control-section save-panel" id="customer-banner">
       <h2>Customer Banner Message</h2>
       <p class="muted">Optional live message shown at the top of the Delish order page.</p>
       <textarea id="customerMessage" placeholder="Example: Black Eyed Peas sold out for today."></textarea>
@@ -391,6 +663,8 @@
 
   <script>
     const TOKEN_KEY = "delish_operator_token";
+    const LABOR_RATE_KEY = "delish_admin_average_labor_rate";
+    const LABOR_MANUAL_SALES_KEY = "delish_admin_manual_sales";
     const statusBox = document.getElementById("statusBox");
     const tokenStatus = document.getElementById("tokenStatus");
     const windowStatusBox = document.getElementById("windowStatusBox");
@@ -398,13 +672,22 @@
     const windowMode = document.getElementById("windowMode");
     const windowNow = document.getElementById("windowNow");
     const windowHours = document.getElementById("windowHours");
+    const laborActive = document.getElementById("laborActive");
+    const laborHours = document.getElementById("laborHours");
+    const laborCost = document.getElementById("laborCost");
+    const laborPercent = document.getElementById("laborPercent");
+    const laborRateInput = document.getElementById("laborRateInput");
+    const laborManualSalesInput = document.getElementById("laborManualSalesInput");
+    const laborStatusBox = document.getElementById("laborStatusBox");
+    const refreshLaborBtn = document.getElementById("refreshLaborBtn");
     const pickupWindowList = document.getElementById("pickupWindowList");
 const pickupWindowStatusBox = document.getElementById("pickupWindowStatusBox");
 const savePickupWindowsBtn = document.getElementById("savePickupWindowsBtn");
 const reloadPickupWindowsBtn = document.getElementById("reloadPickupWindowsBtn");
 
     const ITEM_CATALOG = [
-      { id: "monday_red_beans_fried_chicken", name: "Monday - Red Beans or Okra with Fried Chicken" },
+      { id: "monday_red_beans_fried_chicken", name: "Monday - Red Beans with Fried Chicken" },
+      { id: "monday_okra_fried_chicken", name: "Monday - Okra with Fried Chicken" },
       { id: "monday_hamburger_steak", name: "Monday - Hamburger Steak Plate" },
       { id: "tuesday_beef_tips", name: "Tuesday - Beef Tips Plate" },
       { id: "tuesday_meatloaf", name: "Tuesday - Meatloaf Plate" },
@@ -458,6 +741,12 @@ const reloadPickupWindowsBtn = document.getElementById("reloadPickupWindowsBtn")
       if (!windowStatusBox) return;
       windowStatusBox.textContent = text;
       windowStatusBox.className = "status" + (tone ? ` ${tone}` : "");
+    }
+
+    function setLaborStatus(text, tone = "") {
+      if (!laborStatusBox) return;
+      laborStatusBox.textContent = text;
+      laborStatusBox.className = "status" + (tone ? ` ${tone}` : "");
     }
 
     function setPickupWindowStatus(text, tone = "") {
@@ -570,6 +859,160 @@ async function savePickupWindows() {
       return `${hour}:${minute} ${suffix}`;
     }
 
+    function formatMoney(value) {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD"
+      }).format(Number(value || 0));
+    }
+
+    function minutesSince(iso) {
+      const start = new Date(iso).getTime();
+      if (!Number.isFinite(start)) return 0;
+      return Math.max(0, Math.round((Date.now() - start) / 60000));
+    }
+
+    function getCentralDateKey(date = new Date()) {
+      const parts = new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/Chicago",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+      }).formatToParts(date);
+
+      const map = {};
+      for (const part of parts) {
+        if (part.type !== "literal") map[part.type] = part.value;
+      }
+
+      return `${map.year}-${map.month}-${map.day}`;
+    }
+
+    function loadSavedLaborRate() {
+      let saved = "";
+      try {
+        saved = localStorage.getItem(LABOR_RATE_KEY) || "";
+      } catch {}
+
+      const rate = Number(saved);
+      if (Number.isFinite(rate) && rate > 0 && laborRateInput) {
+        laborRateInput.value = rate.toFixed(2);
+      }
+    }
+
+    function saveLaborRate() {
+      const rate = Math.max(0, Number(laborRateInput?.value || 0));
+      try {
+        localStorage.setItem(LABOR_RATE_KEY, String(rate));
+      } catch {}
+      return rate;
+    }
+
+    function loadSavedManualSales() {
+      let saved = "";
+      try {
+        saved = localStorage.getItem(LABOR_MANUAL_SALES_KEY) || "";
+      } catch {}
+
+      const amount = Number(saved);
+      if (Number.isFinite(amount) && amount > 0 && laborManualSalesInput) {
+        laborManualSalesInput.value = amount.toFixed(2);
+      }
+    }
+
+    function saveManualSales() {
+      const amount = Math.max(0, Number(laborManualSalesInput?.value || 0));
+      try {
+        if (amount > 0) {
+          localStorage.setItem(LABOR_MANUAL_SALES_KEY, String(amount));
+        } else {
+          localStorage.removeItem(LABOR_MANUAL_SALES_KEY);
+        }
+      } catch {}
+      return amount;
+    }
+
+    async function fetchJson(url, options = {}) {
+      const res = await fetch(url, {
+        cache: "no-store",
+        ...options,
+        headers: {
+          ...(options.headers || {})
+        }
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok || data.ok === false) {
+        throw new Error(data.error || "Request failed.");
+      }
+
+      return data;
+    }
+
+    async function loadLaborSnapshot() {
+      if (!laborActive || !laborHours || !laborCost || !laborPercent) return;
+
+      setLaborStatus("Loading labor control...");
+
+      const today = getCentralDateKey();
+      const rate = saveLaborRate();
+      const token = getSavedToken();
+      const timeclockUrl = token
+        ? `/api/delish/timeclock/?mode=admin&date=${encodeURIComponent(today)}&t=${Date.now()}`
+        : `/api/delish/timeclock/?date=${encodeURIComponent(today)}&t=${Date.now()}`;
+      const timeclockOptions = token
+        ? { headers: { "x-delish-manager-pin": token } }
+        : {};
+      const salesOptions = token
+        ? { headers: { "x-operator-token": token } }
+        : {};
+
+      const [timeclock, sales] = await Promise.all([
+        fetchJson(timeclockUrl, timeclockOptions),
+        fetchJson(`/api/delish/sales-summary/?date=${encodeURIComponent(today)}&t=${Date.now()}`, salesOptions)
+          .catch(() => ({ ok: false, orderCount: 0, grossSales: 0 }))
+      ]);
+
+      const activeRows = Array.isArray(timeclock.active) ? timeclock.active : [];
+      const activeCount = activeRows.length;
+      const completedMinutes = Number(timeclock.summary?.totalMinutes || 0);
+      const activeMinutes = activeRows.reduce((sum, shift) => sum + minutesSince(shift.clockInAt), 0);
+      const totalHours = timeclock.laborSummary
+        ? Number(timeclock.laborSummary.totalHours || 0)
+        : Math.round(((completedMinutes + activeMinutes) / 60) * 100) / 100;
+      const estimatedCost = totalHours * rate;
+      const liveGrossSales = Number(sales.grossSales || 0);
+      const manualGrossSales = saveManualSales();
+      const usingManualSales = sales.ok === false && manualGrossSales > 0;
+      const grossSales = usingManualSales ? manualGrossSales : liveGrossSales;
+      const percent = grossSales > 0 ? (estimatedCost / grossSales) * 100 : null;
+
+      laborActive.textContent = `${activeCount}`;
+      laborHours.textContent = `${totalHours.toFixed(2)} hrs`;
+      laborCost.textContent = formatMoney(estimatedCost);
+      laborPercent.textContent = percent === null ? "No sales yet" : `${percent.toFixed(1)}%`;
+
+      if (sales.ok === false) {
+        setLaborStatus(
+          usingManualSales
+            ? `Labor loaded. Live sales unavailable, using manual sales of ${formatMoney(manualGrossSales)}.`
+            : "Labor loaded. Sales summary was unavailable, so labor % is waiting on sales data.",
+          "warn"
+        );
+        return;
+      }
+
+      if (!token) {
+        setLaborStatus("Live clock-ins loaded. Save the operator token to unlock completed labor totals.", "warn");
+        return;
+      }
+
+      setLaborStatus(
+        `Labor snapshot for ${today}: ${sales.orderCount || 0} paid orders, ${formatMoney(grossSales)} sales.`,
+        "good"
+      );
+    }
+
     function formatCentralNow(parts) {
       const day = titleCase(parts?.weekday || "");
       const date = parts?.isoDate || "";
@@ -585,6 +1028,14 @@ async function savePickupWindows() {
 
       if (data.openNow) {
         return `Ordering is open until ${formatTime(data.closeTime)}.`;
+      }
+
+      if (data.orderingMode === "closed" || data.mode === "closed") {
+        return "Online ordering is closed today.";
+      }
+
+      if (data.orderingMode === "paused" || data.mode === "paused") {
+        return "Ordering is temporarily paused.";
       }
 
       if (data.reason === "outside_service_window") {
@@ -608,8 +1059,8 @@ async function savePickupWindows() {
 
     function renderOrderingWindow(data) {
       const isOpen = !!data.openNow;
-      const isManualPause = data.orderingMode === "paused" || data.reason === "manual_closed";
-      const tone = isOpen ? "open" : (isManualPause ? "warn" : "closed");
+      const isPaused = data.orderingMode === "paused" || data.mode === "paused";
+      const tone = isOpen ? "open" : (isPaused ? "warn" : "closed");
 
       windowStatusPill.textContent = isOpen ? "Open Now" : "Closed Now";
       windowStatusPill.className = `window-pill ${tone}`;
@@ -619,7 +1070,7 @@ async function savePickupWindows() {
         ? `${formatTime(data.openTime)} - ${formatTime(data.closeTime)}`
         : "No service window today";
 
-      setWindowStatus(buildWindowMessage(data), isOpen ? "good" : (isManualPause ? "" : "bad"));
+      setWindowStatus(buildWindowMessage(data), isOpen ? "good" : (isPaused ? "" : "bad"));
     }
 
     async function loadOrderingWindow() {
@@ -633,6 +1084,44 @@ async function savePickupWindows() {
       }
 
       renderOrderingWindow(data);
+    }
+
+    async function postOrderingControl(payload, successMessage) {
+      let token = getSavedToken();
+
+      if (!token) {
+        token = window.prompt("Enter Delish operator token");
+        if (!token) {
+          setWindowStatus("Ordering control cancelled.");
+          return;
+        }
+        if (window.confirm("Save token on this device?")) {
+          saveToken(token.trim());
+        }
+      }
+
+      setWindowStatus("Updating ordering mode...");
+
+      const res = await fetch("/api/delish/operator-control/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-operator-token": token.trim()
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok || !data.ok) {
+        if (res.status === 401) {
+          clearToken();
+        }
+        throw new Error(data.error || "Failed to update ordering mode.");
+      }
+
+      setWindowStatus(successMessage || "Ordering mode updated.", "good");
+      await loadOrderingWindow();
     }
 
     function getSavedToken() {
@@ -722,6 +1211,10 @@ function renderSoldOutList(selected = []) {
       document.getElementById("lagniappeToggle").checked = overrides?.sections?.lagniappe !== false;
       document.getElementById("drinksToggle").checked = overrides?.sections?.drinks !== false;
       document.getElementById("extraSidesToggle").checked = overrides?.sections?.extraSides !== false;
+      document.getElementById("limitedMenuToggle").checked = overrides?.limitedMenu?.active === true;
+      document.getElementById("limitedMenuName").value = overrides?.limitedMenu?.name || "Catfish";
+      document.getElementById("limitedMenuPrice").value = Number(overrides?.limitedMenu?.price || 12.99).toFixed(2);
+      document.getElementById("limitedMenuDesc").value = overrides?.limitedMenu?.desc || "Served with Potato Salad, Green Beans, and a roll.";
       document.getElementById("customerMessage").value = overrides.customerMessage || "";
       renderItemList(Array.isArray(overrides.itemsOff) ? overrides.itemsOff : []);
       renderSoldOutList(Array.isArray(overrides.itemsSoldOut) ? overrides.itemsSoldOut : []);
@@ -746,12 +1239,23 @@ function renderSoldOutList(selected = []) {
       const itemsOff = [...document.querySelectorAll("#itemsOffList input:checked")].map(el => el.value);
       const itemsSoldOut = [...document.querySelectorAll("#itemsSoldOutList input:checked")].map(el => el.value);
       const basesSoldOut = [...document.querySelectorAll("#basesSoldOutList input:checked")].map(el => el.value);
+      const limitedMenuActive = document.getElementById("limitedMenuToggle").checked;
 
       const payload = {
   sections: {
-    lagniappe: document.getElementById("lagniappeToggle").checked,
+    lagniappe: limitedMenuActive ? false : document.getElementById("lagniappeToggle").checked,
     drinks: document.getElementById("drinksToggle").checked,
-    extraSides: document.getElementById("extraSidesToggle").checked
+    extraSides: limitedMenuActive ? false : document.getElementById("extraSidesToggle").checked
+  },
+  limitedMenu: {
+    active: limitedMenuActive,
+    itemId: "friday_fried_catfish",
+    name: document.getElementById("limitedMenuName").value.trim() || "Catfish",
+    price: Number(document.getElementById("limitedMenuPrice").value || 12.99),
+    desc: document.getElementById("limitedMenuDesc").value.trim() || "Served with Potato Salad, Green Beans, and a roll.",
+    hideSides: true,
+    blockExtraSides: true,
+    blockLagniappe: true
   },
   itemsOff,
   itemsSoldOut,
@@ -799,8 +1303,46 @@ reloadPickupWindowsBtn?.addEventListener("click", () => {
     setPickupWindowStatus(err.message || "Reload failed.", "bad")
   );
 });
+    refreshLaborBtn?.addEventListener("click", () => {
+      loadLaborSnapshot().catch(err => setLaborStatus(err.message || "Labor refresh failed.", "bad"));
+    });
+    laborRateInput?.addEventListener("change", () => {
+      loadLaborSnapshot().catch(err => setLaborStatus(err.message || "Labor refresh failed.", "bad"));
+    });
+    laborRateInput?.addEventListener("blur", () => {
+      loadLaborSnapshot().catch(err => setLaborStatus(err.message || "Labor refresh failed.", "bad"));
+    });
+    laborManualSalesInput?.addEventListener("change", () => {
+      loadLaborSnapshot().catch(err => setLaborStatus(err.message || "Labor refresh failed.", "bad"));
+    });
+    laborManualSalesInput?.addEventListener("blur", () => {
+      loadLaborSnapshot().catch(err => setLaborStatus(err.message || "Labor refresh failed.", "bad"));
+    });
     document.getElementById("refreshWindowBtn").addEventListener("click", () => {
       loadOrderingWindow().catch(err => setWindowStatus(err.message || "Window check failed.", "bad"));
+    });
+    document.getElementById("adminOpenBtn")?.addEventListener("click", () => {
+      postOrderingControl({ mode: "open" }, "Ordering forced open.").catch(err =>
+        setWindowStatus(err.message || "Open failed.", "bad")
+      );
+    });
+    document.getElementById("adminAutoBtn")?.addEventListener("click", () => {
+      postOrderingControl({ mode: "auto" }, "Ordering returned to auto mode.").catch(err =>
+        setWindowStatus(err.message || "Auto mode failed.", "bad")
+      );
+    });
+    document.getElementById("adminPause30Btn")?.addEventListener("click", () => {
+      postOrderingControl({ mode: "paused", pauseMinutes: 30 }, "Ordering paused for 30 minutes.").catch(err =>
+        setWindowStatus(err.message || "Pause failed.", "bad")
+      );
+    });
+    document.getElementById("adminCloseTodayBtn")?.addEventListener("click", () => {
+      const confirmed = window.confirm("Close customer ordering for the rest of today?");
+      if (!confirmed) return;
+
+      postOrderingControl({ mode: "closed" }, "Customer ordering is closed today.").catch(err =>
+        setWindowStatus(err.message || "Close today failed.", "bad")
+      );
     });
     document.getElementById("clearTokenBtn").addEventListener("click", () => {
       clearToken();
@@ -808,7 +1350,16 @@ reloadPickupWindowsBtn?.addEventListener("click", () => {
     });
 
     updateTokenStatus();
+    loadSavedLaborRate();
+    loadSavedManualSales();
     bindMutualExclusion();
+    loadLaborSnapshot().catch((err) => {
+      console.error(err);
+      setLaborStatus(err.message || "Unable to load labor control.", "bad");
+    });
+    setInterval(() => {
+      loadLaborSnapshot().catch(() => {});
+    }, 60000);
     loadOrderingWindow().catch((err) => {
       console.error(err);
       setWindowStatus(err.message || "Unable to load ordering window.", "bad");

@@ -1,4 +1,5 @@
 const DRINK_KEY = "chocolate-city:drink:credits";
+const DRINK_REDEEM_LOCK_KEY = "chocolate-city:drink:redeem-lock";
 
 async function redis(command, ...args) {
   const url = process.env.UPSTASH_REDIS_REST_URL;
@@ -12,6 +13,20 @@ async function redis(command, ...args) {
 
   if (!res.ok) throw new Error(`Redis error ${res.status}`);
   return res.json();
+}
+
+async function acquireRedisLock(key, value, seconds = 10) {
+  const result = await redis("SET", key, value, "EX", String(seconds), "NX");
+  return result?.result === "OK";
+}
+
+async function releaseRedisLock(key, value = "") {
+  if (value) {
+    const existing = await redis("GET", key);
+    if (existing?.result !== value) return;
+  }
+
+  await redis("DEL", key);
 }
 
 export default async function handler(req, res) {
@@ -32,36 +47,56 @@ export default async function handler(req, res) {
       return res.status(400).json({ ok: false, error: "Missing sessionId" });
     }
 
-    const data = await redis("GET", DRINK_KEY);
-    const credits = data?.result ? JSON.parse(data.result) : [];
+    const lockValue =
+      globalThis.crypto?.randomUUID?.() ||
+      `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+    const locked = await acquireRedisLock(DRINK_REDEEM_LOCK_KEY, lockValue, 10);
 
-    let found = false;
-
-    const updated = credits.map(c => {
-      if (c.sessionId === sessionId) {
-        found = true;
-        return {
-          ...c,
-          redeemed: true,
-          redeemedAt: new Date().toISOString()
-        };
-      }
-
-      return c;
-    });
-
-    if (!found) {
-      return res.status(404).json({ ok: false, error: "Drink credit not found" });
+    if (!locked) {
+      return res.status(409).json({ ok: false, error: "Drink screen is busy. Try again in a few seconds." });
     }
 
-    await redis("SET", DRINK_KEY, JSON.stringify(updated));
+    try {
+      const data = await redis("GET", DRINK_KEY);
+      const credits = data?.result ? JSON.parse(data.result) : [];
+      const credit = credits.find(c => c.sessionId === sessionId);
 
-    return res.status(200).json({
-      ok: true,
-      redeemed: true,
-      sessionId
-    });
+      if (!credit) {
+        return res.status(404).json({ ok: false, error: "Drink credit not found" });
+      }
+
+      if (credit.redeemed) {
+        return res.status(200).json({
+          ok: true,
+          redeemed: true,
+          alreadyRedeemed: true,
+          sessionId
+        });
+      }
+
+      const updated = credits.map(c => {
+        if (c.sessionId === sessionId) {
+          return {
+            ...c,
+            redeemed: true,
+            redeemedAt: new Date().toISOString()
+          };
+        }
+
+        return c;
+      });
+
+      await redis("SET", DRINK_KEY, JSON.stringify(updated));
+
+      return res.status(200).json({
+        ok: true,
+        redeemed: true,
+        sessionId
+      });
+    } finally {
+      await releaseRedisLock(DRINK_REDEEM_LOCK_KEY, lockValue).catch(() => {});
+    }
   } catch (err) {
-    return res.status(500).json({ ok: false, error: err.message });
+    return res.status(500).json({ ok: false, error: "Unable to redeem drink credit" });
   }
 }

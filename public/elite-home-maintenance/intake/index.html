@@ -336,7 +336,6 @@
         <a href="/elite-home-maintenance/">Home</a>
         <a href="/elite-home-maintenance/services/">Services</a>
         <a href="/elite-home-maintenance/intake/">Request Service</a>
-        <a href="tel:+13182062460">Call Now</a>
       </nav>
     </div>
   </header>
@@ -380,7 +379,7 @@
         <div class="card">
           <h2>Service request form</h2>
 
-         <form id="elite-intake-form" action="https://script.google.com/macros/s/AKfycbyger9rnvWTcG5R0m7vqgnYJzw1SdS7OiMikBv_ouXKFR0pT8AF6uydhwoIjALoUyjHlA/exec" method="POST">
+         <form id="elite-intake-form" novalidate>
   <input type="hidden" name="source" value="elite-home-maintenance-intake" />
 
   <div class="grid-2">
@@ -472,32 +471,37 @@
       submitBtn.disabled = true;
       submitBtn.textContent = 'Submitting...';
 
-      try {
-        const formData = new FormData(form);
+      const payload = {
+        name:          (document.getElementById('full_name')?.value || '').trim(),
+        phone:         (document.getElementById('phone')?.value || '').trim(),
+        email:         (document.getElementById('email')?.value || '').trim(),
+        service:       document.getElementById('service_type')?.value || '',
+        property_type: document.getElementById('property_type')?.value || '',
+        address:       (document.getElementById('address')?.value || '').trim(),
+        urgency:       document.getElementById('urgency')?.value || '',
+        description:   (document.getElementById('details')?.value || '').trim(),
+        timeline:      (document.getElementById('timeline')?.value || '').trim(),
+        zip:           '',
+        source:        'elite-home-maintenance-intake',
+      };
 
-        const response = await fetch(form.action, {
+      try {
+        const res = await fetch('/api/elite-home-maintenance/lead', {
           method: 'POST',
-          body: new URLSearchParams(formData),
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          }
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
         });
 
-        const text = await response.text();
-        let data = null;
+        const data = await res.json().catch(() => ({}));
 
-        try {
-          data = JSON.parse(text);
-        } catch (_) {}
-
-        if (response.ok && data && data.ok) {
+        if (res.ok && data.ok) {
           window.location.href = '/elite-home-maintenance/thank-you/';
           return;
         }
 
-        throw new Error((data && data.error) || 'Submission failed.');
+        throw new Error(data.error || 'Submission failed.');
       } catch (err) {
-        alert('There was a problem submitting your request. Please call Jamey at (318) 206-2460.');
+        alert('Something went wrong. Please try again in a moment.');
         submitBtn.disabled = false;
         submitBtn.textContent = originalText;
       }
@@ -506,7 +510,7 @@
 </script>
 
           <div class="notice">
-            Temporary routing is active. Submitting this form opens your email app and sends the request to Jamey Metoyer directly.
+            Submitting this form routes directly to Jamey — SMS + email notification on every request.
           </div>
         </div>
       </div>

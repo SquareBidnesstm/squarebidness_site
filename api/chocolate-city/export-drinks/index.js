@@ -26,9 +26,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ ok: false, error: "Admin token not configured." });
   }
 
-  const providedToken = String(
-    req.headers["x-admin-token"] || req.query.token || ""
-  ).trim();
+  const providedToken = String(req.headers["x-admin-token"] || "").trim();
 
   if (providedToken !== expectedToken) {
     return res.status(401).json({ ok: false, error: "Unauthorized." });
@@ -71,6 +69,6 @@ export default async function handler(req, res) {
     res.setHeader("Cache-Control", "no-store");
     return res.status(200).send(csv);
   } catch (err) {
-    return res.status(500).json({ ok: false, error: err.message });
+    return res.status(500).json({ ok: false, error: "Unable to export drink credits." });
   }
 }

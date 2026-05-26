@@ -25,6 +25,22 @@ function normalizeBasesSoldOut(basesSoldOut) {
   return [...new Set(basesSoldOut.map((x) => String(x || "").trim()).filter(Boolean))];
 }
 
+function normalizeLimitedMenu(limitedMenu = {}) {
+  const active = limitedMenu?.active === true;
+  const price = Number(limitedMenu?.price);
+
+  return {
+    active,
+    itemId: String(limitedMenu?.itemId || "friday_fried_catfish").trim() || "friday_fried_catfish",
+    name: String(limitedMenu?.name || "Catfish").trim().slice(0, 80) || "Catfish",
+    price: Number.isFinite(price) && price >= 0 ? Math.round(price * 100) / 100 : 12.99,
+    desc: String(limitedMenu?.desc || "Served with Potato Salad, Green Beans, and a roll.").trim().slice(0, 180),
+    hideSides: limitedMenu?.hideSides !== false,
+    blockExtraSides: limitedMenu?.blockExtraSides !== false,
+    blockLagniappe: limitedMenu?.blockLagniappe !== false,
+  };
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -54,13 +70,18 @@ export default async function handler(req, res) {
     const itemsOff = normalizeItemsOff(body.itemsOff);
     const itemsSoldOut = normalizeItemsSoldOut(body.itemsSoldOut);
     const basesSoldOut = normalizeBasesSoldOut(body.basesSoldOut);
+    const limitedMenu = normalizeLimitedMenu(body.limitedMenu);
 
     const next = {
       ...current,
       sections: {
-        lagniappe: body?.sections?.lagniappe !== false,
+        lagniappe: limitedMenu.active && limitedMenu.blockLagniappe
+          ? false
+          : body?.sections?.lagniappe !== false,
         drinks: body?.sections?.drinks !== false,
-        extraSides: body?.sections?.extraSides !== false,
+        extraSides: limitedMenu.active && limitedMenu.blockExtraSides
+          ? false
+          : body?.sections?.extraSides !== false,
       },
       sectionsDate: getCentralDateKey(),
       itemsOff,
@@ -69,6 +90,8 @@ export default async function handler(req, res) {
       itemsSoldOutDate: getCentralDateKey(),
       basesSoldOut,
       basesSoldOutDate: getCentralDateKey(),
+      limitedMenu,
+      limitedMenuDate: getCentralDateKey(),
       customerMessage: String(body.customerMessage || "").trim().slice(0, 180),
       updatedAt: new Date().toISOString(),
       updatedBy: "operator",

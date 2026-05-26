@@ -21,7 +21,7 @@ export async function generateMetadata({
 
   const { data: shop } = await supabaseServer
     .from("shops")
-    .select("id, name, city, state")
+    .select("id, name, city, state, logo_url")
     .eq("slug", shopSlug)
     .eq("active", true)
     .single();
@@ -39,6 +39,10 @@ export async function generateMetadata({
   const typeLabel = SHOP_TYPE_LABELS[shopType] ?? "Appointment Booking";
   const url = `https://booking.squarebidness.com/${shopSlug}`;
 
+  const ogImages = (shop as any).logo_url
+    ? [{ url: (shop as any).logo_url, width: 512, height: 512, alt: shop.name }]
+    : [];
+
   return {
     title: `${shop.name} — Book an Appointment`,
     description: `Book your appointment at ${shop.name} in ${shop.city}, ${shop.state}. ${typeLabel} powered by SquareBidness.`,
@@ -48,11 +52,13 @@ export async function generateMetadata({
       url,
       siteName: "SquareBidness",
       type: "website",
+      ...(ogImages.length > 0 ? { images: ogImages } : {}),
     },
     twitter: {
       card: "summary_large_image",
       title: shop.name,
       description: `Book your appointment at ${shop.name} — ${shop.city}, ${shop.state}`,
+      ...(ogImages.length > 0 ? { images: [ogImages[0].url] } : {}),
     },
   };
 }
@@ -66,15 +72,17 @@ export default async function ShopLanding({
 
   const { data: shop } = await supabaseServer
     .from("shops")
-    .select("id, name, city, state")
+    .select("id, name, city, state, logo_url")
     .eq("slug", shopSlug)
     .eq("active", true)
     .single();
 
+  if (!shop) notFound();
+
   const { data: shopTypeSetting } = await supabaseServer
     .from("shop_settings")
     .select("value_json")
-    .eq("shop_id", shop?.id ?? "")
+    .eq("shop_id", shop.id)
     .eq("key", "shop_type")
     .single();
 
@@ -91,11 +99,9 @@ export default async function ShopLanding({
 
   const label = specialistLabel[shopType] ?? "specialist";
 
-  if (!shop) notFound();
-
   const { data: barbers } = await supabaseServer
     .from("barbers")
-    .select("slug, name, display_name, role")
+    .select("slug, name, display_name, role, photo_url")
     .eq("shop_id", shop.id)
     .eq("active", true)
     .order("sort_order");
@@ -113,6 +119,14 @@ export default async function ShopLanding({
       }}
     >
       <div style={{ textAlign: "center", marginBottom: 48, maxWidth: 560 }}>
+        {shop.logo_url && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={shop.logo_url}
+            alt={shop.name}
+            style={{ width: 80, height: 80, borderRadius: 16, objectFit: "cover", marginBottom: 20 }}
+          />
+        )}
         <div
           style={{
             color: "#d4af37",
@@ -151,19 +165,33 @@ export default async function ShopLanding({
                 cursor: "pointer",
               }}
             >
-              <div>
-                <div style={{ fontSize: 18, fontWeight: 700, color: "#ffffff" }}>
-                  {b.display_name || b.name}
-                </div>
-                <div
-                  style={{
-                    fontSize: 13,
-                    color: "#d4af37",
-                    marginTop: 3,
-                    letterSpacing: "0.05em",
-                  }}
-                >
-                  {b.role}
+              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                {(b as any).photo_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={(b as any).photo_url}
+                    alt={b.display_name || b.name}
+                    style={{ width: 48, height: 48, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }}
+                  />
+                ) : (
+                  <div style={{ width: 48, height: 48, borderRadius: "50%", background: "#1a1a1a", border: "1px solid #2a2a2a", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <span style={{ color: "#444", fontSize: 20 }}>✂️</span>
+                  </div>
+                )}
+                <div>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: "#ffffff" }}>
+                    {b.display_name || b.name}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 13,
+                      color: "#d4af37",
+                      marginTop: 3,
+                      letterSpacing: "0.05em",
+                    }}
+                  >
+                    {b.role}
+                  </div>
                 </div>
               </div>
               <div style={{ color: "#444", fontSize: 20 }}>→</div>

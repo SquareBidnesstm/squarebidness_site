@@ -1,0 +1,406 @@
+import { NextRequest, NextResponse } from "next/server";
+import Stripe from "stripe";
+import { supabaseServer } from "../../../../lib/supabase/server";
+import { uploadQRToStorage } from "../../../../lib/qr";
+import { sendBuyerConfirmation, sendOrganizerSaleNotification } from "../../../../lib/notifications/email";
+import { sendBuyerSMS, sendOrganizerSaleSMS } from "../../../../lib/notifications/sms";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: "2026-04-22.dahlia" as any,
+});
+
+export async function POST(req: NextRequest) {
+  const body = await req.text();
+  const sig = req.headers.get("stripe-signature")!;
+
+  let event: Stripe.Event;
+  try {
+    event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!);
+  } catch {
+    return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
+  }
+
+  // ── Helper: decrement quantity_sold for tier selections stored in metadata ──
+  // Retries up to 3 times on optimistic lock conflict (another request updated
+  // quantity_sold between our SELECT and UPDATE).
+  async function decrementTierSelections(tierSelectionsJson: string | null | undefined) {
+    if (!tierSelectionsJson) return;
+    let selections: { tierId: string; qty: number }[] = [];
+    try { selections = JSON.parse(tierSelectionsJson); } catch { return; }
+    for (const { tierId, qty } of selections) {
+      let retries = 0;
+      while (retries < 3) {
+        const { data: tierData } = await supabaseServer
+          .from("ticket_tiers")
+          .select("quantity_sold")
+          .eq("id", tierId)
+          .single();
+        if (!tierData) break;
+        const newSold = Math.max(0, tierData.quantity_sold - qty);
+        const { data: updated } = await supabaseServer
+          .from("ticket_tiers")
+          .update({ quantity_sold: newSold })
+          .eq("id", tierId)
+          .eq("quantity_sold", tierData.quantity_sold) // optimistic lock
+          .select("id");
+        if (updated && updated.length > 0) break; // success
+        retries++; // lock conflict — re-read and retry
+      }
+    }
+  }
+
+  // ── Checkout session expired: cancel pending order + restore capacity ──────
+  if (event.type === "checkout.session.expired") {
+    const expiredSession = event.data.object as Stripe.Checkout.Session;
+    const expiredOrderId = expiredSession.metadata?.order_id;
+    if (expiredOrderId) {
+      // Mark the order cancelled (only if still pending to avoid double-processing)
+      const { data: cancelledOrder } = await supabaseServer
+        .from("orders")
+        .update({ status: "cancelled" })
+        .eq("id", expiredOrderId)
+        .eq("status", "pending")
+        .select("id")
+        .single();
+
+      // Only decrement capacity if we actually transitioned the order (idempotency)
+      if (cancelledOrder) {
+        // tier_selections live on the payment_intent metadata
+        const piId = expiredSession.payment_intent as string | null;
+        let tierSelectionsJson: string | null = null;
+        if (piId) {
+          try {
+            const pi = await stripe.paymentIntents.retrieve(piId);
+            tierSelectionsJson = pi.metadata?.tier_selections ?? null;
+          } catch { /* payment intent may not exist if session expired before auth */ }
+        }
+        await decrementTierSelections(tierSelectionsJson);
+      }
+    }
+    return NextResponse.json({ ok: true });
+  }
+
+  // ── Payment failed: clean up stuck pending orders ──────
+  if (event.type === "payment_intent.payment_failed") {
+    const pi = event.data.object as Stripe.PaymentIntent;
+    const orderId = pi.metadata?.order_id;
+    if (orderId) {
+      const { data: cancelledOrder } = await supabaseServer
+        .from("orders")
+        .update({ status: "cancelled" })
+        .eq("id", orderId)
+        .eq("status", "pending")
+        .select("id")
+        .single();
+
+      // Decrement capacity only if we transitioned the order
+      if (cancelledOrder) {
+        await decrementTierSelections(pi.metadata?.tier_selections ?? null);
+      }
+    }
+    return NextResponse.json({ ok: true });
+  }
+
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object as Stripe.Checkout.Session;
+    const orderId = session.metadata?.order_id;
+
+    // Retrieve PaymentIntent once — reused for tier_selections and platform_payouts below
+    let paymentIntent: Stripe.PaymentIntent | null = null;
+    if (session.payment_intent) {
+      try {
+        paymentIntent = await stripe.paymentIntents.retrieve(session.payment_intent as string);
+      } catch (err) {
+        console.error("Failed to retrieve PaymentIntent:", err);
+      }
+    }
+    const tierSelections = paymentIntent?.metadata?.tier_selections ?? null;
+
+    if (!orderId) return NextResponse.json({ ok: true });
+
+    // Idempotency: only transition from pending → paid
+    // If Stripe retries and the order is already paid, this update affects 0 rows
+    const { data: claimed } = await supabaseServer
+      .from("orders")
+      .update({
+        status: "paid",
+        stripe_payment_intent_id: session.payment_intent as string,
+      })
+      .eq("id", orderId)
+      .eq("status", "pending")
+      .select("id")
+      .single();
+
+    if (!claimed) {
+      // Order already processed — return 200 so Stripe stops retrying
+      return NextResponse.json({ ok: true });
+    }
+
+    // Fetch full order now that it's confirmed paid
+    const { data: order } = await supabaseServer
+      .from("orders")
+      .select("*, events ( *, organizers ( name, email, phone ) )")
+      .eq("id", claimed.id)
+      .single();
+
+    if (!order) return NextResponse.json({ ok: true });
+
+    const ev = order.events as any;
+    const organizer = ev?.organizers as any;
+
+    // Issue tickets
+    const selections: { tierId: string; qty: number }[] = tierSelections
+      ? JSON.parse(tierSelections)
+      : [];
+
+    const issuedTickets: { ticketCode: string; tierName: string; qrDataUrl: string }[] = [];
+
+    for (const { tierId, qty } of selections) {
+      const { data: tierData } = await supabaseServer
+        .from("ticket_tiers")
+        .select("name, price, quantity, quantity_sold")
+        .eq("id", tierId)
+        .single();
+
+      if (!tierData) continue;
+
+      // Atomic capacity guard: only update if quantity_sold + qty <= quantity
+      const { data: updated } = await supabaseServer
+        .from("ticket_tiers")
+        .update({ quantity_sold: tierData.quantity_sold + qty })
+        .eq("id", tierId)
+        .lte("quantity_sold", tierData.quantity - qty)
+        .select("id")
+        .single();
+
+      if (!updated) {
+        // Race condition — another purchase took the last spots, auto-refund
+        console.error(`Oversell prevented for tier ${tierId}, order ${order.id}`);
+        let refundOk = false;
+        if (order.stripe_payment_intent_id) {
+          refundOk = await stripe.refunds.create(
+              {
+                payment_intent: order.stripe_payment_intent_id,
+                reverse_transfer: true,
+                refund_application_fee: true, // oversell is platform's fault — full refund
+              },
+              { idempotencyKey: `oversell-refund-${order.id}` }
+            )
+            .then(() => true)
+            .catch((e) => { console.error("Auto-refund failed:", e); return false; });
+        }
+        // Mark order cancelled; if refund failed, surface it for manual resolution
+        await supabaseServer
+          .from("orders")
+          .update({ status: refundOk ? "cancelled" : "refund_failed" })
+          .eq("id", order.id);
+        return NextResponse.json({ ok: true });
+      }
+
+      for (let i = 0; i < qty; i++) {
+        let inserted = false;
+        let ticketCode = "";
+        let qrUrl = "";
+        for (let attempt = 0; attempt < 3; attempt++) {
+          ticketCode = `TKT-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+          // Upload QR to Storage (falls back to data URL on error)
+          qrUrl = await uploadQRToStorage(ticketCode, supabaseServer);
+          const { error: insertErr } = await supabaseServer.from("tickets").insert({
+            ticket_code: ticketCode,
+            order_id: order.id,
+            event_id: order.event_id,
+            tier_id: tierId,
+            tier_name: tierData.name ?? "",
+            buyer_name: order.buyer_name,
+            buyer_email: order.buyer_email,
+            price_snapshot: tierData.price ?? 0,
+            qr_code: qrUrl,
+            status: "valid",
+          });
+          if (!insertErr) { inserted = true; break; }
+          if (insertErr.code !== "23505") {
+            console.error("Ticket insert error:", insertErr);
+            break;
+          }
+          // 23505 = unique_violation on ticket_code — retry with new code
+        }
+        if (!inserted) {
+          // Ticket insert failed after retries — decrement the capacity we already incremented
+          // to avoid permanently consuming a slot without issuing a ticket.
+          const { data: tierNow } = await supabaseServer
+            .from("ticket_tiers")
+            .select("quantity_sold")
+            .eq("id", tierId)
+            .single();
+          if (tierNow && typeof tierNow.quantity_sold === "number") {
+            await supabaseServer
+              .from("ticket_tiers")
+              .update({ quantity_sold: Math.max(0, tierNow.quantity_sold - 1) })
+              .eq("id", tierId);
+          }
+          console.error(`Ticket insert failed after retries for order ${order.id}, tier ${tierId} — capacity decremented`);
+          continue;
+        }
+
+        issuedTickets.push({
+          ticketCode,
+          tierName: tierData.name ?? "Ticket",
+          qrDataUrl: qrUrl,
+        });
+      }
+    }
+
+    // Increment referral uses counter with optimistic lock + retry to prevent lost updates
+    if (order.ref_code) {
+      let retries = 0;
+      while (retries < 3) {
+        const { data: refRow } = await supabaseServer
+          .from("referral_codes")
+          .select("id, uses")
+          .eq("code", order.ref_code)
+          .single();
+        if (!refRow) break;
+        const { data: updated } = await supabaseServer
+          .from("referral_codes")
+          .update({ uses: (refRow.uses ?? 0) + 1 })
+          .eq("id", refRow.id)
+          .eq("uses", refRow.uses) // optimistic lock: only update if uses hasn't changed
+          .select("id");
+        if (updated && updated.length > 0) break; // success
+        retries++;
+      }
+    }
+
+    // Increment promo uses now that payment is confirmed (not at session creation).
+    // Atomically increment promo uses — RPC enforces max_uses guard in a single UPDATE,
+    // eliminating the TOCTOU race between the old SELECT+check+UPDATE pattern.
+    // Returns true if incremented, false if max_uses was already reached.
+    if (order.promo_id) {
+      try {
+        const { data: incremented } = await supabaseServer.rpc("increment_promo_uses", { promo_id: order.promo_id });
+        if (!incremented) {
+          console.error("Promo max_uses already reached for order", order.id, "— increment skipped (atomic guard)");
+        }
+      } catch {
+        // non-critical — log and continue
+        console.error("Failed to increment promo uses for order", order.id);
+      }
+    }
+
+    // Track platform payout — idempotency guard: only insert if no row exists for this order.
+    // Without this guard a Stripe webhook retry would create a duplicate payout row.
+    try {
+      if (paymentIntent && paymentIntent.application_fee_amount && paymentIntent.application_fee_amount > 0) {
+        const { data: existingPayout } = await supabaseServer
+          .from("platform_payouts")
+          .select("id")
+          .eq("order_id", orderId)
+          .maybeSingle();
+        if (!existingPayout) {
+          await supabaseServer.from("platform_payouts").insert({
+            order_id: orderId,
+            amount: (paymentIntent.application_fee_amount / 100).toFixed(2),
+            amount_cents: paymentIntent.application_fee_amount,
+            status: "paid",
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Failed to insert platform_payouts record:", err);
+    }
+
+    // Format event date/time for notifications
+    const eventDate = ev?.starts_at
+      ? new Date(ev.starts_at).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })
+      : "";
+    const eventTime = ev?.starts_at
+      ? new Date(ev.starts_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })
+      : "";
+
+    const totalTickets = issuedTickets.length;
+    const orderTotal = Number(order.total);
+
+    // ── EMAIL ──────────────────────────────────────────────
+    // Buyer confirmation
+    await sendBuyerConfirmation({
+      buyerName: order.buyer_name,
+      buyerEmail: order.buyer_email,
+      orderCode: order.order_code,
+      orderId: order.id,
+      eventTitle: ev?.title ?? "Your Event",
+      eventDate,
+      eventTime,
+      venueName: ev?.venue_name ?? null,
+      city: ev?.city ?? null,
+      state: ev?.state ?? null,
+      tickets: issuedTickets,
+      total: orderTotal,
+    }).catch((err) => console.error("Buyer email error:", err));
+
+    // Organizer sale notification
+    if (organizer?.email) {
+      await sendOrganizerSaleNotification({
+        organizerEmail: organizer.email,
+        organizerName: organizer.name,
+        eventTitle: ev?.title ?? "Your Event",
+        buyerName: order.buyer_name,
+        ticketCount: totalTickets,
+        total: orderTotal,
+        orderCode: order.order_code,
+      }).catch((err) => console.error("Organizer email error:", err));
+    }
+
+    // ── SMS ────────────────────────────────────────────────
+    // Buyer SMS (only if they provided a phone number)
+    if (order.buyer_phone) {
+      await sendBuyerSMS({
+        phone: order.buyer_phone,
+        buyerName: order.buyer_name,
+        eventTitle: ev?.title ?? "Your Event",
+        eventDate,
+        orderCode: order.order_code,
+        orderId: order.id,
+        ticketCount: totalTickets,
+      }).catch((err) => console.error("Buyer SMS error:", err));
+    }
+
+    // Organizer SMS (only if they have a phone on file)
+    if (organizer?.phone) {
+      await sendOrganizerSaleSMS({
+        phone: organizer.phone,
+        eventTitle: ev?.title ?? "Your Event",
+        buyerName: order.buyer_name,
+        ticketCount: totalTickets,
+        total: orderTotal,
+      }).catch((err) => console.error("Organizer SMS error:", err));
+    }
+  }
+
+  // ── charge.refunded: mark order + tickets as refunded ────────────────────────
+  // Fires when a refund is created via Stripe dashboard or API (including organizer-initiated).
+  // This ensures DB state stays in sync with Stripe even if the refund happens outside the app.
+  if (event.type === "charge.refunded") {
+    const charge = event.data.object as Stripe.Charge;
+    const piId = typeof charge.payment_intent === "string" ? charge.payment_intent : null;
+    if (piId) {
+      const { data: refundedOrder } = await supabaseServer
+        .from("orders")
+        .update({ status: "refunded" })
+        .eq("stripe_payment_intent_id", piId)
+        .in("status", ["paid", "completed"]) // idempotency: skip if already refunded/cancelled
+        .select("id")
+        .single();
+
+      if (refundedOrder) {
+        // Mark all valid tickets on this order as refunded
+        await supabaseServer
+          .from("tickets")
+          .update({ status: "refunded" })
+          .eq("order_id", refundedOrder.id)
+          .in("status", ["valid", "checked_in"]);
+      }
+    }
+  }
+
+  return NextResponse.json({ ok: true });
+}

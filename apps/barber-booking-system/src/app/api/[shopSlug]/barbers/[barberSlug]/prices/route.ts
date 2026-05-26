@@ -112,6 +112,21 @@ export async function PUT(
     }
   }
 
+  // Validate that every service ID in the overrides belongs to this barber/shop
+  const { data: assignedServices } = await supabaseServer
+    .from("barber_services")
+    .select("service_id")
+    .eq("barber_id", barber.id)
+    .eq("shop_id", shop.id)
+    .eq("active", true);
+
+  const validServiceIds = new Set((assignedServices ?? []).map((s) => s.service_id as string));
+  for (const id of Object.keys(overrides)) {
+    if (!validServiceIds.has(id)) {
+      return NextResponse.json({ error: "Invalid service ID in overrides." }, { status: 400 });
+    }
+  }
+
   const { error } = await supabaseServer
     .from("shop_settings")
     .upsert(
@@ -119,7 +134,10 @@ export async function PUT(
       { onConflict: "shop_id,key" }
     );
 
-  if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+  if (error) {
+    console.error("[barbers/prices PUT] DB error:", error);
+    return NextResponse.json({ ok: false, error: "An unexpected error occurred. Please try again." }, { status: 500 });
+  }
 
   return NextResponse.json({ ok: true });
 }

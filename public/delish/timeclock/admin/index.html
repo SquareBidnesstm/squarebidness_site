@@ -7,7 +7,6 @@
   <meta name="description" content="Delish time clock admin." />
   <meta name="robots" content="noindex,nofollow" />
   <meta name="theme-color" content="#111111" />
-  <link rel="stylesheet" href="/styles/global.css" />
   <meta name="sb:build" content="2026-04-14-01" />
 
 <meta name="apple-mobile-web-app-title" content="Delish Time Clock" />
@@ -142,6 +141,23 @@
     .manager-grid button,
     .employee-grid button {
       cursor:pointer;
+    }
+
+    .admin-access {
+      display:grid;
+      grid-template-columns:minmax(240px, 360px) minmax(0, 1fr);
+      align-items:stretch;
+      gap:12px;
+    }
+
+    .admin-access input {
+      width:100%;
+    }
+
+    .admin-access .status {
+      margin:0;
+      padding:0 18px;
+      font-weight:800;
     }
 
     .primary {
@@ -367,11 +383,32 @@
     .live-row {
       display:flex;
       justify-content:space-between;
+      align-items:center;
       gap:12px;
       padding:14px;
       border-radius:14px;
       border:1px solid var(--line);
       background:rgba(255,255,255,.03);
+    }
+
+    .force-clockout {
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .force-clockout input {
+      width:240px;
+      min-height:42px;
+      padding:0 12px;
+      border-radius:12px;
+      border:1px solid #303747;
+      background:var(--panel-2);
+      color:var(--text);
+      font:inherit;
+      font-weight:700;
     }
 
     .tag {
@@ -406,6 +443,35 @@
       margin-top:10px;
     }
 
+    .rate-list {
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin-top:18px;
+    }
+
+    .rate-row {
+      display:grid;
+      grid-template-columns:minmax(150px, 1fr) 140px auto;
+      gap:10px;
+      align-items:center;
+      padding:12px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+    }
+
+    .rate-row input {
+      min-height:42px;
+      padding:0 12px;
+      border-radius:12px;
+      border:1px solid #303747;
+      background:var(--panel-2);
+      color:var(--text);
+      font:inherit;
+      font-weight:800;
+    }
+
     @media (max-width: 1180px) {
       .grid {
         grid-template-columns:repeat(3, 1fr);
@@ -427,6 +493,27 @@
       }
 
       .inline-fields {
+        grid-template-columns:1fr;
+      }
+
+      .toolbar input,
+      .toolbar button,
+      .toolbar a,
+      .manager-grid input,
+      .manager-grid .status,
+      .employee-grid input,
+      .employee-grid select,
+      .employee-grid button,
+      .rate-row {
+        width:100%;
+        justify-content:center;
+      }
+
+      .rate-row {
+        grid-template-columns:1fr;
+      }
+
+      .admin-access {
         grid-template-columns:1fr;
       }
     }
@@ -458,19 +545,17 @@
         <div class="time-chip" id="centralNow">Central Time</div>
       </div>
 
-      <div class="status" id="statusBox">Ready.</div>
+      <div class="manager-grid admin-access">
+        <input id="managerPin" type="password" inputmode="numeric" placeholder="Manager PIN" />
+        <div class="status warn" id="statusBox">Enter manager PIN, then load admin.</div>
+      </div>
 
       <div class="toolbar">
         <input id="dateFilter" type="date" />
         <input id="salesInput" type="number" min="0" step="0.01" placeholder="Daily sales (optional)" />
-        <input id="hourlyRateInput" type="number" min="0" step="0.01" placeholder="Avg hourly labor rate" value="12.00" />
         <button id="loadBtn" class="primary">Load Day</button>
         <a id="csvLink" href="/api/delish/timeclock/?mode=csv" target="_blank" rel="noopener">Export CSV</a>
         <a href="/delish/timeclock/">Open Time Clock</a>
-      </div>
-
-      <div class="manager-grid">
-        <input id="managerPin" type="password" inputmode="numeric" placeholder="Manager PIN" />
       </div>
 
       <div class="grid">
@@ -510,7 +595,7 @@
     <div class="card__body">
       <div class="stat-label">Labor Dollars</div>
       <div class="stat-value" id="statLaborDollars">$0.00</div>
-      <div class="stat-sub">Hours × hourly rate</div>
+      <div class="stat-sub">Hours × employee pay rates</div>
     </div>
   </section>
 
@@ -564,6 +649,7 @@
             <div class="employee-grid">
               <input id="newEmployeeName" type="text" placeholder="Employee name" />
               <input id="newEmployeePin" type="text" inputmode="numeric" placeholder="Employee PIN" />
+              <input id="newEmployeeRate" type="number" min="0" step="0.01" placeholder="Hourly rate" value="12.00" />
               <button id="addEmployeeBtn" class="success">Add Employee</button>
             </div>
 
@@ -576,6 +662,10 @@
 
             <div class="helper">
               Manager PIN required for employee changes.
+            </div>
+
+            <div class="rate-list" id="employeeRateList">
+              <div class="empty">Load admin to edit pay rates.</div>
             </div>
           </div>
         </section>
@@ -607,10 +697,12 @@
                 <th>Shifts</th>
                 <th>Minutes</th>
                 <th>Hours</th>
+                <th>Rate</th>
+                <th>Labor $</th>
               </tr>
             </thead>
             <tbody id="employeeTotalsBody">
-              <tr><td colspan="4" class="empty">No labor data yet.</td></tr>
+              <tr><td colspan="6" class="empty">No labor data yet.</td></tr>
             </tbody>
           </table>
         </div>
@@ -627,6 +719,8 @@
                 <th>Clock Out</th>
                 <th>Minutes</th>
                 <th>Hours</th>
+                <th>Rate</th>
+                <th>Labor $</th>
                 <th>Devices</th>
                 <th>Actions</th>
               </tr>
@@ -666,14 +760,12 @@
   <script>
     const API_URL = "/api/delish/timeclock/";
     const SALES_KEY = "delish_timeclock_admin_sales";
-    const RATE_KEY = "delish_timeclock_admin_hourly_rate";
 
     const els = {
       now: document.getElementById("centralNow"),
       status: document.getElementById("statusBox"),
       date: document.getElementById("dateFilter"),
       sales: document.getElementById("salesInput"),
-      hourlyRate: document.getElementById("hourlyRateInput"),
       loadBtn: document.getElementById("loadBtn"),
       csvLink: document.getElementById("csvLink"),
       managerPin: document.getElementById("managerPin"),
@@ -694,6 +786,8 @@
       liveCount: document.getElementById("liveCount"),
       newEmployeeName: document.getElementById("newEmployeeName"),
       newEmployeePin: document.getElementById("newEmployeePin"),
+      newEmployeeRate: document.getElementById("newEmployeeRate"),
+      employeeRateList: document.getElementById("employeeRateList"),
       addEmployeeBtn: document.getElementById("addEmployeeBtn"),
       deleteEmployeeSelect: document.getElementById("deleteEmployeeSelect"),
       deleteEmployeeBtn: document.getElementById("deleteEmployeeBtn")
@@ -706,6 +800,7 @@
       payrollTurnIns: [],
       summary: { employees: [], totalHours: 0, totalShifts: 0 }
     };
+    let currentSalesData = { grossSales: 0, orderCount: 0, failed: false };
 
     function centralNowLabel() {
       return new Intl.DateTimeFormat("en-US", {
@@ -753,12 +848,13 @@
       return (els.managerPin.value || "").trim();
     }
 
-    function getSalesValue() {
-      return Number(els.sales.value || 0);
+    function operatorHeaders() {
+      const token = getManagerPin();
+      return token ? { "x-operator-token": token } : {};
     }
 
-    function getHourlyRate() {
-      return Number(els.hourlyRate.value || 0);
+    function getSalesValue() {
+      return Number(els.sales.value || 0);
     }
 
     function currency(value) {
@@ -788,12 +884,15 @@
     }
 
     async function fetchSales(date) {
-      if (!date) return { grossSales: 0, orderCount: 0 };
+      if (!date) return { grossSales: 0, orderCount: 0, failed: false };
 
       try {
-        return await fetchJson(`/api/delish/sales-summary/?date=${encodeURIComponent(date)}&t=${Date.now()}`);
+        const data = await fetchJson(`/api/delish/sales-summary/?date=${encodeURIComponent(date)}&t=${Date.now()}`, {
+          headers: operatorHeaders()
+        });
+        return { ...data, failed: false };
       } catch {
-        return { grossSales: 0, orderCount: 0 };
+        return { grossSales: 0, orderCount: 0, failed: true };
       }
     }
 
@@ -802,28 +901,14 @@
     function saveLocalControls() {
       try {
         localStorage.setItem(SALES_KEY, els.sales.value || "");
-        localStorage.setItem(RATE_KEY, els.hourlyRate.value || "");
       } catch {}
     }
 
     function restoreLocalControls() {
       try {
         const sales = localStorage.getItem(SALES_KEY);
-        const rate = localStorage.getItem(RATE_KEY);
         if (sales !== null) els.sales.value = sales;
-        if (rate !== null) els.hourlyRate.value = rate;
       } catch {}
-    }
-    function calculateLaborStats(totalHours, sales = 0) {
-      const hourlyRate = getHourlyRate();
-      const laborDollars = totalHours * hourlyRate;
-      const laborPct = sales > 0 ? (laborDollars / sales) * 100 : 0;
-      const avgHourlySales = totalHours > 0 ? sales / totalHours : 0;
-
-      els.statLaborDollars.textContent = currency(laborDollars);
-      els.statLaborPct.textContent = pct(laborPct);
-      if (els.statGrossSales) els.statGrossSales.textContent = currency(sales);
-      if (els.statAvgHourlySales) els.statAvgHourlySales.textContent = currency(avgHourlySales);
     }
     function renderEmployeeOptions(employees) {
       const list = employees || [];
@@ -831,6 +916,29 @@
         <option value="">Select employee to remove</option>
         ${list.map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join("")}
       `;
+    }
+
+    function renderEmployeeRates(employees) {
+      const list = employees || [];
+      if (!list.length) {
+        els.employeeRateList.innerHTML = '<div class="empty">No employees added yet.</div>';
+        return;
+      }
+
+      els.employeeRateList.innerHTML = list.map(employee => `
+        <div class="rate-row">
+          <strong>${escapeHtml(employee.name)}</strong>
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            value="${escapeHtml(Number(employee.hourlyRate || 0).toFixed(2))}"
+            data-employee-rate="${escapeHtml(employee.name)}"
+            aria-label="Hourly rate for ${escapeHtml(employee.name)}"
+          />
+          <button class="btn-mini primary" data-save-rate="${escapeHtml(employee.name)}">Save Rate</button>
+        </div>
+      `).join("");
     }
 
     function renderLive(active) {
@@ -849,7 +957,16 @@
             <span class="muted">Clocked in ${escapeHtml(formatCentralDateTime(item.clockInAt))}</span><br />
             <span class="muted">${escapeHtml(item.device || "")}</span>
           </div>
-          <div class="tag in">Clocked In</div>
+          <div class="force-clockout">
+            <div class="tag in">Clocked In</div>
+            <input
+              type="datetime-local"
+              data-force-out="${escapeHtml(item.name)}"
+              value="${escapeHtml(defaultForceClockOutValue(item))}"
+              aria-label="Force clock out time for ${escapeHtml(item.name)}"
+            />
+            <button class="btn-mini danger" data-force-clock-out="${escapeHtml(item.name)}">Force Clock Out</button>
+          </div>
         </div>
       `).join("");
     }
@@ -857,7 +974,7 @@
     function renderEmployeeTotals(summary) {
       const rows = summary?.employees || [];
       if (!rows.length) {
-        els.employeeTotalsBody.innerHTML = `<tr><td colspan="4" class="empty">No labor data yet.</td></tr>`;
+        els.employeeTotalsBody.innerHTML = `<tr><td colspan="6" class="empty">No labor data yet.</td></tr>`;
         return;
       }
 
@@ -867,6 +984,8 @@
           <td>${item.shifts}</td>
           <td>${item.minutes}</td>
           <td>${item.hours}</td>
+          <td>${currency(item.hourlyRate || 0)}</td>
+          <td>${currency(item.laborDollars || 0)}</td>
         </tr>
       `).join("");
     }
@@ -877,7 +996,7 @@
       });
 
       if (!rows.length) {
-        els.shiftsBody.innerHTML = `<tr><td colspan="7" class="empty">No completed shifts yet.</td></tr>`;
+        els.shiftsBody.innerHTML = `<tr><td colspan="9" class="empty">No completed shifts yet.</td></tr>`;
         return;
       }
 
@@ -902,6 +1021,8 @@
           </td>
           <td>${shift.durationMinutes}</td>
           <td>${shift.durationHours}</td>
+          <td>${currency(shift.hourlyRate || 0)}</td>
+          <td>${currency(shift.laborDollars || 0)}</td>
           <td><span class="muted">${escapeHtml(shift.clockInDevice || "")} → ${escapeHtml(shift.clockOutDevice || "")}</span></td>
           <td>
             <div class="action-row">
@@ -934,14 +1055,16 @@
 
   
 function renderStats(data, selectedDate, salesData = {}) {
-  const totalHours = Number(data.summary?.totalHours ?? 0);
+  const totalHours = Number(data.laborSummary?.totalHours ?? data.summary?.totalHours ?? 0);
   const totalShifts = Number(data.summary?.totalShifts ?? 0);
   const activeCount = (data.active || []).length;
-  const grossSales = Number(salesData.grossSales || 0);
-  const orderCount = Number(salesData.orderCount || 0);
+  const liveGrossSales = Number(salesData.grossSales || 0);
+  const manualGrossSales = Math.max(0, Number(els.sales.value || 0));
+  const usingManualSales = salesData.failed && manualGrossSales > 0;
+  const grossSales = usingManualSales ? manualGrossSales : liveGrossSales;
+  const orderCount = salesData.failed ? 0 : Number(salesData.orderCount || 0);
 
-  const hourlyRate = getHourlyRate();
-  const laborDollars = totalHours * hourlyRate;
+  const laborDollars = Number(data.laborSummary?.totalLaborDollars ?? data.summary?.totalLaborDollars ?? 0);
   const laborPctValue = grossSales > 0 ? (laborDollars / grossSales) * 100 : 0;
   const avgHourlySales = totalHours > 0 ? grossSales / totalHours : 0;
   const ordersPerLaborHour = totalHours > 0 ? orderCount / totalHours : 0;
@@ -960,7 +1083,18 @@ function renderStats(data, selectedDate, salesData = {}) {
     els.statOrdersPerHour.textContent = ordersPerLaborHour.toFixed(2);
   }
 
-  els.sales.value = grossSales ? grossSales.toFixed(2) : "";
+  if (!salesData.failed) {
+    els.sales.value = grossSales ? grossSales.toFixed(2) : "";
+  }
+
+  if (salesData.failed) {
+    if (usingManualSales) {
+      setStatus("Live order sales did not load. Manual sales are being used.", "warn");
+    } else {
+      setStatus("Live order sales did not load. Enter daily sales manually to calculate labor cost.", "warn");
+    }
+    return;
+  }
 
   if (grossSales <= 0 && totalHours > 0) {
     setStatus("Labor is tracking, but no paid sales found for this day yet.", "warn");
@@ -1001,6 +1135,7 @@ function renderStats(data, selectedDate, salesData = {}) {
 
     function toLocalDateTimeValue(iso) {
       const d = new Date(iso);
+      if (!Number.isFinite(d.getTime())) return "";
       const pad = n => String(n).padStart(2, "0");
       const year = d.getFullYear();
       const month = pad(d.getMonth() + 1);
@@ -1008,6 +1143,20 @@ function renderStats(data, selectedDate, salesData = {}) {
       const hours = pad(d.getHours());
       const mins = pad(d.getMinutes());
       return `${year}-${month}-${day}T${hours}:${mins}`;
+    }
+
+    function defaultForceClockOutValue(shift) {
+      const clockIn = new Date(shift?.clockInAt);
+      if (!Number.isFinite(clockIn.getTime())) return "";
+
+      const fourPmSameDay = new Date(clockIn);
+      fourPmSameDay.setHours(16, 0, 0, 0);
+
+      if (fourPmSameDay.getTime() > clockIn.getTime()) {
+        return toLocalDateTimeValue(fourPmSameDay.toISOString());
+      }
+
+      return toLocalDateTimeValue(new Date().toISOString());
     }
 
     function toIsoFromLocal(value) {
@@ -1020,27 +1169,39 @@ function renderStats(data, selectedDate, salesData = {}) {
     saveLocalControls();
 
     const date = els.date.value;
+    const managerPin = getManagerPin();
+
+    if (!managerPin) {
+      setStatus("Enter manager PIN, then load admin.", "warn");
+      return;
+    }
+
     els.now.textContent = centralNowLabel();
 
     const qs = new URLSearchParams();
+    qs.set("mode", "admin");
     if (date) qs.set("date", date);
     qs.set("t", Date.now());
 
     const [data, salesData] = await Promise.all([
-      fetchJson(`${API_URL}?${qs.toString()}`),
+      fetchJson(`${API_URL}?${qs.toString()}`, {
+        headers: { "x-delish-manager-pin": managerPin }
+      }),
       fetchSales(date)
     ]);
 
     currentData = data;
+    currentSalesData = salesData;
 
     renderStats(data, date, salesData);
     renderEmployeeTotals(data.summary);
     renderShifts(data.shifts || [], date);
     renderPayrollTurnIns(data.payrollTurnIns || []);
     renderEmployeeOptions(data.employees || []);
+    renderEmployeeRates(data.employeeDetails || []);
     renderLive(data.active || []);
 
-    els.csvLink.href = `${API_URL}?mode=csv${date ? `&date=${encodeURIComponent(date)}` : ""}`;
+    els.csvLink.href = "#";
 
    const activeCount = (data.active || []).length;
 if (activeCount >= 4) {
@@ -1062,10 +1223,12 @@ if (activeCount >= 4) {
       const managerPin = getManagerPin();
       const name = (els.newEmployeeName.value || "").trim();
       const pin = (els.newEmployeePin.value || "").trim();
+      const hourlyRate = Number(els.newEmployeeRate.value || 0);
 
       if (!managerPin) return setStatus("Manager PIN required.", "warn");
       if (!name) return setStatus("Enter employee name.", "warn");
       if (!pin) return setStatus("Enter employee PIN.", "warn");
+      if (!Number.isFinite(hourlyRate) || hourlyRate < 0) return setStatus("Enter a valid hourly rate.", "warn");
 
       try {
         await fetchJson(API_URL, {
@@ -1074,16 +1237,51 @@ if (activeCount >= 4) {
             action: "add_employee",
             managerPin,
             name,
-            pin
+            pin,
+            hourlyRate
           })
         });
 
         els.newEmployeeName.value = "";
         els.newEmployeePin.value = "";
+        els.newEmployeeRate.value = "12.00";
         setStatus(`${name} added.`, "good");
         await loadAdmin();
       } catch (err) {
         setStatus(err.message || "Unable to add employee.", "bad");
+      }
+    }
+
+    async function updateEmployeeRate(name, button) {
+      const managerPin = getManagerPin();
+      if (!managerPin) return setStatus("Manager PIN required.", "warn");
+
+      const rateEl = document.querySelector(`[data-employee-rate="${CSS.escape(name)}"]`);
+      const hourlyRate = Number(rateEl?.value || 0);
+
+      if (!Number.isFinite(hourlyRate) || hourlyRate < 0) {
+        return setStatus("Enter a valid hourly rate.", "warn");
+      }
+
+      if (button) button.disabled = true;
+
+      try {
+        await fetchJson(API_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "update_employee_rate",
+            managerPin,
+            name,
+            hourlyRate,
+            date: els.date.value
+          })
+        });
+
+        setStatus(`${name} rate updated.`, "good");
+        await loadAdmin();
+      } catch (err) {
+        setStatus(err.message || "Unable to update rate.", "bad");
+        if (button) button.disabled = false;
       }
     }
 
@@ -1165,12 +1363,55 @@ if (activeCount >= 4) {
       }
     }
 
+    async function forceClockOut(name, button) {
+      const managerPin = getManagerPin();
+      if (!managerPin) return setStatus("Manager PIN required.", "warn");
+
+      const outEl = document.querySelector(`[data-force-out="${CSS.escape(name)}"]`);
+      const clockOutAt = toIsoFromLocal(outEl?.value || "");
+
+      if (!clockOutAt) {
+        return setStatus("Clock out time is required.", "warn");
+      }
+
+      const ok = window.confirm(`Force clock out ${name}?`);
+      if (!ok) return;
+
+      if (button) button.disabled = true;
+
+      try {
+        await fetchJson(API_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "force_clock_out",
+            managerPin,
+            name,
+            clockOutAt,
+            date: els.date.value,
+            device: "Time Clock Admin"
+          })
+        });
+
+        setStatus(`${name} force clocked out.`, "good");
+        await loadAdmin();
+      } catch (err) {
+        setStatus(err.message || "Unable to force clock out.", "bad");
+        if (button) button.disabled = false;
+      }
+    }
+
     document.addEventListener("click", async (e) => {
       const saveId = e.target?.getAttribute("data-save-shift");
       const deleteId = e.target?.getAttribute("data-delete-shift");
+      const forceName = e.target?.getAttribute("data-force-clock-out");
+      const rateName = e.target?.getAttribute("data-save-rate");
 
       if (saveId) {
         await saveShift(saveId);
+      }
+
+      if (rateName) {
+        await updateEmployeeRate(rateName, e.target);
       }
 
       if (deleteId) {
@@ -1178,20 +1419,75 @@ if (activeCount >= 4) {
         if (!ok) return;
         await deleteShift(deleteId);
       }
+
+      if (forceName) {
+        await forceClockOut(forceName, e.target);
+      }
     });
 
     els.loadBtn.addEventListener("click", loadAdmin);
     els.addEmployeeBtn.addEventListener("click", addEmployee);
     els.deleteEmployeeBtn.addEventListener("click", deleteEmployee);
-    els.sales.setAttribute("readonly", "readonly");
-els.sales.addEventListener("focus", () => {
-  setStatus("Sales is now pulled from Delish order data.", "good");
-});
-    els.hourlyRate.addEventListener("input", async () => {
-  saveLocalControls();
-  const salesData = await fetchSales(els.date.value);
-  renderStats(currentData, els.date.value, salesData);
-});
+    els.csvLink.addEventListener("click", async (event) => {
+      event.preventDefault();
+
+      const managerPin = getManagerPin();
+      if (!managerPin) {
+        setStatus("Manager PIN required to export CSV.", "warn");
+        return;
+      }
+
+      try {
+        const date = els.date.value;
+        const res = await fetch(API_URL, {
+          method: "POST",
+          cache: "no-store",
+          headers: {
+            "Content-Type": "application/json",
+            "x-delish-manager-pin": managerPin
+          },
+          body: JSON.stringify({
+            action: "export_csv",
+            date
+          })
+        });
+
+        const text = await res.text();
+        if (!res.ok) {
+          let error = "Unable to export CSV.";
+          try {
+            error = JSON.parse(text).error || error;
+          } catch {}
+          throw new Error(error);
+        }
+
+        const blob = new Blob([text], { type: "text/csv;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `delish-timeclock-${date || "all"}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        setStatus("CSV exported.", "good");
+      } catch (err) {
+        setStatus(err.message || "Unable to export CSV.", "bad");
+      }
+    });
+    els.sales.addEventListener("focus", () => {
+      if (currentSalesData.failed) {
+        setStatus("Enter daily sales manually while live order sales is unavailable.", "warn");
+      } else {
+        setStatus("Sales is pulled from Delish order data. Manual entry is used only if live sales fails.", "good");
+      }
+    });
+    els.sales.addEventListener("input", () => {
+      saveLocalControls();
+      if (currentSalesData.failed) {
+        renderStats(currentData, els.date.value, currentSalesData);
+      }
+    });
     restoreLocalControls();
     els.date.value = centralDateInputValue();
 

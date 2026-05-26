@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../../lib/supabase/server";
+import { checkRateLimit, isValidSlug, recordAttempt } from "../../../../lib/utils";
 
 // Convert "HH:MM" to total minutes from midnight
 function timeToMinutes(t: string): number {
@@ -27,23 +28,58 @@ export async function GET(
   { params }: { params: Promise<{ shopSlug: string }> }
 ) {
   const { shopSlug } = await params;
+  if (!isValidSlug(shopSlug)) {
+    return NextResponse.json({ ok: false, error: "Invalid shop" }, { status: 400 });
+  }
+
+  // Rate limit: 60 checks per 15 min per IP per shop (prevents slot scraping)
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
+  recordAttempt(`avail:${shopSlug}:${ip}`);
+  const { limited } = await checkRateLimit(`avail:${shopSlug}:${ip}`, 60);
+  if (limited) {
+    return NextResponse.json({ ok: false, error: "Too many requests." }, { status: 429 });
+  }
+
   const { searchParams } = new URL(req.url);
 
   const barberSlug = searchParams.get("barber");
   const date = searchParams.get("date"); // YYYY-MM-DD
   const durationStr = searchParams.get("duration"); // minutes
+  const excludeBookingId = searchParams.get("excludeBooking") ?? null;
 
   if (!barberSlug || !date || !durationStr) {
     return NextResponse.json({ ok: false, error: "Missing barber, date, or duration" }, { status: 400 });
+  }
+
+  if (!isValidSlug(barberSlug)) {
+    return NextResponse.json({ ok: false, error: "Invalid barber" }, { status: 400 });
   }
 
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
     return NextResponse.json({ ok: false, error: "Invalid date format" }, { status: 400 });
   }
 
-  const duration = parseInt(durationStr);
-  if (isNaN(duration) || duration < 1) {
+  // Enforce past-date and max 90-day booking window
+  const requestedDate = new Date(`${date}T12:00:00`);
+  const todayUTC = new Date();
+  todayUTC.setUTCHours(0, 0, 0, 0);
+  const yesterdayUTC = new Date(todayUTC.getTime() - 1); // anything before today
+  if (requestedDate < yesterdayUTC) {
+    return NextResponse.json({ ok: false, closed: true, slots: [], error: "Cannot book appointments in the past." });
+  }
+  const maxAllowed = new Date();
+  maxAllowed.setDate(maxAllowed.getDate() + 90);
+  if (requestedDate > maxAllowed) {
+    return NextResponse.json({ ok: false, closed: true, slots: [], error: "Bookings can only be made up to 90 days in advance." });
+  }
+
+  const duration = parseInt(durationStr, 10);
+  if (isNaN(duration) || duration < 1 || duration > 480) {
     return NextResponse.json({ ok: false, error: "Invalid duration" }, { status: 400 });
+  }
+
+  if (excludeBookingId && !/^[0-9a-f-]{16,80}$/i.test(excludeBookingId)) {
+    return NextResponse.json({ ok: false, error: "Invalid exclude booking" }, { status: 400 });
   }
 
   // Get shop
@@ -111,18 +147,38 @@ export async function GET(
     .eq("key", "booking_rules")
     .single();
 
-  const slotInterval: number = (rulesSetting?.value_json as { slot_interval_minutes?: number } | null)?.slot_interval_minutes ?? 30;
+  const rules = rulesSetting?.value_json as { slot_interval_minutes?: number; min_lead_time_minutes?: number } | null;
+  const slotInterval: number = rules?.slot_interval_minutes ?? 30;
+  const minLeadMinutes: number = rules?.min_lead_time_minutes ?? 120; // default 2 hours
 
-  // Get existing bookings for this barber on this date
-  const { data: existingBookings } = await supabaseServer
+  // Get existing bookings for this barber on this date (exclude current booking when rescheduling)
+  let bookingsQuery = supabaseServer
     .from("bookings")
     .select("starts_at, ends_at")
     .eq("barber_id", barber.id)
     .eq("appointment_date", date)
-    .in("status", ["pending", "confirmed"]);
+    .in("status", ["pending", "confirmed", "pending_approval", "counter_proposed", "awaiting_payment"]);
+
+  if (excludeBookingId) bookingsQuery = bookingsQuery.neq("id", excludeBookingId);
+
+  const { data: existingBookings } = await bookingsQuery;
+
+  // Also block any blocked_times for this barber (or shop-wide blocks) on this date
+  const { data: blockedTimes } = await supabaseServer
+    .from("blocked_times")
+    .select("starts_at, ends_at")
+    .eq("shop_id", shop.id)
+    .or(`barber_id.eq.${barber.id},barber_id.is.null`)
+    .lte("starts_at", `${date}T23:59:59`)
+    .gte("ends_at", `${date}T00:00:00`);
 
   // Parse existing bookings into minute ranges
-  const bookedRanges = (existingBookings ?? []).map((b) => {
+  const allBlocked = [
+    ...(existingBookings ?? []),
+    ...(blockedTimes ?? []),
+  ];
+
+  const bookedRanges = allBlocked.map((b) => {
     const start = new Date(b.starts_at);
     const end = new Date(b.ends_at);
     // Convert UTC ISO to local minutes-from-midnight for this date
@@ -141,11 +197,14 @@ export async function GET(
   const openMinutes = timeToMinutes(hoursRow.open_time);
   const closeMinutes = timeToMinutes(hoursRow.close_time);
 
-  // Figure out "now" in shop-naive minutes (for filtering past slots on today)
+  // Figure out "now" in the shop's local timezone (times are stored as naive-UTC clock strings)
   const nowUTC = new Date();
-  const todayStr = `${nowUTC.getUTCFullYear()}-${String(nowUTC.getUTCMonth() + 1).padStart(2, "0")}-${String(nowUTC.getUTCDate()).padStart(2, "0")}`;
+  const shopTz = shop.timezone ?? "America/Chicago";
+  // toLocaleString in the shop's timezone gives us the local wall-clock time
+  const shopNow = new Date(nowUTC.toLocaleString("en-US", { timeZone: shopTz }));
+  const todayStr = `${shopNow.getFullYear()}-${String(shopNow.getMonth() + 1).padStart(2, "0")}-${String(shopNow.getDate()).padStart(2, "0")}`;
   const isToday = date === todayStr;
-  const nowMinutes = isToday ? nowUTC.getUTCHours() * 60 + nowUTC.getUTCMinutes() + 30 : 0; // +30 min lead time
+  const nowMinutes = isToday ? shopNow.getHours() * 60 + shopNow.getMinutes() + minLeadMinutes : 0;
 
   const slots: { time: string; label: string }[] = [];
 

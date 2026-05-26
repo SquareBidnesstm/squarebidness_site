@@ -17,7 +17,7 @@ export async function GET(
     .from("shops")
     .select("id")
     .eq("slug", shopSlug)
-    .single();
+    .maybeSingle();
 
   if (!shop) {
     return NextResponse.json({ ok: false, error: "Shop not found" }, { status: 404 });
@@ -30,7 +30,8 @@ export async function GET(
     .order("day_of_week");
 
   if (error) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    console.error("[admin/hours GET] DB error:", error);
+    return NextResponse.json({ ok: false, error: "An unexpected error occurred. Please try again." }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true, hours: hours ?? [] });
@@ -51,7 +52,7 @@ export async function PUT(
     .from("shops")
     .select("id")
     .eq("slug", shopSlug)
-    .single();
+    .maybeSingle();
 
   if (!shop) {
     return NextResponse.json({ ok: false, error: "Shop not found" }, { status: 404 });
@@ -71,6 +72,20 @@ export async function PUT(
     return NextResponse.json({ ok: false, error: "Invalid hours payload" }, { status: 400 });
   }
 
+  // Validate open < close for each non-closed day
+  const timeRe = /^\d{2}:\d{2}$/;
+  const toMins = (t: string) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
+  for (const h of hours) {
+    if (!h.is_closed) {
+      if (!h.open_time || !h.close_time || !timeRe.test(h.open_time) || !timeRe.test(h.close_time)) {
+        return NextResponse.json({ ok: false, error: `Invalid time format for day ${h.day_of_week}` }, { status: 400 });
+      }
+      if (toMins(h.open_time) >= toMins(h.close_time)) {
+        return NextResponse.json({ ok: false, error: `Open time must be before close time (day ${h.day_of_week})` }, { status: 400 });
+      }
+    }
+  }
+
   // Upsert each day
   const upsertRows = hours.map((h) => ({
     shop_id: shop.id,
@@ -85,7 +100,8 @@ export async function PUT(
     .upsert(upsertRows, { onConflict: "shop_id,day_of_week" });
 
   if (error) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    console.error("[admin/hours PUT] DB error:", error);
+    return NextResponse.json({ ok: false, error: "An unexpected error occurred. Please try again." }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true });

@@ -1,5 +1,6 @@
 // FILE: /api/delish/complete-order.js
 import { Redis } from "@upstash/redis";
+import { requireDelishOperatorAuth } from "../_lib/delish-operator-auth.js";
 import { sendDelishSms } from "../_lib/send-delish-sms.js";
 
 function normalizeUsPhone(phone) {
@@ -32,6 +33,8 @@ export default async function handler(req, res) {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ ok: false, error: "Method not allowed." });
   }
+
+  if (!requireDelishOperatorAuth(req, res)) return;
 
   try {
     const { id } = req.body || {};

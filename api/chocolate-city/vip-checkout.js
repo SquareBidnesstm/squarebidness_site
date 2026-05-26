@@ -1,41 +1,16 @@
-const KEY = "chocolate-city:vip:bookings";
-
-const PACKAGES = {
-  section_one: {
-    name: "Section One",
-    fullPrice: 300,
-    price: 300,
-    description: "6 bands, 10 Vegas Bomb shots, 4 waters, VIP parking, no wait in line."
-  },
-  section_two: {
-    name: "Section Two",
-    fullPrice: 400,
-    price: 400,
-    description: "6 bands, 10 Vegas Bomb shots, 4 waters, VIP parking, no wait in line, 1 premium bottle of choice."
-  },
-  city_section: {
-    name: "The City Section",
-    fullPrice: 650,
-    price: 650,
-    description: "10 bands, 10 Vegas Bomb shots, 4 waters, 2 premium bottles, 5-beer bucket, hurricane bottle, VIP parking, no wait in line."
-  }
-};
-
-async function redis(command, ...args) {
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-
-  if (!url || !token) throw new Error("Missing Upstash env vars");
-
-  const res = await fetch(`${url}/${command}/${args.map(encodeURIComponent).join("/")}`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-
-  if (!res.ok) throw new Error(`Redis error ${res.status}`);
-  return res.json();
-}
+import {
+  acquireVipHold,
+  getVipEventLabel,
+  getVipPackage,
+  normalizeVipEventDate,
+  refreshVipHold,
+  releaseVipHold,
+  sanitizeMetadataValue
+} from "../_lib/chocolate-city-vip.js";
 
 export default async function handler(req, res) {
+  let hold = null;
+
   try {
     if (req.method !== "POST") {
       return res.status(405).json({ ok: false, error: "Method not allowed" });
@@ -47,12 +22,11 @@ export default async function handler(req, res) {
       return res.status(500).json({ ok: false, error: "Stripe key missing" });
     }
 
-    const Stripe = (await import("stripe")).default;
-    const stripe = new Stripe(stripeKey);
-
     const body = req.body || {};
-
-    const customerName = String(body.customerName || "").trim();
+    const packageId = String(body.packageId || "");
+    const eventDate = normalizeVipEventDate(body.eventDate);
+    const selectedPackage = getVipPackage(packageId);
+    const customerName = sanitizeMetadataValue(body.customerName, 80);
 
     if (!customerName) {
       return res.status(400).json({
@@ -61,8 +35,6 @@ export default async function handler(req, res) {
       });
     }
 
-    const selectedPackage = PACKAGES[body.packageId];
-
     if (!selectedPackage) {
       return res.status(400).json({
         ok: false,
@@ -70,15 +42,17 @@ export default async function handler(req, res) {
       });
     }
 
-    const data = await redis("GET", KEY);
-    const bookings = data?.result ? JSON.parse(data.result) : [];
+    hold = await acquireVipHold({ packageId, customerName, eventDate });
 
-    if (bookings.length >= 2) {
+    if (!hold) {
       return res.status(409).json({
         ok: false,
-        error: "VIP sections are sold out for this night."
+        error: "VIP sections are sold out or currently being checked out."
       });
     }
+
+    const Stripe = (await import("stripe")).default;
+    const stripe = new Stripe(stripeKey);
 
     const successUrl =
       process.env.CHOCOLATE_CITY_VIP_SUCCESS_URL ||
@@ -92,6 +66,7 @@ export default async function handler(req, res) {
       mode: "payment",
       success_url: `${successUrl}?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: cancelUrl,
+      expires_at: Math.floor(Date.now() / 1000) + (31 * 60),
       phone_number_collection: { enabled: true },
       line_items: [
         {
@@ -100,26 +75,33 @@ export default async function handler(req, res) {
             currency: "usd",
             unit_amount: selectedPackage.price * 100,
             product_data: {
-              name: `Chocolate City VIP Section — ${selectedPackage.name}`,
+              name: `Chocolate City VIP Section - ${selectedPackage.name}`,
               description: selectedPackage.description
             }
           }
         }
       ],
       metadata: {
-        business: "Chocolate City Lounge LLC",
-        packageId: body.packageId,
-        packageName: selectedPackage.name,
-        fullPrice: String(selectedPackage.fullPrice),
-deposit: String(selectedPackage.price),
-remainingBalance: "0",
-customerName,
-type: "vip_deposit"
+        type: "vip_deposit",
+        v: "1",
+        packageId,
+        eventDate,
+        eventLabel: getVipEventLabel(eventDate),
+        holdId: hold.holdId,
+        holdSlot: String(hold.slot),
+        customerName
       }
     });
 
+    await refreshVipHold(hold, session.id);
+    hold = null;
+
     return res.status(200).json({ ok: true, url: session.url });
   } catch (err) {
-    return res.status(500).json({ ok: false, error: err.message });
+    if (hold) {
+      await releaseVipHold(hold).catch(() => {});
+    }
+
+    return res.status(500).json({ ok: false, error: "Unable to start VIP checkout." });
   }
 }

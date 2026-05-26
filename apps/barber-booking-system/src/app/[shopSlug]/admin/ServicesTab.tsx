@@ -29,8 +29,24 @@ export default function ServicesTab({ shopSlug }: { shopSlug: string }) {
   const [newService, setNewService] = useState<EditState>({ name: "", price: "", duration_minutes: "" });
   const [addingSaving, setAddingSaving] = useState(false);
 
+  const [depositEnabled, setDepositEnabled] = useState(true);
+  const [depositAmount, setDepositAmount] = useState("15");
+  const [depositType, setDepositType] = useState<"fixed" | "percent">("fixed");
+  const [depositSaving, setDepositSaving] = useState(false);
+  const [depositSaved, setDepositSaved] = useState(false);
+
   useEffect(() => {
     load();
+    fetch(`/api/${shopSlug}/admin/deposit-settings`)
+      .then(r => r.json())
+      .then(d => {
+        if (d.ok && d.settings) {
+          setDepositEnabled(d.settings.enabled ?? true);
+          setDepositAmount(String(d.settings.amount ?? 20));
+          setDepositType(d.settings.type ?? "fixed");
+        }
+      })
+      .catch(() => {});
   }, [shopSlug]);
 
   async function load() {
@@ -105,6 +121,19 @@ export default function ServicesTab({ shopSlug }: { shopSlug: string }) {
       setAddingNew(false);
     }
     setAddingSaving(false);
+  }
+
+  async function saveDepositSettings() {
+    setDepositSaving(true);
+    setDepositSaved(false);
+    await fetch(`/api/${shopSlug}/admin/deposit-settings`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ enabled: depositEnabled, amount: parseFloat(depositAmount) || 0, type: depositType }),
+    });
+    setDepositSaving(false);
+    setDepositSaved(true);
+    setTimeout(() => setDepositSaved(false), 2500);
   }
 
   if (loading) return <div style={emptyBox}>Loading services...</div>;
@@ -281,6 +310,76 @@ export default function ServicesTab({ shopSlug }: { shopSlug: string }) {
       {services.length === 0 && !addingNew && (
         <div style={emptyBox}>No services yet. Add one above.</div>
       )}
+
+      {/* Deposit Settings */}
+      <div style={{ marginTop: 40 }}>
+        <h3 style={{ fontSize: 22, fontWeight: 900, marginBottom: 6 }}>Deposit Settings</h3>
+        <p style={{ color: "#666", fontSize: 13, marginBottom: 20 }}>
+          When on, customers must pay a deposit to confirm their booking. Turn off for free / no-deposit scheduling.
+        </p>
+
+        <div style={{ ...cardStyle, border: depositEnabled ? "1px solid #3a3a00" : "1px solid #232323" }}>
+          {/* Toggle row */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: depositEnabled ? 20 : 0 }}>
+            <div>
+              <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 2 }}>Require Deposit</div>
+              <div style={{ color: "#666", fontSize: 13 }}>
+                {depositEnabled ? "Customers must pay a deposit to book" : "Customers book with no deposit required"}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setDepositEnabled(v => !v)}
+              style={{
+                width: 52, height: 28, borderRadius: 14, border: "none", cursor: "pointer",
+                background: depositEnabled ? "#d4af37" : "#2a2a2a",
+                position: "relative", transition: "background 0.2s", flexShrink: 0,
+              }}
+            >
+              <span style={{
+                position: "absolute", top: 3, left: depositEnabled ? 26 : 3,
+                width: 22, height: 22, borderRadius: "50%",
+                background: depositEnabled ? "#000" : "#666",
+                transition: "left 0.2s",
+              }} />
+            </button>
+          </div>
+
+          {depositEnabled && (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              <div>
+                <div style={labelStyle}>Amount</div>
+                <input
+                  type="number"
+                  value={depositAmount}
+                  onChange={e => setDepositAmount(e.target.value)}
+                  min="0"
+                  step="0.01"
+                  style={inputStyle}
+                />
+              </div>
+              <div>
+                <div style={labelStyle}>Type</div>
+                <select
+                  value={depositType}
+                  onChange={e => setDepositType(e.target.value as "fixed" | "percent")}
+                  style={inputStyle}
+                >
+                  <option value="fixed">Fixed ($)</option>
+                  <option value="percent">Percent (%)</option>
+                </select>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div style={{ marginTop: 14, display: "flex", gap: 12, alignItems: "center" }}>
+          <button onClick={saveDepositSettings} disabled={depositSaving} style={{ ...goldButton, opacity: depositSaving ? 0.6 : 1 }}>
+            {depositSaving ? "Saving..." : "Save Deposit Settings"}
+          </button>
+          {depositSaved && <span style={{ color: "#5cd600", fontSize: 13, fontWeight: 700 }}>Saved</span>}
+        </div>
+      </div>
     </div>
   );
 }

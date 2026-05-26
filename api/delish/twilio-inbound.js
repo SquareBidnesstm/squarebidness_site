@@ -30,6 +30,37 @@ function parseFormBody(raw) {
   return data;
 }
 
+function firstHeader(value) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function getRequestUrl(req) {
+  if (process.env.TWILIO_INBOUND_WEBHOOK_URL) {
+    return process.env.TWILIO_INBOUND_WEBHOOK_URL;
+  }
+
+  const proto = firstHeader(req.headers["x-forwarded-proto"]) || "https";
+  const host = firstHeader(req.headers["x-forwarded-host"]) ||
+    firstHeader(req.headers.host);
+
+  if (!host) return "";
+
+  return `${proto}://${host}${req.url || ""}`;
+}
+
+function isValidTwilioSignature(req, body) {
+  const authToken = process.env.TWILIO_AUTH_TOKEN;
+
+  if (!authToken) return true;
+
+  const signature = firstHeader(req.headers["x-twilio-signature"]) || "";
+  const requestUrl = getRequestUrl(req);
+
+  if (!signature || !requestUrl) return false;
+
+  return twilio.validateRequest(authToken, signature, requestUrl, body);
+}
+
 function normalizePhone(phone) {
   const digits = String(phone || "").replace(/\D/g, "");
 
@@ -64,6 +95,11 @@ export default async function handler(req, res) {
   try {
     const rawBody = await readRawBody(req);
     const body = parseFormBody(rawBody);
+
+    if (!isValidTwilioSignature(req, body)) {
+      console.error("DELISH TWILIO INBOUND SIGNATURE INVALID");
+      return res.status(403).send("Forbidden");
+    }
 
     const from = normalizePhone(body.From || "");
     const incomingText = String(body.Body || "").trim().toUpperCase();

@@ -213,6 +213,31 @@
   margin-top: 10px;
 }
 
+    .flashSaleSection{
+      display:none;
+      margin-top:24px;
+      padding:16px;
+      border-radius:16px;
+      background:linear-gradient(180deg,rgba(90,34,34,.42),rgba(18,18,18,.96));
+      border:1px solid rgba(255,95,95,.38);
+      box-shadow:0 18px 54px rgba(0,0,0,.28);
+    }
+    .flashSaleSection.is-visible{display:block}
+    .flashSaleKicker{
+      display:inline-flex;
+      padding:6px 10px;
+      border-radius:999px;
+      background:#d93636;
+      color:#fff;
+      font-size:12px;
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      margin-bottom:8px;
+    }
+    .flashSaleSection h2{margin-bottom:4px}
+    .flashSaleSection .menuItem{border-color:rgba(255,255,255,.12)}
+
     .qtyWrap.is-disabled {
       opacity:.55;
       pointer-events:none;
@@ -249,6 +274,13 @@
   </div>
 
   <div class="liveNote" id="orderingBanner">Loading today’s ordering status...</div>
+
+  <div class="flashSaleSection" id="flashSaleSection">
+    <div class="flashSaleKicker">Special Items</div>
+    <h2 id="flashSaleTitle">Special Items</h2>
+    <div class="menuNote" id="flashSaleMessage">Limited-time specials available now.</div>
+    <div id="flashSaleItems"></div>
+  </div>
 
   <div class="section">
     <input id="customerName" placeholder="Full Name" />
@@ -330,6 +362,7 @@
   let EXTRA_SIDES_BASE = [];
   let EXTRA_SIDES_FRIDAY_SUNDAY = [];
   let LAGNIAPPE = [];
+  let FLASH_SALE = null;
 
   const customerName = document.getElementById("customerName");
   const customerPhone = document.getElementById("customerPhone");
@@ -347,6 +380,10 @@
   const orderingBanner = document.getElementById("orderingBanner");
   const lagniappeItems = document.getElementById("lagniappeItems");
   const taxDisplay = document.getElementById("taxDisplay");
+  const flashSaleSection = document.getElementById("flashSaleSection");
+  const flashSaleTitle = document.getElementById("flashSaleTitle");
+  const flashSaleMessage = document.getElementById("flashSaleMessage");
+  const flashSaleItems = document.getElementById("flashSaleItems");
 
   let currentDay = null;
   let currentMode = "closed";
@@ -382,6 +419,19 @@
 
     orderingStatus = data;
     return data;
+  }
+
+  async function loadFlashSale() {
+    const res = await fetch(`/api/delish/flash-sale/?t=${Date.now()}`, { cache: "no-store" });
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || !data.ok) {
+      FLASH_SALE = null;
+      return null;
+    }
+
+    FLASH_SALE = data.sale || null;
+    return FLASH_SALE;
   }
 
   async function loadPickupWindows() {
@@ -484,6 +534,7 @@
         today: now.weekday,
         parts: now,
         openNow: false,
+        orderingMode: "auto",
         reason: "status_not_loaded",
         openTime: "",
         closeTime: ""
@@ -495,6 +546,7 @@
       today: orderingStatus.today,
       parts: orderingStatus.now,
       openNow: orderingStatus.openNow,
+      orderingMode: orderingStatus.orderingMode || orderingStatus.mode || "auto",
       reason: orderingStatus.reason,
       openTime: orderingStatus.openTime,
       closeTime: orderingStatus.closeTime
@@ -503,6 +555,11 @@
 
    function updateOrderingBanner(state) {
   if (!orderingBanner) return;
+
+  if (isFlashSaleActiveClient()) {
+    orderingBanner.textContent = FLASH_SALE.message || "Flash sale is live. Limited plates available for pickup.";
+    return;
+  }
 
   if (MENU_OVERRIDES?.customerMessage) {
     orderingBanner.textContent = MENU_OVERRIDES.customerMessage;
@@ -526,7 +583,9 @@
   }
 
   if (state.reason === "manual_closed") {
-    orderingBanner.textContent = "Ordering is currently paused.";
+    orderingBanner.textContent = state.orderingMode === "closed"
+      ? "Online ordering is closed today."
+      : "Ordering is currently paused.";
     return;
   }
 
@@ -551,6 +610,98 @@
     item => isItemEnabled(item.id) && !isItemSoldOut(item.id)
   );
 }
+
+  function getLimitedMenuOverride() {
+    const limitedMenu = MENU_OVERRIDES?.limitedMenu;
+    return limitedMenu?.active === true ? limitedMenu : null;
+  }
+
+  function buildLimitedMenuItem(limitedMenu) {
+    return {
+      id: limitedMenu.itemId || "friday_fried_catfish",
+      name: limitedMenu.name || "Catfish",
+      price: Number(limitedMenu.price || 12.99),
+      desc: limitedMenu.desc || "Served with Potato Salad, Green Beans, and a roll.",
+      baseOptions: [],
+      sideSelectionRequired: limitedMenu.hideSides === false
+    };
+  }
+
+  function getActiveMenuForDay(day) {
+    const limitedMenu = getLimitedMenuOverride();
+    if (limitedMenu) {
+      return {
+        title: "Delish — Limited Menu",
+        note: "Today only. One plate available while supplies last.",
+        mains: [buildLimitedMenuItem(limitedMenu)]
+      };
+    }
+
+    return MENU_BY_DAY[day] || null;
+  }
+
+  function isFlashSaleActiveClient() {
+    return !!(FLASH_SALE && FLASH_SALE.active && Array.isArray(FLASH_SALE.items) && FLASH_SALE.items.length);
+  }
+
+  function getFlashSaleItems() {
+    return isFlashSaleActiveClient() ? FLASH_SALE.items : [];
+  }
+
+  function escapeHtml(value) {
+    return String(value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function renderFlashSaleItem(item) {
+    const itemName = escapeHtml(item.name);
+    const description = escapeHtml(item.description);
+    return `
+      <div class="menuItem">
+        <div class="menuTop">
+          <div class="menuCopy">
+            <span>SPECIAL - ${itemName} ($${Number(item.price).toFixed(2)})</span>
+            ${description ? `<small>${description}</small>` : item.limit ? `<small>Limited quantity: ${Number(item.limit)} available.</small>` : `<small>Limited-time special item.</small>`}
+          </div>
+          <div class="qtyWrap">
+            <button type="button" class="qtyBtn" data-target="${item.flashId}Qty" data-action="decrease">−</button>
+            <input type="number" min="0" max="${item.limit ? Number(item.limit) : 20}" value="0" id="${item.flashId}Qty" class="qty" />
+            <button type="button" class="qtyBtn" data-target="${item.flashId}Qty" data-action="increase">+</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderFlashSale() {
+    if (!flashSaleSection || !flashSaleItems) return;
+
+    if (!isFlashSaleActiveClient()) {
+      flashSaleSection.classList.remove("is-visible");
+      flashSaleItems.innerHTML = "";
+      return;
+    }
+
+    flashSaleTitle.textContent = FLASH_SALE.title || "Special Items";
+    flashSaleMessage.textContent = FLASH_SALE.message || "Limited-time specials available now.";
+    flashSaleItems.innerHTML = getFlashSaleItems().map(renderFlashSaleItem).join("");
+    flashSaleSection.classList.add("is-visible");
+
+    const windows = Array.isArray(FLASH_SALE.pickupWindows) ? FLASH_SALE.pickupWindows : [];
+    windows.forEach((label) => {
+      const exists = Array.from(pickupWindow.options).some(option => option.value === label);
+      if (!exists) {
+        pickupWindow.insertAdjacentHTML("beforeend", `<option value="${label}">${label}</option>`);
+      }
+    });
+    if (!pickupWindow.value) {
+      pickupWindow.value = windows[0] || "";
+    }
+  }
 
   function isExtraSideAllowedForDay(day) {
     const menu = MENU_BY_DAY[day];
@@ -769,13 +920,16 @@
 
  updateOrderingBanner(state);
 
-if (state.today && MENU_BY_DAY[state.today]) {
-  const menu = MENU_BY_DAY[state.today];
+if (state.today && getActiveMenuForDay(state.today)) {
+  const menu = getActiveMenuForDay(state.today);
+  const limitedMenu = getLimitedMenuOverride();
   menuDayTitle.textContent = menu.title;
   menuDayNote.textContent = "Order online, pickup on arrival · Alexandria, Louisiana";
   mainMenuNote.textContent = menu.note;
 
-  const visibleMains = (menu.mains || []).filter(item => isItemEnabled(item.id));
+  const visibleMains = limitedMenu
+    ? (menu.mains || [])
+    : (menu.mains || []).filter(item => isItemEnabled(item.id));
   mainMenuItems.innerHTML = visibleMains.map(item => renderMainItem(item, state.today)).join("");
 
   const visibleDrinks = isSectionEnabled("drinks")
@@ -783,7 +937,7 @@ if (state.today && MENU_BY_DAY[state.today]) {
     : [];
   drinkItems.innerHTML = visibleDrinks.map(renderDrinkItem).join("");
 
-if (isExtraSideAllowedForDay(state.today) && isSectionEnabled("extraSides")) {
+if (!limitedMenu && isExtraSideAllowedForDay(state.today) && isSectionEnabled("extraSides")) {
   renderSelectOptions(
     extraSideSelect,
     getExtraSidesForDay(state.today).filter(
@@ -807,7 +961,7 @@ if (isExtraSideAllowedForDay(state.today) && isSectionEnabled("extraSides")) {
   extraSideSelect.disabled = true;
 }
 
-  if (!isSectionEnabled("lagniappe")) {
+  if (limitedMenu || !isSectionEnabled("lagniappe")) {
   lagniappeItems.innerHTML = `
     <div class="menuNotice">
       Sorry, Lagniappe items are not available today.
@@ -821,6 +975,8 @@ if (isExtraSideAllowedForDay(state.today) && isSectionEnabled("extraSides")) {
   attachQtyButtons();
   attachPlateSideListeners();
   syncPlateSides();
+  renderFlashSale();
+  attachQtyButtons();
 } else if (state.reason === "not_a_service_day") {
     menuDayTitle.textContent = "Delish — Closed Today";
     menuDayNote.textContent = "Pickup Only · Alexandria, Louisiana";
@@ -836,6 +992,8 @@ if (isExtraSideAllowedForDay(state.today) && isSectionEnabled("extraSides")) {
     drinkItems.innerHTML = "";
     renderSelectOptions(extraSideSelect, [], "Extra Side (optional)");
     lagniappeItems.innerHTML = "";
+    renderFlashSale();
+    attachQtyButtons();
   } else {
     menuDayTitle.textContent = "Delish — Temporarily Unavailable";
     menuDayNote.textContent = "Pickup Only · Alexandria, Louisiana";
@@ -851,13 +1009,15 @@ if (isExtraSideAllowedForDay(state.today) && isSectionEnabled("extraSides")) {
     drinkItems.innerHTML = "";
     renderSelectOptions(extraSideSelect, [], "Extra Side (optional)");
     lagniappeItems.innerHTML = "";
+    renderFlashSale();
+    attachQtyButtons();
   }
 
   calc();
 }
 
   function getCurrentMainItems() {
-    const menu = MENU_BY_DAY[currentDay];
+    const menu = getActiveMenuForDay(currentDay);
     return menu && Array.isArray(menu.mains) ? menu.mains : [];
   }
 
@@ -944,6 +1104,26 @@ function getDrinkSelections() {
   }, []);
 }
 
+function getFlashSaleSelections() {
+  return getFlashSaleItems().reduce((items, item) => {
+    const qtyEl = document.getElementById(`${item.flashId}Qty`);
+    const qty = Number(qtyEl?.value || 0);
+
+    if (qty > 0) {
+      items.push({
+        id: item.flashId,
+        name: `FLASH SALE - ${item.name}`,
+        price: Number(item.price),
+        qty,
+        flashSale: true,
+        sourceId: item.sourceId
+      });
+    }
+
+    return items;
+  }, []);
+}
+
   function getSelectedItems() {
   const plateSelections = getPlateSelections();
   const items = plateSelections.items.map(item => ({
@@ -969,6 +1149,9 @@ function getDrinkSelections() {
 
   const lagniappeItemsSelected = getLagniappeSelections();
   items.push(...lagniappeItemsSelected);
+
+  const flashSaleItemsSelected = getFlashSaleSelections();
+  items.push(...flashSaleItemsSelected);
 
   return { items, sideNotes: plateSelections.sideNotes };
 }
@@ -1061,17 +1244,24 @@ function getDrinkSelections() {
 const plateItems = getPlateSelections().items;
 const lagniappeItemsSelected = getLagniappeSelections();
 const drinkItemsSelected = getDrinkSelections();
+const flashSaleItemsSelected = getFlashSaleSelections();
 const hasOrderItem =
   plateItems.length > 0 ||
   lagniappeItemsSelected.length > 0 ||
-  drinkItemsSelected.length > 0;
+  drinkItemsSelected.length > 0 ||
+  flashSaleItemsSelected.length > 0;
 const sidesOk = plateItems.length > 0 ? selectedPlatesHaveSides() : true;
+const flashSaleOnly =
+  flashSaleItemsSelected.length > 0 &&
+  selectedItems.length === flashSaleItemsSelected.length;
 
-    if (!state.openNow) {
+    if (!state.openNow && !isFlashSaleActiveClient()) {
       checkoutBtn.disabled = true;
 
       if (state.reason === "manual_closed") {
-        checkoutBtn.textContent = "Ordering Paused";
+        checkoutBtn.textContent = state.orderingMode === "closed"
+          ? "Closed Today"
+          : "Ordering Paused";
       } else if (state.reason === "outside_service_window") {
         checkoutBtn.textContent = "Opening Soon";
       } else {
@@ -1081,8 +1271,14 @@ const sidesOk = plateItems.length > 0 ? selectedPlatesHaveSides() : true;
       return;
     }
 
+    if (!state.openNow && isFlashSaleActiveClient() && hasOrderItem && !flashSaleOnly) {
+      checkoutBtn.disabled = false;
+      checkoutBtn.textContent = "Flash Sale Only";
+      return;
+    }
+
     if (!(nameOk && phoneOk && pickupOk && hasOrderItem && sidesOk)) {
-      checkoutBtn.disabled = true;
+      checkoutBtn.disabled = false;
       checkoutBtn.textContent = "Complete Order";
       return;
     }
@@ -1100,10 +1296,46 @@ const sidesOk = plateItems.length > 0 ? selectedPlatesHaveSides() : true;
     clearStatus();
 
     const state = getServiceState();
+    const selected = getSelectedItems();
+    const selectedItems = selected.items;
+    const plateSelections = getPlateSelections();
+    const lagniappeItemsSelected = getLagniappeSelections();
+    const drinkItemsSelected = getDrinkSelections();
+    const flashSaleItemsSelected = getFlashSaleSelections();
+    const flashSaleOnly =
+      flashSaleItemsSelected.length > 0 &&
+      selectedItems.length === flashSaleItemsSelected.length;
 
-    if (!state.openNow) {
+    if (!customerName.value.trim()) {
+      showStatus("Please enter your name.");
+      return;
+    }
+
+    if (!isValidPhone(customerPhone.value.trim())) {
+      showStatus("Please enter a valid 10-digit US phone number.");
+      return;
+    }
+
+    if (!pickupWindow.value.trim()) {
+      showStatus("Please choose a pickup time.");
+      return;
+    }
+
+    if (!plateSelections.items.length && !lagniappeItemsSelected.length && !drinkItemsSelected.length && !flashSaleItemsSelected.length) {
+      showStatus("Add at least one main plate, drink, or Lagniappe item first.");
+      return;
+    }
+
+    if (!state.openNow && isFlashSaleActiveClient() && !flashSaleOnly) {
+      showStatus("Flash sale checkout is only for flash sale plates. Remove regular menu items to continue.");
+      return;
+    }
+
+    if (!state.openNow && !flashSaleOnly) {
       if (state.reason === "manual_closed") {
-        showStatus("Online ordering is currently paused.");
+        showStatus(state.orderingMode === "closed"
+          ? "Online ordering is closed today."
+          : "Online ordering is currently paused.");
             } else if (state.reason === "outside_service_window") {
         showStatus(`Ordering is available from ${formatTo12Hour(state.openTime)} to ${formatTo12Hour(state.closeTime)}.`);
       } else if (state.reason === "not_a_service_day") {
@@ -1113,21 +1345,6 @@ const sidesOk = plateItems.length > 0 ? selectedPlatesHaveSides() : true;
       }
       return;
     }
-    if (!isValidPhone(customerPhone.value.trim())) {
-    showStatus("Please enter a valid 10-digit US phone number.");
-    return;
-  }
-
-    const selected = getSelectedItems();
-    const selectedItems = selected.items;
-   const plateSelections = getPlateSelections();
-const lagniappeItemsSelected = getLagniappeSelections();
-const drinkItemsSelected = getDrinkSelections();
-
-if (!plateSelections.items.length && !lagniappeItemsSelected.length && !drinkItemsSelected.length) {
-  showStatus("Add at least one main plate, drink, or Lagniappe item first.");
-  return;
-}
 
     if (plateSelections.items.length > 0 && !selectedPlatesHaveSides()) {
       showStatus("Each main plate requires all required selections before checkout.");
@@ -1161,6 +1378,8 @@ if (!plateSelections.items.length && !lagniappeItemsSelected.length && !drinkIte
         items: selectedItems.map(item => ({
           id: item.id,
           qty: item.qty,
+          sourceId: item.sourceId || "",
+          flashSale: item.flashSale === true,
           baseId: item.baseId || "",
           baseName: item.baseName || "",
           side1Id: item.side1Id || "",
@@ -1171,7 +1390,7 @@ if (!plateSelections.items.length && !lagniappeItemsSelected.length && !drinkIte
         subtotal,
         tax,
         total,
-        source: "delish-web"
+        source: flashSaleItemsSelected.length ? "delish-flash-sale" : "delish-web"
       };
 
       const res = await fetch("/api/delish/create-checkout/", {
@@ -1200,6 +1419,7 @@ if (!plateSelections.items.length && !lagniappeItemsSelected.length && !drinkIte
       await loadMenuOverrides();
       await loadOrderingStatus();
       await loadPickupWindows();
+      await loadFlashSale();
       applyDailyMenu();
     } catch (error) {
       console.error("DELISH INIT ERROR:", error);

@@ -184,9 +184,9 @@
     <img class="logo" src="/chocolate-city/assets/cc-icon-192.png" alt="Chocolate City Lounge logo">
 
     <div class="kicker">Paid VIP Confirmation</div>
-    <h1>VIP Reserved</h1>
+    <h1 id="pageTitle">VIP Reserved</h1>
 
-    <p class="note">
+    <p class="note" id="pageNote">
       Screenshot this confirmation. Show this page or QR code at the door.
       Your VIP section is paid in full online.
     </p>
@@ -200,6 +200,11 @@
       <div class="row">
         <div class="label">Section</div>
         <div class="value gold" id="sectionName">Loading...</div>
+      </div>
+
+      <div class="row">
+        <div class="label">VIP Night</div>
+        <div class="value" id="eventLabel">—</div>
       </div>
 
       <div class="row">
@@ -230,7 +235,7 @@
   </main>
 
   <script>
-    async function loadSession(){
+    async function loadSession(attempt = 1){
       const params = new URLSearchParams(window.location.search);
       const sessionId = params.get("session_id");
 
@@ -251,8 +256,30 @@
           return;
         }
 
+        if(!data.confirmed){
+          document.getElementById("pageTitle").textContent = "Payment Received";
+          document.getElementById("pageNote").textContent = "Your payment was received and the VIP reservation is being finalized.";
+          document.getElementById("sectionName").textContent = "Finalizing reservation";
+
+          if(attempt < 5){
+            setTimeout(() => loadSession(attempt + 1), 2000);
+            return;
+          }
+
+          document.getElementById("pageNote").textContent = "Your payment was received, but the reservation could not be confirmed yet. Please see staff with your Stripe receipt.";
+          document.getElementById("sectionName").textContent = data.packageName || "VIP Section";
+          document.getElementById("customerName").textContent = data.customerName || "—";
+          document.getElementById("eventLabel").textContent = data.eventLabel || data.eventDate || "—";
+          document.getElementById("deposit").textContent = `$${data.deposit || data.fullPrice || "0"}`;
+          document.getElementById("remaining").textContent = `$${data.remaining || "0"}`;
+          return;
+        }
+
+        document.getElementById("pageTitle").textContent = "VIP Reserved";
+        document.getElementById("pageNote").textContent = "Screenshot this confirmation. Show this page or QR code at the door. Your VIP section is paid in full online.";
         document.getElementById("customerName").textContent = data.customerName || "—";
         document.getElementById("sectionName").textContent = data.packageName || "VIP Section";
+        document.getElementById("eventLabel").textContent = data.eventLabel || data.eventDate || "—";
         document.getElementById("deposit").textContent = `$${data.deposit || data.fullPrice || "0"}`;
         document.getElementById("remaining").textContent = `$${data.remaining || "0"}`;
 

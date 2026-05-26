@@ -1,0 +1,93 @@
+import { NextRequest, NextResponse } from "next/server";
+import webpush from "web-push";
+import { supabaseServer } from "../../../../lib/supabase/server";
+import { getVerifiedOrganizerSlug } from "../../../../lib/auth";
+import { checkRateLimit, recordAttempt } from "../../../../lib/utils";
+
+let vapidConfigured = false;
+
+function ensureVapidConfigured(): boolean {
+  if (vapidConfigured) return true;
+  const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  const privateKey = process.env.VAPID_PRIVATE_KEY;
+  if (!publicKey || !privateKey) return false;
+  webpush.setVapidDetails("mailto:events@squarebidness.com", publicKey, privateKey);
+  vapidConfigured = true;
+  return true;
+}
+
+export async function POST(req: NextRequest) {
+  if (!ensureVapidConfigured()) {
+    return NextResponse.json({ error: "Push notifications are not configured." }, { status: 503 });
+  }
+
+  // Auth
+  const organizerSlug = await getVerifiedOrganizerSlug(req);
+  if (!organizerSlug) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { data: organizer } = await supabaseServer
+    .from("organizers").select("id").eq("slug", organizerSlug).single();
+  if (!organizer) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { eventId, title, body } = await req.json();
+  if (!eventId || !title) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+
+  // Per-event push blast rate limit: max 3 blasts per 15-min window
+  const blastKey = `push_blast:${eventId}`;
+  recordAttempt(blastKey);
+  const { limited } = await checkRateLimit(blastKey, 3);
+  if (limited) {
+    return NextResponse.json(
+      { error: "Push blast rate limit reached. Try again later." },
+      { status: 429 }
+    );
+  }
+
+  // Verify ownership
+  const { data: event } = await supabaseServer
+    .from("events").select("id, organizer_id, slug").eq("id", eventId).single();
+  if (!event || event.organizer_id !== organizer.id) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  // Fetch all push subscriptions for this event
+  const { data: subs } = await supabaseServer
+    .from("push_subscriptions")
+    .select("endpoint, p256dh, auth")
+    .eq("event_id", eventId);
+
+  if (!subs?.length) return NextResponse.json({ ok: true, sent: 0 });
+
+  const payload = JSON.stringify({
+    title,
+    body: body || "",
+    url: `/events/${event.slug}`,
+    icon: "/events-192.png",
+  });
+
+  let sent = 0;
+  const stale: string[] = [];
+
+  await Promise.allSettled(
+    subs.map(async (sub) => {
+      try {
+        await webpush.sendNotification(
+          { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+          payload
+        );
+        sent++;
+      } catch (err: any) {
+        if (err.statusCode === 404 || err.statusCode === 410) {
+          stale.push(sub.endpoint);
+        }
+      }
+    })
+  );
+
+  // Clean up expired subscriptions
+  if (stale.length > 0) {
+    await supabaseServer.from("push_subscriptions").delete().in("endpoint", stale);
+  }
+
+  return NextResponse.json({ ok: true, sent });
+}

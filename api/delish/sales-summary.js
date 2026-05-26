@@ -1,3 +1,5 @@
+import { requireDelishOperatorAuth } from "../_lib/delish-operator-auth.js";
+
 export const config = {
   runtime: "nodejs"
 };
@@ -6,19 +8,7 @@ const REDIS_URL = process.env.DELISH_UPSTASH_REDIS_REST_URL;
 const REDIS_TOKEN = process.env.DELISH_UPSTASH_REDIS_REST_TOKEN;
 const TZ = "America/Chicago";
 
-/*
-  IMPORTANT:
-  Replace ORDER_LIST_KEY with the Redis list/key your Delish order flow actually uses.
-
-  Common pattern examples:
-  - "delish:orders"
-  - "delish:orders:all"
-  - "delish:pickup_orders"
-  - whatever your kitchen/orders screen is reading from
-
-  Start with your real orders key here:
-*/
-const ORDER_LIST_KEY = "delish:orders:list"; 
+const ORDER_LIST_KEY = "delish:orders:list";
 
 function send(res, status, data) {
   res.status(status).json(data);
@@ -165,6 +155,8 @@ export default async function handler(req, res) {
         error: "Method not allowed."
       });
     }
+
+    if (!requireDelishOperatorAuth(req, res)) return;
 
     const date = String(req.query.date || "").trim();
 

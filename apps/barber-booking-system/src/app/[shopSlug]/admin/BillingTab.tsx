@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 type SubInfo = {
-  plan: "free" | "solo" | "pro";
+  plan: "free" | "solo" | "pro" | "enterprise";
   status: "free" | "active" | "past_due" | "canceled" | "incomplete";
   current_period_end: string | null;
 };
@@ -33,7 +33,7 @@ export default function BillingTab({ shopSlug }: Props) {
     load();
   }, [shopSlug]);
 
-  async function handleCheckout(plan: "solo" | "pro") {
+  async function handleCheckout(plan: "solo" | "pro" | "enterprise") {
     setWorking(true);
     setError("");
     try {
@@ -76,11 +76,12 @@ export default function BillingTab({ shopSlug }: Props) {
   if (loading) return <div style={emptyBox}>Loading billing info...</div>;
 
   const isActive = sub?.status === "active";
-  const isSolo = isActive && sub?.plan === "solo";
-  const isPro = isActive && sub?.plan === "pro";
-  const isPastDue = sub?.status === "past_due";
-  const isCanceled = sub?.status === "canceled";
-  const hasCustomer = sub?.status !== "free" && sub?.status !== "incomplete" && sub != null;
+  const isSolo       = isActive && sub?.plan === "solo";
+  const isPro        = isActive && sub?.plan === "pro";
+  const isEnterprise = isActive && sub?.plan === "enterprise";
+  const isPastDue    = sub?.status === "past_due";
+  const isCanceled   = sub?.status === "canceled";
+  const hasCustomer  = sub?.status !== "free" && sub?.status !== "incomplete" && sub != null;
 
   const periodEnd = sub?.current_period_end
     ? new Date(sub.current_period_end).toLocaleDateString("en-US", {
@@ -88,10 +89,11 @@ export default function BillingTab({ shopSlug }: Props) {
       })
     : null;
 
-  const currentPlanLabel = isPro ? "Pro" : isSolo ? "Solo" : "Free";
+  const currentPlanLabel = isEnterprise ? "Enterprise" : isPro ? "Pro" : isSolo ? "Solo" : "Free";
+  const currentPlanColor = isEnterprise ? "#a78bfa" : isPro ? "#d4af37" : isSolo ? "#5cd600" : "#fff";
 
   return (
-    <div style={{ maxWidth: 700 }}>
+    <div style={{ maxWidth: 900 }}>
       <h2 style={{ fontSize: 28, fontWeight: 900, marginBottom: 8 }}>Billing</h2>
       <p style={{ color: "#666", marginBottom: 28, fontSize: 14 }}>
         Manage your SquareBidness subscription.
@@ -100,14 +102,14 @@ export default function BillingTab({ shopSlug }: Props) {
       {/* Current plan status */}
       {(isActive || isPastDue || isCanceled) && (
         <div style={{
-          border: isPro ? "1px solid #3a3000" : isSolo ? "1px solid #1a2a1a" : "1px solid #232323",
-          background: isPro ? "#0f0c00" : isSolo ? "#0a0f0a" : "#0d0d0d",
+          border: isEnterprise ? "1px solid #3b2a6e" : isPro ? "1px solid #3a3000" : isSolo ? "1px solid #1a2a1a" : "1px solid #232323",
+          background: isEnterprise ? "#0c0a14" : isPro ? "#0f0c00" : isSolo ? "#0a0f0a" : "#0d0d0d",
           borderRadius: 20, padding: "20px 24px", marginBottom: 24,
           display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12,
         }}>
           <div>
             <div style={{ color: "#666", fontSize: 12, marginBottom: 4 }}>Current Plan</div>
-            <div style={{ fontSize: 28, fontWeight: 900, color: isPro ? "#d4af37" : isSolo ? "#5cd600" : "#fff" }}>
+            <div style={{ fontSize: 28, fontWeight: 900, color: currentPlanColor }}>
               {currentPlanLabel}
             </div>
             {isActive && periodEnd && (
@@ -130,31 +132,27 @@ export default function BillingTab({ shopSlug }: Props) {
         </div>
       )}
 
-      {/* Plan cards */}
+      {/* Plan cards — 3 columns */}
       {!isPastDue && (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14, marginBottom: 24 }}>
 
-          {/* Solo card */}
+          {/* Solo */}
           <div style={{
             border: isSolo ? "2px solid #5cd600" : "1px solid #232323",
             background: isSolo ? "#060f06" : "#0d0d0d",
-            borderRadius: 20, padding: "24px 22px",
-            display: "flex", flexDirection: "column", gap: 16,
+            borderRadius: 20, padding: "24px 20px",
+            display: "flex", flexDirection: "column", gap: 14,
           }}>
             <div>
-              <div style={{ fontSize: 11, letterSpacing: "0.2em", color: "#5cd600", textTransform: "uppercase", fontWeight: 700, marginBottom: 8 }}>
-                Solo
+              <div style={{ fontSize: 11, letterSpacing: "0.2em", color: "#5cd600", textTransform: "uppercase", fontWeight: 700, marginBottom: 8 }}>Solo</div>
+              <div style={{ fontSize: 34, fontWeight: 900, color: "#fff" }}>
+                $19<span style={{ fontSize: 15, color: "#555", fontWeight: 400 }}>/mo</span>
               </div>
-              <div style={{ fontSize: 36, fontWeight: 900, color: "#fff" }}>
-                $19<span style={{ fontSize: 16, color: "#555", fontWeight: 400 }}>/mo</span>
-              </div>
-              <div style={{ color: "#555", fontSize: 13, marginTop: 6 }}>
-                Perfect for independent contractors
-              </div>
+              <div style={{ color: "#555", fontSize: 13, marginTop: 5 }}>Independent contractors</div>
             </div>
-            <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 8 }}>
+            <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 7 }}>
               {[
-                "1 barber seat",
+                "1 barber / stylist seat",
                 "Booking page",
                 "Unlimited bookings",
                 "Admin dashboard",
@@ -172,24 +170,24 @@ export default function BillingTab({ shopSlug }: Props) {
               </div>
             ) : isActive ? (
               <button onClick={handlePortal} disabled={working} style={{ ...secondaryButton, textAlign: "center" }}>
-                {working ? "Opening..." : isPro ? "Switch via Portal" : "Manage"}
+                {working ? "Opening..." : "Switch via Portal"}
               </button>
             ) : (
-              <button onClick={() => handleCheckout("solo")} disabled={working} style={{ ...outlineGreenBtn }}>
+              <button onClick={() => handleCheckout("solo")} disabled={working} style={outlineGreenBtn}>
                 {working ? "Loading..." : isCanceled && hasCustomer ? "Resubscribe — Solo" : "Start Free Trial"}
               </button>
             )}
           </div>
 
-          {/* Pro card */}
+          {/* Pro */}
           <div style={{
             border: isPro ? "2px solid #d4af37" : "1px solid #232323",
             background: isPro ? "#0f0c00" : "#0d0d0d",
-            borderRadius: 20, padding: "24px 22px",
-            display: "flex", flexDirection: "column", gap: 16,
+            borderRadius: 20, padding: "24px 20px",
+            display: "flex", flexDirection: "column", gap: 14,
             position: "relative", overflow: "hidden",
           }}>
-            {!isPro && (
+            {!isPro && !isEnterprise && (
               <div style={{
                 position: "absolute", top: 14, right: -22,
                 background: "#d4af37", color: "#000", fontSize: 10, fontWeight: 900,
@@ -199,19 +197,15 @@ export default function BillingTab({ shopSlug }: Props) {
               </div>
             )}
             <div>
-              <div style={{ fontSize: 11, letterSpacing: "0.2em", color: "#d4af37", textTransform: "uppercase", fontWeight: 700, marginBottom: 8 }}>
-                Pro
+              <div style={{ fontSize: 11, letterSpacing: "0.2em", color: "#d4af37", textTransform: "uppercase", fontWeight: 700, marginBottom: 8 }}>Pro</div>
+              <div style={{ fontSize: 34, fontWeight: 900, color: "#fff" }}>
+                $29<span style={{ fontSize: 15, color: "#555", fontWeight: 400 }}>/mo</span>
               </div>
-              <div style={{ fontSize: 36, fontWeight: 900, color: "#fff" }}>
-                $29<span style={{ fontSize: 16, color: "#555", fontWeight: 400 }}>/mo</span>
-              </div>
-              <div style={{ color: "#555", fontSize: 13, marginTop: 6 }}>
-                For shops with multiple barbers
-              </div>
+              <div style={{ color: "#555", fontSize: 13, marginTop: 5 }}>Small shops &amp; teams</div>
             </div>
-            <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 8 }}>
+            <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 7 }}>
               {[
-                "Up to 10 barber seats",
+                "5 barber / stylist seats",
                 "Everything in Solo",
                 "Per-barber schedule pages",
                 "Admin-controlled permissions",
@@ -230,7 +224,7 @@ export default function BillingTab({ shopSlug }: Props) {
               </div>
             ) : isActive ? (
               <button onClick={handlePortal} disabled={working} style={{ ...goldButton, textAlign: "center" }}>
-                {working ? "Opening..." : "Upgrade via Portal"}
+                {working ? "Opening..." : "Switch via Portal"}
               </button>
             ) : (
               <button onClick={() => handleCheckout("pro")} disabled={working} style={goldButton}>
@@ -238,10 +232,56 @@ export default function BillingTab({ shopSlug }: Props) {
               </button>
             )}
           </div>
+
+          {/* Enterprise */}
+          <div style={{
+            border: isEnterprise ? "2px solid #a78bfa" : "1px solid #2a2040",
+            background: isEnterprise ? "#0c0a14" : "#0a090f",
+            borderRadius: 20, padding: "24px 20px",
+            display: "flex", flexDirection: "column", gap: 14,
+            position: "relative", overflow: "hidden",
+          }}>
+            <div>
+              <div style={{ fontSize: 11, letterSpacing: "0.2em", color: "#a78bfa", textTransform: "uppercase", fontWeight: 700, marginBottom: 8 }}>Enterprise</div>
+              <div style={{ fontSize: 34, fontWeight: 900, color: "#fff" }}>
+                $45<span style={{ fontSize: 15, color: "#555", fontWeight: 400 }}>/mo</span>
+              </div>
+              <div style={{ color: "#555", fontSize: 13, marginTop: 5 }}>Larger shops &amp; salons</div>
+            </div>
+            <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 7 }}>
+              {[
+                "10 barber / stylist seats",
+                "Everything in Pro",
+                "Per-barber schedule pages",
+                "Admin-controlled permissions",
+                "Custom hours per barber",
+                "Custom prices per barber",
+                "30-day free trial",
+              ].map((f) => (
+                <li key={f} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#aaa" }}>
+                  <span style={{ color: "#a78bfa", fontWeight: 700 }}>✓</span> {f}
+                </li>
+              ))}
+            </ul>
+            {isEnterprise ? (
+              <div style={{ padding: "10px 16px", borderRadius: 10, background: "#140f2a", border: "1px solid #3b2a6e", color: "#a78bfa", fontWeight: 700, fontSize: 14, textAlign: "center" }}>
+                Current Plan
+              </div>
+            ) : isActive ? (
+              <button onClick={handlePortal} disabled={working} style={{ ...purpleButton, textAlign: "center" }}>
+                {working ? "Opening..." : "Upgrade via Portal"}
+              </button>
+            ) : (
+              <button onClick={() => handleCheckout("enterprise")} disabled={working} style={purpleButton}>
+                {working ? "Loading..." : isCanceled && hasCustomer ? "Resubscribe — Enterprise" : "Start Free Trial"}
+              </button>
+            )}
+          </div>
+
         </div>
       )}
 
-      {/* Past due — show portal CTA */}
+      {/* Past due */}
       {isPastDue && (
         <div style={{ padding: "16px 20px", background: "#1a0a0a", border: "1px solid #440000", borderRadius: 12, marginBottom: 24 }}>
           <div style={{ color: "#ff7070", fontWeight: 700, marginBottom: 8 }}>Payment past due</div>
@@ -266,186 +306,65 @@ export default function BillingTab({ shopSlug }: Props) {
           <span style={{ fontWeight: 700, fontSize: 14 }}>Plan comparison</span>
         </div>
         {[
-          { feature: "Booking page",               free: "✓", solo: "✓",  pro: "✓" },
-          { feature: "Unlimited bookings",          free: "✓", solo: "✓",  pro: "✓" },
-          { feature: "Admin dashboard",             free: "✓", solo: "✓",  pro: "✓" },
-          { feature: "Barber seats",                free: "—", solo: "1",  pro: "10" },
-          { feature: "Personal schedule pages",     free: "—", solo: "✓",  pro: "✓" },
-          { feature: "Custom hours per barber",     free: "—", solo: "✓",  pro: "✓" },
-          { feature: "Custom prices per barber",    free: "—", solo: "✓",  pro: "✓" },
-          { feature: "Priority support",            free: "—", solo: "—",  pro: "✓" },
-        ].map(({ feature, free, solo, pro }) => (
+          { feature: "Booking page",              free: "✓", solo: "✓", pro: "✓",  ent: "✓"  },
+          { feature: "Unlimited bookings",         free: "✓", solo: "✓", pro: "✓",  ent: "✓"  },
+          { feature: "Admin dashboard",            free: "✓", solo: "✓", pro: "✓",  ent: "✓"  },
+          { feature: "Barber / stylist seats",     free: "—", solo: "1", pro: "5",  ent: "10" },
+          { feature: "Personal schedule pages",    free: "—", solo: "✓", pro: "✓",  ent: "✓"  },
+          { feature: "Custom hours per barber",    free: "—", solo: "✓", pro: "✓",  ent: "✓"  },
+          { feature: "Custom prices per barber",   free: "—", solo: "✓", pro: "✓",  ent: "✓"  },
+          { feature: "Priority support",           free: "—", solo: "—", pro: "✓",  ent: "✓"  },
+        ].map(({ feature, free, solo, pro, ent }) => (
           <div key={feature} style={{
-            display: "grid", gridTemplateColumns: "1fr 70px 70px 70px",
-            padding: "13px 20px", borderBottom: "1px solid #0d0d0d",
+            display: "grid", gridTemplateColumns: "1fr 60px 60px 60px 80px",
+            padding: "12px 20px", borderBottom: "1px solid #0d0d0d",
             fontSize: 13, alignItems: "center",
           }}>
             <span style={{ color: "#bbb" }}>{feature}</span>
             <span style={{ color: free === "✓" ? "#5cd600" : "#333", textAlign: "center", fontWeight: 700 }}>{free}</span>
-            <span style={{ color: solo === "✓" || (solo !== "—") ? "#5cd600" : "#333", textAlign: "center", fontWeight: 700 }}>{solo}</span>
-            <span style={{ color: pro === "✓" || (pro !== "—") ? "#d4af37" : "#333", textAlign: "center", fontWeight: 700 }}>{pro}</span>
+            <span style={{ color: solo !== "—" ? "#5cd600" : "#333", textAlign: "center", fontWeight: 700 }}>{solo}</span>
+            <span style={{ color: pro !== "—" ? "#d4af37" : "#333", textAlign: "center", fontWeight: 700 }}>{pro}</span>
+            <span style={{ color: ent !== "—" ? "#a78bfa" : "#333", textAlign: "center", fontWeight: 700 }}>{ent}</span>
           </div>
         ))}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 70px 70px 70px", padding: "10px 20px", background: "#0a0a0a", fontSize: 12 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 60px 60px 60px 80px", padding: "10px 20px", background: "#0a0a0a", fontSize: 12 }}>
           <span />
           <span style={{ color: "#444", textAlign: "center", fontWeight: 600 }}>Free</span>
           <span style={{ color: "#5cd600", textAlign: "center", fontWeight: 600 }}>Solo</span>
           <span style={{ color: "#d4af37", textAlign: "center", fontWeight: 600 }}>Pro</span>
+          <span style={{ color: "#a78bfa", textAlign: "center", fontWeight: 600 }}>Enterprise</span>
         </div>
       </div>
 
-      {/* Deposit settings */}
-      <DepositSettings shopSlug={shopSlug} />
     </div>
   );
 }
-
-function DepositSettings({ shopSlug }: { shopSlug: string }) {
-  const [enabled, setEnabled] = useState(false);
-  const [amount, setAmount] = useState("10");
-  const [type, setType] = useState<"fixed" | "percent">("fixed");
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-
-  useEffect(() => {
-    fetch(`/api/${shopSlug}/admin/deposit-settings`)
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.ok) {
-          setEnabled(d.settings.enabled);
-          setAmount(String(d.settings.amount));
-          setType(d.settings.type);
-        }
-      })
-      .finally(() => setLoading(false));
-  }, [shopSlug]);
-
-  async function save() {
-    setSaving(true);
-    await fetch(`/api/${shopSlug}/admin/deposit-settings`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ enabled, amount: parseFloat(amount) || 0, type }),
-    });
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
-  }
-
-  if (loading) return null;
-
-  return (
-    <div style={{ border: "1px solid #1a1a1a", borderRadius: 16, overflow: "hidden", marginTop: 20 }}>
-      <div style={{ background: "#111", padding: "14px 20px", borderBottom: "1px solid #1a1a1a", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span style={{ fontWeight: 700, fontSize: 14 }}>Deposit Settings</span>
-        <span style={{ color: "#555", fontSize: 12 }}>Require a deposit at booking</span>
-      </div>
-      <div style={{ padding: "20px 20px", display: "grid", gap: 16 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <button
-            type="button"
-            onClick={() => setEnabled(!enabled)}
-            style={{
-              width: 44, height: 24, borderRadius: 999, border: "none",
-              background: enabled ? "#d4af37" : "#333", position: "relative", cursor: "pointer",
-            }}
-          >
-            <span style={{
-              position: "absolute", top: 4, left: enabled ? 23 : 4,
-              width: 16, height: 16, borderRadius: "50%", background: "#fff", transition: "left 0.15s",
-            }} />
-          </button>
-          <span style={{ fontSize: 14, color: enabled ? "#fff" : "#666" }}>
-            {enabled ? "Deposits enabled" : "Deposits disabled"}
-          </span>
-        </div>
-
-        {enabled && (
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            <div>
-              <div style={{ fontSize: 12, color: "#666", marginBottom: 6, fontWeight: 600 }}>Amount</div>
-              <input
-                type="number"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                min="1"
-                step="0.01"
-                style={{ width: "100%", padding: "10px 12px", background: "#0d0d0d", border: "1px solid #2a2a2a", color: "#fff", borderRadius: 8, fontSize: 15, outline: "none" }}
-              />
-            </div>
-            <div>
-              <div style={{ fontSize: 12, color: "#666", marginBottom: 6, fontWeight: 600 }}>Type</div>
-              <select
-                value={type}
-                onChange={(e) => setType(e.target.value as "fixed" | "percent")}
-                style={{ width: "100%", padding: "10px 12px", background: "#0d0d0d", border: "1px solid #2a2a2a", color: "#fff", borderRadius: 8, fontSize: 15, outline: "none" }}
-              >
-                <option value="fixed">Fixed ($)</option>
-                <option value="percent">Percent (%)</option>
-              </select>
-            </div>
-          </div>
-        )}
-
-        <div style={{ display: "flex", justifyContent: "flex-end" }}>
-          <button onClick={save} disabled={saving} style={{ ...goldBtnSm, opacity: saving ? 0.6 : 1 }}>
-            {saving ? "Saving..." : saved ? "✓ Saved" : "Save"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-const goldBtnSm: React.CSSProperties = {
-  padding: "8px 18px", borderRadius: 8, border: "none",
-  background: "#d4af37", color: "#000", fontWeight: 800, fontSize: 13, cursor: "pointer",
-};
 
 const goldButton: React.CSSProperties = {
-  padding: "12px 20px",
-  borderRadius: 12,
-  border: "none",
-  background: "#d4af37",
-  color: "#000",
-  fontWeight: 800,
-  fontSize: 14,
-  cursor: "pointer",
-  whiteSpace: "nowrap",
-  width: "100%",
+  padding: "12px 20px", borderRadius: 12, border: "none",
+  background: "#d4af37", color: "#000", fontWeight: 800,
+  fontSize: 14, cursor: "pointer", whiteSpace: "nowrap", width: "100%",
+};
+
+const purpleButton: React.CSSProperties = {
+  padding: "12px 20px", borderRadius: 12, border: "none",
+  background: "#a78bfa", color: "#000", fontWeight: 800,
+  fontSize: 14, cursor: "pointer", whiteSpace: "nowrap", width: "100%",
 };
 
 const outlineGreenBtn: React.CSSProperties = {
-  padding: "12px 20px",
-  borderRadius: 12,
-  border: "1px solid #2a4a2a",
-  background: "#050f05",
-  color: "#5cd600",
-  fontWeight: 800,
-  fontSize: 14,
-  cursor: "pointer",
-  whiteSpace: "nowrap",
-  width: "100%",
+  padding: "12px 20px", borderRadius: 12, border: "1px solid #2a4a2a",
+  background: "#050f05", color: "#5cd600", fontWeight: 800,
+  fontSize: 14, cursor: "pointer", whiteSpace: "nowrap", width: "100%",
 };
 
 const secondaryButton: React.CSSProperties = {
-  padding: "12px 20px",
-  borderRadius: 12,
-  border: "1px solid #2d2d2d",
-  background: "#111",
-  color: "#fff",
-  fontWeight: 800,
-  fontSize: 14,
-  cursor: "pointer",
-  whiteSpace: "nowrap",
+  padding: "12px 20px", borderRadius: 12, border: "1px solid #2d2d2d",
+  background: "#111", color: "#fff", fontWeight: 800,
+  fontSize: 14, cursor: "pointer", whiteSpace: "nowrap",
 };
 
 const emptyBox: React.CSSProperties = {
-  border: "1px dashed #2a2a2a",
-  borderRadius: 18,
-  padding: 28,
-  textAlign: "center",
-  color: "#9a9a9a",
-  background: "#070707",
+  border: "1px dashed #2a2a2a", borderRadius: 18, padding: 28,
+  textAlign: "center", color: "#9a9a9a", background: "#070707",
 };

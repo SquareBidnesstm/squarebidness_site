@@ -6,13 +6,23 @@ import ServicesTab from "./ServicesTab";
 import BarbersTab from "./BarbersTab";
 import HoursTab from "./HoursTab";
 import BillingTab from "./BillingTab";
+import DepositsTab from "./DepositsTab";
+import WalkInModal from "./WalkInModal";
+import RescheduleModal from "./RescheduleModal";
+import BlockTimeModal from "./BlockTimeModal";
+import ClientsTab from "./ClientsTab";
+import SmsBlastModal from "./SmsBlastModal";
+import SettingsTab from "./SettingsTab";
 
 type BookingStatus =
   | "pending"
+  | "pending_approval"
   | "confirmed"
   | "completed"
   | "cancelled"
-  | "no_show";
+  | "no_show"
+  | "counter_proposed"
+  | "awaiting_payment";
 
 type AdminBooking = {
   id: string;
@@ -24,7 +34,8 @@ type AdminBooking = {
   starts_at: string;
   ends_at: string;
   status: BookingStatus;
-  payment_status: "unpaid" | "deposit_paid" | "paid" | "refunded";
+  payment_status: "unpaid" | "deposit_paid" | "paid" | "refunded" | "refund_failed";
+  price_snapshot: number | null;
   source: string | null;
   client_notes: string | null;
   created_at: string;
@@ -35,6 +46,7 @@ type AdminBooking = {
     duration_minutes: number;
     price: number;
   } | null;
+  payments: { id: string; amount: number; payment_type: string; provider: string; status: string }[] | null;
 };
 
 function formatMoney(value: number) {
@@ -45,10 +57,11 @@ function formatDate(dateStr: string) {
   return new Date(`${dateStr}T12:00:00`).toLocaleDateString();
 }
 
-function formatTime(dateTime: string) {
+function formatTime(dateTime: string, timezone?: string) {
   return new Date(dateTime).toLocaleTimeString([], {
     hour: "numeric",
     minute: "2-digit",
+    ...(timezone ? { timeZone: timezone } : {}),
   });
 }
 
@@ -59,18 +72,24 @@ function getTodayString() {
 
 const STATUS_LABELS: Record<BookingStatus, string> = {
   pending: "Pending",
+  pending_approval: "Pending Approval",
   confirmed: "Confirmed",
   completed: "Completed",
   cancelled: "Cancelled",
   no_show: "No Show",
+  counter_proposed: "Counter Proposed",
+  awaiting_payment: "Awaiting Payment",
 };
 
 const STATUS_COLORS: Record<BookingStatus, React.CSSProperties> = {
   pending: { background: "#2b2b00", color: "#e0d000", borderColor: "#4a4a00" },
+  pending_approval: { background: "#2b1800", color: "#ffaa33", borderColor: "#4a2800" },
   confirmed: { background: "#0d2200", color: "#5cd600", borderColor: "#1e4400" },
   completed: { background: "#002233", color: "#4dcfff", borderColor: "#003344" },
   cancelled: { background: "#220000", color: "#ff5555", borderColor: "#440000" },
   no_show: { background: "#1a0a00", color: "#ff9955", borderColor: "#331500" },
+  counter_proposed: { background: "#1a001a", color: "#cc88ff", borderColor: "#330033" },
+  awaiting_payment: { background: "#001a2b", color: "#33aaff", borderColor: "#002233" },
 };
 
 export default function AdminPage() {
@@ -78,19 +97,72 @@ export default function AdminPage() {
   const shopSlug = params.shopSlug as string;
   const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<"bookings" | "barbers" | "services" | "hours" | "billing">("bookings");
+  const [activeTab, setActiveTab] = useState<"bookings" | "clients" | "barbers" | "services" | "hours" | "deposits" | "billing" | "settings">("bookings");
   const [shopName, setShopName] = useState("");
+  const [shopLogoUrl, setShopLogoUrl] = useState<string | null>(null);
+  const [shopTimezone, setShopTimezone] = useState("America/New_York");
+  const [allBarbers, setAllBarbers] = useState<{ slug: string; name: string }[]>([]);
   const [bookings, setBookings] = useState<AdminBooking[]>([]);
+  const [bookingsPage, setBookingsPage] = useState(1);
+  const [bookingsHasMore, setBookingsHasMore] = useState(false);
+  const [bookingsLoadingMore, setBookingsLoadingMore] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  // Date range for bookings fetch (default: last 90 days → today)
+  const [dateFrom, setDateFrom] = useState<string>(() => {
+    const d = new Date(); d.setDate(d.getDate() - 90);
+    return d.toISOString().slice(0, 10);
+  });
+  const [dateTo, setDateTo] = useState<string>(() => new Date().toISOString().slice(0, 10));
   const [search, setSearch] = useState("");
-  const [barberFilter, setBarberFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [showTodayOnly, setShowTodayOnly] = useState(false);
+  const filterKey = `admin_filters_${shopSlug}`;
+  const [barberFilter, setBarberFilter] = useState<string>(() => {
+    try { return JSON.parse(localStorage.getItem(filterKey) ?? "{}").barberFilter ?? "all"; } catch { return "all"; }
+  });
+  const [statusFilter, setStatusFilter] = useState<string>(() => {
+    try { return JSON.parse(localStorage.getItem(filterKey) ?? "{}").statusFilter ?? "all"; } catch { return "all"; }
+  });
+  const [showTodayOnly, setShowTodayOnly] = useState<boolean>(() => {
+    try { return JSON.parse(localStorage.getItem(filterKey) ?? "{}").showTodayOnly ?? false; } catch { return false; }
+  });
+
+  // Persist filters to localStorage whenever they change
+  useEffect(() => {
+    try { localStorage.setItem(filterKey, JSON.stringify({ barberFilter, statusFilter, showTodayOnly })); } catch {}
+  }, [filterKey, barberFilter, statusFilter, showTodayOnly]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [managingId, setManagingId] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [pushEnabled, setPushEnabled] = useState(false);
+  const [pushLoading, setPushLoading] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [showFilters, setShowFilters] = useState(true);
+  const [hoursConfigured, setHoursConfigured] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const check = () => {
+      const mobile = window.innerWidth < 700;
+      setIsMobile(mobile);
+      if (mobile) setShowFilters(false); // start collapsed on mobile
+    };
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  // Check if shop hours are configured
+  useEffect(() => {
+    fetch(`/api/${shopSlug}/admin/hours`)
+      .then(r => r.json())
+      .then(d => setHoursConfigured(Array.isArray(d.hours) && d.hours.length > 0))
+      .catch(() => setHoursConfigured(null));
+  }, [shopSlug]);
+  const [showWalkIn, setShowWalkIn] = useState(false);
+  const [showBlockTime, setShowBlockTime] = useState(false);
+  const [showSmsBlast, setShowSmsBlast] = useState(false);
+  const [reschedulingBooking, setReschedulingBooking] = useState<AdminBooking | null>(null);
+  const [walkInSuccess, setWalkInSuccess] = useState<{ booking_code: string; customer_name: string; barber: string; service: string } | null>(null);
 
   const today = useMemo(() => getTodayString(), []);
 
@@ -99,7 +171,10 @@ export default function AdminPage() {
       try {
         setLoading(true);
         setError("");
-        const res = await fetch(`/api/${shopSlug}/admin/bookings`, {
+        const params = new URLSearchParams({ page: "1" });
+        if (dateFrom) params.set("date_from", dateFrom);
+        if (dateTo) params.set("date_to", dateTo);
+        const res = await fetch(`/api/${shopSlug}/admin/bookings?${params}`, {
           cache: "no-store",
         });
         const data = await res.json();
@@ -108,7 +183,11 @@ export default function AdminPage() {
           return;
         }
         if (data.shop?.name) setShopName(data.shop.name);
+        if (data.shop?.logo_url) setShopLogoUrl(data.shop.logo_url);
+        if (data.shop?.timezone) setShopTimezone(data.shop.timezone);
         setBookings(data.bookings || []);
+        setBookingsPage(1);
+        setBookingsHasMore(data.pagination?.has_more ?? false);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unexpected error");
       } finally {
@@ -116,7 +195,27 @@ export default function AdminPage() {
       }
     }
     loadBookings();
-  }, [shopSlug]);
+  }, [shopSlug, dateFrom, dateTo]);
+
+  async function loadMoreBookings() {
+    if (bookingsLoadingMore || !bookingsHasMore) return;
+    setBookingsLoadingMore(true);
+    try {
+      const nextPage = bookingsPage + 1;
+      const params = new URLSearchParams({ page: String(nextPage) });
+      if (dateFrom) params.set("date_from", dateFrom);
+      if (dateTo) params.set("date_to", dateTo);
+      const res = await fetch(`/api/${shopSlug}/admin/bookings?${params}`, { cache: "no-store" });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        setBookings((prev) => [...prev, ...(data.bookings || [])]);
+        setBookingsPage(nextPage);
+        setBookingsHasMore(data.pagination?.has_more ?? false);
+      }
+    } finally {
+      setBookingsLoadingMore(false);
+    }
+  }
 
   async function handleLogout() {
     setLoggingOut(true);
@@ -124,23 +223,77 @@ export default function AdminPage() {
     router.push(`/${shopSlug}/admin/login`);
   }
 
+  // Check admin push state on mount
+  useEffect(() => {
+    if (typeof window === "undefined" || !("Notification" in window)) return;
+    if (Notification.permission === "granted") {
+      navigator.serviceWorker.ready.then((reg) => {
+        reg.pushManager.getSubscription().then((sub) => {
+          if (sub) setPushEnabled(true);
+        });
+      }).catch(() => {});
+    }
+  }, []);
+
+  async function toggleAdminPush() {
+    if (!("Notification" in window) || !("serviceWorker" in navigator)) return;
+    setPushLoading(true);
+    try {
+      const reg = await navigator.serviceWorker.register("/sw.js");
+      await navigator.serviceWorker.ready;
+      if (pushEnabled) {
+        const sub = await reg.pushManager.getSubscription();
+        if (sub) {
+          await fetch(`/api/${shopSlug}/push-subscribe`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ endpoint: sub.endpoint }),
+          });
+          await sub.unsubscribe();
+        }
+        setPushEnabled(false);
+      } else {
+        const permission = await Notification.requestPermission();
+        if (permission !== "granted") { setPushLoading(false); return; }
+        const sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+        });
+        await fetch(`/api/${shopSlug}/push-subscribe`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ subscription: sub.toJSON() }),
+        });
+        setPushEnabled(true);
+      }
+    } catch (e) {
+      console.error("Admin push toggle error:", e);
+    }
+    setPushLoading(false);
+  }
+
+  const [forfeitPrompt, setForfeitPrompt] = useState<{ bookingId: string; status: BookingStatus } | null>(null);
+
   const updateStatus = useCallback(
-    async (bookingId: string, newStatus: BookingStatus) => {
+    async (bookingId: string, newStatus: BookingStatus, refundDeposit?: boolean) => {
       setUpdatingId(bookingId);
       try {
         const res = await fetch(`/api/${shopSlug}/bookings/${bookingId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: newStatus }),
+          body: JSON.stringify({ status: newStatus, refund_deposit: refundDeposit ?? false }),
         });
         const data = await res.json();
         if (res.ok && data.ok) {
           setBookings((prev) =>
             prev.map((b) =>
-              b.id === bookingId ? { ...b, status: newStatus } : b
+              b.id === bookingId
+                ? { ...b, status: newStatus, payment_status: data.booking?.payment_status ?? b.payment_status }
+                : b
             )
           );
           setManagingId(null);
+          setForfeitPrompt(null);
         }
       } finally {
         setUpdatingId(null);
@@ -149,15 +302,24 @@ export default function AdminPage() {
     [shopSlug]
   );
 
-  const uniqueBarbers = useMemo(() => {
-    const map = new Map<string, string>();
-    bookings.forEach((b) => {
-      const slug = b.barbers?.slug;
-      const name = b.barbers?.display_name || b.barbers?.name;
-      if (slug && name) map.set(slug, name);
-    });
-    return Array.from(map.entries()).map(([slug, name]) => ({ slug, name }));
-  }, [bookings]);
+  // Load all barbers from API (not derived from bookings — ensures filter always shows everyone)
+  useEffect(() => {
+    fetch(`/api/${shopSlug}/admin/barbers`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.ok && Array.isArray(d.barbers)) {
+          setAllBarbers(
+            d.barbers
+              .filter((b: { active: boolean }) => b.active)
+              .map((b: { slug: string; name: string; display_name: string | null }) => ({
+                slug: b.slug,
+                name: b.display_name || b.name,
+              }))
+          );
+        }
+      })
+      .catch(() => {});
+  }, [shopSlug]);
 
   const filteredBookings = useMemo(() => {
     return bookings
@@ -214,21 +376,28 @@ export default function AdminPage() {
       (b) => b.appointment_date === today
     ).length;
     const bookedRevenue = bookings.reduce(
-      (sum, b) => sum + Number(b.services?.price || 0),
+      (sum, b) => sum + Number(b.price_snapshot || 0),
       0
     );
     const completedRevenue = bookings
       .filter((b) => b.status === "completed")
-      .reduce((sum, b) => sum + Number(b.services?.price || 0), 0);
+      .reduce((sum, b) => sum + Number(b.price_snapshot || 0), 0);
     const todayBookedRevenue = bookings
       .filter((b) => b.appointment_date === today)
-      .reduce((sum, b) => sum + Number(b.services?.price || 0), 0);
+      .reduce((sum, b) => sum + Number(b.price_snapshot || 0), 0);
     const todayCompletedRevenue = bookings
       .filter((b) => b.appointment_date === today && b.status === "completed")
-      .reduce((sum, b) => sum + Number(b.services?.price || 0), 0);
+      .reduce((sum, b) => sum + Number(b.price_snapshot || 0), 0);
+    // Actual cash/card collected — sum of succeeded payments across all bookings
+    const collectedRevenue = bookings.reduce((sum, b) => {
+      return sum + (b.payments ?? [])
+        .filter((p) => p.status === "succeeded")
+        .reduce((s, p) => s + Number(p.amount), 0);
+    }, 0);
     return {
       total, confirmed, completed, todayCount,
       bookedRevenue, completedRevenue, todayBookedRevenue, todayCompletedRevenue,
+      collectedRevenue,
     };
   }, [bookings, today]);
 
@@ -238,7 +407,7 @@ export default function AdminPage() {
         minHeight: "100vh",
         background: "#050505",
         color: "#ffffff",
-        padding: "48px 24px",
+        padding: isMobile ? "24px 16px" : "48px 24px",
       }}
     >
       <section style={{ maxWidth: 1280, margin: "0 auto" }}>
@@ -248,27 +417,77 @@ export default function AdminPage() {
               display: "flex",
               justifyContent: "space-between",
               alignItems: "flex-start",
+              flexWrap: "wrap",
+              gap: 12,
             }}
           >
-            <div
-              style={{
-                color: "#d4af37",
-                fontSize: 12,
-                letterSpacing: "0.22em",
-                textTransform: "uppercase",
-                marginBottom: 10,
-              }}
-            >
-              {shopName || shopSlug}
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+              {/* Clickable logo upload */}
+              <div
+                onClick={() => {
+                  const input = document.createElement("input");
+                  input.type = "file";
+                  input.accept = "image/jpeg,image/png,image/webp,image/gif";
+                  input.onchange = async () => {
+                    const file = input.files?.[0];
+                    if (!file) return;
+                    const fd = new FormData();
+                    fd.append("file", file);
+                    fd.append("type", "shop_logo");
+                    const res = await fetch(`/api/${shopSlug}/admin/upload`, { method: "POST", body: fd });
+                    const data = await res.json();
+                    if (data.ok) setShopLogoUrl(`${data.url}?v=${Date.now()}`);
+                  };
+                  input.click();
+                }}
+                title={shopLogoUrl ? "Click to change logo" : "Click to add shop logo"}
+                style={{
+                  width: 36, height: 36, borderRadius: 8, flexShrink: 0,
+                  cursor: "pointer", overflow: "hidden",
+                  border: shopLogoUrl ? "none" : "1.5px dashed #3a3a3a",
+                  background: shopLogoUrl ? "transparent" : "#111",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}
+              >
+                {shopLogoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={shopLogoUrl} alt={shopName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                ) : (
+                  <span style={{ fontSize: 16, opacity: 0.4 }}>🖼</span>
+                )}
+              </div>
+              <div
+                style={{
+                  color: "#d4af37",
+                  fontSize: 12,
+                  letterSpacing: "0.22em",
+                  textTransform: "uppercase",
+                }}
+              >
+                {shopName || shopSlug}
+              </div>
             </div>
-            <button
-              type="button"
-              onClick={handleLogout}
-              disabled={loggingOut}
-              style={secondaryButton}
-            >
-              {loggingOut ? "Signing out..." : "Sign out"}
-            </button>
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              {"Notification" in (typeof window !== "undefined" ? window : {}) && (
+                <button
+                  type="button"
+                  onClick={toggleAdminPush}
+                  disabled={pushLoading}
+                  title={pushEnabled ? "Disable push notifications" : "Enable push notifications"}
+                  style={{ ...secondaryButton, fontSize: 18, padding: "8px 12px" }}
+                >
+                  {pushLoading ? "…" : pushEnabled ? "🔔" : "🔕"}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={handleLogout}
+                disabled={loggingOut}
+                style={secondaryButton}
+              >
+                {loggingOut ? "Signing out..." : "Sign out"}
+              </button>
+            </div>
           </div>
           <h1 style={{ fontSize: 52, lineHeight: 1.05, fontWeight: 900, margin: 0 }}>
             Admin Dashboard
@@ -279,8 +498,8 @@ export default function AdminPage() {
         </div>
 
         {/* Tab nav */}
-        <div style={{ display: "flex", gap: 8, marginBottom: 28 }}>
-          {(["bookings", "barbers", "services", "hours", "billing"] as const).map((tab) => (
+        <div style={{ display: "flex", gap: 8, marginBottom: 28, flexWrap: "wrap" }}>
+          {(["bookings", "clients", "barbers", "services", "hours", "deposits", "billing", "settings"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -301,20 +520,46 @@ export default function AdminPage() {
           ))}
         </div>
 
-        {activeTab === "barbers" ? (
+        {activeTab === "clients" ? (
+          <ClientsTab shopSlug={shopSlug} />
+        ) : activeTab === "barbers" ? (
           <BarbersTab shopSlug={shopSlug} />
         ) : activeTab === "services" ? (
           <ServicesTab shopSlug={shopSlug} />
         ) : activeTab === "hours" ? (
           <HoursTab shopSlug={shopSlug} />
+        ) : activeTab === "deposits" ? (
+          <DepositsTab shopSlug={shopSlug} />
         ) : activeTab === "billing" ? (
           <BillingTab shopSlug={shopSlug} />
+        ) : activeTab === "settings" ? (
+          <SettingsTab shopSlug={shopSlug} />
         ) : (
         <>
+        {/* Hours not configured warning */}
+        {hoursConfigured === false && (
+          <div style={{
+            marginBottom: 20, padding: "14px 18px", borderRadius: 12,
+            background: "#1a0d00", border: "1px solid #5a3000",
+            display: "flex", alignItems: "center", gap: 10,
+          }}>
+            <span style={{ fontSize: 18 }}>⚠️</span>
+            <span style={{ color: "#ff9955", fontSize: 14 }}>
+              <strong>No shop hours configured.</strong> Customers won&apos;t see any available booking slots.{" "}
+              <button
+                onClick={() => setActiveTab("hours")}
+                style={{ background: "none", border: "none", color: "#d4af37", fontWeight: 700, cursor: "pointer", padding: 0, fontSize: 14 }}
+              >
+                Set hours →
+              </button>
+            </span>
+          </div>
+        )}
+
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+            gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, minmax(0, 1fr))",
             gap: 16,
             marginBottom: 16,
           }}
@@ -332,13 +577,13 @@ export default function AdminPage() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+            gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, minmax(0, 1fr))",
             gap: 16,
             marginBottom: 24,
           }}
         >
           <StatCard label="Total Booked" value={formatMoney(stats.bookedRevenue)} />
-          <StatCard label="Earned (Completed)" value={formatMoney(stats.completedRevenue)} gold />
+          <StatCard label="Collected (Payments)" value={formatMoney(stats.collectedRevenue)} gold />
           <StatCard label="Today Booked" value={formatMoney(stats.todayBookedRevenue)} />
           <StatCard label="Today Earned" value={formatMoney(stats.todayCompletedRevenue)} gold />
         </div>
@@ -351,10 +596,29 @@ export default function AdminPage() {
             padding: 24,
           }}
         >
+          {/* Mobile filter toggle */}
+          {isMobile && (
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <button
+                type="button"
+                onClick={() => setShowFilters(v => !v)}
+                style={{ ...secondaryButton, fontSize: 13, padding: "8px 14px" }}
+              >
+                {showFilters ? "▲ Hide Filters" : "▼ Filters"}{
+                  [barberFilter !== "all", statusFilter !== "all", showTodayOnly].filter(Boolean).length > 0
+                    ? ` (${[barberFilter !== "all", statusFilter !== "all", showTodayOnly].filter(Boolean).length} active)`
+                    : ""
+                }
+              </button>
+              <span style={{ color: "#666", fontSize: 13 }}>{filteredBookings.length} shown</span>
+            </div>
+          )}
+
+          {(!isMobile || showFilters) && (
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "1.3fr 200px 200px auto",
+              gridTemplateColumns: isMobile ? "1fr" : "1.3fr 200px 200px auto",
               gap: 14,
               marginBottom: 24,
               alignItems: "center",
@@ -372,7 +636,7 @@ export default function AdminPage() {
               style={inputStyle}
             >
               <option value="all">All barbers</option>
-              {uniqueBarbers.map((b) => (
+              {allBarbers.map((b) => (
                 <option key={b.slug} value={b.slug}>
                   {b.name}
                 </option>
@@ -398,21 +662,81 @@ export default function AdminPage() {
               Today Only
             </button>
           </div>
+          )}
 
           <div
             style={{
               display: "flex",
-              alignItems: "center",
+              alignItems: isMobile ? "flex-start" : "center",
+              flexDirection: isMobile ? "column" : "row",
               justifyContent: "space-between",
               gap: 16,
               marginBottom: 18,
             }}
           >
             <h2 style={{ margin: 0, fontSize: 30, fontWeight: 900 }}>Bookings</h2>
-            <div style={{ color: "#8f8f8f", fontSize: 14 }}>
-              {filteredBookings.length} shown
+            <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+              {/* Date range filter */}
+              <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "#9a9a9a" }}>
+                From
+                <input
+                  type="date"
+                  value={dateFrom}
+                  onChange={e => setDateFrom(e.target.value)}
+                  style={{ background: "#111", border: "1px solid #333", color: "#fff", borderRadius: 8, padding: "4px 8px", fontSize: 13 }}
+                />
+              </label>
+              <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "#9a9a9a" }}>
+                To
+                <input
+                  type="date"
+                  value={dateTo}
+                  onChange={e => setDateTo(e.target.value)}
+                  style={{ background: "#111", border: "1px solid #333", color: "#fff", borderRadius: 8, padding: "4px 8px", fontSize: 13 }}
+                />
+              </label>
+              <div style={{ color: "#8f8f8f", fontSize: 14 }}>{filteredBookings.length} shown</div>
+              <a
+                href={`/api/${shopSlug}/admin/calendar.ics`}
+                download
+                style={{ ...secondaryButton, textDecoration: "none", display: "inline-flex", alignItems: "center" } as React.CSSProperties}
+              >
+                📅 Export .ics
+              </a>
+              <button
+                type="button"
+                onClick={() => setShowSmsBlast(true)}
+                style={secondaryButton}
+              >
+                📲 SMS Blast
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowBlockTime(true)}
+                style={secondaryButton}
+              >
+                Block Time
+              </button>
+              <button
+                type="button"
+                onClick={() => { setWalkInSuccess(null); setShowWalkIn(true); }}
+                style={goldButton}
+              >
+                + Walk-In
+              </button>
             </div>
           </div>
+
+          {walkInSuccess && (
+            <div style={{ background: "#0a2200", border: "1px solid #1e4400", borderRadius: 14, padding: "14px 18px", marginBottom: 18, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div>
+                <span style={{ color: "#5cd600", fontWeight: 800 }}>Walk-in checked in — </span>
+                <span style={{ color: "#ccc" }}>{walkInSuccess.customer_name} · {walkInSuccess.service} · {walkInSuccess.barber} · </span>
+                <span style={{ color: "#5cd600", fontFamily: "monospace" }}>{walkInSuccess.booking_code}</span>
+              </div>
+              <button onClick={() => setWalkInSuccess(null)} style={{ background: "none", border: "none", color: "#5cd600", cursor: "pointer", fontSize: 18 }}>×</button>
+            </div>
+          )}
 
           {loading ? (
             <div style={emptyBox}>Loading bookings...</div>
@@ -439,8 +763,12 @@ export default function AdminPage() {
                     key={booking.id}
                     id={`booking-${booking.id}`}
                     style={{
-                      border: "1px solid #232323",
-                      background: "#070707",
+                      border: booking.payment_status === "refund_failed"
+                        ? "1.5px solid #c0392b"
+                        : "1px solid #232323",
+                      background: booking.payment_status === "refund_failed"
+                        ? "#140a0a"
+                        : "#070707",
                       borderRadius: 22,
                       padding: 18,
                     }}
@@ -448,7 +776,7 @@ export default function AdminPage() {
                     <div
                       style={{
                         display: "grid",
-                        gridTemplateColumns: "1fr auto",
+                        gridTemplateColumns: isMobile ? "1fr" : "1fr auto",
                         gap: 18,
                         alignItems: "center",
                       }}
@@ -470,7 +798,18 @@ export default function AdminPage() {
                           <span style={{ ...darkPill, ...statusStyle }}>
                             {STATUS_LABELS[booking.status]}
                           </span>
-                          <span style={darkPill}>{booking.payment_status}</span>
+                          {booking.payment_status === "refund_failed" ? (
+                            <span style={{
+                              ...darkPill,
+                              background: "#c0392b",
+                              color: "#fff",
+                              fontWeight: 700,
+                            }}>
+                              ⚠️ Refund Failed — Action Required
+                            </span>
+                          ) : (
+                            <span style={darkPill}>{booking.payment_status}</span>
+                          )}
                         </div>
 
                         <div
@@ -495,7 +834,7 @@ export default function AdminPage() {
                         >
                           <span>{booking.booking_code}</span>
                           <span>{formatDate(booking.appointment_date)}</span>
-                          <span>{formatTime(booking.starts_at)}</span>
+                          <span>{formatTime(booking.starts_at, shopTimezone)}</span>
                           <span>{booking.customer_phone || "—"}</span>
                           <span>{booking.source || "—"}</span>
                         </div>
@@ -572,10 +911,72 @@ export default function AdminPage() {
                           <span style={{ color: "#666" }}>Ends at: </span>
                           {formatTime(booking.ends_at)}
                         </div>
+                        {booking.payments && booking.payments.length > 0 && (
+                          <div style={{ marginTop: 4, paddingTop: 8, borderTop: "1px solid #1a1a1a" }}>
+                            <div style={{ color: "#666", marginBottom: 4 }}>Payments:</div>
+                            {booking.payments.map(p => (
+                              <div key={p.id} style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                                <span style={{ color: p.status === "succeeded" ? "#5cd600" : "#ff9955", fontWeight: 700 }}>
+                                  {formatMoney(Number(p.amount))}
+                                </span>
+                                <span style={{ color: "#666", textTransform: "capitalize" }}>{p.payment_type} · {p.provider}</span>
+                                <span style={{ color: p.status === "succeeded" ? "#4a8800" : "#664400", fontSize: 12 }}>{p.status}</span>
+                              </div>
+                            ))}
+                            {booking.payment_status === "deposit_paid" && (
+                              <div style={{ color: "#d4af37", fontSize: 13, marginTop: 4 }}>
+                                Balance due: {formatMoney(Math.max(0, Number(booking.services?.price ?? 0) - booking.payments.filter(p => p.status === "succeeded").reduce((s, p) => s + Number(p.amount), 0)))}
+                              </div>
+                            )}
+                          </div>
+                        )}
                         <div>
                           <span style={{ color: "#666" }}>Created: </span>
                           {new Date(booking.created_at).toLocaleString()}
                         </div>
+                        {booking.payment_status === "deposit_paid" && booking.status === "completed" && (() => {
+                          const remaining = Math.max(0, Number(booking.services?.price ?? 0) - (booking.payments?.filter(p => p.status === "succeeded").reduce((s, p) => s + Number(p.amount), 0) ?? 0));
+                          return (
+                            <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  const method = window.prompt(
+                                    `Collect ${formatMoney(remaining)} balance\n\nPayment method (cash / check / zelle / venmo / other):`,
+                                    "cash"
+                                  );
+                                  if (!method) return; // cancelled
+                                  const validMethods = ["cash", "check", "zelle", "venmo", "other"];
+                                  const m = validMethods.includes(method.trim().toLowerCase()) ? method.trim().toLowerCase() : "cash";
+                                  if (!window.confirm(`Mark ${formatMoney(remaining)} collected via ${m}?`)) return;
+                                  const res = await fetch(`/api/${shopSlug}/admin/bookings/${booking.id}/collect-balance`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ method: m }) });
+                                  const d = await res.json();
+                                  if (d.ok) setBookings(prev => prev.map(b => b.id === booking.id ? { ...b, payment_status: "paid" } : b));
+                                  else alert(d.error ?? "Failed to record payment");
+                                }}
+                                style={{ padding: "10px 16px", borderRadius: 10, border: "none", background: "#d4af37", color: "#000", fontWeight: 800, cursor: "pointer", fontSize: 13 }}
+                              >
+                                Collect Balance — {formatMoney(remaining)}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  const res = await fetch(`/api/${shopSlug}/admin/bookings/${booking.id}/payment-link`, { method: "POST", headers: { "Content-Type": "application/json" } });
+                                  const d = await res.json();
+                                  if (d.ok && d.url) {
+                                    await navigator.clipboard.writeText(d.url).catch(() => {});
+                                    window.open(d.url, "_blank");
+                                  } else {
+                                    alert(d.error || "Could not generate payment link.");
+                                  }
+                                }}
+                                style={{ padding: "10px 16px", borderRadius: 10, border: "1px solid #2d2d2d", background: "#111", color: "#d4af37", fontWeight: 800, cursor: "pointer", fontSize: 13 }}
+                              >
+                                💳 Send Payment Link — {formatMoney(remaining)}
+                              </button>
+                            </div>
+                          );
+                        })()}
                       </div>
                     )}
 
@@ -600,6 +1001,9 @@ export default function AdminPage() {
                               "cancelled",
                               "no_show",
                               "pending",
+                              "pending_approval",
+                              "counter_proposed",
+                              "awaiting_payment",
                             ] as BookingStatus[]
                           )
                             .filter((s) => s !== booking.status)
@@ -608,7 +1012,13 @@ export default function AdminPage() {
                                 key={s}
                                 type="button"
                                 disabled={isUpdating}
-                                onClick={() => updateStatus(booking.id, s)}
+                                onClick={() => {
+                                  if ((s === "cancelled" || s === "no_show") && booking.payment_status === "deposit_paid") {
+                                    setForfeitPrompt({ bookingId: booking.id, status: s });
+                                  } else {
+                                    updateStatus(booking.id, s);
+                                  }
+                                }}
                                 style={{
                                   padding: "10px 14px",
                                   borderRadius: 10,
@@ -624,6 +1034,20 @@ export default function AdminPage() {
                                 {isUpdating ? "Updating..." : STATUS_LABELS[s]}
                               </button>
                             ))}
+                          <button
+                            type="button"
+                            disabled={isUpdating}
+                            onClick={() => { setReschedulingBooking(booking); setManagingId(null); }}
+                            style={{
+                              padding: "10px 14px", borderRadius: 10,
+                              border: "1px solid #3d3000", background: "#1a1400",
+                              color: "#d4af37", fontWeight: 700, fontSize: 13,
+                              cursor: isUpdating ? "not-allowed" : "pointer",
+                              opacity: isUpdating ? 0.5 : 1,
+                            }}
+                          >
+                            Reschedule
+                          </button>
                         </div>
                       </div>
                     )}
@@ -632,10 +1056,112 @@ export default function AdminPage() {
               })}
             </div>
           )}
+
+          {/* Load more — shows when API has more pages beyond the current date window */}
+          {bookingsHasMore && (
+            <div style={{ textAlign: "center", marginTop: 18 }}>
+              <button
+                onClick={loadMoreBookings}
+                disabled={bookingsLoadingMore}
+                style={{
+                  background: "#1a1a1a",
+                  color: bookingsLoadingMore ? "#555" : "#d4af37",
+                  border: "1px solid #2b2b2b",
+                  borderRadius: 12,
+                  padding: "12px 28px",
+                  fontWeight: 700,
+                  fontSize: 14,
+                  cursor: bookingsLoadingMore ? "not-allowed" : "pointer",
+                }}
+              >
+                {bookingsLoadingMore ? "Loading…" : "Load more bookings"}
+              </button>
+            </div>
+          )}
         </div>
         </>
         )}
       </section>
+
+      {showWalkIn && (
+        <WalkInModal
+          shopSlug={shopSlug}
+          onClose={() => setShowWalkIn(false)}
+          onCreated={(b) => {
+            setShowWalkIn(false);
+            setWalkInSuccess(b);
+            // Reload bookings with active date/barber filters so the list stays
+            // consistent with whatever the admin was viewing before the walk-in
+            const walkinParams = new URLSearchParams({ page: "1" });
+            if (dateFrom) walkinParams.set("date_from", dateFrom);
+            if (dateTo) walkinParams.set("date_to", dateTo);
+            fetch(`/api/${shopSlug}/admin/bookings?${walkinParams.toString()}`, { cache: "no-store" })
+              .then(r => r.json())
+              .then(data => {
+                if (data.ok) {
+                  setBookings(data.bookings || []);
+                  setBookingsPage(1);
+                  setBookingsHasMore(data.pagination?.has_more ?? false);
+                }
+              })
+              .catch(console.error);
+          }}
+        />
+      )}
+
+      {showBlockTime && <BlockTimeModal shopSlug={shopSlug} onClose={() => setShowBlockTime(false)} />}
+      {showSmsBlast && <SmsBlastModal shopSlug={shopSlug} onClose={() => setShowSmsBlast(false)} />}
+
+      {forfeitPrompt && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", zIndex: 999, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+          <div style={{ background: "#0d0d0d", border: "1px solid #2d2d2d", borderRadius: 24, padding: 32, maxWidth: 440, width: "100%" }}>
+            <h3 style={{ margin: "0 0 12px", fontSize: 22, fontWeight: 900 }}>
+              {forfeitPrompt.status === "no_show" ? "Mark No-Show" : "Cancel Booking"}
+            </h3>
+            <p style={{ color: "#aaa", fontSize: 14, marginBottom: 24 }}>
+              This booking has a deposit paid. What should happen to it?
+            </p>
+            <div style={{ display: "grid", gap: 10 }}>
+              <button
+                disabled={!!updatingId}
+                onClick={() => updateStatus(forfeitPrompt.bookingId, forfeitPrompt.status, false)}
+                style={{ padding: "14px 20px", borderRadius: 12, border: "1px solid #3d0000", background: "#1a0000", color: "#ff7070", fontWeight: 800, cursor: "pointer", textAlign: "left" }}
+              >
+                <div style={{ fontWeight: 900, marginBottom: 2 }}>Forfeit deposit</div>
+                <div style={{ fontSize: 12, color: "#884444" }}>Keep the deposit. Client is not refunded.</div>
+              </button>
+              <button
+                disabled={!!updatingId}
+                onClick={() => updateStatus(forfeitPrompt.bookingId, forfeitPrompt.status, true)}
+                style={{ padding: "14px 20px", borderRadius: 12, border: "1px solid #2d2d2d", background: "#111", color: "#fff", fontWeight: 800, cursor: "pointer", textAlign: "left" }}
+              >
+                <div style={{ fontWeight: 900, marginBottom: 2 }}>Refund deposit</div>
+                <div style={{ fontSize: 12, color: "#666" }}>Issue a Stripe refund. Takes 5–10 business days.</div>
+              </button>
+              <button
+                onClick={() => setForfeitPrompt(null)}
+                style={{ padding: "12px 20px", borderRadius: 12, border: "none", background: "transparent", color: "#555", fontWeight: 700, cursor: "pointer" }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {reschedulingBooking && (
+        <RescheduleModal
+          shopSlug={shopSlug}
+          booking={reschedulingBooking}
+          onClose={() => setReschedulingBooking(null)}
+          onRescheduled={(bookingId, newDate, newStartsAt) => {
+            setReschedulingBooking(null);
+            setBookings(prev => prev.map(b =>
+              b.id === bookingId ? { ...b, appointment_date: newDate, starts_at: newStartsAt } : b
+            ));
+          }}
+        />
+      )}
     </main>
   );
 }

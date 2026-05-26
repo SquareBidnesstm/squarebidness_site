@@ -1,4 +1,11 @@
-const BOOKING_KEY = "chocolate-city:vip:bookings";
+import {
+  VIP_BOOKING_KEY,
+  VIP_EVENT_DATES,
+  VIP_LIMIT,
+  vipBookingKey,
+  vipHoldKey
+} from "../_lib/chocolate-city-vip.js";
+
 const RESET_MARKER_KEY = "chocolate-city:vip:last-reset-date";
 
 async function redis(command, ...args) {
@@ -37,28 +44,35 @@ function getCentralParts() {
 
 export default async function handler(req, res) {
   try {
-   const resetToken = req.headers["x-reset-token"] || req.query.token;
-const adminToken = req.headers["x-admin-token"];
+    if (req.method !== "GET" && req.method !== "POST") {
+      return res.status(405).json({ ok: false, error: "Method not allowed" });
+    }
 
-const resetAllowed =
-  process.env.CHOCOLATE_CITY_CRON_SECRET &&
-  resetToken === process.env.CHOCOLATE_CITY_CRON_SECRET;
+    const authHeader = String(req.headers.authorization || "").trim();
+    const resetToken = req.headers["x-reset-token"];
+    const adminToken = req.headers["x-admin-token"];
+    const cronSecret = process.env.CRON_SECRET || process.env.CHOCOLATE_CITY_CRON_SECRET || "";
 
-const adminAllowed =
-  process.env.CHOCOLATE_CITY_ADMIN_TOKEN &&
-  adminToken === process.env.CHOCOLATE_CITY_ADMIN_TOKEN;
+    const resetAllowed =
+      (cronSecret && authHeader === `Bearer ${cronSecret}`) ||
+      (process.env.CHOCOLATE_CITY_CRON_SECRET &&
+        resetToken === process.env.CHOCOLATE_CITY_CRON_SECRET);
 
-if (!resetAllowed && !adminAllowed) {
-  return res.status(401).json({ ok: false, error: "Unauthorized" });
-}
+    const adminAllowed =
+      process.env.CHOCOLATE_CITY_ADMIN_TOKEN &&
+      adminToken === process.env.CHOCOLATE_CITY_ADMIN_TOKEN;
+
+    if (!resetAllowed && !adminAllowed) {
+      return res.status(401).json({ ok: false, error: "Unauthorized" });
+    }
     const force = req.query.force === "true" || req.body?.force === true;
     const central = getCentralParts();
 
-    if (!force && central.hour !== 2) {
+    if (!force && central.hour < 2) {
       return res.status(200).json({
         ok: true,
         skipped: true,
-        reason: "Not 2AM Central",
+        reason: "Before 2AM Central",
         central
       });
     }
@@ -74,15 +88,28 @@ if (!resetAllowed && !adminAllowed) {
       });
     }
 
-    await redis("SET", BOOKING_KEY, JSON.stringify([]));
+    for (const eventDate of VIP_EVENT_DATES) {
+      for (let slot = 1; slot <= VIP_LIMIT; slot += 1) {
+        await redis("DEL", vipHoldKey(slot, eventDate.date));
+      }
+    }
+
+    if (adminAllowed) {
+      await redis("SET", VIP_BOOKING_KEY, JSON.stringify([]));
+      for (const eventDate of VIP_EVENT_DATES) {
+        await redis("SET", vipBookingKey(eventDate.date), JSON.stringify([]));
+      }
+    }
+
     await redis("SET", RESET_MARKER_KEY, central.date);
 
     return res.status(200).json({
       ok: true,
       reset: true,
+      bookingsCleared: !!adminAllowed,
       central
     });
   } catch (err) {
-    return res.status(500).json({ ok: false, error: err.message });
+    return res.status(500).json({ ok: false, error: "Unable to reset VIP inventory." });
   }
 }

@@ -7,8 +7,7 @@ export async function GET(
   { params }: { params: Promise<{ shopSlug: string }> }
 ) {
   const { shopSlug } = await params;
-  const authed = await verifyAdminSession(req, shopSlug);
-  if (!authed) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+  // GET is intentionally public — the booking form needs deposit config
 
   const { data: shop } = await supabaseServer.from("shops").select("id").eq("slug", shopSlug).single();
   if (!shop) return NextResponse.json({ ok: false, error: "Not found" }, { status: 404 });
@@ -16,9 +15,11 @@ export async function GET(
   const { data } = await supabaseServer
     .from("shop_settings").select("value_json").eq("shop_id", shop.id).eq("key", "deposit_settings").single();
 
+  // Default to disabled — never charge a deposit for a shop that hasn't configured one,
+  // as a "enabled: true" default would route customers through Stripe with no booking created.
   return NextResponse.json({
     ok: true,
-    settings: data?.value_json ?? { enabled: false, amount: 10, type: "fixed" },
+    settings: data?.value_json ?? { enabled: false, amount: 0, type: "fixed" },
   });
 }
 

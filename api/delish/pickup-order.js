@@ -1,5 +1,6 @@
 // FILE: /api/delish/pickup-order.js
 import { Redis } from "@upstash/redis";
+import { requireDelishOperatorAuth } from "../_lib/delish-operator-auth.js";
 
 const redis = new Redis({
   url: process.env.DELISH_UPSTASH_REDIS_REST_URL,
@@ -11,6 +12,8 @@ export default async function handler(req, res) {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ ok: false, error: "Method not allowed." });
   }
+
+  if (!requireDelishOperatorAuth(req, res)) return;
 
   try {
     const { id } = req.body || {};

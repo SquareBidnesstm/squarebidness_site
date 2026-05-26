@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../../../../lib/supabase/server";
 import { verifyAdminSession } from "../../../../../../lib/auth";
+import { normalizePhone } from "../../../../../../lib/utils";
 
 export async function PATCH(
   req: NextRequest,
@@ -26,17 +27,33 @@ export async function PATCH(
   const body = await req.json();
   const updates: Record<string, string | boolean> = {};
 
-  if (body.name !== undefined) updates.name = body.name;
+  if (body.name !== undefined) {
+    const trimmedName = String(body.name).trim();
+    if (/\d{7,}/.test(trimmedName) || /^\d+$/.test(trimmedName)) {
+      return NextResponse.json(
+        { ok: false, error: "Name cannot be a phone number. Enter the barber's actual name." },
+        { status: 400 }
+      );
+    }
+    updates.name = trimmedName;
+  }
   if (body.display_name !== undefined) updates.display_name = body.display_name;
   if (body.role !== undefined) updates.role = body.role;
   if (body.active !== undefined) updates.active = body.active;
+  if (body.phone !== undefined) {
+    // Normalize to E.164 so Twilio SMS delivery works reliably
+    const normalized = normalizePhone(String(body.phone ?? ""));
+    updates.phone = normalized ?? body.phone; // fall back to raw value if normalization fails
+  }
+  if (body.special_sessions_enabled !== undefined) updates.special_sessions_enabled = body.special_sessions_enabled;
+  if (body.special_sessions_price_cents !== undefined) updates.special_sessions_price_cents = body.special_sessions_price_cents;
 
   const { data: barber, error } = await supabaseServer
     .from("barbers")
     .update(updates)
     .eq("id", barberId)
     .eq("shop_id", shop.id)
-    .select("id, slug, name, display_name, role, active, sort_order")
+    .select("id, slug, name, display_name, role, phone, special_sessions_enabled, special_sessions_price_cents, active, sort_order")
     .single();
 
   if (error || !barber) {

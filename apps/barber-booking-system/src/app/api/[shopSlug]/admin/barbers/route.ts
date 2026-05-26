@@ -24,7 +24,7 @@ export async function GET(
     .from("shops")
     .select("id")
     .eq("slug", shopSlug)
-    .single();
+    .maybeSingle();
 
   if (!shop) {
     return NextResponse.json({ ok: false, error: "Shop not found" }, { status: 404 });
@@ -32,12 +32,13 @@ export async function GET(
 
   const { data: barbers, error } = await supabaseServer
     .from("barbers")
-    .select("id, slug, name, display_name, role, active, sort_order")
+    .select("id, slug, name, display_name, role, phone, special_sessions_enabled, special_sessions_price_cents, active, sort_order, photo_url")
     .eq("shop_id", shop.id)
     .order("sort_order");
 
   if (error) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    console.error("[admin/barbers GET] DB error:", error);
+    return NextResponse.json({ ok: false, error: "An unexpected error occurred. Please try again." }, { status: 500 });
   }
 
   // Fetch PIN presence for each barber
@@ -51,7 +52,9 @@ export async function GET(
       .in("key", barberIds.map((id) => `barber_auth_${id}`));
     for (const s of settings ?? []) {
       const bid = (s.key as string).replace("barber_auth_", "");
-      pinSet[bid] = !!(s.value_json as { pin?: string } | null)?.pin;
+      const v = s.value_json as { pin?: string; pin_hash?: string } | null;
+      // Support both legacy plaintext (pin) and hashed (pin_hash) storage
+      pinSet[bid] = !!(v?.pin || v?.pin_hash);
     }
   }
 
@@ -60,17 +63,17 @@ export async function GET(
     .from("subscriptions")
     .select("plan, status")
     .eq("shop_id", shop.id)
-    .single();
+    .maybeSingle();
 
   const { data: limitSetting } = await supabaseServer
     .from("shop_settings")
     .select("value_json")
     .eq("shop_id", shop.id)
     .eq("key", "barber_limit")
-    .single();
+    .maybeSingle();
 
   const activePlan = sub?.status === "active" ? sub?.plan : "free";
-  const defaultLimit = activePlan === "pro" ? 10 : activePlan === "solo" ? 1 : 0;
+  const defaultLimit = activePlan === "enterprise" ? 10 : activePlan === "pro" ? 5 : activePlan === "solo" ? 1 : 0;
   const customLimit = (limitSetting?.value_json as { limit?: number } | null)?.limit;
   const barberLimit = customLimit ?? defaultLimit;
 
@@ -97,7 +100,7 @@ export async function POST(
     .from("shops")
     .select("id")
     .eq("slug", shopSlug)
-    .single();
+    .maybeSingle();
 
   if (!shop) {
     return NextResponse.json({ ok: false, error: "Shop not found" }, { status: 404 });
@@ -108,7 +111,7 @@ export async function POST(
     .from("subscriptions")
     .select("plan, status")
     .eq("shop_id", shop.id)
-    .single();
+    .maybeSingle();
 
   // Check for custom limit in shop_settings (platform admin can override)
   const { data: limitSetting } = await supabaseServer
@@ -116,10 +119,10 @@ export async function POST(
     .select("value_json")
     .eq("shop_id", shop.id)
     .eq("key", "barber_limit")
-    .single();
+    .maybeSingle();
 
   const activePlan = sub?.status === "active" ? sub?.plan : "free";
-  const defaultLimit = activePlan === "pro" ? 10 : activePlan === "solo" ? 1 : 0;
+  const defaultLimit = activePlan === "enterprise" ? 10 : activePlan === "pro" ? 5 : activePlan === "solo" ? 1 : 0;
   const customLimit = (limitSetting?.value_json as { limit?: number } | null)?.limit;
   const barberLimit = customLimit ?? defaultLimit;
 
@@ -150,6 +153,22 @@ export async function POST(
     return NextResponse.json({ ok: false, error: "Name is required." }, { status: 400 });
   }
 
+  // Reject phone numbers entered as names (7+ consecutive digits)
+  if (/\d{7,}/.test(name.trim())) {
+    return NextResponse.json(
+      { ok: false, error: "Name cannot be a phone number. Enter the barber's actual name." },
+      { status: 400 }
+    );
+  }
+
+  // Reject names that are purely numeric
+  if (/^\d+$/.test(name.trim())) {
+    return NextResponse.json(
+      { ok: false, error: "Name must contain letters." },
+      { status: 400 }
+    );
+  }
+
   // Get current max sort_order
   const { data: existing } = await supabaseServer
     .from("barbers")
@@ -157,23 +176,27 @@ export async function POST(
     .eq("shop_id", shop.id)
     .order("sort_order", { ascending: false })
     .limit(1)
-    .single();
+    .maybeSingle();
 
   const nextOrder = (existing?.sort_order ?? 0) + 1;
 
-  // Generate a unique slug
+  // Generate a unique slug (capped at 20 attempts to prevent infinite loop on network errors)
   let baseSlug = nameToSlug(name.trim()) || `barber-${nextOrder}`;
   let slug = baseSlug;
-  let attempt = 1;
-  while (true) {
+  let attempts = 0;
+  while (attempts++ < 20) {
     const { data: conflict } = await supabaseServer
       .from("barbers")
       .select("id")
       .eq("shop_id", shop.id)
       .eq("slug", slug)
-      .single();
+      .maybeSingle();
     if (!conflict) break;
-    slug = `${baseSlug}-${attempt++}`;
+    if (attempts >= 20) {
+      slug = `${baseSlug}-${Math.random().toString(36).slice(2, 7)}`;
+      break;
+    }
+    slug = `${baseSlug}-${attempts}`;
   }
 
   const { data: barber, error } = await supabaseServer
@@ -187,11 +210,25 @@ export async function POST(
       active: true,
       sort_order: nextOrder,
     })
-    .select("id, slug, name, display_name, role, active, sort_order")
+    .select("id, slug, name, display_name, role, active, sort_order, photo_url")
     .single();
 
   if (error || !barber) {
-    return NextResponse.json({ ok: false, error: error?.message || "Could not create barber." }, { status: 500 });
+    console.error("[admin/barbers POST] DB insert error:", error);
+    return NextResponse.json({ ok: false, error: "An unexpected error occurred. Please try again." }, { status: 500 });
+  }
+
+  // Re-count after insert to catch concurrent violations (TOCTOU guard)
+  const { count: newCount } = await supabaseServer
+    .from("barbers")
+    .select("id", { count: "exact", head: true })
+    .eq("shop_id", shop.id)
+    .eq("active", true);
+
+  if (newCount !== null && newCount > barberLimit) {
+    // Rollback — delete the just-inserted barber (deactivating leaves a ghost row that still counts toward limits)
+    await supabaseServer.from("barbers").delete().eq("id", barber.id);
+    return NextResponse.json({ ok: false, error: "Barber limit reached for your plan." }, { status: 400 });
   }
 
   // Auto-assign all active services to this new barber

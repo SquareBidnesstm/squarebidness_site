@@ -34,6 +34,19 @@ function normalizeUsPhone(phone) {
   return null;
 }
 
+function getItemsJson(metadata = {}) {
+  const chunkCount = Math.max(0, Number(metadata.itemsJsonChunkCount || 0));
+
+  if (chunkCount > 0) {
+    let combined = "";
+    for (let index = 1; index <= chunkCount; index += 1) {
+      combined += String(metadata[`itemsJson${index}`] || "");
+    }
+    return combined || "[]";
+  }
+
+  return metadata.itemsJson || "[]";
+}
 
 
 function buildPickupSms(metadata) {
@@ -45,7 +58,7 @@ function buildPickupSms(metadata) {
 
   let itemLines = [];
   try {
-    const items = JSON.parse(metadata.itemsJson || "[]");
+    const items = JSON.parse(getItemsJson(metadata));
     if (Array.isArray(items) && items.length) {
       itemLines = items.map((i) => {
         const qty = Number(i.qty || 0);
@@ -139,19 +152,38 @@ async function retryOnce(label, fn) {
     }
   }
 }
+
+async function acquireProcessingGuard(sessionId, eventId) {
+  const lockKey = `delish:stripe:processing:${sessionId}`;
+  const lockValue = `${eventId || "event"}:${Date.now()}`;
+
+  const result = await redis.set(lockKey, lockValue, {
+    nx: true,
+    ex: 60 * 10,
+  });
+
+  return result === "OK" || result === true;
+}
+
+async function releaseProcessingGuard(sessionId) {
+  if (!sessionId) return;
+  await redis.del(`delish:stripe:processing:${sessionId}`);
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).send("Method not allowed");
   }
 
-  let failureContext = {
+	  let failureContext = {
     sessionId: "",
     customerName: "",
     customerPhone: "",
     pickupWindow: "",
-    total: "",
-  };
+	    total: "",
+	  };
+  let processingGuardSessionId = "";
 
   try {
     const sig = req.headers["stripe-signature"];
@@ -186,6 +218,19 @@ export default async function handler(req, res) {
   if (alreadyProcessed) {
     return res.status(200).json({ received: true, duplicate: true });
   }
+
+	  const guardAcquired = await acquireProcessingGuard(sessionId, event.id);
+	  if (!guardAcquired) {
+    const existingOrderId = await redis.get(`delish:order:by-session:${sessionId}`);
+
+    return res.status(200).json({
+      received: true,
+      duplicate: true,
+      inProgress: !existingOrderId,
+      orderId: existingOrderId || undefined,
+    });
+	  }
+  processingGuardSessionId = sessionId;
 
   // determine type first
   const isCateringDeposit =
@@ -274,12 +319,21 @@ No catering record found in Redis. Reconcile manually.`,
   }
 
   // safe items parse for pickup orders
+  const recordId = metadata.recordId || metadata.orderNumber || "";
+  const pendingOrder = recordId
+    ? await redis.get(`delish:pending-order:${recordId}`)
+    : null;
+
   let items = [];
-  try {
-    items = JSON.parse(metadata.itemsJson || "[]");
-    if (!Array.isArray(items)) items = [];
-  } catch {
-    items = [];
+  if (pendingOrder && Array.isArray(pendingOrder.items)) {
+    items = pendingOrder.items;
+  } else {
+    try {
+      items = JSON.parse(getItemsJson(metadata));
+      if (!Array.isArray(items)) items = [];
+    } catch {
+      items = [];
+    }
   }
 
   const existingOrderId = await redis.get(`delish:order:by-session:${sessionId}`);
@@ -300,27 +354,32 @@ No catering record found in Redis. Reconcile manually.`,
 
   const order = {
     id: crypto.randomUUID(),
-    orderNumber: metadata.orderNumber || metadata.recordId || `DL-${Date.now()}`,
+    orderNumber:
+      pendingOrder?.orderNumber ||
+      metadata.orderNumber ||
+      metadata.recordId ||
+      `DL-${Date.now()}`,
     createdAt: new Date().toISOString(),
     completedAt: "",
     status: "received",
     orderState: "received",
-    smsConsent: metadata.smsConsent === "yes" ? "yes" : "no",
-    customerName: metadata.customerName || "",
-    customerPhone: metadata.customerPhone || "",
-    customerEmail: metadata.customerEmail || "",
-    pickupDate: metadata.pickupDate || "",
-    pickupWindow: metadata.pickupWindow || "",
-    notes: metadata.notes || "",
+    smsConsent:
+      pendingOrder?.smsConsent || (metadata.smsConsent === "yes" ? "yes" : "no"),
+    customerName: pendingOrder?.customerName || metadata.customerName || "",
+    customerPhone: pendingOrder?.customerPhone || metadata.customerPhone || "",
+    customerEmail: pendingOrder?.customerEmail || metadata.customerEmail || "",
+    pickupDate: pendingOrder?.pickupDate || metadata.pickupDate || "",
+    pickupWindow: pendingOrder?.pickupWindow || metadata.pickupWindow || "",
+    notes: pendingOrder?.notes || metadata.notes || "",
     items,
-    subtotal: Number(metadata.subtotal || 0),
-    tax: Number(metadata.tax || 0),
+    subtotal: Number(pendingOrder?.subtotal ?? metadata.subtotal ?? 0),
+    tax: Number(pendingOrder?.tax ?? metadata.tax ?? 0),
     total:
       typeof session.amount_total === "number"
         ? Number((session.amount_total / 100).toFixed(2))
-        : Number(metadata.total || 0),
+        : Number(pendingOrder?.total ?? metadata.total ?? 0),
     paymentStatus: "paid",
-    source: metadata.source || "stripe-webhook",
+    source: pendingOrder?.source || metadata.source || "stripe-webhook",
     stripeSessionId: sessionId,
   };
 
@@ -345,8 +404,17 @@ No catering record found in Redis. Reconcile manually.`,
 // ------------------------------------------------------------
  
   try {
-    const smsConsent = metadata.smsConsent === "yes";
-    const smsTo = normalizeUsPhone(metadata.customerPhone || "");
+    const smsConsent = order.smsConsent === "yes";
+    const smsTo = normalizeUsPhone(order.customerPhone || "");
+    const smsMetadata = {
+      ...metadata,
+      ...pendingOrder,
+      ...order,
+      amountTotal:
+        typeof session.amount_total === "number"
+          ? (session.amount_total / 100).toFixed(2)
+          : "",
+    };
  
     // Customer confirmation SMS (only with consent + valid phone)
     if (smsConsent && smsTo) {
@@ -358,13 +426,7 @@ No catering record found in Redis. Reconcile manually.`,
  
       const smsResult = await sendDelishSms({
         to: smsTo,
-        message: buildPickupSms({
-          ...metadata,
-          amountTotal:
-            typeof session.amount_total === "number"
-              ? (session.amount_total / 100).toFixed(2)
-              : "",
-        }),
+        message: buildPickupSms(smsMetadata),
       });
  
       console.log("DELISH SMS HELPER RESULT:", smsResult);
@@ -372,7 +434,7 @@ No catering record found in Redis. Reconcile manually.`,
     } else {
       console.log("DELISH PICKUP SMS SKIPPED:", {
         smsConsent,
-        rawPhone: metadata.customerPhone || "",
+        rawPhone: order.customerPhone || metadata.customerPhone || "",
         normalizedPhone: smsTo,
       });
     }
@@ -382,13 +444,7 @@ No catering record found in Redis. Reconcile manually.`,
     if (ownerSmsTo) {
       await sendDelishSms({
         to: ownerSmsTo,
-        message: buildOwnerNewOrderSms({
-          ...metadata,
-          amountTotal:
-            typeof session.amount_total === "number"
-              ? (session.amount_total / 100).toFixed(2)
-              : "",
-        }),
+        message: buildOwnerNewOrderSms(smsMetadata),
       });
     }
   } catch (smsError) {
@@ -397,23 +453,30 @@ No catering record found in Redis. Reconcile manually.`,
  
 
  // mark processed LAST
-await redis.set(`delish:stripe:session:${sessionId}`, {
-  processedAt: new Date().toISOString(),
-  eventType: event.type,
-  orderId: order.id,
-  orderNumber: order.orderNumber,
-});
-     
-   return res.status(200).json({ received: true });
+	await redis.set(`delish:stripe:session:${sessionId}`, {
+	  processedAt: new Date().toISOString(),
+	  eventType: event.type,
+	  orderId: order.id,
+	  orderNumber: order.orderNumber,
+	});
+  processingGuardSessionId = "";
+	     
+	   return res.status(200).json({ received: true });
 }
 
 // handle any other Stripe event safely
 return res.status(200).json({ received: true, ignored: event.type });
 
-} catch (error) {
-  console.error("DELISH STRIPE WEBHOOK ERROR:", error);
+	} catch (error) {
+	  console.error("DELISH STRIPE WEBHOOK ERROR:", error);
 
   try {
+    await releaseProcessingGuard(processingGuardSessionId);
+  } catch (releaseError) {
+    console.error("DELISH STRIPE WEBHOOK GUARD RELEASE ERROR:", releaseError);
+  }
+
+	  try {
     const alertTo = normalizeUsPhone(process.env.DELISH_FAILURE_ALERT_TO || "");
 
     if (alertTo) {

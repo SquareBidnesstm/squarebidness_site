@@ -1,4 +1,5 @@
 // FILE: /api/delish/create-checkout.js
+import { Redis } from "@upstash/redis";
 import Stripe from "stripe";
 import { getDelishOrderingState } from "../_lib/delish-ordering-config.js";
 import { getDelishMenuOverrides } from "../_lib/delish-menu-overrides.js";
@@ -6,16 +7,29 @@ import {
   getDisabledPickupWindows,
   isAllowedPickupWindow,
 } from "../_lib/delish-pickup-windows.js";
+import { getDelishFlashSale, isFlashSaleActive } from "../_lib/delish-flash-sale.js";
 
 const stripe = new Stripe(process.env.DELISH_STRIPE_SECRET_KEY, {
   apiVersion: "2025-02-24.acacia",
 });
 
+const redis = new Redis({
+  url: process.env.DELISH_UPSTASH_REDIS_REST_URL,
+  token: process.env.DELISH_UPSTASH_REDIS_REST_TOKEN,
+});
+
+const PENDING_ORDER_TTL_SECONDS = 60 * 60 * 24;
+
 const MENU_BY_DAY = {
   monday: [
     {
       id: "monday_red_beans_fried_chicken",
-      name: "Red Beans or Okra with Fried Chicken",
+      name: "Red Beans with Fried Chicken",
+      price: 13.99,
+    },
+    {
+      id: "monday_okra_fried_chicken",
+      name: "Okra with Fried Chicken",
       price: 13.99,
     },
     {
@@ -244,7 +258,28 @@ function getCentralDateParts(date = new Date()) {
   };
 }
 
-function getAllowedItemsForToday(todayDay) {
+function getLimitedMenuOverride(overrides = {}) {
+  const limitedMenu = overrides?.limitedMenu;
+  return limitedMenu?.active === true ? limitedMenu : null;
+}
+
+function buildLimitedMenuItem(limitedMenu = {}) {
+  return {
+    id: String(limitedMenu.itemId || "friday_fried_catfish").trim() || "friday_fried_catfish",
+    name: String(limitedMenu.name || "Catfish").trim() || "Catfish",
+    price: Number.isFinite(Number(limitedMenu.price)) ? Number(limitedMenu.price) : 12.99,
+  };
+}
+
+function getAllowedItemsForToday(todayDay, overrides = {}) {
+  const limitedMenu = getLimitedMenuOverride(overrides);
+  if (limitedMenu) {
+    const drinkItems = (MENU_BY_DAY.everyday || []).filter((item) =>
+      String(item.id || "").startsWith("drink_")
+    );
+    return [buildLimitedMenuItem(limitedMenu), ...drinkItems];
+  }
+
   const dayItems = MENU_BY_DAY[todayDay] || [];
   const everydayItems = MENU_BY_DAY.everyday || [];
   return [...dayItems, ...everydayItems];
@@ -252,6 +287,24 @@ function getAllowedItemsForToday(todayDay) {
 
 function buildAllowedMap(items) {
   return new Map(items.map((item) => [item.id, item]));
+}
+
+function buildFlashSaleMap(flashSale) {
+  if (!isFlashSaleActive(flashSale)) return new Map();
+
+  return new Map(
+    (flashSale.items || []).map((item) => [
+      item.flashId,
+      {
+        id: item.flashId,
+        sourceId: item.sourceId,
+        name: `SPECIAL - ${item.name}`,
+        price: item.price,
+        limit: item.limit,
+        flashSale: true,
+      },
+    ])
+  );
 }
 
 function isItemAllowedForCurrentDay(itemId, todayDay) {
@@ -295,6 +348,41 @@ function buildShortOrderSummary(items = []) {
     .map((item) => `${item.qty}x ${item.name}`)
     .join(", ")
     .slice(0, 500);
+}
+
+function duplicateItemKey(item = {}) {
+  return [
+    item.id,
+    item.baseId,
+    item.baseName,
+    item.side1Id,
+    item.side1Name,
+    item.side2Id,
+    item.side2Name,
+  ]
+    .map((value) => String(value || "").trim())
+    .join("|");
+}
+
+function aggregateDuplicateItems(items = []) {
+  const itemMap = new Map();
+
+  for (const item of items) {
+    const key = duplicateItemKey(item);
+    const qty = Math.max(1, Number(item?.qty || 1));
+    const existing = itemMap.get(key);
+
+    if (existing) {
+      existing.qty += qty;
+    } else {
+      itemMap.set(key, {
+        ...item,
+        qty,
+      });
+    }
+  }
+
+  return Array.from(itemMap.values());
 }
 
 function safeMeta(value, max = 500) {
@@ -472,6 +560,16 @@ export default async function handler(req, res) {
       });
     }
 
+    if (
+      !process.env.DELISH_UPSTASH_REDIS_REST_URL ||
+      !process.env.DELISH_UPSTASH_REDIS_REST_TOKEN
+    ) {
+      return res.status(500).json({
+        ok: false,
+        error: "Missing Delish Redis configuration.",
+      });
+    }
+
     const body =
       typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
 
@@ -486,12 +584,22 @@ export default async function handler(req, res) {
     const todayIso = orderingState.now.isoDate;
     const todayDay = orderingState.today;
     const menuOverrides = await getDelishMenuOverrides();
+    const flashSale = await getDelishFlashSale();
+    const flashSaleMap = buildFlashSaleMap(flashSale);
+    const requestedItems = aggregateDuplicateItems(body.items);
+    const requestedItemIds = requestedItems.map((item) => String(item.id || "").trim());
+    const isFlashSaleOrder =
+      flashSaleMap.size > 0 &&
+      requestedItemIds.length > 0 &&
+      requestedItemIds.every((id) => flashSaleMap.has(id));
 
-    if (!orderingState.openNow) {
+    if (!orderingState.openNow && !isFlashSaleOrder) {
       let message = orderingState.message || "Online ordering is closed right now.";
 
       if (orderingState.reason === "manual_closed") {
-        message = "Online ordering is currently paused.";
+        message = orderingState.orderingMode === "closed"
+          ? "Online ordering is closed today."
+          : "Online ordering is currently paused.";
       } else if (orderingState.reason === "outside_service_window") {
         message = `Ordering is available from ${orderingState.openTime} to ${orderingState.closeTime}.`;
       } else if (orderingState.reason === "sunday_not_scheduled") {
@@ -518,7 +626,11 @@ export default async function handler(req, res) {
     const requestedPickupWindow = String(body.pickupWindow || "").trim();
     const disabledPickupWindows = await getDisabledPickupWindows();
 
-    if (!isAllowedPickupWindow(requestedPickupWindow)) {
+    const flashPickupWindows = Array.isArray(flashSale.pickupWindows)
+      ? flashSale.pickupWindows
+      : [];
+
+    if (!isAllowedPickupWindow(requestedPickupWindow) && !(isFlashSaleOrder && flashPickupWindows.includes(requestedPickupWindow))) {
       return res.status(400).json({
         ok: false,
         error: "PICKUP_WINDOW_NOT_ALLOWED",
@@ -526,7 +638,7 @@ export default async function handler(req, res) {
       });
     }
 
-    if (disabledPickupWindows.includes(requestedPickupWindow)) {
+    if (!isFlashSaleOrder && disabledPickupWindows.includes(requestedPickupWindow)) {
       return res.status(403).json({
         ok: false,
         error: "PICKUP_WINDOW_DISABLED",
@@ -534,7 +646,9 @@ export default async function handler(req, res) {
       });
     }
 
-    const allowedItems = getAllowedItemsForToday(todayDay);
+    const limitedMenu = getLimitedMenuOverride(menuOverrides);
+    const limitedMenuItemId = limitedMenu ? buildLimitedMenuItem(limitedMenu).id : "";
+    const allowedItems = getAllowedItemsForToday(todayDay, menuOverrides);
     const allowedMap = buildAllowedMap(allowedItems);
 
     // ------------------------------------------------------------
@@ -542,33 +656,41 @@ export default async function handler(req, res) {
 // Replace the return block inside the .map() in cleanItems
 // ------------------------------------------------------------
  
-    const cleanItems = body.items
+    const cleanItems = requestedItems
       .map((item) => {
         const id = String(item.id || "").trim();
-        const qty = Math.min(3, Math.max(1, Number(item.qty || 1)));
+        const rawQty = Math.max(1, Number(item.qty || 1));
  
-        if (!id || !allowedMap.has(id)) return null;
-        if (!isItemAllowedForCurrentDay(id, todayDay)) return null;
-        if (!isSectionEnabledBackend(id, menuOverrides)) return null;
-        if (!isItemEnabledBackend(id, menuOverrides)) return null;
-        if (isItemSoldOutBackend(id, menuOverrides)) return null;
- 
-        const allowed = allowedMap.get(id);
-        const baseId = String(item.baseId || "").trim();
-        if (baseId && isBaseSoldOutBackend(baseId, menuOverrides)) return null;
+        const isFlashItem = flashSaleMap.has(id);
+        if (!id || (!allowedMap.has(id) && !isFlashItem)) return null;
+        if (!isFlashItem && !isItemAllowedForCurrentDay(id, todayDay)) return null;
+        if (!isFlashItem && !isSectionEnabledBackend(id, menuOverrides)) return null;
+
+        const allowed = isFlashItem ? flashSaleMap.get(id) : allowedMap.get(id);
+        const isLimitedMenuItem = !isFlashItem && limitedMenu && id === limitedMenuItemId;
+        if (!isFlashItem && !isLimitedMenuItem && !isItemEnabledBackend(id, menuOverrides)) return null;
+        if (!isFlashItem && !isLimitedMenuItem && isItemSoldOutBackend(id, menuOverrides)) return null;
+        const maxQty = isFlashItem
+          ? Math.max(1, Number(allowed.limit || 20))
+          : 3;
+        const qty = Math.min(maxQty, rawQty);
+        const baseId = isLimitedMenuItem ? "" : String(item.baseId || "").trim();
+        if (!isFlashItem && baseId && isBaseSoldOutBackend(baseId, menuOverrides)) return null;
  
         return {
           id: allowed.id,
+          sourceId: allowed.sourceId || "",
           name: allowed.name,
           qty,
           price: allowed.price,
           total: qty * allowed.price,
+          flashSale: allowed.flashSale === true,
           baseId,       // FIX: was missing
-          baseName: item.baseName || "",   // FIX: was missing
-          side1Id: item.side1Id || "",
-          side2Id: item.side2Id || "",
-          side1Name: item.side1Name || "",
-          side2Name: item.side2Name || "",
+          baseName: isLimitedMenuItem ? "" : item.baseName || "",   // FIX: was missing
+          side1Id: isLimitedMenuItem ? "" : item.side1Id || "",
+          side2Id: isLimitedMenuItem ? "" : item.side2Id || "",
+          side1Name: isLimitedMenuItem ? "" : item.side1Name || "",
+          side2Name: isLimitedMenuItem ? "" : item.side2Name || "",
         };
       })
       .filter(Boolean);
@@ -581,7 +703,7 @@ export default async function handler(req, res) {
       });
     }
 
-    if (cleanItems.length !== body.items.length) {
+    if (cleanItems.length !== requestedItems.length) {
       return res.status(403).json({
         ok: false,
         error: "ITEM_NOT_AVAILABLE",
@@ -600,13 +722,6 @@ export default async function handler(req, res) {
     const recordId = makeRecordId();
     const shortOrderSummary = buildShortOrderSummary(cleanItems);
 
-    let itemsJson = "[]";
-    try {
-      itemsJson = JSON.stringify(cleanItems);
-    } catch {
-      itemsJson = "[]";
-    }
-
     const lineItems = cleanItems.map((item) => ({
       quantity: item.qty,
       price_data: {
@@ -620,6 +735,7 @@ export default async function handler(req, res) {
             itemId: item.id,
             activeMenuDay: todayDay,
             brand: "Delish",
+            flashSale: item.flashSale ? "yes" : "no",
           },
         },
         unit_amount: Math.round(Number(item.price) * 100),
@@ -645,6 +761,34 @@ export default async function handler(req, res) {
       });
     }
 
+    const pendingOrder = {
+      orderNumber: recordId,
+      recordId,
+      createdAt: new Date().toISOString(),
+      status: "pending_payment",
+      orderState: "pending_payment",
+      orderType: "paid_pickup",
+      smsConsent: "yes",
+      customerName: safeMeta(body.customerName, 100),
+      customerPhone: safeMeta(body.customerPhone, 30),
+      customerEmail: safeMeta(body.customerEmail || "", 120),
+      pickupDate: safeMeta(body.pickupDate, 20),
+      pickupWindow: safeMeta(body.pickupWindow, 40),
+      notes: safeMeta(body.notes || body.orderNotes || "", 300),
+      items: cleanItems,
+      itemCount: cleanItems.length,
+      subtotal: calculatedSubtotal,
+      tax: calculatedTax,
+      total: calculatedTotal,
+      source: safeMeta(body.source || "delish-order-page", 50),
+      activeMenuDay: safeMeta(todayDay, 20),
+      flashSale: isFlashSaleOrder ? "yes" : "no",
+    };
+
+    await redis.set(`delish:pending-order:${recordId}`, pendingOrder, {
+      ex: PENDING_ORDER_TTL_SECONDS,
+    });
+
     const sharedMetadata = {
       brand: "Delish",
       recordId,
@@ -658,13 +802,14 @@ export default async function handler(req, res) {
       notes: safeMeta(body.notes || body.orderNotes || "", 300),
       smsConsent: "yes",
       orderSummary: shortOrderSummary,
-      itemsJson,
+      pendingOrderKey: `delish:pending-order:${recordId}`,
       itemCount: String(cleanItems.length),
       subtotal: String(calculatedSubtotal),
       tax: String(calculatedTax),
       total: String(calculatedTotal),
       source: safeMeta(body.source || "delish-order-page", 50),
       activeMenuDay: safeMeta(todayDay, 20),
+      flashSale: isFlashSaleOrder ? "yes" : "no",
     };
 
     const session = await stripe.checkout.sessions.create({
@@ -672,13 +817,23 @@ export default async function handler(req, res) {
       payment_method_types: ["card"],
       line_items: lineItems,
       success_url: "https://www.squarebidness.com/delish/order/success/?session_id={CHECKOUT_SESSION_ID}",
-      cancel_url: "https://www.squarebidness.com/delish/order/",
+      cancel_url: "https://www.squarebidness.com/delish/",
       metadata: sharedMetadata,
       payment_intent_data: {
         metadata: sharedMetadata,
       },
       customer_email: body.customerEmail || undefined,
     });
+
+    await redis.set(
+      `delish:pending-order:${recordId}`,
+      {
+        ...pendingOrder,
+        stripeSessionId: session.id,
+        stripeCheckoutUrl: session.url || "",
+      },
+      { ex: PENDING_ORDER_TTL_SECONDS }
+    );
 
     return res.status(200).json({
       ok: true,

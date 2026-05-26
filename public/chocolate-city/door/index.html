@@ -337,7 +337,7 @@
         <img src="/chocolate-city/assets/cc-icon-192.png" alt="Chocolate City Lounge logo">
         <span>Chocolate City Lounge LLC</span>
       </a>
-      <a class="back-link" href="/chocolate-city/vip/">Reserve VIP</a>
+      <a class="back-link" href="/chocolate-city/admin/">Back to Admin</a>
     </header>
 
     <header class="top">
@@ -385,6 +385,7 @@
         <div class="guest" id="guestName">Guest</div>
         <div class="package" id="packageName">VIP Section</div>
         <div class="meta">
+          <div>VIP Night: <strong id="eventLabel">—</strong></div>
           <div>VIP Code: <strong id="vipCode">—</strong></div>
           <div>Payment: <strong id="paymentStatus">—</strong></div>
           <div>Used: <strong id="usedStatus">—</strong></div>
@@ -397,6 +398,7 @@
     </section>
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
   <script>
     const TOKEN_KEY = "cc_admin_token";
     const tokenInput = document.getElementById("token");
@@ -407,6 +409,7 @@
     const resultBadge = document.getElementById("resultBadge");
     const guestName = document.getElementById("guestName");
     const packageName = document.getElementById("packageName");
+    const eventLabel = document.getElementById("eventLabel");
     const vipCode = document.getElementById("vipCode");
     const paymentStatus = document.getElementById("paymentStatus");
     const usedStatus = document.getElementById("usedStatus");
@@ -420,6 +423,9 @@
     let scannerStream = null;
     let scannerTimer = null;
     let barcodeDetector = null;
+    let scannerCanvas = null;
+    let scannerContext = null;
+    let scannerMode = "";
 
     function setStatus(message, tone = ""){
       statusBox.className = "status" + (tone ? ` ${tone}` : "");
@@ -458,6 +464,7 @@
       resultBadge.className = "badge" + (alreadyUsed ? " used" : "");
       guestName.textContent = booking.customerName || "Guest";
       packageName.textContent = booking.packageName || "VIP Section";
+      eventLabel.textContent = booking.eventLabel || booking.eventDate || "—";
       vipCode.textContent = booking.vipCode || "";
       paymentStatus.textContent = booking.paymentStatus || "paid";
       usedStatus.textContent = alreadyUsed ? (booking.usedAt || "yes") : "no";
@@ -515,13 +522,25 @@
     }
 
     async function startScanner(){
-      if(!("BarcodeDetector" in window)){
-        setStatus("Camera QR scanning is not supported on this browser. Enter the VIP code or guest name.", "warn");
+      if(!navigator.mediaDevices?.getUserMedia){
+        setStatus("Camera access is not supported on this browser. Open this page in Safari or enter the VIP code/name.", "warn");
         return;
       }
 
       try{
-        barcodeDetector = new BarcodeDetector({ formats:["qr_code"] });
+        if("BarcodeDetector" in window){
+          barcodeDetector = new BarcodeDetector({ formats:["qr_code"] });
+          scannerMode = "native";
+        }else if(window.jsQR){
+          barcodeDetector = null;
+          scannerMode = "jsqr";
+          scannerCanvas = scannerCanvas || document.createElement("canvas");
+          scannerContext = scannerCanvas.getContext("2d", { willReadFrequently:true });
+        }else{
+          setStatus("QR scanner is still loading. Wait a second and tap Start Camera Scan again.", "warn");
+          return;
+        }
+
         scannerStream = await navigator.mediaDevices.getUserMedia({
           video:{ facingMode:"environment" },
           audio:false
@@ -534,7 +553,7 @@
         stopScanBtn.disabled = false;
         setStatus("Camera active. Point it at the VIP QR code.");
 
-        scannerTimer = window.setInterval(scanFrame, 650);
+        scannerTimer = window.setInterval(scanFrame, scannerMode === "native" ? 650 : 250);
       }catch(err){
         stopScanner();
         setStatus(err.message || "Unable to start camera scan.", "bad");
@@ -542,11 +561,24 @@
     }
 
     async function scanFrame(){
-      if(!barcodeDetector || !scannerVideo.videoWidth) return;
+      if(!scannerVideo.videoWidth) return;
 
       try{
-        const codes = await barcodeDetector.detect(scannerVideo);
-        const rawValue = codes?.[0]?.rawValue || "";
+        let rawValue = "";
+
+        if(scannerMode === "native" && barcodeDetector){
+          const codes = await barcodeDetector.detect(scannerVideo);
+          rawValue = codes?.[0]?.rawValue || "";
+        }else if(scannerMode === "jsqr" && scannerContext){
+          scannerCanvas.width = scannerVideo.videoWidth;
+          scannerCanvas.height = scannerVideo.videoHeight;
+          scannerContext.drawImage(scannerVideo, 0, 0, scannerCanvas.width, scannerCanvas.height);
+          const imageData = scannerContext.getImageData(0, 0, scannerCanvas.width, scannerCanvas.height);
+          const code = window.jsQR(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts:"attemptBoth"
+          });
+          rawValue = code?.data || "";
+        }
 
         if(rawValue){
           vipCodeInput.value = rawValue.trim();
@@ -572,6 +604,8 @@
       }
 
       scannerVideo.srcObject = null;
+      barcodeDetector = null;
+      scannerMode = "";
       videoWrap.classList.remove("is-visible");
       startScanBtn.disabled = false;
       stopScanBtn.disabled = true;

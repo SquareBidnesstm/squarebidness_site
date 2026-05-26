@@ -1,9 +1,13 @@
 import {
+  VIP_BOOKING_LOCK_KEY,
+  acquireRedisLock,
   findVipBooking,
   getVipBookings,
   parseVipCode,
   publicVipBooking,
+  releaseRedisLock,
   saveVipBookings,
+  sanitizeMetadataValue,
 } from "../_lib/chocolate-city-vip.js";
 
 function getToken(req) {
@@ -22,6 +26,28 @@ function parseBody(body) {
   } catch {
     return {};
   }
+}
+
+function findVipMatches(bookings, { sessionId = "", name = "" } = {}) {
+  const cleanSessionId = parseVipCode(sessionId);
+  const cleanName = sanitizeMetadataValue(name, 80).toLowerCase();
+
+  if (cleanSessionId) {
+    return bookings.filter((booking) => booking.sessionId === cleanSessionId);
+  }
+
+  if (!cleanName) return [];
+
+  const exactMatches = bookings.filter((booking) => {
+    return sanitizeMetadataValue(booking.customerName, 80).toLowerCase() === cleanName;
+  });
+
+  if (exactMatches.length) return exactMatches;
+
+  return bookings.filter((booking) => {
+    const bookingName = sanitizeMetadataValue(booking.customerName, 80).toLowerCase();
+    return bookingName && bookingName.includes(cleanName);
+  });
 }
 
 export default async function handler(req, res) {
@@ -52,7 +78,19 @@ export default async function handler(req, res) {
     }
 
     const bookings = await getVipBookings();
-    const booking = findVipBooking(bookings, { sessionId, name });
+    const matches = findVipMatches(bookings, { sessionId, name });
+    const booking = sessionId
+      ? findVipBooking(bookings, { sessionId })
+      : matches[0] || null;
+
+    if (!sessionId && matches.length > 1) {
+      return res.status(409).json({
+        ok: false,
+        valid: false,
+        used: false,
+        error: "Multiple VIP reservations match that name. Scan the QR code or enter the full VIP code."
+      });
+    }
 
     if (!booking) {
       return res.status(404).json({
@@ -74,29 +112,76 @@ export default async function handler(req, res) {
     }
 
     if (markUsed) {
+      const lockValue =
+        globalThis.crypto?.randomUUID?.() ||
+        `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+      const locked = await acquireRedisLock(VIP_BOOKING_LOCK_KEY, lockValue, 10);
+
+      if (!locked) {
+        return res.status(409).json({
+          ok: false,
+          valid: false,
+          used: false,
+          error: "VIP door screen is busy. Try again in a few seconds."
+        });
+      }
+
       const now = new Date().toISOString();
-      const updated = bookings.map((item) => {
-        if (item.sessionId !== booking.sessionId) return item;
-        return {
-          ...item,
-          used: true,
-          usedAt: now
-        };
-      });
+      const bookingEventDate = booking.eventDate || "";
 
-      await saveVipBookings(updated);
+      try {
+        const latestBookings = bookingEventDate
+          ? await getVipBookings(bookingEventDate)
+          : (await getVipBookings()).filter((item) => !item.eventDate);
+        const latestBooking = findVipBooking(latestBookings, {
+          sessionId: booking.sessionId,
+          name: booking.customerName
+        });
 
-      return res.status(200).json({
-        ok: true,
-        valid: true,
-        used: true,
-        markedUsed: true,
-        booking: publicVipBooking({
-          ...booking,
+        if (!latestBooking) {
+          return res.status(404).json({
+            ok: false,
+            valid: false,
+            used: false,
+            error: "VIP reservation not found"
+          });
+        }
+
+        if (latestBooking.used) {
+          return res.status(200).json({
+            ok: true,
+            valid: true,
+            used: true,
+            booking: publicVipBooking(latestBooking),
+            message: "VIP reservation has already been used."
+          });
+        }
+
+        const updated = latestBookings.map((item) => {
+          if (item.sessionId !== latestBooking.sessionId) return item;
+          return {
+            ...item,
+            used: true,
+            usedAt: now
+          };
+        });
+
+        await saveVipBookings(updated, bookingEventDate);
+
+        return res.status(200).json({
+          ok: true,
+          valid: true,
           used: true,
-          usedAt: now
-        })
-      });
+          markedUsed: true,
+          booking: publicVipBooking({
+            ...latestBooking,
+            used: true,
+            usedAt: now
+          })
+        });
+      } finally {
+        await releaseRedisLock(VIP_BOOKING_LOCK_KEY, lockValue).catch(() => {});
+      }
     }
 
     return res.status(200).json({
@@ -107,6 +192,6 @@ export default async function handler(req, res) {
     });
   } catch (err) {
     console.error("Chocolate City VIP verify error:", err);
-    return res.status(500).json({ ok: false, valid: false, error: err.message });
+    return res.status(500).json({ ok: false, valid: false, error: "Unable to verify VIP reservation" });
   }
 }

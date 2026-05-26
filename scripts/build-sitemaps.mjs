@@ -9,6 +9,7 @@ const BLOG_INDEX_JSON = path.join(PUBLIC_DIR, "blog", "index.json");
 
 const OUT_DIR = path.join(PUBLIC_DIR, "sitemaps");
 const OUT_FILE = path.join(OUT_DIR, "sitemap-posts.xml");
+const SHOULD_WRITE = process.env.VERCEL === "1" || process.env.SITEMAPS_WRITE === "1";
 
 // ---------- utils ----------
 function exists(p) {
@@ -51,6 +52,11 @@ function urlEntry(loc, { changefreq = "monthly", priority = "0.6", lastmod = nul
 }
 
 // ---------- main ----------
+if (!SHOULD_WRITE) {
+  console.log("[sitemaps] skipped local write. Set SITEMAPS_WRITE=1 to run it locally.");
+  process.exit(0);
+}
+
 if (!exists(BLOG_INDEX_JSON)) {
   console.error(`[sitemaps] Missing: ${path.relative(process.cwd(), BLOG_INDEX_JSON)}`);
   process.exit(1);

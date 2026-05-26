@@ -1,28 +1,28 @@
 import Stripe from "stripe";
+import {
+  VIP_BOOKING_LOCK_KEY,
+  VIP_LIMIT,
+  acquireRedisLock,
+  getVipBookings,
+  getVipEventLabel,
+  getVipHold,
+  getVipPackage,
+  normalizeVipEventDate,
+  releaseRedisLock,
+  releaseVipHold,
+  redis,
+  saveVipBookings
+} from "../_lib/chocolate-city-vip.js";
 
-const BOOKING_KEY = "chocolate-city:vip:bookings";
 const DRINK_KEY = "chocolate-city:drink:credits";
 const SESSION_KEY_PREFIX = "chocolate-city:stripe:session:";
+const PROCESSING_KEY_PREFIX = "chocolate-city:stripe:processing:";
 
 export const config = {
   api: {
     bodyParser: false
   }
 };
-
-async function redis(command, ...args) {
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-
-  if (!url || !token) throw new Error("Missing Upstash env vars");
-
-  const res = await fetch(`${url}/${command}/${args.map(encodeURIComponent).join("/")}`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-
-  if (!res.ok) throw new Error(`Redis error ${res.status}`);
-  return res.json();
-}
 
 async function buffer(readable) {
   const chunks = [];
@@ -32,6 +32,14 @@ async function buffer(readable) {
   }
 
   return Buffer.concat(chunks);
+}
+
+async function markSessionProcessed(sessionLockKey, type, extra = {}) {
+  await redis(
+    "SET",
+    sessionLockKey,
+    JSON.stringify({ processed: true, at: new Date().toISOString(), type, ...extra })
+  );
 }
 
 export default async function handler(req, res) {
@@ -60,7 +68,7 @@ export default async function handler(req, res) {
     try {
       event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
     } catch (err) {
-      return res.status(400).send(`Webhook signature failed: ${err.message}`);
+      return res.status(400).send("Webhook signature failed");
     }
 
     if (event.type !== "checkout.session.completed") {
@@ -74,46 +82,103 @@ export default async function handler(req, res) {
       return res.status(200).json({ received: true, ignored: true });
     }
 
+    if (session.payment_status && session.payment_status !== "paid") {
+      return res.status(200).json({ received: true, ignored: true, paymentStatus: session.payment_status });
+    }
+
     const sessionLockKey = `${SESSION_KEY_PREFIX}${session.id}`;
     const existing = await redis("GET", sessionLockKey);
-
     if (existing?.result) {
       return res.status(200).json({ received: true, duplicate: true });
     }
 
+    const processingKey = `${PROCESSING_KEY_PREFIX}${session.id}`;
+    const processingValue = JSON.stringify({ at: new Date().toISOString(), type });
+    const processing = await acquireRedisLock(
+      processingKey,
+      processingValue,
+      60
+    );
+
+    if (!processing) {
+      return res.status(200).json({ received: true, duplicate: true, processing: true });
+    }
+
     if (type === "vip_deposit") {
-      const data = await redis("GET", BOOKING_KEY);
-      const bookings = data?.result ? JSON.parse(data.result) : [];
+      const lockValue = JSON.stringify({ sessionId: session.id, at: new Date().toISOString() });
+      const bookingLock = await acquireRedisLock(VIP_BOOKING_LOCK_KEY, lockValue, 10);
 
-      const booking = {
-        sessionId: session.id,
-        paidAt: new Date().toISOString(),
-        customerName:
-          session.metadata?.customerName ||
-          session.customer_details?.name ||
-          "",
-        customerEmail: session.customer_details?.email || "",
-        customerPhone: session.customer_details?.phone || "",
-        packageId: session.metadata?.packageId || "",
-        packageName: session.metadata?.packageName || "",
-        fullPrice: Number(session.metadata?.fullPrice || 0),
-        deposit: Number(session.metadata?.deposit || 0),
-        remainingBalance: Number(session.metadata?.remainingBalance || 0),
-        paymentStatus: session.payment_status || "paid",
-        used: false,
-        usedAt: ""
-      };
+      if (!bookingLock) {
+        await releaseRedisLock(processingKey, processingValue);
+        return res.status(500).json({ ok: false, error: "VIP booking is busy. Retry webhook." });
+      }
 
-      bookings.push(booking);
+      try {
+        const eventDate = normalizeVipEventDate(session.metadata?.eventDate);
+        const bookings = await getVipBookings(eventDate);
+        const existingBooking = bookings.find((booking) => booking.sessionId === session.id);
 
-      await redis("SET", BOOKING_KEY, JSON.stringify(bookings));
-      await redis(
-        "SET",
-        sessionLockKey,
-        JSON.stringify({ processed: true, at: new Date().toISOString(), type })
-      );
+        if (existingBooking) {
+          await markSessionProcessed(sessionLockKey, type, { duplicateBooking: true });
+          return res.status(200).json({ received: true, duplicate: true, booking: existingBooking });
+        }
 
-      return res.status(200).json({ received: true, booking });
+        const overCapacity = bookings.length >= VIP_LIMIT;
+
+        const packageId = session.metadata?.packageId || "";
+        const selectedPackage = getVipPackage(packageId);
+
+        if (!selectedPackage) {
+          await markSessionProcessed(sessionLockKey, type, { skipped: "invalid_package" });
+          return res.status(200).json({ received: true, skipped: true, reason: "invalid_package" });
+        }
+
+        const holdSlot = Number(session.metadata?.holdSlot || 0);
+        const holdId = session.metadata?.holdId || "";
+        const hold = await getVipHold(holdSlot, eventDate);
+        const holdMatches = !!holdSlot && !!hold && hold.holdId === holdId;
+        const holdExpired = !!holdSlot && !holdMatches;
+
+        const booking = {
+          sessionId: session.id,
+          paidAt: new Date().toISOString(),
+          customerName:
+            session.metadata?.customerName ||
+            session.customer_details?.name ||
+            "",
+          customerEmail: session.customer_details?.email || "",
+          customerPhone: session.customer_details?.phone || "",
+          packageId,
+          packageName: selectedPackage.name,
+          eventDate,
+          eventLabel: getVipEventLabel(eventDate),
+          fullPrice: selectedPackage.fullPrice,
+          deposit: selectedPackage.price,
+          remainingBalance: 0,
+          paymentStatus: session.payment_status || "paid",
+          holdId: holdMatches ? holdId : "",
+          holdSlot: holdMatches ? holdSlot : "",
+          holdExpired,
+          overCapacity,
+          needsReview: overCapacity,
+          used: false,
+          usedAt: ""
+        };
+
+        bookings.push(booking);
+
+        await saveVipBookings(bookings, eventDate);
+        await markSessionProcessed(sessionLockKey, type);
+
+        if (holdMatches) {
+          await releaseVipHold({ slot: holdSlot, eventDate });
+        }
+
+        return res.status(200).json({ received: true, booking });
+      } finally {
+        await releaseRedisLock(VIP_BOOKING_LOCK_KEY, lockValue).catch(() => {});
+        await releaseRedisLock(processingKey, processingValue).catch(() => {});
+      }
     }
 
     if (type === "send_drink") {
@@ -140,17 +205,14 @@ export default async function handler(req, res) {
       credits.push(credit);
 
       await redis("SET", DRINK_KEY, JSON.stringify(credits));
-      await redis(
-        "SET",
-        sessionLockKey,
-        JSON.stringify({ processed: true, at: new Date().toISOString(), type })
-      );
+      await markSessionProcessed(sessionLockKey, type);
+      await releaseRedisLock(processingKey, processingValue).catch(() => {});
 
       return res.status(200).json({ received: true, credit });
     }
 
     return res.status(200).json({ received: true });
   } catch (err) {
-    return res.status(500).json({ ok: false, error: err.message });
+    return res.status(500).json({ ok: false, error: "Unable to process Chocolate City webhook." });
   }
 }

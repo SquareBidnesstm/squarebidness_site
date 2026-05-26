@@ -2,9 +2,9 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "SquareBidness Booking",
-    short_name: "SquareBidness",
-    description: "Book your appointment at the best shops near you.",
+    name: "Booking",
+    short_name: "Booking",
+    description: "Book barber and beauty appointments with SquareBidness professionals.",
     start_url: "/",
     display: "standalone",
     background_color: "#050505",

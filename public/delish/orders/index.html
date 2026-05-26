@@ -839,7 +839,10 @@ async function enableSoundAlerts() {
     }
     async function loadCateringCount(){
       try {
-        const res = await fetch(`/api/delish/catering-orders/?t=${Date.now()}`, { cache: "no-store" });
+        const res = await fetch(`/api/delish/catering-orders/?t=${Date.now()}`, {
+          cache: "no-store",
+          headers: operatorHeaders()
+        });
         const data = await res.json();
 
         if (!data.ok) return;
@@ -860,7 +863,14 @@ async function enableSoundAlerts() {
 
         async function loadOrders(){
       try {
-        const res = await fetch(`/api/delish/orders/?t=${Date.now()}`, { cache: "no-store" });
+        const res = await fetch(`/api/delish/orders/?t=${Date.now()}`, {
+          cache: "no-store",
+          headers: operatorHeaders()
+        });
+        if (res.status === 401) {
+          clearOperatorToken();
+          throw new Error("Operator token required. Save the token again.");
+        }
         const data = await res.json();
 
         if (!data.ok) {
@@ -922,6 +932,11 @@ renderOrders(orders);
   } catch {
     return "";
   }
+}
+
+function operatorHeaders() {
+  const token = getSavedOperatorToken();
+  return token ? { "x-operator-token": token.trim() } : {};
 }
 
 function saveOperatorToken(token) {

@@ -1,5 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../lib/supabase/server";
+import { hashPin } from "../../../lib/utils";
+import { sendShopSignupNotification } from "../../../lib/email";
+
+// Protect onboard with a shared platform secret so only the internal
+// onboarding wizard (or Marcus) can create new shops.
+function verifyOnboardSecret(req: NextRequest): boolean {
+  const secret = process.env.ONBOARD_SECRET;
+  if (!secret) return false; // If env var not set, deny all
+  const auth = req.headers.get("authorization") ?? "";
+  return auth === `Bearer ${secret}`;
+}
 
 type OnboardPayload = {
   shopType?: string;
@@ -9,6 +20,7 @@ type OnboardPayload = {
   state?: string;
   timezone?: string;
   ownerName?: string;
+  ownerEmail?: string;
   barbers?: { name: string; role: string }[];
   pin?: string;
 };
@@ -74,10 +86,15 @@ function nameToSlug(name: string): string {
 }
 
 export async function POST(req: NextRequest) {
+  // Gate: requires Authorization: Bearer <ONBOARD_SECRET>
+  if (!verifyOnboardSecret(req)) {
+    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const body = (await req.json()) as OnboardPayload;
 
-    const { shopType, shopName, slug, city, state, timezone, ownerName, barbers, pin } = body;
+    const { shopType, shopName, slug, city, state, timezone, ownerName, ownerEmail, barbers, pin } = body;
     const cleanShopType = shopType && SERVICES_BY_TYPE[shopType] ? shopType : "barbershop";
     const DEFAULT_SERVICES = SERVICES_BY_TYPE[cleanShopType];
 
@@ -89,8 +106,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: "At least one barber with a name is required." }, { status: 400 });
     }
 
-    if (pin.length < 4) {
-      return NextResponse.json({ ok: false, error: "PIN must be at least 4 digits." }, { status: 400 });
+    if (!/^\d{4}$/.test(pin)) {
+      return NextResponse.json({ ok: false, error: "PIN must be exactly 4 digits." }, { status: 400 });
     }
 
     const cleanSlug = slug.toLowerCase().replace(/[^a-z0-9-]/g, "").replace(/^-|-$/g, "");
@@ -98,11 +115,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: "Invalid slug." }, { status: 400 });
     }
 
+    // Block slugs that conflict with built-in app routes
+    const RESERVED_SLUGS = new Set([
+      "admin", "book", "onboard", "login", "api", "_next",
+      "platform", "favicon.ico", "cancel", "reschedule", "book",
+    ]);
+    if (RESERVED_SLUGS.has(cleanSlug)) {
+      return NextResponse.json(
+        { ok: false, error: `"/${cleanSlug}" is a reserved path. Please choose a different slug.` },
+        { status: 400 }
+      );
+    }
+
     const { data: existing } = await supabaseServer
       .from("shops")
       .select("id")
       .eq("slug", cleanSlug)
-      .single();
+      .maybeSingle();
 
     if (existing) {
       return NextResponse.json(
@@ -186,11 +215,13 @@ export async function POST(req: NextRequest) {
       DEFAULT_HOURS.map((h) => ({ shop_id: shop.id, ...h }))
     );
 
+    const { hash: pin_hash, salt: pin_salt } = await hashPin(pin);
+
     await supabaseServer.from("shop_settings").insert([
       {
         shop_id: shop.id,
         key: "admin_auth",
-        value_json: { pin },
+        value_json: { pin_hash, pin_salt },
       },
       {
         shop_id: shop.id,
@@ -200,7 +231,7 @@ export async function POST(req: NextRequest) {
       {
         shop_id: shop.id,
         key: "booking_rules",
-        value_json: { slot_interval_minutes: 30, lead_time_minutes: 0, max_days_out: 30 },
+        value_json: { slot_interval_minutes: 30, min_lead_time_minutes: 0, max_days_out: 30 },
       },
       {
         shop_id: shop.id,
@@ -215,6 +246,17 @@ export async function POST(req: NextRequest) {
       plan: "free",
       status: "free",
     });
+
+    // Fire signup notification (non-blocking — never fails the onboard response)
+    sendShopSignupNotification({
+      shopName: shop.name,
+      shopSlug: shop.slug,
+      ownerName,
+      ownerEmail: ownerEmail?.trim() || null,
+      city,
+      state,
+      shopType: cleanShopType,
+    }).catch((err) => console.error("[onboard] signup notification error:", err));
 
     return NextResponse.json({ ok: true, shopSlug: shop.slug, shopName: shop.name });
   } catch (err) {

@@ -18,12 +18,12 @@ async function redis(command, ...args) {
 
 const DEFAULT_STATE = {
   fridayOpen: false,
-  fridayText: "Friday — select nights only.",
-  weekendStatus: "Open this weekend",
+  fridayText: "Friday is open this week from 7PM – 2AM.",
+  weekendStatus: "Reopening May 22–24",
   eventTitle: "All Roads Lead to Chocolate City",
-  eventNote: "Saturdays move the city. Sundays belong to it.",
+  eventNote: "Reopening May 22–24 with the music, vibes, and grown-folk energy Albany loves.",
   vipStatus: "Only 2 VIP sections available per night. First come. Paid in full online.",
-  announcement: "Stay tuned for updates, event nights, and VIP sections.",
+  announcement: "Reopening Weekend • May 22–24 • VIP sections available now",
   updatedAt: new Date().toISOString()
 };
 
@@ -66,6 +66,6 @@ export default async function handler(req, res) {
 
     return res.status(405).json({ ok: false, error: "Method not allowed" });
   } catch (err) {
-    return res.status(500).json({ ok: false, error: err.message });
+    return res.status(500).json({ ok: false, error: "Unable to load Chocolate City status." });
   }
 }

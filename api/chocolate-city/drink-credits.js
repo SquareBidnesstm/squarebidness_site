@@ -16,6 +16,14 @@ async function redis(command, ...args) {
 
 export default async function handler(req, res) {
   try {
+    const expectedToken = String(process.env.CHOCOLATE_CITY_ADMIN_TOKEN || "").trim();
+    const providedToken = String(req.headers["x-admin-token"] || "").trim();
+    const wantsAdmin = Boolean(providedToken);
+
+    if (wantsAdmin && (!expectedToken || providedToken !== expectedToken)) {
+      return res.status(401).json({ ok: false, error: "Unauthorized" });
+    }
+
     const data = await redis("GET", DRINK_KEY);
     const credits = data?.result ? JSON.parse(data.result) : [];
 
@@ -23,13 +31,20 @@ export default async function handler(req, res) {
       .filter(c => !c.redeemed)
       .slice()
       .reverse();
+    const publicCredits = activeCredits.map(c => ({
+      recipientName: c.recipientName || "Guest",
+      senderName: c.senderName || "Anonymous",
+      message: c.message || "",
+      label: c.label || "Drink Credit",
+      amount: Number(c.amount || 0)
+    }));
 
     return res.status(200).json({
       ok: true,
       count: activeCredits.length,
-      credits: activeCredits
+      credits: wantsAdmin ? activeCredits : publicCredits
     });
   } catch (err) {
-    return res.status(500).json({ ok: false, error: err.message });
+    return res.status(500).json({ ok: false, error: "Unable to load drink credits." });
   }
 }

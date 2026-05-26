@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Delish Flash Sale Admin</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <link rel="manifest" href="/delish/manifest.json" />
+  <link rel="icon" sizes="32x32" href="/delish/assets/delish-favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/delish/assets/delish-logo-mark-180.png" />
+  <style>
+    :root{--bg:#0f0f10;--panel:#18181b;--panel2:#212126;--line:#32323a;--text:#f6f2ea;--muted:#bfb7aa;--accent:#d7ae72;--red:#d93636;--red2:#6d1d1d;--good:#204b2d}
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#0e0e10,#09090a);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    .wrap{max-width:980px;margin:0 auto;padding:22px}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:18px;margin-bottom:16px}
+    .topline{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .brandRow{display:flex;align-items:center;gap:14px;min-width:0}
+    .brandRow > div{min-width:0}
+    .brandMark{width:70px;height:70px;object-fit:contain;border-radius:18px;filter:drop-shadow(0 14px 34px rgba(0,0,0,.34));flex:0 0 auto}
+    h1,h2,h3,p{margin-top:0;overflow-wrap:anywhere}
+    p,.muted{color:var(--muted)}
+    .pill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--panel2);border-radius:999px;padding:8px 12px;font-weight:900}
+    .pill.active{background:rgba(32,75,45,.36);border-color:rgba(74,155,97,.5);color:#d6f5de}
+    .pill.inactive{background:rgba(109,29,29,.32);border-color:rgba(217,54,54,.5);color:#ffd3d3}
+    label{font-weight:900}
+    input,textarea,select{width:100%;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:14px;padding:12px;font:inherit}
+    textarea{min-height:90px;resize:vertical}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .row{display:grid;grid-template-columns:1fr 160px 120px auto;gap:10px;align-items:end;margin-top:10px;padding:12px;border:1px solid var(--line);background:var(--panel2);border-radius:16px}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    button,.button-link{border:0;border-radius:999px;padding:14px 18px;font:inherit;font-weight:950;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+    .btn-primary{background:var(--accent);color:#181410}
+    .btn-secondary{background:#27272c;color:var(--text);border:1px solid var(--line)}
+    .btn-red{background:var(--red);color:#fff}
+    .btn-danger{background:var(--red2);color:#ffd3d3;border:1px solid rgba(217,54,54,.45)}
+    .status{margin-top:12px;padding:12px 14px;border-radius:14px;background:#1a1a1f;border:1px solid var(--line);color:var(--muted)}
+    .status.good{background:rgba(32,75,45,.28);border-color:rgba(74,155,97,.5);color:#d6f5de}
+    .status.bad{background:rgba(90,34,34,.28);border-color:rgba(196,88,88,.45);color:#ffd3d3}
+    .toggleRow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px;border-radius:16px;background:var(--panel2);border:1px solid var(--line)}
+    .toggleRow input{width:auto;transform:scale(1.2)}
+    .windowGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:8px}
+    .windowOption{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px;border-radius:14px;background:var(--panel2);border:1px solid var(--line)}
+    .windowOption input{width:auto}
+    @media(max-width:760px){.grid,.row{grid-template-columns:1fr}.windowGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.row{align-items:stretch}.brandMark{width:58px;height:58px}}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="card">
+      <div class="topline">
+        <div class="brandRow">
+          <img class="brandMark" src="/delish/assets/delish-logo-mark-512.png" alt="Delish logo" />
+          <div>
+            <h1>Flash Sale Admin</h1>
+            <p>After-hours sale lane with custom operator-set prices.</p>
+          </div>
+        </div>
+        <span class="pill" id="salePill">Loading</span>
+      </div>
+      <div class="actions">
+        <a class="button-link btn-secondary" href="/delish/admin/">Back to Admin</a>
+        <a class="button-link btn-secondary" href="/delish/orders/">Kitchen Screen</a>
+        <a class="button-link btn-secondary" href="/delish/">Customer Page</a>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="toggleRow">
+        <div>
+          <h2>Flash Sale Switch</h2>
+          <p class="muted">When active, selected flash items can be ordered during the sale window even after normal ordering closes.</p>
+        </div>
+        <label><input type="checkbox" id="enabled" /> On</label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Sale Details</h2>
+      <div class="grid">
+        <label>Sale title
+          <input id="title" value="Flash Sale" />
+        </label>
+        <label>Start
+          <input id="startAt" type="datetime-local" />
+        </label>
+        <label>End
+          <input id="endAt" type="datetime-local" />
+        </label>
+      </div>
+      <div style="margin-top:12px;">
+        <label>Flash sale pickup windows</label>
+        <div class="windowGrid" id="pickupWindows">
+          <label class="windowOption">2:00 PM <input type="checkbox" value="2:00 PM" /></label>
+          <label class="windowOption">2:30 PM <input type="checkbox" value="2:30 PM" /></label>
+          <label class="windowOption">3:00 PM <input type="checkbox" value="3:00 PM" /></label>
+          <label class="windowOption">3:30 PM <input type="checkbox" value="3:30 PM" /></label>
+        </div>
+        <p class="muted" style="margin:8px 0 0;">These only affect flash sale ordering. Regular pickup windows stay separate.</p>
+      </div>
+      <label style="display:block;margin-top:12px;">Customer message
+        <textarea id="message" placeholder="Example: Flash sale live until 3:30 PM or sold out."></textarea>
+      </label>
+    </section>
+
+    <section class="card">
+      <div class="topline">
+        <div>
+          <h2>Sale Items</h2>
+          <p class="muted">Choose an item, type any flash sale price, and optionally set a plate limit for the operator note.</p>
+        </div>
+        <button class="btn-red" id="addItemBtn" type="button">Add Item</button>
+      </div>
+      <div id="itemsList"></div>
+    </section>
+
+    <section class="card">
+      <div class="actions">
+        <button class="btn-primary" id="saveBtn" type="button">Save Flash Sale</button>
+        <button class="btn-secondary" id="reloadBtn" type="button">Reload</button>
+        <button class="btn-danger" id="turnOffBtn" type="button">Turn Off Sale</button>
+      </div>
+      <div class="status" id="statusBox">Ready.</div>
+    </section>
+  </main>
+
+  <script>
+    const TOKEN_KEY = "delish_operator_token";
+    const statusBox = document.getElementById("statusBox");
+    const salePill = document.getElementById("salePill");
+    const itemsList = document.getElementById("itemsList");
+    let catalog = [];
+    let currentItems = [];
+
+    function setStatus(text, tone = "") {
+      statusBox.textContent = text;
+      statusBox.className = "status" + (tone ? ` ${tone}` : "");
+    }
+
+    function getSavedToken() {
+      return window.localStorage.getItem(TOKEN_KEY) || "";
+    }
+
+    function saveToken(token) {
+      window.localStorage.setItem(TOKEN_KEY, token);
+    }
+
+    function getToken() {
+      let token = getSavedToken();
+      if (token) return token;
+      token = window.prompt("Enter Delish operator token") || "";
+      if (token && window.confirm("Save token on this device?")) saveToken(token.trim());
+      return token.trim();
+    }
+
+    function toLocalInput(date = new Date()) {
+      const pad = (n) => String(n).padStart(2, "0");
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    }
+
+    function flattenMenu(menu) {
+      const dayItems = Object.entries(menu.days || {}).flatMap(([day, config]) =>
+        (config.mains || []).map(item => ({
+          id: item.id,
+          name: `${day.charAt(0).toUpperCase() + day.slice(1)} - ${item.name}`,
+          baseName: item.name,
+        }))
+      );
+      const lagniappe = (menu.lagniappe || []).map(item => ({ id: item.id, name: item.name, baseName: item.name }));
+      return [...dayItems, ...lagniappe];
+    }
+
+    function renderPill(sale) {
+      salePill.textContent = sale?.active ? "Active Now" : "Inactive";
+      salePill.className = `pill ${sale?.active ? "active" : "inactive"}`;
+    }
+
+    function renderItems() {
+      if (!currentItems.length) {
+        itemsList.innerHTML = `<p class="muted">No flash sale items yet. Add the plates they want to move.</p>`;
+        return;
+      }
+
+      itemsList.innerHTML = currentItems.map((item, index) => `
+        <div class="row" data-index="${index}">
+          <label>Item
+            <select data-field="sourceId">
+              <option value="">Choose item</option>
+              ${catalog.map(option => `<option value="${option.id}" ${option.id === item.sourceId ? "selected" : ""}>${option.name}</option>`).join("")}
+            </select>
+          </label>
+          <label>Flash price
+            <input data-field="price" type="number" min="0" step="0.01" placeholder="8.99" value="${item.price || ""}" />
+          </label>
+          <label>Limit
+            <input data-field="limit" type="number" min="0" step="1" placeholder="Optional" value="${item.limit || ""}" />
+          </label>
+          <button class="btn-danger" data-remove="${index}" type="button">Remove</button>
+        </div>
+      `).join("");
+
+      itemsList.querySelectorAll("[data-field]").forEach((input) => {
+        input.addEventListener("input", updateItemFromInput);
+        input.addEventListener("change", updateItemFromInput);
+      });
+
+      itemsList.querySelectorAll("[data-remove]").forEach((button) => {
+        button.addEventListener("click", () => {
+          currentItems.splice(Number(button.dataset.remove), 1);
+          renderItems();
+        });
+      });
+    }
+
+    function updateItemFromInput(event) {
+      const row = event.target.closest("[data-index]");
+      const index = Number(row?.dataset.index || -1);
+      if (index < 0 || !currentItems[index]) return;
+
+      const field = event.target.dataset.field;
+      currentItems[index][field] = event.target.value;
+
+      if (field === "sourceId") {
+        const selected = catalog.find(item => item.id === event.target.value);
+        currentItems[index].name = selected?.baseName || "";
+      }
+    }
+
+    function readPayload() {
+      const pickupWindows = [...document.querySelectorAll("#pickupWindows input[type='checkbox']")]
+        .filter(input => input.checked)
+        .map(input => input.value);
+
+      return {
+        enabled: document.getElementById("enabled").checked,
+        title: document.getElementById("title").value,
+        message: document.getElementById("message").value,
+        startAt: document.getElementById("startAt").value,
+        endAt: document.getElementById("endAt").value,
+        pickupWindows,
+        items: currentItems.map(item => {
+          const selected = catalog.find(option => option.id === item.sourceId);
+          return {
+            sourceId: item.sourceId,
+            name: selected?.baseName || item.name || "",
+            price: Number(item.price || 0),
+            limit: Number(item.limit || 0),
+          };
+        }),
+      };
+    }
+
+    function applySale(sale) {
+      document.getElementById("enabled").checked = !!sale.enabled;
+      document.getElementById("title").value = sale.title || "Flash Sale";
+      document.getElementById("message").value = sale.message || "";
+      document.getElementById("startAt").value = sale.startAt || "";
+      document.getElementById("endAt").value = sale.endAt || "";
+      const selectedWindows = new Set(Array.isArray(sale.pickupWindows) ? sale.pickupWindows : []);
+      document.querySelectorAll("#pickupWindows input[type='checkbox']").forEach((input) => {
+        input.checked = selectedWindows.has(input.value);
+      });
+      currentItems = Array.isArray(sale.items) ? sale.items.map(item => ({ ...item })) : [];
+      renderPill(sale);
+      renderItems();
+    }
+
+    async function loadMenu() {
+      const res = await fetch("/delish/menu.json", { cache: "no-store" });
+      const data = await res.json();
+      catalog = flattenMenu(data);
+    }
+
+    async function loadSale() {
+      setStatus("Loading flash sale...");
+      const res = await fetch(`/api/delish/flash-sale/?t=${Date.now()}`, { cache: "no-store" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) throw new Error(data.error || "Failed to load flash sale.");
+      applySale(data.sale || {});
+      setStatus("Flash sale loaded.", "good");
+    }
+
+    async function saveSale(payload = readPayload()) {
+      const token = getToken();
+      if (!token) {
+        setStatus("Save cancelled.");
+        return;
+      }
+
+      setStatus("Saving flash sale...");
+      const res = await fetch("/api/delish/save-flash-sale/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-operator-token": token,
+        },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) {
+        if (res.status === 401) window.localStorage.removeItem(TOKEN_KEY);
+        throw new Error(data.error || "Failed to save flash sale.");
+      }
+
+      applySale(data.sale || {});
+      setStatus("Flash sale saved.", "good");
+    }
+
+    document.getElementById("addItemBtn").addEventListener("click", () => {
+      currentItems.push({ sourceId: "", name: "", price: "", limit: "" });
+      renderItems();
+    });
+
+    document.getElementById("saveBtn").addEventListener("click", async () => {
+      try { await saveSale(); } catch (error) { setStatus(error.message, "bad"); }
+    });
+
+    document.getElementById("reloadBtn").addEventListener("click", async () => {
+      try { await loadSale(); } catch (error) { setStatus(error.message, "bad"); }
+    });
+
+    document.getElementById("turnOffBtn").addEventListener("click", async () => {
+      try {
+        const payload = readPayload();
+        payload.enabled = false;
+        await saveSale(payload);
+      } catch (error) {
+        setStatus(error.message, "bad");
+      }
+    });
+
+    (async function init() {
+      try {
+        const now = new Date();
+        const end = new Date(now.getTime() + 60 * 60 * 1000);
+        document.getElementById("startAt").value = toLocalInput(now);
+        document.getElementById("endAt").value = toLocalInput(end);
+        await loadMenu();
+        await loadSale();
+      } catch (error) {
+        setStatus(error.message || "Unable to load flash sale admin.", "bad");
+      }
+    })();
+  </script>
+</body>
+</html>

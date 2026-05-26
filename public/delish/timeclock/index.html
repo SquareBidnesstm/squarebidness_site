@@ -8,7 +8,6 @@
   <meta name="robots" content="noindex,nofollow" />
   <meta name="theme-color" content="#111111" />
 
-  <link rel="stylesheet" href="/styles/global.css" />
   <meta name="sb:build" content="2026-04-13-01" />
 
 <meta name="apple-mobile-web-app-title" content="Delish Time Clock" />
@@ -43,6 +42,7 @@
       color:var(--text);
       font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
       min-height:100%;
+      overflow-x:hidden;
     }
 
     a { color:inherit; }
@@ -68,6 +68,11 @@
       display:flex;
       align-items:center;
       gap:12px;
+      min-width:0;
+    }
+
+    .brand > div {
+      min-width:0;
     }
 
     .brand img {
@@ -117,6 +122,7 @@
       display:grid;
       grid-template-columns:1.15fr .85fr;
       gap:18px;
+      min-width:0;
     }
 
     .card {
@@ -125,6 +131,7 @@
       border-radius:var(--radius);
       box-shadow:var(--shadow);
       overflow:hidden;
+      min-width:0;
     }
 
     .card__body {
@@ -140,6 +147,7 @@
     .card p.lead {
       margin:0 0 18px;
       color:var(--muted);
+      overflow-wrap:anywhere;
     }
 
     .form-grid {
@@ -176,6 +184,31 @@
 
     .field input::placeholder {
       color:rgba(255,255,255,.36);
+    }
+
+    .employee-match {
+      min-height:52px;
+      padding:13px 14px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.035);
+      color:var(--muted);
+      display:flex;
+      align-items:center;
+      font-weight:800;
+      overflow-wrap:anywhere;
+    }
+
+    .employee-match.found {
+      color:#dcfce7;
+      border-color:rgba(34,197,94,.32);
+      background:rgba(34,197,94,.09);
+    }
+
+    .employee-match.warn {
+      color:#fde68a;
+      border-color:rgba(245,158,11,.34);
+      background:rgba(245,158,11,.08);
     }
 
     .actions {
@@ -329,9 +362,48 @@
     }
 
     @media (max-width: 640px) {
+      .wrap {
+        width:min(420px, calc(100% - 22px));
+      }
+
+      .page {
+        padding:18px 0 38px;
+      }
+
       .topbar {
         flex-direction:column;
         align-items:flex-start;
+        gap:12px;
+      }
+
+      .brand {
+        align-items:flex-start;
+        width:100%;
+      }
+
+      .brand img {
+        width:40px;
+        height:40px;
+      }
+
+      h1 {
+        font-size:2rem;
+      }
+
+      .sub {
+        max-width:100%;
+        overflow-wrap:anywhere;
+      }
+
+      .time-chip {
+        width:100%;
+        justify-content:center;
+        white-space:normal;
+        text-align:center;
+      }
+
+      .card__body {
+        padding:16px;
       }
 
       .form-grid,
@@ -366,26 +438,24 @@
         <section class="card">
           <div class="card__body">
             <h2>Employee Punch</h2>
-            <p class="lead">Simple and controlled. PIN required. No double clock-ins.</p>
+            <p class="lead">Enter employee number. Name confirms. Then clock in or out.</p>
 
             <div class="form-grid">
               <div class="field">
-                <label for="employeeName">Employee</label>
-                <select id="employeeName">
-                  <option value="">Select employee</option>
-                </select>
+                <label for="employeePin">Employee Number</label>
+                <input
+                  id="employeePin"
+                  type="tel"
+                  inputmode="numeric"
+                  maxlength="8"
+                  placeholder="Enter employee number"
+                  autocomplete="off"
+                />
               </div>
 
               <div class="field">
-                <label for="employeePin">PIN</label>
-                <input
-                  id="employeePin"
-                  type="password"
-                  inputmode="numeric"
-                  maxlength="8"
-                  placeholder="Enter PIN"
-                  autocomplete="off"
-                />
+                <label>Employee</label>
+                <div class="employee-match" id="employeeMatch">Enter number to pull up name.</div>
               </div>
             </div>
 
@@ -435,7 +505,7 @@
           </div>
 
           <div class="footer-note">
-            Next phase: shift duration, CSV export, labor totals, and manager controls.
+            Manager review, labor totals, payroll turn-ins, and CSV export live in Time Clock Admin.
           </div>
         </div>
       </section>
@@ -446,12 +516,12 @@
   <script>
     const API_URL = "/api/delish/timeclock/";
     const DEVICE_KEY = "delish_timeclock_device";
-    const DEFAULT_DEVICE = "kitchen-ipad";
+    const DEFAULT_DEVICE = "Time Clock Tablet";
 
     const els = {
       now: document.getElementById("centralNow"),
-      name: document.getElementById("employeeName"),
       pin: document.getElementById("employeePin"),
+      employeeMatch: document.getElementById("employeeMatch"),
       clockIn: document.getElementById("clockInBtn"),
       clockOut: document.getElementById("clockOutBtn"),
       status: document.getElementById("statusBox"),
@@ -460,11 +530,14 @@
       liveCount: document.getElementById("liveCount"),
       deviceLabel: document.getElementById("deviceLabel")
     };
+    let matchedEmployee = null;
+    let lookupTimer = null;
+    let lastLookupPin = "";
 
     function getOrCreateDevice() {
       try {
         let device = localStorage.getItem(DEVICE_KEY);
-        if (!device) {
+        if (!device || device === "kitchen-ipad" || device === "Clockin-tablet") {
           device = DEFAULT_DEVICE;
           localStorage.setItem(DEVICE_KEY, device);
         }
@@ -505,6 +578,11 @@
       els.status.textContent = message;
     }
 
+    function setEmployeeMatch(text, tone = "") {
+      els.employeeMatch.className = "employee-match" + (tone ? ` ${tone}` : "");
+      els.employeeMatch.textContent = text;
+    }
+
     function escapeHtml(str) {
       return String(str ?? "")
         .replace(/&/g, "&amp;")
@@ -528,24 +606,6 @@
   if (!res.ok) throw new Error(data.error || "Request failed");
   return data;
 }
-
-async function fetchSales(date) {
-  if (!date) return { grossSales: 0, orderCount: 0 };
-
-  try {
-    return await fetchJson(`/api/delish/sales-summary/?date=${encodeURIComponent(date)}&t=${Date.now()}`);
-  } catch {
-    return { grossSales: 0, orderCount: 0 };
-  }
-}
-
-    function renderEmployees(employees) {
-      const options = ['<option value="">Select employee</option>']
-        .concat(
-          (employees || []).map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`)
-        );
-      els.name.innerHTML = options.join("");
-    }
 
     function renderLive(active) {
       const rows = active || [];
@@ -595,7 +655,6 @@ async function fetchSales(date) {
 
       try {
         const data = await fetchJson(`${API_URL}?t=${Date.now()}`);
-        renderEmployees(data.employees || []);
         renderLive(data.active || []);
         renderRecent(data.recent || []);
       } catch (err) {
@@ -603,17 +662,68 @@ async function fetchSales(date) {
       }
     }
 
-    async function submitPunch(action) {
-      const name = els.name.value.trim();
-      const pin = els.pin.value.trim();
+    async function lookupEmployee(pin) {
+      const cleanPin = String(pin || "").trim();
+      matchedEmployee = null;
 
-      if (!name) {
-        setStatus("Select an employee.", "warn");
-        return;
+      if (!cleanPin) {
+        lastLookupPin = "";
+        setEmployeeMatch("Enter number to pull up name.");
+        return null;
       }
 
+      if (cleanPin.length < 4) {
+        lastLookupPin = "";
+        setEmployeeMatch("Keep typing employee number.");
+        return null;
+      }
+
+      if (cleanPin === lastLookupPin && matchedEmployee) return matchedEmployee;
+      lastLookupPin = cleanPin;
+      setEmployeeMatch("Checking number...");
+
+      try {
+        const data = await fetchJson(API_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "lookup_employee",
+            pin: cleanPin,
+            device
+          })
+        });
+
+        matchedEmployee = data.employee || null;
+        if (matchedEmployee?.name) {
+          setEmployeeMatch(
+            `${matchedEmployee.name}${matchedEmployee.clockedIn ? " is clocked in" : ""}`,
+            "found"
+          );
+          return matchedEmployee;
+        }
+
+        setEmployeeMatch("Employee number not found.", "warn");
+        return null;
+      } catch (err) {
+        setEmployeeMatch(err.message || "Employee number not found.", "warn");
+        return null;
+      }
+    }
+
+    function queueEmployeeLookup() {
+      window.clearTimeout(lookupTimer);
+      const pin = els.pin.value.trim();
+      matchedEmployee = null;
+      lookupTimer = window.setTimeout(() => {
+        lookupEmployee(pin);
+      }, 250);
+    }
+
+    async function submitPunch(action) {
+      const pin = els.pin.value.trim();
+
       if (!pin) {
-        setStatus("Enter PIN.", "warn");
+        setStatus("Enter employee number.", "warn");
+        setEmployeeMatch("Enter number to pull up name.", "warn");
         return;
       }
 
@@ -621,18 +731,26 @@ async function fetchSales(date) {
       els.clockOut.disabled = true;
 
       try {
+        const employee = matchedEmployee?.name ? matchedEmployee : await lookupEmployee(pin);
+        if (!employee?.name) {
+          setStatus("Employee number not found.", "warn");
+          return;
+        }
+
         const data = await fetchJson(API_URL, {
           method: "POST",
           body: JSON.stringify({
             action,
-            name,
             pin,
             device
           })
         });
 
-        setStatus(data.message || "Saved.", data.ok ? "good" : "warn");
+        setStatus(data.message || `${employee.name} saved.`, data.ok ? "good" : "warn");
         els.pin.value = "";
+        matchedEmployee = null;
+        lastLookupPin = "";
+        setEmployeeMatch("Enter number to pull up name.");
 
         renderLive(data.active || []);
         renderRecent(data.recent || []);
@@ -640,7 +758,7 @@ async function fetchSales(date) {
         if (window.sbAnalytics?.track) {
           window.sbAnalytics.track("delish_timeclock_punch", {
             action,
-            employee: name
+            employee: employee.name
           });
         }
       } catch (err) {
@@ -653,6 +771,13 @@ async function fetchSales(date) {
 
     els.clockIn.addEventListener("click", () => submitPunch("clock_in"));
     els.clockOut.addEventListener("click", () => submitPunch("clock_out"));
+    els.pin.addEventListener("input", queueEmployeeLookup);
+    els.pin.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        submitPunch("clock_in");
+      }
+    });
 
     setInterval(() => {
       els.now.textContent = formatCentralNow();

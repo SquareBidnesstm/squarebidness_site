@@ -16,6 +16,7 @@ type Booking = {
   ends_at: string;
   status: BookingStatus;
   payment_status: string;
+  price_snapshot: number | null;
   client_notes: string | null;
   services: { name: string; duration_minutes: number; price: number } | null;
 };
@@ -82,7 +83,7 @@ function getTodayString() {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 }
 
-type Tab = "schedule" | "hours" | "prices";
+type Tab = "schedule" | "earnings" | "hours" | "prices";
 
 export default function BarberPage() {
   const params = useParams();
@@ -91,6 +92,8 @@ export default function BarberPage() {
   const router = useRouter();
 
   const [barberName, setBarberName] = useState("");
+  const [barberPhotoUrl, setBarberPhotoUrl] = useState<string | null>(null);
+  const [shopTimezone, setShopTimezone] = useState("America/Chicago");
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [perms, setPerms] = useState<Perms>({ can_edit_hours: false, can_edit_prices: false });
   const [loading, setLoading] = useState(true);
@@ -99,6 +102,8 @@ export default function BarberPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [pushEnabled, setPushEnabled] = useState(false);
+  const [pushLoading, setPushLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("schedule");
 
   // Hours state
@@ -126,6 +131,8 @@ export default function BarberPage() {
           return;
         }
         setBarberName(data.barberName || barberSlug);
+        if (data.barberPhotoUrl) setBarberPhotoUrl(data.barberPhotoUrl);
+        if (data.timezone) setShopTimezone(data.timezone);
         setBookings(data.bookings || []);
         setPerms(data.perms ?? { can_edit_hours: false, can_edit_prices: false });
       } catch {
@@ -163,6 +170,57 @@ export default function BarberPage() {
     }
     setPricesLoaded(true);
   }, [shopSlug, barberSlug, pricesLoaded]);
+
+  // Check push permission state on mount
+  useEffect(() => {
+    if (typeof window === "undefined" || !("Notification" in window)) return;
+    if (Notification.permission === "granted") {
+      navigator.serviceWorker.ready.then((reg) => {
+        reg.pushManager.getSubscription().then((sub) => {
+          if (sub) setPushEnabled(true);
+        });
+      }).catch(() => {});
+    }
+  }, []);
+
+  async function togglePushNotifications() {
+    if (!("Notification" in window) || !("serviceWorker" in navigator)) return;
+    setPushLoading(true);
+    try {
+      const reg = await navigator.serviceWorker.register("/sw.js");
+      await navigator.serviceWorker.ready;
+
+      if (pushEnabled) {
+        const sub = await reg.pushManager.getSubscription();
+        if (sub) {
+          await fetch(`/api/${shopSlug}/push-subscribe`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ endpoint: sub.endpoint, barber_slug: barberSlug }),
+          });
+          await sub.unsubscribe();
+        }
+        setPushEnabled(false);
+      } else {
+        const permission = await Notification.requestPermission();
+        if (permission !== "granted") { setPushLoading(false); return; }
+
+        const sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+        });
+        await fetch(`/api/${shopSlug}/push-subscribe`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ subscription: sub.toJSON(), barber_slug: barberSlug }),
+        });
+        setPushEnabled(true);
+      }
+    } catch (e) {
+      console.error("Push toggle error:", e);
+    }
+    setPushLoading(false);
+  }
 
   function handleTabChange(tab: Tab) {
     setActiveTab(tab);
@@ -233,7 +291,7 @@ export default function BarberPage() {
     const confirmed = bookings.filter((b) => b.status === "confirmed").length;
     const completedRevenue = bookings
       .filter((b) => b.status === "completed")
-      .reduce((s, b) => s + Number(b.services?.price || 0), 0);
+      .reduce((s, b) => s + Number(b.price_snapshot ?? b.services?.price ?? 0), 0);
     return {
       total: bookings.length,
       confirmed,
@@ -242,7 +300,7 @@ export default function BarberPage() {
     };
   }, [bookings, today]);
 
-  const hasTabs = perms.can_edit_hours || perms.can_edit_prices;
+  const hasTabs = true; // always show tabs (earnings always visible)
 
   return (
     <main style={{ minHeight: "100vh", background: "#050505", color: "#fff", padding: "48px 24px" }}>
@@ -250,16 +308,66 @@ export default function BarberPage() {
 
         {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28 }}>
-          <div>
-            <div style={{ color: "#d4af37", fontSize: 12, letterSpacing: "0.22em", textTransform: "uppercase", marginBottom: 10 }}>
-              My Schedule
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            {/* Clickable photo upload */}
+            <div
+              onClick={() => {
+                const input = document.createElement("input");
+                input.type = "file";
+                input.accept = "image/jpeg,image/png,image/webp,image/gif";
+                input.onchange = async () => {
+                  const file = input.files?.[0];
+                  if (!file) return;
+                  const fd = new FormData();
+                  fd.append("file", file);
+                  fd.append("type", "barber_photo");
+                  // Need barber id — get from admin upload endpoint via barber slug
+                  fd.append("barber_slug", barberSlug);
+                  const res = await fetch(`/api/${shopSlug}/barbers/${barberSlug}/photo`, { method: "POST", body: fd });
+                  const data = await res.json();
+                  if (data.ok) setBarberPhotoUrl(`${data.url}?v=${Date.now()}`);
+                };
+                input.click();
+              }}
+              title={barberPhotoUrl ? "Click to change photo" : "Click to add your photo"}
+              style={{
+                width: 56, height: 56, borderRadius: "50%", flexShrink: 0,
+                cursor: "pointer", overflow: "hidden",
+                border: barberPhotoUrl ? "2px solid #d4af37" : "2px dashed #3a3a3a",
+                background: barberPhotoUrl ? "transparent" : "#111",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}
+            >
+              {barberPhotoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={barberPhotoUrl} alt={barberName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              ) : (
+                <span style={{ fontSize: 22, opacity: 0.35 }}>📷</span>
+              )}
             </div>
-            <h1 style={{ fontSize: 44, fontWeight: 900, margin: 0 }}>{barberName || barberSlug}</h1>
-            <p style={{ color: "#666", fontSize: 15, marginTop: 8 }}>Your appointments only.</p>
+            <div>
+              <div style={{ color: "#d4af37", fontSize: 12, letterSpacing: "0.22em", textTransform: "uppercase", marginBottom: 10 }}>
+                My Schedule
+              </div>
+              <h1 style={{ fontSize: 44, fontWeight: 900, margin: 0 }}>{barberName || barberSlug}</h1>
+              <p style={{ color: "#666", fontSize: 15, marginTop: 8 }}>Your appointments only.</p>
+            </div>
           </div>
-          <button onClick={handleLogout} disabled={loggingOut} style={secondaryBtn}>
-            {loggingOut ? "Signing out..." : "Sign out"}
-          </button>
+          <div style={{ display: "flex", gap: 8 }}>
+            {"Notification" in (typeof window !== "undefined" ? window : {}) && (
+              <button
+                onClick={togglePushNotifications}
+                disabled={pushLoading}
+                title={pushEnabled ? "Disable push notifications" : "Enable push notifications"}
+                style={{ ...secondaryBtn, fontSize: 18, padding: "8px 12px" }}
+              >
+                {pushLoading ? "…" : pushEnabled ? "🔔" : "🔕"}
+              </button>
+            )}
+            <button onClick={handleLogout} disabled={loggingOut} style={secondaryBtn}>
+              {loggingOut ? "Signing out..." : "Sign out"}
+            </button>
+          </div>
         </div>
 
         {/* Stats */}
@@ -282,7 +390,7 @@ export default function BarberPage() {
         {/* Tabs — only shown if admin gave edit permissions */}
         {hasTabs && (
           <div style={{ display: "flex", gap: 6, marginBottom: 28, borderBottom: "1px solid #1a1a1a", paddingBottom: 0 }}>
-            {(["schedule", ...(perms.can_edit_hours ? ["hours"] : []), ...(perms.can_edit_prices ? ["prices"] : [])] as Tab[]).map((tab) => (
+            {(["schedule", "earnings", ...(perms.can_edit_hours ? ["hours"] : []), ...(perms.can_edit_prices ? ["prices"] : [])] as Tab[]).map((tab) => (
               <button
                 key={tab}
                 onClick={() => handleTabChange(tab)}
@@ -300,7 +408,7 @@ export default function BarberPage() {
                   marginBottom: -1,
                 }}
               >
-                {tab === "schedule" ? "Schedule" : tab === "hours" ? "My Hours" : "My Prices"}
+                {tab === "schedule" ? "Schedule" : tab === "earnings" ? "Earnings" : tab === "hours" ? "My Hours" : "My Prices"}
               </button>
             ))}
           </div>
@@ -379,6 +487,11 @@ export default function BarberPage() {
               </div>
             )}
           </>
+        )}
+
+        {/* ── EARNINGS TAB ── */}
+        {activeTab === "earnings" && (
+          <EarningsTab bookings={bookings} timezone={shopTimezone} />
         )}
 
         {/* ── HOURS TAB ── */}
@@ -561,3 +674,113 @@ const emptyBox: React.CSSProperties = {
   color: "#9a9a9a",
   background: "#070707",
 };
+
+function EarningsTab({ bookings, timezone }: { bookings: Booking[]; timezone: string }) {
+  const tz = timezone || "America/Chicago";
+
+  // Get "today" as YYYY-MM-DD in the shop's timezone
+  const nowInTz = new Date().toLocaleDateString("en-CA", { timeZone: tz }); // en-CA gives YYYY-MM-DD
+  const [y, mo, d] = nowInTz.split("-").map(Number);
+
+  // Start of current month (YYYY-MM-01) in shop tz
+  const monthStart = `${y}-${String(mo).padStart(2, "0")}-01`;
+
+  // Start of current week (Sunday) in shop tz — treat the date as UTC to get correct day-of-week
+  const nowDateUTC = new Date(Date.UTC(y, mo - 1, d));
+  const dowSunday = nowDateUTC.getUTCDay(); // 0=Sun
+  const weekStartUTC = new Date(Date.UTC(y, mo - 1, d - dowSunday));
+  const weekStart = weekStartUTC.toISOString().slice(0, 10); // YYYY-MM-DD
+
+  // Get an appointment's date in the shop timezone for comparison
+  function apptDateInTz(isoStr: string) {
+    return new Date(isoStr).toLocaleDateString("en-CA", { timeZone: tz });
+  }
+
+  const completed = bookings.filter((b) => b.status === "completed");
+
+  function rev(list: Booking[]) {
+    return list.reduce((s, b) => s + Number(b.price_snapshot ?? b.services?.price ?? 0), 0);
+  }
+
+  const totalEarned = rev(completed);
+  const weekEarned = rev(completed.filter((b) => apptDateInTz(b.starts_at) >= weekStart));
+  const monthEarned = rev(completed.filter((b) => apptDateInTz(b.starts_at) >= monthStart));
+
+  // By service
+  const bySvc = new Map<string, { name: string; count: number; revenue: number }>();
+  for (const b of completed) {
+    const name = b.services?.name ?? "Unknown";
+    const price = Number(b.price_snapshot ?? b.services?.price ?? 0);
+    const existing = bySvc.get(name);
+    if (existing) { existing.count++; existing.revenue += price; }
+    else bySvc.set(name, { name, count: 1, revenue: price });
+  }
+  const byService = Array.from(bySvc.values()).sort((a, b) => b.revenue - a.revenue);
+
+  // Last 30 days by day for a simple trend
+  const last30: Record<string, number> = {};
+  const cutoffUTC = new Date(Date.UTC(y, mo - 1, d - 30));
+  const cutoffStr = cutoffUTC.toISOString().slice(0, 10); // YYYY-MM-DD
+  for (const b of completed) {
+    const apptDate = apptDateInTz(b.starts_at);
+    if (apptDate >= cutoffStr) {
+      last30[apptDate] = (last30[apptDate] ?? 0) + Number(b.price_snapshot ?? b.services?.price ?? 0);
+    }
+  }
+
+  const card = (label: string, value: string, gold = false) => (
+    <div style={{ background: "#0d0d0d", border: "1px solid #1e1e1e", borderRadius: 16, padding: "18px 20px" }}>
+      <div style={{ color: "#555", fontSize: 12, marginBottom: 6 }}>{label}</div>
+      <div style={{ fontSize: 28, fontWeight: 900, color: gold ? "#d4af37" : "#fff" }}>{value}</div>
+    </div>
+  );
+
+  return (
+    <div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginBottom: 28 }}>
+        {card("This Week", `$${weekEarned.toFixed(2)}`, true)}
+        {card("This Month", `$${monthEarned.toFixed(2)}`)}
+        {card("All Time", `$${totalEarned.toFixed(2)}`)}
+      </div>
+
+      {byService.length > 0 && (
+        <div style={{ background: "#0d0d0d", border: "1px solid #1e1e1e", borderRadius: 16, padding: 22, marginBottom: 20 }}>
+          <p style={{ color: "#555", fontSize: 12, marginBottom: 14, fontWeight: 700 }}>REVENUE BY SERVICE</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {byService.map((s) => (
+              <div key={s.name} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <span style={{ fontWeight: 700 }}>{s.name}</span>
+                  <span style={{ color: "#555", fontSize: 13, marginLeft: 8 }}>{s.count}×</span>
+                </div>
+                <span style={{ color: "#d4af37", fontWeight: 800 }}>${s.revenue.toFixed(2)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {Object.keys(last30).length > 0 && (
+        <div style={{ background: "#0d0d0d", border: "1px solid #1e1e1e", borderRadius: 16, padding: 22 }}>
+          <p style={{ color: "#555", fontSize: 12, marginBottom: 14, fontWeight: 700 }}>LAST 30 DAYS</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {Object.entries(last30)
+              .sort((a, b) => b[0].localeCompare(a[0]))
+              .map(([date, amount]) => (
+                <div key={date} style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span style={{ color: "#888", fontSize: 14 }}>
+                    {new Date(`${date}T12:00:00`).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+                  </span>
+                  <span style={{ fontWeight: 700 }}>${amount.toFixed(2)}</span>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
+
+      {completed.length === 0 && (
+        <div style={{ color: "#555", textAlign: "center", padding: 40 }}>No completed bookings yet.</div>
+      )}
+    </div>
+  );
+}

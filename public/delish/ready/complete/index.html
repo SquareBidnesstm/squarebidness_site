@@ -307,9 +307,26 @@
   </div>
 
   <script>
+    const OPERATOR_TOKEN_KEY = "delish_operator_token";
     const ordersGrid = document.getElementById("ordersGrid");
     const statusBox = document.getElementById("statusBox");
     const readyCount = document.getElementById("readyCount");
+
+    function getSavedOperatorToken() {
+      try {
+        return localStorage.getItem(OPERATOR_TOKEN_KEY) || "";
+      } catch {
+        return "";
+      }
+    }
+
+    function operatorHeaders(extra = {}) {
+      const token = getSavedOperatorToken();
+      return {
+        ...extra,
+        ...(token ? { "x-operator-token": token.trim() } : {})
+      };
+    }
 
     function escapeHtml(str) {
       return String(str || "")
@@ -369,7 +386,8 @@
     async function loadReadyOrders() {
       try {
         const res = await fetch(`/api/delish/ready-orders/?t=${Date.now()}`, {
-          cache: "no-store"
+          cache: "no-store",
+          headers: operatorHeaders()
         });
 
         const data = await res.json();
@@ -403,9 +421,7 @@
       try {
         const res = await fetch("/api/delish/pickup-order/", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
+          headers: operatorHeaders({ "Content-Type": "application/json" }),
           body: JSON.stringify({ id })
         });
 

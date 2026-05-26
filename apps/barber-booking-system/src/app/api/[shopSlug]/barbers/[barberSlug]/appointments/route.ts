@@ -15,7 +15,7 @@ export async function GET(
 
   const { data: shop } = await supabaseServer
     .from("shops")
-    .select("id")
+    .select("id, timezone")
     .eq("slug", shopSlug)
     .eq("active", true)
     .single();
@@ -26,7 +26,7 @@ export async function GET(
 
   const { data: barber } = await supabaseServer
     .from("barbers")
-    .select("id, name, display_name")
+    .select("id, name, display_name, photo_url")
     .eq("shop_id", shop.id)
     .eq("slug", barberSlug)
     .eq("active", true)
@@ -49,6 +49,7 @@ export async function GET(
       ends_at,
       status,
       payment_status,
+      price_snapshot,
       client_notes,
       services (
         name,
@@ -58,7 +59,9 @@ export async function GET(
     `)
     .eq("shop_id", shop.id)
     .eq("barber_id", barber.id)
-    .order("starts_at", { ascending: false });
+    .gte("appointment_date", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10))
+    .order("starts_at", { ascending: false })
+    .limit(500);
 
   if (error) {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
@@ -80,6 +83,8 @@ export async function GET(
   return NextResponse.json({
     ok: true,
     barberName: barber.display_name || barber.name,
+    barberPhotoUrl: barber.photo_url ?? null,
+    timezone: shop.timezone ?? "America/Chicago",
     bookings: bookings ?? [],
     perms,
   });

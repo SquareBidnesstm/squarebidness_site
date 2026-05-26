@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -34,9 +34,13 @@ type Barber = {
   name: string;
   display_name: string;
   role: string;
+  phone?: string | null;
+  special_sessions_enabled?: boolean;
+  special_sessions_price_cents?: number;
   active: boolean;
   sort_order: number;
   has_pin: boolean;
+  photo_url?: string | null;
 };
 
 type BarberPerms = {
@@ -48,7 +52,36 @@ type EditState = {
   name: string;
   display_name: string;
   role: string;
+  bio?: string;
+  phone?: string;
+  special_sessions_enabled?: boolean;
+  special_sessions_price?: string; // dollar display, e.g. "150"
 };
+
+/** Strip +1 / +country code for display in the +1 prefix input */
+function phoneToInput(e164: string | null | undefined): string {
+  if (!e164) return "";
+  const digits = e164.replace(/\D/g, "");
+  // strip leading 1 if 11 digits
+  return digits.length === 11 && digits.startsWith("1") ? digits.slice(1) : digits;
+}
+
+/** Format raw digits to E.164 +1XXXXXXXXXX (US only). Returns "" if invalid. */
+function inputToE164(raw: string): string {
+  const digits = raw.replace(/\D/g, "");
+  if (digits.length === 10) return `+1${digits}`;
+  if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
+  return digits.length === 0 ? "" : ""; // blank clears; partial = don't save
+}
+
+/** Render a 10-digit US number as (XXX) XXX-XXXX for display */
+function fmtPhoneDisplay(e164: string | null | undefined): string {
+  if (!e164) return "";
+  const d = e164.replace(/\D/g, "");
+  const ten = d.length === 11 && d.startsWith("1") ? d.slice(1) : d;
+  if (ten.length !== 10) return e164;
+  return `(${ten.slice(0, 3)}) ${ten.slice(3, 6)}-${ten.slice(6)}`;
+}
 
 const COMMON_ROLES = [
   "Barber", "Head Barber", "Master Barber", "Apprentice",
@@ -65,15 +98,23 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editState, setEditState] = useState<EditState>({ name: "", display_name: "", role: "" });
+  const [editState, setEditState] = useState<EditState>({ name: "", display_name: "", role: "", bio: "" });
   const [saving, setSaving] = useState(false);
   const [addingNew, setAddingNew] = useState(false);
-  const [newBarber, setNewBarber] = useState<EditState>({ name: "", display_name: "", role: "Barber" });
+  const [newBarber, setNewBarber] = useState<EditState>({ name: "", display_name: "", role: "Barber", bio: "" });
+  const [barberBios, setBarberBios] = useState<Record<string, string>>({});
   const [addingSaving, setAddingSaving] = useState(false);
   const [hoursOpen, setHoursOpen] = useState<string | null>(null);
   const [barberHours, setBarberHours] = useState<Record<string, HourRow[]>>({});
   const [hoursSaving, setHoursSaving] = useState(false);
   const [hoursSaved, setHoursSaved] = useState<string | null>(null);
+  // Ref to track which barber IDs have already been fetched — avoids stale-closure
+  // re-fetches when barberHours state changes recreates loadBarberHours
+  const loadedBarberIds = useRef<Set<string>>(new Set());
+
+  // Photo upload state
+  const [uploadingPhotoId, setUploadingPhotoId] = useState<string | null>(null);
+  const photoInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   // PIN state
   const [pinOpenId, setPinOpenId] = useState<string | null>(null);
@@ -101,6 +142,12 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
       if (data.ok) {
         setBarbers(data.barbers);
         setBarberLimit(data.barberLimit ?? 0);
+        // Load bios for all barbers
+        const biosRes = await fetch(`/api/${shopSlug}/admin/barbers/bios`);
+        if (biosRes.ok) {
+          const biosData = await biosRes.json();
+          if (biosData.ok) setBarberBios(biosData.bios ?? {});
+        }
       } else {
         setError(data.error || "Failed to load barbers.");
       }
@@ -112,15 +159,20 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
   }
 
   const loadBarberHours = useCallback(async (barberId: string) => {
-    if (barberHours[barberId]) return;
+    // Use ref instead of state to guard — avoids stale closure from barberHours in deps
+    if (loadedBarberIds.current.has(barberId)) return;
+    loadedBarberIds.current.add(barberId);
     const res = await fetch(`/api/${shopSlug}/admin/barbers/${barberId}/hours`);
     const data = await res.json();
     if (data.ok) {
       const loaded: HourRow[] = data.hours;
       const merged = DEFAULT_SHOP_HOURS.map((def) => loaded.find((h) => h.day_of_week === def.day_of_week) ?? def);
       setBarberHours((prev) => ({ ...prev, [barberId]: merged }));
+    } else {
+      // Remove from loaded set on failure so a retry is possible
+      loadedBarberIds.current.delete(barberId);
     }
-  }, [shopSlug, barberHours]);
+  }, [shopSlug]);
 
   function updateBarberHourDay(barberId: string, dayIndex: number, field: keyof HourRow, value: string | boolean | null) {
     setBarberHours((prev) => ({
@@ -149,30 +201,60 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
   async function clearBarberHours(barberId: string) {
     await fetch(`/api/${shopSlug}/admin/barbers/${barberId}/hours`, { method: "DELETE" });
     setBarberHours((prev) => { const n = { ...prev }; delete n[barberId]; return n; });
+    loadedBarberIds.current.delete(barberId); // allow re-fetch after clear
     setHoursOpen(null);
   }
 
   function startEdit(b: Barber) {
     setEditingId(b.id);
-    setEditState({ name: b.name, display_name: b.display_name || b.name, role: b.role });
+    setEditState({
+      name: b.name,
+      display_name: b.display_name || b.name,
+      role: b.role,
+      bio: barberBios[b.id] ?? "",
+      phone: phoneToInput(b.phone),
+      special_sessions_enabled: b.special_sessions_enabled ?? false,
+      special_sessions_price: b.special_sessions_price_cents
+        ? String(Math.round(b.special_sessions_price_cents / 100))
+        : "150",
+    });
     setAddingNew(false);
     setPinOpenId(null);
   }
 
   async function saveEdit(id: string) {
     setSaving(true);
-    const res = await fetch(`/api/${shopSlug}/admin/barbers/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: editState.name.trim(),
-        display_name: editState.display_name.trim() || editState.name.trim(),
-        role: editState.role,
+    const e164 = inputToE164(editState.phone ?? "");
+    const rawDigits = (editState.phone ?? "").replace(/\D/g, "");
+    // Only save phone if blank (clearing) or valid 10-digit US number
+    const phonePayload = rawDigits.length === 0 ? "" : rawDigits.length === 10 ? e164 : undefined;
+
+    const priceRaw = parseInt(editState.special_sessions_price ?? "150", 10);
+    const priceCents = isNaN(priceRaw) || priceRaw < 1 ? 15000 : priceRaw * 100;
+
+    const [res] = await Promise.all([
+      fetch(`/api/${shopSlug}/admin/barbers/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: editState.name.trim(),
+          display_name: editState.display_name.trim() || editState.name.trim(),
+          role: editState.role,
+          ...(phonePayload !== undefined ? { phone: phonePayload } : {}),
+          special_sessions_enabled: editState.special_sessions_enabled ?? false,
+          special_sessions_price_cents: priceCents,
+        }),
       }),
-    });
+      fetch(`/api/${shopSlug}/admin/barbers/${id}/bio`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bio: (editState.bio ?? "").trim() }),
+      }),
+    ]);
     const data = await res.json();
     if (data.ok) {
       setBarbers((prev) => prev.map((b) => (b.id === id ? { ...data.barber, has_pin: b.has_pin } : b)));
+      setBarberBios((prev) => ({ ...prev, [id]: (editState.bio ?? "").trim() }));
       setEditingId(null);
     }
     setSaving(false);
@@ -225,8 +307,8 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
   async function savePin(barberId: string) {
     setPinError("");
     setPinSuccess("");
-    if (!pinInput || !/^\d{4,12}$/.test(pinInput)) {
-      setPinError("PIN must be 4–12 digits.");
+    if (!pinInput || !/^\d{4}$/.test(pinInput)) {
+      setPinError("PIN must be exactly 4 digits.");
       return;
     }
     setPinSaving(true);
@@ -281,6 +363,23 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(updated),
     });
+  }
+
+  async function uploadBarberPhoto(barberId: string, file: File) {
+    setUploadingPhotoId(barberId);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("type", "barber_photo");
+      fd.append("barber_id", barberId);
+      const res = await fetch(`/api/${shopSlug}/admin/upload`, { method: "POST", body: fd });
+      const data = await res.json();
+      if (data.ok) {
+        setBarbers((prev) => prev.map((b) => b.id === barberId ? { ...b, photo_url: data.url } : b));
+      }
+    } finally {
+      setUploadingPhotoId(null);
+    }
   }
 
   if (loading) return <div style={emptyBox}>Loading barbers...</div>;
@@ -392,7 +491,7 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
             >
               {isEditing ? (
                 <div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 160px", gap: 12, marginBottom: 14 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 160px", gap: 12, marginBottom: 12 }}>
                     <div>
                       <div style={labelStyle}>Full Name</div>
                       <input
@@ -423,6 +522,120 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
                       </select>
                     </div>
                   </div>
+                  <div style={{ marginBottom: 14 }}>
+                    <div style={labelStyle}>Bio <span style={{ color: "#555", fontWeight: 400 }}>(shown on booking page · max 500 chars)</span></div>
+                    <textarea
+                      value={editState.bio}
+                      onChange={(e) => setEditState((p) => ({ ...p, bio: e.target.value.slice(0, 500) }))}
+                      rows={3}
+                      placeholder="Short bio shown to customers on the booking page…"
+                      style={{ ...inputStyle, resize: "vertical" }}
+                    />
+                  </div>
+                  <div style={{ marginBottom: 16 }}>
+                    <div style={labelStyle}>
+                      Approval SMS Phone <span style={{ color: "#555", fontWeight: 400 }}>(used for manual booking approval texts)</span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "stretch" }}>
+                      <div style={{
+                        padding: "10px 12px",
+                        background: "#1a1a1a",
+                        border: "1px solid #2a2a2a",
+                        borderRight: "none",
+                        borderRadius: "8px 0 0 8px",
+                        color: "#666",
+                        fontSize: 15,
+                        fontWeight: 700,
+                        flexShrink: 0,
+                        display: "flex",
+                        alignItems: "center",
+                      }}>
+                        +1
+                      </div>
+                      <input
+                        value={editState.phone ?? ""}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/[^\d\s\-().]/g, "").slice(0, 14);
+                          setEditState((p) => ({ ...p, phone: val }));
+                        }}
+                        placeholder="555 867 5309"
+                        inputMode="tel"
+                        style={{ ...inputStyle, borderRadius: "0 8px 8px 0", flex: 1 }}
+                      />
+                    </div>
+                    {(() => {
+                      const digits = (editState.phone ?? "").replace(/\D/g, "");
+                      return digits.length > 0 && digits.length !== 10
+                        ? <div style={{ fontSize: 11, color: "#ff9955", marginTop: 4 }}>Enter 10 digits (area code + number)</div>
+                        : null;
+                    })()}
+                  </div>
+
+                  {/* ── Special Sessions ─────────────────────────────── */}
+                  <div style={{ background: "#0a0a0a", border: "1px solid #1e1e1e", borderRadius: 10, padding: "16px 18px", marginBottom: 16 }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: editState.special_sessions_enabled ? 14 : 0 }}>
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: "#fff", marginBottom: 2 }}>
+                          ⚡ Special Sessions
+                        </div>
+                        <div style={{ fontSize: 11, color: "#555" }}>
+                          Off-hours bookings at a premium rate — client pays in full via Stripe
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setEditState((p) => ({ ...p, special_sessions_enabled: !p.special_sessions_enabled }))}
+                        aria-pressed={editState.special_sessions_enabled}
+                        style={{
+                          flexShrink: 0, width: 46, height: 26, borderRadius: 13, border: "none",
+                          background: editState.special_sessions_enabled ? "#d4af37" : "#2a2a2a",
+                          cursor: "pointer", position: "relative", transition: "background 0.2s",
+                        }}
+                      >
+                        <span style={{
+                          position: "absolute", top: 3,
+                          left: editState.special_sessions_enabled ? 22 : 3,
+                          width: 20, height: 20, borderRadius: "50%", background: "#fff",
+                          transition: "left 0.2s",
+                        }} />
+                      </button>
+                    </div>
+
+                    {editState.special_sessions_enabled && (
+                      <div>
+                        <div style={{ fontSize: 12, color: "#666", fontWeight: 600, marginBottom: 6 }}>
+                          Default price <span style={{ color: "#555", fontWeight: 400 }}>(client pays this in full)</span>
+                        </div>
+                        <div style={{ display: "flex", alignItems: "stretch" }}>
+                          <div style={{
+                            padding: "10px 12px",
+                            background: "#1a1a1a",
+                            border: "1px solid #2a2a2a",
+                            borderRight: "none",
+                            borderRadius: "8px 0 0 8px",
+                            color: "#d4af37",
+                            fontSize: 15,
+                            fontWeight: 700,
+                            flexShrink: 0,
+                            display: "flex",
+                            alignItems: "center",
+                          }}>$</div>
+                          <input
+                            type="number"
+                            min="1"
+                            value={editState.special_sessions_price ?? "150"}
+                            onChange={(e) => setEditState((p) => ({ ...p, special_sessions_price: e.target.value }))}
+                            placeholder="150"
+                            style={{ ...inputStyle, borderRadius: "0 8px 8px 0", flex: 1, width: "auto" }}
+                          />
+                        </div>
+                        <div style={{ fontSize: 11, color: "#555", marginTop: 5 }}>
+                          You can override this per-booking when you reply via SMS (e.g. ACCEPT $200)
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
                   <div style={{ display: "flex", gap: 10 }}>
                     <button
                       onClick={() => saveEdit(b.id)}
@@ -439,6 +652,39 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
               ) : (
                 <div>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                      {/* Photo avatar */}
+                      <div
+                        onClick={() => photoInputRefs.current[b.id]?.click()}
+                        title="Click to upload photo"
+                        style={{
+                          width: 52, height: 52, borderRadius: "50%",
+                          background: "#1a1a1a", border: "1px solid #2a2a2a",
+                          overflow: "hidden", flexShrink: 0, cursor: "pointer",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          position: "relative",
+                        }}
+                      >
+                        {uploadingPhotoId === b.id ? (
+                          <span style={{ color: "#555", fontSize: 11 }}>…</span>
+                        ) : b.photo_url ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={b.photo_url} alt={b.display_name || b.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        ) : (
+                          <span style={{ color: "#444", fontSize: 20 }}>📷</span>
+                        )}
+                      </div>
+                      <input
+                        ref={(el) => { photoInputRefs.current[b.id] = el; }}
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/gif"
+                        style={{ display: "none" }}
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) uploadBarberPhoto(b.id, f);
+                          e.target.value = "";
+                        }}
+                      />
                     <div>
                       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
                         <span style={{ fontSize: 18, fontWeight: 700 }}>
@@ -460,7 +706,7 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
                           </span>
                         )}
                       </div>
-                      <div style={{ color: "#666", fontSize: 13, display: "flex", alignItems: "center", gap: 10 }}>
+                      <div style={{ color: "#666", fontSize: 13, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
                         <span>{b.role}</span>
                         <span style={{ color: "#333" }}>·</span>
                         <a
@@ -478,7 +724,24 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
                           {copied === b.slug ? "Copied!" : "Copy link"}
                         </button>
                       </div>
+                      <div style={{ marginTop: 5, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                        {b.phone ? (
+                          <span style={{ fontSize: 12, color: "#5cd600", fontFamily: "monospace" }}>
+                            📱 {fmtPhoneDisplay(b.phone)}
+                          </span>
+                        ) : (
+                          <span style={{ fontSize: 11, color: "#664400", background: "#1a0d00", border: "1px solid #331500", borderRadius: 999, padding: "2px 8px", fontWeight: 600 }}>
+                            No approval phone
+                          </span>
+                        )}
+                        {b.special_sessions_enabled ? (
+                          <span style={{ fontSize: 11, color: "#d4af37", background: "rgba(212,175,55,0.08)", border: "1px solid rgba(212,175,55,0.25)", borderRadius: 999, padding: "2px 8px", fontWeight: 700 }}>
+                            ⚡ Special Sessions ${b.special_sessions_price_cents ? Math.round(b.special_sessions_price_cents / 100) : 150}
+                          </span>
+                        ) : null}
+                      </div>
                     </div>
+                    </div>{/* end photo+name flex */}
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                       <button onClick={() => startEdit(b)} style={secondaryButton}>
                         Edit

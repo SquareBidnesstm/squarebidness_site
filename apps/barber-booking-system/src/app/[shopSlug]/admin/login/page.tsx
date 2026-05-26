@@ -28,8 +28,9 @@ export default function AdminLoginPage() {
       const data = await res.json();
 
       if (res.ok && data.ok) {
-        router.push(`/${shopSlug}/admin`);
-        router.refresh();
+        // Hard redirect so the browser sends the freshly-set cookie in the next request.
+        // router.push + router.refresh() can cancel the in-progress navigation in App Router.
+        window.location.href = `/${shopSlug}/admin`;
       } else {
         setError(data.error || "Incorrect PIN.");
         setPin("");

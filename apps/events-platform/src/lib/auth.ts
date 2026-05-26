@@ -1,0 +1,155 @@
+// =========================================================
+// AUTH — Square Bidness Events Platform
+// HMAC-SHA256 session tokens with embedded timestamps.
+// Format: "{issuedAt}.{hmacHex}"  (issuedAt = ms since epoch)
+// Tokens expire after MAX_TOKEN_AGE_MS (30 days).
+// Old format (no ".") is rejected → forces one-time re-login.
+// =========================================================
+
+const MAX_TOKEN_AGE_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+
+/** Constant-time string comparison to prevent HMAC timing side-channels. */
+function timingSafeEqual(a: string, b: string): boolean {
+  const enc = new TextEncoder();
+  const aB = enc.encode(a);
+  const bB = enc.encode(b);
+  if (aB.length !== bB.length) return false;
+  let diff = 0;
+  for (let i = 0; i < aB.length; i++) diff |= aB[i] ^ bB[i];
+  return diff === 0;
+}
+
+function requireAppSecret(): string {
+  const secret = process.env.APP_SECRET;
+  if (!secret) throw new Error("APP_SECRET environment variable is required but not set.");
+  return secret;
+}
+
+async function hmacHex(secret: string, message: string): Promise<string> {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const sig = await crypto.subtle.sign("HMAC", key, enc.encode(message));
+  return Array.from(new Uint8Array(sig))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+// ── Organizer session ────────────────────────────────────
+
+export async function computeOrganizerSessionToken(organizerSlug: string): Promise<string> {
+  const secret = requireAppSecret();
+  const issuedAt = Date.now().toString();
+  const mac = await hmacHex(secret, `organizer:${organizerSlug}:${issuedAt}`);
+  return `${issuedAt}.${mac}`;
+}
+
+export function organizerSessionCookieName(organizerSlug: string): string {
+  return `org_session_${organizerSlug}`;
+}
+
+export async function verifyOrganizerSession(
+  req: Request,
+  organizerSlug: string
+): Promise<boolean> {
+  const secret = requireAppSecret();
+  const cookieHeader = req.headers.get("cookie") ?? "";
+  const cookieName = organizerSessionCookieName(organizerSlug);
+  const match = cookieHeader
+    .split(";")
+    .map((c) => c.trim())
+    .find((c) => c.startsWith(`${cookieName}=`));
+  if (!match) return false;
+  const value = match.slice(cookieName.length + 1);
+
+  // Reject legacy format (no ".")
+  const dotIdx = value.indexOf(".");
+  if (dotIdx === -1) return false;
+
+  const issuedAt = value.slice(0, dotIdx);
+  const mac = value.slice(dotIdx + 1);
+  const issuedAtMs = Number(issuedAt);
+  if (!issuedAtMs || Date.now() - issuedAtMs > MAX_TOKEN_AGE_MS) return false;
+
+  const expected = await hmacHex(secret, `organizer:${organizerSlug}:${issuedAt}`);
+  return timingSafeEqual(mac, expected);
+}
+
+/**
+ * Reads the org_session_* cookie from the request, verifies the HMAC + timestamp,
+ * and returns the organizerSlug on success, or null on failure.
+ * Use this in organizer-protected API routes instead of manual token comparison.
+ */
+export async function getVerifiedOrganizerSlug(req: Request): Promise<string | null> {
+  const cookieHeader = req.headers.get("cookie") ?? "";
+  const cookies = cookieHeader.split(";").map((c) => c.trim());
+
+  // Collect all org_session_* cookies — if more than one is present the
+  // identity is ambiguous (user may manage multiple organizer accounts) so
+  // we refuse to guess and force re-authentication instead.
+  const orgCookies = cookies.filter((c) => c.startsWith("org_session_"));
+  if (orgCookies.length !== 1) return null;
+
+  const sessionEntry = orgCookies[0];
+  const eqIdx = sessionEntry.indexOf("=");
+  if (eqIdx === -1) return null;
+  const cookieName = sessionEntry.slice(0, eqIdx).trim();
+  const organizerSlug = cookieName.replace("org_session_", "");
+  if (!organizerSlug) return null;
+
+  const verified = await verifyOrganizerSession(req, organizerSlug);
+  return verified ? organizerSlug : null;
+}
+
+/**
+ * Server-component helper: verifies the organizer session from a raw cookie
+ * header string (built with cookieStore.getAll().map(...).join("; ")).
+ * Returns the verified organizerSlug or null.
+ *
+ * Usage in server components:
+ *   const cookieStore = await cookies();
+ *   const cookieHeader = cookieStore.getAll().map(c => `${c.name}=${c.value}`).join("; ");
+ *   const slug = await getVerifiedOrganizerSlugFromHeader(cookieHeader);
+ *   if (!slug) redirect("/organizer/login");
+ */
+export async function getVerifiedOrganizerSlugFromHeader(cookieHeader: string): Promise<string | null> {
+  const req = new Request("https://placeholder", { headers: { cookie: cookieHeader } });
+  return getVerifiedOrganizerSlug(req);
+}
+
+// ── Admin (Marcus) session ───────────────────────────────
+
+export async function computeAdminSessionToken(): Promise<string> {
+  const secret = requireAppSecret();
+  const issuedAt = Date.now().toString();
+  const mac = await hmacHex(secret, `sbe:admin:${issuedAt}`);
+  return `${issuedAt}.${mac}`;
+}
+
+export async function verifyAdminSession(req: Request): Promise<boolean> {
+  const secret = requireAppSecret();
+  const cookieHeader = req.headers.get("cookie") ?? "";
+  const match = cookieHeader
+    .split(";")
+    .map((c) => c.trim())
+    .find((c) => c.startsWith("sbe_admin_session="));
+  if (!match) return false;
+  const value = match.slice("sbe_admin_session=".length);
+
+  // Reject legacy format (no ".")
+  const dotIdx = value.indexOf(".");
+  if (dotIdx === -1) return false;
+
+  const issuedAt = value.slice(0, dotIdx);
+  const mac = value.slice(dotIdx + 1);
+  const issuedAtMs = Number(issuedAt);
+  if (!issuedAtMs || Date.now() - issuedAtMs > MAX_TOKEN_AGE_MS) return false;
+
+  const expected = await hmacHex(secret, `sbe:admin:${issuedAt}`);
+  return timingSafeEqual(mac, expected);
+}

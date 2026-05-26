@@ -437,6 +437,24 @@
   </div>
 
   <script>
+    const OPERATOR_TOKEN_KEY = "delish_operator_token";
+
+    function getSavedOperatorToken() {
+      try {
+        return localStorage.getItem(OPERATOR_TOKEN_KEY) || "";
+      } catch {
+        return "";
+      }
+    }
+
+    function operatorHeaders(extra = {}) {
+      const token = getSavedOperatorToken();
+      return {
+        ...extra,
+        ...(token ? { "x-operator-token": token.trim() } : {})
+      };
+    }
+
     function escapeHtml(value) {
       return String(value ?? "")
         .replace(/&/g, "&amp;")
@@ -532,9 +550,7 @@
       try {
         const res = await fetch("/api/delish/approve-catering/", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
+          headers: operatorHeaders({ "Content-Type": "application/json" }),
           body: JSON.stringify({ id, totalAmount })
         });
 
@@ -569,9 +585,7 @@
       try {
         const res = await fetch("/api/delish/clear-catering-request/", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
+          headers: operatorHeaders({ "Content-Type": "application/json" }),
           body: JSON.stringify({ id, action: "clear" })
         });
 
@@ -721,7 +735,8 @@
       try {
         const res = await fetch("/api/delish/catering-orders/", {
           method: "GET",
-          cache: "no-store"
+          cache: "no-store",
+          headers: operatorHeaders()
         });
 
         const data = await res.json();
@@ -743,7 +758,7 @@
         ordersEl.innerHTML = orders.map(renderOrderCard).join("");
       } catch (error) {
         setSummary([]);
-        statusBar.textContent = "Unable to load catering requests right now.";
+        statusBar.textContent = error.message || "Unable to load catering requests right now.";
         ordersEl.innerHTML = `<div class="empty">There was a problem loading the catering pipeline.</div>`;
         console.error("DELISH CATERING ORDERS PAGE ERROR:", error);
       }
