@@ -27,11 +27,26 @@
     .container{max-width:900px;margin:0 auto;padding:0 16px}.hero{padding:5rem 0 3rem;text-align:center;border-bottom:1px solid var(--line);background:radial-gradient(800px 420px at 50% 0,rgba(199,166,92,.14),transparent 60%),#000}
     .kicker{display:inline-block;border:1px solid rgba(199,166,92,.6);color:var(--gold);border-radius:999px;padding:.45rem .9rem;text-transform:uppercase;letter-spacing:.12em;font-size:.78rem}
     h1{font-size:clamp(2.2rem,6vw,4.5rem);margin:1rem 0 .5rem;letter-spacing:.03em}.sub{color:var(--muted);line-height:1.6}
-    .section{padding:2.5rem 0;border-bottom:1px solid var(--line)}.panel{border:1px solid var(--line);background:var(--card);border-radius:20px;padding:1.25rem}
+    .section{padding:2.5rem 0;border-bottom:1px solid var(--line)}.panel{border:1px solid var(--line);background:var(--card);border-radius:20px;padding:1.5rem 1.75rem}
     .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1rem}.item{border:1px solid var(--line);border-radius:16px;padding:1rem;background:rgba(0,0,0,.25)}
     .item b{color:var(--gold)}.item p{color:var(--muted);line-height:1.55}
     .btn{display:inline-flex;justify-content:center;align-items:center;border:1px solid rgba(199,166,92,.7);color:var(--gold);border-radius:999px;padding:.85rem 1.15rem;font-weight:800;margin-top:1.1rem}
     footer{text-align:center;padding:2rem 1rem;color:var(--muted);font-size:.88rem}footer a{text-decoration:underline;text-underline-offset:3px}
+    .form-heading{font-size:1.15rem;font-weight:700;color:var(--gold);margin:0 0 1.25rem;letter-spacing:.04em;text-transform:uppercase}
+    .field{display:flex;flex-direction:column;gap:.35rem;margin-bottom:1rem}
+    .field label{font-size:.82rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+    .field input,.field select,.field textarea{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:10px;padding:.7rem .9rem;color:#fff;font-size:.97rem;font-family:inherit;outline:none;transition:border-color .2s}
+    .field input:focus,.field select,.field textarea:focus{border-color:rgba(199,166,92,.6)}
+    .field select option{background:#111;color:#fff}
+    .field textarea{resize:vertical;min-height:90px}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    @media(max-width:560px){.form-row{grid-template-columns:1fr}}
+    .submit-btn{width:100%;padding:.95rem;background:transparent;border:1px solid rgba(199,166,92,.8);border-radius:999px;color:var(--gold);font-size:1rem;font-weight:800;letter-spacing:.06em;cursor:pointer;margin-top:.5rem;transition:background .2s}
+    .submit-btn:hover{background:rgba(199,166,92,.1)}
+    .form-note{font-size:.8rem;color:var(--muted);margin-top:1rem;text-align:center;line-height:1.55}
+    .success-msg{display:none;text-align:center;padding:2rem 1rem}
+    .success-msg h2{color:var(--gold);margin-bottom:.5rem}
+    .success-msg p{color:var(--muted)}
   </style>
 </head>
 <body>
@@ -40,7 +55,7 @@
       <span class="kicker">Naee Doll • Booking</span>
       <h1>Work with Naee.</h1>
       <p class="sub">Bookings, shoots, appearances, brand work, media, and collaborations.</p>
-      <a class="btn" href="mailto:naedoll@squarebidness.com?subject=Naee%20Doll%20—%20Booking%20Request" onclick="sbIntent('naee_booking_email', this)">Start Booking →</a>
+      <a class="btn" href="#inquiry">Submit an Inquiry ↓</a>
     </div>
   </header>
 
@@ -54,7 +69,124 @@
         </div>
       </div>
     </section>
+
+    <section class="section" id="inquiry">
+      <div class="container">
+        <div class="panel">
+          <p class="form-heading">Booking Inquiry</p>
+          <form id="bookingForm" novalidate>
+            <div class="form-row">
+              <div class="field">
+                <label for="fullName">Full Name *</label>
+                <input id="fullName" name="fullName" type="text" autocomplete="name" required placeholder="Your name" />
+              </div>
+              <div class="field">
+                <label for="phone">Phone *</label>
+                <input id="phone" name="phone" type="tel" autocomplete="tel" required placeholder="(000) 000-0000" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="field">
+                <label for="email">Email *</label>
+                <input id="email" name="email" type="email" autocomplete="email" required placeholder="you@email.com" />
+              </div>
+              <div class="field">
+                <label for="social">Instagram / Social Handle *</label>
+                <input id="social" name="social" type="text" required placeholder="@handle" />
+              </div>
+            </div>
+            <div class="field">
+              <label for="collabType">Collaboration Type *</label>
+              <select id="collabType" name="collabType" required>
+                <option value="" disabled selected>Select type</option>
+                <option>Brand Partnership</option>
+                <option>Editorial</option>
+                <option>Runway</option>
+                <option>Event Appearance</option>
+                <option>Commercial</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="brief">Campaign Brief</label>
+              <textarea id="brief" name="brief" placeholder="Describe the project, campaign, or appearance..."></textarea>
+            </div>
+            <div class="form-row">
+              <div class="field">
+                <label for="dates">Proposed Date(s)</label>
+                <input id="dates" name="dates" type="text" placeholder="Date range or flexibility" />
+              </div>
+              <div class="field">
+                <label for="budget">Budget Range *</label>
+                <select id="budget" name="budget" required>
+                  <option value="" disabled selected>Select range</option>
+                  <option>Under $500</option>
+                  <option>$500–$1,500</option>
+                  <option>$1,500–$5,000</option>
+                  <option>$5,000+</option>
+                  <option>Let's Talk</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label for="source">How did you hear about Naee Doll?</label>
+              <select id="source" name="source">
+                <option value="" disabled selected>Select one</option>
+                <option>Instagram</option>
+                <option>Referral</option>
+                <option>Google</option>
+                <option>Square Bidness</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <button class="submit-btn" type="submit">Submit Inquiry →</button>
+            <p class="form-note">Serious inquiries only. All collaborations require a signed contract and deposit.</p>
+          </form>
+          <div class="success-msg" id="successMsg">
+            <h2>Inquiry Received.</h2>
+            <p>Expect a response within 48 hours.</p>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
+
+  <script>
+    (function () {
+      const form = document.getElementById('bookingForm');
+      const success = document.getElementById('successMsg');
+      if (!form) return;
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const get = id => (document.getElementById(id) || {}).value || '';
+        const name = get('fullName'), email = get('email'), phone = get('phone'),
+              social = get('social'), type = get('collabType'), brief = get('brief'),
+              dates = get('dates'), budget = get('budget'), source = get('source');
+        if (!name || !email || !phone || !social || !type || !budget) {
+          alert('Please fill in all required fields.');
+          return;
+        }
+        const body = [
+          'Full Name: ' + name,
+          'Email: ' + email,
+          'Phone: ' + phone,
+          'Social Handle: ' + social,
+          'Collaboration Type: ' + type,
+          'Campaign Brief: ' + (brief || '—'),
+          'Proposed Dates: ' + (dates || '—'),
+          'Budget: ' + budget,
+          'Source: ' + (source || '—')
+        ].join('\n');
+        const subject = encodeURIComponent('Naee Doll Booking Inquiry — ' + type + ' — ' + name);
+        if (typeof window.gtag === 'function') {
+          window.gtag('event', 'booking_inquiry_submit', { event_category: 'naee_doll', event_label: type });
+        }
+        window.location.href = 'mailto:naedoll@squarebidness.com?subject=' + subject + '&body=' + encodeURIComponent(body);
+        form.style.display = 'none';
+        if (success) success.style.display = 'block';
+      });
+    })();
+  </script>
 
   <footer>
     Naee Doll • Square Bidness © 2026 •

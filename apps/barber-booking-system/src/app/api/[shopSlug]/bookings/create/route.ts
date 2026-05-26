@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../../../../lib/supabase/server";
+import { checkRateLimit } from "../../../../../lib/rate-limit";
 
 type CreateBookingPayload = {
   barber_id?: string;
@@ -117,6 +118,11 @@ export async function POST(
   { params }: { params: Promise<{ shopSlug: string }> }
 ) {
   try {
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    if (!await checkRateLimit(ip)) {
+      return NextResponse.json({ ok: false, error: "Too many requests. Please try again later." }, { status: 429 });
+    }
+
     const { shopSlug } = await params;
     const body = (await req.json()) as CreateBookingPayload;
 
@@ -186,6 +192,20 @@ export async function POST(
 
     if (overlaps && overlaps.length > 0) {
       return NextResponse.json({ ok: false, error: "That time is already booked" }, { status: 409 });
+    }
+
+    // Idempotency: block duplicate submissions for same customer+barber+slot
+    const { data: duplicate } = await supabaseServer
+      .from("bookings")
+      .select("id")
+      .eq("barber_id", barber.id)
+      .eq("starts_at", startsAt.toISOString())
+      .eq("customer_phone", body.customer_phone)
+      .in("status", ["pending", "confirmed"])
+      .maybeSingle();
+
+    if (duplicate) {
+      return NextResponse.json({ ok: false, error: "This appointment was already booked. Check your confirmation or contact the shop." }, { status: 409 });
     }
 
     const { data: bookingCode, error: bookingCodeError } = await supabaseServer.rpc(

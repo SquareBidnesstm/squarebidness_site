@@ -27,7 +27,7 @@
   <meta property="og:description" content="Request a private event at The SteaKhouse in Hammond, Louisiana." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://squarebidness.com/steakhouse/private-events/" />
-  <meta property="og:image" content="/steakhouse/assets/og/the-steakhouse_private-events_1200x630.jpg" />
+  <meta property="og:image" content="/steakhouse/assets/the-steakhouse_og_1200x630.jpg" />
   <meta name="twitter:card" content="summary_large_image" />
 
   <!-- Schema (shared LocalBusiness/Restaurant) -->
@@ -198,6 +198,9 @@
             <li><strong>Requests accepted:</strong> Mon–Sun (based on scheduling)</li>
             <li><strong>Response time:</strong> typically within 24–48 hours</li>
             <li><strong>Questions now?</strong> Call <a href="tel:+19856625090">(985) 662-5090</a></li>
+            <li><strong>Groups of 12–100 guests</strong></li>
+            <li><strong>Available 7 days a week, 5:00 PM – 10:00 PM</strong></li>
+            <li><strong>Per-person starting rate:</strong> contact us for custom quote</li>
           </ul>
 
           <div class="note">
@@ -316,60 +319,64 @@
     // Footer year
     document.getElementById("year").textContent = String(new Date().getFullYear());
 
-    // Mailto submit (no backend needed)
+    // API submit — saves to Supabase, no email client needed
     (function () {
       const form = document.getElementById("eventForm");
       const success = document.getElementById("success");
+      const submitBtn = form ? form.querySelector("[type=submit]") : null;
       if (!form) return;
 
       const clean = (v, n=400) =>
         String(v ?? "").replace(/[<>]/g,"").replace(/\s+/g," ").trim().slice(0,n);
 
-      const req = (id) => clean(document.getElementById(id)?.value || "");
+      const val = (id) => clean(document.getElementById(id)?.value || "");
 
-      form.addEventListener("submit", (e) => {
+      form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
-        const name = req("name");
-        const phone = req("phone");
-        const email = req("email");
-        const type = req("type");
-        const date = req("date");
-        const time = req("time");
-        const guests = req("guests");
-        const budget = req("budget");
-        const notes = req("notes");
+        const name   = val("name");
+        const phone  = val("phone");
+        const email  = val("email");
+        const type   = val("type");
+        const date   = val("date");
+        const time   = val("time");
+        const guests = val("guests");
+        const budget = val("budget");
+        const notes  = val("notes");
 
         if (!name || !phone || !email) {
           alert("Please enter Name, Phone, and Email.");
           return;
         }
 
-        const subject = encodeURIComponent(`Private Event Request — ${type || "Event"} — ${name}`);
-        const body = encodeURIComponent(
-`Private Event Request
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "Sending…"; }
 
-Name: ${name}
-Phone: ${phone}
-Email: ${email}
-Event Type: ${type}
-Preferred Date: ${date || "—"}
-Preferred Time: ${time || "—"}
-Estimated Guests: ${guests || "—"}
-Budget: ${budget || "—"}
+        try {
+          const res = await fetch("/api/steakhouse/event-inquiry", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, phone, email, event_type: type, date, time, guests, budget, notes })
+          });
 
-Notes:
-${notes || "—"}
+          const data = await res.json();
 
-Sent from: squarebidness.com/steakhouse/private-events/
-`
-        );
+          if (!res.ok) throw new Error(data.error || "Request failed");
 
-        // ✅ Update this inbox any time
-        const to = "thesteakhousehammond@gmail.com";
+          if (typeof window.gtag === "function") {
+            window.gtag("event", "event_request_submit", {
+              event_category: "private_events",
+              event_label: type || "Event"
+            });
+          }
 
-        window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
-        if (success) success.style.display = "block";
+          form.style.display = "none";
+          if (success) success.style.display = "block";
+
+        } catch (err) {
+          console.error(err);
+          if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = "Send Request"; }
+          alert("Something went wrong. Please call us at (985) 662-5090 or try again.");
+        }
       });
     })();
   </script>

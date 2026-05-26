@@ -19,7 +19,7 @@
     if (!sessionId) return;
 
     try {
-      const res = await fetch(`http://localhost:4242/order-details?session_id=${encodeURIComponent(sessionId)}`);
+      const res = await fetch(`https://sb-checkout-server.vercel.app/order-details?session_id=${encodeURIComponent(sessionId)}`);
       if (!res.ok) throw new Error(`Server ${res.status}`);
       const data = await res.json();
 

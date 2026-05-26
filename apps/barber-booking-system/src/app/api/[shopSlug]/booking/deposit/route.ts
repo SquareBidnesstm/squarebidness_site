@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { supabaseServer } from "../../../../../lib/supabase/server";
+import { checkRateLimit } from "../../../../../lib/rate-limit";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-04-22.dahlia" });
 
@@ -8,6 +9,11 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ shopSlug: string }> }
 ) {
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  if (!await checkRateLimit(ip)) {
+    return NextResponse.json({ ok: false, error: "Too many requests. Please try again later." }, { status: 429 });
+  }
+
   const { shopSlug } = await params;
 
   const body = await req.json();
