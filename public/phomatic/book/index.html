@@ -702,7 +702,7 @@
           <strong>Before you book:</strong> add location, preferred time window, wardrobe notes, and any must-have shots in the booking notes.
         </p>
         <p class="pm-note" style="margin-top:.75rem;opacity:.7;font-size:.85rem;">
-          A non-refundable deposit of 25% is required at booking. Session reschedules accepted with 48+ hours notice via Acuity.
+          A non-refundable deposit of 25% is required at booking. Session reschedules accepted with 48+ hours notice.
         </p>
       </div>
     </section>
@@ -948,7 +948,7 @@
       const res = await fetch('/api/phomatic/booking/slots?date=' + dateStr);
       if (!res.ok) throw new Error('API error');
       const data = await res.json();
-      const slots = data.slots || [];
+      const slots = data.available || data.slots || [];
       if (!slots.length) {
         wrap.innerHTML = `<div class="bwiz-slots-label">Available times</div><div class="bwiz-slots-empty">No times available for this date. Try another day.</div>`;
         return;
