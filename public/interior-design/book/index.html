@@ -1,4 +1,4 @@
-<!-- /public/interior-design/book/index.html  (PASTE READY — PRE-STRIPE INTAKE PAGE) -->
+<!-- /public/interior-design/book/index.html -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -158,18 +158,6 @@
     line-height:1.65;
   }
 
-  .notice{
-    margin-top:18px;
-    display:inline-block;
-    padding:10px 14px;
-    border-radius:999px;
-    background:rgba(183,156,110,.12);
-    border:1px solid rgba(183,156,110,.24);
-    color:#4b3d29;
-    font-size:13px;
-    letter-spacing:.2px;
-  }
-
   .layout{
     display:grid;
     grid-template-columns:1.3fr .7fr;
@@ -301,6 +289,7 @@
   }
 
   .btn:hover{background:var(--gold2)}
+  .btn:disabled{opacity:.6;cursor:not-allowed}
 
   .btn-secondary{
     background:#fff;
@@ -355,35 +344,47 @@
     line-height:1.55;
   }
 
-  .gold-panel{
-    background:#111;
-    color:#fff;
-    border-radius:20px;
-    padding:18px;
-    border:1px solid rgba(255,255,255,.08);
+  .success-box{
+    display:none;
+    padding:36px 22px;
+    text-align:center;
   }
 
-  .gold-panel h3{
-    margin:0 0 8px;
-    font-size:20px;
+  .success-icon{
+    width:64px;
+    height:64px;
+    border-radius:50%;
+    background:rgba(183,156,110,.15);
+    border:2px solid rgba(183,156,110,.4);
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-size:28px;
+    margin-bottom:14px;
   }
 
-  .gold-panel p{
-    margin:0;
-    color:rgba(255,255,255,.82);
-    line-height:1.6;
+  .success-box h2{
+    margin:0 0 10px;
+    font-size:26px;
   }
 
-  .gold-panel .tag{
+  .success-box p{
+    color:var(--muted);
+    max-width:440px;
+    margin:0 auto 20px;
+    line-height:1.65;
+  }
+
+  .error-banner{
+    display:none;
     margin-top:12px;
-    display:inline-block;
-    padding:8px 10px;
-    border-radius:999px;
-    background:rgba(183,156,110,.18);
-    border:1px solid rgba(183,156,110,.32);
-    color:#f3e7cf;
-    font-size:12px;
-    letter-spacing:.2px;
+    padding:12px 14px;
+    border-radius:12px;
+    background:#fef2f2;
+    border:1px solid #fecaca;
+    color:#991b1b;
+    font-size:13px;
+    line-height:1.5;
   }
 
   footer{
@@ -424,10 +425,8 @@
     <div class="eyebrow"><span class="dot"></span> Consultation Request</div>
     <h1>Start Your Project</h1>
     <p class="lead">
-      Tell Monica about your property, goals, and timeline. This intake form helps organize the project lane
-      before consultation scheduling and secure online payment are added.
+      Tell Monica about your property, goals, and timeline. She'll review your details and reach out to schedule your consultation.
     </p>
-    <div class="notice">Pre-Stripe intake mode: consultation requests are open now.</div>
   </div>
 </section>
 
@@ -435,36 +434,32 @@
   <div class="wrap layout">
     <div class="card">
       <h2>Request a Consultation</h2>
-      <p>
-        Complete the form below and submit your project details. This version is set up to gather qualified
-        leads now and is ready for Stripe deposit integration next.
-      </p>
 
-      <form id="consultationForm" action="mailto:monica@squarebidness.com" method="post" enctype="text/plain">
+      <form id="consultationForm">
         <div class="grid">
           <div class="field">
             <label for="fullName">Full Name</label>
-            <input id="fullName" name="Full Name" type="text" autocomplete="name" required />
+            <input id="fullName" name="fullName" type="text" autocomplete="name" required />
           </div>
 
           <div class="field">
             <label for="phone">Phone</label>
-            <input id="phone" name="Phone" type="tel" autocomplete="tel" required />
+            <input id="phone" name="phone" type="tel" autocomplete="tel" required />
           </div>
 
           <div class="field">
             <label for="email">Email</label>
-            <input id="email" name="Email" type="email" autocomplete="email" required />
+            <input id="email" name="email" type="email" autocomplete="email" required />
           </div>
 
           <div class="field">
             <label for="city">City</label>
-            <input id="city" name="City" type="text" autocomplete="address-level2" />
+            <input id="city" name="city" type="text" autocomplete="address-level2" />
           </div>
 
           <div class="field">
             <label for="projectType">Project Type</label>
-            <select id="projectType" name="Project Type" required>
+            <select id="projectType" name="projectType" required>
               <option value="">Select one</option>
               <option>Luxury Home Staging</option>
               <option>Residential Styling</option>
@@ -477,7 +472,7 @@
 
           <div class="field">
             <label for="propertyType">Property Type</label>
-            <select id="propertyType" name="Property Type" required>
+            <select id="propertyType" name="propertyType" required>
               <option value="">Select one</option>
               <option>Primary Residence</option>
               <option>Vacant Listing</option>
@@ -491,7 +486,7 @@
 
           <div class="field">
             <label for="timeline">Preferred Timeline</label>
-            <select id="timeline" name="Timeline" required>
+            <select id="timeline" name="timeline" required>
               <option value="">Select one</option>
               <option>As Soon As Possible</option>
               <option>Within 1 Week</option>
@@ -503,7 +498,7 @@
 
           <div class="field">
             <label for="budget">Estimated Budget</label>
-            <select id="budget" name="Estimated Budget">
+            <select id="budget" name="budget">
               <option value="">Select one</option>
               <option>Under $500</option>
               <option>$500 – $1,500</option>
@@ -516,48 +511,55 @@
 
           <div class="field full">
             <label for="address">Property Address</label>
-            <input id="address" name="Property Address" type="text" autocomplete="street-address" />
-            <div class="helper">Optional for now. Use city/state only if you do not want to submit the full address yet.</div>
+            <input id="address" name="address" type="text" autocomplete="street-address" />
+            <div class="helper">Optional. City/state only is fine if you prefer not to share the full address yet.</div>
           </div>
 
           <div class="field full">
             <label for="details">Project Details</label>
-            <textarea id="details" name="Project Details" placeholder="Tell Monica what kind of space you need styled, whether the home is occupied or vacant, what market or lifestyle outcome you want, and anything else important." required></textarea>
+            <textarea id="details" name="details" placeholder="Tell Monica what kind of space you need styled, whether the home is occupied or vacant, what market or lifestyle outcome you want, and anything else important." required></textarea>
           </div>
 
           <div class="field full">
             <label for="referral">How did you hear about Monica?</label>
-            <input id="referral" name="Referral Source" type="text" />
+            <input id="referral" name="referral" type="text" />
           </div>
 
           <div class="field full">
             <label for="photos">Photo Link</label>
-            <input id="photos" name="Photo Link" type="url" placeholder="Paste a Google Drive, Dropbox, iCloud, or listing link if available" />
-            <div class="helper">Pre-Stripe version uses a link field for photos. File uploads can be added later.</div>
+            <input id="photos" name="photos" type="url" placeholder="Paste a Google Drive, Dropbox, iCloud, or listing link if available" />
           </div>
 
           <div class="field full">
             <label>Project Readiness</label>
             <div class="checks">
-              <label class="check"><input type="checkbox" name="Ready For Consultation" value="Yes" /> <span>I am ready to discuss this project with Monica.</span></label>
-              <label class="check"><input type="checkbox" name="Interested In Deposit Booking" value="Yes" /> <span>I want the option to secure my consultation with an online deposit when available.</span></label>
-              <label class="check"><input type="checkbox" name="SMS Follow Up OK" value="Yes" /> <span>I am okay with text follow-up regarding this request.</span></label>
+              <label class="check"><input id="readyCheck" type="checkbox" name="readyCheck" value="Yes" /> <span>I am ready to discuss this project with Monica.</span></label>
+              <label class="check"><input id="depositCheck" type="checkbox" name="depositCheck" value="Yes" /> <span>I want the option to secure my consultation with an online deposit when available.</span></label>
+              <label class="check"><input id="smsCheck" type="checkbox" name="smsCheck" value="Yes" /> <span>I am okay with text follow-up regarding this request.</span></label>
             </div>
           </div>
         </div>
 
         <div class="actions">
-          <button class="btn" type="submit">Submit Consultation Request</button>
+          <button id="submitBtn" class="btn" type="submit">Submit Consultation Request</button>
           <a class="btn btn-secondary" href="/interior-design/">Return to Main Page</a>
         </div>
 
-        <div class="small-note" style="margin-top:14px;">
-          This page is set up for intake first. Stripe consultation deposit, success page, and automated confirmation flow can be added next.
+        <div id="submitError" class="error-banner">
+          Something went wrong. Please try again or contact Monica directly.
         </div>
-        <div class="small-note" style="margin-top:10px;opacity:.75;">
+
+        <div class="small-note" style="margin-top:14px;opacity:.75;">
           A 50% deposit is required to hold your consultation date. Cancellations with less than 48 hours notice are non-refundable.
         </div>
       </form>
+
+      <div id="formSuccess" class="success-box">
+        <div class="success-icon">✓</div>
+        <h2>Request Submitted</h2>
+        <p>Monica received your consultation details and will be in touch soon to discuss your project.</p>
+        <a class="btn" href="/interior-design/">Back to Main Page</a>
+      </div>
     </div>
 
     <div class="stack">
@@ -579,15 +581,6 @@
         </div>
       </div>
 
-      <div class="gold-panel">
-        <h3>Next Upgrade</h3>
-        <p>
-          This intake page is structured to convert into a Stripe consultation deposit lane next —
-          cleaner scheduling, stronger lead quality, and a more premium operator experience.
-        </p>
-        <div class="tag">Pre-Stripe Ready</div>
-      </div>
-
       <div class="card">
         <h3 class="mini-title">What Comes Next</h3>
         <div class="list">
@@ -601,7 +594,7 @@
           </div>
           <div class="item">
             <b>Step 3</b>
-            <span>Stripe deposit lane is added for secure booking.</span>
+            <span>Monica follows up to schedule your consultation.</span>
           </div>
         </div>
       </div>
@@ -617,15 +610,70 @@
   document.getElementById("year").textContent = new Date().getFullYear();
 
   (function () {
-    const form = document.getElementById("consultationForm");
+    const form    = document.getElementById("consultationForm");
+    const success = document.getElementById("formSuccess");
+    const errBanner = document.getElementById("submitError");
+    const submitBtn = document.getElementById("submitBtn");
     if (!form) return;
 
-    form.addEventListener("submit", function () {
-      if (window.gtag) {
-        gtag("event", "generate_lead", {
-          event_category: "interior_design",
-          event_label: "consultation_request"
+    function val(id) {
+      const el = document.getElementById(id);
+      return el ? el.value.trim() : "";
+    }
+    function chk(id) {
+      const el = document.getElementById(id);
+      return el ? el.checked : false;
+    }
+
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting…";
+      errBanner.style.display = "none";
+
+      const payload = {
+        name:               val("fullName"),
+        phone:              val("phone"),
+        email:              val("email"),
+        city:               val("city"),
+        project_type:       val("projectType"),
+        property_type:      val("propertyType"),
+        preferred_timeline: val("timeline"),
+        estimated_budget:   val("budget"),
+        address:            val("address"),
+        project_details:    val("details"),
+        referrer:           val("referral"),
+        photo_link:         val("photos"),
+        ready_for_consultation: chk("readyCheck"),
+        interested_in_deposit:  chk("depositCheck"),
+        sms_ok:                 chk("smsCheck"),
+      };
+
+      try {
+        const res = await fetch("/api/interior-design/consultation", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
         });
+
+        if (res.ok) {
+          form.style.display = "none";
+          success.style.display = "block";
+          if (window.gtag) {
+            gtag("event", "generate_lead", {
+              event_category: "interior_design",
+              event_label: "consultation_request",
+            });
+          }
+        } else {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Submit Consultation Request";
+          errBanner.style.display = "block";
+        }
+      } catch (err) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit Consultation Request";
+        errBanner.style.display = "block";
       }
     });
   })();
