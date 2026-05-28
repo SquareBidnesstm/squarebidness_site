@@ -201,8 +201,17 @@
     }
     .pm-hero__inner{
       max-width:1100px;margin:0 auto;padding:1.75rem 1rem 2rem;
-      display:grid;gap:1.1rem;
+      display:grid;gap:1.5rem;
+      grid-template-columns:1fr 1fr;
+      align-items:center;
     }
+    @media(max-width:760px){
+      .pm-hero__inner{grid-template-columns:1fr;}
+      .pm-hero__image{order:-1;}
+    }
+    .pm-hero__text{display:grid;gap:.85rem;}
+    .pm-hero__image{display:flex;align-items:center;justify-content:center;}
+    .pm-hero__image .pm-lockup{max-width:100%;margin:0;}
 
     .pm-badge{
       display:inline-flex;align-items:center;gap:.45rem;
@@ -366,12 +375,9 @@
       </a>
 
       <nav class="pm-nav" aria-label="Pho-Matic navigation">
-        <a href="/phomatic/" data-sb-component="nav" data-sb-action="open" data-sb-label="home" data-sb-href="/phomatic/">Home</a>
         <a href="/phomatic/portfolio/" data-sb-component="nav" data-sb-action="open" data-sb-label="portfolio" data-sb-href="/phomatic/portfolio/">Portfolio</a>
         <a href="/phomatic/about/" data-sb-component="nav" data-sb-action="open" data-sb-label="about" data-sb-href="/phomatic/about/">About</a>
-        <a href="/phomatic/book/" data-sb-component="nav" data-sb-action="open" data-sb-label="book" data-sb-href="/phomatic/book/">Book</a>
-        <a href="https://www.instagram.com/datpholife" target="_blank" rel="me noopener noreferrer"
-           data-sb-component="nav" data-sb-action="outbound" data-sb-label="instagram" data-sb-href="https://www.instagram.com/datpholife">Instagram</a>
+        <a href="/phomatic/book/" data-sb-component="nav" data-sb-action="open" data-sb-label="book" data-sb-href="/phomatic/book/" style="background:rgba(201,162,39,.18);border-color:rgba(201,162,39,.55);color:#fff;">Book Now</a>
       </nav>
     </div>
   </div>
@@ -379,34 +385,38 @@
   <!-- HERO -->
   <header class="pm-hero">
     <div class="pm-hero__inner">
-      <span class="pm-badge">Portraits · Events · Product · U.S. + Abroad</span>
 
-      <img class="pm-lockup"
-           src="/phomatic/assets/brand/phomatic-logo-lockup.png"
-           alt="Pho-Matic Photography"
-           width="520" height="180"
-           loading="eager" decoding="async" />
-
-      <h1>Clean, real-world images — built for people and brands.</h1>
-      <p>
-        Pho-Matic Photography by <strong>Gieno Smith</strong>. Based in <strong>Hammond, Louisiana</strong> and available across the United States and abroad.
-        Clients choose us for a professional, stress-free set and a creative eye that captures the shot.
-      </p>
-
-      <div class="pm-hero__meta">
-        <a class="pm-cta pm-cta--gold" href="/phomatic/book/"
-           data-sb-component="hero" data-sb-action="open" data-sb-label="book_now" data-sb-href="/phomatic/book/">Book now</a>
-        <a class="pm-cta" href="/phomatic/portfolio/"
-           data-sb-component="hero" data-sb-action="open" data-sb-label="view_portfolio" data-sb-href="/phomatic/portfolio/">View portfolio</a>
-        <a class="pm-cta" href="/phomatic/book/lookup/"
-           data-sb-component="hero" data-sb-action="open" data-sb-label="my_bookings" data-sb-href="/phomatic/book/lookup/">My Bookings</a>
+      <!-- TEXT COLUMN -->
+      <div class="pm-hero__text">
+        <span class="pm-badge">Portraits · Events · Product · U.S. + Abroad</span>
+        <h1>Clean, real-world images — built for people and brands.</h1>
+        <p>
+          Pho-Matic Photography by <strong>Gieno Smith</strong>. Based in <strong>Hammond, Louisiana</strong> and available across the United States and abroad.
+          Clients choose us for a professional, stress-free set and a creative eye that captures the shot.
+        </p>
+        <div class="pm-hero__meta">
+          <a class="pm-cta pm-cta--gold" href="/phomatic/book/"
+             data-sb-component="hero" data-sb-action="open" data-sb-label="book_now" data-sb-href="/phomatic/book/"
+             style="font-size:1rem;padding:.75rem 1.4rem;">Book Now</a>
+          <a class="pm-cta" href="/phomatic/portfolio/"
+             data-sb-component="hero" data-sb-action="open" data-sb-label="view_portfolio" data-sb-href="/phomatic/portfolio/">View Portfolio</a>
+        </div>
+        <div class="pm-proof" aria-label="Pho-Matic proof points">
+          <span class="pm-chip"><strong>Portraits</strong> that feel real</span>
+          <span class="pm-chip"><strong>Events</strong> with energy</span>
+          <span class="pm-chip"><strong>Product</strong> that sells</span>
+        </div>
       </div>
 
-      <div class="pm-proof" aria-label="Pho-Matic proof points">
-        <span class="pm-chip"><strong>Portraits</strong> that feel real</span>
-        <span class="pm-chip"><strong>Events</strong> with energy</span>
-        <span class="pm-chip"><strong>Product</strong> that sells</span>
+      <!-- IMAGE COLUMN -->
+      <div class="pm-hero__image">
+        <img class="pm-lockup"
+             src="/phomatic/assets/brand/phomatic-logo-lockup.png"
+             alt="Pho-Matic Photography"
+             width="520" height="180"
+             loading="eager" decoding="async" />
       </div>
+
     </div>
   </header>
 
@@ -505,8 +515,6 @@
         <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem;">
           <a class="pm-cta pm-cta--gold" href="/phomatic/portfolio/"
              data-sb-component="featured" data-sb-action="open" data-sb-label="open_portfolio" data-sb-href="/phomatic/portfolio/">Open Portfolio</a>
-          <a class="pm-cta" href="/phomatic/book/"
-             data-sb-component="featured" data-sb-action="open" data-sb-label="book_session" data-sb-href="/phomatic/book/">Book a session</a>
         </div>
       </div>
     </section>
@@ -568,11 +576,7 @@
 
         <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem;">
           <a class="pm-cta pm-cta--gold" href="/phomatic/book/"
-             data-sb-component="services" data-sb-action="open" data-sb-label="book" data-sb-href="/phomatic/book/">Book a session</a>
-          <a class="pm-cta" href="/phomatic/portfolio/"
-             data-sb-component="services" data-sb-action="open" data-sb-label="portfolio" data-sb-href="/phomatic/portfolio/">View portfolio</a>
-          <a class="pm-cta" href="/phomatic/services/"
-             data-sb-component="services" data-sb-action="open" data-sb-label="services" data-sb-href="/phomatic/services/">Services</a>
+             data-sb-component="services" data-sb-action="open" data-sb-label="book" data-sb-href="/phomatic/book/">Book Now</a>
         </div>
       </div>
     </section>
@@ -631,9 +635,7 @@
 
         <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem;">
           <a class="pm-cta pm-cta--gold" href="/phomatic/book/"
-             data-sb-component="rates" data-sb-action="open" data-sb-label="book" data-sb-href="/phomatic/book/">Select appointment & book</a>
-          <a class="pm-cta" href="/phomatic/portfolio/"
-             data-sb-component="rates" data-sb-action="open" data-sb-label="portfolio" data-sb-href="/phomatic/portfolio/">See work examples</a>
+             data-sb-component="rates" data-sb-action="open" data-sb-label="book" data-sb-href="/phomatic/book/">Book Now</a>
         </div>
       </div>
     </section>
@@ -669,13 +671,9 @@
 
         <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem;">
           <a class="pm-cta pm-cta--gold" href="/phomatic/book/"
-             data-sb-component="faq" data-sb-action="open" data-sb-label="book" data-sb-href="/phomatic/book/">Book a session</a>
+             data-sb-component="faq" data-sb-action="open" data-sb-label="book" data-sb-href="/phomatic/book/">Book Now</a>
           <a class="pm-cta" href="/phomatic/portfolio/"
              data-sb-component="faq" data-sb-action="open" data-sb-label="portfolio" data-sb-href="/phomatic/portfolio/">Portfolio</a>
-          <a class="pm-cta" href="https://www.facebook.com/Pho-Matic-Photography-By-Gieno-Smith" target="_blank" rel="me noopener noreferrer"
-             data-sb-component="faq" data-sb-action="outbound" data-sb-label="facebook" data-sb-href="https://www.facebook.com/Pho-Matic-Photography-By-Gieno-Smith">Facebook</a>
-          <a class="pm-cta" href="https://www.instagram.com/datpholife" target="_blank" rel="me noopener noreferrer"
-             data-sb-component="faq" data-sb-action="outbound" data-sb-label="instagram" data-sb-href="https://www.instagram.com/datpholife">Instagram</a>
         </div>
       </div>
     </section>
@@ -688,11 +686,8 @@
 
         <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem;">
           <a class="pm-cta pm-cta--gold" href="/phomatic/book/"
-             data-sb-component="final" data-sb-action="open" data-sb-label="book" data-sb-href="/phomatic/book/">Book now</a>
-          <a class="pm-cta" href="/phomatic/portfolio/"
-             data-sb-component="final" data-sb-action="open" data-sb-label="portfolio" data-sb-href="/phomatic/portfolio/">View portfolio</a>
-          <a class="pm-cta" href="/phomatic/services/"
-             data-sb-component="final" data-sb-action="open" data-sb-label="services" data-sb-href="/phomatic/services/">Services</a>
+             data-sb-component="final" data-sb-action="open" data-sb-label="book" data-sb-href="/phomatic/book/"
+             style="font-size:1rem;padding:.75rem 1.4rem;">Book Now</a>
         </div>
       </div>
     </section>
@@ -709,15 +704,26 @@
         Photographer in <strong>Hammond, Louisiana</strong> — available <strong>U.S. + abroad</strong>.
       </p>
 
+      <!-- Socials -->
+      <div style="margin:1rem 0 0;display:flex;justify-content:center;gap:.65rem;flex-wrap:wrap;">
+        <a href="https://www.instagram.com/datpholife" target="_blank" rel="me noopener noreferrer"
+           data-sb-component="footer" data-sb-action="outbound" data-sb-label="instagram"
+           style="display:inline-flex;align-items:center;gap:.4rem;background:rgba(201,162,39,.1);border:1px solid rgba(201,162,39,.4);border-radius:999px;padding:.5rem 1rem;color:#fff;text-decoration:none;font-weight:950;font-size:.82rem;">
+          Instagram · @datpholife
+        </a>
+        <a href="https://www.facebook.com/Pho-Matic-Photography-By-Gieno-Smith" target="_blank" rel="me noopener noreferrer"
+           data-sb-component="footer" data-sb-action="outbound" data-sb-label="facebook"
+           style="display:inline-flex;align-items:center;gap:.4rem;background:rgba(201,162,39,.1);border:1px solid rgba(201,162,39,.4);border-radius:999px;padding:.5rem 1rem;color:#fff;text-decoration:none;font-weight:950;font-size:.82rem;">
+          Facebook
+        </a>
+      </div>
+      <!-- Nav links -->
       <p style="margin:.75rem 0 0;display:flex;justify-content:center;gap:.6rem;flex-wrap:wrap;">
         <a class="pm-linkpill" href="/phomatic/" data-sb-component="footer" data-sb-action="open" data-sb-label="home" data-sb-href="/phomatic/">Home</a>
         <a class="pm-linkpill" href="/phomatic/portfolio/" data-sb-component="footer" data-sb-action="open" data-sb-label="portfolio" data-sb-href="/phomatic/portfolio/">Portfolio</a>
         <a class="pm-linkpill" href="/phomatic/about/" data-sb-component="footer" data-sb-action="open" data-sb-label="about" data-sb-href="/phomatic/about/">About</a>
         <a class="pm-linkpill" href="/phomatic/book/" data-sb-component="footer" data-sb-action="open" data-sb-label="book" data-sb-href="/phomatic/book/">Book</a>
-        <a class="pm-linkpill" href="https://www.instagram.com/datpholife" target="_blank" rel="me noopener noreferrer"
-           data-sb-component="footer" data-sb-action="outbound" data-sb-label="instagram" data-sb-href="https://www.instagram.com/datpholife">@datpholife</a>
-        <a class="pm-linkpill" href="https://www.facebook.com/Pho-Matic-Photography-By-Gieno-Smith" target="_blank" rel="me noopener noreferrer"
-           data-sb-component="footer" data-sb-action="outbound" data-sb-label="facebook" data-sb-href="https://www.facebook.com/Pho-Matic-Photography-By-Gieno-Smith">Facebook</a>
+        <a class="pm-linkpill" href="/phomatic/book/lookup/" data-sb-component="footer" data-sb-action="open" data-sb-label="my_bookings" data-sb-href="/phomatic/book/lookup/">My Bookings</a>
       </p>
 
       <p style="margin:.85rem 0 0;color:#6b7280;font-size:.85rem;line-height:1.5;">
