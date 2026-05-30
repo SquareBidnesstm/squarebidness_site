@@ -98,14 +98,16 @@
 
     function getEmail(){ return ($("email").value||"").trim().toLowerCase(); }
 
-    function row(L){
-      const receipt = `/lab/fleetlog/receipt/?id=${encodeURIComponent(L.id)}`;
+    function row(L, email){
+      // form fields are stored under L.raw — not at the top level
+      const raw = L.raw || {};
+      const receipt = `/lab/fleetlog/receipt/?id=${encodeURIComponent(L.id)}&email=${encodeURIComponent(email)}`;
       return `
         <tr>
-          <td>${L.date || "—"}</td>
-          <td>${L.route || "—"}</td>
-          <td>${(L.start||"—")} → ${(L.end||"—")}</td>
-          <td>${L.miles || "—"}</td>
+          <td>${raw.date || L.createdAt?.slice(0,10) || "—"}</td>
+          <td>${raw.route || "—"}</td>
+          <td>${(raw.start||"—")} → ${(raw.end||"—")}</td>
+          <td>${raw.miles || "—"}</td>
           <td><a href="${receipt}" target="_blank" rel="noopener">Open</a></td>
         </tr>
       `;
@@ -163,7 +165,7 @@
 
         setMsg("");
         show("tbl", true);
-        $("rows").innerHTML = logs.map(row).join("");
+        $("rows").innerHTML = logs.map(L => row(L, email)).join("");
         window.sbTrack?.("sb_page_ready",{brand:"sb-fleetlog",page:location.pathname,component:"history",action:"loaded"});
       }catch(e){
         setMsg("Error: " + e.message, true);

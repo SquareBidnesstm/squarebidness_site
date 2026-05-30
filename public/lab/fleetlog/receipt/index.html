@@ -52,7 +52,8 @@
 
   <script>
     const qp = new URLSearchParams(location.search);
-    const id = qp.get("id") || "";
+    const id    = qp.get("id")    || "";
+    const email = qp.get("email") || (localStorage.getItem("fleetlog_email") || "");
     const el = document.getElementById("content");
 
     function item(k, v){
@@ -61,26 +62,37 @@
 
     async function load(){
       if(!id){ el.innerHTML = `<div class="muted">Missing receipt id.</div>`; return; }
+      if(!email || !email.includes("@")){ el.innerHTML = `<div class="muted">Missing driver email. <a href="/lab/fleetlog/">Return to app</a></div>`; return; }
 
-      const r = await fetch(`/api/fleetlog/logs/get?id=${encodeURIComponent(id)}`);
-      const j = await r.json();
+      el.innerHTML = `<div class="muted">Loading…</div>`;
 
-      if(!j.ok){ el.innerHTML = `<div class="muted">Receipt not found.</div>`; return; }
+      try{
+        const r = await fetch(`/api/fleetlog/logs/get?id=${encodeURIComponent(id)}&email=${encodeURIComponent(email)}`);
+        const j = await r.json();
 
-      const L = j.log || {};
-      el.innerHTML = [
-        item("Log ID", L.id),
-        item("Date", L.date),
-        item("Truck / Unit", L.truckId),
-        item("Route", L.route),
-        item("Start", L.start),
-        item("End", L.end),
-        item("Miles", L.miles),
-        item("Notes", L.notes),
-        item("Created", L.createdAt)
-      ].join("");
+        if(!j.ok){ el.innerHTML = `<div class="muted">Receipt not found or access denied.</div>`; return; }
 
-      window.sbTrack?.("sb_page_ready",{brand:"sb-fleetlog",page:location.pathname,component:"receipt",action:"loaded"});
+        const L = j.log || {};
+        const raw = L.raw || {};  // form fields are stored under .raw
+
+        el.innerHTML = [
+          item("Log ID",      L.id),
+          item("Created",     L.createdAt),
+          item("Date",        raw.date),
+          item("Truck / Unit",raw.truckId),
+          item("Route",       raw.route),
+          item("Start",       raw.start),
+          item("End",         raw.end),
+          item("Miles",       raw.miles),
+          item("Notes",       raw.notes),
+          item("Driver",      L.email),
+          item("Plan",        L.tier ? String(L.tier).toUpperCase() : null)
+        ].join("");
+
+        window.sbTrack?.("sb_page_ready",{brand:"sb-fleetlog",page:location.pathname,component:"receipt",action:"loaded"});
+      }catch(e){
+        el.innerHTML = `<div class="muted">Error loading receipt: ${e.message}</div>`;
+      }
     }
 
     load();
