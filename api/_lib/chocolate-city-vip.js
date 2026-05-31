@@ -13,19 +13,19 @@ export const VIP_PACKAGES = {
   section_one: {
     name: "The Gold Section",
     fullPrice: 300,
-    price: 300,
+    price: 150,
     description: "6 bands, 10 Vegas Bomb shots, 4 waters, VIP parking, no wait in line."
   },
   section_two: {
     name: "The Premium Section",
     fullPrice: 400,
-    price: 400,
+    price: 200,
     description: "6 bands, 10 Vegas Bomb shots, 4 waters, VIP parking, no wait in line, 1 premium bottle of choice."
   },
   city_section: {
     name: "The City Section",
     fullPrice: 650,
-    price: 650,
+    price: 325,
     description: "10 bands, 10 Vegas Bomb shots, 4 waters, 2 premium bottles, 5-beer bucket, hurricane bottle, VIP parking, no wait in line."
   }
 };
