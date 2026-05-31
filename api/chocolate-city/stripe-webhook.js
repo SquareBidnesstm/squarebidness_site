@@ -154,7 +154,7 @@ export default async function handler(req, res) {
           eventLabel: getVipEventLabel(eventDate),
           fullPrice: selectedPackage.fullPrice,
           deposit: selectedPackage.price,
-          remainingBalance: 0,
+          remainingBalance: Math.max(0, selectedPackage.fullPrice - selectedPackage.price),
           paymentStatus: session.payment_status || "paid",
           holdId: holdMatches ? holdId : "",
           holdSlot: holdMatches ? holdSlot : "",
