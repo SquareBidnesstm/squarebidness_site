@@ -63,6 +63,15 @@ function diffMinutes(startIso, endIso) {
   return Math.max(0, Math.round(ms / 60000));
 }
 
+function breakMinutesForShift(shift, fallbackEndIso = nowIso()) {
+  return (Array.isArray(shift?.breaks) ? shift.breaks : []).reduce((sum, item) => {
+    const startedAt = item?.startedAt;
+    const endedAt = item?.endedAt || fallbackEndIso;
+    if (!startedAt || !endedAt) return sum;
+    return sum + diffMinutes(startedAt, endedAt);
+  }, 0);
+}
+
 function minutesToHours(minutes) {
   return Math.round((Number(minutes || 0) / 60) * 100) / 100;
 }
@@ -388,10 +397,15 @@ function summarizeShifts(shifts, employees = []) {
 function summarizeLabor(shifts, active, employees = [], timestamp = nowIso()) {
   const activeRows = (active || []).map(shift => {
     const clockInAt = shift.clockInAt;
+    const totalMinutes = diffMinutes(clockInAt, timestamp);
+    const breakMinutes = breakMinutesForShift(shift, timestamp);
+    const paidMinutes = Math.max(0, totalMinutes - breakMinutes);
     return {
       ...shift,
-      durationMinutes: diffMinutes(clockInAt, timestamp),
-      durationHours: minutesToHours(diffMinutes(clockInAt, timestamp)),
+      durationMinutes: paidMinutes,
+      durationHours: minutesToHours(paidMinutes),
+      totalMinutes,
+      breakMinutes,
       dateCentral: getCentralDateKey(clockInAt)
     };
   });
@@ -400,7 +414,9 @@ function summarizeLabor(shifts, active, employees = [], timestamp = nowIso()) {
 }
 
 function buildShiftUpdate(shift, clockInAt, clockOutAt) {
-  const minutes = diffMinutes(clockInAt, clockOutAt);
+  const totalMinutes = diffMinutes(clockInAt, clockOutAt);
+  const breakMinutes = breakMinutesForShift(shift, clockOutAt);
+  const minutes = Math.max(0, totalMinutes - breakMinutes);
   const hourlyRate = normalizePayRate(shift?.hourlyRate) || 0;
 
   return {
@@ -409,6 +425,8 @@ function buildShiftUpdate(shift, clockInAt, clockOutAt) {
     clockOutAt,
     durationMinutes: minutes,
     durationHours: minutesToHours(minutes),
+    totalMinutes,
+    breakMinutes,
     hourlyRate,
     laborDollars: Math.round(((minutes / 60) * hourlyRate) * 100) / 100,
     dateCentral: getCentralDateKey(clockInAt)
@@ -726,6 +744,10 @@ export default async function handler(req, res) {
         return send(res, 409, { ok: false, error: "Not clocked in." });
       }
 
+      if (current.breakStartedAt) {
+        return send(res, 409, { ok: false, error: "End break before clocking out." });
+      }
+
       const timestamp = nowIso();
       const completed = {
         ...buildShiftUpdate(current, current.clockInAt, timestamp),
@@ -759,6 +781,133 @@ export default async function handler(req, res) {
       });
     }
 
+    if (action === "start_break") {
+      const pin = String(body.pin || "").trim();
+      const device = normalizeDevice(body.device);
+
+      if (!pin) {
+        return send(res, 400, { ok: false, error: "Employee number required." });
+      }
+
+      const employees = await getEmployees();
+      const employee = findEmployeeByPin(employees, pin);
+      const name = normalizeEmployeeName(employee?.name);
+
+      if (!employee || String(employee.pin || "") !== pin) {
+        return send(res, 401, { ok: false, error: "Employee number not found." });
+      }
+
+      const activeMap = await getActiveMap();
+      const current = activeMap[name];
+
+      if (!current) {
+        return send(res, 409, { ok: false, error: "Clock in before starting break." });
+      }
+
+      if (current.breakStartedAt) {
+        return send(res, 409, { ok: false, error: "Already on break." });
+      }
+
+      const timestamp = nowIso();
+      activeMap[name] = {
+        ...current,
+        breakStartedAt: timestamp,
+        breakDurationMinutes: 30,
+        breaks: [
+          ...(Array.isArray(current.breaks) ? current.breaks : []),
+          { startedAt: timestamp, durationMinutes: 30, device }
+        ]
+      };
+
+      await setActiveMap(activeMap);
+      await pushPunch({ name, action: "break_start", timestamp, device });
+      await logTimeclockEvent("break_start", current.id, {
+        employeeName: name,
+        timestamp,
+        device,
+        durationMinutes: 30,
+      });
+
+      return send(res, 200, {
+        ...(await buildPublicState()),
+        message: `${name} started 30 minute break.`
+      });
+    }
+
+    if (action === "end_break") {
+      const pin = String(body.pin || "").trim();
+      const device = normalizeDevice(body.device);
+      const managerPin = String(body.managerPin || "").trim();
+
+      if (!pin) {
+        return send(res, 400, { ok: false, error: "Employee number required." });
+      }
+
+      const employees = await getEmployees();
+      const employee = findEmployeeByPin(employees, pin);
+      const name = normalizeEmployeeName(employee?.name);
+
+      if (!employee || String(employee.pin || "") !== pin) {
+        return send(res, 401, { ok: false, error: "Employee number not found." });
+      }
+
+      const activeMap = await getActiveMap();
+      const current = activeMap[name];
+
+      if (!current) {
+        return send(res, 409, { ok: false, error: "Employee is not clocked in." });
+      }
+
+      if (!current.breakStartedAt) {
+        return send(res, 409, { ok: false, error: "Employee is not on break." });
+      }
+
+      const timestamp = nowIso();
+      const breakMinutes = diffMinutes(current.breakStartedAt, timestamp);
+
+      if (breakMinutes < 30) {
+        requireManager(managerPin);
+      }
+
+      const breaks = Array.isArray(current.breaks) ? [...current.breaks] : [];
+      const lastBreak = breaks[breaks.length - 1] || { startedAt: current.breakStartedAt, durationMinutes: 30 };
+      const completedBreak = {
+        ...lastBreak,
+        endedAt: timestamp,
+        minutes: breakMinutes,
+        earlyReturnApproved: breakMinutes < 30,
+        device
+      };
+      if (breaks.length) {
+        breaks[breaks.length - 1] = completedBreak;
+      } else {
+        breaks.push(completedBreak);
+      }
+
+      activeMap[name] = {
+        ...current,
+        breaks,
+        lastBreakEndedAt: timestamp
+      };
+      delete activeMap[name].breakStartedAt;
+      delete activeMap[name].breakDurationMinutes;
+
+      await setActiveMap(activeMap);
+      await pushPunch({ name, action: "break_end", timestamp, device });
+      await logTimeclockEvent("break_end", current.id, {
+        employeeName: name,
+        timestamp,
+        device,
+        breakMinutes,
+        earlyReturnApproved: breakMinutes < 30,
+      });
+
+      return send(res, 200, {
+        ...(await buildPublicState()),
+        message: `${name} ended break.`
+      });
+    }
+
     if (action === "lookup_employee") {
       const pin = String(body.pin || "").trim();
       if (!pin) {
@@ -779,7 +928,9 @@ export default async function handler(req, res) {
         ok: true,
         employee: {
           name,
-          clockedIn: !!activeMap[name]
+          clockedIn: !!activeMap[name],
+          onBreak: !!activeMap[name]?.breakStartedAt,
+          breakStartedAt: activeMap[name]?.breakStartedAt || null
         }
       });
     }

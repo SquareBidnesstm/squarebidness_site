@@ -242,6 +242,16 @@
       color:#fff;
     }
 
+    .btn-break {
+      background:linear-gradient(180deg,#f59e0b,#d97706);
+      color:#111827;
+    }
+
+    .btn-return {
+      background:linear-gradient(180deg,#38bdf8,#0284c7);
+      color:#fff;
+    }
+
     .status-box {
       margin-top:16px;
       padding:14px 16px;
@@ -339,6 +349,12 @@
       background:rgba(239,68,68,.12);
       color:#fca5a5;
       border:1px solid rgba(239,68,68,.28);
+    }
+
+    .tag.break {
+      background:rgba(245,158,11,.14);
+      color:#fde68a;
+      border:1px solid rgba(245,158,11,.3);
     }
 
     .empty {
@@ -462,6 +478,8 @@
             <div class="actions">
               <button class="btn-in" id="clockInBtn">Clock In</button>
               <button class="btn-out" id="clockOutBtn">Clock Out</button>
+              <button class="btn-break" id="startBreakBtn">Start 30 Min Break</button>
+              <button class="btn-return" id="endBreakBtn">End Break</button>
             </div>
 
             <div class="status-box" id="statusBox">
@@ -524,6 +542,8 @@
       employeeMatch: document.getElementById("employeeMatch"),
       clockIn: document.getElementById("clockInBtn"),
       clockOut: document.getElementById("clockOutBtn"),
+      startBreak: document.getElementById("startBreakBtn"),
+      endBreak: document.getElementById("endBreakBtn"),
       status: document.getElementById("statusBox"),
       liveList: document.getElementById("liveList"),
       recentList: document.getElementById("recentList"),
@@ -617,16 +637,32 @@
       }
 
       els.liveList.innerHTML = rows.map(item => {
+        const onBreak = !!item.breakStartedAt;
+        const detail = onBreak
+          ? `On break since ${formatCentralTime(item.breakStartedAt)}`
+          : `Clocked in ${formatCentralTime(item.clockInAt)}`;
         return `
           <div class="row">
             <div>
               <strong>${escapeHtml(item.name)}</strong>
-              <small>Clocked in ${escapeHtml(formatCentralTime(item.clockInAt))}</small>
+              <small>${escapeHtml(detail)}</small>
             </div>
-            <div class="tag in">Clocked In</div>
+            <div class="tag ${onBreak ? "break" : "in"}">${onBreak ? "On Break" : "Clocked In"}</div>
           </div>
         `;
       }).join("");
+    }
+
+    function activityMeta(action) {
+      const labels = {
+        clock_in: ["in", "Clock In"],
+        manager_clock_in: ["in", "Clock In"],
+        clock_out: ["out", "Clock Out"],
+        break_start: ["break", "Break Start"],
+        break_end: ["in", "Break End"],
+        manual_shift_added: ["out", "Manual Shift"]
+      };
+      return labels[action] || ["out", "Saved"];
     }
 
     function renderRecent(recent) {
@@ -637,14 +673,14 @@
       }
 
       els.recentList.innerHTML = rows.map(item => {
-        const isIn = item.action === "clock_in";
+        const [tagClass, label] = activityMeta(item.action);
         return `
           <div class="row">
             <div>
               <strong>${escapeHtml(item.name)}</strong>
               <small>${escapeHtml(formatCentralTime(item.timestamp))} • ${escapeHtml(item.device || "device")}</small>
             </div>
-            <div class="tag ${isIn ? "in" : "out"}">${isIn ? "Clock In" : "Clock Out"}</div>
+            <div class="tag ${tagClass}">${label}</div>
           </div>
         `;
       }).join("");
@@ -694,8 +730,11 @@
 
         matchedEmployee = data.employee || null;
         if (matchedEmployee?.name) {
+          const employeeState = matchedEmployee.onBreak
+            ? " is on break"
+            : (matchedEmployee.clockedIn ? " is clocked in" : "");
           setEmployeeMatch(
-            `${matchedEmployee.name}${matchedEmployee.clockedIn ? " is clocked in" : ""}`,
+            `${matchedEmployee.name}${employeeState}`,
             "found"
           );
           return matchedEmployee;
@@ -727,8 +766,8 @@
         return;
       }
 
-      els.clockIn.disabled = true;
-      els.clockOut.disabled = true;
+      const actionButtons = [els.clockIn, els.clockOut, els.startBreak, els.endBreak];
+      actionButtons.forEach(button => { button.disabled = true; });
 
       try {
         const employee = matchedEmployee?.name ? matchedEmployee : await lookupEmployee(pin);
@@ -737,12 +776,28 @@
           return;
         }
 
+        let managerPin = "";
+        if (action === "end_break" && employee.breakStartedAt) {
+          const startedMs = new Date(employee.breakStartedAt).getTime();
+          const elapsedMinutes = Number.isFinite(startedMs)
+            ? Math.floor((Date.now() - startedMs) / 60000)
+            : 0;
+          if (elapsedMinutes < 30) {
+            managerPin = window.prompt(`Break is only ${elapsedMinutes} minutes. Manager PIN required to return early.`) || "";
+            if (!managerPin.trim()) {
+              setStatus("Manager PIN required to end break before 30 minutes.", "warn");
+              return;
+            }
+          }
+        }
+
         const data = await fetchJson(API_URL, {
           method: "POST",
           body: JSON.stringify({
             action,
             pin,
-            device
+            device,
+            managerPin
           })
         });
 
@@ -764,13 +819,14 @@
       } catch (err) {
         setStatus(err.message || "Unable to save punch.", "bad");
       } finally {
-        els.clockIn.disabled = false;
-        els.clockOut.disabled = false;
+        actionButtons.forEach(button => { button.disabled = false; });
       }
     }
 
     els.clockIn.addEventListener("click", () => submitPunch("clock_in"));
     els.clockOut.addEventListener("click", () => submitPunch("clock_out"));
+    els.startBreak.addEventListener("click", () => submitPunch("start_break"));
+    els.endBreak.addEventListener("click", () => submitPunch("end_break"));
     els.pin.addEventListener("input", queueEmployeeLookup);
     els.pin.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
