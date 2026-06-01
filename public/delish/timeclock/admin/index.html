@@ -651,7 +651,25 @@
     <div class="stat-sub">Order count ÷ total labor hours</div>
   </div>
 </section>
-</div>
+      </div>
+
+      <section class="section card">
+        <div class="card__body">
+          <h2>Manual Time Entry</h2>
+          <p class="lead">Use this when an employee forgot to clock in or out.</p>
+          <div class="employee-grid">
+            <select id="manualEmployeeSelect">
+              <option value="">Select employee</option>
+            </select>
+            <input id="manualClockInAt" type="datetime-local" aria-label="Manual clock in time" />
+            <input id="manualClockOutAt" type="datetime-local" aria-label="Manual clock out time" />
+            <button id="addManualShiftBtn" class="success">Add Manual Shift</button>
+          </div>
+          <div class="helper">
+            Manual shifts are marked manager-adjusted and included in daily totals, payroll week totals, and CSV exports.
+          </div>
+        </div>
+      </section>
 
       <div class="split">
         <section class="card">
@@ -832,6 +850,10 @@
       addEmployeeBtn: document.getElementById("addEmployeeBtn"),
       deleteEmployeeSelect: document.getElementById("deleteEmployeeSelect"),
       deleteEmployeeBtn: document.getElementById("deleteEmployeeBtn"),
+      manualEmployeeSelect: document.getElementById("manualEmployeeSelect"),
+      manualClockInAt: document.getElementById("manualClockInAt"),
+      manualClockOutAt: document.getElementById("manualClockOutAt"),
+      addManualShiftBtn: document.getElementById("addManualShiftBtn"),
       payrollCsvBtn: document.getElementById("payrollCsvBtn")
     };
 
@@ -954,11 +976,27 @@
         if (sales !== null) els.sales.value = sales;
       } catch {}
     }
+
+    function defaultShiftValue(hour, minute = 0) {
+      const date = els.date.value || centralDateInputValue();
+      return `${date}T${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+    }
+
+    function setDefaultManualShiftTimes(force = false) {
+      if (force || !els.manualClockInAt.value) els.manualClockInAt.value = defaultShiftValue(8);
+      if (force || !els.manualClockOutAt.value) els.manualClockOutAt.value = defaultShiftValue(16);
+    }
+
     function renderEmployeeOptions(employees) {
       const list = employees || [];
+      const options = list.map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join("");
       els.deleteEmployeeSelect.innerHTML = `
         <option value="">Select employee to remove</option>
-        ${list.map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join("")}
+        ${options}
+      `;
+      els.manualEmployeeSelect.innerHTML = `
+        <option value="">Select employee</option>
+        ${options}
       `;
     }
 
@@ -1451,6 +1489,42 @@ if (activeCount >= 4) {
       }
     }
 
+    async function addManualShift() {
+      const managerPin = getManagerPin();
+      const name = (els.manualEmployeeSelect.value || "").trim();
+      const clockInAt = toIsoFromLocal(els.manualClockInAt.value || "");
+      const clockOutAt = toIsoFromLocal(els.manualClockOutAt.value || "");
+
+      if (!managerPin) return setStatus("Manager PIN required.", "warn");
+      if (!name) return setStatus("Select employee for manual shift.", "warn");
+      if (!clockInAt || !clockOutAt) return setStatus("Enter clock in and clock out times.", "warn");
+      if (new Date(clockOutAt).getTime() <= new Date(clockInAt).getTime()) {
+        return setStatus("Clock out must be after clock in.", "warn");
+      }
+
+      try {
+        await fetchJson(API_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "add_manual_shift",
+            managerPin,
+            name,
+            clockInAt,
+            clockOutAt,
+            date: els.date.value,
+            device: "Time Clock Admin"
+          })
+        });
+
+        selectedPayrollEmployee = name;
+        setStatus(`Manual shift added for ${name}.`, "good");
+        setDefaultManualShiftTimes(true);
+        await loadAdmin();
+      } catch (err) {
+        setStatus(err.message || "Unable to add manual shift.", "bad");
+      }
+    }
+
     async function saveShift(id) {
       const managerPin = getManagerPin();
       if (!managerPin) return setStatus("Manager PIN required.", "warn");
@@ -1576,6 +1650,7 @@ if (activeCount >= 4) {
     els.loadBtn.addEventListener("click", loadAdmin);
     els.addEmployeeBtn.addEventListener("click", addEmployee);
     els.deleteEmployeeBtn.addEventListener("click", deleteEmployee);
+    els.addManualShiftBtn.addEventListener("click", addManualShift);
     els.payrollCsvBtn.addEventListener("click", async () => {
       await exportCsv("payroll_week");
     });
@@ -1650,6 +1725,8 @@ if (activeCount >= 4) {
     });
     restoreLocalControls();
     els.date.value = centralDateInputValue();
+    setDefaultManualShiftTimes(true);
+    els.date.addEventListener("change", () => setDefaultManualShiftTimes(true));
 
     setInterval(() => {
       els.now.textContent = centralNowLabel();

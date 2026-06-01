@@ -852,6 +852,65 @@ export default async function handler(req, res) {
       return send(res, 200, await buildState());
     }
 
+    if (action === "add_manual_shift") {
+      requireManager(body.managerPin);
+
+      const name = normalizeEmployeeName(body.name);
+      const clockInAt = String(body.clockInAt || "").trim();
+      const clockOutAt = String(body.clockOutAt || "").trim();
+      const device = normalizeDevice(body.device || "manager-manual-entry");
+
+      if (!name || !clockInAt || !clockOutAt) {
+        return send(res, 400, { ok: false, error: "Employee, clock in, and clock out are required." });
+      }
+
+      const clockInMs = new Date(clockInAt).getTime();
+      const clockOutMs = new Date(clockOutAt).getTime();
+
+      if (!Number.isFinite(clockInMs) || !Number.isFinite(clockOutMs)) {
+        return send(res, 400, { ok: false, error: "Clock in or clock out time is invalid." });
+      }
+
+      if (clockOutMs <= clockInMs) {
+        return send(res, 400, { ok: false, error: "Clock out must be after clock in." });
+      }
+
+      const employees = await getEmployees();
+      const employee = findEmployeeByName(employees, name);
+
+      if (!employee) {
+        return send(res, 404, { ok: false, error: "Employee not found." });
+      }
+
+      const employeeRecord = normalizeEmployeeRecord(employee);
+      const completed = {
+        ...buildShiftUpdate({
+          id: `${shiftId(name, clockInAt)}_manual`,
+          name,
+          hourlyRate: employeeRecord.hourlyRate,
+          clockInDevice: device
+        }, clockInAt, clockOutAt),
+        clockOutDevice: device,
+        adjustedByManager: true,
+        manualEntry: true
+      };
+
+      await pushPunch({ name, action: "manual_shift_added", timestamp: clockOutAt, device });
+      await pushCompletedShift(completed);
+      await logTimeclockEvent("manual_shift_added", completed.id, {
+        shift: completed,
+        employeeName: name,
+        clockInAt,
+        clockOutAt,
+        device,
+      });
+
+      return send(res, 200, {
+        ...(await buildState(String(body.date || "").trim())),
+        message: `Manual shift added for ${name}.`
+      });
+    }
+
     if (action === "force_clock_out") {
       requireManager(body.managerPin);
 
