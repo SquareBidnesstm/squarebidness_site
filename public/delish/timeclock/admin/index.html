@@ -721,7 +721,10 @@
 
       <section class="section">
         <h2>Payroll Week Totals</h2>
-        <p class="lead" id="payrollWeekLabel">Tuesday-through-Monday payroll totals will show after admin loads.</p>
+        <p class="lead" id="payrollWeekLabel">Monday-through-Sunday payroll totals will show after admin loads.</p>
+        <div class="toolbar">
+          <button id="turnInPayrollBtn" class="success">Turn In Payroll Week</button>
+        </div>
         <div class="table-wrap">
           <table>
             <thead>
@@ -791,7 +794,7 @@
 
       <section class="section">
         <h2>Payroll Turn-Ins</h2>
-        <p class="lead">Every Monday, when the last employee clocks out, the Tuesday-through-Monday payroll week is marked turned in for Tuesday payday.</p>
+        <p class="lead">Payroll weeks run Monday through Sunday. Time is turned in Sunday for Tuesday payday, either with the button above or after the last Sunday clock-out.</p>
         <div class="table-wrap">
           <table>
             <thead>
@@ -856,6 +859,7 @@
       manualClockOutAt: document.getElementById("manualClockOutAt"),
       managerClockInBtn: document.getElementById("managerClockInBtn"),
       addManualShiftBtn: document.getElementById("addManualShiftBtn"),
+      turnInPayrollBtn: document.getElementById("turnInPayrollBtn"),
       payrollCsvBtn: document.getElementById("payrollCsvBtn")
     };
 
@@ -1556,6 +1560,31 @@ if (activeCount >= 4) {
       }
     }
 
+    async function turnInPayrollWeek() {
+      const managerPin = getManagerPin();
+      if (!managerPin) return setStatus("Manager PIN required to turn in payroll.", "warn");
+
+      const ok = window.confirm("Turn in this Monday-through-Sunday payroll week for Tuesday payday?");
+      if (!ok) return;
+
+      try {
+        const data = await fetchJson(API_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "turn_in_payroll",
+            managerPin,
+            date: els.date.value
+          })
+        });
+
+        currentData = data;
+        setStatus(data.message || "Payroll week turned in.", "good");
+        await loadAdmin();
+      } catch (err) {
+        setStatus(err.message || "Unable to turn in payroll week.", "bad");
+      }
+    }
+
     async function saveShift(id) {
       const managerPin = getManagerPin();
       if (!managerPin) return setStatus("Manager PIN required.", "warn");
@@ -1683,6 +1712,7 @@ if (activeCount >= 4) {
     els.deleteEmployeeBtn.addEventListener("click", deleteEmployee);
     els.managerClockInBtn.addEventListener("click", managerClockIn);
     els.addManualShiftBtn.addEventListener("click", addManualShift);
+    els.turnInPayrollBtn.addEventListener("click", turnInPayrollWeek);
     els.payrollCsvBtn.addEventListener("click", async () => {
       await exportCsv("payroll_week");
     });

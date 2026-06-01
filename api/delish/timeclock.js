@@ -114,14 +114,14 @@ function getPayrollPeriodForDate(dateKey = getCentralDateKey(nowIso())) {
   const [year, month, day] = cleanDateKey.split("-").map(Number);
   const selected = new Date(Date.UTC(year, month - 1, day));
   const dayOfWeek = selected.getUTCDay();
-  const daysSinceTuesday = (dayOfWeek - 2 + 7) % 7;
-  const periodStart = addDaysToDateKey(cleanDateKey, -daysSinceTuesday);
+  const daysSinceMonday = (dayOfWeek - 1 + 7) % 7;
+  const periodStart = addDaysToDateKey(cleanDateKey, -daysSinceMonday);
   const periodEnd = addDaysToDateKey(periodStart, 6);
 
   return {
     periodStart,
     periodEnd,
-    payDate: addDaysToDateKey(periodEnd, 1)
+    payDate: addDaysToDateKey(periodEnd, 2)
   };
 }
 
@@ -419,10 +419,14 @@ async function maybeTurnInPayroll(timestamp, activeMap) {
   if (Object.keys(activeMap || {}).length > 0) return null;
 
   const { dateKey, weekday } = getCentralDateParts(timestamp);
-  if (weekday !== "monday") return null;
+  if (weekday !== "sunday") return null;
 
-  const periodEnd = dateKey;
-  const periodStart = addDaysToDateKey(periodEnd, -6);
+  return turnInPayrollPeriod(getPayrollPeriodForDate(dateKey), timestamp, "last_sunday_clock_out");
+}
+
+async function turnInPayrollPeriod(period, timestamp = nowIso(), trigger = "manager_turn_in") {
+  const periodStart = period.periodStart;
+  const periodEnd = period.periodEnd;
   const turnIns = await getPayrollTurnIns();
 
   if (turnIns[periodEnd]) return turnIns[periodEnd];
@@ -435,11 +439,11 @@ async function maybeTurnInPayroll(timestamp, activeMap) {
   const turnIn = {
     id: `payroll_${periodEnd}`,
     status: "turned_in",
-    payDate: addDaysToDateKey(periodEnd, 1),
+    payDate: addDaysToDateKey(periodEnd, 2),
     periodStart,
     periodEnd,
     turnedInAt: timestamp,
-    trigger: "last_monday_clock_out",
+    trigger,
     totalHours: summary.totalHours,
     totalMinutes: summary.totalMinutes,
     totalLaborDollars: summary.totalLaborDollars,
@@ -612,6 +616,31 @@ export default async function handler(req, res) {
 
     if (action === "export_csv") {
       return sendCsv(req, res, body);
+    }
+
+    if (action === "turn_in_payroll") {
+      requireManager(body.managerPin);
+
+      const date = String(body.date || "").trim() || getCentralDateKey(nowIso());
+      const timestamp = nowIso();
+      const payrollTurnIn = await turnInPayrollPeriod(
+        getPayrollPeriodForDate(date),
+        timestamp,
+        "manager_turn_in"
+      );
+
+      if (!payrollTurnIn) {
+        return send(res, 400, { ok: false, error: "No completed shifts found for this payroll week." });
+      }
+
+      await logTimeclockEvent("payroll_turned_in", payrollTurnIn.id, {
+        payrollTurnIn,
+      });
+
+      return send(res, 200, {
+        ...(await buildState(date)),
+        message: `Payroll week ${payrollTurnIn.periodStart} to ${payrollTurnIn.periodEnd} turned in.`
+      });
     }
 
     if (action === "clock_in") {
