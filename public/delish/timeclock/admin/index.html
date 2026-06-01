@@ -663,10 +663,11 @@
             </select>
             <input id="manualClockInAt" type="datetime-local" aria-label="Manual clock in time" />
             <input id="manualClockOutAt" type="datetime-local" aria-label="Manual clock out time" />
+            <button id="managerClockInBtn" class="primary">Clock In Only</button>
             <button id="addManualShiftBtn" class="success">Add Manual Shift</button>
           </div>
           <div class="helper">
-            Manual shifts are marked manager-adjusted and included in daily totals, payroll week totals, and CSV exports.
+            Clock In Only leaves the employee active so they can clock out themselves. Add Manual Shift creates a completed shift.
           </div>
         </div>
       </section>
@@ -853,6 +854,7 @@
       manualEmployeeSelect: document.getElementById("manualEmployeeSelect"),
       manualClockInAt: document.getElementById("manualClockInAt"),
       manualClockOutAt: document.getElementById("manualClockOutAt"),
+      managerClockInBtn: document.getElementById("managerClockInBtn"),
       addManualShiftBtn: document.getElementById("addManualShiftBtn"),
       payrollCsvBtn: document.getElementById("payrollCsvBtn")
     };
@@ -1525,6 +1527,35 @@ if (activeCount >= 4) {
       }
     }
 
+    async function managerClockIn() {
+      const managerPin = getManagerPin();
+      const name = (els.manualEmployeeSelect.value || "").trim();
+      const clockInAt = toIsoFromLocal(els.manualClockInAt.value || "");
+
+      if (!managerPin) return setStatus("Manager PIN required.", "warn");
+      if (!name) return setStatus("Select employee to clock in.", "warn");
+      if (!clockInAt) return setStatus("Enter clock in time.", "warn");
+
+      try {
+        await fetchJson(API_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "manager_clock_in",
+            managerPin,
+            name,
+            clockInAt,
+            date: els.date.value,
+            device: "Time Clock Admin"
+          })
+        });
+
+        setStatus(`${name} is clocked in. They can clock out themselves.`, "good");
+        await loadAdmin();
+      } catch (err) {
+        setStatus(err.message || "Unable to clock employee in.", "bad");
+      }
+    }
+
     async function saveShift(id) {
       const managerPin = getManagerPin();
       if (!managerPin) return setStatus("Manager PIN required.", "warn");
@@ -1650,6 +1681,7 @@ if (activeCount >= 4) {
     els.loadBtn.addEventListener("click", loadAdmin);
     els.addEmployeeBtn.addEventListener("click", addEmployee);
     els.deleteEmployeeBtn.addEventListener("click", deleteEmployee);
+    els.managerClockInBtn.addEventListener("click", managerClockIn);
     els.addManualShiftBtn.addEventListener("click", addManualShift);
     els.payrollCsvBtn.addEventListener("click", async () => {
       await exportCsv("payroll_week");

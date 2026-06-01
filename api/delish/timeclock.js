@@ -911,6 +911,60 @@ export default async function handler(req, res) {
       });
     }
 
+    if (action === "manager_clock_in") {
+      requireManager(body.managerPin);
+
+      const name = normalizeEmployeeName(body.name);
+      const clockInAt = String(body.clockInAt || "").trim();
+      const device = normalizeDevice(body.device || "manager-clock-in");
+
+      if (!name || !clockInAt) {
+        return send(res, 400, { ok: false, error: "Employee and clock in time are required." });
+      }
+
+      const clockInMs = new Date(clockInAt).getTime();
+      if (!Number.isFinite(clockInMs)) {
+        return send(res, 400, { ok: false, error: "Clock in time is invalid." });
+      }
+
+      const employees = await getEmployees();
+      const employee = findEmployeeByName(employees, name);
+      if (!employee) {
+        return send(res, 404, { ok: false, error: "Employee not found." });
+      }
+
+      const activeMap = await getActiveMap();
+      if (activeMap[name]) {
+        return send(res, 409, { ok: false, error: "Employee is already clocked in." });
+      }
+
+      const employeeRecord = normalizeEmployeeRecord(employee);
+      const shift = {
+        id: `${shiftId(name, clockInAt)}_manager`,
+        name,
+        hourlyRate: employeeRecord.hourlyRate,
+        clockInAt,
+        clockInDevice: device,
+        adjustedByManager: true,
+        managerClockIn: true
+      };
+
+      activeMap[name] = shift;
+      await setActiveMap(activeMap);
+      await pushPunch({ name, action: "manager_clock_in", timestamp: clockInAt, device });
+      await logTimeclockEvent("manager_clock_in", shift.id, {
+        shift,
+        employeeName: name,
+        clockInAt,
+        device,
+      });
+
+      return send(res, 200, {
+        ...(await buildState(String(body.date || "").trim())),
+        message: `${name} clocked in by manager.`
+      });
+    }
+
     if (action === "force_clock_out") {
       requireManager(body.managerPin);
 
