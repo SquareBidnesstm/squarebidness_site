@@ -478,7 +478,7 @@
             <div class="actions">
               <button class="btn-in" id="clockInBtn">Clock In</button>
               <button class="btn-out" id="clockOutBtn">Clock Out</button>
-              <button class="btn-break" id="startBreakBtn">Start 30 Min Break</button>
+              <button class="btn-break" id="startBreakBtn">Start 15 Min Break</button>
               <button class="btn-return" id="endBreakBtn">End Break</button>
             </div>
 
@@ -535,6 +535,7 @@
     const API_URL = "/api/delish/timeclock/";
     const DEVICE_KEY = "delish_timeclock_device";
     const DEFAULT_DEVICE = "Time Clock Tablet";
+    const BREAK_DURATION_MINUTES = 15;
 
     const els = {
       now: document.getElementById("centralNow"),
@@ -782,10 +783,10 @@
           const elapsedMinutes = Number.isFinite(startedMs)
             ? Math.floor((Date.now() - startedMs) / 60000)
             : 0;
-          if (elapsedMinutes < 30) {
+          if (elapsedMinutes < BREAK_DURATION_MINUTES) {
             managerPin = window.prompt(`Break is only ${elapsedMinutes} minutes. Manager PIN required to return early.`) || "";
             if (!managerPin.trim()) {
-              setStatus("Manager PIN required to end break before 30 minutes.", "warn");
+              setStatus(`Manager PIN required to end break before ${BREAK_DURATION_MINUTES} minutes.`, "warn");
               return;
             }
           }

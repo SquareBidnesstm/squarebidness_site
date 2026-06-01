@@ -25,6 +25,7 @@ const PAYROLL_TURN_INS_KEY = "delish:timeclock:payroll_turn_ins";
 
 const MAX_RECENT = 25;
 const MAX_SHIFTS = 1000;
+const BREAK_DURATION_MINUTES = 15;
 
 function send(res, status, data) {
   res.status(status).json(data);
@@ -812,10 +813,10 @@ export default async function handler(req, res) {
       activeMap[name] = {
         ...current,
         breakStartedAt: timestamp,
-        breakDurationMinutes: 30,
+        breakDurationMinutes: BREAK_DURATION_MINUTES,
         breaks: [
           ...(Array.isArray(current.breaks) ? current.breaks : []),
-          { startedAt: timestamp, durationMinutes: 30, device }
+          { startedAt: timestamp, durationMinutes: BREAK_DURATION_MINUTES, device }
         ]
       };
 
@@ -825,12 +826,12 @@ export default async function handler(req, res) {
         employeeName: name,
         timestamp,
         device,
-        durationMinutes: 30,
+        durationMinutes: BREAK_DURATION_MINUTES,
       });
 
       return send(res, 200, {
         ...(await buildPublicState()),
-        message: `${name} started 30 minute break.`
+        message: `${name} started ${BREAK_DURATION_MINUTES} minute break.`
       });
     }
 
@@ -865,17 +866,20 @@ export default async function handler(req, res) {
       const timestamp = nowIso();
       const breakMinutes = diffMinutes(current.breakStartedAt, timestamp);
 
-      if (breakMinutes < 30) {
+      if (breakMinutes < BREAK_DURATION_MINUTES) {
         requireManager(managerPin);
       }
 
       const breaks = Array.isArray(current.breaks) ? [...current.breaks] : [];
-      const lastBreak = breaks[breaks.length - 1] || { startedAt: current.breakStartedAt, durationMinutes: 30 };
+      const lastBreak = breaks[breaks.length - 1] || {
+        startedAt: current.breakStartedAt,
+        durationMinutes: BREAK_DURATION_MINUTES
+      };
       const completedBreak = {
         ...lastBreak,
         endedAt: timestamp,
         minutes: breakMinutes,
-        earlyReturnApproved: breakMinutes < 30,
+        earlyReturnApproved: breakMinutes < BREAK_DURATION_MINUTES,
         device
       };
       if (breaks.length) {
@@ -899,7 +903,7 @@ export default async function handler(req, res) {
         timestamp,
         device,
         breakMinutes,
-        earlyReturnApproved: breakMinutes < 30,
+        earlyReturnApproved: breakMinutes < BREAK_DURATION_MINUTES,
       });
 
       return send(res, 200, {
