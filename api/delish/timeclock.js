@@ -109,6 +109,22 @@ function addDaysToDateKey(dateKey, days) {
   return date.toISOString().slice(0, 10);
 }
 
+function getPayrollPeriodForDate(dateKey = getCentralDateKey(nowIso())) {
+  const cleanDateKey = String(dateKey || "").trim() || getCentralDateKey(nowIso());
+  const [year, month, day] = cleanDateKey.split("-").map(Number);
+  const selected = new Date(Date.UTC(year, month - 1, day));
+  const dayOfWeek = selected.getUTCDay();
+  const daysSinceTuesday = (dayOfWeek - 2 + 7) % 7;
+  const periodStart = addDaysToDateKey(cleanDateKey, -daysSinceTuesday);
+  const periodEnd = addDaysToDateKey(periodStart, 6);
+
+  return {
+    periodStart,
+    periodEnd,
+    payDate: addDaysToDateKey(periodEnd, 1)
+  };
+}
+
 function normalizeEmployeeName(name) {
   return String(name || "").trim().replace(/\s+/g, " ");
 }
@@ -448,6 +464,11 @@ async function buildState(date) {
 
   const active = activeArrayFromMap(activeMap);
   const filteredShifts = enrichShiftsWithPay(filterShiftsByDate(shifts, date), employees);
+  const payrollPeriod = getPayrollPeriodForDate(date || getCentralDateKey(nowIso()));
+  const payrollWeekShifts = enrichShiftsWithPay(
+    filterShiftsByDateRange(shifts, payrollPeriod.periodStart, payrollPeriod.periodEnd),
+    employees
+  );
   const activeForDate = date
     ? active.filter(shift => getCentralDateKey(shift.clockInAt) === date)
     : active;
@@ -461,6 +482,10 @@ async function buildState(date) {
     shifts: filteredShifts,
     summary: summarizeShifts(filteredShifts, employees),
     laborSummary: summarizeLabor(filteredShifts, activeForDate, employees),
+    payrollWeek: {
+      ...payrollPeriod,
+      summary: summarizeShifts(payrollWeekShifts, employees)
+    },
     payrollTurnIns: Object.values(payrollTurnIns)
       .sort((a, b) => String(b.periodEnd || "").localeCompare(String(a.periodEnd || "")))
       .slice(0, 12)
@@ -544,10 +569,17 @@ async function sendCsv(req, res, body = {}) {
   requireManager(getManagerPinFromRequest(req, body));
 
   const date = String(body.date || req.query?.date || "").trim();
+  const period = String(body.period || req.query?.period || "day").trim();
   const [allShifts, employees] = await Promise.all([getShifts(), getEmployees()]);
-  const shifts = enrichShiftsWithPay(filterShiftsByDate(allShifts, date), employees);
+  const payrollPeriod = getPayrollPeriodForDate(date || getCentralDateKey(nowIso()));
+  const scopedShifts = period === "payroll_week"
+    ? filterShiftsByDateRange(allShifts, payrollPeriod.periodStart, payrollPeriod.periodEnd)
+    : filterShiftsByDate(allShifts, date);
+  const shifts = enrichShiftsWithPay(scopedShifts, employees);
   const csv = shiftsToCsv(shifts);
-  const suffix = date || "all";
+  const suffix = period === "payroll_week"
+    ? `payroll-${payrollPeriod.periodStart}-to-${payrollPeriod.periodEnd}`
+    : (date || "all");
 
   res.setHeader("Content-Type", "text/csv; charset=utf-8");
   res.setHeader("Content-Disposition", `attachment; filename="delish-timeclock-${suffix}.csv"`);
