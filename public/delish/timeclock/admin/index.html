@@ -844,6 +844,7 @@
       summary: { employees: [], totalHours: 0, totalShifts: 0 }
     };
     let currentSalesData = { grossSales: 0, orderCount: 0, failed: false };
+    let selectedPayrollEmployee = "";
 
     function centralNowLabel() {
       return new Intl.DateTimeFormat("en-US", {
@@ -1061,10 +1062,12 @@
         </tr>
       `).join("");
 
-      renderPayrollEmployeeDetail(rows[0].name);
+      const selectedStillExists = rows.some(item => item.name === selectedPayrollEmployee);
+      renderPayrollEmployeeDetail(selectedStillExists ? selectedPayrollEmployee : rows[0].name);
     }
 
     function renderPayrollEmployeeDetail(name) {
+      selectedPayrollEmployee = name || "";
       const payrollWeek = currentData.payrollWeek || {};
       const summary = (payrollWeek.summary?.employees || []).find(item => item.name === name);
       const shifts = (payrollWeek.shifts || []).filter(shift => shift.name === name);
@@ -1082,7 +1085,7 @@
           <table>
             <thead>
               <tr>
-                <th colspan="6">${escapeHtml(name)} weekly total: ${Number(summary.hours || 0).toFixed(2)} hours · ${currency(summary.laborDollars || 0)}</th>
+                <th colspan="7">${escapeHtml(name)} weekly total: ${Number(summary.hours || 0).toFixed(2)} hours · ${currency(summary.laborDollars || 0)}</th>
               </tr>
               <tr>
                 <th>Date</th>
@@ -1091,19 +1094,37 @@
                 <th>Minutes</th>
                 <th>Hours</th>
                 <th>Labor $</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               ${shifts.length ? shifts.map(shift => `
                 <tr>
                   <td>${escapeHtml(shift.dateCentral || "")}</td>
-                  <td>${escapeHtml(formatCentralDateTime(shift.clockInAt))}</td>
-                  <td>${escapeHtml(formatCentralDateTime(shift.clockOutAt))}</td>
+                  <td>
+                    <input
+                      type="datetime-local"
+                      data-edit-in="${escapeHtml(shift.id)}"
+                      value="${toLocalDateTimeValue(shift.clockInAt)}"
+                      style="min-height:40px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="datetime-local"
+                      data-edit-out="${escapeHtml(shift.id)}"
+                      value="${toLocalDateTimeValue(shift.clockOutAt)}"
+                      style="min-height:40px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);"
+                    />
+                  </td>
                   <td>${shift.durationMinutes}</td>
                   <td>${shift.durationHours}</td>
                   <td>${currency(shift.laborDollars || 0)}</td>
+                  <td>
+                    <button class="btn-mini primary" data-save-shift="${escapeHtml(shift.id)}">Save</button>
+                  </td>
                 </tr>
-              `).join("") : `<tr><td colspan="6" class="empty">No completed shifts for ${escapeHtml(name)} from ${escapeHtml(periodStart)} to ${escapeHtml(periodEnd)}.</td></tr>`}
+              `).join("") : `<tr><td colspan="7" class="empty">No completed shifts for ${escapeHtml(name)} from ${escapeHtml(periodStart)} to ${escapeHtml(periodEnd)}.</td></tr>`}
             </tbody>
           </table>
         </div>
@@ -1530,6 +1551,7 @@ if (activeCount >= 4) {
 
       if (payrollEmployee) {
         renderPayrollEmployeeDetail(payrollEmployee);
+        return;
       }
 
       if (saveId) {
