@@ -472,6 +472,18 @@
       font-weight:800;
     }
 
+    .clickable-row {
+      cursor:pointer;
+    }
+
+    .clickable-row:hover {
+      background:rgba(212,162,76,.08);
+    }
+
+    .employee-detail {
+      margin-top:14px;
+    }
+
     @media (max-width: 1180px) {
       .grid {
         grid-template-columns:repeat(3, 1fr);
@@ -708,6 +720,9 @@
             </tbody>
           </table>
         </div>
+        <div class="employee-detail" id="payrollEmployeeDetail">
+          <div class="empty">Click an employee to see their weekly shifts.</div>
+        </div>
       </section>
 
       <section class="section">
@@ -804,6 +819,7 @@
       statOrdersPerHour: document.getElementById("statOrdersPerHour"),
       payrollWeekLabel: document.getElementById("payrollWeekLabel"),
       payrollWeekTotalsBody: document.getElementById("payrollWeekTotalsBody"),
+      payrollEmployeeDetail: document.getElementById("payrollEmployeeDetail"),
       employeeTotalsBody: document.getElementById("employeeTotalsBody"),
       shiftsBody: document.getElementById("shiftsBody"),
       payrollTurnInsBody: document.getElementById("payrollTurnInsBody"),
@@ -824,6 +840,7 @@
       active: [],
       shifts: [],
       payrollTurnIns: [],
+      payrollWeek: { shifts: [], summary: { employees: [] } },
       summary: { employees: [], totalHours: 0, totalShifts: 0 }
     };
     let currentSalesData = { grossSales: 0, orderCount: 0, failed: false };
@@ -1029,12 +1046,13 @@
 
       if (!rows.length) {
         els.payrollWeekTotalsBody.innerHTML = `<tr><td colspan="6" class="empty">No completed shifts in this payroll week yet.</td></tr>`;
+        els.payrollEmployeeDetail.innerHTML = '<div class="empty">No employee weekly shifts to show yet.</div>';
         return;
       }
 
       els.payrollWeekTotalsBody.innerHTML = rows.map(item => `
-        <tr>
-          <td>${escapeHtml(item.name)}</td>
+        <tr class="clickable-row" data-payroll-employee="${escapeHtml(item.name)}">
+          <td><button class="btn-mini primary" data-payroll-employee="${escapeHtml(item.name)}">${escapeHtml(item.name)}</button></td>
           <td>${item.shifts}</td>
           <td>${item.minutes}</td>
           <td>${item.hours}</td>
@@ -1042,6 +1060,54 @@
           <td>${currency(item.laborDollars || 0)}</td>
         </tr>
       `).join("");
+
+      renderPayrollEmployeeDetail(rows[0].name);
+    }
+
+    function renderPayrollEmployeeDetail(name) {
+      const payrollWeek = currentData.payrollWeek || {};
+      const summary = (payrollWeek.summary?.employees || []).find(item => item.name === name);
+      const shifts = (payrollWeek.shifts || []).filter(shift => shift.name === name);
+
+      if (!summary) {
+        els.payrollEmployeeDetail.innerHTML = '<div class="empty">Click an employee to see their weekly shifts.</div>';
+        return;
+      }
+
+      const periodStart = payrollWeek.periodStart || "—";
+      const periodEnd = payrollWeek.periodEnd || "—";
+
+      els.payrollEmployeeDetail.innerHTML = `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th colspan="6">${escapeHtml(name)} weekly total: ${Number(summary.hours || 0).toFixed(2)} hours · ${currency(summary.laborDollars || 0)}</th>
+              </tr>
+              <tr>
+                <th>Date</th>
+                <th>Clock In</th>
+                <th>Clock Out</th>
+                <th>Minutes</th>
+                <th>Hours</th>
+                <th>Labor $</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${shifts.length ? shifts.map(shift => `
+                <tr>
+                  <td>${escapeHtml(shift.dateCentral || "")}</td>
+                  <td>${escapeHtml(formatCentralDateTime(shift.clockInAt))}</td>
+                  <td>${escapeHtml(formatCentralDateTime(shift.clockOutAt))}</td>
+                  <td>${shift.durationMinutes}</td>
+                  <td>${shift.durationHours}</td>
+                  <td>${currency(shift.laborDollars || 0)}</td>
+                </tr>
+              `).join("") : `<tr><td colspan="6" class="empty">No completed shifts for ${escapeHtml(name)} from ${escapeHtml(periodStart)} to ${escapeHtml(periodEnd)}.</td></tr>`}
+            </tbody>
+          </table>
+        </div>
+      `;
     }
 
     function renderShifts(shifts, selectedDate) {
@@ -1460,6 +1526,11 @@ if (activeCount >= 4) {
       const deleteId = e.target?.getAttribute("data-delete-shift");
       const forceName = e.target?.getAttribute("data-force-clock-out");
       const rateName = e.target?.getAttribute("data-save-rate");
+      const payrollEmployee = e.target?.closest("[data-payroll-employee]")?.getAttribute("data-payroll-employee");
+
+      if (payrollEmployee) {
+        renderPayrollEmployeeDetail(payrollEmployee);
+      }
 
       if (saveId) {
         await saveShift(saveId);

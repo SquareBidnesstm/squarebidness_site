@@ -484,6 +484,7 @@ async function buildState(date) {
     laborSummary: summarizeLabor(filteredShifts, activeForDate, employees),
     payrollWeek: {
       ...payrollPeriod,
+      shifts: payrollWeekShifts,
       summary: summarizeShifts(payrollWeekShifts, employees)
     },
     payrollTurnIns: Object.values(payrollTurnIns)
