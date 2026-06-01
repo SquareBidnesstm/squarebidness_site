@@ -555,6 +555,7 @@
         <input id="salesInput" type="number" min="0" step="0.01" placeholder="Daily sales (optional)" />
         <button id="loadBtn" class="primary">Load Day</button>
         <a id="csvLink" href="/api/delish/timeclock/?mode=csv" target="_blank" rel="noopener">Export CSV</a>
+        <button id="payrollCsvBtn">Export Payroll Week CSV</button>
         <a href="/delish/timeclock/">Open Time Clock</a>
       </div>
 
@@ -688,6 +689,28 @@
       </div>
 
       <section class="section">
+        <h2>Payroll Week Totals</h2>
+        <p class="lead" id="payrollWeekLabel">Tuesday-through-Monday payroll totals will show after admin loads.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Employee</th>
+                <th>Shifts</th>
+                <th>Minutes</th>
+                <th>Hours</th>
+                <th>Rate</th>
+                <th>Labor $</th>
+              </tr>
+            </thead>
+            <tbody id="payrollWeekTotalsBody">
+              <tr><td colspan="6" class="empty">No payroll week data yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section">
         <h2>Employee Daily Totals</h2>
         <div class="table-wrap">
           <table>
@@ -779,6 +802,8 @@
       statLaborPct: document.getElementById("statLaborPct"),
       statOrders: document.getElementById("statOrders"),
       statOrdersPerHour: document.getElementById("statOrdersPerHour"),
+      payrollWeekLabel: document.getElementById("payrollWeekLabel"),
+      payrollWeekTotalsBody: document.getElementById("payrollWeekTotalsBody"),
       employeeTotalsBody: document.getElementById("employeeTotalsBody"),
       shiftsBody: document.getElementById("shiftsBody"),
       payrollTurnInsBody: document.getElementById("payrollTurnInsBody"),
@@ -790,7 +815,8 @@
       employeeRateList: document.getElementById("employeeRateList"),
       addEmployeeBtn: document.getElementById("addEmployeeBtn"),
       deleteEmployeeSelect: document.getElementById("deleteEmployeeSelect"),
-      deleteEmployeeBtn: document.getElementById("deleteEmployeeBtn")
+      deleteEmployeeBtn: document.getElementById("deleteEmployeeBtn"),
+      payrollCsvBtn: document.getElementById("payrollCsvBtn")
     };
 
     let currentData = {
@@ -979,6 +1005,34 @@
       }
 
       els.employeeTotalsBody.innerHTML = rows.map(item => `
+        <tr>
+          <td>${escapeHtml(item.name)}</td>
+          <td>${item.shifts}</td>
+          <td>${item.minutes}</td>
+          <td>${item.hours}</td>
+          <td>${currency(item.hourlyRate || 0)}</td>
+          <td>${currency(item.laborDollars || 0)}</td>
+        </tr>
+      `).join("");
+    }
+
+    function renderPayrollWeek(payrollWeek) {
+      const rows = payrollWeek?.summary?.employees || [];
+      const periodStart = payrollWeek?.periodStart || "—";
+      const periodEnd = payrollWeek?.periodEnd || "—";
+      const payDate = payrollWeek?.payDate || "—";
+      const totalHours = Number(payrollWeek?.summary?.totalHours || 0).toFixed(2);
+      const totalLaborDollars = currency(payrollWeek?.summary?.totalLaborDollars || 0);
+
+      els.payrollWeekLabel.textContent =
+        `Payroll week ${periodStart} to ${periodEnd}. Pay date ${payDate}. Total: ${totalHours} hours · ${totalLaborDollars}. Open shifts are added after clock-out.`;
+
+      if (!rows.length) {
+        els.payrollWeekTotalsBody.innerHTML = `<tr><td colspan="6" class="empty">No completed shifts in this payroll week yet.</td></tr>`;
+        return;
+      }
+
+      els.payrollWeekTotalsBody.innerHTML = rows.map(item => `
         <tr>
           <td>${escapeHtml(item.name)}</td>
           <td>${item.shifts}</td>
@@ -1194,6 +1248,7 @@ function renderStats(data, selectedDate, salesData = {}) {
     currentSalesData = salesData;
 
     renderStats(data, date, salesData);
+    renderPayrollWeek(data.payrollWeek);
     renderEmployeeTotals(data.summary);
     renderShifts(data.shifts || [], date);
     renderPayrollTurnIns(data.payrollTurnIns || []);
@@ -1428,8 +1483,15 @@ if (activeCount >= 4) {
     els.loadBtn.addEventListener("click", loadAdmin);
     els.addEmployeeBtn.addEventListener("click", addEmployee);
     els.deleteEmployeeBtn.addEventListener("click", deleteEmployee);
+    els.payrollCsvBtn.addEventListener("click", async () => {
+      await exportCsv("payroll_week");
+    });
     els.csvLink.addEventListener("click", async (event) => {
       event.preventDefault();
+      await exportCsv("day");
+    });
+
+    async function exportCsv(period = "day") {
 
       const managerPin = getManagerPin();
       if (!managerPin) {
@@ -1448,7 +1510,8 @@ if (activeCount >= 4) {
           },
           body: JSON.stringify({
             action: "export_csv",
-            date
+            date,
+            period
           })
         });
 
@@ -1465,16 +1528,20 @@ if (activeCount >= 4) {
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = `delish-timeclock-${date || "all"}.csv`;
+        const payrollWeek = currentData.payrollWeek || {};
+        const suffix = period === "payroll_week"
+          ? `payroll-${payrollWeek.periodStart || date || "week"}-to-${payrollWeek.periodEnd || date || "week"}`
+          : (date || "all");
+        link.download = `delish-timeclock-${suffix}.csv`;
         document.body.appendChild(link);
         link.click();
         link.remove();
         URL.revokeObjectURL(url);
-        setStatus("CSV exported.", "good");
+        setStatus(period === "payroll_week" ? "Payroll week CSV exported." : "CSV exported.", "good");
       } catch (err) {
         setStatus(err.message || "Unable to export CSV.", "bad");
       }
-    });
+    }
     els.sales.addEventListener("focus", () => {
       if (currentSalesData.failed) {
         setStatus("Enter daily sales manually while live order sales is unavailable.", "warn");
