@@ -584,13 +584,13 @@
 
   if (state.reason === "manual_closed") {
     orderingBanner.textContent = state.orderingMode === "closed"
-      ? "Online ordering is closed today."
+      ? "Opening soon. Online ordering is not live yet."
       : "Ordering is currently paused.";
     return;
   }
 
   if (state.reason === "not_a_service_day") {
-    orderingBanner.textContent = "Closed today. Check the menu for the next active service day.";
+    orderingBanner.textContent = "Opening soon. Check back for the next active service day.";
     return;
   }
 
@@ -978,14 +978,14 @@ if (!limitedMenu && isExtraSideAllowedForDay(state.today) && isSectionEnabled("e
   renderFlashSale();
   attachQtyButtons();
 } else if (state.reason === "not_a_service_day") {
-    menuDayTitle.textContent = "Delish — Closed Today";
+    menuDayTitle.textContent = "Delish — Opening Soon";
     menuDayNote.textContent = "Pickup Only · Alexandria, Louisiana";
-    mainMenuNote.textContent = "Online ordering is closed today.";
+    mainMenuNote.textContent = "Online ordering is opening soon.";
     mainMenuItems.innerHTML = `
       <div class="menuItem">
         <div class="menuCopy">
-          <span>Closed Today</span>
-          <small>Please come back during active ordering days.</small>
+          <span>Opening Soon</span>
+          <small>Please check back when online ordering is live.</small>
         </div>
       </div>
     `;
@@ -1260,12 +1260,12 @@ const flashSaleOnly =
 
       if (state.reason === "manual_closed") {
         checkoutBtn.textContent = state.orderingMode === "closed"
-          ? "Closed Today"
+          ? "Opening Soon"
           : "Ordering Paused";
       } else if (state.reason === "outside_service_window") {
         checkoutBtn.textContent = "Opening Soon";
       } else {
-        checkoutBtn.textContent = "Closed Today";
+        checkoutBtn.textContent = "Opening Soon";
       }
 
       return;
@@ -1334,12 +1334,12 @@ const flashSaleOnly =
     if (!state.openNow && !flashSaleOnly) {
       if (state.reason === "manual_closed") {
         showStatus(state.orderingMode === "closed"
-          ? "Online ordering is closed today."
+          ? "Opening soon. Online ordering is not live yet."
           : "Online ordering is currently paused.");
             } else if (state.reason === "outside_service_window") {
         showStatus(`Ordering is available from ${formatTo12Hour(state.openTime)} to ${formatTo12Hour(state.closeTime)}.`);
       } else if (state.reason === "not_a_service_day") {
-        showStatus("Online ordering is closed today.");
+        showStatus("Opening soon. Online ordering is not live yet.");
       } else {
         showStatus("Online ordering is closed right now.");
       }
