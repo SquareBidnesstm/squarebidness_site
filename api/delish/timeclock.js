@@ -320,6 +320,22 @@ function activeArrayFromMap(map) {
   );
 }
 
+function findActiveEntry(activeMap, name) {
+  const targetName = normalizeEmployeeName(name).toLowerCase();
+  if (!targetName) return null;
+
+  for (const [key, shift] of Object.entries(activeMap || {})) {
+    const keyName = normalizeEmployeeName(key).toLowerCase();
+    const shiftName = normalizeEmployeeName(shift?.name).toLowerCase();
+
+    if (keyName === targetName || shiftName === targetName) {
+      return { key, shift };
+    }
+  }
+
+  return null;
+}
+
 function filterShiftsByDate(shifts, date) {
   if (!date) return shifts || [];
   return (shifts || []).filter(shift => shift.dateCentral === date);
@@ -691,14 +707,15 @@ export default async function handler(req, res) {
       }
 
       const activeMap = await getActiveMap();
-      if (activeMap[name]) {
-        return send(res, 409, { ok: false, error: "Already clocked in." });
+      if (findActiveEntry(activeMap, name)) {
+        return send(res, 409, { ok: false, error: "You are clocked in already." });
       }
 
       const timestamp = nowIso();
       const shift = {
         id: shiftId(name, timestamp),
         name,
+        employeePin: pin,
         hourlyRate: normalizePayRate(employee.hourlyRate) || 0,
         clockInAt: timestamp,
         clockInDevice: device
@@ -739,10 +756,11 @@ export default async function handler(req, res) {
       }
 
       const activeMap = await getActiveMap();
-      const current = activeMap[name];
+      const activeEntry = findActiveEntry(activeMap, name);
+      const current = activeEntry?.shift;
 
       if (!current) {
-        return send(res, 409, { ok: false, error: "Not clocked in." });
+        return send(res, 409, { ok: false, error: "You are clocked out already." });
       }
 
       if (current.breakStartedAt) {
@@ -755,7 +773,7 @@ export default async function handler(req, res) {
         clockOutDevice: device
       };
 
-      delete activeMap[name];
+      delete activeMap[activeEntry.key];
 
       await setActiveMap(activeMap);
       await pushPunch({ name, action: "clock_out", timestamp, device });
@@ -799,7 +817,8 @@ export default async function handler(req, res) {
       }
 
       const activeMap = await getActiveMap();
-      const current = activeMap[name];
+      const activeEntry = findActiveEntry(activeMap, name);
+      const current = activeEntry?.shift;
 
       if (!current) {
         return send(res, 409, { ok: false, error: "Clock in before starting break." });
@@ -810,7 +829,7 @@ export default async function handler(req, res) {
       }
 
       const timestamp = nowIso();
-      activeMap[name] = {
+      activeMap[activeEntry.key] = {
         ...current,
         breakStartedAt: timestamp,
         breakDurationMinutes: BREAK_DURATION_MINUTES,
@@ -853,10 +872,11 @@ export default async function handler(req, res) {
       }
 
       const activeMap = await getActiveMap();
-      const current = activeMap[name];
+      const activeEntry = findActiveEntry(activeMap, name);
+      const current = activeEntry?.shift;
 
       if (!current) {
-        return send(res, 409, { ok: false, error: "Employee is not clocked in." });
+        return send(res, 409, { ok: false, error: "You are clocked out already." });
       }
 
       if (!current.breakStartedAt) {
@@ -888,13 +908,13 @@ export default async function handler(req, res) {
         breaks.push(completedBreak);
       }
 
-      activeMap[name] = {
+      activeMap[activeEntry.key] = {
         ...current,
         breaks,
         lastBreakEndedAt: timestamp
       };
-      delete activeMap[name].breakStartedAt;
-      delete activeMap[name].breakDurationMinutes;
+      delete activeMap[activeEntry.key].breakStartedAt;
+      delete activeMap[activeEntry.key].breakDurationMinutes;
 
       await setActiveMap(activeMap);
       await pushPunch({ name, action: "break_end", timestamp, device });
@@ -927,14 +947,15 @@ export default async function handler(req, res) {
 
       const name = normalizeEmployeeName(employee.name);
       const activeMap = await getActiveMap();
+      const activeEntry = findActiveEntry(activeMap, name);
 
       return send(res, 200, {
         ok: true,
         employee: {
           name,
-          clockedIn: !!activeMap[name],
-          onBreak: !!activeMap[name]?.breakStartedAt,
-          breakStartedAt: activeMap[name]?.breakStartedAt || null
+          clockedIn: !!activeEntry,
+          onBreak: !!activeEntry?.shift?.breakStartedAt,
+          breakStartedAt: activeEntry?.shift?.breakStartedAt || null
         }
       });
     }
@@ -1022,7 +1043,7 @@ export default async function handler(req, res) {
       const employees = await getEmployees();
       const activeMap = await getActiveMap();
 
-      if (activeMap[name]) {
+      if (findActiveEntry(activeMap, name)) {
         return send(res, 409, { ok: false, error: "Employee is currently clocked in." });
       }
 
@@ -1118,14 +1139,15 @@ export default async function handler(req, res) {
       }
 
       const activeMap = await getActiveMap();
-      if (activeMap[name]) {
-        return send(res, 409, { ok: false, error: "Employee is already clocked in." });
+      if (findActiveEntry(activeMap, name)) {
+        return send(res, 409, { ok: false, error: "You are clocked in already." });
       }
 
       const employeeRecord = normalizeEmployeeRecord(employee);
       const shift = {
         id: `${shiftId(name, clockInAt)}_manager`,
         name,
+        employeePin: String(employeeRecord.pin || ""),
         hourlyRate: employeeRecord.hourlyRate,
         clockInAt,
         clockInDevice: device,
@@ -1161,10 +1183,11 @@ export default async function handler(req, res) {
       }
 
       const activeMap = await getActiveMap();
-      const current = activeMap[name];
+      const activeEntry = findActiveEntry(activeMap, name);
+      const current = activeEntry?.shift;
 
       if (!current) {
-        return send(res, 404, { ok: false, error: "Employee is not currently clocked in." });
+        return send(res, 404, { ok: false, error: "You are clocked out already." });
       }
 
       const clockInMs = new Date(current.clockInAt).getTime();
@@ -1184,7 +1207,7 @@ export default async function handler(req, res) {
         adjustedByManager: true
       };
 
-      delete activeMap[name];
+      delete activeMap[activeEntry.key];
 
       await setActiveMap(activeMap);
       await pushPunch({ name, action: "clock_out", timestamp: clockOutAt, device });
@@ -1259,6 +1282,47 @@ export default async function handler(req, res) {
       });
 
       return send(res, 200, await buildState(String(body.date || "").trim()));
+    }
+
+    if (action === "delete_employee_shifts_for_date") {
+      requireManager(body.managerPin);
+
+      const name = normalizeEmployeeName(body.name);
+      const date = String(body.date || "").trim();
+
+      if (!name || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        return send(res, 400, { ok: false, error: "Employee and date are required." });
+      }
+
+      const targetName = name.toLowerCase();
+      const shifts = await getShifts();
+      const removed = [];
+      const updated = shifts.filter(shift => {
+        const shiftName = normalizeEmployeeName(shift?.name).toLowerCase();
+        const shiftDate = shift?.dateCentral || (shift?.clockInAt ? getCentralDateKey(shift.clockInAt) : "");
+        const shouldDelete = shiftName === targetName && shiftDate === date;
+
+        if (shouldDelete) removed.push(shift);
+        return !shouldDelete;
+      });
+
+      if (!removed.length) {
+        return send(res, 404, { ok: false, error: "No matching shifts found." });
+      }
+
+      await setShifts(updated);
+      await logTimeclockEvent("employee_date_shifts_deleted", `${targetName}:${date}`, {
+        employeeName: name,
+        date,
+        removedCount: removed.length,
+        removedShifts: removed,
+      });
+
+      return send(res, 200, {
+        ...(await buildState(date)),
+        message: `${removed.length} shift${removed.length === 1 ? "" : "s"} deleted for ${name} on ${date}.`,
+        removedCount: removed.length,
+      });
     }
 
     return send(res, 400, { ok: false, error: "Invalid action." });
