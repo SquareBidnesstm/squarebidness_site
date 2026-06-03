@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Order Online | Delish</title>
+  <meta name="description" content="Lobby QR screen for Delish online ordering in Alexandria, Louisiana." />
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#0a0604" />
+
+  <link rel="icon" sizes="16x16" href="/delish/assets/delish-favicon-16.png" />
+  <link rel="icon" sizes="32x32" href="/delish/assets/delish-favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/delish/assets/delish-logo-mark-180.png" />
+
+  <style>
+    :root {
+      --bg:#080504;
+      --panel:#130c09;
+      --gold:#d7ae72;
+      --gold-2:#ffe0a0;
+      --gold-3:#9b6a34;
+      --text:#fff7e8;
+      --muted:#dfc29b;
+      --shadow:0 34px 90px rgba(0,0,0,.6);
+    }
+
+    * { box-sizing:border-box; }
+
+    html,
+    body {
+      margin:0;
+      min-height:100%;
+      background:#080504;
+      color:var(--text);
+      font-family:Georgia,"Times New Roman",serif;
+      overflow:hidden;
+    }
+
+    body {
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      padding:clamp(16px,2.6vw,42px);
+      background:
+        radial-gradient(circle at 50% 34%, rgba(245,168,62,.34), transparent 0 18%, rgba(245,168,62,.09) 28%, transparent 46%),
+        radial-gradient(circle at 20% 20%, rgba(215,129,49,.18), transparent 28%),
+        radial-gradient(circle at 78% 20%, rgba(215,174,114,.13), transparent 26%),
+        linear-gradient(135deg,#070403 0%,#130806 38%,#060302 100%);
+    }
+
+    .screen {
+      position:relative;
+      width:min(94vw, 1200px);
+      height:min(94vh, 1700px);
+      min-height:700px;
+      display:grid;
+      grid-template-rows:auto 1fr auto;
+      gap:clamp(22px,3vh,48px);
+      padding:clamp(34px,5.2vw,82px);
+      border:3px solid rgba(215,174,114,.88);
+      border-radius:clamp(28px,4vw,60px);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.04), transparent 14%),
+        radial-gradient(circle at 50% 35%, rgba(226,143,47,.2), transparent 34%),
+        linear-gradient(180deg, rgba(25,13,8,.94), rgba(8,4,3,.96));
+      box-shadow:var(--shadow), inset 0 0 0 1px rgba(255,224,160,.28);
+      overflow:hidden;
+      isolation:isolate;
+    }
+
+    .screen::before,
+    .screen::after {
+      content:"";
+      position:absolute;
+      inset:22px;
+      border:1px solid rgba(255,224,160,.72);
+      border-radius:calc(clamp(28px,4vw,60px) - 10px);
+      pointer-events:none;
+      z-index:-1;
+    }
+
+    .screen::after {
+      inset:34px;
+      border-color:rgba(155,106,52,.55);
+      opacity:.9;
+    }
+
+    .grain {
+      position:absolute;
+      inset:0;
+      z-index:-2;
+      opacity:.3;
+      background-image:
+        radial-gradient(circle at 20% 40%, rgba(255,255,255,.18) 0 1px, transparent 1px),
+        radial-gradient(circle at 80% 20%, rgba(255,224,160,.14) 0 1px, transparent 1px);
+      background-size:17px 19px, 23px 29px;
+      mix-blend-mode:screen;
+    }
+
+    .header {
+      text-align:center;
+      display:grid;
+      gap:clamp(10px,1.6vh,18px);
+      justify-items:center;
+    }
+
+    .rule {
+      width:min(620px, 70%);
+      display:grid;
+      grid-template-columns:1fr auto 1fr;
+      align-items:center;
+      gap:18px;
+      color:var(--gold-2);
+      font-size:clamp(24px,3.2vw,42px);
+      line-height:1;
+      text-shadow:0 0 22px rgba(255,224,160,.25);
+    }
+
+    .rule::before,
+    .rule::after {
+      content:"";
+      height:2px;
+      background:linear-gradient(90deg, transparent, rgba(255,224,160,.8), transparent);
+    }
+
+    h1 {
+      margin:0;
+      color:var(--gold-2);
+      font-size:clamp(64px,9.5vw,150px);
+      line-height:.85;
+      letter-spacing:.025em;
+      text-transform:uppercase;
+      text-shadow:
+        0 2px 0 #6e431e,
+        0 8px 20px rgba(0,0,0,.72),
+        0 0 32px rgba(255,224,160,.22);
+      white-space:nowrap;
+    }
+
+    .content {
+      display:grid;
+      grid-template-columns:minmax(260px,.82fr) minmax(320px,1fr);
+      align-items:center;
+      gap:clamp(30px,5vw,76px);
+      min-height:0;
+    }
+
+    .brand {
+      display:grid;
+      justify-items:center;
+      gap:clamp(18px,3vh,36px);
+      text-align:center;
+    }
+
+    .brand img {
+      width:min(360px, 34vw);
+      max-height:36vh;
+      object-fit:contain;
+      filter:drop-shadow(0 20px 34px rgba(0,0,0,.55)) drop-shadow(0 0 20px rgba(255,224,160,.16));
+    }
+
+    .tagline {
+      color:var(--gold-2);
+      font-family:Arial,Helvetica,sans-serif;
+      font-size:clamp(24px,2.6vw,42px);
+      line-height:1.2;
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      text-shadow:0 5px 18px rgba(0,0,0,.6);
+    }
+
+    .tagline small {
+      display:block;
+      margin-top:.45em;
+      color:var(--muted);
+      font-size:.62em;
+      font-weight:800;
+      letter-spacing:.06em;
+    }
+
+    .qr-panel {
+      justify-self:center;
+      align-self:center;
+      display:grid;
+      gap:clamp(18px,2vh,26px);
+      justify-items:center;
+      text-align:center;
+    }
+
+    .qr-card {
+      width:min(54vh, 500px);
+      aspect-ratio:1;
+      display:grid;
+      place-items:center;
+      padding:clamp(18px,2.5vw,30px);
+      background:#fff;
+      border-radius:4px;
+      box-shadow:
+        0 26px 58px rgba(0,0,0,.5),
+        0 0 46px rgba(255,224,160,.16);
+    }
+
+    .qr-card img {
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      image-rendering:pixelated;
+    }
+
+    .scan-text {
+      margin:0;
+      color:var(--text);
+      font-family:Arial,Helvetica,sans-serif;
+      font-weight:900;
+      font-size:clamp(24px,2.7vw,42px);
+      line-height:1.15;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+      text-shadow:0 6px 18px rgba(0,0,0,.55);
+    }
+
+    .url {
+      color:var(--muted);
+      font-family:Arial,Helvetica,sans-serif;
+      font-size:clamp(18px,1.7vw,28px);
+      font-weight:800;
+      letter-spacing:.03em;
+    }
+
+    .footer {
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:clamp(16px,2vw,32px);
+      min-height:44px;
+      color:var(--muted);
+      font-family:Arial,Helvetica,sans-serif;
+      font-size:clamp(16px,1.45vw,24px);
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+
+    .footer span {
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:var(--gold);
+      box-shadow:0 0 16px rgba(255,224,160,.5);
+    }
+
+    @media (orientation:portrait) {
+      .screen {
+        width:min(94vw, 980px);
+        height:min(96vh, 1500px);
+        grid-template-rows:auto 1fr auto;
+        gap:clamp(14px,2vh,30px);
+      }
+
+      .content {
+        grid-template-columns:1fr;
+        gap:clamp(14px,2.4vh,32px);
+      }
+
+      .brand img {
+        width:min(280px, 38vw);
+        max-height:18vh;
+      }
+
+      .tagline {
+        font-size:clamp(22px,3.8vw,38px);
+      }
+
+      .qr-card {
+        width:min(42vh, 66vw, 460px);
+      }
+
+      .scan-text {
+        font-size:clamp(22px,2.6vw,34px);
+      }
+
+      .url {
+        font-size:clamp(16px,1.8vw,24px);
+      }
+    }
+
+    @media (orientation:landscape) {
+      .screen {
+        width:min(96vw, 1600px);
+        height:min(94vh, 980px);
+        min-height:0;
+        padding:clamp(26px,3.2vw,54px);
+        gap:clamp(14px,2vh,28px);
+      }
+
+      h1 {
+        font-size:clamp(56px,6vw,108px);
+      }
+
+      .content {
+        grid-template-columns:minmax(320px,.95fr) minmax(340px,1fr);
+        gap:clamp(26px,4vw,58px);
+      }
+
+      .brand {
+        gap:clamp(14px,2vh,24px);
+      }
+
+      .brand img {
+        width:min(300px, 20vw);
+        max-height:28vh;
+      }
+
+      .tagline {
+        font-size:clamp(24px,2.5vw,40px);
+      }
+
+      .qr-card {
+        width:min(46vh, 34vw, 430px);
+      }
+
+      .scan-text {
+        font-size:clamp(24px,2.2vw,36px);
+      }
+    }
+
+    @media (max-width:700px) {
+      body { overflow:auto; }
+
+      .screen {
+        min-height:auto;
+        height:auto;
+        padding:30px 22px;
+      }
+
+      h1 {
+        white-space:normal;
+        font-size:clamp(48px,14vw,76px);
+      }
+
+      .footer {
+        flex-direction:column;
+        gap:10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="screen" aria-label="Delish online ordering QR screen">
+    <div class="grain" aria-hidden="true"></div>
+
+    <header class="header">
+      <div class="rule" aria-hidden="true"><span>&starf;</span></div>
+      <h1>Order Online</h1>
+      <div class="rule" aria-hidden="true"><span>&starf;</span></div>
+    </header>
+
+    <section class="content">
+      <div class="brand">
+        <img src="/delish/assets/delish-logo-mark-512.png" alt="Delish logo" />
+        <div class="tagline">
+          Fresh food. Fast pickup.
+          <small>Order from your phone</small>
+        </div>
+      </div>
+
+      <div class="qr-panel">
+        <div class="qr-card">
+          <img src="/delish/assets/delish_qr_clean.png" alt="QR code for Delish online ordering" />
+        </div>
+        <p class="scan-text">Scan to Order</p>
+        <div class="url">squarebidness.com/delish/</div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <strong>Pickup Orders</strong>
+      <span aria-hidden="true"></span>
+      <strong>Catering</strong>
+      <span aria-hidden="true"></span>
+      <strong>Delish</strong>
+    </footer>
+  </main>
+</body>
+</html>
