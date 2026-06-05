@@ -248,23 +248,23 @@
 
         <div>
           <label>Weekend Status</label>
-          <input id="weekendStatus" value="Reopening May 22–24" />
+          <input id="weekendStatus" value="This Weekend" />
         </div>
       </div>
 
       <label>Main Headline</label>
-      <input id="eventTitle" value="Chocolate City Reopens May 22–24" />
+      <input id="eventTitle" value="All Roads Lead to Chocolate City" />
 
       <label>Friday Message</label>
-      <input id="fridayText" value="Chocolate City reopens May 22–24 at 30065 North Café Line Rd." />
+      <input id="fridayText" value="Friday — select nights only." />
 
       <label>Event Note</label>
-      <textarea id="eventNote">Reopening May 22–24 with the music, vibes, and grown-folk energy Albany loves.</textarea>
+      <textarea id="eventNote">VIP sections are available for this weekend. Choose your night and reserve before arrival.</textarea>
 
       <label>VIP Status</label>
       <textarea id="vipStatus">Only 2 VIP sections available per night. First come. Paid in full online.</textarea>
       <label>Announcement</label>
-      <textarea id="announcement">Reopening Weekend • May 22–24 • VIP sections available now</textarea>
+      <textarea id="announcement">This Weekend • VIP sections available now</textarea>
 
       <button onclick="saveStatus()">Save Chocolate City Updates</button>
       <button type="button" onclick="loadBookings()">Load VIP Bookings</button>
@@ -419,7 +419,7 @@
       return;
     }
 
-    const confirmed = prompt("Type RESET to clear every VIP booking for May 22, May 23, and May 24.");
+    const confirmed = prompt("Type RESET to clear every VIP booking for the current weekend.");
     if(confirmed !== "RESET"){
       status.textContent = "VIP reset canceled.";
       return;
@@ -444,8 +444,8 @@
         return;
       }
 
-      status.textContent = "VIP inventory reset. All May 22–24 sections are available again.";
-      box.innerHTML = "<p>VIP inventory cleared for all reopening dates.</p>";
+      status.textContent = "VIP inventory reset. Current weekend sections are available again.";
+      box.innerHTML = "<p>VIP inventory cleared for the current weekend.</p>";
     }catch(err){
       status.textContent = "Reset failed. Check API/env vars.";
     }
