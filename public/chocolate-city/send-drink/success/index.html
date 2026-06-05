@@ -77,6 +77,48 @@
       font-weight:800;
     }
 
+    .claim{
+      margin:20px auto 4px;
+      padding:18px;
+      border-radius:22px;
+      border:1px solid rgba(245,213,138,.34);
+      background:rgba(215,168,79,.13);
+    }
+
+    .claim span{
+      display:block;
+      color:var(--muted);
+      font-size:13px;
+      font-weight:900;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+    }
+
+    .claim strong{
+      display:block;
+      margin-top:8px;
+      color:var(--gold2);
+      font-size:clamp(38px,12vw,58px);
+      line-height:1;
+      letter-spacing:.04em;
+    }
+
+    .details{
+      margin-top:18px;
+      display:grid;
+      gap:10px;
+      text-align:left;
+      color:var(--muted);
+      font-weight:800;
+    }
+
+    .details div{
+      padding:12px;
+      border-radius:14px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(245,213,138,.12);
+    }
+
     a{
       display:inline-flex;
       align-items:center;
@@ -100,14 +142,81 @@
     <h1>Drink Credit Sent</h1>
 
     <p>
-      Your drink credit has been submitted. Chocolate City staff will verify and handle redemption at the venue.
+      Your drink credit has been submitted. Show this claim code to staff at the bar.
     </p>
 
+    <div class="claim">
+      <span>Claim Code</span>
+      <strong id="claimCode">Loading</strong>
+    </div>
+
+    <div class="details" id="details">
+      <div>Confirming drink credit...</div>
+    </div>
+
     <div class="note">
-      Drink credits are redeemed in person only. Recipient must meet age and entry requirements.
+      Staff can verify this under the active drink credits screen. Recipient must meet age and entry requirements.
     </div>
 
     <a href="/chocolate-city/">Back to Chocolate City</a>
   </main>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get("session_id") || "";
+    const claimCode = document.getElementById("claimCode");
+    const details = document.getElementById("details");
+
+    function escapeHtml(str){
+      return String(str || "").replace(/[&<>"']/g, m => ({
+        "&":"&amp;",
+        "<":"&lt;",
+        ">":"&gt;",
+        '"':"&quot;",
+        "'":"&#039;"
+      }[m]));
+    }
+
+    function fallbackCode(value){
+      const clean = String(value || "").replace(/[^a-z0-9]/gi, "").toUpperCase();
+      return `CC-${clean.slice(-6) || "DRINK"}`;
+    }
+
+    async function loadCredit(){
+      if(!sessionId){
+        claimCode.textContent = "CC-DRINK";
+        details.innerHTML = "<div>Payment complete. Staff can look up the active drink credit by recipient name.</div>";
+        return;
+      }
+
+      claimCode.textContent = fallbackCode(sessionId);
+
+      try{
+        const res = await fetch(`/api/chocolate-city/drink-credit/?session_id=${encodeURIComponent(sessionId)}`, {
+          cache:"no-store"
+        });
+        const data = await res.json();
+
+        if(!data.ok) throw new Error(data.error || "Unable to load");
+
+        if(data.pending){
+          claimCode.textContent = data.claimCode || fallbackCode(sessionId);
+          details.innerHTML = "<div>Payment is complete. The bar screen may take a few seconds to update.</div>";
+          return;
+        }
+
+        const c = data.credit || {};
+        claimCode.textContent = c.claimCode || fallbackCode(sessionId);
+        details.innerHTML = `
+          <div>Recipient: ${escapeHtml(c.recipientName || "Guest")}</div>
+          <div>Amount: $${escapeHtml(String(c.amount || 0))}</div>
+          <div>Good for: ${escapeHtml(c.serviceLabel || "Tonight")}</div>
+        `;
+      }catch(err){
+        details.innerHTML = "<div>Payment complete. Staff can look up the active drink credit by recipient name.</div>";
+      }
+    }
+
+    loadCredit();
+  </script>
 </body>
 </html>
