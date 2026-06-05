@@ -172,6 +172,21 @@
       font-weight:900;
     }
 
+    .claim{
+      margin-top:12px;
+      display:inline-flex;
+      min-height:40px;
+      align-items:center;
+      padding:0 13px;
+      border-radius:999px;
+      border:1px solid rgba(245,213,138,.34);
+      background:rgba(215,168,79,.13);
+      color:var(--gold2);
+      font-size:1.15rem;
+      font-weight:900;
+      letter-spacing:.04em;
+    }
+
     .meta{
       margin-top:14px;
       display:grid;
@@ -229,6 +244,24 @@
       color:var(--gold2);
       margin-bottom:10px;
     }
+
+    .tools{
+      margin-bottom:18px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .tools input{
+      flex:1;
+      min-width:220px;
+      padding:14px;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background:#050302;
+      color:var(--text);
+      font-size:16px;
+    }
   </style>
 </head>
 
@@ -256,6 +289,11 @@
       Loading drink credits...
     </div>
 
+    <div class="tools">
+      <input id="searchBox" placeholder="Search name, code, message">
+      <button onclick="loadCredits()">Refresh</button>
+    </div>
+
     <section class="grid" id="creditsGrid">
       <div class="empty">
         <strong>Loading…</strong>
@@ -267,6 +305,7 @@
   <script>
     const grid = document.getElementById("creditsGrid");
     const statusBox = document.getElementById("statusBox");
+    let lastCredits = [];
 
     function escapeHtml(str){
       return String(str || "").replace(/[&<>"']/g, m => ({
@@ -290,17 +329,30 @@
     }
 
     function renderCredits(credits){
-      if(!credits.length){
+      const query = document.getElementById("searchBox").value.trim().toLowerCase();
+      const filtered = credits.filter(c => {
+        if(!query) return true;
+
+        return [
+          c.recipientName,
+          c.senderName,
+          c.message,
+          c.claimCode,
+          c.label
+        ].some(value => String(value || "").toLowerCase().includes(query));
+      });
+
+      if(!filtered.length){
         grid.innerHTML = `
           <div class="empty">
-            <strong>No Active Credits</strong>
-            Nothing needs redemption right now.
+            <strong>${credits.length ? "No Match" : "No Active Credits"}</strong>
+            ${credits.length ? "Try another name or claim code." : "Nothing needs redemption right now."}
           </div>
         `;
         return;
       }
 
-      grid.innerHTML = credits.map(c => `
+      grid.innerHTML = filtered.map(c => `
         <article class="card">
           <div class="badge">Drink Credit</div>
 
@@ -312,8 +364,13 @@
             $${escapeHtml(String(c.amount || 0))}
           </div>
 
+          <div class="claim">
+            ${escapeHtml(c.claimCode || "")}
+          </div>
+
           <div class="meta">
             <div>From: ${escapeHtml(c.senderName || "Anonymous")}</div>
+            <div>Good for: ${escapeHtml(c.serviceLabel || "Tonight")}</div>
           </div>
 
           <div class="message">
@@ -354,6 +411,7 @@
         if(!data.ok) throw new Error(data.error || "Unable to load");
 
         const credits = Array.isArray(data.credits) ? data.credits : [];
+        lastCredits = credits;
 
         renderCredits(credits);
 
@@ -410,6 +468,7 @@
 
     document.getElementById("token").value =
       localStorage.getItem("cc_admin_token") || "";
+    document.getElementById("searchBox").addEventListener("input", () => renderCredits(lastCredits));
 
     loadCredits();
     setInterval(loadCredits, 10000);
