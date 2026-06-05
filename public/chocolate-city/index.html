@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
 
   <title>Chocolate City Lounge LLC | 25+ Lounge in Albany, Louisiana</title>
-  <meta name="description" content="Chocolate City Lounge LLC — 25+ lounge experience in Albany, Louisiana. Reopening May 22–24 at 30065 North Café Line Rd." />
+  <meta name="description" content="Chocolate City Lounge LLC — 25+ lounge experience in Albany, Louisiana. Weekend nights, VIP sections, and good energy in Albany." />
   <meta name="robots" content="index,follow" />
   <meta name="theme-color" content="#080504" />
 
   <!-- Open Graph / Facebook / iMessage -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Chocolate City Lounge LLC" />
-  <meta property="og:description" content="Chocolate City Lounge reopens May 22–24 with music, vibes, and good energy in Albany, Louisiana." />
+  <meta property="og:description" content="Chocolate City Lounge weekend nights with music, vibes, VIP sections, and good energy in Albany, Louisiana." />
   <meta property="og:url" content="https://www.squarebidness.com/chocolate-city/" />
   <meta property="og:site_name" content="Chocolate City Lounge LLC" />
   <meta property="og:image" content="https://www.squarebidness.com/chocolate-city/assets/cc-meta_1200x630.jpg?v=20260504b" />
@@ -25,7 +25,7 @@
   <!-- Twitter / X -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Chocolate City Lounge LLC" />
-  <meta name="twitter:description" content="Reopening May 22–24 at 30065 North Café Line Rd in Albany, Louisiana." />
+  <meta name="twitter:description" content="Chocolate City Lounge weekend nights, VIP sections, and good energy in Albany, Louisiana." />
   <meta name="twitter:image" content="https://www.squarebidness.com/chocolate-city/assets/cc-meta_1200x630.jpg?v=20260504b" />
 
   <link rel="canonical" href="https://www.squarebidness.com/chocolate-city/" />
@@ -44,7 +44,7 @@
     "url": "https://www.squarebidness.com/chocolate-city/",
     "image": "https://www.squarebidness.com/chocolate-city/assets/cc-meta_1200x630.jpg?v=20260504b",
     "logo": "https://www.squarebidness.com/chocolate-city/assets/cc-icon-512.png",
-    "description": "Chocolate City Lounge LLC is a 25+ lounge experience in Albany, Louisiana. Reopening May 22–24 at 30065 North Café Line Rd.",
+    "description": "Chocolate City Lounge LLC is a 25+ lounge experience in Albany, Louisiana with weekend nights and VIP section reservations.",
     "areaServed": {
       "@type": "City",
       "name": "Albany, Louisiana"
@@ -485,7 +485,7 @@
         <div class="kicker">Chocolate City Lounge LLC</div>
 
         <div class="event-banner" id="announcement">
-          Chocolate City Lounge returns May 22–24
+          This weekend at Chocolate City
         </div>
 
         <h1 id="eventTitle">All Roads Lead to Chocolate City</h1>
@@ -496,7 +496,7 @@
         </div>
 
         <div class="status">
-          <div class="pill" id="weekendStatus">Reopening May 22–24</div>
+          <div class="pill" id="weekendStatus">This Weekend</div>
           <div class="pill">Saturday 7PM – 2AM</div>
           <div class="pill">Sunday 7PM – 12AM</div>
           <div class="pill" id="fridayPill">Friday — Select Nights Only</div>
@@ -504,7 +504,7 @@
 
         <div class="schedule-update" id="scheduleUpdate">
           <h2>Event Note</h2>
-          <p id="eventNoteText">Chocolate City Lounge returns May 22–24 with the music, vibes, and grown-folk energy Albany loves.</p>
+          <p id="eventNoteText">VIP sections are available for this weekend. Choose your night and reserve before arrival.</p>
         </div>
 
         <div class="cta-row">
@@ -568,6 +568,88 @@
 </main>
 
  <script>
+  const CHOCOLATE_CITY_TIME_ZONE = "America/Chicago";
+
+  function getCentralDateParts(date = new Date()){
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: CHOCOLATE_CITY_TIME_ZONE,
+      weekday: "short",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).formatToParts(date);
+    const map = Object.fromEntries(parts.map(part => [part.type, part.value]));
+    return {
+      year: Number(map.year),
+      month: Number(map.month),
+      day: Number(map.day),
+      weekday: map.weekday
+    };
+  }
+
+  function addDays(date, days){
+    return new Date(date.getTime() + (days * 24 * 60 * 60 * 1000));
+  }
+
+  function formatCentralIso(date){
+    const parts = getCentralDateParts(date);
+    return [
+      String(parts.year).padStart(4, "0"),
+      String(parts.month).padStart(2, "0"),
+      String(parts.day).padStart(2, "0")
+    ].join("-");
+  }
+
+  function formatCentralLabel(date, options = {}){
+    return new Intl.DateTimeFormat("en-US", {
+      timeZone: CHOCOLATE_CITY_TIME_ZONE,
+      weekday: options.weekday || "long",
+      month: options.month || "long",
+      day: "numeric"
+    }).format(date);
+  }
+
+  function getVipEventDates(referenceDate = new Date()){
+    const current = getCentralDateParts(referenceDate);
+    const dayIndex = { Sun:0, Mon:1, Tue:2, Wed:3, Thu:4, Fri:5, Sat:6 }[current.weekday] ?? 1;
+    const mondayOffset = dayIndex === 0 ? -6 : 1 - dayIndex;
+    const centralNoon = new Date(Date.UTC(current.year, current.month - 1, current.day, 12));
+
+    return [4, 5, 6].map(offset => {
+      const date = addDays(centralNoon, mondayOffset + offset);
+      return {
+        date: formatCentralIso(date),
+        label: formatCentralLabel(date),
+        shortLabel: formatCentralLabel(date, { month:"short" })
+      };
+    });
+  }
+
+  function getWeekendRangeText(dates = getVipEventDates()){
+    if(!dates.length) return "this weekend";
+    const first = dates[0].label.replace(/^[^,]+,\s*/, "");
+    const last = dates[dates.length - 1].label.replace(/^[^,]+,\s*/, "");
+    return `${first} – ${last}`;
+  }
+
+  function setDefaultWeekendCopy(){
+    const dates = getVipEventDates();
+    const range = getWeekendRangeText(dates);
+    const announcement = document.getElementById("announcement");
+    const weekendStatus = document.getElementById("weekendStatus");
+    const eventNoteText = document.getElementById("eventNoteText");
+
+    if(announcement) announcement.textContent = `VIP sections available for ${range}`;
+    if(weekendStatus) weekendStatus.textContent = range;
+    if(eventNoteText) {
+      eventNoteText.textContent = `Chocolate City VIP sections are available for ${range}. Choose your night before checkout.`;
+    }
+  }
+
+  function isStaleWeekendCopy(value){
+    return /may\s*22|22\s*[–-]\s*24|2026-05-2[2-4]|reopening/i.test(String(value || ""));
+  }
+
   async function loadStatus(){
     try{
       const res = await fetch("/api/chocolate-city/status/", { cache:"no-store" });
@@ -591,7 +673,9 @@
       }
 
       if(weekendStatus) {
-        weekendStatus.textContent = s.weekendStatus || "Open this weekend";
+        weekendStatus.textContent = !s.weekendStatus || isStaleWeekendCopy(s.weekendStatus)
+          ? getWeekendRangeText()
+          : s.weekendStatus;
       }
 
       if(vipStatus) {
@@ -600,7 +684,9 @@
       }
 
       if(announcement) {
-        announcement.textContent = s.announcement || "Stay tuned for updates, event nights, and VIP sections.";
+        announcement.textContent = !s.announcement || isStaleWeekendCopy(s.announcement)
+          ? `VIP sections available for ${getWeekendRangeText()}`
+          : s.announcement;
       }
 
       if(fridayPill) {
@@ -612,11 +698,13 @@
       if(fridayText) {
         fridayText.textContent = fridayOpen
           ? "Friday is open this week from 7PM – 2AM."
-          : (s.fridayText || "Friday — select nights only.");
+          : (!s.fridayText || isStaleWeekendCopy(s.fridayText) ? "Friday — select nights only." : s.fridayText);
       }
 
       if(eventNoteText) {
-        eventNoteText.textContent = s.eventNote || "Chocolate City Lounge returns May 22–24 with the music, vibes, and grown-folk energy Albany loves.";
+        eventNoteText.textContent = !s.eventNote || isStaleWeekendCopy(s.eventNote)
+          ? `Chocolate City VIP sections are available for ${getWeekendRangeText()}. Choose your night before checkout.`
+          : s.eventNote;
       }
     }catch(err){
       console.warn("Chocolate City status unavailable", err);
@@ -629,7 +717,7 @@
     if(!box) return;
 
     try{
-      const dates = ["2026-05-22", "2026-05-23", "2026-05-24"];
+      const dates = getVipEventDates().map(eventDate => eventDate.date);
       const results = await Promise.all(dates.map(async (eventDate) => {
         const res = await fetch(`/api/chocolate-city/vip-availability/?eventDate=${encodeURIComponent(eventDate)}`, { cache:"no-store" });
         const data = await res.json();
@@ -640,7 +728,7 @@
       const totalRemaining = results.reduce((sum, item) => sum + Number(item.remaining || 0), 0);
 
       if(totalRemaining <= 0){
-        box.textContent = "VIP sections are sold out for May 22–24.";
+        box.textContent = `VIP sections are sold out for ${getWeekendRangeText()}.`;
         return;
       }
 
@@ -701,6 +789,7 @@
     });
   });
 
+  setDefaultWeekendCopy();
   loadStatus();
   loadVipAvailability();
 </script>
