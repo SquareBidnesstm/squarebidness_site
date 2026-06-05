@@ -142,6 +142,21 @@
       color:var(--gold);
     }
 
+    .claim{
+      margin-top:14px;
+      display:inline-flex;
+      min-height:42px;
+      align-items:center;
+      padding:0 14px;
+      border-radius:999px;
+      border:1px solid rgba(245,213,138,.34);
+      background:rgba(215,168,79,.13);
+      color:var(--gold2);
+      font-size:1.25rem;
+      font-weight:900;
+      letter-spacing:.04em;
+    }
+
     .meta{
       margin-top:18px;
       display:grid;
@@ -292,14 +307,19 @@
           ${escapeHtml(c.recipientName || "Guest")}
         </div>
 
-        <div class="amount">
-          $${escapeHtml(String(c.amount || 0))}
-        </div>
+      <div class="amount">
+        $${escapeHtml(String(c.amount || 0))}
+      </div>
 
-        <div class="meta">
-          <div>From: ${escapeHtml(c.senderName || "Anonymous")}</div>
-          <div>Status: Active</div>
-        </div>
+      <div class="claim">
+        ${escapeHtml(c.claimCode || "")}
+      </div>
+
+      <div class="meta">
+        <div>From: ${escapeHtml(c.senderName || "Anonymous")}</div>
+        <div>Good for: ${escapeHtml(c.serviceLabel || "Tonight")}</div>
+        <div>Status: Active</div>
+      </div>
 
         <div class="message">
           ${escapeHtml(c.message || "Enjoy your drink at Chocolate City.")}
