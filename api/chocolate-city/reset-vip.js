@@ -2,6 +2,7 @@ import {
   VIP_BOOKING_KEY,
   VIP_EVENT_DATES,
   VIP_LIMIT,
+  getCompatVipEventDates,
   vipBookingKey,
   vipHoldKey
 } from "../_lib/chocolate-city-vip.js";
@@ -89,15 +90,19 @@ export default async function handler(req, res) {
     }
 
     for (const eventDate of VIP_EVENT_DATES) {
-      for (let slot = 1; slot <= VIP_LIMIT; slot += 1) {
-        await redis("DEL", vipHoldKey(slot, eventDate.date));
+      for (const lookupDate of getCompatVipEventDates(eventDate.date)) {
+        for (let slot = 1; slot <= VIP_LIMIT; slot += 1) {
+          await redis("DEL", vipHoldKey(slot, lookupDate));
+        }
       }
     }
 
     if (adminAllowed) {
       await redis("SET", VIP_BOOKING_KEY, JSON.stringify([]));
       for (const eventDate of VIP_EVENT_DATES) {
-        await redis("SET", vipBookingKey(eventDate.date), JSON.stringify([]));
+        for (const lookupDate of getCompatVipEventDates(eventDate.date)) {
+          await redis("SET", vipBookingKey(lookupDate), JSON.stringify([]));
+        }
       }
     }
 
