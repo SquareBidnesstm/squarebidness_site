@@ -1,4 +1,10 @@
-const DRINK_KEY = "chocolate-city:drink:credits";
+import {
+  DRINK_KEY,
+  getDrinkServiceDate,
+  getDrinkServiceLabel,
+  isActiveDrinkCredit,
+  normalizeDrinkCredit
+} from "../_lib/chocolate-city-drinks.js";
 
 async function redis(command, ...args) {
   const url = process.env.UPSTASH_REDIS_REST_URL;
@@ -25,10 +31,12 @@ export default async function handler(req, res) {
     }
 
     const data = await redis("GET", DRINK_KEY);
-    const credits = data?.result ? JSON.parse(data.result) : [];
+    const credits = data?.result ? JSON.parse(data.result).map(normalizeDrinkCredit) : [];
+    const serviceDate = String(req.query?.serviceDate || getDrinkServiceDate()).trim();
+    const includeAll = wantsAdmin && String(req.query?.all || "") === "1";
 
     const activeCredits = credits
-      .filter(c => !c.redeemed)
+      .filter(c => includeAll ? !c.redeemed : isActiveDrinkCredit(c, serviceDate))
       .slice()
       .reverse();
     const publicCredits = activeCredits.map(c => ({
@@ -36,11 +44,15 @@ export default async function handler(req, res) {
       senderName: c.senderName || "Anonymous",
       message: c.message || "",
       label: c.label || "Drink Credit",
-      amount: Number(c.amount || 0)
+      amount: Number(c.amount || 0),
+      claimCode: c.claimCode || "",
+      serviceLabel: c.serviceLabel || getDrinkServiceLabel(serviceDate)
     }));
 
     return res.status(200).json({
       ok: true,
+      serviceDate,
+      serviceLabel: getDrinkServiceLabel(serviceDate),
       count: activeCredits.length,
       credits: wantsAdmin ? activeCredits : publicCredits
     });
