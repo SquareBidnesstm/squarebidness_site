@@ -13,8 +13,13 @@ import {
   redis,
   saveVipBookings
 } from "../_lib/chocolate-city-vip.js";
+import {
+  DRINK_KEY,
+  getDrinkClaimCode,
+  getDrinkServiceDate,
+  getDrinkServiceLabel
+} from "../_lib/chocolate-city-drinks.js";
 
-const DRINK_KEY = "chocolate-city:drink:credits";
 const SESSION_KEY_PREFIX = "chocolate-city:stripe:session:";
 const PROCESSING_KEY_PREFIX = "chocolate-city:stripe:processing:";
 
@@ -184,10 +189,14 @@ export default async function handler(req, res) {
     if (type === "send_drink") {
       const data = await redis("GET", DRINK_KEY);
       const credits = data?.result ? JSON.parse(data.result) : [];
+      const serviceDate = session.metadata?.serviceDate || getDrinkServiceDate();
 
       const credit = {
         sessionId: session.id,
         paidAt: new Date().toISOString(),
+        serviceDate,
+        serviceLabel: session.metadata?.serviceLabel || getDrinkServiceLabel(serviceDate),
+        claimCode: getDrinkClaimCode(session.id),
         recipientName: session.metadata?.recipientName || "Guest",
         recipientPhone: session.metadata?.recipientPhone || "",
         senderName: session.metadata?.senderName || "Anonymous",
