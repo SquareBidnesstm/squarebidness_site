@@ -386,9 +386,9 @@
   </div>
 
   <div class="date-picker" aria-label="Choose VIP night">
-    <button class="date-option is-active" type="button" data-event-date="2026-05-22">Friday May 22</button>
-    <button class="date-option" type="button" data-event-date="2026-05-23">Saturday May 23</button>
-    <button class="date-option" type="button" data-event-date="2026-05-24">Sunday May 24</button>
+    <button class="date-option is-active" type="button">Loading Friday...</button>
+    <button class="date-option" type="button">Loading Saturday...</button>
+    <button class="date-option" type="button">Loading Sunday...</button>
   </div>
 
   <div class="notice" id="vipAvailability">
@@ -474,7 +474,74 @@
     </footer>
   </main>
 <script>
-let selectedVipDate = "2026-05-22";
+const CHOCOLATE_CITY_TIME_ZONE = "America/Chicago";
+
+function getCentralDateParts(date = new Date()){
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: CHOCOLATE_CITY_TIME_ZONE,
+    weekday: "short",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(date);
+  const map = Object.fromEntries(parts.map(part => [part.type, part.value]));
+  return {
+    year: Number(map.year),
+    month: Number(map.month),
+    day: Number(map.day),
+    weekday: map.weekday
+  };
+}
+
+function addDays(date, days){
+  return new Date(date.getTime() + (days * 24 * 60 * 60 * 1000));
+}
+
+function formatCentralIso(date){
+  const parts = getCentralDateParts(date);
+  return [
+    String(parts.year).padStart(4, "0"),
+    String(parts.month).padStart(2, "0"),
+    String(parts.day).padStart(2, "0")
+  ].join("-");
+}
+
+function formatCentralLabel(date){
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: CHOCOLATE_CITY_TIME_ZONE,
+    weekday: "long",
+    month: "short",
+    day: "numeric"
+  }).format(date);
+}
+
+function getVipEventDates(referenceDate = new Date()){
+  const current = getCentralDateParts(referenceDate);
+  const dayIndex = { Sun:0, Mon:1, Tue:2, Wed:3, Thu:4, Fri:5, Sat:6 }[current.weekday] ?? 1;
+  const mondayOffset = dayIndex === 0 ? -6 : 1 - dayIndex;
+  const centralNoon = new Date(Date.UTC(current.year, current.month - 1, current.day, 12));
+
+  return [4, 5, 6].map(offset => {
+    const date = addDays(centralNoon, mondayOffset + offset);
+    return {
+      date: formatCentralIso(date),
+      label: formatCentralLabel(date)
+    };
+  });
+}
+
+function hydrateDatePicker(){
+  const eventDates = getVipEventDates();
+  document.querySelectorAll(".date-option").forEach((button, index) => {
+    const eventDate = eventDates[index] || eventDates[0];
+    button.dataset.eventDate = eventDate.date;
+    button.textContent = eventDate.label;
+    button.classList.toggle("is-active", index === 0);
+  });
+  return eventDates[0]?.date || "";
+}
+
+let selectedVipDate = hydrateDatePicker();
 
 async function loadVipAvailability(){
   const box = document.getElementById("vipAvailability");
@@ -605,7 +672,7 @@ document.querySelectorAll(".vip-btn").forEach(button => {
 
 document.querySelectorAll(".date-option").forEach(button => {
   button.addEventListener("click", () => {
-    selectedVipDate = button.dataset.eventDate || "2026-05-22";
+    selectedVipDate = button.dataset.eventDate || selectedVipDate;
     document.querySelectorAll(".date-option").forEach(btn => {
       btn.classList.toggle("is-active", btn === button);
     });
@@ -617,7 +684,6 @@ document.querySelectorAll(".date-option").forEach(button => {
 loadStatus();
 loadVipAvailability();
 
-// 🔥 OPTIONAL (REAL-TIME PRESSURE)
 setInterval(loadVipAvailability, 15000);
 </script>
 </body>
