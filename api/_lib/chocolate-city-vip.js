@@ -3,11 +3,68 @@ export const VIP_LIMIT = 2;
 export const VIP_HOLD_SECONDS = 35 * 60;
 export const VIP_HOLD_PREFIX = "chocolate-city:vip:hold:";
 export const VIP_BOOKING_LOCK_KEY = "chocolate-city:vip:booking-lock";
-export const VIP_EVENT_DATES = [
-  { date: "2026-05-22", label: "Friday, May 22" },
-  { date: "2026-05-23", label: "Saturday, May 23" },
-  { date: "2026-05-24", label: "Sunday, May 24" }
-];
+const CENTRAL_TIME_ZONE = "America/Chicago";
+const STALE_REOPENING_DATE_MAP = {
+  "2026-06-05": "2026-05-22",
+  "2026-06-06": "2026-05-23",
+  "2026-06-07": "2026-05-24"
+};
+
+function getCentralDateParts(date = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: CENTRAL_TIME_ZONE,
+    weekday: "short",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(date);
+  const map = Object.fromEntries(parts.map(part => [part.type, part.value]));
+  return {
+    year: Number(map.year),
+    month: Number(map.month),
+    day: Number(map.day),
+    weekday: map.weekday
+  };
+}
+
+function addDays(date, days) {
+  return new Date(date.getTime() + (days * 24 * 60 * 60 * 1000));
+}
+
+function formatCentralIso(date) {
+  const parts = getCentralDateParts(date);
+  return [
+    String(parts.year).padStart(4, "0"),
+    String(parts.month).padStart(2, "0"),
+    String(parts.day).padStart(2, "0")
+  ].join("-");
+}
+
+function formatCentralLabel(date) {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: CENTRAL_TIME_ZONE,
+    weekday: "long",
+    month: "long",
+    day: "numeric"
+  }).format(date);
+}
+
+export function getVipEventDates(referenceDate = new Date()) {
+  const current = getCentralDateParts(referenceDate);
+  const dayIndex = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 }[current.weekday] ?? 1;
+  const mondayOffset = dayIndex === 0 ? -6 : 1 - dayIndex;
+  const centralNoon = new Date(Date.UTC(current.year, current.month - 1, current.day, 12));
+
+  return [4, 5, 6].map(offset => {
+    const date = addDays(centralNoon, mondayOffset + offset);
+    return {
+      date: formatCentralIso(date),
+      label: formatCentralLabel(date)
+    };
+  });
+}
+
+export const VIP_EVENT_DATES = getVipEventDates();
 
 export const VIP_PACKAGES = {
   section_one: {
@@ -71,8 +128,18 @@ export function getVipEventLabel(value) {
   return VIP_EVENT_DATES.find((eventDate) => eventDate.date === date)?.label || date;
 }
 
+export function getCompatVipEventDates(eventDate) {
+  const normalizedEventDate = normalizeVipEventDate(eventDate);
+  return [normalizedEventDate, STALE_REOPENING_DATE_MAP[normalizedEventDate]].filter(Boolean);
+}
+
+function normalizeVipKeyDate(eventDate) {
+  const clean = String(eventDate || "").trim();
+  return /^\d{4}-\d{2}-\d{2}$/.test(clean) ? clean : normalizeVipEventDate(clean);
+}
+
 export function vipBookingKey(eventDate) {
-  return `${VIP_BOOKING_KEY}:${normalizeVipEventDate(eventDate)}`;
+  return `${VIP_BOOKING_KEY}:${normalizeVipKeyDate(eventDate)}`;
 }
 
 export function sanitizeMetadataValue(value, maxLength = 120) {
@@ -84,7 +151,7 @@ export function sanitizeMetadataValue(value, maxLength = 120) {
 }
 
 export function vipHoldKey(slot, eventDate) {
-  return `${VIP_HOLD_PREFIX}${normalizeVipEventDate(eventDate)}:${slot}`;
+  return `${VIP_HOLD_PREFIX}${normalizeVipKeyDate(eventDate)}:${slot}`;
 }
 
 export async function getActiveVipHolds(eventDate) {
@@ -219,13 +286,20 @@ export async function releaseRedisLock(key, value = "") {
 export async function getVipBookings(eventDate = "") {
   if (eventDate) {
     const normalizedEventDate = normalizeVipEventDate(eventDate);
-    const data = await redis("GET", vipBookingKey(normalizedEventDate));
-    const bookings = data?.result ? JSON.parse(data.result) : [];
-    return bookings.map((booking) => ({
-      ...booking,
-      eventDate: booking.eventDate || normalizedEventDate,
-      eventLabel: booking.eventLabel || getVipEventLabel(normalizedEventDate)
-    }));
+    const bookings = [];
+
+    for (const lookupDate of getCompatVipEventDates(normalizedEventDate)) {
+      const data = await redis("GET", vipBookingKey(lookupDate));
+      const dateBookings = data?.result ? JSON.parse(data.result) : [];
+      bookings.push(...dateBookings.map((booking) => ({
+        ...booking,
+        eventDate: normalizedEventDate,
+        eventLabel: getVipEventLabel(normalizedEventDate),
+        originalEventDate: booking.eventDate || lookupDate
+      })));
+    }
+
+    return bookings;
   }
 
   const allBookings = [];
