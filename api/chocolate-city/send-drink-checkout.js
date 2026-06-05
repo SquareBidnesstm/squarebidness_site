@@ -1,4 +1,5 @@
 import Stripe from "stripe";
+import { getDrinkServiceDate, getDrinkServiceLabel } from "../_lib/chocolate-city-drinks.js";
 
 function cleanMetadataValue(value, maxLength = 120) {
   return String(value || "")
@@ -52,6 +53,8 @@ export default async function handler(req, res) {
     const recipientPhone = cleanMetadataValue(body.recipientPhone, 32);
     const senderName = cleanMetadataValue(body.senderName, 80);
     const message = cleanMetadataValue(body.message, 180);
+    const serviceDate = getDrinkServiceDate();
+    const serviceLabel = getDrinkServiceLabel(serviceDate);
 
     if (!recipientName) {
       return res.status(400).json({ ok: false, error: "Recipient name required" });
@@ -92,7 +95,9 @@ export default async function handler(req, res) {
         recipientName,
         recipientPhone,
         senderName,
-        message
+        message,
+        serviceDate,
+        serviceLabel
       }
     });
 
