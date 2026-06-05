@@ -1,4 +1,8 @@
-const DRINK_KEY = "chocolate-city:drink:credits";
+import {
+  DRINK_KEY,
+  normalizeDrinkCredit
+} from "../_lib/chocolate-city-drinks.js";
+
 const DRINK_REDEEM_LOCK_KEY = "chocolate-city:drink:redeem-lock";
 
 async function redis(command, ...args) {
@@ -58,7 +62,7 @@ export default async function handler(req, res) {
 
     try {
       const data = await redis("GET", DRINK_KEY);
-      const credits = data?.result ? JSON.parse(data.result) : [];
+      const credits = data?.result ? JSON.parse(data.result).map(normalizeDrinkCredit) : [];
       const credit = credits.find(c => c.sessionId === sessionId);
 
       if (!credit) {
