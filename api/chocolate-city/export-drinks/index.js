@@ -1,4 +1,6 @@
 // /api/chocolate-city/export-drinks/index.js
+import { normalizeDrinkCredit } from "../../_lib/chocolate-city-drinks.js";
+
 function csvField(value) {
   const str = String(value ?? "").replace(/"/g, '""');
   return `"${str}"`;
@@ -38,16 +40,19 @@ export default async function handler(req, res) {
 
   try {
     const data = await redis("GET", "chocolate-city:drink:credits");
-    const credits = data?.result ? JSON.parse(data.result) : [];
+    const credits = data?.result ? JSON.parse(data.result).map(normalizeDrinkCredit) : [];
 
     const header = csvRow([
-      "Session ID", "Paid At", "Recipient Name", "Sender Name", "Message",
+      "Session ID", "Claim Code", "Service Date", "Service Label", "Paid At", "Recipient Name", "Sender Name", "Message",
       "Label", "Amount", "Phone", "Email",
       "Payment Status", "Redeemed", "Redeemed At"
     ]);
 
     const rows = credits.map(c => csvRow([
       c.sessionId || "",
+      c.claimCode || "",
+      c.serviceDate || "",
+      c.serviceLabel || "",
       c.paidAt || "",
       c.recipientName || "",
       c.senderName || "",
