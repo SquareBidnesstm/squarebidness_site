@@ -484,6 +484,21 @@
       margin-top:14px;
     }
 
+    .shift-time-input {
+      min-height:40px;
+      padding:0 10px;
+      border-radius:10px;
+      border:1px solid var(--line);
+      background:var(--panel-2);
+      color:var(--text);
+      font:inherit;
+      font-weight:700;
+    }
+
+    .shift-editing {
+      background:rgba(212,162,76,.08);
+    }
+
     @media (max-width: 1180px) {
       .grid {
         grid-template-columns:repeat(3, 1fr);
@@ -873,6 +888,7 @@
     };
     let currentSalesData = { grossSales: 0, orderCount: 0, failed: false };
     let selectedPayrollEmployee = "";
+    let editingShiftId = "";
 
     function centralNowLabel() {
       return new Intl.DateTimeFormat("en-US", {
@@ -1142,33 +1158,43 @@
               </tr>
             </thead>
             <tbody>
-              ${shifts.length ? shifts.map(shift => `
-                <tr>
+              ${shifts.length ? shifts.map(shift => {
+                const editing = editingShiftId === shift.id;
+                return `
+                <tr class="${editing ? "shift-editing" : ""}">
                   <td>${escapeHtml(shift.dateCentral || "")}</td>
-                  <td>
+                  <td>${editing ? `
                     <input
+                      class="shift-time-input"
                       type="datetime-local"
                       data-edit-in="${escapeHtml(shift.id)}"
                       value="${toLocalDateTimeValue(shift.clockInAt)}"
-                      style="min-height:40px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);"
                     />
-                  </td>
-                  <td>
+                  ` : escapeHtml(formatCentralDateTime(shift.clockInAt))}</td>
+                  <td>${editing ? `
                     <input
+                      class="shift-time-input"
                       type="datetime-local"
                       data-edit-out="${escapeHtml(shift.id)}"
                       value="${toLocalDateTimeValue(shift.clockOutAt)}"
-                      style="min-height:40px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);"
                     />
-                  </td>
+                  ` : escapeHtml(formatCentralDateTime(shift.clockOutAt))}</td>
                   <td>${shift.durationMinutes}</td>
                   <td>${shift.durationHours}</td>
                   <td>${currency(shift.laborDollars || 0)}</td>
                   <td>
-                    <button class="btn-mini primary" data-save-shift="${escapeHtml(shift.id)}">Save</button>
+                    <div class="action-row">
+                      ${editing ? `
+                        <button class="btn-mini primary" data-save-shift="${escapeHtml(shift.id)}">Save</button>
+                        <button class="btn-mini" data-cancel-edit-shift="${escapeHtml(shift.id)}">Cancel</button>
+                      ` : `
+                        <button class="btn-mini primary" data-edit-shift="${escapeHtml(shift.id)}">Edit</button>
+                      `}
+                    </div>
                   </td>
                 </tr>
-              `).join("") : `<tr><td colspan="7" class="empty">No completed shifts for ${escapeHtml(name)} from ${escapeHtml(periodStart)} to ${escapeHtml(periodEnd)}.</td></tr>`}
+              `;
+              }).join("") : `<tr><td colspan="7" class="empty">No completed shifts for ${escapeHtml(name)} from ${escapeHtml(periodStart)} to ${escapeHtml(periodEnd)}.</td></tr>`}
             </tbody>
           </table>
         </div>
@@ -1185,25 +1211,27 @@
         return;
       }
 
-      els.shiftsBody.innerHTML = rows.map(shift => `
-        <tr>
+      els.shiftsBody.innerHTML = rows.map(shift => {
+        const editing = editingShiftId === shift.id;
+        return `
+        <tr class="${editing ? "shift-editing" : ""}">
           <td>${escapeHtml(shift.name)}</td>
-          <td>
+          <td>${editing ? `
             <input
+              class="shift-time-input"
               type="datetime-local"
               data-edit-in="${escapeHtml(shift.id)}"
               value="${toLocalDateTimeValue(shift.clockInAt)}"
-              style="min-height:40px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);"
             />
-          </td>
-          <td>
+          ` : escapeHtml(formatCentralDateTime(shift.clockInAt))}</td>
+          <td>${editing ? `
             <input
+              class="shift-time-input"
               type="datetime-local"
               data-edit-out="${escapeHtml(shift.id)}"
               value="${toLocalDateTimeValue(shift.clockOutAt)}"
-              style="min-height:40px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);"
             />
-          </td>
+          ` : escapeHtml(formatCentralDateTime(shift.clockOutAt))}</td>
           <td>${shift.durationMinutes}</td>
           <td>${shift.durationHours}</td>
           <td>${currency(shift.hourlyRate || 0)}</td>
@@ -1211,12 +1239,18 @@
           <td><span class="muted">${escapeHtml(shift.clockInDevice || "")} → ${escapeHtml(shift.clockOutDevice || "")}</span></td>
           <td>
             <div class="action-row">
-              <button class="btn-mini primary" data-save-shift="${escapeHtml(shift.id)}">Save</button>
+              ${editing ? `
+                <button class="btn-mini primary" data-save-shift="${escapeHtml(shift.id)}">Save</button>
+                <button class="btn-mini" data-cancel-edit-shift="${escapeHtml(shift.id)}">Cancel</button>
+              ` : `
+                <button class="btn-mini primary" data-edit-shift="${escapeHtml(shift.id)}">Edit</button>
+              `}
               <button class="btn-mini danger" data-delete-shift="${escapeHtml(shift.id)}">Delete</button>
             </div>
           </td>
         </tr>
-      `).join("");
+      `;
+      }).join("");
     }
 
     function renderPayrollTurnIns(turnIns) {
@@ -1585,6 +1619,25 @@ if (activeCount >= 4) {
       }
     }
 
+    function refreshShiftViews() {
+      renderPayrollWeek(currentData.payrollWeek);
+      renderShifts(currentData.shifts || [], els.date.value);
+    }
+
+    function beginEditShift(id) {
+      editingShiftId = id;
+      refreshShiftViews();
+      const outEl = document.querySelector(`[data-edit-out="${CSS.escape(id)}"]`);
+      if (outEl) outEl.focus();
+      setStatus("Edit the clock in or clock out time, then press Save.", "warn");
+    }
+
+    function cancelEditShift() {
+      editingShiftId = "";
+      refreshShiftViews();
+      setStatus("Shift edit canceled.");
+    }
+
     async function saveShift(id) {
       const managerPin = getManagerPin();
       if (!managerPin) return setStatus("Manager PIN required.", "warn");
@@ -1611,6 +1664,7 @@ if (activeCount >= 4) {
           })
         });
 
+        editingShiftId = "";
         setStatus("Shift updated.", "good");
         await loadAdmin();
       } catch (err) {
@@ -1678,6 +1732,8 @@ if (activeCount >= 4) {
 
     document.addEventListener("click", async (e) => {
       const saveId = e.target?.getAttribute("data-save-shift");
+      const editId = e.target?.getAttribute("data-edit-shift");
+      const cancelEditId = e.target?.getAttribute("data-cancel-edit-shift");
       const deleteId = e.target?.getAttribute("data-delete-shift");
       const forceName = e.target?.getAttribute("data-force-clock-out");
       const rateName = e.target?.getAttribute("data-save-rate");
@@ -1688,8 +1744,19 @@ if (activeCount >= 4) {
         return;
       }
 
+      if (editId) {
+        beginEditShift(editId);
+        return;
+      }
+
+      if (cancelEditId) {
+        cancelEditShift();
+        return;
+      }
+
       if (saveId) {
         await saveShift(saveId);
+        return;
       }
 
       if (rateName) {
