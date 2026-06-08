@@ -46,13 +46,13 @@ export const metadata: Metadata = {
     description: "Find and buy tickets to the best events in Louisiana — concerts, comedy shows, trail rides, pop-ups, and community events.",
     type: "website",
     url: "https://events.squarebidness.com",
-    images: [{ url: "/events-meta-1200x630.png", width: 1200, height: 630, alt: "Square Bidness Events — Louisiana" }],
+    images: [{ url: "/events-meta.png", width: 1200, height: 630, alt: "Square Bidness Events — Louisiana" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Louisiana Events — Concerts, Comedy, Trail Rides & More",
     description: "Find and buy tickets to the best events in Louisiana.",
-    images: ["/events-meta-1200x630.png"],
+    images: ["/events-meta.png"],
   },
   alternates: { canonical: "https://events.squarebidness.com" },
   other: {
