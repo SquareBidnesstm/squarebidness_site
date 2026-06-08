@@ -47,6 +47,11 @@
 
     * { box-sizing: border-box; }
 
+    html,
+    body {
+      overflow-x: hidden;
+    }
+
     body {
       margin: 0;
       background: radial-gradient(circle at 20% 0%, rgba(245,54,37,.18), transparent 32%), var(--bg);
@@ -58,7 +63,7 @@
     a { color: inherit; }
 
     .wrap {
-      width: min(1120px, calc(100% - 32px));
+      width: min(1120px, calc(100vw - 32px));
       margin: 0 auto;
     }
 
@@ -116,17 +121,21 @@
     }
 
     .hero {
-      min-height: calc(100svh - 74px);
+      min-height: min(760px, calc(100svh - 74px));
       display: grid;
       align-items: center;
-      padding: 70px 0;
+      padding: 46px 0 30px;
     }
 
     .hero-inner {
       display: grid;
-      grid-template-columns: minmax(0, 1.1fr) minmax(280px, .9fr);
+      grid-template-columns: minmax(0, .92fr) minmax(300px, 1.08fr);
       align-items: center;
-      gap: 42px;
+      gap: 30px;
+    }
+
+    .hero-inner > * {
+      min-width: 0;
     }
 
     .eyebrow {
@@ -137,10 +146,10 @@
     }
 
     h1 {
-      max-width: 780px;
+      max-width: 640px;
       margin: 14px 0 20px;
-      font-size: clamp(3.2rem, 8vw, 7.8rem);
-      line-height: .9;
+      font-size: clamp(2.6rem, 6vw, 5.6rem);
+      line-height: .92;
       letter-spacing: 0;
       text-transform: uppercase;
     }
@@ -149,7 +158,7 @@
       max-width: 650px;
       color: var(--muted);
       font-size: clamp(1.1rem, 2vw, 1.45rem);
-      margin: 0 0 30px;
+      margin: 0 0 24px;
     }
 
     .actions {
@@ -178,22 +187,54 @@
     }
 
     .feature {
-      padding: 24px;
+      padding: 14px;
       border: 1px solid var(--line);
-      border-radius: 28px;
+      border-radius: 18px;
       background: linear-gradient(145deg, rgba(245,54,37,.16), rgba(245,199,107,.08));
       box-shadow: 0 28px 80px rgba(0,0,0,.32);
     }
 
     .feature img {
       width: 100%;
+      max-height: 330px;
       display: block;
       border-radius: 20px;
       background: #000;
+      object-fit: contain;
+    }
+
+    .culture-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .culture-pill {
+      min-height: 92px;
+      padding: 14px;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 8px;
+      background: rgba(255,255,255,.055);
+    }
+
+    .culture-pill strong {
+      display: block;
+      color: var(--gold);
+      font-size: .85rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .culture-pill span {
+      display: block;
+      margin-top: 8px;
+      color: rgba(255,247,238,.74);
+      font-weight: 800;
     }
 
     .section {
-      padding: 20px 0 72px;
+      padding: 22px 0 72px;
     }
 
     .grid {
@@ -240,20 +281,77 @@
       .nav {
         align-items: flex-start;
         flex-direction: column;
-        padding: 14px 0;
+        gap: 10px;
+        padding: 12px 0;
       }
 
       .links {
+        width: 100%;
         justify-content: flex-start;
+        gap: 4px 8px;
+        font-size: .82rem;
+      }
+
+      .links a {
+        padding: 7px 4px;
       }
 
       .hero-inner {
         grid-template-columns: 1fr;
+        gap: 22px;
       }
 
       .hero {
         min-height: auto;
-        padding-top: 46px;
+        padding: 28px 0 24px;
+      }
+
+      h1 {
+        max-width: 350px;
+        margin-bottom: 14px;
+        font-size: clamp(2.15rem, 10.8vw, 3.25rem);
+      }
+
+      .lead {
+        max-width: 100%;
+        font-size: 1rem;
+      }
+
+      .feature {
+        order: -1;
+        padding: 10px;
+      }
+
+      .feature img {
+        max-height: 178px;
+      }
+
+      .culture-strip {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        width: 100%;
+        min-width: 0;
+      }
+
+      .culture-pill {
+        min-width: 0;
+        min-height: 70px;
+        padding: 10px;
+        overflow: hidden;
+      }
+
+      .culture-pill:last-child {
+        grid-column: 1 / -1;
+      }
+
+      .culture-pill strong {
+        font-size: .72rem;
+      }
+
+      .culture-pill span {
+        font-size: .78rem;
+        line-height: 1.25;
       }
     }
   </style>
@@ -280,11 +378,25 @@
       <div class="hero-inner">
         <div>
           <p class="eyebrow">Hammond, Louisiana</p>
-          <h1>Live tattoo culture built around artists and experiences.</h1>
-          <p class="lead">Appointments, walk-ins, artist showcases, livestream moments, and recurring events operating inside Famous Ink Tattoo Company.</p>
+          <h1>Famous Ink tattoo culture.</h1>
+          <p class="lead">Walk in, book your artist, catch the shop energy, and follow the events coming out of Famous Ink Tattoo Company.</p>
           <div class="actions">
             <a class="btn primary" href="/famous-ink/book/">Book Appointment</a>
             <a class="btn" href="/famous-ink/artists/">Explore Artists</a>
+          </div>
+          <div class="culture-strip" aria-label="Famous Ink culture highlights">
+            <div class="culture-pill">
+              <strong>Walk-ins</strong>
+              <span>Monday-Saturday</span>
+            </div>
+            <div class="culture-pill">
+              <strong>Artists</strong>
+              <span>Roster and profiles</span>
+            </div>
+            <div class="culture-pill">
+              <strong>Events</strong>
+              <span>Drink & Ink nights</span>
+            </div>
           </div>
         </div>
         <div class="feature" aria-label="Famous Ink social image">
