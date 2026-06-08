@@ -738,6 +738,10 @@
         <h2>Payroll Week Totals</h2>
         <p class="lead" id="payrollWeekLabel">Monday-through-Sunday payroll totals will show after admin loads.</p>
         <div class="toolbar">
+          <button id="currentWeekBtn" class="primary">Current Week</button>
+          <button id="previousWeekBtn">Previous Week</button>
+          <input id="payrollWeekDate" type="date" aria-label="Week of date" />
+          <button id="loadPayrollWeekBtn">Load Week</button>
           <button id="turnInPayrollBtn" class="success">Turn In Payroll Week</button>
         </div>
         <div class="table-wrap">
@@ -874,6 +878,10 @@
       manualClockOutAt: document.getElementById("manualClockOutAt"),
       managerClockInBtn: document.getElementById("managerClockInBtn"),
       addManualShiftBtn: document.getElementById("addManualShiftBtn"),
+      currentWeekBtn: document.getElementById("currentWeekBtn"),
+      previousWeekBtn: document.getElementById("previousWeekBtn"),
+      payrollWeekDate: document.getElementById("payrollWeekDate"),
+      loadPayrollWeekBtn: document.getElementById("loadPayrollWeekBtn"),
       turnInPayrollBtn: document.getElementById("turnInPayrollBtn"),
       payrollCsvBtn: document.getElementById("payrollCsvBtn")
     };
@@ -915,6 +923,12 @@
       }
 
       return `${map.year}-${map.month}-${map.day}`;
+    }
+
+    function addDays(date, days) {
+      const next = new Date(date);
+      next.setDate(next.getDate() + days);
+      return next;
     }
 
     function formatCentralDateTime(iso) {
@@ -1007,6 +1021,14 @@
     function setDefaultManualShiftTimes(force = false) {
       if (force || !els.manualClockInAt.value) els.manualClockInAt.value = defaultShiftValue(8);
       if (force || !els.manualClockOutAt.value) els.manualClockOutAt.value = defaultShiftValue(16);
+    }
+
+    async function loadPayrollWeekFromDate(dateValue) {
+      const date = dateValue || centralDateInputValue();
+      els.date.value = date;
+      els.payrollWeekDate.value = date;
+      setDefaultManualShiftTimes(true);
+      await loadAdmin();
     }
 
     function renderEmployeeOptions(employees) {
@@ -1779,6 +1801,15 @@ if (activeCount >= 4) {
     els.deleteEmployeeBtn.addEventListener("click", deleteEmployee);
     els.managerClockInBtn.addEventListener("click", managerClockIn);
     els.addManualShiftBtn.addEventListener("click", addManualShift);
+    els.currentWeekBtn.addEventListener("click", async () => {
+      await loadPayrollWeekFromDate(centralDateInputValue());
+    });
+    els.previousWeekBtn.addEventListener("click", async () => {
+      await loadPayrollWeekFromDate(centralDateInputValue(addDays(new Date(), -7)));
+    });
+    els.loadPayrollWeekBtn.addEventListener("click", async () => {
+      await loadPayrollWeekFromDate(els.payrollWeekDate.value || els.date.value);
+    });
     els.turnInPayrollBtn.addEventListener("click", turnInPayrollWeek);
     els.payrollCsvBtn.addEventListener("click", async () => {
       await exportCsv("payroll_week");
@@ -1854,8 +1885,12 @@ if (activeCount >= 4) {
     });
     restoreLocalControls();
     els.date.value = centralDateInputValue();
+    els.payrollWeekDate.value = els.date.value;
     setDefaultManualShiftTimes(true);
-    els.date.addEventListener("change", () => setDefaultManualShiftTimes(true));
+    els.date.addEventListener("change", () => {
+      els.payrollWeekDate.value = els.date.value;
+      setDefaultManualShiftTimes(true);
+    });
 
     setInterval(() => {
       els.now.textContent = centralNowLabel();
