@@ -341,11 +341,141 @@
     .btn-link:hover{ opacity:1; }
 
     .loop-strip{
-      border-top:1px solid #1f1f1f;border-bottom:1px solid #1f1f1f;
-      padding:1rem 0;text-align:center;font-size:.8rem;opacity:.9;
+      border-top:1px solid #1f1f1f;
+      border-bottom:1px solid #1f1f1f;
+      padding:1rem 0;
+      opacity:.96;
     }
-    .loop-strip a{ color:#fff;text-decoration:none; }
-    .loop-strip a:hover{ text-decoration:underline; }
+    .icon-strip{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:.8rem;
+      min-width:0;
+    }
+    .icon-strip__title{
+      flex:0 0 auto;
+      margin:0;
+      color:#d7dae0;
+      font-size:.92rem;
+      font-weight:800;
+      letter-spacing:-.02em;
+    }
+    .icon-strip__dot{
+      width:5px;
+      height:5px;
+      flex:0 0 auto;
+      border-radius:999px;
+      background:rgba(255,255,255,.28);
+    }
+    .icon-strip__items{
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+      gap:.7rem;
+      min-width:0;
+    }
+    .icon-strip__item{
+      width:4.6rem;
+      flex:0 0 4.6rem;
+      display:grid;
+      justify-items:center;
+      gap:.38rem;
+      color:#d7dae0;
+      text-decoration:none;
+    }
+    .icon-strip__mark{
+      width:3.35rem;
+      height:3.35rem;
+      display:grid;
+      place-items:center;
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:16px;
+      background:linear-gradient(180deg,rgba(255,255,255,.085),rgba(255,255,255,.035));
+      box-shadow:0 12px 26px rgba(0,0,0,.22), inset 0 1px rgba(255,255,255,.08);
+      transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease;
+      overflow:hidden;
+    }
+    .icon-strip__item:first-child .icon-strip__mark,
+    .icon-strip__item:nth-child(2) .icon-strip__mark{
+      border-color:rgba(216,179,107,.42);
+      box-shadow:0 0 0 1px rgba(216,179,107,.08),0 12px 26px rgba(0,0,0,.22);
+    }
+    .icon-strip__mark img{
+      width:2.6rem;
+      height:2.6rem;
+      object-fit:contain;
+      border-radius:11px;
+    }
+    .icon-strip__mark--sb::before{
+      content:"SB";
+      display:grid;
+      place-items:center;
+      width:2.55rem;
+      height:2.55rem;
+      border-radius:11px;
+      background:#f6f0df;
+      color:#050712;
+      font-size:.98rem;
+      font-weight:1000;
+      letter-spacing:-.08em;
+    }
+    .icon-strip__label{
+      max-width:100%;
+      color:#aeb2bf;
+      font-size:.68rem;
+      font-weight:800;
+      line-height:1.05;
+      text-align:center;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .icon-strip__item:hover,
+    .icon-strip__item:focus-visible{
+      color:#fff;
+      text-decoration:none;
+    }
+    .icon-strip__item:hover .icon-strip__mark,
+    .icon-strip__item:focus-visible .icon-strip__mark{
+      transform:translateY(-2px);
+      border-color:rgba(255,255,255,.28);
+      box-shadow:0 16px 34px rgba(0,0,0,.3), inset 0 1px rgba(255,255,255,.12);
+    }
+    .icon-strip__item:focus-visible{
+      outline:2px solid rgba(216,179,107,.72);
+      outline-offset:4px;
+      border-radius:18px;
+    }
+    @media(max-width:900px){
+      .icon-strip{
+        justify-content:flex-start;
+        overflow-x:auto;
+        padding-bottom:.2rem;
+        scrollbar-width:none;
+      }
+      .icon-strip::-webkit-scrollbar{ display:none; }
+      .icon-strip__items{ justify-content:flex-start; }
+    }
+    @media(max-width:520px){
+      .icon-strip{ gap:.55rem; }
+      .icon-strip__title{ font-size:.84rem; }
+      .icon-strip__items{ gap:.48rem; }
+      .icon-strip__item{
+        width:4.05rem;
+        flex-basis:4.05rem;
+      }
+      .icon-strip__mark{
+        width:3rem;
+        height:3rem;
+        border-radius:14px;
+      }
+      .icon-strip__mark img{
+        width:2.28rem;
+        height:2.28rem;
+      }
+      .icon-strip__label{ font-size:.62rem; }
+    }
 
     [hidden]{ display:none !important; }
 
@@ -566,20 +696,54 @@
       </div>
     </section>
 
-  <section class="section section--band">
+  <section class="section section--band" id="systems-rail" aria-label="Square Bidness systems and active client lanes">
   <div class="container loop-strip">
-    <p>
-      <a href="/work/">Systems</a> ·
-      <a href="/delish/">Delish</a> ·
-      <a href="/puffs/">Puff's Smokehouse</a> ·
-      <a href="/philson-le-fleuriste/">Philson Le Fleuriste</a> ·
-      <a href="/courageaux/">Courageaux</a> ·
-      <a href="/phomatic/">Phomatic Photography</a> ·
-      <a href="/start2finish/">Start 2 Finish</a> ·
-      <a href="/jcelectrical/">JC Electrical Services</a> ·
-      <a href="/mdw/">MDW Commercial Real Estate</a> ·
-      <a href="/richardson/">Richardson Fashion</a>
-    </p>
+    <div class="icon-strip">
+      <p class="icon-strip__title">Systems</p>
+      <span class="icon-strip__dot" aria-hidden="true"></span>
+      <div class="icon-strip__items">
+        <a class="icon-strip__item" href="/work/" aria-label="Systems">
+          <span class="icon-strip__mark icon-strip__mark--sb" aria-hidden="true"></span>
+          <span class="icon-strip__label">Systems</span>
+        </a>
+        <a class="icon-strip__item" href="/delish/" aria-label="Delish">
+          <span class="icon-strip__mark"><img src="/delish/assets/delish-logo-mark-192.png" alt="" loading="lazy" decoding="async" /></span>
+          <span class="icon-strip__label">Delish</span>
+        </a>
+        <a class="icon-strip__item" href="/puffs/" aria-label="Puff's Smokehouse">
+          <span class="icon-strip__mark"><img src="/puffs/icons/icon-192.png" alt="" loading="lazy" decoding="async" /></span>
+          <span class="icon-strip__label">Puff's</span>
+        </a>
+        <a class="icon-strip__item" href="/philson-le-fleuriste/" aria-label="Philson Le Fleuriste">
+          <span class="icon-strip__mark"><img src="/philson-le-fleuriste/assets/favicon_ico/android-chrome-192x192.png" alt="" loading="lazy" decoding="async" /></span>
+          <span class="icon-strip__label">Philson</span>
+        </a>
+        <a class="icon-strip__item" href="/courageaux/" aria-label="Courageaux">
+          <span class="icon-strip__mark"><img src="/courageaux/assets/icon_courageaux_192.png" alt="" loading="lazy" decoding="async" /></span>
+          <span class="icon-strip__label">Courageaux</span>
+        </a>
+        <a class="icon-strip__item" href="/phomatic/" aria-label="Phomatic Photography">
+          <span class="icon-strip__mark"><img src="/phomatic/assets/icons/pho-icon-192.png" alt="" loading="lazy" decoding="async" /></span>
+          <span class="icon-strip__label">Phomatic</span>
+        </a>
+        <a class="icon-strip__item" href="/start2finish/" aria-label="Start 2 Finish">
+          <span class="icon-strip__mark"><img src="/start2finish/assets/icons/android-chrome-192x192.png" alt="" loading="lazy" decoding="async" /></span>
+          <span class="icon-strip__label">Start 2 Finish</span>
+        </a>
+        <a class="icon-strip__item" href="/jcelectrical/" aria-label="JC Electrical Services">
+          <span class="icon-strip__mark"><img src="/jcelectrical/assets/icons/android-chrome-192x192.png" alt="" loading="lazy" decoding="async" /></span>
+          <span class="icon-strip__label">JC Electrical</span>
+        </a>
+        <a class="icon-strip__item" href="/mdw/" aria-label="MDW Commercial Real Estate">
+          <span class="icon-strip__mark"><img src="/mdw/assets/icons/android-chrome-192x192.png" alt="" loading="lazy" decoding="async" /></span>
+          <span class="icon-strip__label">MDW</span>
+        </a>
+        <a class="icon-strip__item" href="/richardson/" aria-label="Richardson Fashion">
+          <span class="icon-strip__mark"><img src="/richardson/icons/icon-192.png" alt="" loading="lazy" decoding="async" /></span>
+          <span class="icon-strip__label">Richardson</span>
+        </a>
+      </div>
+    </div>
   </div>
 </section>
   </main>
