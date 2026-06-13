@@ -50,13 +50,13 @@ export const metadata: Metadata = {
     description: "Free online booking app for barbers, nail technicians, hair stylists, lash artists, and beauty salons. Let clients book 24/7.",
     type: "website",
     url: "https://booking.squarebidness.com",
-    images: [{ url: "/booking-meta.jpg", width: 1200, height: 630, alt: "Online Booking for Barbers and Beauty Professionals" }],
+    images: [{ url: "//booking-meta-final.png", width: 1200, height: 630, alt: "Online Booking for Barbers and Beauty Professionals" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Online Booking App for Barbers, Nail Techs & Hair Stylists",
     description: "Free online booking app for barbers, nail technicians, hair stylists, lash artists, and beauty salons.",
-    images: ["/booking-meta.jpg"],
+    images: ["/booking-meta-final.png"],
   },
   alternates: {
     canonical: "https://booking.squarebidness.com",
