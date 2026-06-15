@@ -133,8 +133,13 @@
   "rewrites": [
     {
       "has": [{ "type": "host", "value": "health.squarebidness.com" }],
-      "source": "/((?!api/).*)",
-      "destination": "/health/$1"
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    },
+    {
+      "has": [{ "type": "host", "value": "health.squarebidness.com" }],
+      "source": "/:path*",
+      "destination": "/health/:path*"
     }
   ],
   "redirects": [
