@@ -1,5 +1,6 @@
 import { Redis } from "@upstash/redis";
 import { writeLedgerEvent } from "../_lib/supabase-ledger.js";
+import { sendDelishSms } from "../_lib/send-delish-sms.js";
 
 export const config = {
   runtime: "nodejs"
@@ -26,6 +27,9 @@ const PAYROLL_TURN_INS_KEY = "delish:timeclock:payroll_turn_ins";
 const MAX_RECENT = 25;
 const MAX_SHIFTS = 1000;
 const BREAK_DURATION_MINUTES = 15;
+const CLOCK_IN_START_MINUTES = 5 * 60;
+const CLOCK_IN_END_MINUTES = 22 * 60;
+const AUTO_CLOCK_OUT_DEVICE = "auto-midnight-clockout";
 
 function send(res, status, data) {
   res.status(status).json(data);
@@ -113,10 +117,77 @@ function getCentralDateParts(iso) {
   };
 }
 
+function getCentralTimeParts(iso = nowIso()) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: TZ,
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23"
+  }).formatToParts(new Date(iso));
+
+  const map = {};
+  for (const part of parts) {
+    if (part.type !== "literal") map[part.type] = part.value;
+  }
+
+  return {
+    hour: Number(map.hour || 0),
+    minute: Number(map.minute || 0)
+  };
+}
+
+function getCentralMinutesSinceMidnight(iso = nowIso()) {
+  const { hour, minute } = getCentralTimeParts(iso);
+  return (hour * 60) + minute;
+}
+
+function isWithinClockInWindow(iso = nowIso()) {
+  const minutes = getCentralMinutesSinceMidnight(iso);
+  return minutes >= CLOCK_IN_START_MINUTES && minutes <= CLOCK_IN_END_MINUTES;
+}
+
 function addDaysToDateKey(dateKey, days) {
   const [year, month, day] = String(dateKey || "").split("-").map(Number);
   const date = new Date(Date.UTC(year, month - 1, day + Number(days || 0)));
   return date.toISOString().slice(0, 10);
+}
+
+function getCentralDateTimeParts(iso) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: TZ,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23"
+  }).formatToParts(new Date(iso));
+
+  const map = {};
+  for (const part of parts) {
+    if (part.type !== "literal") map[part.type] = part.value;
+  }
+
+  return {
+    dateKey: `${map.year}-${map.month}-${map.day}`,
+    hour: Number(map.hour || 0),
+    minute: Number(map.minute || 0)
+  };
+}
+
+function centralLocalTimeToUtcIso(dateKey, hour = 0, minute = 0) {
+  const [year, month, day] = String(dateKey || "").split("-").map(Number);
+  const approx = Date.UTC(year, month - 1, day, Number(hour || 0) + 6, Number(minute || 0));
+
+  for (let offset = -720; offset <= 720; offset += 1) {
+    const iso = new Date(approx + (offset * 60000)).toISOString();
+    const parts = getCentralDateTimeParts(iso);
+    if (parts.dateKey === dateKey && parts.hour === Number(hour || 0) && parts.minute === Number(minute || 0)) {
+      return iso;
+    }
+  }
+
+  return new Date(approx).toISOString();
 }
 
 function getPayrollPeriodForDate(dateKey = getCentralDateKey(nowIso())) {
@@ -459,6 +530,108 @@ async function maybeTurnInPayroll(timestamp, activeMap) {
   return turnInPayrollPeriod(getPayrollPeriodForDate(dateKey), timestamp, "last_sunday_clock_out");
 }
 
+function getTimeclockAlertRecipients() {
+  return [
+    process.env.DELISH_TIMECLOCK_ALERT_NUMBER,
+    process.env.DELISH_ALERT_NUMBER,
+    process.env.DELISH_ORDER_ALERT_NUMBER
+  ]
+    .map(value => String(value || "").trim())
+    .filter(Boolean);
+}
+
+async function sendAutoClockOutAlert(completed) {
+  const recipients = getTimeclockAlertRecipients();
+  if (!recipients.length) {
+    return [{ ok: false, skipped: true, reason: "missing_alert_recipient" }];
+  }
+
+  const message =
+    `Delish Timeclock: ${completed.name} was still clocked in at midnight and was automatically clocked out at 12:00 AM. Please review/edit if needed.`;
+
+  return Promise.all(
+    recipients.map(to => sendDelishSms({ to, message }).catch(error => ({
+      ok: false,
+      to,
+      error: error?.message || String(error)
+    })))
+  );
+}
+
+export async function runDelishMidnightAutoClockOut(timestamp = nowIso()) {
+  const currentDate = getCentralDateKey(timestamp);
+  const midnightIso = centralLocalTimeToUtcIso(currentDate, 0, 0);
+  const midnightMs = new Date(midnightIso).getTime();
+  const activeMap = await getActiveMap();
+  const completed = [];
+  const alertResults = [];
+
+  for (const [key, shift] of Object.entries(activeMap || {})) {
+    const clockInMs = new Date(shift?.clockInAt).getTime();
+    if (!Number.isFinite(clockInMs) || clockInMs >= midnightMs) continue;
+
+    const autoCompleted = {
+      ...buildShiftUpdate(shift, shift.clockInAt, midnightIso),
+      clockOutDevice: AUTO_CLOCK_OUT_DEVICE,
+      autoClockOut: true,
+      autoClockOutAt: midnightIso,
+      autoClockOutReason: "Still clocked in at midnight.",
+      needsManagerReview: true
+    };
+
+    delete activeMap[key];
+    completed.push(autoCompleted);
+  }
+
+  if (!completed.length) {
+    return {
+      ok: true,
+      message: "No active Delish shifts needed midnight auto clock-out.",
+      closedCount: 0,
+      closed: []
+    };
+  }
+
+  await setActiveMap(activeMap);
+
+  for (const shift of completed) {
+    await pushPunch({
+      name: shift.name,
+      action: "auto_midnight_clock_out",
+      timestamp: midnightIso,
+      device: AUTO_CLOCK_OUT_DEVICE
+    });
+    await pushCompletedShift(shift);
+
+    const alertResult = await sendAutoClockOutAlert(shift);
+    alertResults.push({ shiftId: shift.id, employeeName: shift.name, alertResult });
+
+    await logTimeclockEvent("auto_midnight_clock_out", shift.id, {
+      shift,
+      employeeName: shift.name,
+      clockOutAt: midnightIso,
+      device: AUTO_CLOCK_OUT_DEVICE,
+      alertResult,
+    });
+  }
+
+  const payrollTurnIn = await maybeTurnInPayroll(midnightIso, activeMap);
+  if (payrollTurnIn) {
+    await logTimeclockEvent("payroll_turned_in", payrollTurnIn.id, {
+      payrollTurnIn,
+    });
+  }
+
+  return {
+    ok: true,
+    message: `${completed.length} Delish shift${completed.length === 1 ? "" : "s"} auto clocked out at midnight.`,
+    closedCount: completed.length,
+    closed: completed,
+    alertResults,
+    payrollTurnIn
+  };
+}
+
 async function turnInPayrollPeriod(period, timestamp = nowIso(), trigger = "manager_turn_in") {
   const periodStart = period.periodStart;
   const periodEnd = period.periodEnd;
@@ -696,14 +869,8 @@ export default async function handler(req, res) {
         return send(res, 401, { ok: false, error: "Employee number not found." });
       }
 
-      const hour = new Date().toLocaleString("en-US", {
-        timeZone: TZ,
-        hour: "numeric",
-        hour12: false
-      });
-
-      if (Number(hour) < 8 || Number(hour) > 18) {
-        return send(res, 403, { ok: false, error: "Outside clock-in hours." });
+      if (!isWithinClockInWindow()) {
+        return send(res, 403, { ok: false, error: "Outside clock-in hours. Clock-in is open from 5:00 AM to 10:00 PM." });
       }
 
       const activeMap = await getActiveMap();
