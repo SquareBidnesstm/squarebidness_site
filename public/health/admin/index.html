@@ -1,0 +1,412 @@
+<!-- /public/health/admin/index.html -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>CNA Applications — Admin | Square Bidness Health</title>
+<meta name="robots" content="noindex,nofollow" />
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/health-32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/health-16.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/health-180.png" />
+<style>
+:root{
+  --gold:#b79c6e;
+  --gold2:#8f7a55;
+  --bg:#f6f4ef;
+  --ink:#111111;
+  --muted:rgba(0,0,0,.60);
+  --card:#ffffff;
+  --line:rgba(0,0,0,.09);
+  --shadow:0 4px 24px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:900px;margin:0 auto;padding:0 18px}
+
+/* Nav */
+.nav{background:#111;border-bottom:1px solid rgba(255,255,255,.08);padding:0}
+.nav-inner{min-height:56px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{color:#fff;font-weight:700;font-size:14px;letter-spacing:.3px;display:flex;align-items:center;gap:8px}
+.brand img{width:24px;height:24px;border-radius:6px}
+.nav-badge{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.45)}
+
+/* Auth gate */
+#authGate{
+  display:flex;align-items:center;justify-content:center;
+  min-height:calc(100vh - 56px);padding:40px 18px;
+}
+.auth-card{
+  background:var(--card);border:1px solid var(--line);border-radius:20px;
+  box-shadow:var(--shadow);padding:36px 32px;width:100%;max-width:380px;
+}
+.auth-card h2{font-size:20px;margin-bottom:6px}
+.auth-card p{color:var(--muted);font-size:14px;margin-bottom:20px;line-height:1.6}
+.auth-card input{
+  width:100%;border:1px solid rgba(0,0,0,.12);border-radius:12px;
+  background:#fff;color:#111;padding:12px 14px;font:inherit;outline:none;
+  transition:border-color .2s,box-shadow .2s;margin-bottom:12px;
+}
+.auth-card input:focus{border-color:rgba(183,156,110,.75);box-shadow:0 0 0 4px rgba(183,156,110,.12)}
+.auth-card .err{color:#991b1b;font-size:13px;margin-bottom:10px;display:none}
+.btn{
+  appearance:none;border:none;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:12px 22px;border-radius:999px;font-weight:600;font-size:14px;
+  letter-spacing:.2px;transition:.2s;
+}
+.btn-gold{background:var(--gold);color:#fff;width:100%}
+.btn-gold:hover{background:var(--gold2)}
+.btn-gold:disabled{opacity:.6;cursor:not-allowed}
+.btn-sm{padding:6px 14px;font-size:12px}
+.btn-ghost{background:rgba(0,0,0,.05);color:var(--ink)}
+.btn-ghost:hover{background:rgba(0,0,0,.09)}
+
+/* Dashboard */
+#dashboard{display:none;padding:28px 0 60px}
+.dash-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px;flex-wrap:wrap}
+.dash-title{font-size:22px;font-weight:700}
+.count-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:12px;font-weight:600;letter-spacing:.3px;
+  padding:4px 10px;border-radius:999px;
+  background:rgba(183,156,110,.14);border:1px solid rgba(183,156,110,.28);color:var(--gold2);
+}
+
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.filter-chip{
+  font-size:12px;font-weight:600;letter-spacing:.4px;padding:6px 14px;
+  border-radius:999px;border:1px solid rgba(0,0,0,.12);background:#fff;
+  cursor:pointer;color:var(--muted);transition:.18s;
+}
+.filter-chip.active,.filter-chip:hover{background:#111;color:#fff;border-color:#111}
+
+.app-list{display:grid;gap:14px}
+.no-apps{padding:52px 0;text-align:center;color:var(--muted);font-size:15px}
+
+/* Application card */
+.app-card{
+  background:var(--card);border:1px solid var(--line);border-radius:18px;
+  box-shadow:var(--shadow);overflow:hidden;
+}
+.app-card-head{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  padding:18px 20px 14px;border-bottom:1px solid var(--line);
+}
+.app-name{font-size:17px;font-weight:700;margin-bottom:3px}
+.app-date{font-size:12px;color:var(--muted)}
+.status-badge{
+  flex-shrink:0;font-size:11px;font-weight:700;letter-spacing:.6px;
+  text-transform:uppercase;padding:4px 10px;border-radius:999px;white-space:nowrap;
+}
+.s-new{background:rgba(183,156,110,.14);border:1px solid rgba(183,156,110,.28);color:#8f7a55}
+.s-contacted{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);color:#1d4ed8}
+.s-scheduled{background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.25);color:#6d28d9}
+.s-placed{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:#15803d}
+.s-declined{background:rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.12);color:rgba(0,0,0,.45)}
+
+.app-card-body{padding:14px 20px}
+.info-row{display:flex;flex-wrap:wrap;gap:6px 20px;margin-bottom:10px}
+.info-item{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:5px}
+.info-item strong{color:var(--ink);font-weight:600}
+.tag-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.tag{
+  font-size:11px;font-weight:600;padding:3px 9px;border-radius:999px;
+  background:rgba(0,0,0,.05);border:1px solid rgba(0,0,0,.08);color:var(--muted);
+}
+.notes-block{
+  font-size:13px;color:var(--muted);line-height:1.55;
+  background:#f8f7f4;border-radius:10px;padding:10px 12px;margin-bottom:10px;
+}
+.notes-label{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:rgba(0,0,0,.35);margin-bottom:4px}
+
+.app-card-foot{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:12px 20px;border-top:1px solid var(--line);background:rgba(0,0,0,.015);
+  flex-wrap:wrap;
+}
+.sms-tag{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:5px}
+.sms-tag span{
+  display:inline-block;width:7px;height:7px;border-radius:50%;
+  background:#22c55e;flex-shrink:0;
+}
+.sms-no span{background:#d1d5db}
+
+.status-select{
+  font-size:12px;font-weight:600;padding:6px 10px;border-radius:10px;
+  border:1px solid rgba(0,0,0,.12);background:#fff;color:var(--ink);
+  cursor:pointer;outline:none;
+}
+.status-select:focus{border-color:rgba(183,156,110,.7)}
+
+.saving{font-size:12px;color:var(--muted);display:none}
+
+/* Loading */
+.loading{padding:52px 0;text-align:center;color:var(--muted)}
+.spinner{
+  width:28px;height:28px;border:2px solid rgba(0,0,0,.1);
+  border-top-color:var(--gold);border-radius:50%;
+  animation:spin .7s linear infinite;margin:0 auto 12px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:600px){
+  .auth-card{padding:26px 20px}
+  .app-card-head{flex-direction:column;gap:8px}
+  .dash-header{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap nav-inner">
+    <div class="brand">
+      <img src="/assets/health-48.png" alt="Square Bidness Health" />
+      Square Bidness Health
+    </div>
+    <span class="nav-badge">Admin</span>
+  </div>
+</nav>
+
+<!-- Auth Gate -->
+<div id="authGate">
+  <div class="auth-card">
+    <h2>Admin Access</h2>
+    <p>Enter the admin token to view CNA applications.</p>
+    <div id="authErr" class="err">Incorrect token. Try again.</div>
+    <input id="tokenInput" type="password" placeholder="Admin token" autocomplete="current-password" />
+    <button id="authBtn" class="btn btn-gold" type="button">Enter</button>
+  </div>
+</div>
+
+<!-- Dashboard -->
+<div id="dashboard">
+  <div class="wrap">
+    <div class="dash-header">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <h1 class="dash-title">CNA Applications</h1>
+        <span id="countBadge" class="count-badge">— total</span>
+      </div>
+      <button id="refreshBtn" class="btn btn-ghost btn-sm" type="button">↻ Refresh</button>
+    </div>
+
+    <div class="filter-bar" id="filterBar">
+      <button class="filter-chip active" data-filter="all">All</button>
+      <button class="filter-chip" data-filter="new">New</button>
+      <button class="filter-chip" data-filter="contacted">Contacted</button>
+      <button class="filter-chip" data-filter="scheduled">Scheduled</button>
+      <button class="filter-chip" data-filter="placed">Placed</button>
+      <button class="filter-chip" data-filter="declined">Declined</button>
+    </div>
+
+    <div id="appList" class="app-list">
+      <div class="loading">
+        <div class="spinner"></div>
+        Loading applications…
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const API = "https://www.squarebidness.com/api/health/admin-applications";
+  let token = sessionStorage.getItem("health_admin_token") || "";
+  let allApps = [];
+  let activeFilter = "all";
+
+  // --- Auth ---
+  const authGate  = document.getElementById("authGate");
+  const dashboard = document.getElementById("dashboard");
+  const authErr   = document.getElementById("authErr");
+  const tokenInput = document.getElementById("tokenInput");
+  const authBtn   = document.getElementById("authBtn");
+
+  function showDash(){ authGate.style.display="none"; dashboard.style.display="block"; }
+  function showAuth(){ authGate.style.display="flex";  dashboard.style.display="none"; }
+
+  authBtn.addEventListener("click", tryAuth);
+  tokenInput.addEventListener("keydown", function(e){ if(e.key==="Enter") tryAuth(); });
+
+  async function tryAuth(){
+    const t = tokenInput.value.trim();
+    if(!t) return;
+    authBtn.disabled = true;
+    authBtn.textContent = "Checking…";
+    authErr.style.display = "none";
+    const ok = await fetchApps(t);
+    authBtn.disabled = false;
+    authBtn.textContent = "Enter";
+    if(ok){
+      token = t;
+      sessionStorage.setItem("health_admin_token", t);
+      tokenInput.value = "";
+      showDash();
+    } else {
+      authErr.style.display = "block";
+    }
+  }
+
+  // --- Fetch ---
+  async function fetchApps(tok){
+    try{
+      const r = await fetch(API, {
+        headers:{ "Authorization": "Bearer " + tok }
+      });
+      if(r.status === 401) return false;
+      if(!r.ok) throw new Error("Server error");
+      const data = await r.json();
+      allApps = data.applications || [];
+      renderApps();
+      updateCount();
+      return true;
+    }catch(e){
+      document.getElementById("appList").innerHTML =
+        '<div class="no-apps">Error loading applications. Check console.</div>';
+      return true;
+    }
+  }
+
+  // --- Render ---
+  function renderApps(){
+    const list = document.getElementById("appList");
+    const filtered = activeFilter === "all"
+      ? allApps
+      : allApps.filter(a => a.status === activeFilter);
+
+    if(!filtered.length){
+      list.innerHTML = '<div class="no-apps">No applications' +
+        (activeFilter !== "all" ? ' with status "' + activeFilter + '"' : '') + '.</div>';
+      return;
+    }
+    list.innerHTML = filtered.map(appCard).join("");
+
+    // Status selects
+    list.querySelectorAll(".status-select").forEach(function(sel){
+      sel.addEventListener("change", async function(){
+        const id = this.dataset.id;
+        const status = this.value;
+        const saving = document.getElementById("saving-" + id);
+        saving.style.display = "inline";
+        try{
+          const r = await fetch(API, {
+            method:"PATCH",
+            headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},
+            body: JSON.stringify({id, status}),
+          });
+          if(r.ok){
+            const app = allApps.find(a => String(a.id)===String(id));
+            if(app) app.status = status;
+            const badge = document.getElementById("badge-" + id);
+            if(badge){ badge.className = "status-badge s-" + status; badge.textContent = status; }
+          }
+        }finally{
+          saving.style.display = "none";
+        }
+      });
+    });
+  }
+
+  function appCard(a){
+    const date = a.created_at
+      ? new Date(a.created_at).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})
+      : "—";
+
+    const tags = [a.availability, a.preferred_shift, a.travel_range, a.experience]
+      .filter(Boolean)
+      .map(function(t){ return '<span class="tag">' + esc(t) + '</span>'; })
+      .join("");
+
+    const facTypes = a.facility_types
+      ? a.facility_types.split(",").map(function(f){
+          return '<span class="tag">' + esc(f.trim()) + '</span>';
+        }).join("")
+      : "";
+
+    const notes = a.notes
+      ? '<div class="notes-block"><div class="notes-label">Notes</div>' + esc(a.notes) + '</div>'
+      : "";
+
+    const certLine = [
+      a.cert_number ? "Cert #" + a.cert_number : null,
+      a.cert_expiry ? "Exp " + a.cert_expiry : null,
+    ].filter(Boolean).join(" · ");
+
+    return [
+      '<div class="app-card">',
+        '<div class="app-card-head">',
+          '<div>',
+            '<div class="app-name">' + esc(a.full_name || "—") + '</div>',
+            '<div class="app-date">' + date + (a.city ? ' · ' + esc(a.city) : '') + '</div>',
+          '</div>',
+          '<span id="badge-' + a.id + '" class="status-badge s-' + (a.status||"new") + '">' + (a.status||"new") + '</span>',
+        '</div>',
+        '<div class="app-card-body">',
+          '<div class="info-row">',
+            '<div class="info-item"><strong>' + esc(a.phone||"—") + '</strong></div>',
+            (a.email ? '<div class="info-item">' + esc(a.email) + '</div>' : ''),
+          '</div>',
+          (certLine ? '<div class="info-row"><div class="info-item">' + esc(certLine) + '</div></div>' : ''),
+          (tags ? '<div class="tag-row">' + tags + '</div>' : ''),
+          (facTypes ? '<div class="tag-row">' + facTypes + '</div>' : ''),
+          notes,
+        '</div>',
+        '<div class="app-card-foot">',
+          '<div class="sms-tag ' + (a.sms_ok ? '' : 'sms-no') + '">',
+            '<span></span>',
+            a.sms_ok ? 'SMS OK' : 'No SMS',
+          '</div>',
+          '<div style="display:flex;align-items:center;gap:8px">',
+            '<span id="saving-' + a.id + '" class="saving">Saving…</span>',
+            '<select class="status-select" data-id="' + a.id + '">',
+              ['new','contacted','scheduled','placed','declined'].map(function(s){
+                return '<option value="' + s + '"' + (a.status===s?' selected':'') + '>' + s + '</option>';
+              }).join(""),
+            '</select>',
+          '</div>',
+        '</div>',
+      '</div>',
+    ].join("");
+  }
+
+  function updateCount(){
+    const badge = document.getElementById("countBadge");
+    if(badge) badge.textContent = allApps.length + " total";
+  }
+
+  function esc(s){
+    return String(s)
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;");
+  }
+
+  // --- Filters ---
+  document.getElementById("filterBar").addEventListener("click", function(e){
+    const chip = e.target.closest(".filter-chip");
+    if(!chip) return;
+    document.querySelectorAll(".filter-chip").forEach(function(c){ c.classList.remove("active"); });
+    chip.classList.add("active");
+    activeFilter = chip.dataset.filter;
+    renderApps();
+  });
+
+  // --- Refresh ---
+  document.getElementById("refreshBtn").addEventListener("click", function(){
+    if(token) fetchApps(token);
+  });
+
+  // --- Auto-login from session ---
+  if(token){
+    showDash();
+    fetchApps(token);
+  } else {
+    showAuth();
+  }
+})();
+</script>
+</body>
+</html>
