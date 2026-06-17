@@ -151,10 +151,46 @@ a{color:inherit;text-decoration:none}
 }
 @keyframes spin{to{transform:rotate(360deg)}}
 
+/* Quick links panel */
+.res-bar{margin-bottom:18px}
+.res-bar summary{
+  list-style:none;cursor:pointer;
+  font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;
+  color:var(--muted);display:inline-flex;align-items:center;gap:6px;
+  user-select:none;padding:4px 0;
+}
+.res-bar summary::-webkit-details-marker{display:none}
+.res-bar summary:hover{color:var(--ink)}
+.res-bar[open] summary{color:var(--ink)}
+.res-panel{
+  display:flex;flex-wrap:wrap;gap:18px 36px;
+  background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:16px 20px;margin-top:10px;
+}
+.res-label{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(0,0,0,.32);margin-bottom:7px}
+.res-link{display:block;font-size:13px;font-weight:600;color:var(--gold2);margin-bottom:5px;text-decoration:none}
+.res-link:hover{color:var(--ink)}
+/* Text SMS */
+.text-link{
+  display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;
+  color:var(--gold2);padding:4px 10px;border-radius:999px;
+  background:rgba(183,156,110,.1);border:1px solid rgba(183,156,110,.22);
+  transition:.15s;text-decoration:none;
+}
+.text-link:hover{background:rgba(183,156,110,.2);color:var(--ink)}
+/* Delete */
+.del-btn{
+  background:none;border:none;cursor:pointer;
+  font-size:13px;color:rgba(0,0,0,.25);padding:4px 7px;border-radius:7px;
+  transition:.15s;line-height:1;
+}
+.del-btn:hover{color:#dc2626;background:rgba(220,38,38,.08)}
+
 @media(max-width:600px){
   .auth-card{padding:26px 20px}
   .app-card-head{flex-direction:column;gap:8px}
   .dash-header{flex-direction:column;align-items:flex-start}
+  .res-panel{gap:14px 24px}
 }
 </style>
 </head>
@@ -191,6 +227,30 @@ a{color:inherit;text-decoration:none}
       </div>
       <button id="refreshBtn" class="btn btn-ghost btn-sm" type="button">↻ Refresh</button>
     </div>
+
+    <details class="res-bar">
+      <summary>▾ Quick Links</summary>
+      <div class="res-panel">
+        <div>
+          <div class="res-label">Verify Credentials</div>
+          <a class="res-link" href="https://ldh.la.gov/health-standards-section/cna-registry" target="_blank" rel="noopener">LA CNA Registry (LDH)</a>
+          <a class="res-link" href="https://tlc.dhh.la.gov/" target="_blank" rel="noopener">CNA Cert Lookup — Direct</a>
+        </div>
+        <div>
+          <div class="res-label">Background Checks</div>
+          <a class="res-link" href="https://checkr.com" target="_blank" rel="noopener">Checkr</a>
+          <a class="res-link" href="https://www.sterlingcheck.com" target="_blank" rel="noopener">Sterling</a>
+        </div>
+        <div>
+          <div class="res-label">CPR / BLS</div>
+          <a class="res-link" href="https://www.heart.org/en/cpr" target="_blank" rel="noopener">AHA — BLS Reference</a>
+        </div>
+        <div>
+          <div class="res-label">Data</div>
+          <a class="res-link" href="https://supabase.com/dashboard/project/zmqirbhjywmhtqsnvuru/editor" target="_blank" rel="noopener">Supabase Table Editor</a>
+        </div>
+      </div>
+    </details>
 
     <div class="filter-bar" id="filterBar">
       <button class="filter-chip active" data-filter="all">All</button>
@@ -307,12 +367,38 @@ a{color:inherit;text-decoration:none}
         }
       });
     });
+
+    // Delete buttons
+    list.querySelectorAll(".del-btn").forEach(function(btn){
+      btn.addEventListener("click", async function(){
+        const id = this.dataset.id;
+        const name = this.closest(".app-card").querySelector(".app-name").textContent;
+        if(!confirm("Remove " + name + "? This cannot be undone.")) return;
+        const r = await fetch(API, {
+          method:"DELETE",
+          headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},
+          body: JSON.stringify({id}),
+        });
+        if(r.ok){
+          allApps = allApps.filter(a => String(a.id) !== String(id));
+          renderApps();
+          updateCount();
+        }
+      });
+    });
   }
 
   function appCard(a){
     const date = a.created_at
       ? new Date(a.created_at).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})
       : "—";
+
+    const firstName = (a.full_name || "").split(" ")[0];
+    const cleanPhone = (a.phone || "").replace(/\D/g, "");
+    const smsBody = "Hi " + firstName + ", this is Marcus with Square Bidness Health. We received your CNA application — thank you for applying. I’d like to connect this week about placement and next steps. What’s a good time to call?";
+    const textLink = cleanPhone
+      ? '<a class="text-link" href="sms:' + cleanPhone + '&body=' + encodeURIComponent(smsBody) + '">&#9993; Text</a>'
+      : '';
 
     const tags = [a.availability, a.preferred_shift, a.travel_range, a.experience]
       .filter(Boolean)
@@ -354,9 +440,12 @@ a{color:inherit;text-decoration:none}
           notes,
         '</div>',
         '<div class="app-card-foot">',
-          '<div class="sms-tag ' + (a.sms_ok ? '' : 'sms-no') + '">',
-            '<span></span>',
-            a.sms_ok ? 'SMS OK' : 'No SMS',
+          '<div style="display:flex;align-items:center;gap:8px">',
+            '<div class="sms-tag ' + (a.sms_ok ? '' : 'sms-no') + '">',
+              '<span></span>',
+              a.sms_ok ? 'SMS OK' : 'No SMS',
+            '</div>',
+            textLink,
           '</div>',
           '<div style="display:flex;align-items:center;gap:8px">',
             '<span id="saving-' + a.id + '" class="saving">Saving…</span>',
@@ -365,6 +454,7 @@ a{color:inherit;text-decoration:none}
                 return '<option value="' + s + '"' + (a.status===s?' selected':'') + '>' + s + '</option>';
               }).join(""),
             '</select>',
+            '<button class="del-btn" data-id="' + a.id + '" title="Remove row">✕</button>',
           '</div>',
         '</div>',
       '</div>',

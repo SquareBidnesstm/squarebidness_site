@@ -12,7 +12,7 @@ export default async function handler(req, res) {
   const allowed = ["https://www.squarebidness.com", "https://health.squarebidness.com"];
   const origin = req.headers.origin;
   if (allowed.includes(origin)) res.setHeader("Access-Control-Allow-Origin", origin);
-  res.setHeader("Access-Control-Allow-Methods", "GET, PATCH, OPTIONS");
+  res.setHeader("Access-Control-Allow-Methods", "GET, PATCH, DELETE, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   if (req.method === "OPTIONS") return res.status(200).end();
 
@@ -48,6 +48,21 @@ export default async function handler(req, res) {
     if (error) {
       console.error("[health/admin-applications] PATCH error:", error);
       return res.status(500).json({ error: "Could not update status." });
+    }
+    return res.status(200).json({ ok: true });
+  }
+
+  if (req.method === "DELETE") {
+    const { id } = req.body || {};
+    if (!id) return res.status(400).json({ error: "Missing id." });
+    const { error } = await supabase
+      .from("health_cna_applications")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      console.error("[health/admin-applications] DELETE error:", error);
+      return res.status(500).json({ error: "Could not delete." });
     }
     return res.status(200).json({ ok: true });
   }
