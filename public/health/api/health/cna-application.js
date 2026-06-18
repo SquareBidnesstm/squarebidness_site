@@ -68,5 +68,25 @@ export default async function handler(req, res) {
     console.error("[health/cna-application] SMS notify error:", smsErr);
   }
 
+  // Email notify Marcus
+  try {
+    const key = process.env.RESEND_API_KEY;
+    const from_addr = process.env.RESEND_FROM || "Square Bidness <noreply@squarebidness.com>";
+    if (key) {
+      await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          from: from_addr,
+          to: ["squarebidnessapparel@gmail.com"],
+          subject: `[SBHealth] New CNA App: ${String(full_name).trim()}`,
+          text: `New CNA application received.\n\nName: ${String(full_name).trim()}\nPhone: ${String(phone).trim()}\nCity: ${city || "not provided"}\nCert #: ${cert_number || "not provided"}\nCert Expiry: ${cert_expiry || "not provided"}\nExperience: ${experience || "not provided"}\nAvailability: ${availability || "not provided"}\nSMS OK: ${sms_ok}\n\nView all at health.squarebidness.com/admin/`,
+        }),
+      });
+    }
+  } catch (emailErr) {
+    console.error("[health/cna-application] Email notify error:", emailErr);
+  }
+
   return res.status(200).json({ ok: true, message: "Application received." });
 }
