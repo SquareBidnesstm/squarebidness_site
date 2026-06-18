@@ -8,6 +8,7 @@ create table if not exists health_cna_applications (
   phone            text        not null,
   email            text,
   city             text,
+  license_type     text        not null default 'CNA',
   cert_number      text,
   cert_expiry      text,
   experience       text,

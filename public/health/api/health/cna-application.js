@@ -17,7 +17,7 @@ export default async function handler(req, res) {
 
   const {
     full_name, phone, email, city,
-    cert_number, cert_expiry, experience,
+    license_type, cert_number, cert_expiry, experience,
     availability, travel_range, preferred_shift,
     facility_types, notes, sms_ok,
   } = req.body || {};
@@ -31,6 +31,7 @@ export default async function handler(req, res) {
     phone:           String(phone).trim(),
     email:           email          ? String(email).trim().toLowerCase()   : null,
     city:            city           ? String(city).trim()                   : null,
+    license_type:    license_type   ? String(license_type).trim()           : "CNA",
     cert_number:     cert_number    ? String(cert_number).trim()            : null,
     cert_expiry:     cert_expiry    ? String(cert_expiry).trim()            : null,
     experience:      experience     ? String(experience).trim()             : null,
@@ -79,8 +80,8 @@ export default async function handler(req, res) {
         body: JSON.stringify({
           from: from_addr,
           to: ["squarebidnessapparel@gmail.com"],
-          subject: `[SBHealth] New CNA App: ${String(full_name).trim()}`,
-          text: `New CNA application received.\n\nName: ${String(full_name).trim()}\nPhone: ${String(phone).trim()}\nCity: ${city || "not provided"}\nCert #: ${cert_number || "not provided"}\nCert Expiry: ${cert_expiry || "not provided"}\nExperience: ${experience || "not provided"}\nAvailability: ${availability || "not provided"}\nSMS OK: ${sms_ok}\n\nView all at health.squarebidness.com/admin/`,
+          subject: `[SBHealth] New ${license_type || "CNA"} App: ${String(full_name).trim()}`,
+          text: `New ${license_type || "CNA"} application received.\n\nName: ${String(full_name).trim()}\nPhone: ${String(phone).trim()}\nCity: ${city || "not provided"}\nLicense Type: ${license_type || "CNA"}\nLicense #: ${cert_number || "not provided"}\nExpiry: ${cert_expiry || "not provided"}\nExperience: ${experience || "not provided"}\nAvailability: ${availability || "not provided"}\nSMS OK: ${sms_ok}\n\nView all at health.squarebidness.com/admin/`,
         }),
       });
     }
