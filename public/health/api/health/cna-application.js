@@ -48,7 +48,26 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: "Could not save application. Please try again." });
   }
 
-  // TODO: wire Twilio SMS notification when health ops phone number is confirmed
+  // Notify Marcus via SMS
+  try {
+    const sid      = process.env.TWILIO_ACCOUNT_SID;
+    const auth     = process.env.TWILIO_AUTH_TOKEN;
+    const toPhone  = process.env.HEALTH_OPS_NOTIFY_PHONE;
+    const fromPhone = process.env.TWILIO_HEALTH_NUMBER;
+    if (sid && auth && toPhone && fromPhone) {
+      const msg = `[SBHealth] New CNA app: ${String(full_name).trim()} — ${String(phone).trim()} — ${city || "no city"}`;
+      await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
+        method: "POST",
+        headers: {
+          "Authorization": "Basic " + Buffer.from(`${sid}:${auth}`).toString("base64"),
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({ To: toPhone, From: fromPhone, Body: msg }),
+      });
+    }
+  } catch (smsErr) {
+    console.error("[health/cna-application] SMS notify error:", smsErr);
+  }
 
   return res.status(200).json({ ok: true, message: "Application received." });
 }
