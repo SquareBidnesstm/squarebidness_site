@@ -53,8 +53,7 @@ export default async function handler(req, res) {
     const sid      = process.env.TWILIO_ACCOUNT_SID;
     const auth     = process.env.TWILIO_AUTH_TOKEN;
     const toPhone  = process.env.HEALTH_OPS_NOTIFY_PHONE;
-    const fromPhone = process.env.TWILIO_HEALTH_NUMBER;
-    if (sid && auth && toPhone && fromPhone) {
+    if (sid && auth && toPhone) {
       const msg = `[SBHealth] New CNA app: ${String(full_name).trim()} — ${String(phone).trim()} — ${city || "no city"}`;
       await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
         method: "POST",
@@ -62,7 +61,7 @@ export default async function handler(req, res) {
           "Authorization": "Basic " + Buffer.from(`${sid}:${auth}`).toString("base64"),
           "Content-Type": "application/x-www-form-urlencoded",
         },
-        body: new URLSearchParams({ To: toPhone, From: fromPhone, Body: msg }),
+        body: new URLSearchParams({ To: toPhone, MessagingServiceSid: "MG00fde6c9496ded4f835d99413b5a09c3", Body: msg }),
       });
     }
   } catch (smsErr) {
