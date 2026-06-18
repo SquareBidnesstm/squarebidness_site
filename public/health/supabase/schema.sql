@@ -1,5 +1,5 @@
 -- Square Bidness Health — Supabase Schema
--- Run in the events Supabase project (uwgssnrbeisdqdknpscu)
+-- Run in the health Supabase project (zmqirbhjywmhtqsnvuru)
 
 -- CNA Float Pool Applications
 create table if not exists health_cna_applications (
@@ -19,6 +19,16 @@ create table if not exists health_cna_applications (
   sms_ok           boolean     not null default false,
   status           text        not null default 'new',
   created_at       timestamptz not null default now()
+);
+
+-- Inbound SMS Log (Twilio)
+create table if not exists health_sms_log (
+  id           bigint generated always as identity primary key,
+  from_number  text        not null,
+  to_number    text,
+  body         text,
+  direction    text        not null default 'inbound',
+  created_at   timestamptz not null default now()
 );
 
 -- Facility Staffing Inquiries
