@@ -4,268 +4,67 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Infrastructure | Square Bidness Health</title>
-<meta name="description" content="Square Bidness Health operates a three-node private cloud network across Louisiana — built to keep patient data, scheduling, and operations running when the grid goes down." />
-<meta name="robots" content="index,follow" />
+<meta name="robots" content="noindex,nofollow" />
 <meta name="theme-color" content="#111111" />
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/health-32.png" />
 <link rel="icon" type="image/png" sizes="16x16" href="/assets/health-16.png" />
 <link rel="apple-touch-icon" sizes="180x180" href="/assets/health-180.png" />
-<link rel="canonical" href="https://health.squarebidness.com/infrastructure/" />
-<script defer src="/scripts/ga.js"></script>
-<script defer src="/scripts/sb-analytics.js"></script>
 <style>
-:root{
-  --gold:#b79c6e;
-  --gold2:#8f7a55;
-  --bg:#0a0f18;
-  --ink:#ffffff;
-  --muted:rgba(255,255,255,.70);
-  --card:rgba(255,255,255,.05);
-  --line:rgba(255,255,255,.09);
-}
+:root{--gold:#b79c6e;--bg:#0a0f18;--muted:rgba(255,255,255,.60);--line:rgba(255,255,255,.09)}
 *{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink)}
-a{color:inherit;text-decoration:none}
-.wrap{max-width:1120px;margin:0 auto;padding:0 18px}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:#fff;min-height:100vh;display:flex;flex-direction:column}
+a{color:var(--gold);text-decoration:none}
+.wrap{max-width:860px;margin:0 auto;padding:0 22px}
 
-.topbar{background:rgba(0,0,0,.6);border-bottom:1px solid rgba(255,255,255,.08);backdrop-filter:blur(10px);position:sticky;top:0;z-index:100}
-.topbar-inner{min-height:64px;display:flex;align-items:center;justify-content:space-between;gap:14px}
-.brand{display:inline-flex;align-items:center;gap:10px;font-weight:700;color:#fff;font-size:15px;letter-spacing:.3px}
-.brand-img{width:28px;height:28px;border-radius:7px;flex-shrink:0;display:block}
-.back-link{color:rgba(255,255,255,.65);font-size:14px;transition:.2s}
-.back-link:hover{color:#fff}
+.topbar{background:rgba(0,0,0,.5);border-bottom:1px solid var(--line);padding:0 22px}
+.topbar-inner{max-width:860px;margin:0 auto;min-height:60px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:inline-flex;align-items:center;gap:10px;font-weight:700;color:#fff;font-size:15px}
+.brand-img{width:26px;height:26px;border-radius:7px}
+.back{font-size:13px;color:var(--muted)}
+.back:hover{color:#fff}
 
-/* Hero */
-.hero{padding:72px 0 52px;border-bottom:1px solid var(--line)}
-.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
-.dot{width:6px;height:6px;border-radius:50%;background:var(--gold);display:inline-block}
-h1{font-size:52px;line-height:1.05;letter-spacing:.5px;margin-bottom:18px;max-width:800px}
-h1 span{color:var(--gold)}
-.lead{color:var(--muted);font-size:17px;line-height:1.75;max-width:660px}
+.main{flex:1;display:flex;align-items:center;padding:72px 0}
+.eyebrow{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+h1{font-size:38px;font-weight:700;line-height:1.1;margin-bottom:14px}
+.sub{font-size:16px;color:var(--muted);line-height:1.7;max-width:520px;margin-bottom:32px}
 
-.status-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
-.status-chip{
-  display:inline-flex;align-items:center;gap:7px;
-  padding:8px 16px;border-radius:999px;font-size:12px;font-weight:600;letter-spacing:.5px;
-  border:1px solid;
-}
-.chip-green{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.25);color:#4ade80}
-.chip-gold{background:rgba(183,156,110,.12);border-color:rgba(183,156,110,.28);color:var(--gold)}
-.chip-gray{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.14);color:rgba(255,255,255,.6)}
-.pulse{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block}
+.node-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:40px}
+.chip{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:999px;font-size:12px;font-weight:600;letter-spacing:.4px;border:1px solid}
+.chip-green{background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.2);color:#4ade80}
+.chip-gold{background:rgba(183,156,110,.09);border-color:rgba(183,156,110,.22);color:var(--gold)}
+.chip-gray{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.1);color:rgba(255,255,255,.45)}
+.dot{width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block}
 
-/* Nodes */
-.nodes-section{padding:64px 0}
-.nodes-section h2{font-size:13px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:36px}
-.nodes{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.cta-link{display:inline-flex;align-items:center;gap:8px;padding:13px 24px;border-radius:999px;background:var(--gold);color:#fff;font-weight:600;font-size:15px;transition:.2s}
+.cta-link:hover{opacity:.88}
 
-.node-card{
-  background:rgba(255,255,255,.04);
-  border:1px solid rgba(255,255,255,.09);
-  border-radius:22px;padding:28px;
-  position:relative;overflow:hidden;
-  transition:border-color .2s;
-}
-.node-card:hover{border-color:rgba(183,156,110,.35)}
-.node-card::before{
-  content:"";position:absolute;top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,transparent,var(--gold),transparent);
-  opacity:0;transition:opacity .3s;
-}
-.node-card:hover::before{opacity:1}
-
-.node-num{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
-.node-name{font-size:24px;font-weight:700;margin-bottom:6px}
-.node-loc{font-size:13px;color:var(--muted);margin-bottom:16px}
-.node-desc{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:20px}
-
-.node-specs{display:grid;gap:8px;margin-bottom:20px}
-.spec{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:rgba(255,255,255,.65)}
-.spec-icon{font-size:14px;flex-shrink:0;margin-top:1px}
-
-.node-badge{
-  display:inline-block;padding:4px 12px;border-radius:999px;
-  font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
-}
-.badge-green{background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.2)}
-.badge-gold{background:rgba(183,156,110,.14);color:var(--gold);border:1px solid rgba(183,156,110,.25)}
-.badge-gray{background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.1)}
-
-/* Why private cloud */
-.why-section{padding:64px 0;border-top:1px solid var(--line)}
-.why-section h2{font-size:34px;margin-bottom:14px}
-.why-section > .wrap > p{color:var(--muted);font-size:16px;line-height:1.75;max-width:660px;margin-bottom:40px}
-
-.why-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
-.why-card{
-  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
-  border-radius:18px;padding:24px;
-}
-.why-card h3{font-size:17px;margin-bottom:8px}
-.why-card p{font-size:14px;color:var(--muted);line-height:1.65}
-
-/* Catalyst */
-.catalyst-section{
-  margin:0;padding:56px 0;
-  border-top:1px solid var(--line);border-bottom:1px solid var(--line);
-}
-.catalyst-inner{
-  background:rgba(183,156,110,.07);
-  border:1px solid rgba(183,156,110,.18);
-  border-radius:22px;padding:36px;
-  max-width:800px;
-}
-.catalyst-tag{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
-.catalyst-inner h2{font-size:26px;margin-bottom:12px}
-.catalyst-inner p{font-size:15px;color:var(--muted);line-height:1.75}
-.catalyst-inner p + p{margin-top:12px}
-
-/* CTA */
-.cta-section{padding:72px 0;text-align:center}
-.cta-section h2{font-size:34px;margin-bottom:12px}
-.cta-section p{color:var(--muted);font-size:16px;max-width:500px;margin:0 auto 32px}
-.btn-row{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
-.btn{display:inline-flex;align-items:center;padding:14px 28px;border-radius:999px;font-weight:600;font-size:15px;letter-spacing:.2px;transition:.2s}
-.btn-gold{background:var(--gold);color:#fff}
-.btn-gold:hover{background:var(--gold2)}
-.btn-outline{background:rgba(255,255,255,.07);color:#fff;border:1px solid rgba(255,255,255,.15)}
-.btn-outline:hover{background:rgba(255,255,255,.12)}
-
-footer{padding:8px 0 40px;text-align:center;color:rgba(255,255,255,.35);font-size:12px;letter-spacing:.5px}
-footer a{color:var(--gold)}
-
-@media(max-width:900px){
-  .nodes{grid-template-columns:1fr}
-  .why-grid{grid-template-columns:1fr}
-  h1{font-size:36px}
-}
+footer{padding:24px 22px;text-align:center;font-size:12px;color:rgba(255,255,255,.25);border-top:1px solid var(--line)}
 </style>
 </head>
 <body>
 
 <header class="topbar">
-  <div class="wrap topbar-inner">
-    <a class="brand" href="/"><img class="brand-img" src="/assets/health-48.png" alt="Square Bidness Health" />Square Bidness Health</a>
-    <a class="back-link" href="/">← Back</a>
+  <div class="topbar-inner">
+    <a class="brand" href="/"><img class="brand-img" src="/assets/health-48.png" alt="" />Square Bidness Health</a>
+    <a class="back" href="/">← Back</a>
   </div>
 </header>
 
-<section class="hero">
+<main class="main">
   <div class="wrap">
-    <div class="eyebrow"><span class="dot"></span> Infrastructure</div>
-    <h1>The Grid That<br/><span>Stays Up</span></h1>
-    <p class="lead">When hurricanes hit Louisiana, cloud-dependent operators go dark. Our three-node private infrastructure strategy is built to keep patient data, scheduling, and operations running — no matter what.</p>
-    <div class="status-row">
-      <div class="status-chip chip-green"><span class="pulse"></span> Node 1 Operational</div>
-      <div class="status-chip chip-gold"><span class="pulse"></span> Node 2 In Build</div>
-      <div class="status-chip chip-gray"><span class="pulse"></span> Node 3 Staged</div>
+    <div class="eyebrow">Infrastructure</div>
+    <h1>Private. Distributed.<br/>Built for Louisiana.</h1>
+    <p class="sub">Square Bidness Health operates proprietary infrastructure across multiple regions of Louisiana. Details are not public.</p>
+    <div class="node-row">
+      <span class="chip chip-green"><span class="dot"></span> Node 01 · Operational</span>
+      <span class="chip chip-gold"><span class="dot"></span> Node 02 · In Build</span>
+      <span class="chip chip-gray"><span class="dot"></span> Node 03 · Staged</span>
     </div>
+    <a class="cta-link" href="/partner/">Work With Us →</a>
   </div>
-</section>
+</main>
 
-<section class="nodes-section">
-  <div class="wrap">
-    <h2>Three-Node Network</h2>
-    <div class="nodes">
-
-      <div class="node-card">
-        <div class="node-num">Node 01</div>
-        <div class="node-name">Tangipahoa Parish</div>
-        <div class="node-loc">Node 01 · Southeast Louisiana</div>
-        <div class="node-desc">Primary operations hub. Multi-structure operational campus on owned land along the I-12 corridor. Handles primary scheduling, CNA credentialing, and client communications.</div>
-        <div class="node-specs">
-          <div class="spec"><span class="spec-icon">⚡</span> Grid power + backup generator</div>
-          <div class="spec"><span class="spec-icon">🖥</span> Primary server and operations hardware</div>
-          <div class="spec"><span class="spec-icon">📍</span> Owned land — I-12 corridor</div>
-          <div class="spec"><span class="spec-icon">👥</span> Primary staff and clinical coordination</div>
-        </div>
-        <span class="node-badge badge-green">Operational</span>
-      </div>
-
-      <div class="node-card">
-        <div class="node-num">Node 02</div>
-        <div class="node-name">Rapides Parish</div>
-        <div class="node-loc">Node 02 · Central Louisiana</div>
-        <div class="node-desc">Hardened grid node adjacent to Louisiana Christian University. Designed as a solar + battery + generator facility with a dedicated server vault for Central Louisiana operations.</div>
-        <div class="node-specs">
-          <div class="spec"><span class="spec-icon">☀️</span> Solar + battery + generator power stack</div>
-          <div class="spec"><span class="spec-icon">🔒</span> Dedicated server vault</div>
-          <div class="spec"><span class="spec-icon">📍</span> Adjacent to Louisiana Christian University</div>
-          <div class="spec"><span class="spec-icon">🏥</span> Central Louisiana deployment hub</div>
-        </div>
-        <span class="node-badge badge-gold">In Build</span>
-      </div>
-
-      <div class="node-card">
-        <div class="node-num">Node 03</div>
-        <div class="node-name">Washington Parish</div>
-        <div class="node-loc">Node 03 · North Louisiana</div>
-        <div class="node-desc">Cold archive and disaster recovery site. Off-site data backup designed to survive any regional weather event or grid outage. Geographically isolated from the Southeast Louisiana risk zone.</div>
-        <div class="node-specs">
-          <div class="spec"><span class="spec-icon">💾</span> Cold archive and data backup</div>
-          <div class="spec"><span class="spec-icon">🌀</span> Isolated from Gulf storm track</div>
-          <div class="spec"><span class="spec-icon">📍</span> Washington Parish deep rural</div>
-          <div class="spec"><span class="spec-icon">🔁</span> Disaster recovery failover</div>
-        </div>
-        <span class="node-badge badge-gray">Staged</span>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<section class="why-section">
-  <div class="wrap">
-    <h2>Why Private Cloud</h2>
-    <p>SaaS platforms work until they don't. Rural Louisiana has learned that lesson the hard way through every major storm season. We built around the assumption that the grid will fail — and planned accordingly.</p>
-    <div class="why-grid">
-      <div class="why-card">
-        <h3>We Own the Hardware</h3>
-        <p>No per-seat vendor fees that scale against us as we grow. No platform dependency. No third-party terms-of-service that can shut us down. The infrastructure is ours.</p>
-      </div>
-      <div class="why-card">
-        <h3>We Control the Data</h3>
-        <p>CNA credentials, placement records, and facility contacts stay on our hardware — not on a SaaS vendor's shared cloud. HIPAA-aligned by design, not by policy checkbox.</p>
-      </div>
-      <div class="why-card">
-        <h3>Built for Louisiana Weather</h3>
-        <p>Three geographically distributed nodes means no single storm knocks out operations. When the I-10 corridor floods, Node 02 stays up. When Southeast takes a hit, Node 03 holds the archive.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="catalyst-section">
-  <div class="wrap">
-    <div class="catalyst-inner">
-      <div class="catalyst-tag">The Catalyst</div>
-      <h2>Louisiana Is Building Independent Infrastructure — So Are We</h2>
-      <p>In May 2026, Governor Landry announced the Applied Digital / CLECO partnership — a major private data center and power investment in Central Louisiana. The state is building independent grid capacity. That announcement validated what we were already doing.</p>
-      <p>Square Bidness Health started building its private node network before that announcement. We're not following a trend. We're operating from the same conviction: rural Louisiana needs infrastructure it owns, not infrastructure it rents.</p>
-    </div>
-  </div>
-</section>
-
-<section class="cta-section">
-  <div class="wrap">
-    <h2>Built to Last</h2>
-    <p>Facilities in our service area get a staffing partner with infrastructure designed to stay operational when it matters most.</p>
-    <div class="btn-row">
-      <a href="/partner/" class="btn btn-gold">Request Staffing</a>
-      <a href="/service-area/" class="btn btn-outline">View Service Area</a>
-    </div>
-  </div>
-</section>
-
-<footer>
-  <div class="wrap">
-    © <span id="yr"></span> Square Bidness Health — Louisiana &nbsp;|&nbsp;
-    <a href="/questions/">Questions</a> &nbsp;|&nbsp;
-    <a href="mailto:health@squarebidness.com">health@squarebidness.com</a>
-  </div>
-</footer>
-
-<script>document.getElementById("yr").textContent = new Date().getFullYear();</script>
+<footer>© <span id="yr"></span> Square Bidness Health — Louisiana</footer>
+<script>document.getElementById("yr").textContent=new Date().getFullYear()</script>
 </body>
 </html>
