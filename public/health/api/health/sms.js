@@ -7,7 +7,7 @@ const supabase = createClient(
 );
 
 const MESSAGING_SERVICE_SID = "MG00fde6c9496ded4f835d99413b5a09c3";
-const NOTIFY_EMAIL = "squarebidnessapparel@gmail.com";
+const NOTIFY_EMAIL = "health@squarebidness.com";
 
 const AUTO_REPLY = `Square Bidness Health received your message. We're building our CNA float pool now — first placements in 30-60 days. Apply at health.squarebidness.com/join/ or we'll follow up soon.`;
 

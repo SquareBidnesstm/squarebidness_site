@@ -43,7 +43,7 @@ export default async function handler(req, res) {
         headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
         body: JSON.stringify({
           from: from_addr,
-          to: ["squarebidnessapparel@gmail.com"],
+          to: ["health@squarebidness.com"],
           subject: `[SBHealth] Question from ${String(full_name).trim()}`,
           text: `New question submitted via health.squarebidness.com/questions/\n\nName: ${String(full_name).trim()}\nEmail: ${String(email).trim()}\nPhone: ${phone ? String(phone).trim() : "not provided"}\n\nQuestion:\n${String(question).trim()}`,
         }),
