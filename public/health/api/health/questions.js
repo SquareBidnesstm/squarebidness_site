@@ -15,7 +15,7 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  const { full_name, email, question } = req.body || {};
+  const { full_name, email, phone, question } = req.body || {};
 
   if (!full_name || !email || !question) {
     return res.status(400).json({ error: "Name, email, and question are required." });
@@ -24,6 +24,7 @@ export default async function handler(req, res) {
   const { error } = await supabase.from("health_questions").insert([{
     full_name: String(full_name).trim(),
     email:     String(email).trim().toLowerCase(),
+    phone:     phone ? String(phone).trim() : null,
     question:  String(question).trim(),
   }]);
 
@@ -44,7 +45,7 @@ export default async function handler(req, res) {
           from: from_addr,
           to: ["squarebidnessapparel@gmail.com"],
           subject: `[SBHealth] Question from ${String(full_name).trim()}`,
-          text: `New question submitted via health.squarebidness.com/questions/\n\nName: ${String(full_name).trim()}\nEmail: ${String(email).trim()}\n\nQuestion:\n${String(question).trim()}`,
+          text: `New question submitted via health.squarebidness.com/questions/\n\nName: ${String(full_name).trim()}\nEmail: ${String(email).trim()}\nPhone: ${phone ? String(phone).trim() : "not provided"}\n\nQuestion:\n${String(question).trim()}`,
         }),
       });
     }
