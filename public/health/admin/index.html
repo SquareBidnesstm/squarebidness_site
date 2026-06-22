@@ -178,6 +178,38 @@ a{color:inherit;text-decoration:none}
   transition:.15s;text-decoration:none;
 }
 .text-link:hover{background:rgba(183,156,110,.2);color:var(--ink)}
+/* SBH Twilio send button */
+.sbh-btn{
+  display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;
+  color:#fff;padding:4px 12px;border-radius:999px;
+  background:var(--gold);border:none;cursor:pointer;transition:.15s;
+}
+.sbh-btn:hover{background:var(--gold2)}
+.sbh-btn:disabled{opacity:.5;cursor:not-allowed}
+/* SMS send modal */
+.sms-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);
+  z-index:999;align-items:center;justify-content:center;padding:20px;
+}
+.sms-overlay.open{display:flex}
+.sms-modal{
+  background:#fff;border-radius:20px;padding:28px 24px;
+  width:100%;max-width:430px;box-shadow:0 20px 60px rgba(0,0,0,.2);
+}
+.sms-modal h3{font-size:17px;font-weight:700;margin-bottom:4px}
+.sms-modal .sms-to{font-size:12px;color:var(--muted);margin-bottom:14px}
+.sms-modal textarea{
+  width:100%;border:1px solid rgba(0,0,0,.12);border-radius:12px;
+  padding:10px 12px;font:inherit;font-size:13px;line-height:1.55;
+  resize:vertical;min-height:110px;outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+.sms-modal textarea:focus{border-color:rgba(183,156,110,.75);box-shadow:0 0 0 4px rgba(183,156,110,.12)}
+.sms-modal .char-count{font-size:11px;color:var(--muted);text-align:right;margin-top:4px;margin-bottom:14px}
+.sms-modal .modal-foot{display:flex;gap:8px;justify-content:flex-end}
+.sms-status{font-size:13px;margin-top:10px;display:none}
+.sms-status.ok{color:#15803d}
+.sms-status.err{color:#991b1b}
 /* Delete */
 .del-btn{
   background:none;border:none;cursor:pointer;
@@ -324,6 +356,21 @@ a{color:inherit;text-decoration:none}
   </div>
 </div>
 
+<!-- Outbound SMS modal -->
+<div id="smsOverlay" class="sms-overlay">
+  <div class="sms-modal">
+    <h3 id="smsModalName">Send Message</h3>
+    <div id="smsModalTo" class="sms-to"></div>
+    <textarea id="smsModalBody" maxlength="1600"></textarea>
+    <div id="smsCharCount" class="char-count">0 / 1600</div>
+    <div id="smsStatus" class="sms-status"></div>
+    <div class="modal-foot">
+      <button id="smsCancelBtn" class="btn btn-ghost btn-sm" type="button">Cancel</button>
+      <button id="smsSendBtn" class="btn btn-gold btn-sm" type="button" style="width:auto">Send via SBH</button>
+    </div>
+  </div>
+</div>
+
 <script>
 (function(){
   const API = "/api/health/admin-applications";
@@ -440,6 +487,13 @@ a{color:inherit;text-decoration:none}
         }
       });
     });
+
+    // SBH Twilio send buttons
+    list.querySelectorAll(".sbh-btn").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        openSmsModal(this.dataset.phone, this.dataset.name, this.dataset.msg);
+      });
+    });
   }
 
   function appCard(a){
@@ -452,6 +506,10 @@ a{color:inherit;text-decoration:none}
     const smsBody = "Hi " + firstName + ", this is Marcus with Square Bidness Health. We received your CNA application — thank you for applying. I’d like to connect this week about placement and next steps. What’s a good time to call?";
     const textLink = cleanPhone
       ? '<a class="text-link" href="sms:' + cleanPhone + '&body=' + encodeURIComponent(smsBody) + '">&#9993; Text</a>'
+      : '';
+
+    const sbhBtn = (a.sms_ok && cleanPhone)
+      ? '<button class="sbh-btn" data-phone="' + cleanPhone + '" data-name="' + esc(a.full_name || "") + '" data-msg="' + esc(smsBody) + '">&#9993; SBH</button>'
       : '';
 
     const tags = [a.availability, a.preferred_shift, a.travel_range, a.experience]
@@ -500,6 +558,7 @@ a{color:inherit;text-decoration:none}
               a.sms_ok ? 'SMS OK' : 'No SMS',
             '</div>',
             textLink,
+            sbhBtn,
           '</div>',
           '<div style="display:flex;align-items:center;gap:8px">',
             '<span id="saving-' + a.id + '" class="saving">Saving…</span>',
@@ -550,6 +609,82 @@ a{color:inherit;text-decoration:none}
   } else {
     showAuth();
   }
+
+  // --- SMS Modal ---
+  var smsOverlay  = document.getElementById("smsOverlay");
+  var smsModalName = document.getElementById("smsModalName");
+  var smsModalTo  = document.getElementById("smsModalTo");
+  var smsModalBody = document.getElementById("smsModalBody");
+  var smsCharCount = document.getElementById("smsCharCount");
+  var smsStatus   = document.getElementById("smsStatus");
+  var smsCancelBtn = document.getElementById("smsCancelBtn");
+  var smsSendBtn  = document.getElementById("smsSendBtn");
+  var currentPhone = "";
+
+  function openSmsModal(phone, name, msg){
+    currentPhone = phone;
+    smsModalName.textContent = "Text " + (name || "Applicant");
+    smsModalTo.textContent = "From +1 (225) 209-9257 → " + phone;
+    smsModalBody.value = msg;
+    smsCharCount.textContent = msg.length + " / 1600";
+    smsStatus.style.display = "none";
+    smsStatus.textContent = "";
+    smsSendBtn.disabled = false;
+    smsSendBtn.textContent = "Send via SBH";
+    smsOverlay.classList.add("open");
+    smsModalBody.focus();
+  }
+
+  smsModalBody.addEventListener("input", function(){
+    smsCharCount.textContent = this.value.length + " / 1600";
+  });
+
+  smsCancelBtn.addEventListener("click", function(){
+    smsOverlay.classList.remove("open");
+  });
+
+  smsOverlay.addEventListener("click", function(e){
+    if(e.target === smsOverlay) smsOverlay.classList.remove("open");
+  });
+
+  smsSendBtn.addEventListener("click", async function(){
+    var msg = smsModalBody.value.trim();
+    if(!msg || !currentPhone) return;
+    smsSendBtn.disabled = true;
+    smsSendBtn.textContent = "Sending…";
+    smsStatus.style.display = "none";
+    try{
+      var r = await fetch("/api/health/send-sms", {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          "Authorization":"Bearer " + token,
+        },
+        body: JSON.stringify({ to: currentPhone, message: msg }),
+      });
+      if(r.ok){
+        smsStatus.textContent = "Sent — delivered via Square Bidness Health.";
+        smsStatus.className = "sms-status ok";
+        smsStatus.style.display = "block";
+        smsSendBtn.textContent = "Sent ✓";
+        setTimeout(function(){ smsOverlay.classList.remove("open"); }, 1800);
+      } else {
+        var data = await r.json().catch(function(){return{};});
+        smsStatus.textContent = "Error: " + (data.error || "Could not send. Try again.");
+        smsStatus.className = "sms-status err";
+        smsStatus.style.display = "block";
+        smsSendBtn.disabled = false;
+        smsSendBtn.textContent = "Send via SBH";
+      }
+    }catch(err){
+      smsStatus.textContent = "Network error — check connection.";
+      smsStatus.className = "sms-status err";
+      smsStatus.style.display = "block";
+      smsSendBtn.disabled = false;
+      smsSendBtn.textContent = "Send via SBH";
+    }
+  });
+
 })();
 </script>
 </body>
