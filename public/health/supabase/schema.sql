@@ -32,6 +32,17 @@ create table if not exists health_sms_log (
   created_at   timestamptz not null default now()
 );
 
+-- Questions (from /questions/ page)
+create table if not exists health_questions (
+  id         bigint generated always as identity primary key,
+  full_name  text        not null,
+  email      text        not null,
+  phone      text,
+  question   text        not null,
+  status     text        not null default 'new',
+  created_at timestamptz not null default now()
+);
+
 -- Facility Staffing Inquiries
 create table if not exists health_facility_inquiries (
   id               bigint generated always as identity primary key,
