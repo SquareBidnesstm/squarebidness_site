@@ -36,13 +36,22 @@ export default async function handler(req, res) {
   }
 
   if (req.method === "PATCH") {
-    const { id, status } = req.body || {};
-    if (!id || !VALID_STATUSES.includes(status)) {
-      return res.status(400).json({ error: "Invalid id or status." });
+    const { id, status, sms_blasted_at } = req.body || {};
+    if (!id) return res.status(400).json({ error: "Missing id." });
+
+    const updates = {};
+    if (status) {
+      if (!VALID_STATUSES.includes(status)) return res.status(400).json({ error: "Invalid status." });
+      updates.status = status;
     }
+    if (sms_blasted_at) {
+      updates.sms_blasted_at = new Date().toISOString();
+    }
+    if (!Object.keys(updates).length) return res.status(400).json({ error: "Nothing to update." });
+
     const { error } = await supabase
       .from("health_cna_applications")
-      .update({ status })
+      .update(updates)
       .eq("id", id);
 
     if (error) {

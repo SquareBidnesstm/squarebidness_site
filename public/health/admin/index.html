@@ -532,6 +532,10 @@ a{color:inherit;text-decoration:none}
       ? '<button class="sbh-btn" data-phone="' + cleanPhone + '" data-name="' + esc(a.full_name || "") + '" data-msg="' + esc(smsBody) + '">&#9993; SBH</button>'
       : '';
 
+    const blastedTag = a.sms_blasted_at
+      ? '<span class="sms-tag" style="color:#1d4ed8;gap:5px"><span style="background:#3b82f6;width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0"></span>Blasted ' + new Date(a.sms_blasted_at).toLocaleDateString("en-US",{month:"short",day:"numeric"}) + '</span>'
+      : '';
+
     const tags = [a.availability, a.preferred_shift, a.travel_range, a.experience]
       .filter(Boolean)
       .map(function(t){ return '<span class="tag">' + esc(t) + '</span>'; })
@@ -572,11 +576,12 @@ a{color:inherit;text-decoration:none}
           notes,
         '</div>',
         '<div class="app-card-foot">',
-          '<div style="display:flex;align-items:center;gap:8px">',
+          '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">',
             '<div class="sms-tag ' + (a.sms_ok ? '' : 'sms-no') + '">',
               '<span></span>',
               a.sms_ok ? 'SMS OK' : 'No SMS',
             '</div>',
+            blastedTag,
             textLink,
             sbhBtn,
           '</div>',
@@ -714,7 +719,15 @@ a{color:inherit;text-decoration:none}
           headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
           body: JSON.stringify({ to: cleanPhone, message: personalized }),
         });
-        if(r.ok) sent++; else failed++;
+        if(r.ok){
+          sent++;
+          fetch(API, {
+            method:"PATCH",
+            headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},
+            body: JSON.stringify({ id: app.id, sms_blasted_at: true }),
+          });
+          app.sms_blasted_at = new Date().toISOString();
+        } else { failed++; }
       }catch(e){ failed++; }
     }
 
