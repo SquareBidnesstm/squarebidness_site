@@ -348,11 +348,30 @@ a{color:inherit;text-decoration:none}
       <button class="filter-chip" data-filter="declined">Declined</button>
     </div>
 
+    <div id="blastBar" style="margin-bottom:16px;display:none">
+      <button id="blastBtn" class="btn btn-gold btn-sm" type="button" style="width:auto">&#9993; Blast SMS — <span id="blastCount">0</span> with SMS OK</button>
+    </div>
+
     <div id="appList" class="app-list">
       <div class="loading">
         <div class="spinner"></div>
         Loading applications…
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Blast SMS modal -->
+<div id="blastOverlay" class="sms-overlay">
+  <div class="sms-modal">
+    <h3 id="blastModalTitle">Blast SMS</h3>
+    <div id="blastModalSub" class="sms-to"></div>
+    <textarea id="blastModalBody" maxlength="1600"></textarea>
+    <div id="blastCharCount" class="char-count">0 / 1600</div>
+    <div id="blastProgress" class="sms-status"></div>
+    <div class="modal-foot">
+      <button id="blastCancelBtn" class="btn btn-ghost btn-sm" type="button">Cancel</button>
+      <button id="blastSendBtn" class="btn btn-gold btn-sm" type="button" style="width:auto">Send to All</button>
     </div>
   </div>
 </div>
@@ -578,6 +597,33 @@ a{color:inherit;text-decoration:none}
   function updateCount(){
     const badge = document.getElementById("countBadge");
     if(badge) badge.textContent = allApps.length + " total";
+
+    const counts = {};
+    ["new","contacted","scheduled","placed","declined"].forEach(function(s){
+      counts[s] = allApps.filter(function(a){ return (a.status||"new") === s; }).length;
+    });
+    document.querySelectorAll(".filter-chip").forEach(function(chip){
+      const f = chip.dataset.filter;
+      if(f === "all"){
+        chip.textContent = "All (" + allApps.length + ")";
+      } else {
+        chip.textContent = f.charAt(0).toUpperCase() + f.slice(1) + " (" + (counts[f]||0) + ")";
+      }
+    });
+
+    updateBlastBar();
+  }
+
+  function updateBlastBar(){
+    const bar      = document.getElementById("blastBar");
+    const countEl  = document.getElementById("blastCount");
+    if(!bar || !countEl) return;
+    const filtered = activeFilter === "all"
+      ? allApps
+      : allApps.filter(function(a){ return (a.status||"new") === activeFilter; });
+    const smsable  = filtered.filter(function(a){ return a.sms_ok && a.phone; });
+    countEl.textContent = smsable.length;
+    bar.style.display = (smsable.length > 0 && activeFilter !== "all") ? "block" : "none";
   }
 
   function esc(s){
@@ -596,6 +642,86 @@ a{color:inherit;text-decoration:none}
     chip.classList.add("active");
     activeFilter = chip.dataset.filter;
     renderApps();
+    updateBlastBar();
+  });
+
+  // --- Blast SMS ---
+  var blastOverlay  = document.getElementById("blastOverlay");
+  var blastSendBtn  = document.getElementById("blastSendBtn");
+  var blastCancelBtn = document.getElementById("blastCancelBtn");
+  var blastModalBody = document.getElementById("blastModalBody");
+  var blastCharCount = document.getElementById("blastCharCount");
+  var blastProgress  = document.getElementById("blastProgress");
+  var blastModalTitle = document.getElementById("blastModalTitle");
+  var blastModalSub   = document.getElementById("blastModalSub");
+
+  var DEFAULT_BLAST_MSG = "Hey [Name], this is Marcus with Square Bidness Health. Just wanted to reach out and apologize for the delay — things have been moving fast on our end. We’re still on track and haven’t forgotten about you. More details coming soon.";
+
+  document.getElementById("blastBtn").addEventListener("click", function(){
+    var filtered = activeFilter === "all"
+      ? allApps
+      : allApps.filter(function(a){ return (a.status||"new") === activeFilter; });
+    var smsable = filtered.filter(function(a){ return a.sms_ok && a.phone; });
+    var label = activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1);
+    blastModalTitle.textContent = "Blast SMS — " + label;
+    blastModalSub.textContent = "Sending from (225) 209-9257 to " + smsable.length + " applicants with SMS OK";
+    blastModalBody.value = DEFAULT_BLAST_MSG;
+    blastCharCount.textContent = DEFAULT_BLAST_MSG.length + " / 1600";
+    blastProgress.style.display = "none";
+    blastProgress.textContent = "";
+    blastSendBtn.disabled = false;
+    blastSendBtn.textContent = "Send to All";
+    blastOverlay.classList.add("open");
+    blastModalBody.focus();
+  });
+
+  blastModalBody.addEventListener("input", function(){
+    blastCharCount.textContent = this.value.length + " / 1600";
+  });
+
+  blastCancelBtn.addEventListener("click", function(){
+    blastOverlay.classList.remove("open");
+  });
+
+  blastOverlay.addEventListener("click", function(e){
+    if(e.target === blastOverlay) blastOverlay.classList.remove("open");
+  });
+
+  blastSendBtn.addEventListener("click", async function(){
+    var msg = blastModalBody.value.trim();
+    if(!msg) return;
+    var filtered = activeFilter === "all"
+      ? allApps
+      : allApps.filter(function(a){ return (a.status||"new") === activeFilter; });
+    var smsable = filtered.filter(function(a){ return a.sms_ok && a.phone; });
+    if(!smsable.length) return;
+
+    blastSendBtn.disabled = true;
+    blastSendBtn.textContent = "Sending…";
+    blastProgress.className = "sms-status";
+    blastProgress.style.display = "block";
+
+    var sent = 0, failed = 0;
+    for(var i = 0; i < smsable.length; i++){
+      var app = smsable[i];
+      var firstName = (app.full_name || "").split(" ")[0];
+      var personalized = msg.replace(/\[Name\]/g, firstName);
+      var cleanPhone = (app.phone || "").replace(/\D/g, "");
+      blastProgress.textContent = "Sending " + (i+1) + " of " + smsable.length + "…";
+      try{
+        var r = await fetch("/api/health/send-sms", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+          body: JSON.stringify({ to: cleanPhone, message: personalized }),
+        });
+        if(r.ok) sent++; else failed++;
+      }catch(e){ failed++; }
+    }
+
+    blastProgress.textContent = "Done — " + sent + " sent" + (failed ? ", " + failed + " failed" : "") + ".";
+    blastProgress.className = "sms-status " + (failed ? "err" : "ok");
+    blastSendBtn.textContent = "Sent ✓";
+    setTimeout(function(){ blastOverlay.classList.remove("open"); }, 2200);
   });
 
   // --- Refresh ---
