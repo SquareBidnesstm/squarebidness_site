@@ -4,6 +4,7 @@ const BASE_URL =
 const CLIENT_LABELS = {
   delish: "Delish",
   puffs: "Puff's Smokehouse",
+  philson: "Philson Le Fleuriste",
   restaurant: "Restaurant onboarding",
   foodtruck: "Food truck onboarding"
 };
