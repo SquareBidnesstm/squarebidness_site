@@ -170,6 +170,18 @@ a{color:inherit;text-decoration:none}
 .res-label{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(0,0,0,.32);margin-bottom:7px}
 .res-link{display:block;font-size:13px;font-weight:600;color:var(--gold2);margin-bottom:5px;text-decoration:none}
 .res-link:hover{color:var(--ink)}
+/* Action bar buttons */
+.action-btn{
+  display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;
+  letter-spacing:.3px;padding:7px 16px;border-radius:999px;border:none;cursor:pointer;
+  transition:.15s;
+}
+.action-btn-gold{background:var(--gold);color:#fff;}
+.action-btn-gold:hover{background:var(--gold2);}
+.action-btn-gold:disabled{opacity:.5;cursor:not-allowed;}
+.action-btn-outline{background:#fff;color:var(--gold2);border:1px solid rgba(183,156,110,.4);}
+.action-btn-outline:hover{background:rgba(183,156,110,.08);}
+
 /* Text SMS */
 .text-link{
   display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;
@@ -315,6 +327,8 @@ a{color:inherit;text-decoration:none}
       <button class="filter-chip" data-filter="declined">Declined</button>
     </div>
 
+    <div id="actionBar" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px"></div>
+
     <div id="appList" class="app-list">
       <div class="loading">
         <div class="spinner"></div>
@@ -383,12 +397,60 @@ a{color:inherit;text-decoration:none}
     }
   }
 
+  // --- Action Bar ---
+  function renderActionBar(){
+    const bar = document.getElementById("actionBar");
+    if(!bar) return;
+    bar.innerHTML = "";
+
+    const newApps = allApps.filter(a => (a.status||"new") === "new");
+    if(activeFilter !== "new" || !newApps.length){ bar.style.display="none"; return; }
+    bar.style.display = "flex";
+
+    const smsOkApps = newApps.filter(a => a.sms_ok);
+
+    // Mark All as Contacted
+    const markBtn = document.createElement("button");
+    markBtn.className = "action-btn action-btn-gold";
+    markBtn.textContent = "✓ Mark All as Contacted (" + newApps.length + ")";
+    markBtn.addEventListener("click", async function(){
+      markBtn.disabled = true;
+      markBtn.textContent = "Updating…";
+      await Promise.all(newApps.map(function(a){
+        return fetch(API,{
+          method:"PATCH",
+          headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},
+          body:JSON.stringify({id:a.id, status:"contacted"}),
+        }).then(function(r){
+          if(r.ok) a.status = "contacted";
+        });
+      }));
+      renderApps();
+      renderActionBar();
+      updateCount();
+    });
+    bar.appendChild(markBtn);
+
+    // Blast SMS
+    if(smsOkApps.length){
+      const numbers = smsOkApps.map(a => (a.phone||"").replace(/\D/g,"")).filter(Boolean).join(",");
+      const body = "Thank you for applying to the Square Bidness Health CNA Float Pool. We received your application and will be in touch soon. Questions? Visit health.squarebidness.com/questions/";
+      const smsBtn = document.createElement("a");
+      smsBtn.className = "action-btn action-btn-outline";
+      smsBtn.innerHTML = "&#9993; Blast SMS &mdash;" + smsOkApps.length + " with SMS OK";
+      smsBtn.href = "sms:" + numbers + "&body=" + encodeURIComponent(body);
+      bar.appendChild(smsBtn);
+    }
+  }
+
   // --- Render ---
   function renderApps(){
     const list = document.getElementById("appList");
     const filtered = activeFilter === "all"
       ? allApps
       : allApps.filter(a => a.status === activeFilter);
+
+    renderActionBar();
 
     if(!filtered.length){
       list.innerHTML = '<div class="no-apps">No applications' +
@@ -536,6 +598,7 @@ a{color:inherit;text-decoration:none}
     chip.classList.add("active");
     activeFilter = chip.dataset.filter;
     renderApps();
+    renderActionBar();
   });
 
   // --- Refresh ---
