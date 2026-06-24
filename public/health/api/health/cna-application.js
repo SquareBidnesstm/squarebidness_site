@@ -79,7 +79,7 @@ export default async function handler(req, res) {
         headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
         body: JSON.stringify({
           from: from_addr,
-          to: ["squarebidnessapparel@gmail.com"],
+          to: ["health@squarebidness.com"],
           subject: `[SBHealth] New ${license_type || "CNA"} App: ${String(full_name).trim()}`,
           text: `New ${license_type || "CNA"} application received.\n\nName: ${String(full_name).trim()}\nPhone: ${String(phone).trim()}\nCity: ${city || "not provided"}\nLicense Type: ${license_type || "CNA"}\nLicense #: ${cert_number || "not provided"}\nExpiry: ${cert_expiry || "not provided"}\nExperience: ${experience || "not provided"}\nAvailability: ${availability || "not provided"}\nSMS OK: ${sms_ok}\n\nView all at health.squarebidness.com/admin/`,
         }),

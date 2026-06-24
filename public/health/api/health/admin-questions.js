@@ -1,4 +1,4 @@
-// api/health/admin-applications.js
+// api/health/admin-questions.js
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
@@ -6,7 +6,7 @@ const supabase = createClient(
   process.env.SUPABASE_HEALTH_SERVICE_ROLE_KEY
 );
 
-const VALID_STATUSES = ["new", "contacted", "scheduled", "placed", "declined"];
+const VALID_STATUSES = ["new", "replied"];
 
 export default async function handler(req, res) {
   const allowed = ["https://www.squarebidness.com", "https://health.squarebidness.com"];
@@ -24,38 +24,29 @@ export default async function handler(req, res) {
 
   if (req.method === "GET") {
     const { data, error } = await supabase
-      .from("health_cna_applications")
+      .from("health_questions")
       .select("*")
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("[health/admin-applications] GET error:", error);
-      return res.status(500).json({ error: "Could not fetch applications." });
+      console.error("[health/admin-questions] GET error:", error);
+      return res.status(500).json({ error: "Could not fetch questions." });
     }
-    return res.status(200).json({ applications: data });
+    return res.status(200).json({ questions: data });
   }
 
   if (req.method === "PATCH") {
-    const { id, status, sms_blasted_at } = req.body || {};
-    if (!id) return res.status(400).json({ error: "Missing id." });
-
-    const updates = {};
-    if (status) {
-      if (!VALID_STATUSES.includes(status)) return res.status(400).json({ error: "Invalid status." });
-      updates.status = status;
+    const { id, status } = req.body || {};
+    if (!id || !VALID_STATUSES.includes(status)) {
+      return res.status(400).json({ error: "Invalid id or status." });
     }
-    if (sms_blasted_at) {
-      updates.sms_blasted_at = new Date().toISOString();
-    }
-    if (!Object.keys(updates).length) return res.status(400).json({ error: "Nothing to update." });
-
     const { error } = await supabase
-      .from("health_cna_applications")
-      .update(updates)
+      .from("health_questions")
+      .update({ status })
       .eq("id", id);
 
     if (error) {
-      console.error("[health/admin-applications] PATCH error:", error);
+      console.error("[health/admin-questions] PATCH error:", error);
       return res.status(500).json({ error: "Could not update status." });
     }
     return res.status(200).json({ ok: true });
@@ -65,12 +56,12 @@ export default async function handler(req, res) {
     const { id } = req.body || {};
     if (!id) return res.status(400).json({ error: "Missing id." });
     const { error } = await supabase
-      .from("health_cna_applications")
+      .from("health_questions")
       .delete()
       .eq("id", id);
 
     if (error) {
-      console.error("[health/admin-applications] DELETE error:", error);
+      console.error("[health/admin-questions] DELETE error:", error);
       return res.status(500).json({ error: "Could not delete." });
     }
     return res.status(200).json({ ok: true });
