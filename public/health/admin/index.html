@@ -170,18 +170,6 @@ a{color:inherit;text-decoration:none}
 .res-label{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(0,0,0,.32);margin-bottom:7px}
 .res-link{display:block;font-size:13px;font-weight:600;color:var(--gold2);margin-bottom:5px;text-decoration:none}
 .res-link:hover{color:var(--ink)}
-/* Action bar buttons */
-.action-btn{
-  display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;
-  letter-spacing:.3px;padding:7px 16px;border-radius:999px;border:none;cursor:pointer;
-  transition:.15s;
-}
-.action-btn-gold{background:var(--gold);color:#fff;}
-.action-btn-gold:hover{background:var(--gold2);}
-.action-btn-gold:disabled{opacity:.5;cursor:not-allowed;}
-.action-btn-outline{background:#fff;color:var(--gold2);border:1px solid rgba(183,156,110,.4);}
-.action-btn-outline:hover{background:rgba(183,156,110,.08);}
-
 /* Text SMS */
 .text-link{
   display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;
@@ -190,6 +178,38 @@ a{color:inherit;text-decoration:none}
   transition:.15s;text-decoration:none;
 }
 .text-link:hover{background:rgba(183,156,110,.2);color:var(--ink)}
+/* SBH Twilio send button */
+.sbh-btn{
+  display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;
+  color:#fff;padding:4px 12px;border-radius:999px;
+  background:var(--gold);border:none;cursor:pointer;transition:.15s;
+}
+.sbh-btn:hover{background:var(--gold2)}
+.sbh-btn:disabled{opacity:.5;cursor:not-allowed}
+/* SMS send modal */
+.sms-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);
+  z-index:999;align-items:center;justify-content:center;padding:20px;
+}
+.sms-overlay.open{display:flex}
+.sms-modal{
+  background:#fff;border-radius:20px;padding:28px 24px;
+  width:100%;max-width:430px;box-shadow:0 20px 60px rgba(0,0,0,.2);
+}
+.sms-modal h3{font-size:17px;font-weight:700;margin-bottom:4px}
+.sms-modal .sms-to{font-size:12px;color:var(--muted);margin-bottom:14px}
+.sms-modal textarea{
+  width:100%;border:1px solid rgba(0,0,0,.12);border-radius:12px;
+  padding:10px 12px;font:inherit;font-size:13px;line-height:1.55;
+  resize:vertical;min-height:110px;outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+.sms-modal textarea:focus{border-color:rgba(183,156,110,.75);box-shadow:0 0 0 4px rgba(183,156,110,.12)}
+.sms-modal .char-count{font-size:11px;color:var(--muted);text-align:right;margin-top:4px;margin-bottom:14px}
+.sms-modal .modal-foot{display:flex;gap:8px;justify-content:flex-end}
+.sms-status{font-size:13px;margin-top:10px;display:none}
+.sms-status.ok{color:#15803d}
+.sms-status.err{color:#991b1b}
 /* Delete */
 .del-btn{
   background:none;border:none;cursor:pointer;
@@ -269,7 +289,8 @@ a{color:inherit;text-decoration:none}
           <a class="res-link" href="https://supabase.com/dashboard/project/zmqirbhjywmhtqsnvuru/editor" target="_blank" rel="noopener">Supabase Table Editor</a>
         </div>
         <div>
-          <div class="res-label">Internal Vision</div>
+          <div class="res-label">Admin Pages</div>
+          <a class="res-link" href="/admin/questions/">Questions Inbox →</a>
           <a class="res-link" href="/admin/field-tech/">AI-Native Field Tech Vision →</a>
         </div>
       </div>
@@ -327,13 +348,50 @@ a{color:inherit;text-decoration:none}
       <button class="filter-chip" data-filter="declined">Declined</button>
     </div>
 
-    <div id="actionBar" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+      <div id="blastBar" style="display:none">
+        <button id="blastBtn" class="btn btn-gold btn-sm" type="button" style="width:auto">&#9993; Blast SMS — <span id="blastCount">0</span> with SMS OK</button>
+      </div>
+      <div id="markContactedBar" style="display:none">
+        <button id="markContactedBtn" class="btn btn-sm" type="button" style="width:auto;background:#1d4ed8;color:#fff">&#10003; Mark All as Contacted — <span id="markContactedCount">0</span> new</button>
+      </div>
+    </div>
 
     <div id="appList" class="app-list">
       <div class="loading">
         <div class="spinner"></div>
         Loading applications…
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Blast SMS modal -->
+<div id="blastOverlay" class="sms-overlay">
+  <div class="sms-modal">
+    <h3 id="blastModalTitle">Blast SMS</h3>
+    <div id="blastModalSub" class="sms-to"></div>
+    <textarea id="blastModalBody" maxlength="1600"></textarea>
+    <div id="blastCharCount" class="char-count">0 / 1600</div>
+    <div id="blastProgress" class="sms-status"></div>
+    <div class="modal-foot">
+      <button id="blastCancelBtn" class="btn btn-ghost btn-sm" type="button">Cancel</button>
+      <button id="blastSendBtn" class="btn btn-gold btn-sm" type="button" style="width:auto">Send to All</button>
+    </div>
+  </div>
+</div>
+
+<!-- Outbound SMS modal -->
+<div id="smsOverlay" class="sms-overlay">
+  <div class="sms-modal">
+    <h3 id="smsModalName">Send Message</h3>
+    <div id="smsModalTo" class="sms-to"></div>
+    <textarea id="smsModalBody" maxlength="1600"></textarea>
+    <div id="smsCharCount" class="char-count">0 / 1600</div>
+    <div id="smsStatus" class="sms-status"></div>
+    <div class="modal-foot">
+      <button id="smsCancelBtn" class="btn btn-ghost btn-sm" type="button">Cancel</button>
+      <button id="smsSendBtn" class="btn btn-gold btn-sm" type="button" style="width:auto">Send via SBH</button>
     </div>
   </div>
 </div>
@@ -397,60 +455,12 @@ a{color:inherit;text-decoration:none}
     }
   }
 
-  // --- Action Bar ---
-  function renderActionBar(){
-    const bar = document.getElementById("actionBar");
-    if(!bar) return;
-    bar.innerHTML = "";
-
-    const newApps = allApps.filter(a => (a.status||"new") === "new");
-    if(activeFilter !== "new" || !newApps.length){ bar.style.display="none"; return; }
-    bar.style.display = "flex";
-
-    const smsOkApps = newApps.filter(a => a.sms_ok);
-
-    // Mark All as Contacted
-    const markBtn = document.createElement("button");
-    markBtn.className = "action-btn action-btn-gold";
-    markBtn.textContent = "✓ Mark All as Contacted (" + newApps.length + ")";
-    markBtn.addEventListener("click", async function(){
-      markBtn.disabled = true;
-      markBtn.textContent = "Updating…";
-      await Promise.all(newApps.map(function(a){
-        return fetch(API,{
-          method:"PATCH",
-          headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},
-          body:JSON.stringify({id:a.id, status:"contacted"}),
-        }).then(function(r){
-          if(r.ok) a.status = "contacted";
-        });
-      }));
-      renderApps();
-      renderActionBar();
-      updateCount();
-    });
-    bar.appendChild(markBtn);
-
-    // Blast SMS
-    if(smsOkApps.length){
-      const numbers = smsOkApps.map(a => (a.phone||"").replace(/\D/g,"")).filter(Boolean).join(",");
-      const body = "Thank you for applying to the Square Bidness Health CNA Float Pool. We received your application and will be in touch soon. Questions? Visit health.squarebidness.com/questions/";
-      const smsBtn = document.createElement("a");
-      smsBtn.className = "action-btn action-btn-outline";
-      smsBtn.innerHTML = "&#9993; Blast SMS &mdash;" + smsOkApps.length + " with SMS OK";
-      smsBtn.href = "sms:" + numbers + "&body=" + encodeURIComponent(body);
-      bar.appendChild(smsBtn);
-    }
-  }
-
   // --- Render ---
   function renderApps(){
     const list = document.getElementById("appList");
     const filtered = activeFilter === "all"
       ? allApps
       : allApps.filter(a => a.status === activeFilter);
-
-    renderActionBar();
 
     if(!filtered.length){
       list.innerHTML = '<div class="no-apps">No applications' +
@@ -502,6 +512,13 @@ a{color:inherit;text-decoration:none}
         }
       });
     });
+
+    // SBH Twilio send buttons
+    list.querySelectorAll(".sbh-btn").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        openSmsModal(this.dataset.phone, this.dataset.name, this.dataset.msg);
+      });
+    });
   }
 
   function appCard(a){
@@ -514,6 +531,14 @@ a{color:inherit;text-decoration:none}
     const smsBody = "Hi " + firstName + ", this is Marcus with Square Bidness Health. We received your CNA application — thank you for applying. I’d like to connect this week about placement and next steps. What’s a good time to call?";
     const textLink = cleanPhone
       ? '<a class="text-link" href="sms:' + cleanPhone + '&body=' + encodeURIComponent(smsBody) + '">&#9993; Text</a>'
+      : '';
+
+    const sbhBtn = (a.sms_ok && cleanPhone)
+      ? '<button class="sbh-btn" data-phone="' + cleanPhone + '" data-name="' + esc(a.full_name || "") + '" data-msg="' + esc(smsBody) + '">&#9993; SBH</button>'
+      : '';
+
+    const blastedTag = a.sms_blasted_at
+      ? '<span class="sms-tag" style="color:#1d4ed8;gap:5px"><span style="background:#3b82f6;width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0"></span>Blasted ' + new Date(a.sms_blasted_at).toLocaleDateString("en-US",{month:"short",day:"numeric"}) + '</span>'
       : '';
 
     const tags = [a.availability, a.preferred_shift, a.travel_range, a.experience]
@@ -556,12 +581,14 @@ a{color:inherit;text-decoration:none}
           notes,
         '</div>',
         '<div class="app-card-foot">',
-          '<div style="display:flex;align-items:center;gap:8px">',
+          '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">',
             '<div class="sms-tag ' + (a.sms_ok ? '' : 'sms-no') + '">',
               '<span></span>',
               a.sms_ok ? 'SMS OK' : 'No SMS',
             '</div>',
+            blastedTag,
             textLink,
+            sbhBtn,
           '</div>',
           '<div style="display:flex;align-items:center;gap:8px">',
             '<span id="saving-' + a.id + '" class="saving">Saving…</span>',
@@ -580,7 +607,61 @@ a{color:inherit;text-decoration:none}
   function updateCount(){
     const badge = document.getElementById("countBadge");
     if(badge) badge.textContent = allApps.length + " total";
+
+    const counts = {};
+    ["new","contacted","scheduled","placed","declined"].forEach(function(s){
+      counts[s] = allApps.filter(function(a){ return (a.status||"new") === s; }).length;
+    });
+    document.querySelectorAll(".filter-chip").forEach(function(chip){
+      const f = chip.dataset.filter;
+      if(f === "all"){
+        chip.textContent = "All (" + allApps.length + ")";
+      } else {
+        chip.textContent = f.charAt(0).toUpperCase() + f.slice(1) + " (" + (counts[f]||0) + ")";
+      }
+    });
+
+    updateBlastBar();
+    updateMarkContactedBar();
   }
+
+  function updateBlastBar(){
+    const bar      = document.getElementById("blastBar");
+    const countEl  = document.getElementById("blastCount");
+    if(!bar || !countEl) return;
+    const filtered = activeFilter === "all"
+      ? allApps
+      : allApps.filter(function(a){ return (a.status||"new") === activeFilter; });
+    const smsable  = filtered.filter(function(a){ return a.sms_ok && a.phone; });
+    countEl.textContent = smsable.length;
+    bar.style.display = (smsable.length > 0 && activeFilter !== "all") ? "block" : "none";
+  }
+
+  function updateMarkContactedBar(){
+    const bar     = document.getElementById("markContactedBar");
+    const countEl = document.getElementById("markContactedCount");
+    if(!bar || !countEl) return;
+    const newApps = allApps.filter(function(a){ return (a.status||"new") === "new"; });
+    countEl.textContent = newApps.length;
+    bar.style.display = (activeFilter === "new" && newApps.length > 0) ? "block" : "none";
+  }
+
+  document.getElementById("markContactedBtn").addEventListener("click", async function(){
+    const btn = this;
+    const newApps = allApps.filter(function(a){ return (a.status||"new") === "new"; });
+    if(!newApps.length) return;
+    btn.disabled = true;
+    btn.textContent = "Updating…";
+    await Promise.all(newApps.map(function(a){
+      return fetch(API,{
+        method:"PATCH",
+        headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},
+        body:JSON.stringify({id:a.id, status:"contacted"}),
+      }).then(function(r){ if(r.ok) a.status = "contacted"; });
+    }));
+    renderApps();
+    updateCount();
+  });
 
   function esc(s){
     return String(s)
@@ -598,7 +679,95 @@ a{color:inherit;text-decoration:none}
     chip.classList.add("active");
     activeFilter = chip.dataset.filter;
     renderApps();
-    renderActionBar();
+    updateBlastBar();
+    updateMarkContactedBar();
+  });
+
+  // --- Blast SMS ---
+  var blastOverlay  = document.getElementById("blastOverlay");
+  var blastSendBtn  = document.getElementById("blastSendBtn");
+  var blastCancelBtn = document.getElementById("blastCancelBtn");
+  var blastModalBody = document.getElementById("blastModalBody");
+  var blastCharCount = document.getElementById("blastCharCount");
+  var blastProgress  = document.getElementById("blastProgress");
+  var blastModalTitle = document.getElementById("blastModalTitle");
+  var blastModalSub   = document.getElementById("blastModalSub");
+
+  var DEFAULT_BLAST_MSG = "Hey [Name], this is Marcus with Square Bidness Health. Just wanted to reach out and apologize for the delay — things have been moving fast on our end. We’re still on track and haven’t forgotten about you. Got questions? Submit them at health.squarebidness.com/questions/ More details coming soon.";
+
+  document.getElementById("blastBtn").addEventListener("click", function(){
+    var filtered = activeFilter === "all"
+      ? allApps
+      : allApps.filter(function(a){ return (a.status||"new") === activeFilter; });
+    var smsable = filtered.filter(function(a){ return a.sms_ok && a.phone; });
+    var label = activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1);
+    blastModalTitle.textContent = "Blast SMS — " + label;
+    blastModalSub.textContent = "Sending from (225) 209-9257 to " + smsable.length + " applicants with SMS OK";
+    blastModalBody.value = DEFAULT_BLAST_MSG;
+    blastCharCount.textContent = DEFAULT_BLAST_MSG.length + " / 1600";
+    blastProgress.style.display = "none";
+    blastProgress.textContent = "";
+    blastSendBtn.disabled = false;
+    blastSendBtn.textContent = "Send to All";
+    blastOverlay.classList.add("open");
+    blastModalBody.focus();
+  });
+
+  blastModalBody.addEventListener("input", function(){
+    blastCharCount.textContent = this.value.length + " / 1600";
+  });
+
+  blastCancelBtn.addEventListener("click", function(){
+    blastOverlay.classList.remove("open");
+  });
+
+  blastOverlay.addEventListener("click", function(e){
+    if(e.target === blastOverlay) blastOverlay.classList.remove("open");
+  });
+
+  blastSendBtn.addEventListener("click", async function(){
+    var msg = blastModalBody.value.trim();
+    if(!msg) return;
+    var filtered = activeFilter === "all"
+      ? allApps
+      : allApps.filter(function(a){ return (a.status||"new") === activeFilter; });
+    var smsable = filtered.filter(function(a){ return a.sms_ok && a.phone; });
+    if(!smsable.length) return;
+
+    blastSendBtn.disabled = true;
+    blastSendBtn.textContent = "Sending…";
+    blastProgress.className = "sms-status";
+    blastProgress.style.display = "block";
+
+    var sent = 0, failed = 0;
+    for(var i = 0; i < smsable.length; i++){
+      var app = smsable[i];
+      var firstName = (app.full_name || "").split(" ")[0];
+      var personalized = msg.replace(/\[Name\]/g, firstName);
+      var cleanPhone = (app.phone || "").replace(/\D/g, "");
+      blastProgress.textContent = "Sending " + (i+1) + " of " + smsable.length + "…";
+      try{
+        var r = await fetch("/api/health/send-sms", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+          body: JSON.stringify({ to: cleanPhone, message: personalized }),
+        });
+        if(r.ok){
+          sent++;
+          fetch(API, {
+            method:"PATCH",
+            headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},
+            body: JSON.stringify({ id: app.id, sms_blasted_at: true }),
+          });
+          app.sms_blasted_at = new Date().toISOString();
+        } else { failed++; }
+      }catch(e){ failed++; }
+    }
+
+    blastProgress.textContent = "Done — " + sent + " sent" + (failed ? ", " + failed + " failed" : "") + ".";
+    blastProgress.className = "sms-status " + (failed ? "err" : "ok");
+    blastSendBtn.textContent = "Sent ✓";
+    setTimeout(function(){ blastOverlay.classList.remove("open"); }, 2200);
   });
 
   // --- Refresh ---
@@ -613,6 +782,82 @@ a{color:inherit;text-decoration:none}
   } else {
     showAuth();
   }
+
+  // --- SMS Modal ---
+  var smsOverlay  = document.getElementById("smsOverlay");
+  var smsModalName = document.getElementById("smsModalName");
+  var smsModalTo  = document.getElementById("smsModalTo");
+  var smsModalBody = document.getElementById("smsModalBody");
+  var smsCharCount = document.getElementById("smsCharCount");
+  var smsStatus   = document.getElementById("smsStatus");
+  var smsCancelBtn = document.getElementById("smsCancelBtn");
+  var smsSendBtn  = document.getElementById("smsSendBtn");
+  var currentPhone = "";
+
+  function openSmsModal(phone, name, msg){
+    currentPhone = phone;
+    smsModalName.textContent = "Text " + (name || "Applicant");
+    smsModalTo.textContent = "From +1 (225) 209-9257 → " + phone;
+    smsModalBody.value = msg;
+    smsCharCount.textContent = msg.length + " / 1600";
+    smsStatus.style.display = "none";
+    smsStatus.textContent = "";
+    smsSendBtn.disabled = false;
+    smsSendBtn.textContent = "Send via SBH";
+    smsOverlay.classList.add("open");
+    smsModalBody.focus();
+  }
+
+  smsModalBody.addEventListener("input", function(){
+    smsCharCount.textContent = this.value.length + " / 1600";
+  });
+
+  smsCancelBtn.addEventListener("click", function(){
+    smsOverlay.classList.remove("open");
+  });
+
+  smsOverlay.addEventListener("click", function(e){
+    if(e.target === smsOverlay) smsOverlay.classList.remove("open");
+  });
+
+  smsSendBtn.addEventListener("click", async function(){
+    var msg = smsModalBody.value.trim();
+    if(!msg || !currentPhone) return;
+    smsSendBtn.disabled = true;
+    smsSendBtn.textContent = "Sending…";
+    smsStatus.style.display = "none";
+    try{
+      var r = await fetch("/api/health/send-sms", {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          "Authorization":"Bearer " + token,
+        },
+        body: JSON.stringify({ to: currentPhone, message: msg }),
+      });
+      if(r.ok){
+        smsStatus.textContent = "Sent — delivered via Square Bidness Health.";
+        smsStatus.className = "sms-status ok";
+        smsStatus.style.display = "block";
+        smsSendBtn.textContent = "Sent ✓";
+        setTimeout(function(){ smsOverlay.classList.remove("open"); }, 1800);
+      } else {
+        var data = await r.json().catch(function(){return{};});
+        smsStatus.textContent = "Error: " + (data.error || "Could not send. Try again.");
+        smsStatus.className = "sms-status err";
+        smsStatus.style.display = "block";
+        smsSendBtn.disabled = false;
+        smsSendBtn.textContent = "Send via SBH";
+      }
+    }catch(err){
+      smsStatus.textContent = "Network error — check connection.";
+      smsStatus.className = "sms-status err";
+      smsStatus.style.display = "block";
+      smsSendBtn.disabled = false;
+      smsSendBtn.textContent = "Send via SBH";
+    }
+  });
+
 })();
 </script>
 </body>
