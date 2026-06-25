@@ -46,14 +46,14 @@ export default async function handler(req, res) {
       return res.status(405).json({ error: "Method not allowed" });
     }
 
-    if (!process.env.STRIPE_SECRET_KEY) {
+    if (!process.env.STRIPE_ONBOARDING_SECRET_KEY) {
       return res.status(500).json({
-        error: "Missing STRIPE_SECRET_KEY in Vercel environment variables."
+        error: "Missing STRIPE_ONBOARDING_SECRET_KEY in Vercel environment variables."
       });
     }
 
     const { default: Stripe } = await import("stripe");
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+    const stripe = new Stripe(process.env.STRIPE_ONBOARDING_SECRET_KEY);
     const leadId = cleanParam(req.query.leadId);
     const client = cleanParam(req.query.client);
     const source = cleanParam(req.query.source, "direct_stripe_connect");

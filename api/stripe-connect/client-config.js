@@ -73,7 +73,7 @@ export default function handler(req, res) {
 
   return res.status(200).json({
     ok: true,
-    mode: process.env.STRIPE_SECRET_KEY?.startsWith("sk_live_")
+    mode: process.env.STRIPE_ONBOARDING_SECRET_KEY?.startsWith("sk_live_")
       ? "live"
       : "test",
     clients: getPublicStripeConnectClients()
