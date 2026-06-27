@@ -95,6 +95,21 @@ textarea{min-height:120px;resize:vertical}
 .dark-card p{font-size:14px;line-height:1.6;color:rgba(255,255,255,.75)}
 .tag{display:inline-block;margin-top:10px;padding:6px 12px;border-radius:999px;background:rgba(183,156,110,.18);border:1px solid rgba(183,156,110,.3);color:var(--gold);font-size:12px;letter-spacing:.3px}
 footer{padding:8px 0 36px;text-align:center;color:rgba(0,0,0,.48);font-size:12px;letter-spacing:.5px}
+.npi-row{display:flex;gap:10px;align-items:flex-end}
+.npi-row input{flex:1}
+.btn-lookup{
+  appearance:none;border:1px solid rgba(0,0,0,.14);background:#fff;cursor:pointer;
+  padding:13px 18px;border-radius:14px;font:inherit;font-size:14px;font-weight:600;
+  color:#444;white-space:nowrap;transition:.2s;flex-shrink:0;
+}
+.btn-lookup:hover{background:#f5f5f5;border-color:rgba(0,0,0,.22)}
+.btn-lookup:disabled{opacity:.55;cursor:not-allowed}
+.npi-badge{
+  display:none;margin-top:6px;padding:6px 12px;border-radius:999px;
+  background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);
+  color:#166534;font-size:12px;font-weight:600;letter-spacing:.2px;
+}
+.npi-badge.err{background:#fef2f2;border-color:#fecaca;color:#991b1b}
 @media(max-width:920px){.layout{grid-template-columns:1fr}.grid{grid-template-columns:1fr}h1{font-size:32px}}
 </style>
 </head>
@@ -126,6 +141,15 @@ footer{padding:8px 0 36px;text-align:center;color:rgba(0,0,0,.48);font-size:12px
 
       <form id="facilityForm">
         <div class="grid">
+
+          <div class="field full">
+            <label for="npi">Facility NPI <span style="font-weight:400;color:rgba(0,0,0,.45)">(optional — auto-fills details)</span></label>
+            <div class="npi-row">
+              <input id="npi" type="text" inputmode="numeric" maxlength="10" placeholder="10-digit NPI number" />
+              <button type="button" id="npiLookupBtn" class="btn-lookup">Look Up</button>
+            </div>
+            <div id="npiBadge" class="npi-badge"></div>
+          </div>
 
           <div class="field full">
             <label for="facilityName">Facility Name</label>
@@ -257,8 +281,57 @@ document.getElementById("yr").textContent = new Date().getFullYear();
   const success=document.getElementById("formSuccess");
   const errBanner=document.getElementById("submitError");
   const btn=document.getElementById("submitBtn");
+  const npiLookupBtn=document.getElementById("npiLookupBtn");
+  const npiBadge=document.getElementById("npiBadge");
   if(!form) return;
   function val(id){const el=document.getElementById(id);return el?el.value.trim():""}
+  function setVal(id,v){const el=document.getElementById(id);if(el&&v)el.value=v;}
+  function setSelect(id,v){
+    const el=document.getElementById(id);
+    if(!el||!v) return;
+    for(let i=0;i<el.options.length;i++){
+      if(el.options[i].text===v){el.selectedIndex=i;return;}
+    }
+  }
+
+  let npiVerified=false;
+
+  npiLookupBtn.addEventListener("click",async function(){
+    const npi=val("npi").replace(/\D/g,"");
+    if(npi.length!==10){
+      npiBadge.className="npi-badge err";
+      npiBadge.textContent="NPI must be 10 digits.";
+      npiBadge.style.display="block";
+      return;
+    }
+    npiLookupBtn.disabled=true;
+    npiLookupBtn.textContent="Looking up…";
+    npiBadge.style.display="none";
+    npiVerified=false;
+    try{
+      const res=await fetch("/api/health/verify-npi?npi="+npi);
+      const data=await res.json();
+      if(res.ok&&data.found){
+        setVal("facilityName",data.facility_name);
+        setVal("parish",data.city||data.parish);
+        setSelect("facilityType",data.facility_type);
+        npiVerified=true;
+        npiBadge.className="npi-badge";
+        npiBadge.textContent="✓ Verified via NPPES — "+(data.facility_name||"facility found");
+        npiBadge.style.display="block";
+      } else {
+        npiBadge.className="npi-badge err";
+        npiBadge.textContent=data.error||"NPI not found in registry.";
+        npiBadge.style.display="block";
+      }
+    }catch(err){
+      npiBadge.className="npi-badge err";
+      npiBadge.textContent="Lookup failed. You can still fill in details manually.";
+      npiBadge.style.display="block";
+    }
+    npiLookupBtn.disabled=false;
+    npiLookupBtn.textContent="Look Up";
+  });
 
   form.addEventListener("submit",async function(e){
     e.preventDefault();
@@ -275,6 +348,8 @@ document.getElementById("yr").textContent = new Date().getFullYear();
       shifts_needed: val("shiftsNeeded"),
       urgency:       val("urgency"),
       notes:         val("notes"),
+      npi:           val("npi")||null,
+      npi_verified:  npiVerified,
     };
     try{
       const res=await fetch("/api/health/facility-inquiry",{

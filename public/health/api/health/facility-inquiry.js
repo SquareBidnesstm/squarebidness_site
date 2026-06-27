@@ -19,6 +19,7 @@ export default async function handler(req, res) {
     facility_name, contact_name, title,
     phone, email, facility_type,
     parish, shifts_needed, urgency, notes,
+    npi, npi_verified,
   } = req.body || {};
 
   if (!facility_name || !contact_name || !phone) {
@@ -36,6 +37,8 @@ export default async function handler(req, res) {
     shifts_needed: shifts_needed ? String(shifts_needed).trim() : null,
     urgency:       urgency       ? String(urgency).trim()        : null,
     notes:         notes         ? String(notes).trim()          : null,
+    npi:           npi           ? String(npi).trim()            : null,
+    npi_verified:  npi_verified  ? Boolean(npi_verified)         : false,
     status:        "new",
   }]);
 
