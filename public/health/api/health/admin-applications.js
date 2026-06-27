@@ -36,7 +36,7 @@ export default async function handler(req, res) {
   }
 
   if (req.method === "PATCH") {
-    const { id, status, sms_blasted_at } = req.body || {};
+    const { id, status, sms_blasted_at, priority } = req.body || {};
     if (!id) return res.status(400).json({ error: "Missing id." });
 
     const updates = {};
@@ -46,6 +46,9 @@ export default async function handler(req, res) {
     }
     if (sms_blasted_at) {
       updates.sms_blasted_at = new Date().toISOString();
+    }
+    if (priority !== undefined) {
+      updates.priority = Boolean(priority);
     }
     if (!Object.keys(updates).length) return res.status(400).json({ error: "Nothing to update." });
 
