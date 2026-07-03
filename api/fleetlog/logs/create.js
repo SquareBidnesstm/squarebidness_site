@@ -101,7 +101,7 @@ async function maybeSendUsageWarning({email,tier,used}){
         : `<p>You are approaching your fleet capacity.</p>`
       }
       <div style="margin-top:16px">
-        <a href="https://www.squarebidness.com/lab/fleetlog/"
+        <a href="https://trucking.squarebidness.com/"
            style="background:#111;color:#fff;padding:10px 14px;border-radius:10px;text-decoration:none;font-weight:700;">
            Open FleetLog
         </a>

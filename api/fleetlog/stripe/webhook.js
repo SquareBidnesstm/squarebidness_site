@@ -162,7 +162,7 @@ function welcomeEmailHtml({ email, tier, subscriptionId }){
          style="display:inline-block;background:#111;color:#fff;text-decoration:none;padding:12px 16px;border-radius:12px;font-weight:800;">
         Start Logging Now
       </a>
-      <a href="https://www.squarebidness.com/fleetlog/"
+      <a href="https://trucking.squarebidness.com/"
          style="display:inline-block;margin-left:10px;color:#111;text-decoration:underline;">
         Back to FleetLog
       </a>
