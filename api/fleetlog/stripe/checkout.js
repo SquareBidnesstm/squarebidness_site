@@ -39,10 +39,10 @@ export default async function handler(req, res) {
     // Keep these stable in LIVE. You can override via env if you want.
     const success =
       clean(process.env.STRIPE_SUCCESS_URL) ||
-      "https://www.squarebidness.com/fleetlog/success/";
+      "https://trucking.squarebidness.com/success/";
     const cancel =
       clean(process.env.STRIPE_CANCEL_URL) ||
-      "https://www.squarebidness.com/fleetlog/";
+      "https://trucking.squarebidness.com/";
 
     const stripe = new Stripe(key);
 
