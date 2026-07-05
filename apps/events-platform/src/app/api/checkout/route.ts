@@ -122,7 +122,7 @@ export async function POST(req: NextRequest) {
       lineItems.push({
         price_data: {
           currency: "usd",
-          product_data: { name: `${event.title} — ${tier.name}` },
+          product_data: { name: `${event.title} — ${tier.name}`, images: ["https://events.squarebidness.com/events-180.png"] },
           unit_amount: priceCents,
         },
         quantity: qty,
@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
       lineItems.push({
         price_data: {
           currency: "usd",
-          product_data: { name: `${event.title} — ${tier.name} (Free)` },
+          product_data: { name: `${event.title} — ${tier.name} (Free)`, images: ["https://events.squarebidness.com/events-180.png"] },
           unit_amount: 0,
         },
         quantity: qty,
