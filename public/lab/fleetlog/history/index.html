@@ -65,8 +65,8 @@
           No active subscription found for this email. Subscribe to activate FleetLog.
         </div>
         <div class="actions">
-          <a class="btn" href="/api/fleetlog/stripe/checkout?tier=single">Subscribe — Single ($19/mo)</a>
-          <a class="btn btn-ghost" href="/api/fleetlog/stripe/checkout?tier=fleet">Subscribe — Fleet ($99/mo)</a>
+          <a class="btn" href="https://trucking.squarebidness.com/api/fleetlog/stripe/checkout?tier=single">Subscribe — Single ($19/mo)</a>
+          <a class="btn btn-ghost" href="https://trucking.squarebidness.com/api/fleetlog/stripe/checkout?tier=fleet">Subscribe — Fleet ($99/mo)</a>
           <a class="btn btn-ghost" href="/fleetlog/">Back to Marketing</a>
         </div>
       </div>
@@ -124,7 +124,7 @@
       }
       setMsg("Checking subscription…");
       try{
-        const r = await fetch(`/api/fleetlog/auth/status?email=${encodeURIComponent(email)}`);
+        const r = await fetch(`https://trucking.squarebidness.com/api/fleetlog/auth/status?email=${encodeURIComponent(email)}`);
         const j = await r.json();
         if(!j.ok) throw new Error(j.error || "Status failed");
         localStorage.setItem(KEY, email);
@@ -155,7 +155,7 @@
 
       setMsg("Loading…");
       try{
-        const r = await fetch(`/api/fleetlog/logs/list?email=${encodeURIComponent(email)}&limit=25`);
+        const r = await fetch(`https://trucking.squarebidness.com/api/fleetlog/logs/list?email=${encodeURIComponent(email)}&limit=25`);
         const j = await r.json();
         if(!j.ok) throw new Error(j.error || "Failed");
 
@@ -182,7 +182,7 @@
 
       setMsg("Opening billing…");
       try{
-        const r = await fetch(`/api/fleetlog/stripe/portal?email=${encodeURIComponent(email)}`);
+        const r = await fetch(`https://trucking.squarebidness.com/api/fleetlog/stripe/portal?email=${encodeURIComponent(email)}`);
         const j = await r.json();
         if(!j.ok) throw new Error(j.error || "Billing failed");
         window.open(j.url, "_blank", "noopener,noreferrer");

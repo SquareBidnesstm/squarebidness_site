@@ -141,8 +141,8 @@
       </div>
 
       <div class="grid2">
-        <a class="btn btn-primary" href="/api/fleetlog/stripe/checkout?tier=single">Subscribe — Single ($19/mo)</a>
-        <a class="btn btn-ghost" href="/api/fleetlog/stripe/checkout?tier=fleet">Subscribe — Fleet ($99/mo)</a>
+        <a class="btn btn-primary" href="https://trucking.squarebidness.com/api/fleetlog/stripe/checkout?tier=single">Subscribe — Single ($19/mo)</a>
+        <a class="btn btn-ghost" href="https://trucking.squarebidness.com/api/fleetlog/stripe/checkout?tier=fleet">Subscribe — Fleet ($99/mo)</a>
       </div>
     </div>
 
@@ -181,7 +181,7 @@
     // --- Usage helper ---
     async function fetchUsage(email, tierRaw){
       try{
-        const ur = await fetch(`/api/fleetlog/logs/list?email=${encodeURIComponent(email)}&limit=1000`);
+        const ur = await fetch(`https://trucking.squarebidness.com/api/fleetlog/logs/list?email=${encodeURIComponent(email)}&limit=1000`);
         const lj = await ur.json();
         if(!lj.ok) return { used:null, max:null, pct:null, warn80:false };
 
@@ -211,7 +211,7 @@
       show("gate", false);
 
       try{
-        const r = await fetch(`/api/fleetlog/auth/status?email=${encodeURIComponent(email)}`);
+        const r = await fetch(`https://trucking.squarebidness.com/api/fleetlog/auth/status?email=${encodeURIComponent(email)}`);
         const j = await r.json();
         if(!j.ok) throw new Error(j.error || "Status failed");
 
@@ -219,7 +219,7 @@
 
         $("historyLink").href = `/lab/fleetlog/history/?email=${encodeURIComponent(email)}`;
 
-        const portal = `/api/fleetlog/stripe/portal?email=${encodeURIComponent(email)}`;
+        const portal = `https://trucking.squarebidness.com/api/fleetlog/stripe/portal?email=${encodeURIComponent(email)}`;
         $("billingLink").href = portal;
         $("upgradeLink").href = portal;
 

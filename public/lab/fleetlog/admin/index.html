@@ -100,13 +100,13 @@
     <div class="grid" style="margin-top:14px;">
       <div class="card">
         <h2>Audit Log</h2>
-        <div class="k">Source: <code>/api/fleetlog/ops/audit/list</code></div>
+        <div class="k">Source: <code>https://trucking.squarebidness.com/api/fleetlog/ops/audit/list</code></div>
         <div id="auditWrap"></div>
       </div>
 
       <div class="card">
         <h2>Webhook Events</h2>
-        <div class="k">Source: <code>/api/fleetlog/ops/webhooks/list</code></div>
+        <div class="k">Source: <code>https://trucking.squarebidness.com/api/fleetlog/ops/webhooks/list</code></div>
         <div id="webhookWrap"></div>
       </div>
     </div>
@@ -229,8 +229,8 @@
         const lim = parseInt($("limit").value || "50", 10);
 
         const [a, w] = await Promise.all([
-          fetchJson(`/api/fleetlog/ops/audit/list?limit=${lim}`),
-          fetchJson(`/api/fleetlog/ops/webhooks/list?limit=${lim}`)
+          fetchJson(`https://trucking.squarebidness.com/api/fleetlog/ops/audit/list?limit=${lim}`),
+          fetchJson(`https://trucking.squarebidness.com/api/fleetlog/ops/webhooks/list?limit=${lim}`)
         ]);
 
         state.audit = Array.isArray(a.events) ? a.events : [];

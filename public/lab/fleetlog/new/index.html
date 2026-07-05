@@ -1,4 +1,4 @@
-<!-- /public/lab/fleetlog/new/index.html (PASTE READY — wired to /api/fleetlog/logs/create?email=... with tier limits + upgrade UX + usage bar + 80% warning) -->
+<!-- /public/lab/fleetlog/new/index.html (PASTE READY — wired to https://trucking.squarebidness.com/api/fleetlog/logs/create?email=... with tier limits + upgrade UX + usage bar + 80% warning) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -131,8 +131,8 @@
           No active subscription found for this email. Subscribe to activate FleetLog.
         </div>
         <div class="actions">
-          <a class="btn" href="/api/fleetlog/stripe/checkout?tier=single">Subscribe — Single ($19/mo)</a>
-          <a class="btn btn-ghost" href="/api/fleetlog/stripe/checkout?tier=fleet">Subscribe — Fleet ($99/mo)</a>
+          <a class="btn" href="https://trucking.squarebidness.com/api/fleetlog/stripe/checkout?tier=single">Subscribe — Single ($19/mo)</a>
+          <a class="btn btn-ghost" href="https://trucking.squarebidness.com/api/fleetlog/stripe/checkout?tier=fleet">Subscribe — Fleet ($99/mo)</a>
           <a class="btn btn-ghost" href="/fleetlog/">Back to Marketing</a>
         </div>
       </div>
@@ -225,7 +225,7 @@
 
     async function refreshUsage(email, tierRaw){
       try{
-        const r = await fetch(`/api/fleetlog/logs/list?email=${encodeURIComponent(email)}&limit=1000`);
+        const r = await fetch(`https://trucking.squarebidness.com/api/fleetlog/logs/list?email=${encodeURIComponent(email)}&limit=1000`);
         const j = await r.json();
         if(!j.ok) return;
 
@@ -245,7 +245,7 @@
       }
 
       try{
-        const r = await fetch(`/api/fleetlog/auth/status?email=${encodeURIComponent(email)}`);
+        const r = await fetch(`https://trucking.squarebidness.com/api/fleetlog/auth/status?email=${encodeURIComponent(email)}`);
         const j = await r.json();
         if(!j.ok) throw new Error(j.error || "Status failed");
 
@@ -253,7 +253,7 @@
 
         $("historyLink").href = `/lab/fleetlog/history/?email=${encodeURIComponent(email)}`;
 
-        const portalHref = `/api/fleetlog/stripe/portal?email=${encodeURIComponent(email)}`;
+        const portalHref = `https://trucking.squarebidness.com/api/fleetlog/stripe/portal?email=${encodeURIComponent(email)}`;
         $("billingLink").href = portalHref;
         $("upgradeLink").href = portalHref;
 
@@ -307,7 +307,7 @@
       showJson({ ...p, saving:true });
 
       try{
-        const r = await fetch(`/api/fleetlog/logs/create?email=${encodeURIComponent(email)}`, {
+        const r = await fetch(`https://trucking.squarebidness.com/api/fleetlog/logs/create?email=${encodeURIComponent(email)}`, {
           method:"POST",
           headers:{ "Content-Type":"application/json" },
           body: JSON.stringify(p)
