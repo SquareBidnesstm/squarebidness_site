@@ -344,9 +344,21 @@
     }
     .card__media img{ width:100%;height:100%;display:block;object-fit:cover; }
     /* split layout for two-image featured card */
+    /* side-by-side split (unused now) */
     .card__media--split{ display:flex;gap:2px; }
     .card__split-img{ flex:1;overflow:hidden; }
     .card__split-img img{ width:100%;height:100%;object-fit:cover;display:block; }
+    /* stacked top/bottom variant for VSOP */
+    .card__media--stack{
+      aspect-ratio:unset;
+      display:flex;flex-direction:column;gap:2px;
+    }
+    .card__media--stack .card__split-img{
+      aspect-ratio:4/3;
+      flex:none;
+    }
+    /* portrait-image cards (Supima, Women's Lane) */
+    .card__media--portrait{ aspect-ratio:3/4; }
     .badge{
       position:absolute;top:.6rem;left:.6rem;
       background:#800020;color:#FFD700;
@@ -583,7 +595,7 @@
         <div class="home-grid">
           <!-- VSOP Collection — stacked as one featured card, Coming Soon -->
           <article class="card card--featured" data-product-id="vsop-collection">
-            <div class="card__media card__media--split">
+            <div class="card__media card__media--stack">
               <div class="card__split-img">
                 <picture>
                   <source type="image/webp" srcset="/assets/vsop-jacket_800.webp 800w, /assets/vsop-jacket_1200.webp 1200w" sizes="50vw" />
@@ -608,7 +620,7 @@
           </article>
 
           <article class="card" data-product-id="supima-tee">
-            <div class="card__media">
+            <div class="card__media card__media--portrait">
               <picture>
                 <source type="image/webp" srcset="/collections/assets/amari_2_800.webp 800w, /collections/assets/amari_2_1200.webp 1200w" sizes="(max-width: 768px) 100vw, 400px" />
                 <source type="image/jpeg" srcset="/collections/assets/amari_2_800.jpg 800w, /collections/assets/amari_2_1200.jpg 1200w" sizes="(max-width: 768px) 100vw, 400px" />
@@ -670,7 +682,7 @@
           </article>
 
           <article class="card">
-            <div class="card__media">
+            <div class="card__media card__media--portrait">
               <picture>
                 <source type="image/webp"
                   srcset="/assets/community/marquesha-1_800.webp 800w, /assets/community/marquesha-1_1200.webp 1200w"
