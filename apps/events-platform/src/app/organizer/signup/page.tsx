@@ -35,8 +35,7 @@ export default async function OrganizerSignupPage({
       <div style={{ width: "100%", maxWidth: 480 }}>
         <div style={{ display: "flex", justifyContent: "center", marginBottom: 32 }}>
           <a href="/" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, textDecoration: "none" }}>
-            <img src="/sb-mark.png" alt="Square Bidness" style={{ height: 48, width: "auto" }} />
-            <span style={{ color: "#fff", fontSize: "0.6rem", fontWeight: 900, letterSpacing: "0.18em", textTransform: "uppercase" }}>Events</span>
+            <img src="/events-180.png" alt="SB Events" style={{ height: 64, width: 64, borderRadius: 16 }} />
           </a>
         </div>
         <h1 style={{ fontSize: "2rem", fontWeight: 950, letterSpacing: "-0.05em", marginBottom: 6 }}>List your event.</h1>
