@@ -344,19 +344,14 @@
     }
     .card__media img{ width:100%;height:100%;display:block;object-fit:cover; }
     /* split layout for two-image featured card */
-    /* side-by-side split (unused now) */
-    .card__media--split{ display:flex;gap:2px; }
-    .card__split-img{ flex:1;overflow:hidden; }
-    .card__split-img img{ width:100%;height:100%;object-fit:cover;display:block; }
-    /* stacked top/bottom variant for VSOP */
+    /* stacked top/bottom variant (VSOP jacket + shorts) */
     .card__media--stack{
-      aspect-ratio:unset;
+      position:relative;
+      aspect-ratio:3/4;
       display:flex;flex-direction:column;gap:2px;
     }
-    .card__media--stack .card__split-img{
-      aspect-ratio:4/3;
-      flex:none;
-    }
+    .card__split-img{ flex:1;overflow:hidden; }
+    .card__split-img img{ width:100%;height:100%;object-fit:cover;display:block; }
     /* portrait-image cards (Supima, Women's Lane) */
     .card__media--portrait{ aspect-ratio:3/4; }
     .badge{
@@ -593,18 +588,21 @@
         <h2 class="section__title">Live Right Now</h2>
 <p class="section__lead">Apparel, operator installs, and active lanes moving under Square Bidness right now.</p>
         <div class="home-grid">
-          <!-- VSOP Collection — stacked as one featured card, Coming Soon -->
-          <article class="card card--featured" data-product-id="vsop-collection">
+
+          <!-- ROW 1 -->
+
+          <!-- Card 1: VSOP — jacket top, shorts bottom, same 3/4 portrait ratio -->
+          <article class="card" data-product-id="vsop-collection">
             <div class="card__media card__media--stack">
               <div class="card__split-img">
                 <picture>
-                  <source type="image/webp" srcset="/assets/vsop-jacket_800.webp 800w, /assets/vsop-jacket_1200.webp 1200w" sizes="50vw" />
+                  <source type="image/webp" srcset="/assets/vsop-jacket_800.webp 800w, /assets/vsop-jacket_1200.webp 1200w" sizes="(max-width:768px) 100vw, 400px" />
                   <img src="/assets/vsop-jacket_800.jpg" alt="VSOP Hooded Jacket — Burgundy + Brown" width="800" height="1000" loading="lazy" decoding="async" />
                 </picture>
               </div>
               <div class="card__split-img">
                 <picture>
-                  <source type="image/webp" srcset="/assets/vsop-shorts_800.webp 800w, /assets/vsop-shorts_1200.webp 1200w" sizes="50vw" />
+                  <source type="image/webp" srcset="/assets/vsop-shorts_800.webp 800w, /assets/vsop-shorts_1200.webp 1200w" sizes="(max-width:768px) 100vw, 400px" />
                   <img src="/assets/vsop-shorts_800.jpg" alt="VSOP Shorts — Burgundy + Brown" width="800" height="1000" loading="lazy" decoding="async" />
                 </picture>
               </div>
@@ -612,13 +610,14 @@
             </div>
             <div class="card__content">
               <h3>VSOP Collection — Burgundy + Brown</h3>
-              <p class="card__description">Hooded Jacket + Matching Shorts. Full embroidery hit. Built as a set — checking status, dropping soon.</p>
+              <p class="card__description">Hooded Jacket + Matching Shorts. Full embroidery hit. Built as a set — dropping soon.</p>
             </div>
             <div class="card__actions">
               <a class="btn btn--ghost btn--primary" href="/vsop/">View VSOP Collection</a>
             </div>
           </article>
 
+          <!-- Card 2: Supima -->
           <article class="card" data-product-id="supima-tee">
             <div class="card__media card__media--portrait">
               <picture>
@@ -629,8 +628,8 @@
               <span class="badge">Supima Essential</span>
             </div>
             <div class="card__content">
-              <h3>Supima Tee</h3>
-              <p class="card__description">Supima cotton tee. Everyday Square Bidness uniform — shot in Hammond with Amari.</p>
+              <h3>Supima Tee — Everyday Uniform</h3>
+              <p class="card__description">Supima cotton tee. Everyday Square Bidness uniform — men’s and women’s cuts, shot in Hammond with Amari.</p>
               <p class="price">$36.00</p>
             </div>
             <div class="card__actions">
@@ -638,6 +637,33 @@
               <a class="btn-link" href="/supima/">Fit &amp; fabric details</a>
             </div>
           </article>
+
+          <!-- Card 3: Women Coming — moved to row 1 -->
+          <article class="card">
+            <div class="card__media card__media--portrait">
+              <picture>
+                <source type="image/webp"
+                  srcset="/assets/community/marquesha-1_800.webp 800w, /assets/community/marquesha-1_1200.webp 1200w"
+                  sizes="(max-width: 768px) 100vw, 400px" />
+                <source type="image/jpeg"
+                  srcset="/assets/community/marquesha-1-800.jpg 800w, /assets/community/marquesha-1_1200.jpg 1200w"
+                  sizes="(max-width: 768px) 100vw, 400px" />
+                <img src="/assets/community/marquesha-1_1200.jpg" alt="Marquesha — women’s lane coming soon" width="1200" height="1500" loading="lazy" decoding="async" />
+              </picture>
+              <span class="badge">Women Coming</span>
+            </div>
+            <div class="card__content">
+              <h3>Women’s Lane — Coming Soon</h3>
+              <p class="card__description">
+                Marquesha setting the tone for the women’s side — presence, posture, and Square Bidness written all over it.
+              </p>
+            </div>
+            <div class="card__actions">
+              <a class="btn btn--ghost btn--secondary" href="/community/">Watch the Community Lane</a>
+            </div>
+          </article>
+
+          <!-- ROW 2: Winter Games -->
 
           <article class="card" data-product-id="wintergames-crewneck">
             <div class="card__media">
@@ -681,29 +707,6 @@
             </div>
           </article>
 
-          <article class="card">
-            <div class="card__media card__media--portrait">
-              <picture>
-                <source type="image/webp"
-                  srcset="/assets/community/marquesha-1_800.webp 800w, /assets/community/marquesha-1_1200.webp 1200w"
-                  sizes="(max-width: 768px) 100vw, 400px" />
-                <source type="image/jpeg"
-                  srcset="/assets/community/marquesha-1-800.jpg 800w, /assets/community/marquesha-1_1200.jpg 1200w"
-                  sizes="(max-width: 768px) 100vw, 400px" />
-                <img src="/assets/community/marquesha-1_1200.jpg" alt="Marquesha — women’s lane coming soon" width="1200" height="1500" loading="lazy" decoding="async" />
-              </picture>
-              <span class="badge">Women Coming</span>
-            </div>
-            <div class="card__content">
-              <h3>Women’s Lane — Coming Soon</h3>
-              <p class="card__description">
-                Marquesha setting the tone for the women’s side — presence, posture, and Square Bidness written all over it.
-              </p>
-            </div>
-            <div class="card__actions">
-              <a class="btn btn--ghost btn--secondary" href="/community/">Watch the Community Lane</a>
-            </div>
-          </article>
 
         </div>
       </div>
