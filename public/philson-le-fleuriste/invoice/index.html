@@ -364,8 +364,8 @@
 
       <div class="form-section">
         <h3>Invoice Info</h3>
-        <label>Invoice #</label>
-        <input type="text" id="inv-number" value="2026-001" />
+        <label>Invoice # <span id="inv-number-badge" style="font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:#1e3a1e;color:#4ade80;border-radius:4px;padding:.1rem .35rem;margin-left:.3rem;">auto</span></label>
+        <input type="text" id="inv-number" value="Loading…" readonly style="opacity:.6;cursor:default;" />
         <label>Date</label>
         <input type="date" id="inv-date" />
       </div>
@@ -411,7 +411,7 @@
       </div>
 
       <div class="actions">
-        <button class="btn-print" onclick="window.print()">&#x2193; Generate PDF</button>
+        <button class="btn-print" id="generate-btn" onclick="generatePDF()">&#x2193; Generate PDF</button>
         <button class="btn-reset" onclick="resetForm()">Reset Form</button>
       </div>
     </aside>
@@ -494,6 +494,45 @@
     // Set today's date as default
     const today = new Date();
     document.getElementById('inv-date').valueAsDate = today;
+
+    // ---- Invoice number backend ----
+    async function loadNextNumber() {
+      try {
+        const r = await fetch('/api/philson/invoice-counter');
+        const data = await r.json();
+        if (data.ok) setInvNumber(data.invoiceNumber, true);
+      } catch (_) {
+        setInvNumber('2026-001', false);
+      }
+    }
+
+    function setInvNumber(num, auto) {
+      const el = document.getElementById('inv-number');
+      const badge = document.getElementById('inv-number-badge');
+      el.value = num;
+      el.style.opacity = auto ? '.6' : '1';
+      el.style.cursor = auto ? 'default' : 'text';
+      el.readOnly = auto;
+      badge.style.display = auto ? '' : 'none';
+      updatePreview();
+    }
+
+    async function generatePDF() {
+      const btn = document.getElementById('generate-btn');
+      btn.textContent = 'Reserving…';
+      btn.disabled = true;
+      try {
+        const r = await fetch('/api/philson/invoice-counter', { method: 'POST' });
+        const data = await r.json();
+        if (data.ok) setInvNumber(data.invoiceNumber, true);
+      } catch (_) {
+        // API down — still allow print with current number
+      } finally {
+        btn.textContent = '↓ Generate PDF';
+        btn.disabled = false;
+        window.print();
+      }
+    }
 
     // Format date for display
     function formatDate(dateStr) {
@@ -629,7 +668,6 @@
 
     function resetForm() {
       if (!confirm('Clear the form and start over?')) return;
-      document.getElementById('inv-number').value = '2026-001';
       document.getElementById('inv-date').valueAsDate = new Date();
       ['bt-name','bt-addr1','bt-city','bt-state','ev-date','ev-location','inv-notes'].forEach(id => {
         document.getElementById(id).value = '';
@@ -639,6 +677,7 @@
       itemCounter = 0;
       renderItemBlocks();
       updatePreview();
+      loadNextNumber();
     }
 
     // Wire up all inputs to live update
@@ -652,6 +691,7 @@
     // Initial render
     addItem();
     updatePreview();
+    loadNextNumber();
   </script>
 </body>
 </html>
