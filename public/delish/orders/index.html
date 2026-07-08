@@ -774,25 +774,20 @@ async function enableSoundAlerts() {
     async function refundOrder(id, button, orderNumber, total) {
       if (!id) return;
 
-      const token = getSavedOperatorToken();
-      if (!token) {
-        alert(
-          "No operator token saved. Tap any Operator Controls button first to save your token, then try again."
-        );
-        return;
-      }
-
       const confirmed = window.confirm(
         `Refund ${orderNumber || "this Delish order"} for ${money(total)}?\n\nThis sends the Stripe payment back to the customer's original card and removes the order from the active queue.`
       );
 
       if (!confirmed) return;
 
-      const secondConfirm = window.confirm(
-        "Confirm refund now? This cannot be undone from the Delish order screen."
+      const token = window.prompt(
+        "Enter Delish operator token to authorize this refund.\n\nThis cannot be undone from the Delish order screen."
       );
 
-      if (!secondConfirm) return;
+      if (!token || !token.trim()) {
+        setOpsNotice("Refund cancelled. Operator token was not entered.", true);
+        return;
+      }
 
       const originalText = button.textContent;
       button.disabled = true;
