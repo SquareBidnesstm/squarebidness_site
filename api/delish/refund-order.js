@@ -2,6 +2,7 @@
 import { Redis } from "@upstash/redis";
 import Stripe from "stripe";
 import { requireDelishOperatorAuth } from "../_lib/delish-operator-auth.js";
+import { sendDelishSms } from "../_lib/send-delish-sms.js";
 
 const redis = new Redis({
   url: process.env.DELISH_UPSTASH_REDIS_REST_URL,
@@ -11,6 +12,20 @@ const redis = new Redis({
 const stripe = new Stripe(process.env.DELISH_STRIPE_SECRET_KEY, {
   apiVersion: "2025-02-24.acacia",
 });
+
+function normalizeUsPhone(phone) {
+  const digits = String(phone || "").replace(/\D/g, "");
+  if (digits.length === 10) return `+1${digits}`;
+  if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
+  return null;
+}
+
+function buildRefundSms(order, refundAmount) {
+  const orderNumber = String(order.orderNumber || "").trim();
+  const amountText = Number(refundAmount || 0).toFixed(2);
+
+  return `Delish update: your order${orderNumber ? ` ${orderNumber}` : ""} has been refunded for $${amountText}. The refund was sent back to your original payment method. Your bank may take a few business days to show it.`;
+}
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -110,6 +125,29 @@ export default async function handler(req, res) {
       stripePaymentIntentId: paymentIntent,
     };
 
+    const smsTo = normalizeUsPhone(updated.customerPhone || "");
+    if (updated.smsConsent === "yes" && smsTo && !updated.refundSmsSentAt) {
+      try {
+        const smsResult = await sendDelishSms({
+          to: smsTo,
+          message: buildRefundSms(updated, updated.refundAmount),
+        });
+
+        if (smsResult?.ok) {
+          updated.refundSmsSentAt = new Date().toISOString();
+          updated.refundSmsSid = smsResult.sid || "";
+        } else {
+          updated.refundSmsSkippedAt = new Date().toISOString();
+          updated.refundSmsSkipReason =
+            smsResult?.reason || smsResult?.error?.message || "sms_not_sent";
+        }
+      } catch (smsError) {
+        console.error("DELISH REFUND SMS ERROR:", smsError);
+        updated.refundSmsErrorAt = new Date().toISOString();
+        updated.refundSmsError = smsError?.message || "Refund SMS failed.";
+      }
+    }
+
     await redis.set(key, updated);
 
     return res.status(200).json({
@@ -119,6 +157,7 @@ export default async function handler(req, res) {
       refundId: refund.id,
       refundStatus: refund.status || "",
       refundAmount: updated.refundAmount,
+      refundSmsSent: Boolean(updated.refundSmsSentAt),
     });
   } catch (error) {
     console.error("POST /api/delish/refund-order error:", error);

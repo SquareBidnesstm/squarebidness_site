@@ -816,7 +816,10 @@ async function enableSoundAlerts() {
           throw new Error(data.error || "Failed to refund order.");
         }
 
-        setOpsNotice(`Refund sent for ${orderNumber || "Delish order"} (${money(data.refundAmount || total)}).`);
+        setOpsNotice(
+          `Refund sent for ${orderNumber || "Delish order"} (${money(data.refundAmount || total)}).` +
+          (data.refundSmsSent ? " Customer SMS sent." : " Customer SMS not sent or not consented.")
+        );
         await loadOrders();
         await loadCateringCount();
       } catch (error) {
