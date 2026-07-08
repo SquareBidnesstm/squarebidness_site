@@ -153,6 +153,12 @@
       white-space:nowrap;
     }
 
+    .paid.refunded{
+      background:rgba(255,121,121,.14);
+      border-color:rgba(255,121,121,.34);
+      color:#ffd5d5;
+    }
+
     .pickup{
       margin:0 0 14px;
       padding:14px 16px;
@@ -271,6 +277,11 @@
     }
     .btn:hover{transform:translateY(-1px)}
     .btn[disabled]{opacity:.6;cursor:not-allowed;transform:none}
+    .btn-danger{
+      background:rgba(255,121,121,.14);
+      border-color:rgba(255,121,121,.34);
+      color:#ffd5d5;
+    }
 
     .empty{
       padding:28px;
@@ -760,6 +771,66 @@ async function enableSoundAlerts() {
       }
     }
 
+    async function refundOrder(id, button, orderNumber, total) {
+      if (!id) return;
+
+      const token = getSavedOperatorToken();
+      if (!token) {
+        alert(
+          "No operator token saved. Tap any Operator Controls button first to save your token, then try again."
+        );
+        return;
+      }
+
+      const confirmed = window.confirm(
+        `Refund ${orderNumber || "this Delish order"} for ${money(total)}?\n\nThis sends the Stripe payment back to the customer's original card and removes the order from the active queue.`
+      );
+
+      if (!confirmed) return;
+
+      const secondConfirm = window.confirm(
+        "Confirm refund now? This cannot be undone from the Delish order screen."
+      );
+
+      if (!secondConfirm) return;
+
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.textContent = "Refunding...";
+
+      try {
+        const res = await fetch("/api/delish/refund-order/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-operator-token": token.trim(),
+          },
+          body: JSON.stringify({
+            id,
+            reason: "requested_by_customer",
+          }),
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || !data.ok) {
+          if (res.status === 401) {
+            clearOperatorToken();
+            throw new Error("Unauthorized — wrong operator token. Saved token cleared.");
+          }
+          throw new Error(data.error || "Failed to refund order.");
+        }
+
+        setOpsNotice(`Refund sent for ${orderNumber || "Delish order"} (${money(data.refundAmount || total)}).`);
+        await loadOrders();
+        await loadCateringCount();
+      } catch (error) {
+        button.disabled = false;
+        button.textContent = originalText;
+        alert(error.message || "Unable to refund order.");
+      }
+    }
+
     function renderOrders(orders) {
       if (!orders.length) {
         ordersEl.innerHTML = `<div class="empty">No active paid orders right now.</div>`;
@@ -826,6 +897,12 @@ async function enableSoundAlerts() {
  
             <div class="card-actions">
               <button class="btn" data-complete-id="${escapeHtml(order.id)}">Mark Ready</button>
+              <button
+                class="btn btn-danger"
+                data-refund-id="${escapeHtml(order.id)}"
+                data-refund-number="${escapeHtml(order.orderNumber)}"
+                data-refund-total="${Number(order.total || 0)}"
+              >Refund</button>
             </div>
           </article>
         `;
@@ -834,6 +911,17 @@ async function enableSoundAlerts() {
       document.querySelectorAll("[data-complete-id]").forEach((button) => {
         button.addEventListener("click", () => {
           completeOrder(button.getAttribute("data-complete-id"), button);
+        });
+      });
+
+      document.querySelectorAll("[data-refund-id]").forEach((button) => {
+        button.addEventListener("click", () => {
+          refundOrder(
+            button.getAttribute("data-refund-id"),
+            button,
+            button.getAttribute("data-refund-number") || "",
+            Number(button.getAttribute("data-refund-total") || 0)
+          );
         });
       });
     }

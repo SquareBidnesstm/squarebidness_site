@@ -37,7 +37,7 @@ export default async function handler(req, res) {
 
     const cleanOrders = (orders || [])
       .filter(Boolean)
-      .filter((order) => order.status !== "completed");
+      .filter((order) => !["completed", "refunded"].includes(order.status));
 
     return res.status(200).json({
       ok: true,
