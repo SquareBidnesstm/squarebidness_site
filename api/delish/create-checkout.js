@@ -412,6 +412,10 @@ async function redisGet(redisUrl, redisToken, key) {
 
 async function getEffectiveOrderingState() {
   const fallbackState = getDelishOrderingState();
+  if (fallbackState.reason === "temporary_closure") {
+    return fallbackState;
+  }
+
   const redisUrl = process.env.DELISH_UPSTASH_REDIS_REST_URL;
   const redisToken = process.env.DELISH_UPSTASH_REDIS_REST_TOKEN;
 
@@ -715,7 +719,7 @@ export default async function handler(req, res) {
       cleanItems.reduce((sum, item) => sum + item.total, 0).toFixed(2)
     );
 
-    const TAX_RATE = 0.0895;
+    const TAX_RATE = 0.105;
     const calculatedTax = Number((calculatedSubtotal * TAX_RATE).toFixed(2));
     const calculatedTotal = Number((calculatedSubtotal + calculatedTax).toFixed(2));
 

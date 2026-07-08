@@ -13,6 +13,12 @@ export const DELISH_HOURS = {
   sunday: { open: "11:00", close: "14:00", occurrences: [1, 3] }
 };
 
+const TEMPORARY_CLOSURE_UNTIL = {
+  isoDate: "2026-07-13",
+  minutes: 11 * 60,
+  message: "Delish is closed until Monday, July 13 at 11:00 AM. See you then."
+};
+
 export function getCentralNowParts(date = new Date()) {
   const formatter = new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/Chicago",
@@ -51,10 +57,37 @@ function hhmmToMinutes(value) {
   return (hh * 60) + mm;
 }
 
+function getTemporaryClosureState(now, day, config) {
+  const currentMinutes = (Number(now.hour || 0) * 60) + Number(now.minute || 0);
+  const beforeReopenDate = now.isoDate < TEMPORARY_CLOSURE_UNTIL.isoDate;
+  const beforeReopenTime =
+    now.isoDate === TEMPORARY_CLOSURE_UNTIL.isoDate &&
+    currentMinutes < TEMPORARY_CLOSURE_UNTIL.minutes;
+
+  if (!beforeReopenDate && !beforeReopenTime) return null;
+
+  return {
+    mode: "closed",
+    reason: "temporary_closure",
+    today: day,
+    now,
+    openNow: false,
+    openTime: config?.open || "11:00",
+    closeTime: config?.close || "",
+    resumeAt: "2026-07-13T11:00:00-05:00",
+    message: TEMPORARY_CLOSURE_UNTIL.message
+  };
+}
+
 export function getDelishOrderingState(date = new Date()) {
   const now = getCentralNowParts(date);
   const day = now.weekday;
   const config = DELISH_HOURS[day] || null;
+  const temporaryClosure = getTemporaryClosureState(now, day, config);
+
+  if (temporaryClosure) {
+    return temporaryClosure;
+  }
 
   if (DELISH_ORDERING_MODE === "open") {
     return {

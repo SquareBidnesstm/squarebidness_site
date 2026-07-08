@@ -5,6 +5,14 @@ import { getDelishOrderingState, DELISH_ORDERING_MODE } from "../_lib/delish-ord
 export default async function handler(req, res) {
   try {
     const fallbackState = getDelishOrderingState();
+    if (fallbackState.reason === "temporary_closure") {
+      return res.status(200).json({
+        ok: true,
+        orderingMode: "closed",
+        ...fallbackState,
+        message: fallbackState.message
+      });
+    }
 
     const redisUrl = process.env.DELISH_UPSTASH_REDIS_REST_URL;
     const redisToken = process.env.DELISH_UPSTASH_REDIS_REST_TOKEN;
