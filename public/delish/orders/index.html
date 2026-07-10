@@ -567,6 +567,13 @@
           <div style="margin-top:10px;">
   <button
     class="ops-btn"
+    id="opsSaveTokenBtn"
+    style="background:#124fc4;color:#fff;border:1px solid rgba(255,255,255,.12);width:100%;margin-bottom:10px;"
+  >
+    Save Operator Token
+  </button>
+  <button
+    class="ops-btn"
     id="opsClearTokenBtn"
     style="background:#2a2a2a;color:#fff;border:1px solid rgba(255,255,255,.12);width:100%;"
   >
@@ -810,8 +817,7 @@ async function enableSoundAlerts() {
 
         if (!res.ok || !data.ok) {
           if (res.status === 401) {
-            clearOperatorToken();
-            throw new Error("Unauthorized — wrong operator token. Saved token cleared.");
+            throw new Error("Unauthorized — wrong refund token. Orders were not changed.");
           }
           throw new Error(data.error || "Failed to refund order.");
         }
@@ -924,6 +930,8 @@ async function enableSoundAlerts() {
       });
     }
     async function loadCateringCount(){
+      if (!getSavedOperatorToken()) return;
+
       try {
         const res = await fetch(`/api/delish/catering-orders/?t=${Date.now()}`, {
           cache: "no-store",
@@ -949,13 +957,21 @@ async function enableSoundAlerts() {
 
         async function loadOrders(){
       try {
+        if (!getSavedOperatorToken()) {
+          renderOperatorTokenRequired();
+          lastUpdatedEl.innerHTML = `Last updated:<strong>Token needed</strong>`;
+          return;
+        }
+
         const res = await fetch(`/api/delish/orders/?t=${Date.now()}`, {
           cache: "no-store",
           headers: operatorHeaders()
         });
         if (res.status === 401) {
           clearOperatorToken();
-          throw new Error("Operator token required. Save the token again.");
+          renderOperatorTokenRequired("Saved operator token was not accepted. Save the token again to reload orders.");
+          lastUpdatedEl.innerHTML = `Last updated:<strong>Token needed</strong>`;
+          return;
         }
         const data = await res.json();
 
@@ -1012,6 +1028,24 @@ renderOrders(orders);
       opsNoticeEl.style.color = isError ? "#ffb4b4" : "var(--muted)";
     }
 
+    function renderOperatorTokenRequired(message) {
+      ordersEl.innerHTML = `
+        <div class="empty">
+          <p>${escapeHtml(message || "Operator token required. Save the Delish operator token on this tablet to load kitchen and catering orders.")}</p>
+          <button
+            class="ops-btn ops-btn-auto"
+            id="saveTokenFromOrdersBtn"
+            type="button"
+            style="margin-top:14px;width:100%;"
+          >
+            Save Operator Token
+          </button>
+        </div>
+      `;
+
+      document.getElementById("saveTokenFromOrdersBtn")?.addEventListener("click", promptAndSaveOperatorToken);
+    }
+
     function getSavedOperatorToken() {
   try {
     return localStorage.getItem(OPERATOR_TOKEN_KEY) || "";
@@ -1056,6 +1090,18 @@ function updateTokenIndicator() {
     el.classList.add("is-missing");
     el.classList.remove("is-saved");
   }
+}
+
+function promptAndSaveOperatorToken() {
+  const token = window.prompt("Enter Delish operator token");
+  if (!token || !token.trim()) {
+    setOpsNotice("Operator token was not saved.", true);
+    return;
+  }
+
+  saveOperatorToken(token);
+  setOpsNotice("Operator token saved. Reloading orders...");
+  refreshAll();
 }
 
     async function loadOperatorStatus() {
@@ -1163,6 +1209,8 @@ document.getElementById("enableSoundBtn")?.addEventListener("click", enableSound
   clearOperatorToken();
   setOpsNotice("Saved operator token cleared.");
 });
+
+    document.getElementById("opsSaveTokenBtn")?.addEventListener("click", promptAndSaveOperatorToken);
 
     document.getElementById("opsCloseBtn")?.addEventListener("click", async () => {
       const confirmed = window.confirm("Close ordering for the rest of today?");
