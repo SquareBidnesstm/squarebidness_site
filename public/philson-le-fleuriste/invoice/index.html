@@ -390,6 +390,8 @@
 
       <div class="form-section">
         <h3>Event Details</h3>
+        <label>Name</label>
+        <input type="text" id="ev-name" placeholder="Robinson Wedding" />
         <label>Event Date</label>
         <input type="date" id="ev-date" />
         <label>Location</label>
@@ -439,6 +441,10 @@
           </div>
           <div class="inv-info-box">
             <div class="inv-info-label">Event Details</div>
+            <div class="inv-info-detail">
+              <span class="inv-info-detail-key">Name:</span>
+              <span class="inv-info-detail-val" id="p-ev-name">&mdash;</span>
+            </div>
             <div class="inv-info-detail">
               <span class="inv-info-detail-key">Date:</span>
               <span class="inv-info-detail-val" id="p-ev-date">&mdash;</span>
@@ -612,6 +618,7 @@
       document.getElementById('p-bt-citystate').style.display = cityState ? '' : 'none';
 
       // Event
+      document.getElementById('p-ev-name').textContent = document.getElementById('ev-name').value || '—';
       const evDateVal = document.getElementById('ev-date').value;
       if (evDateVal) {
         const evD = new Date(evDateVal + 'T00:00:00');
@@ -669,7 +676,7 @@
     function resetForm() {
       if (!confirm('Clear the form and start over?')) return;
       document.getElementById('inv-date').valueAsDate = new Date();
-      ['bt-name','bt-addr1','bt-city','bt-state','ev-date','ev-location','inv-notes'].forEach(id => {
+      ['bt-name','bt-addr1','bt-city','bt-state','ev-name','ev-date','ev-location','inv-notes'].forEach(id => {
         document.getElementById(id).value = '';
       });
       document.getElementById('pay-to').value = 'Eddie Philson';
@@ -682,7 +689,7 @@
 
     // Wire up all inputs to live update
     const formInputs = ['inv-number','inv-date','bt-name','bt-addr1','bt-city','bt-state',
-                        'ev-date','ev-location','pay-to','inv-notes'];
+                        'ev-name','ev-date','ev-location','pay-to','inv-notes'];
     formInputs.forEach(id => {
       const el = document.getElementById(id);
       if (el) el.addEventListener('input', updatePreview);
