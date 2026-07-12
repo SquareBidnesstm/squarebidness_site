@@ -26,7 +26,7 @@
   <meta property="og:title" content="Tax Slayer — Tax Preparation & E-File" />
   <meta property="og:description" content="Free consult · Same-day e-file support · W-2 · 1099 · Small business · Start your file online with a secure form." />
   <meta property="og:url" content="https://www.squarebidness.com/taxslayer/" />
-  <meta property="og:image" content="https://www.squarebidness.com/taxslayer/assets/taxslayer_og_1200x630.jpg" />
+  <meta property="og:image" content="https://www.squarebidness.com/taxslayer/assets/taxslayer-icon-1200.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:image:alt" content="Tax Slayer — Jessica Porter (Alexandria, Louisiana)" />
@@ -36,16 +36,18 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Tax Slayer — Tax Preparation & E-File" />
   <meta name="twitter:description" content="Free consult · Same-day e-file support · W-2 · 1099 · Small business · Start your file online with a secure form." />
-  <meta name="twitter:image" content="https://www.squarebidness.com/taxslayer/assets/taxslayer_og_1200x630.jpg" />
+  <meta name="twitter:image" content="https://www.squarebidness.com/taxslayer/assets/taxslayer-icon-1200.png" />
   <meta name="twitter:image:alt" content="Tax Slayer — Jessica Porter (Alexandria, Louisiana)" />
 
   <!-- CSS -->
   <link rel="stylesheet" href="/styles/style.css" />
 
   <!-- Icons / PWA -->
-  <link rel="icon" href="/favicon.ico" sizes="any" />
-  <link rel="apple-touch-icon" href="/assets/icons/icon-180.png" />
-  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/taxslayer/assets/taxslayer-16.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/taxslayer/assets/taxslayer-32.png" />
+  <link rel="icon" type="image/png" sizes="48x48" href="/taxslayer/assets/taxslayer-48.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/taxslayer/assets/taxslayer-180.png" />
+  <link rel="manifest" href="/taxslayer/manifest.webmanifest" />
 
   <!-- Analytics -->
   <script defer src="/scripts/ga.js"></script>
@@ -53,32 +55,34 @@
 
   <style>
     :root{
-      --bg:#0b0b0b;
-      --panel:#111;
-      --panel2:#0f0f0f;
-      --text:#f5f5f5;
-      --muted:#bdbdbd;
-      --muted2:#9ca3af;
-      --line:#232323;
-      --line2:#2d2d2d;
+      --bg:#070707;
+      --panel:#141112;
+      --panel2:#0c0b0c;
+      --text:#f8f8f8;
+      --muted:#c9c1c1;
+      --muted2:#a8adb5;
+      --line:rgba(255,255,255,.12);
+      --line2:rgba(255,255,255,.18);
 
       /* Client brand accent */
-      --accent:#f97316;
-      --accent2:#fb923c;
+      --accent:#e50914;
+      --accent2:#ff3341;
+      --steel:#aeb4bd;
+      --steel2:#4b5563;
 
       --radius:18px;
       --radius2:24px;
-      --shadow:0 18px 48px rgba(0,0,0,.65);
+      --shadow:0 18px 52px rgba(0,0,0,.72), 0 0 34px rgba(229,9,20,.16);
     }
 
-    *{box-sizing:border-box}
-    html,body{height:100%}
+    *,*::before,*::after{box-sizing:border-box}
+    html,body{height:100%;overflow-x:hidden;max-width:100vw;}
     body{
       margin:0;
       background:
-        radial-gradient(900px 420px at 18% -10%, rgba(249,115,22,.12), rgba(0,0,0,0) 60%),
-        radial-gradient(900px 420px at 90% 0%, rgba(255,255,255,.06), rgba(0,0,0,0) 55%),
-        linear-gradient(180deg, #080808, var(--bg) 40%, #080808 100%);
+        radial-gradient(900px 420px at 18% -10%, rgba(229,9,20,.20), rgba(0,0,0,0) 60%),
+        radial-gradient(760px 360px at 88% 0%, rgba(174,180,189,.10), rgba(0,0,0,0) 56%),
+        linear-gradient(180deg, #020202, var(--bg) 42%, #030303 100%);
       color:var(--text);
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
       line-height:1.55;
@@ -94,14 +98,15 @@
       position:sticky;
       top:0;
       z-index:50;
-      border-bottom:1px solid var(--line);
-      background:rgba(0,0,0,.55);
+      border-bottom:1px solid rgba(229,9,20,.22);
+      background:rgba(5,5,5,.72);
       backdrop-filter: blur(10px);
     }
     .topbar__inner{
-      max-width:1120px;
+      width:min(1120px, calc(100vw - 36px));
+      max-width:calc(100vw - 36px);
       margin:0 auto;
-      padding:12px 18px;
+      padding:12px 0;
       display:flex;
       align-items:center;
       justify-content:space-between;
@@ -118,9 +123,10 @@
       white-space:nowrap;
     }
     .brand .mark{
-      width:10px;height:10px;border-radius:999px;
-      background:var(--accent);
-      box-shadow:0 0 0 4px rgba(249,115,22,.15);
+      width:30px;height:30px;border-radius:9px;
+      background:url("/taxslayer/assets/taxslayer-48.png") center/cover no-repeat;
+      border:1px solid rgba(255,255,255,.20);
+      box-shadow:0 0 0 3px rgba(229,9,20,.14), 0 0 18px rgba(229,9,20,.30);
     }
     .top-actions{
       display:flex;
@@ -146,14 +152,15 @@
     .pill:active{transform: translateY(1px)}
     .pill:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.22)}
     .pill--accent{
-      border-color:rgba(249,115,22,.6);
-      background:linear-gradient(180deg,var(--accent2),var(--accent));
-      color:#140a03;
+      border-color:rgba(255,51,65,.62);
+      background:linear-gradient(180deg,#ff3341,#b70812);
+      color:#fff;
+      box-shadow:0 0 18px rgba(229,9,20,.20);
     }
 
     /* Layout */
-    .wrap{max-width:1120px;margin:0 auto;padding:24px}
-    @media(max-width:900px){ .wrap{padding:18px} }
+    .wrap{width:min(1120px,calc(100vw - 36px));max-width:calc(100vw - 36px);margin:0 auto;padding:24px 0;min-width:0}
+    @media(max-width:900px){ .wrap{padding:18px 0;width:calc(100vw - 36px);max-width:calc(100vw - 36px);overflow:hidden} }
 
     .grid{display:grid;gap:18px}
     .hero{
@@ -174,11 +181,11 @@
       font-weight:900;
     }
 
-    h1{ margin:8px 0 10px; line-height:1.08; letter-spacing:-0.01em; }
+    h1{ margin:8px 0 10px; line-height:1.08; letter-spacing:-0.01em; overflow-wrap:anywhere; max-width:100%; }
     h2{ margin:0 0 8px; }
     h3{ margin:0 0 8px; }
 
-    .muted{ color:var(--muted); }
+    .muted{ color:var(--muted); overflow-wrap:anywhere; }
     .muted2{ color:var(--muted2); }
 
     .card{
@@ -190,10 +197,10 @@
     }
 
     .frame{
-      border:1px solid var(--line);
+      border:1px solid rgba(174,180,189,.20);
       border-radius:var(--radius2);
       overflow:hidden;
-      background:#000;
+      background:linear-gradient(145deg,#050505,#151111);
       box-shadow: var(--shadow);
     }
 
@@ -216,8 +223,9 @@
 
     .btn.primary{
       background:linear-gradient(180deg,var(--accent2),var(--accent));
-      color:#140a03;
-      border-color:rgba(249,115,22,.55);
+      color:#fff;
+      border-color:rgba(255,51,65,.55);
+      box-shadow:0 0 18px rgba(229,9,20,.20);
     }
     .btn.ghost{
       background:transparent;
@@ -227,12 +235,13 @@
     .btn.pill{ border-radius:999px; font-weight:900; padding:10px 14px; }
 
     .btn:focus-visible{
-      outline:3px solid rgba(249,115,22,.55);
+      outline:3px solid rgba(255,51,65,.58);
       outline-offset:2px;
     }
 
     .meta{
       margin-top:10px;
+      overflow-wrap:anywhere;
       font-size:14px;
       line-height:1.55;
       color:var(--muted);
@@ -253,6 +262,8 @@
       color:var(--muted);
       font-size:14px;
       line-height:1.55;
+      min-width:0;
+      overflow-wrap:anywhere;
     }
     .addr svg{flex:0 0 auto; opacity:.9; margin-top:2px}
 
@@ -270,6 +281,7 @@
     .list li{ margin:6px 0; }
 
     .fineprint{
+      overflow-wrap:anywhere;
       color:#7a7a7a;
       font-size:11px;
       margin-top:10px;
@@ -297,10 +309,29 @@
 
     .sticky{ position:sticky; top:92px; }
     @media(max-width:900px){ .sticky{ position:static; top:auto; } }
+    @media(max-width:520px){
+      .topbar__inner{display:grid;grid-template-columns:1fr;align-items:flex-start;width:calc(100vw - 36px);max-width:calc(100vw - 36px);padding-left:0;padding-right:0;}
+      .brand{width:100%;min-width:0;overflow-wrap:anywhere;}
+      .top-actions{width:100%;min-width:0;display:grid;grid-template-columns:1fr;}
+      .pill{white-space:normal;text-align:center;min-width:0;width:100%;}
+      .btnrow{display:grid;grid-template-columns:1fr;}
+      .btnrow .btn{white-space:normal;text-align:center;min-width:0;width:100%;}
+      .hero h1{font-size:1.72rem;line-height:1.08;}
+      .hero,.card,.frame,.split,.grid,.callout,.fineprint{min-width:0;max-width:100%;overflow:hidden;}
+      .meta,.addr{font-size:13px;}
+    }
+    @media(max-width:520px){
+      main.wrap{display:block;}
+      .hero{display:block !important;width:100%;}
+      .hero > *{width:100%;max-width:100%;min-width:0;overflow:hidden;}
+      .hero p,.hero .muted,.callout,.fineprint{overflow-wrap:anywhere;word-break:break-word;}
+      .frame{margin-top:14px;}
+      .frame img{width:100%;max-width:100%;}
+    }
 
     .callout{
-      border:1px solid rgba(249,115,22,.35);
-      background:rgba(249,115,22,.08);
+      border:1px solid rgba(229,9,20,.35);
+      background:linear-gradient(135deg,rgba(229,9,20,.13),rgba(174,180,189,.05));
       border-radius:16px;
       padding:12px 12px;
       margin-top:12px;
@@ -363,7 +394,7 @@
     "@id":"https://www.squarebidness.com/taxslayer/#business",
     "name":"Tax Slayer — Jessica Porter",
     "url":"https://www.squarebidness.com/taxslayer/",
-    "image":"https://www.squarebidness.com/taxslayer/assets/taxslayer_og_1200x630.jpg",
+    "image":"https://www.squarebidness.com/taxslayer/assets/taxslayer-icon-1200.png",
     "areaServed":[
       {"@type":"AdministrativeArea","name":"Alexandria, Louisiana"},
       {"@type":"AdministrativeArea","name":"Central Louisiana"},
@@ -406,7 +437,7 @@
     <section class="grid hero" aria-label="Tax Slayer hero">
       <div>
         <p class="kicker">Income Tax Filing</p>
-        <h1>Fast, Accurate Tax Preparation<br />&amp; E-File Support</h1>
+        <h1>Fast, Accurate Tax Prep<br />&amp; E-File Support</h1>
 
         <p class="muted" style="max-width:70ch">
           W-2, 1099, small business, credits &amp; deductions, prior-year fixes, and refund tracking.
@@ -455,8 +486,8 @@
 
       <div class="frame" aria-label="Hero image">
         <img
-          src="/taxslayer/assets/taxslayer_og_1200x630.jpg"
-          alt="Tax Slayer — Jessica Porter"
+          src="/taxslayer/assets/taxslayer-icon-1200.png"
+          alt="Tax Slayer logo mark"
           loading="eager"
           decoding="async"
           style="display:block;width:100%;height:auto"
@@ -465,7 +496,7 @@
     </section>
 
     <!-- COMMUNITY GIVEAWAY -->
-    <section class="card" style="margin-top:18px;border-color:rgba(249,115,22,.45);background:linear-gradient(135deg,rgba(249,115,22,.16),rgba(37,99,235,.12),rgba(34,197,94,.08));" aria-label="Tax Slayer 6th Annual Back to School Giveaway shirt orders">
+    <section class="card" style="margin-top:18px;border-color:rgba(229,9,20,.42);background:linear-gradient(135deg,rgba(229,9,20,.18),rgba(174,180,189,.08),rgba(0,0,0,.22));" aria-label="Tax Slayer 6th Annual Back to School Giveaway shirt orders">
       <div class="split" style="align-items:center;">
         <div>
           <p class="kicker">Community Giveaway</p>
