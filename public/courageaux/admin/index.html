@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Courageaux — Admin</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <link rel="icon" href="/courageaux/assets/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/courageaux/assets/favicon-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/courageaux/assets/icon_180.png">
+  <style>
+    :root{
+      --bg:#0b0b0b; --card:#121212; --ink:#fff; --muted:#a1a1aa;
+      --stroke:#1f1f1f; --gold:#c9a227; --ok:#20c997; --danger:#ff5c5c;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,sans-serif;min-height:100vh}
+    a{color:var(--gold);text-underline-offset:3px}
+
+    .wrap{max-width:520px;margin:0 auto;padding:20px 16px 48px}
+
+    /* Auth */
+    #auth{display:flex;flex-direction:column;gap:12px;padding-top:80px}
+    #auth h1{font-size:1.4rem;letter-spacing:-.01em}
+    #auth p{color:var(--muted);font-size:.9rem}
+    .auth-input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid #2a2a2a;background:#070707;color:var(--ink);font:inherit;font-size:1rem;outline:none}
+    .auth-input:focus{border-color:#3c3c3c;box-shadow:0 0 0 3px rgba(201,162,39,.12)}
+    #auth-err{color:var(--danger);font-size:.88rem;display:none}
+
+    /* Buttons */
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 18px;border-radius:12px;font-weight:900;border:1px solid transparent;font:inherit;cursor:pointer;font-size:1rem;white-space:nowrap;transition:opacity .12s}
+    .btn:active{opacity:.8}
+    .btn--gold{background:var(--gold);color:#000}
+    .btn--ghost{background:#0f0f0f;color:#fff;border-color:#2a2a2a}
+    .btn--danger{background:rgba(255,92,92,.12);color:var(--danger);border-color:rgba(255,92,92,.3)}
+    .btn--full{width:100%}
+
+    /* Badge */
+    .brand{display:flex;align-items:center;gap:8px;font-weight:950;font-size:.92rem;margin-bottom:20px;color:var(--muted)}
+    .brand img{width:22px;height:22px;border-radius:7px;border:1px solid rgba(255,255,255,.14);background:#fff;padding:2px}
+
+    /* Panel */
+    #panel{display:none;flex-direction:column;gap:16px}
+
+    .section{background:var(--card);border:1px solid var(--stroke);border-radius:16px;padding:16px}
+    .section-title{font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:900;margin-bottom:12px}
+
+    /* Big toggle */
+    .toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .toggle-label{font-size:1.1rem;font-weight:950}
+    .toggle-sub{font-size:.82rem;color:var(--muted);margin-top:2px}
+    .toggle{position:relative;width:60px;height:32px;flex-shrink:0}
+    .toggle input{opacity:0;width:0;height:0}
+    .slider{position:absolute;inset:0;border-radius:999px;background:#2a2a2a;cursor:pointer;transition:background .2s}
+    .slider:before{content:"";position:absolute;left:4px;top:4px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .2s}
+    input:checked + .slider{background:var(--ok)}
+    input:checked + .slider:before{transform:translateX(28px)}
+
+    .status-dot{width:10px;height:10px;border-radius:50%;background:#3f3f3f;flex-shrink:0;transition:background .2s}
+    .status-dot.on{background:var(--ok)}
+    .status-dot.sale{background:var(--gold)}
+
+    /* Flash sale */
+    .flash-body{display:none;margin-top:14px;display:flex;flex-direction:column;gap:10px}
+    .flash-body.hidden{display:none}
+    label.field-label{font-size:.86rem;color:#d7dae0;font-weight:800;display:block;margin-bottom:4px}
+    .field-input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #2a2a2a;background:#070707;color:var(--ink);font:inherit;outline:none}
+    .field-input:focus{border-color:#3c3c3c;box-shadow:0 0 0 3px rgba(201,162,39,.12)}
+    .discount-row{display:flex;align-items:center;gap:10px}
+    .discount-row input[type=range]{flex:1;accent-color:var(--gold)}
+    .discount-val{font-weight:950;color:var(--gold);min-width:40px;text-align:right}
+
+    /* Bookings */
+    .booking-card{background:#0e0e0e;border:1px solid var(--stroke);border-radius:12px;padding:12px;margin-top:8px}
+    .booking-card .bc-name{font-weight:950;font-size:.95rem}
+    .booking-card .bc-time{color:var(--gold);font-weight:900;font-size:.88rem;margin-top:2px}
+    .booking-card .bc-addr{color:var(--muted);font-size:.82rem;margin-top:4px}
+    .booking-card .bc-price{color:var(--ok);font-weight:950;font-size:.88rem;margin-top:4px}
+    .booking-card .bc-phone a{color:#d7dae0;font-size:.82rem}
+    .no-bookings{color:var(--muted);font-size:.88rem;padding:8px 0}
+
+    /* Date nav */
+    .date-nav{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+    .date-nav button{background:#0f0f0f;border:1px solid #2a2a2a;color:#fff;border-radius:8px;padding:6px 10px;cursor:pointer;font:inherit;font-size:.9rem}
+    .date-nav button:hover{background:#1a1a1a}
+    .date-label{flex:1;text-align:center;font-weight:950;font-size:.92rem}
+
+    /* QR */
+    .qr-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;padding:8px 0}
+    .qr-wrap img{border-radius:12px;border:6px solid #fff;width:180px;height:180px}
+    .qr-url{font-size:.78rem;color:var(--muted);word-break:break-all;text-align:center}
+
+    /* Toast */
+    #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#fff;color:#000;padding:10px 18px;border-radius:999px;font-weight:900;font-size:.88rem;opacity:0;transition:opacity .2s;pointer-events:none;z-index:999;white-space:nowrap}
+    #toast.show{opacity:1}
+
+    .save-btn-wrap{margin-top:4px}
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- Auth screen -->
+  <div id="auth">
+    <div class="brand">
+      <img src="/courageaux/assets/icon_courageaux_512.png" alt="Courageaux">
+      Courageaux Aesthetics
+    </div>
+    <h1>Admin Panel</h1>
+    <p>Enter your admin PIN to continue.</p>
+    <input id="pin-input" class="auth-input" type="password" placeholder="Admin PIN" autocomplete="current-password" />
+    <span id="auth-err">Incorrect PIN. Try again.</span>
+    <button class="btn btn--gold" onclick="login()">Sign In</button>
+  </div>
+
+  <!-- Main panel -->
+  <div id="panel">
+    <div class="brand">
+      <img src="/courageaux/assets/icon_courageaux_512.png" alt="Courageaux">
+      Courageaux Admin
+    </div>
+
+    <!-- Booking toggle -->
+    <div class="section">
+      <div class="section-title">Booking Status</div>
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label" id="booking-label">Booking is OFF</div>
+          <div class="toggle-sub">Clients can only book when this is ON.</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="booking-toggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Flash sale -->
+    <div class="section">
+      <div class="section-title">Flash Sale / Special</div>
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Flash Sale</div>
+          <div class="toggle-sub">Turn on to discount all slots right now.</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="sale-toggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="flash-body hidden" id="flash-body">
+        <div>
+          <label class="field-label" for="sale-label">Special Name</label>
+          <input id="sale-label" class="field-input" type="text" placeholder="e.g. After Church Sunday Special" maxlength="80">
+        </div>
+        <div>
+          <label class="field-label">Discount</label>
+          <div class="discount-row">
+            <input type="range" id="sale-discount" min="5" max="75" step="5" value="50">
+            <span class="discount-val" id="discount-display">50% OFF</span>
+          </div>
+        </div>
+        <div style="background:#121212;border:1px solid #2a2a2a;border-radius:12px;padding:12px">
+          <div style="font-size:.78rem;color:var(--muted);font-weight:900;letter-spacing:.08em;margin-bottom:8px">SALE PRICES</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center">
+            <div>
+              <div style="font-size:.75rem;color:var(--muted)">15 min</div>
+              <div style="font-weight:950;color:var(--gold)" id="price-15">$20</div>
+            </div>
+            <div>
+              <div style="font-size:.75rem;color:var(--muted)">30 min</div>
+              <div style="font-weight:950;color:var(--gold)" id="price-30">$33</div>
+            </div>
+            <div>
+              <div style="font-size:.75rem;color:var(--muted)">60 min</div>
+              <div style="font-weight:950;color:var(--gold)" id="price-60">$55</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="save-btn-wrap">
+      <button class="btn btn--gold btn--full" id="save-btn" onclick="saveStatus()">Save Changes</button>
+    </div>
+
+    <!-- QR Code -->
+    <div class="section">
+      <div class="section-title">Booking QR Code</div>
+      <div class="qr-wrap">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&bgcolor=ffffff&color=000000&data=https://www.squarebidness.com/courageaux/book/" alt="Booking QR code" loading="lazy" />
+        <div class="qr-url">squarebidness.com/courageaux/book/</div>
+      </div>
+    </div>
+
+    <!-- Today's bookings -->
+    <div class="section">
+      <div class="section-title">Bookings</div>
+      <div class="date-nav">
+        <button onclick="changeDate(-1)">&#8592;</button>
+        <div class="date-label" id="date-label"></div>
+        <button onclick="changeDate(1)">&#8594;</button>
+      </div>
+      <div id="bookings-list"><div class="no-bookings">Loading…</div></div>
+    </div>
+
+    <div style="text-align:center;margin-top:8px">
+      <a href="/courageaux/" style="font-size:.82rem;color:var(--muted)">← Back to Courageaux</a>
+      &nbsp;·&nbsp;
+      <button onclick="logout()" style="background:none;border:none;color:var(--muted);font:inherit;font-size:.82rem;cursor:pointer;padding:0">Sign out</button>
+    </div>
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<script>
+const BASE = "/api/courageaux";
+let adminToken = "";
+let currentDate = new Date().toISOString().slice(0, 10);
+
+const PRICES = { 15: 40, 30: 65, 60: 110 };
+
+function toast(msg, ok = true) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.style.background = ok ? "#fff" : "#ff5c5c";
+  t.style.color = ok ? "#000" : "#fff";
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2500);
+}
+
+async function login() {
+  const pin = document.getElementById("pin-input").value.trim();
+  if (!pin) return;
+  // Test auth by fetching status
+  const res = await fetch(`${BASE}/status`, { headers: { "x-admin-token": pin } });
+  if (!res.ok) {
+    document.getElementById("auth-err").style.display = "block";
+    return;
+  }
+  adminToken = pin;
+  localStorage.setItem("cx_admin_token", pin);
+  document.getElementById("auth-err").style.display = "none";
+  showPanel(await res.json());
+}
+
+function logout() {
+  localStorage.removeItem("cx_admin_token");
+  adminToken = "";
+  document.getElementById("panel").style.display = "none";
+  document.getElementById("auth").style.display = "flex";
+}
+
+function showPanel(data) {
+  document.getElementById("auth").style.display = "none";
+  document.getElementById("panel").style.display = "flex";
+  applyState(data.state);
+  updateDateLabel();
+  loadBookings();
+}
+
+function applyState(state) {
+  const bookingToggle = document.getElementById("booking-toggle");
+  bookingToggle.checked = !!state.bookingOpen;
+  updateBookingLabel(!!state.bookingOpen);
+
+  const saleToggle = document.getElementById("sale-toggle");
+  saleToggle.checked = !!state.flashSaleActive;
+  toggleFlashBody(!!state.flashSaleActive);
+
+  if (state.flashSaleLabel) document.getElementById("sale-label").value = state.flashSaleLabel;
+  const disc = state.flashSaleDiscount || 50;
+  document.getElementById("sale-discount").value = disc;
+  updateDiscountDisplay(disc);
+}
+
+function updateBookingLabel(on) {
+  document.getElementById("booking-label").textContent = on ? "Booking is ON" : "Booking is OFF";
+  document.getElementById("booking-label").style.color = on ? "var(--ok)" : "var(--ink)";
+}
+
+function toggleFlashBody(show) {
+  const fb = document.getElementById("flash-body");
+  fb.classList.toggle("hidden", !show);
+}
+
+function updateDiscountDisplay(disc) {
+  document.getElementById("discount-display").textContent = `${disc}% OFF`;
+  [15, 30, 60].forEach(s => {
+    const salePrice = Math.round(PRICES[s] * (1 - disc / 100));
+    document.getElementById(`price-${s}`).textContent = `$${salePrice}`;
+  });
+}
+
+document.getElementById("booking-toggle").addEventListener("change", e => {
+  updateBookingLabel(e.target.checked);
+});
+
+document.getElementById("sale-toggle").addEventListener("change", e => {
+  toggleFlashBody(e.target.checked);
+});
+
+document.getElementById("sale-discount").addEventListener("input", e => {
+  updateDiscountDisplay(parseInt(e.target.value));
+});
+
+async function saveStatus() {
+  const btn = document.getElementById("save-btn");
+  btn.textContent = "Saving…";
+  btn.disabled = true;
+
+  const body = {
+    bookingOpen: document.getElementById("booking-toggle").checked,
+    flashSaleActive: document.getElementById("sale-toggle").checked,
+    flashSaleLabel: document.getElementById("sale-label").value.trim(),
+    flashSaleDiscount: parseInt(document.getElementById("sale-discount").value)
+  };
+
+  try {
+    const res = await fetch(`${BASE}/status`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-admin-token": adminToken },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (data.ok) {
+      toast("Saved!");
+      applyState(data.state);
+    } else {
+      toast("Error: " + data.error, false);
+    }
+  } catch (err) {
+    toast("Network error", false);
+  } finally {
+    btn.textContent = "Save Changes";
+    btn.disabled = false;
+  }
+}
+
+function updateDateLabel() {
+  const d = new Date(currentDate + "T12:00:00");
+  const today = new Date().toISOString().slice(0, 10);
+  const label = currentDate === today ? "Today" : d.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
+  document.getElementById("date-label").textContent = label;
+}
+
+function changeDate(dir) {
+  const d = new Date(currentDate + "T12:00:00");
+  d.setDate(d.getDate() + dir);
+  currentDate = d.toISOString().slice(0, 10);
+  updateDateLabel();
+  loadBookings();
+}
+
+async function loadBookings() {
+  const list = document.getElementById("bookings-list");
+  list.innerHTML = `<div class="no-bookings">Loading…</div>`;
+  try {
+    const res = await fetch(`${BASE}/book?date=${currentDate}`, {
+      headers: { "x-admin-token": adminToken }
+    });
+    const data = await res.json();
+    if (!data.ok || !data.bookings.length) {
+      list.innerHTML = `<div class="no-bookings">No bookings for this day.</div>`;
+      return;
+    }
+    list.innerHTML = data.bookings.map(b => `
+      <div class="booking-card">
+        <div class="bc-name">${esc(b.name)}</div>
+        <div class="bc-time">${b.time} &nbsp;·&nbsp; ${b.slot} min</div>
+        <div class="bc-price">$${b.price}${b.flashSale ? ` 🔥 ${esc(b.flashSaleLabel)}` : ""}</div>
+        <div class="bc-addr">📍 ${esc(b.address)}</div>
+        <div class="bc-phone"><a href="tel:${esc(b.phone)}">${esc(b.phone)}</a></div>
+      </div>
+    `).join("");
+  } catch {
+    list.innerHTML = `<div class="no-bookings">Error loading bookings.</div>`;
+  }
+}
+
+function esc(str) {
+  return String(str || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+// Auto-login from localStorage
+window.addEventListener("DOMContentLoaded", async () => {
+  const saved = localStorage.getItem("cx_admin_token");
+  if (saved) {
+    const res = await fetch(`${BASE}/status`, { headers: { "x-admin-token": saved } });
+    if (res.ok) {
+      adminToken = saved;
+      showPanel(await res.json());
+      return;
+    }
+  }
+  document.getElementById("auth").style.display = "flex";
+});
+
+// Enter key on PIN field
+document.getElementById("pin-input").addEventListener("keydown", e => {
+  if (e.key === "Enter") login();
+});
+</script>
+</body>
+</html>
