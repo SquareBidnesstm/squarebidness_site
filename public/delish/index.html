@@ -451,12 +451,55 @@
     return pickupWindowsState;
   }
 
+  function parsePickupWindowStartMinutes(windowLabel) {
+    const match = String(windowLabel || "")
+      .trim()
+      .match(/^(\d{1,2}):(\d{2})\s*(AM|PM)\s*-/i);
+
+    if (!match) return null;
+
+    let hour = Number(match[1]);
+    const minute = Number(match[2]);
+    const period = match[3].toUpperCase();
+
+    if (!Number.isFinite(hour) || !Number.isFinite(minute)) return null;
+    if (period === "AM" && hour === 12) hour = 0;
+    if (period === "PM" && hour !== 12) hour += 12;
+
+    return (hour * 60) + minute;
+  }
+
+  function getCurrentCentralMinutes() {
+    const formatter = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/Chicago",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false
+    });
+    const parts = formatter.formatToParts(new Date());
+    const map = {};
+
+    parts.forEach((part) => {
+      if (part.type !== "literal") map[part.type] = part.value;
+    });
+
+    return (Number(map.hour || 0) * 60) + Number(map.minute || 0);
+  }
+
+  function isFuturePickupWindow(windowLabel) {
+    const startMinutes = parsePickupWindowStartMinutes(windowLabel);
+    if (startMinutes === null) return true;
+    return startMinutes > getCurrentCentralMinutes();
+  }
+
   function renderPickupWindows() {
     if (!pickupWindow) return;
 
     const currentValue = pickupWindow.value;
     const disabledSet = new Set(pickupWindowsState.disabledWindows || []);
-    const availableWindows = (pickupWindowsState.windows || []).filter(windowLabel => !disabledSet.has(windowLabel));
+    const availableWindows = (pickupWindowsState.windows || [])
+      .filter(windowLabel => !disabledSet.has(windowLabel))
+      .filter(windowLabel => isFuturePickupWindow(windowLabel));
 
     pickupWindow.innerHTML = [
       `<option value="">Select Pickup Time</option>`,
@@ -465,6 +508,12 @@
 
     if (availableWindows.includes(currentValue)) {
       pickupWindow.value = currentValue;
+    }
+
+    pickupWindow.disabled = availableWindows.length === 0;
+
+    if (typeof calc === "function") {
+      calc();
     }
   }
 
@@ -1419,6 +1468,7 @@ const flashSaleOnly =
       await loadMenuOverrides();
       await loadOrderingStatus();
       await loadPickupWindows();
+      setInterval(renderPickupWindows, 60 * 1000);
       await loadFlashSale();
       applyDailyMenu();
     } catch (error) {

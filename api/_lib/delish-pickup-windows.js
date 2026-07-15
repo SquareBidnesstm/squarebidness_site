@@ -41,6 +41,62 @@ export function isAllowedPickupWindow(value) {
   return DEFAULT_PICKUP_WINDOWS.includes(String(value || "").trim());
 }
 
+function getCentralNowParts(date = new Date()) {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Chicago",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+
+  const parts = formatter.formatToParts(date);
+  const map = {};
+
+  for (const part of parts) {
+    if (part.type !== "literal") map[part.type] = part.value;
+  }
+
+  return {
+    hour: Number(map.hour || 0),
+    minute: Number(map.minute || 0),
+  };
+}
+
+function parsePickupWindowStartMinutes(windowLabel) {
+  const match = String(windowLabel || "")
+    .trim()
+    .match(/^(\d{1,2}):(\d{2})\s*(AM|PM)\s*-/i);
+
+  if (!match) return null;
+
+  let hour = Number(match[1]);
+  const minute = Number(match[2]);
+  const period = match[3].toUpperCase();
+
+  if (!Number.isFinite(hour) || !Number.isFinite(minute)) return null;
+  if (period === "AM" && hour === 12) hour = 0;
+  if (period === "PM" && hour !== 12) hour += 12;
+
+  return (hour * 60) + minute;
+}
+
+export function getCurrentCentralMinutes(date = new Date()) {
+  const now = getCentralNowParts(date);
+  return (Number(now.hour || 0) * 60) + Number(now.minute || 0);
+}
+
+export function isFuturePickupWindow(windowLabel, date = new Date()) {
+  const startMinutes = parsePickupWindowStartMinutes(windowLabel);
+  if (startMinutes === null) return true;
+  return startMinutes > getCurrentCentralMinutes(date);
+}
+
+export function getFuturePickupWindows(windows = DEFAULT_PICKUP_WINDOWS, date = new Date()) {
+  return (Array.isArray(windows) ? windows : []).filter((windowLabel) =>
+    isFuturePickupWindow(windowLabel, date)
+  );
+}
+
 export async function getDisabledPickupWindows() {
   const redis = getRedis();
   if (!redis) return [];

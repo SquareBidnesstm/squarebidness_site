@@ -6,6 +6,7 @@ import { getDelishMenuOverrides } from "../_lib/delish-menu-overrides.js";
 import {
   getDisabledPickupWindows,
   isAllowedPickupWindow,
+  isFuturePickupWindow,
 } from "../_lib/delish-pickup-windows.js";
 import { getDelishFlashSale, isFlashSaleActive } from "../_lib/delish-flash-sale.js";
 
@@ -647,6 +648,14 @@ export default async function handler(req, res) {
         ok: false,
         error: "PICKUP_WINDOW_DISABLED",
         message: "That pickup window is no longer available. Please choose another time.",
+      });
+    }
+
+    if (!isFlashSaleOrder && !isFuturePickupWindow(requestedPickupWindow)) {
+      return res.status(403).json({
+        ok: false,
+        error: "PICKUP_WINDOW_EXPIRED",
+        message: "That pickup window has already started. Please choose a later pickup time.",
       });
     }
 
