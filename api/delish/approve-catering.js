@@ -4,6 +4,7 @@ import Stripe from "stripe";
 import nodemailer from "nodemailer";
 import twilio from "twilio";
 import { requireDelishOperatorAuth } from "../_lib/delish-operator-auth.js";
+import { getStripeConnectClient } from "../stripe-connect/client-config.js";
 
 const redis = new Redis({
   url: process.env.DELISH_UPSTASH_REDIS_REST_URL,
@@ -97,35 +98,56 @@ export default async function handler(req, res) {
       process.env.DELISH_CATERING_STRIPE_CANCEL_URL ||
       "https://www.squarebidness.com/delish/catering/";
 
+    const connectClient = getStripeConnectClient("delish");
+    const checkoutMetadata = {
+      brand: "Delish",
+
+      // Critical for webhook routing.
+      lane: "catering",
+      type: "deposit",
+      orderType: "catering_deposit",
+
+      cateringRequestId: existing.id,
+      requestNumber: existing.requestNumber,
+
+      customerName: existing.customerName || "",
+      customerPhone: existing.phone || "",
+      customerEmail: existing.email || "",
+
+      eventDate: existing.eventDate || "",
+      eventTime: existing.eventTime || "",
+      serviceType: existing.serviceType || "",
+
+      totalAmount: totalFormatted,
+      depositPercent: String(depositPercent),
+      depositAmount: depositFormatted,
+    };
+
+    const paymentIntentData = {
+      metadata: checkoutMetadata,
+    };
+
+    if (connectClient?.connectedAccountId?.startsWith("acct_")) {
+      paymentIntentData.transfer_data = {
+        destination: connectClient.connectedAccountId,
+      };
+
+      if (connectClient.feeCents > 0) {
+        paymentIntentData.application_fee_amount = Math.min(
+          connectClient.feeCents,
+          Math.max(0, depositCents - 1)
+        );
+      }
+    }
+
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       success_url: `${successUrl}?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${cancelUrl}?request_id=${encodeURIComponent(id)}`,
       customer_email: existing.email || undefined,
 
-      metadata: {
-        brand: "Delish",
-
-        // 🔑 CRITICAL FOR WEBHOOK
-        lane: "catering",
-        type: "deposit",
-        orderType: "catering_deposit",
-
-        cateringRequestId: existing.id,
-        requestNumber: existing.requestNumber,
-
-        customerName: existing.customerName || "",
-        customerPhone: existing.phone || "",
-        customerEmail: existing.email || "",
-
-        eventDate: existing.eventDate || "",
-        eventTime: existing.eventTime || "",
-        serviceType: existing.serviceType || "",
-
-        totalAmount: totalFormatted,
-        depositPercent: String(depositPercent),
-        depositAmount: depositFormatted,
-      },
+      metadata: checkoutMetadata,
+      payment_intent_data: paymentIntentData,
 
       line_items: [
         {
