@@ -8,7 +8,6 @@ import {
   isAllowedPickupWindow,
 } from "../_lib/delish-pickup-windows.js";
 import { getDelishFlashSale, isFlashSaleActive } from "../_lib/delish-flash-sale.js";
-import { getStripeConnectClient } from "../stripe-connect/client-config.js";
 
 const stripe = new Stripe(process.env.DELISH_STRIPE_SECRET_KEY, {
   apiVersion: "2025-02-24.acacia",
@@ -817,24 +816,6 @@ export default async function handler(req, res) {
       flashSale: isFlashSaleOrder ? "yes" : "no",
     };
 
-    const connectClient = getStripeConnectClient("delish");
-    const paymentIntentData = {
-      metadata: sharedMetadata,
-    };
-
-    if (connectClient?.connectedAccountId?.startsWith("acct_")) {
-      paymentIntentData.transfer_data = {
-        destination: connectClient.connectedAccountId,
-      };
-
-      if (connectClient.feeCents > 0) {
-        const totalCents = Math.round(calculatedTotal * 100);
-        paymentIntentData.application_fee_amount = Math.min(
-          connectClient.feeCents,
-          Math.max(0, totalCents - 1)
-        );
-      }
-    }
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -843,7 +824,9 @@ export default async function handler(req, res) {
       success_url: "https://www.squarebidness.com/delish/order/success/?session_id={CHECKOUT_SESSION_ID}",
       cancel_url: "https://www.squarebidness.com/delish/",
       metadata: sharedMetadata,
-      payment_intent_data: paymentIntentData,
+      payment_intent_data: {
+        metadata: sharedMetadata,
+      },
       customer_email: body.customerEmail || undefined,
     });
 
