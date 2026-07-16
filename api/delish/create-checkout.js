@@ -10,9 +10,12 @@ import {
 } from "../_lib/delish-pickup-windows.js";
 import { getDelishFlashSale, isFlashSaleActive } from "../_lib/delish-flash-sale.js";
 
-const stripe = new Stripe(process.env.DELISH_STRIPE_SECRET_KEY, {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2025-02-24.acacia",
 });
+
+const DELISH_DESTINATION_ACCOUNT = "acct_1TspkpAcqVPZn6LU";
+const PLATFORM_FEE_CENTS = 100; // $1.00 per order
 
 const redis = new Redis({
   url: process.env.DELISH_UPSTASH_REDIS_REST_URL,
@@ -558,10 +561,10 @@ export default async function handler(req, res) {
   }
 
   try {
-    if (!process.env.DELISH_STRIPE_SECRET_KEY) {
+    if (!process.env.STRIPE_SECRET_KEY) {
       return res.status(500).json({
         ok: false,
-        error: "Missing DELISH_STRIPE_SECRET_KEY.",
+        error: "Missing STRIPE_SECRET_KEY.",
       });
     }
 
@@ -835,6 +838,10 @@ export default async function handler(req, res) {
       metadata: sharedMetadata,
       payment_intent_data: {
         metadata: sharedMetadata,
+        application_fee_amount: PLATFORM_FEE_CENTS,
+        transfer_data: {
+          destination: DELISH_DESTINATION_ACCOUNT,
+        },
       },
       customer_email: body.customerEmail || undefined,
     });
