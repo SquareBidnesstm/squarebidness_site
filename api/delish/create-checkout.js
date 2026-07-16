@@ -15,7 +15,7 @@ const stripe = new Stripe(process.env.STRIPE_ONBOARDING_SECRET_KEY, {
 });
 
 const DELISH_DESTINATION_ACCOUNT = "acct_1TspkpAcqVPZn6LU";
-const PLATFORM_FEE_PERCENT = 0.05; // 5% of order total
+const PLATFORM_FEE_PERCENT = 0.10; // 10% of order total
 
 const redis = new Redis({
   url: process.env.DELISH_UPSTASH_REDIS_REST_URL,
