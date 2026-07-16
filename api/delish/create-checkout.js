@@ -836,10 +836,14 @@ export default async function handler(req, res) {
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       automatic_payment_methods: { enabled: true },
+      on_behalf_of: DELISH_DESTINATION_ACCOUNT,
       line_items: lineItems,
       success_url: "https://www.squarebidness.com/delish/order/success/?session_id={CHECKOUT_SESSION_ID}",
       cancel_url: "https://www.squarebidness.com/delish/",
       metadata: sharedMetadata,
+      custom_text: {
+        submit: { message: "Your order will be ready for pickup at Delish in Alexandria, LA." },
+      },
       payment_intent_data: {
         metadata: sharedMetadata,
         application_fee_amount: hasMainDish ? Math.round(calculatedTotal * 100 * PLATFORM_FEE_PERCENT) : 0,
