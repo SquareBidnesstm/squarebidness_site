@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-sb-brand="courageaux" data-sb-tier="book" data-sb-variant="v4-native">
+<html lang="en" data-sb-brand="courageaux" data-sb-tier="book" data-sb-variant="v5-direct">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -10,144 +10,109 @@
   <meta name="robots" content="index,follow" />
   <link rel="icon" href="/courageaux/assets/favicon.ico" sizes="any">
   <link rel="icon" type="image/png" sizes="32x32" href="/courageaux/assets/favicon-32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/courageaux/assets/favicon-16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/courageaux/assets/icon_180.png">
   <link rel="manifest" href="/courageaux/manifest.webmanifest">
-
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Courageaux Aesthetics — Book an Appointment" />
   <meta property="og:description" content="Pick your slot. We come to you." />
   <meta property="og:url" content="https://www.squarebidness.com/courageaux/book/" />
   <meta property="og:image" content="https://www.squarebidness.com/courageaux/assets/courageaux_og_1200x630.jpg" />
-
   <script defer src="/scripts/ga.js"></script>
   <script defer src="/scripts/sb-analytics.js"></script>
-
   <style>
     :root{
-      --bg:#0b0b0b; --card:#121212; --ink:#fff; --muted:#bdbdbd; --muted2:#a1a1aa;
-      --stroke:#1f1f1f; --gold:#c9a227; --ok:#20c997; --danger:#ff5c5c;
-      --shadow:0 18px 40px rgba(0,0,0,.35);
+      --bg:#0b0b0b;--card:#121212;--ink:#fff;--muted:#bdbdbd;--muted2:#71717a;
+      --stroke:#1f1f1f;--gold:#c9a227;--ok:#20c997;--danger:#ff5c5c;
     }
     *{box-sizing:border-box;margin:0;padding:0}
     html,body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,sans-serif;line-height:1.5}
     a{color:inherit;text-decoration:none}
 
-    /* Nav */
     .cx-topnav{position:sticky;top:0;z-index:50;border-bottom:1px solid var(--stroke);background:rgba(0,0,0,.6);backdrop-filter:blur(10px)}
-    .cx-topnav__inner{max-width:960px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
-    .cx-brand{display:inline-flex;align-items:center;gap:9px;font-weight:950;font-size:.92rem;color:#fff}
+    .cx-topnav__inner{max-width:600px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+    .cx-brand{display:inline-flex;align-items:center;gap:9px;font-weight:950;font-size:.92rem}
     .cx-brand img{width:22px;height:22px;border-radius:7px;border:1px solid rgba(255,255,255,.14);background:#fff;padding:2px}
     .cx-back{color:var(--muted2);font-size:.88rem;font-weight:800}
-    .cx-back:hover{color:#fff}
 
-    /* Hero */
-    .hero{border-bottom:1px solid var(--stroke);padding:22px 16px 20px;background:radial-gradient(800px 320px at 20% -5%, rgba(201,162,39,.10), transparent 60%)}
-    .hero__inner{max-width:960px;margin:0 auto}
-    .badge{display:inline-flex;align-items:center;gap:8px;background:#fff;color:#000;border-radius:999px;padding:6px 10px;font-weight:950;font-size:.82rem;letter-spacing:.02em;box-shadow:0 8px 24px rgba(0,0,0,.2)}
-    .badge img{height:18px;width:18px}
-    h1{margin:.55rem 0 .2rem;font-size:clamp(1.6rem,4vw,2.2rem);letter-spacing:-.01em;line-height:1.1}
-    .sub{color:#d7dae0;max-width:60ch;font-size:.95rem}
-    .mood-strip{height:6px;border-radius:999px;margin-top:14px;background:linear-gradient(90deg,rgba(201,162,39,.6),rgba(255,255,255,.1),rgba(201,162,39,.3));border:1px solid rgba(255,255,255,.08)}
+    .hero{padding:28px 16px 20px;border-bottom:1px solid var(--stroke);background:radial-gradient(700px 280px at 20% -5%,rgba(201,162,39,.10),transparent 60%)}
+    .hero__inner{max-width:600px;margin:0 auto}
+    h1{font-size:clamp(1.7rem,5vw,2.4rem);letter-spacing:-.02em;line-height:1.1;margin-bottom:6px}
+    .sub{color:#d7dae0;font-size:.95rem;margin-bottom:14px}
 
-    /* Flash sale banner */
-    #flash-banner{display:none;background:linear-gradient(90deg,rgba(201,162,39,.18),rgba(201,162,39,.08));border:1px solid rgba(201,162,39,.4);border-radius:14px;padding:12px 14px;margin:14px 0 0}
+    #flash-banner{display:none;background:rgba(201,162,39,.12);border:1px solid rgba(201,162,39,.4);border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:.9rem}
     #flash-banner.show{display:flex;align-items:center;gap:10px}
-    .flash-icon{font-size:1.3rem}
-    .flash-text strong{display:block;font-size:.95rem;color:var(--gold);font-weight:950}
-    .flash-text span{font-size:.82rem;color:#d7dae0}
+    #flash-banner strong{color:var(--gold)}
 
-    /* Main */
-    main{max-width:960px;margin:0 auto;padding:20px 16px 48px}
+    main{max-width:600px;margin:0 auto;padding:20px 16px 60px;display:flex;flex-direction:column;gap:10px}
 
-    /* Closed state */
-    #closed-state{display:none;text-align:center;padding:48px 16px}
-    #closed-state h2{font-size:1.4rem;margin-bottom:8px}
-    #closed-state p{color:var(--muted);max-width:40ch;margin:0 auto 18px}
+    /* Loading / closed / success */
+    .state{text-align:center;padding:48px 0;color:var(--muted)}
+    .state h2{font-size:1.3rem;color:var(--ink);margin-bottom:8px}
+    .state p{max-width:38ch;margin:0 auto 16px}
+    .state a{color:var(--gold);font-weight:950;text-decoration:underline;text-underline-offset:3px}
+    #success-state h2{color:var(--ok)}
 
-    /* Booking form */
-    #booking-form{display:none;flex-direction:column;gap:16px}
-    #booking-form.show{display:flex}
-
-    /* Step headers */
-    .step-head{font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);font-weight:900;margin-bottom:10px}
-
-    /* Slot cards */
+    /* Slots */
     .slots{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-    .slot-card{background:var(--card);border:2px solid var(--stroke);border-radius:14px;padding:14px 10px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;user-select:none}
-    .slot-card:hover{border-color:rgba(201,162,39,.4);background:#161616}
-    .slot-card.selected{border-color:var(--gold);background:rgba(201,162,39,.08)}
-    .slot-card .slot-dur{font-size:1.1rem;font-weight:950;margin-bottom:4px}
-    .slot-card .slot-price{color:var(--gold);font-weight:950;font-size:1rem}
-    .slot-card .slot-og{color:var(--muted2);font-size:.76rem;text-decoration:line-through;margin-top:1px}
-    .slot-card .slot-badge{font-size:.72rem;background:rgba(201,162,39,.15);color:var(--gold);border-radius:999px;padding:2px 8px;margin-top:5px;display:inline-block;font-weight:900}
+    .slot-card{background:var(--card);border:2px solid var(--stroke);border-radius:14px;padding:16px 10px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;user-select:none;-webkit-tap-highlight-color:transparent}
+    .slot-card:hover{border-color:rgba(201,162,39,.4)}
+    .slot-card.selected{border-color:var(--gold);background:rgba(201,162,39,.07)}
+    .slot-dur{font-size:1.15rem;font-weight:950;margin-bottom:5px}
+    .slot-price{color:var(--gold);font-weight:950;font-size:1.05rem}
+    .slot-og{color:var(--muted2);font-size:.74rem;text-decoration:line-through;margin-top:1px}
+    .slot-tag{display:inline-block;font-size:.7rem;background:rgba(201,162,39,.15);color:var(--gold);border-radius:999px;padding:2px 8px;margin-top:6px;font-weight:900}
 
-    /* Date picker */
+    /* Date */
     .date-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-    @media(max-width:480px){.date-grid{grid-template-columns:repeat(4,1fr)}}
-    .date-pill{background:var(--card);border:1px solid var(--stroke);border-radius:10px;padding:8px 4px;text-align:center;cursor:pointer;transition:border-color .15s}
+    @media(max-width:440px){.date-grid{grid-template-columns:repeat(4,1fr)}}
+    .date-pill{background:var(--card);border:1px solid var(--stroke);border-radius:10px;padding:8px 4px;text-align:center;cursor:pointer;transition:border-color .15s;-webkit-tap-highlight-color:transparent}
     .date-pill:hover{border-color:rgba(201,162,39,.4)}
-    .date-pill.selected{border-color:var(--gold);background:rgba(201,162,39,.08)}
-    .date-pill .dp-day{font-size:.7rem;color:var(--muted2);font-weight:800;text-transform:uppercase}
-    .date-pill .dp-num{font-size:1rem;font-weight:950;margin-top:1px}
-    .date-pill .dp-wed{font-size:.62rem;color:var(--gold);font-weight:900;margin-top:1px}
+    .date-pill.selected{border-color:var(--gold);background:rgba(201,162,39,.07)}
+    .dp-day{font-size:.68rem;color:var(--muted2);font-weight:800;text-transform:uppercase}
+    .dp-num{font-size:.98rem;font-weight:950;margin-top:1px}
+    .dp-wed{font-size:.6rem;color:var(--gold);font-weight:900;margin-top:1px}
 
-    /* Time slots */
+    /* Time */
     .time-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-    @media(max-width:400px){.time-grid{grid-template-columns:repeat(3,1fr)}}
-    .time-pill{background:var(--card);border:1px solid var(--stroke);border-radius:10px;padding:9px 6px;text-align:center;cursor:pointer;font-weight:900;font-size:.88rem;transition:border-color .15s}
+    @media(max-width:380px){.time-grid{grid-template-columns:repeat(3,1fr)}}
+    .time-pill{background:var(--card);border:1px solid var(--stroke);border-radius:10px;padding:10px 4px;text-align:center;cursor:pointer;font-weight:900;font-size:.86rem;transition:border-color .15s;-webkit-tap-highlight-color:transparent}
     .time-pill:hover{border-color:rgba(201,162,39,.4)}
-    .time-pill.selected{border-color:var(--gold);background:rgba(201,162,39,.08);color:var(--gold)}
+    .time-pill.selected{border-color:var(--gold);background:rgba(201,162,39,.07);color:var(--gold)}
 
-    /* Form fields */
-    .card{background:var(--card);border:1px solid var(--stroke);border-radius:16px;padding:16px}
-    .field+.field{margin-top:10px}
-    label{display:block;font-size:.86rem;color:#d7dae0;font-weight:800;margin-bottom:4px}
-    input,textarea{width:100%;padding:11px 13px;border-radius:10px;border:1px solid #2a2a2a;background:#070707;color:var(--ink);font:inherit;font-size:1rem;outline:none}
-    input:focus,textarea:focus{border-color:#3c3c3c;box-shadow:0 0 0 3px rgba(201,162,39,.12)}
-    textarea{min-height:70px;resize:vertical}
+    /* Form */
+    .form-section{display:flex;flex-direction:column;gap:10px}
+    label{display:block;font-size:.84rem;color:#d7dae0;font-weight:800;margin-bottom:4px}
+    input,textarea{width:100%;padding:12px 13px;border-radius:10px;border:1px solid #2a2a2a;background:#070707;color:var(--ink);font:inherit;font-size:1rem;outline:none;-webkit-appearance:none}
+    input:focus,textarea:focus{border-color:#444;box-shadow:0 0 0 3px rgba(201,162,39,.12)}
+    textarea{min-height:72px;resize:vertical}
 
-    /* Summary */
-    #summary-box{display:none;background:rgba(201,162,39,.07);border:1px solid rgba(201,162,39,.3);border-radius:14px;padding:14px}
-    #summary-box.show{display:block}
-    .sum-row{display:flex;justify-content:space-between;align-items:center;font-size:.9rem;padding:3px 0}
-    .sum-row span:first-child{color:var(--muted)}
-    .sum-row span:last-child{font-weight:950}
-    .sum-total{border-top:1px solid rgba(201,162,39,.2);margin-top:8px;padding-top:8px}
-    .sum-total span:last-child{color:var(--gold);font-size:1.1rem}
+    /* Summary strip */
+    #summary-strip{display:none;background:rgba(201,162,39,.07);border:1px solid rgba(201,162,39,.25);border-radius:12px;padding:12px 14px;font-size:.88rem}
+    #summary-strip.show{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+    #sum-left{color:var(--muted)}
+    #sum-price{color:var(--gold);font-weight:950;font-size:1rem}
 
-    /* Error */
-    .error{color:#ffd1d1;background:rgba(255,92,92,.1);border:1px solid rgba(255,92,92,.3);border-radius:10px;padding:10px 12px;font-size:.88rem;display:none}
+    .error{color:#ffd1d1;background:rgba(255,92,92,.1);border:1px solid rgba(255,92,92,.3);border-radius:10px;padding:10px 13px;font-size:.88rem;display:none}
     .error.show{display:block}
 
-    /* Submit */
-    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 20px;border-radius:12px;font-weight:950;border:1px solid transparent;font:inherit;cursor:pointer;font-size:1rem;white-space:nowrap;width:100%;transition:opacity .12s}
+    .btn{display:flex;align-items:center;justify-content:center;width:100%;padding:15px;border-radius:12px;font-weight:950;border:none;font:inherit;font-size:1rem;cursor:pointer;transition:opacity .12s;-webkit-tap-highlight-color:transparent}
     .btn--gold{background:var(--gold);color:#000}
-    .btn--ghost{background:#0f0f0f;color:#fff;border-color:#2a2a2a}
-    .btn:disabled{opacity:.5;cursor:not-allowed}
-    .btn:active:not(:disabled){opacity:.85}
+    .btn:disabled{opacity:.45;cursor:not-allowed}
+    .btn:active:not(:disabled){opacity:.82}
 
-    /* Success */
-    #success-state{display:none;text-align:center;padding:48px 16px}
-    #success-state.show{display:block}
-    #success-state h2{font-size:1.5rem;margin-bottom:8px;color:var(--ok)}
-    #success-state p{color:var(--muted);max-width:44ch;margin:0 auto 12px}
+    .section-label{font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);font-weight:900;margin-bottom:8px}
 
-    /* Loading */
-    #loading-state{display:none;text-align:center;padding:48px 16px;color:var(--muted)}
-    #loading-state.show{display:block}
-
-    .cx-footer{margin-top:32px;border-top:1px solid var(--stroke);padding-top:16px;text-align:center;color:var(--muted2);font-size:.82rem}
-    .cx-footer a{color:var(--gold);font-weight:950;text-underline-offset:3px;text-decoration:underline}
+    footer{border-top:1px solid var(--stroke);padding:16px;text-align:center;color:var(--muted2);font-size:.8rem}
+    footer a{color:var(--gold);font-weight:950;text-underline-offset:3px;text-decoration:underline}
   </style>
 </head>
 <body>
 
-<nav class="cx-topnav" aria-label="Courageaux navigation">
+<nav class="cx-topnav">
   <div class="cx-topnav__inner">
     <a class="cx-brand" href="/courageaux/">
-      <img src="/courageaux/assets/icon_courageaux_512.png" alt="Courageaux Aesthetics" width="22" height="22" loading="eager">
-      Courageaux Aesthetics
+      <img src="/courageaux/assets/icon_courageaux_512.png" alt="Courageaux" width="22" height="22" loading="eager">
+      Courageaux
     </a>
     <a class="cx-back" href="/courageaux/">← Home</a>
   </div>
@@ -155,292 +120,237 @@
 
 <header class="hero">
   <div class="hero__inner">
-    <span class="badge">
-      <img src="/courageaux/assets/logo_courageaux_black_400.png" alt="Courageaux" width="18" height="18" loading="eager">
-      Courageaux Aesthetics · Book
-    </span>
-    <h1>Book your appointment.</h1>
-    <p class="sub">Mobile skincare — we come to you. Pick your slot, enter your address, and you're confirmed.</p>
     <div id="flash-banner">
-      <span class="flash-icon">🔥</span>
-      <div class="flash-text">
-        <strong id="flash-label-text"></strong>
-        <span id="flash-sub-text"></span>
-      </div>
+      <span>🔥</span>
+      <div><strong id="flash-label-text"></strong> — <span id="flash-sub-text"></span></div>
     </div>
-    <div class="mood-strip" aria-hidden="true"></div>
+    <h1>Clean, calm,<br>confident skin.</h1>
+    <p class="sub">Mobile service. Pick your time — Amari comes to you.</p>
   </div>
 </header>
 
-<main>
-  <!-- Loading -->
-  <div id="loading-state" class="show">Checking availability…</div>
+<main id="main-wrap">
 
-  <!-- Closed -->
-  <div id="closed-state">
+  <div id="loading-state" class="state">Checking availability…</div>
+
+  <div id="closed-state" class="state" style="display:none">
     <h2>Not currently booking.</h2>
-    <p>Amari isn't accepting appointments right now. Check back soon or follow on Instagram for updates.</p>
-    <a href="https://instagram.com/courageuxaesthetics" target="_blank" rel="noopener" style="color:var(--gold);font-weight:950;text-decoration:underline;font-size:.9rem">@courageuxaesthetics on Instagram</a>
+    <p>Check back soon or follow for updates.</p>
+    <a href="https://instagram.com/courageuxaesthetics" target="_blank" rel="noopener">@courageuxaesthetics</a>
   </div>
 
-  <!-- Success -->
-  <div id="success-state">
+  <div id="success-state" class="state" style="display:none">
     <h2>You're booked!</h2>
-    <p id="success-msg">Amari has been notified and will confirm shortly. See you soon.</p>
-    <div style="margin-top:16px">
-      <a href="/courageaux/intake/" style="color:var(--gold);font-weight:950;font-size:.9rem;text-decoration:underline">Complete your client intake form →</a>
-    </div>
-    <div style="margin-top:24px">
-      <a href="/courageaux/" style="color:var(--muted2);font-size:.88rem">← Back to Courageaux</a>
-    </div>
+    <p id="success-msg"></p>
+    <a href="/courageaux/intake/">Complete your intake form →</a>
+    <div style="margin-top:20px"><a href="/courageaux/" style="color:var(--muted2)">← Back to Courageaux</a></div>
   </div>
 
-  <!-- Booking form -->
-  <div id="booking-form" role="form" aria-label="Book an appointment">
+  <div id="booking-wrap" style="display:none">
 
-    <!-- Step 1: Slot -->
-    <div class="card">
-      <div class="step-head">Step 1 — Choose your time slot</div>
-      <div class="slots" id="slot-grid" role="group" aria-label="Time slot options"></div>
+    <!-- Slots -->
+    <div>
+      <div class="section-label">Choose your slot</div>
+      <div class="slots" id="slot-grid"></div>
     </div>
 
-    <!-- Step 2: Date -->
-    <div class="card" id="step-date" style="display:none">
-      <div class="step-head">Step 2 — Pick a date</div>
-      <div class="date-grid" id="date-grid" role="group" aria-label="Date options"></div>
+    <!-- Date -->
+    <div id="step-date" style="display:none">
+      <div class="section-label">Pick a date</div>
+      <div class="date-grid" id="date-grid"></div>
     </div>
 
-    <!-- Step 3: Time -->
-    <div class="card" id="step-time" style="display:none">
-      <div class="step-head">Step 3 — Pick a time</div>
-      <div class="time-grid" id="time-grid" role="group" aria-label="Time options"></div>
+    <!-- Time -->
+    <div id="step-time" style="display:none">
+      <div class="section-label">Pick a time</div>
+      <div class="time-grid" id="time-grid"></div>
     </div>
 
-    <!-- Step 4: Info -->
-    <div class="card" id="step-info" style="display:none">
-      <div class="step-head">Step 4 — Your info</div>
-      <div class="field">
+    <!-- Form -->
+    <div id="step-form" class="form-section" style="display:none">
+      <div class="section-label">Your info</div>
+      <div>
         <label for="f-name">Full Name</label>
         <input id="f-name" type="text" autocomplete="name" placeholder="Your name" required>
       </div>
-      <div class="field">
+      <div>
         <label for="f-phone">Mobile Number</label>
         <input id="f-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(xxx) xxx-xxxx" required>
       </div>
-      <div class="field">
-        <label for="f-address">Your Address <span style="color:var(--muted2);font-weight:700">(where Amari pulls up)</span></label>
-        <textarea id="f-address" placeholder="Street address, city, zip" required></textarea>
+      <div>
+        <label for="f-address">Your Address <span style="color:var(--muted2);font-weight:600">(where Amari pulls up)</span></label>
+        <textarea id="f-address" placeholder="Street, city, zip" required></textarea>
       </div>
     </div>
 
-    <!-- Summary -->
-    <div id="summary-box">
-      <div class="sum-row"><span>Service</span><span id="sum-slot"></span></div>
-      <div class="sum-row"><span>Date &amp; Time</span><span id="sum-datetime"></span></div>
-      <div class="sum-row sum-total"><span>Total</span><span id="sum-price"></span></div>
+    <!-- Summary + submit -->
+    <div id="summary-strip">
+      <span id="sum-left"></span>
+      <span id="sum-price"></span>
     </div>
 
-    <!-- Error -->
     <div class="error" id="form-error"></div>
 
-    <!-- Submit -->
     <div id="step-submit" style="display:none">
       <button class="btn btn--gold" id="submit-btn" onclick="submitBooking()">Confirm &amp; Book</button>
-      <p style="text-align:center;margin-top:8px;font-size:.78rem;color:var(--muted2)">
-        By booking you agree to a 24-hour cancellation policy.
-      </p>
+      <p style="text-align:center;margin-top:8px;font-size:.76rem;color:var(--muted2)">24-hour cancellation policy applies.</p>
     </div>
 
   </div>
 
-  <div class="cx-footer">
-    <a href="/courageaux/">Courageaux Aesthetics</a> · Site by <a href="https://lab.squarebidness.com/" target="_blank" rel="noopener">Square Bidness Tech Lab</a>
-  </div>
 </main>
 
+<footer>
+  <a href="/courageaux/">Courageaux Aesthetics</a> · <a href="https://lab.squarebidness.com/" target="_blank" rel="noopener">Square Bidness Tech Lab</a>
+</footer>
+
 <script>
-const PRICES     = { 15: 40,  30: 65,  60: 110 };
-const WED_PRICES = { 15: 25,  30: 65,  60: 110 };
-const TIMES = ["9:00 AM","9:30 AM","10:00 AM","10:30 AM","11:00 AM","11:30 AM","12:00 PM","12:30 PM","1:00 PM","1:30 PM","2:00 PM","2:30 PM","3:00 PM","3:30 PM","4:00 PM","4:30 PM","5:00 PM","5:30 PM","6:00 PM"];
+const PRICES     = { 15:40,  30:65,  60:110 };
+const WED_PRICES = { 15:25,  30:65,  60:110 };
+const TIMES = ["9:00 AM","9:30 AM","10:00 AM","10:30 AM","11:00 AM","11:30 AM",
+               "12:00 PM","12:30 PM","1:00 PM","1:30 PM","2:00 PM","2:30 PM",
+               "3:00 PM","3:30 PM","4:00 PM","4:30 PM","5:00 PM","5:30 PM","6:00 PM"];
 
 let STATUS = {};
-let sel = { slot: null, date: null, time: null };
+let sel = { slot:null, date:null, time:null };
 
 function calcPrice(slot, dateStr) {
-  if (STATUS.flashSaleActive && STATUS.flashSaleDiscount > 0) {
+  if (STATUS.flashSaleActive && STATUS.flashSaleDiscount > 0)
     return Math.round(PRICES[slot] * (1 - STATUS.flashSaleDiscount / 100));
-  }
-  const dow = new Date(dateStr + "T12:00:00").getDay();
+  const dow = new Date((dateStr||"2000-01-03") + "T12:00:00").getDay();
   return dow === 3 ? (WED_PRICES[slot] ?? PRICES[slot]) : (PRICES[slot] ?? 0);
 }
 
-function regularPrice(slot) { return PRICES[slot] ?? 0; }
-
-function isWed(dateStr) {
-  return new Date(dateStr + "T12:00:00").getDay() === 3;
-}
-
 function buildSlots() {
-  const grid = document.getElementById("slot-grid");
-  grid.innerHTML = [15, 30, 60].map(s => {
-    const price = sel.date ? calcPrice(s, sel.date) : (STATUS.flashSaleActive ? Math.round(PRICES[s] * (1 - STATUS.flashSaleDiscount / 100)) : PRICES[s]);
-    const reg = regularPrice(s);
-    const discounted = price < reg;
-    const wedOnly = !STATUS.flashSaleActive && s === 15 && !sel.date;
-    return `
-      <div class="slot-card${sel.slot === s ? " selected" : ""}" onclick="selectSlot(${s})" role="button" tabindex="0" aria-pressed="${sel.slot === s}">
-        <div class="slot-dur">${s} min</div>
-        <div class="slot-price">$${price}</div>
-        ${discounted ? `<div class="slot-og">$${reg}</div>` : ""}
-        ${s === 15 && !STATUS.flashSaleActive ? `<div class="slot-badge">Wed $25</div>` : ""}
-        ${STATUS.flashSaleActive ? `<div class="slot-badge">${STATUS.flashSaleDiscount}% OFF</div>` : ""}
-      </div>`;
+  document.getElementById("slot-grid").innerHTML = [15,30,60].map(s => {
+    const price = sel.date ? calcPrice(s, sel.date) : (STATUS.flashSaleActive ? Math.round(PRICES[s]*(1-STATUS.flashSaleDiscount/100)) : PRICES[s]);
+    const reg = PRICES[s];
+    const disc = price < reg;
+    return `<div class="slot-card${sel.slot===s?" selected":""}" onclick="selectSlot(${s})" role="button" tabindex="0">
+      <div class="slot-dur">${s} min</div>
+      <div class="slot-price">$${price}</div>
+      ${disc?`<div class="slot-og">$${reg}</div>`:""}
+      ${s===15&&!STATUS.flashSaleActive?`<div class="slot-tag">Wed $25</div>`:""}
+      ${STATUS.flashSaleActive?`<div class="slot-tag">${STATUS.flashSaleDiscount}% OFF</div>`:""}
+    </div>`;
   }).join("");
 }
 
 function buildDates() {
-  const grid = document.getElementById("date-grid");
   const today = new Date();
-  grid.innerHTML = Array.from({length: 14}, (_, i) => {
-    const d = new Date(today);
-    d.setDate(today.getDate() + i);
-    const str = d.toISOString().slice(0, 10);
-    const dayName = d.toLocaleDateString("en-US", { weekday: "short" });
-    const dayNum = d.getDate();
-    const wed = d.getDay() === 3;
-    return `
-      <div class="date-pill${sel.date === str ? " selected" : ""}" onclick="selectDate('${str}')" role="button" tabindex="0">
-        <div class="dp-day">${dayName}</div>
-        <div class="dp-num">${dayNum}</div>
-        ${wed ? `<div class="dp-wed">$25 deal</div>` : ""}
-      </div>`;
+  document.getElementById("date-grid").innerHTML = Array.from({length:14},(_,i)=>{
+    const d = new Date(today); d.setDate(today.getDate()+i);
+    const str = d.toISOString().slice(0,10);
+    const day = d.toLocaleDateString("en-US",{weekday:"short"});
+    const wed = d.getDay()===3;
+    return `<div class="date-pill${sel.date===str?" selected":""}" onclick="selectDate('${str}')" role="button" tabindex="0">
+      <div class="dp-day">${day}</div>
+      <div class="dp-num">${d.getDate()}</div>
+      ${wed?`<div class="dp-wed">$25</div>`:""}
+    </div>`;
   }).join("");
 }
 
 function buildTimes() {
-  const grid = document.getElementById("time-grid");
-  grid.innerHTML = TIMES.map(t => `
-    <div class="time-pill${sel.time === t ? " selected" : ""}" onclick="selectTime('${t}')" role="button" tabindex="0">${t}</div>
-  `).join("");
+  document.getElementById("time-grid").innerHTML = TIMES.map(t =>
+    `<div class="time-pill${sel.time===t?" selected":""}" onclick="selectTime('${t}')" role="button" tabindex="0">${t}</div>`
+  ).join("");
 }
 
 function selectSlot(s) {
-  sel.slot = s;
-  buildSlots();
-  document.getElementById("step-date").style.display = "block";
-  buildDates();
-  document.getElementById("step-date").scrollIntoView({ behavior: "smooth", block: "start" });
-  updateSummary();
+  sel.slot=s; buildSlots();
+  show("step-date"); buildDates();
+  scroll("step-date"); updateSummary();
 }
 
 function selectDate(d) {
-  sel.date = d;
-  buildSlots(); // refresh prices for this day
-  buildDates();
-  document.getElementById("step-time").style.display = "block";
-  buildTimes();
-  document.getElementById("step-time").scrollIntoView({ behavior: "smooth", block: "start" });
-  updateSummary();
+  sel.date=d; buildSlots(); buildDates();
+  show("step-time"); buildTimes();
+  scroll("step-time"); updateSummary();
 }
 
 function selectTime(t) {
-  sel.time = t;
-  buildTimes();
-  document.getElementById("step-info").style.display = "block";
-  document.getElementById("step-submit").style.display = "block";
-  document.getElementById("step-info").scrollIntoView({ behavior: "smooth", block: "start" });
-  updateSummary();
+  sel.time=t; buildTimes();
+  show("step-form"); show("step-submit");
+  scroll("step-form"); updateSummary();
 }
 
 function updateSummary() {
-  const box = document.getElementById("summary-box");
-  if (!sel.slot || !sel.date || !sel.time) { box.classList.remove("show"); return; }
-  box.classList.add("show");
-  const price = calcPrice(sel.slot, sel.date);
-  const d = new Date(sel.date + "T12:00:00");
-  const dateLabel = d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
-  document.getElementById("sum-slot").textContent = `${sel.slot} min appointment`;
-  document.getElementById("sum-datetime").textContent = `${dateLabel} at ${sel.time}`;
-  document.getElementById("sum-price").textContent = `$${price}`;
+  const strip = document.getElementById("summary-strip");
+  if (!sel.slot||!sel.date||!sel.time){strip.classList.remove("show");return;}
+  strip.classList.add("show");
+  const d = new Date(sel.date+"T12:00:00");
+  const dl = d.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"});
+  document.getElementById("sum-left").textContent = `${sel.slot} min · ${dl} at ${sel.time}`;
+  document.getElementById("sum-price").textContent = `$${calcPrice(sel.slot,sel.date)}`;
 }
 
 async function submitBooking() {
-  const name = document.getElementById("f-name").value.trim();
-  const phone = document.getElementById("f-phone").value.trim();
+  const name    = document.getElementById("f-name").value.trim();
+  const phone   = document.getElementById("f-phone").value.trim();
   const address = document.getElementById("f-address").value.trim();
-  const errEl = document.getElementById("form-error");
-
-  if (!sel.slot || !sel.date || !sel.time) {
-    showError("Please select a slot, date, and time."); return;
-  }
-  if (!name) { showError("Please enter your name."); return; }
-  if (!phone) { showError("Please enter your phone number."); return; }
-  if (!address) { showError("Please enter your address so Amari knows where to pull up."); return; }
+  if (!sel.slot||!sel.date||!sel.time){showErr("Please select a slot, date, and time.");return;}
+  if (!name){showErr("Please enter your name.");return;}
+  if (!phone){showErr("Please enter your phone number.");return;}
+  if (!address){showErr("Please enter your address.");return;}
 
   const btn = document.getElementById("submit-btn");
-  btn.disabled = true;
-  btn.textContent = "Booking…";
-  errEl.classList.remove("show");
+  btn.disabled=true; btn.textContent="Booking…";
+  document.getElementById("form-error").classList.remove("show");
 
   try {
-    const res = await fetch("/api/courageaux/book", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, phone, address, date: sel.date, time: sel.time, slot: sel.slot })
+    const res = await fetch("/api/courageaux/book",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({name,phone,address,date:sel.date,time:sel.time,slot:sel.slot})
     });
     const data = await res.json();
     if (data.ok) {
-      const d = new Date(sel.date + "T12:00:00");
-      const dateLabel = d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+      const d = new Date(sel.date+"T12:00:00");
+      const dl = d.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
       document.getElementById("success-msg").textContent =
-        `Your ${sel.slot}-min appointment on ${dateLabel} at ${sel.time} is confirmed. Amari will be at your door. Booking ID: ${data.bookingId}`;
-      document.getElementById("booking-form").style.display = "none";
-      document.getElementById("success-state").classList.add("show");
-      document.getElementById("success-state").scrollIntoView({ behavior: "smooth" });
+        `${sel.slot}-min appointment · ${dl} at ${sel.time}. Amari will be at your door. ID: ${data.bookingId}`;
+      hide("booking-wrap");
+      show("success-state");
+      document.getElementById("success-state").scrollIntoView({behavior:"smooth"});
     } else {
-      showError(data.error || "Something went wrong. Please try again.");
-      btn.disabled = false;
-      btn.textContent = "Confirm & Book";
+      showErr(data.error||"Something went wrong. Please try again.");
+      btn.disabled=false; btn.textContent="Confirm & Book";
     }
   } catch {
-    showError("Network error. Please try again.");
-    btn.disabled = false;
-    btn.textContent = "Confirm & Book";
+    showErr("Network error. Please try again.");
+    btn.disabled=false; btn.textContent="Confirm & Book";
   }
 }
 
-function showError(msg) {
-  const el = document.getElementById("form-error");
-  el.textContent = msg;
-  el.classList.add("show");
-  el.scrollIntoView({ behavior: "smooth", block: "center" });
+function showErr(msg){
+  const el=document.getElementById("form-error");
+  el.textContent=msg; el.classList.add("show");
+  el.scrollIntoView({behavior:"smooth",block:"center"});
 }
+function show(id){document.getElementById(id).style.display="block"}
+function hide(id){document.getElementById(id).style.display="none"}
+function scroll(id){setTimeout(()=>document.getElementById(id).scrollIntoView({behavior:"smooth",block:"start"}),50)}
 
 async function init() {
   try {
     const res = await fetch("/api/courageaux/status");
-    const data = await res.json();
-    STATUS = data.state || {};
-  } catch {
-    STATUS = { bookingOpen: false };
+    const {state} = await res.json();
+    STATUS = state||{};
+  } catch { STATUS={bookingOpen:false}; }
+
+  hide("loading-state");
+
+  if (!STATUS.bookingOpen){show("closed-state");return;}
+
+  if (STATUS.flashSaleActive&&STATUS.flashSaleLabel) {
+    const b=document.getElementById("flash-banner");
+    b.classList.add("show");
+    document.getElementById("flash-label-text").textContent=STATUS.flashSaleLabel;
+    document.getElementById("flash-sub-text").textContent=`${STATUS.flashSaleDiscount}% off all slots`;
   }
 
-  document.getElementById("loading-state").classList.remove("show");
-
-  if (!STATUS.bookingOpen) {
-    document.getElementById("closed-state").style.display = "block";
-    return;
-  }
-
-  if (STATUS.flashSaleActive && STATUS.flashSaleLabel) {
-    const banner = document.getElementById("flash-banner");
-    banner.classList.add("show");
-    document.getElementById("flash-label-text").textContent = STATUS.flashSaleLabel;
-    document.getElementById("flash-sub-text").textContent =
-      `${STATUS.flashSaleDiscount}% off all slots — today only.`;
-  }
-
-  document.getElementById("booking-form").classList.add("show");
+  show("booking-wrap");
   buildSlots();
 }
 
