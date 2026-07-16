@@ -100,11 +100,12 @@
         <span class="dot" id="booking-dot"></span>
         <span id="booking-chip-text">Checking…</span>
       </div>
-      <div class="chip" id="mobile-chip" style="display:none">
+      <div class="chip" id="mobile-chip" style="display:none;cursor:pointer" onclick="checkMobile()" role="button" tabindex="0">
         <span class="dot dot--gold"></span>
-        <strong style="color:var(--gold)">MOBILE</strong>&nbsp;· We come to you
+        <strong style="color:var(--gold)">MOBILE</strong>&nbsp;· Check availability
       </div>
     </div>
+    <div id="mobile-result" style="display:none;margin-top:10px;font-size:.88rem;line-height:1.5"></div>
   </div>
 
   <footer>
@@ -124,6 +125,27 @@
 
   <script>
     document.getElementById("yr").textContent = new Date().getFullYear();
+
+    async function checkMobile() {
+      const chip   = document.getElementById("mobile-chip");
+      const result = document.getElementById("mobile-result");
+      chip.style.opacity = ".5";
+      chip.style.pointerEvents = "none";
+      try {
+        const { available } = await (await fetch("/api/courageaux/mobile-check")).json();
+        result.style.display = "block";
+        if (available) {
+          result.innerHTML = `<span style="color:var(--ok)">✓ Amari is available</span> · <a href="/courageaux/book/" style="color:var(--gold);font-weight:900">Book now →</a>`;
+        } else {
+          result.innerHTML = `<span style="color:var(--muted2)">Mobile is paused right now. Check back soon.</span>`;
+          chip.style.opacity = "";
+          chip.style.pointerEvents = "";
+        }
+      } catch {
+        chip.style.opacity = "";
+        chip.style.pointerEvents = "";
+      }
+    }
     (async () => {
       try {
         const {state} = await (await fetch("/api/courageaux/status")).json();
