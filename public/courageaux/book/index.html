@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en" data-sb-brand="courageaux" data-sb-tier="book" data-sb-variant="v5-direct">
+<html lang="en" data-sb-brand="courageaux" data-sb-tier="book" data-sb-variant="v6-delish">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Courageaux Aesthetics — Book an Appointment</title>
-  <meta name="description" content="Book a mobile skincare appointment with Courageaux Aesthetics. Pick your time, we come to you." />
+  <title>Courageaux Aesthetics — Book a Facial</title>
+  <meta name="description" content="Book a mobile skincare appointment with Courageaux Aesthetics. Pick your service, drop your address, Amari pulls up." />
   <link rel="canonical" href="https://www.squarebidness.com/courageaux/book/" />
   <meta name="theme-color" content="#0b0b0b" />
   <meta name="robots" content="index,follow" />
@@ -12,104 +12,97 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/courageaux/assets/favicon-32.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/courageaux/assets/icon_180.png">
   <link rel="manifest" href="/courageaux/manifest.webmanifest">
-  <meta property="og:type" content="website" />
-  <meta property="og:title" content="Courageaux Aesthetics — Book an Appointment" />
-  <meta property="og:description" content="Pick your slot. We come to you." />
-  <meta property="og:url" content="https://www.squarebidness.com/courageaux/book/" />
-  <meta property="og:image" content="https://www.squarebidness.com/courageaux/assets/courageaux_og_1200x630.jpg" />
   <script defer src="/scripts/ga.js"></script>
   <script defer src="/scripts/sb-analytics.js"></script>
   <style>
-    :root{
-      --bg:#0b0b0b;--card:#121212;--ink:#fff;--muted:#bdbdbd;--muted2:#71717a;
-      --stroke:#1f1f1f;--gold:#c9a227;--ok:#20c997;--danger:#ff5c5c;
-    }
+    :root{--bg:#0b0b0b;--card:#121212;--ink:#fff;--muted:#bdbdbd;--muted2:#71717a;--stroke:#1f1f1f;--gold:#c9a227;--ok:#20c997;--danger:#ff5c5c}
     *{box-sizing:border-box;margin:0;padding:0}
     html,body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,sans-serif;line-height:1.5}
     a{color:inherit;text-decoration:none}
 
-    .cx-topnav{position:sticky;top:0;z-index:50;border-bottom:1px solid var(--stroke);background:rgba(0,0,0,.6);backdrop-filter:blur(10px)}
-    .cx-topnav__inner{max-width:600px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+    nav{position:sticky;top:0;z-index:50;border-bottom:1px solid var(--stroke);background:rgba(0,0,0,.6);backdrop-filter:blur(10px)}
+    .nav-inner{max-width:640px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
     .cx-brand{display:inline-flex;align-items:center;gap:9px;font-weight:950;font-size:.92rem}
     .cx-brand img{width:22px;height:22px;border-radius:7px;border:1px solid rgba(255,255,255,.14);background:#fff;padding:2px}
     .cx-back{color:var(--muted2);font-size:.88rem;font-weight:800}
 
-    .hero{padding:28px 16px 20px;border-bottom:1px solid var(--stroke);background:radial-gradient(700px 280px at 20% -5%,rgba(201,162,39,.10),transparent 60%)}
-    .hero__inner{max-width:600px;margin:0 auto}
-    h1{font-size:clamp(1.7rem,5vw,2.4rem);letter-spacing:-.02em;line-height:1.1;margin-bottom:6px}
-    .sub{color:#d7dae0;font-size:.95rem;margin-bottom:14px}
+    .wrap{max-width:640px;margin:0 auto;padding:20px 16px 80px}
 
-    #flash-banner{display:none;background:rgba(201,162,39,.12);border:1px solid rgba(201,162,39,.4);border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:.9rem}
+    /* Flash banner */
+    #flash-banner{display:none;background:rgba(201,162,39,.12);border:1px solid rgba(201,162,39,.4);border-radius:12px;padding:10px 14px;margin-bottom:16px;font-size:.9rem}
     #flash-banner.show{display:flex;align-items:center;gap:10px}
     #flash-banner strong{color:var(--gold)}
 
-    main{max-width:600px;margin:0 auto;padding:20px 16px 60px;display:flex;flex-direction:column;gap:10px}
-
-    /* Loading / closed / success */
-    .state{text-align:center;padding:48px 0;color:var(--muted)}
-    .state h2{font-size:1.3rem;color:var(--ink);margin-bottom:8px}
-    .state p{max-width:38ch;margin:0 auto 16px}
+    /* States */
+    .state{text-align:center;padding:60px 0;color:var(--muted)}
+    .state h2{font-size:1.4rem;color:var(--ink);margin-bottom:8px}
+    .state p{max-width:36ch;margin:0 auto 16px}
     .state a{color:var(--gold);font-weight:950;text-decoration:underline;text-underline-offset:3px}
-    #success-state h2{color:var(--ok)}
 
-    /* Slots */
-    .slots{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-    .slot-card{background:var(--card);border:2px solid var(--stroke);border-radius:14px;padding:16px 10px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;user-select:none;-webkit-tap-highlight-color:transparent}
-    .slot-card:hover{border-color:rgba(201,162,39,.4)}
-    .slot-card.selected{border-color:var(--gold);background:rgba(201,162,39,.07)}
-    .slot-dur{font-size:1.15rem;font-weight:950;margin-bottom:5px}
-    .slot-price{color:var(--gold);font-weight:950;font-size:1.05rem}
-    .slot-og{color:var(--muted2);font-size:.74rem;text-decoration:line-through;margin-top:1px}
-    .slot-tag{display:inline-block;font-size:.7rem;background:rgba(201,162,39,.15);color:var(--gold);border-radius:999px;padding:2px 8px;margin-top:6px;font-weight:900}
+    h1{font-size:clamp(1.7rem,5vw,2.2rem);letter-spacing:-.02em;line-height:1.1;margin-bottom:4px}
+    .sub{color:#d7dae0;font-size:.95rem;margin-bottom:20px}
 
-    /* Date */
-    .date-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+    .section-label{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);font-weight:900;margin-bottom:8px;margin-top:20px}
+
+    /* Service cards */
+    .services{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .svc-card{background:var(--card);border:2px solid var(--stroke);border-radius:14px;padding:14px 10px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;user-select:none;-webkit-tap-highlight-color:transparent}
+    .svc-card:hover{border-color:rgba(201,162,39,.4)}
+    .svc-card.selected{border-color:var(--gold);background:rgba(201,162,39,.07)}
+    .svc-name{font-size:.9rem;font-weight:950;margin-bottom:3px}
+    .svc-dur{font-size:.75rem;color:var(--muted2);margin-bottom:6px}
+    .svc-price{color:var(--gold);font-weight:950;font-size:1.05rem}
+    .svc-og{color:var(--muted2);font-size:.72rem;text-decoration:line-through;margin-top:1px}
+    .svc-tag{display:inline-block;font-size:.66rem;background:rgba(201,162,39,.15);color:var(--gold);border-radius:999px;padding:2px 7px;margin-top:5px;font-weight:900}
+
+    /* Date grid */
+    .date-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
     @media(max-width:440px){.date-grid{grid-template-columns:repeat(4,1fr)}}
     .date-pill{background:var(--card);border:1px solid var(--stroke);border-radius:10px;padding:8px 4px;text-align:center;cursor:pointer;transition:border-color .15s;-webkit-tap-highlight-color:transparent}
     .date-pill:hover{border-color:rgba(201,162,39,.4)}
     .date-pill.selected{border-color:var(--gold);background:rgba(201,162,39,.07)}
-    .dp-day{font-size:.68rem;color:var(--muted2);font-weight:800;text-transform:uppercase}
-    .dp-num{font-size:.98rem;font-weight:950;margin-top:1px}
-    .dp-wed{font-size:.6rem;color:var(--gold);font-weight:900;margin-top:1px}
+    .dp-day{font-size:.64rem;color:var(--muted2);font-weight:800;text-transform:uppercase}
+    .dp-num{font-size:.95rem;font-weight:950;margin-top:1px}
+    .dp-wed{font-size:.58rem;color:var(--gold);font-weight:900;margin-top:1px}
 
-    /* Time */
-    .time-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+    /* Time grid */
+    .time-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
     @media(max-width:380px){.time-grid{grid-template-columns:repeat(3,1fr)}}
-    .time-pill{background:var(--card);border:1px solid var(--stroke);border-radius:10px;padding:10px 4px;text-align:center;cursor:pointer;font-weight:900;font-size:.86rem;transition:border-color .15s;-webkit-tap-highlight-color:transparent}
+    .time-pill{background:var(--card);border:1px solid var(--stroke);border-radius:10px;padding:9px 4px;text-align:center;cursor:pointer;font-weight:900;font-size:.82rem;transition:border-color .15s;-webkit-tap-highlight-color:transparent}
     .time-pill:hover{border-color:rgba(201,162,39,.4)}
     .time-pill.selected{border-color:var(--gold);background:rgba(201,162,39,.07);color:var(--gold)}
 
-    /* Form */
-    .form-section{display:flex;flex-direction:column;gap:10px}
-    label{display:block;font-size:.84rem;color:#d7dae0;font-weight:800;margin-bottom:4px}
-    input,textarea{width:100%;padding:12px 13px;border-radius:10px;border:1px solid #2a2a2a;background:#070707;color:var(--ink);font:inherit;font-size:1rem;outline:none;-webkit-appearance:none}
+    /* Form fields */
+    label{display:block;font-size:.82rem;color:#d7dae0;font-weight:800;margin-bottom:4px}
+    input,textarea{width:100%;padding:13px 14px;border-radius:10px;border:1px solid #2a2a2a;background:#070707;color:var(--ink);font:inherit;font-size:1rem;outline:none;-webkit-appearance:none;margin-bottom:10px}
     input:focus,textarea:focus{border-color:#444;box-shadow:0 0 0 3px rgba(201,162,39,.12)}
-    textarea{min-height:72px;resize:vertical}
+    textarea{min-height:72px;resize:vertical;margin-bottom:0}
 
-    /* Summary strip */
-    #summary-strip{display:none;background:rgba(201,162,39,.07);border:1px solid rgba(201,162,39,.25);border-radius:12px;padding:12px 14px;font-size:.88rem}
-    #summary-strip.show{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
-    #sum-left{color:var(--muted)}
-    #sum-price{color:var(--gold);font-weight:950;font-size:1rem}
+    /* Total box */
+    .total-box{margin-top:16px;padding:14px 16px;background:var(--card);border-radius:12px;border:1px solid var(--stroke);font-size:.95rem;line-height:1.7}
+    .total-row{display:flex;justify-content:space-between}
+    .total-row.grand{font-weight:950;font-size:1.05rem;border-top:1px solid var(--stroke);margin-top:6px;padding-top:6px}
+    .total-label{color:var(--muted)}
+    .total-val{color:var(--ink)}
+    .total-row.grand .total-val{color:var(--gold)}
 
-    .error{color:#ffd1d1;background:rgba(255,92,92,.1);border:1px solid rgba(255,92,92,.3);border-radius:10px;padding:10px 13px;font-size:.88rem;display:none}
+    .error{color:#ffd1d1;background:rgba(255,92,92,.1);border:1px solid rgba(255,92,92,.3);border-radius:10px;padding:10px 13px;font-size:.88rem;display:none;margin-top:10px}
     .error.show{display:block}
 
-    .btn{display:flex;align-items:center;justify-content:center;width:100%;padding:15px;border-radius:12px;font-weight:950;border:none;font:inherit;font-size:1rem;cursor:pointer;transition:opacity .12s;-webkit-tap-highlight-color:transparent}
+    .btn{display:flex;align-items:center;justify-content:center;width:100%;padding:16px;border-radius:12px;font-weight:950;border:none;font:inherit;font-size:1rem;cursor:pointer;margin-top:12px;transition:opacity .12s;-webkit-tap-highlight-color:transparent}
     .btn--gold{background:var(--gold);color:#000}
-    .btn:disabled{opacity:.45;cursor:not-allowed}
+    .btn:disabled{opacity:.4;cursor:not-allowed}
     .btn:active:not(:disabled){opacity:.82}
+    .btn-note{text-align:center;margin-top:8px;font-size:.74rem;color:var(--muted2)}
 
-    .section-label{font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);font-weight:900;margin-bottom:8px}
-
-    footer{border-top:1px solid var(--stroke);padding:16px;text-align:center;color:var(--muted2);font-size:.8rem}
-    footer a{color:var(--gold);font-weight:950;text-underline-offset:3px;text-decoration:underline}
+    footer{border-top:1px solid var(--stroke);padding:16px;text-align:center;color:var(--muted2);font-size:.8rem;margin-top:24px}
+    footer a{color:var(--gold);font-weight:950}
   </style>
 </head>
 <body>
 
-<nav class="cx-topnav">
-  <div class="cx-topnav__inner">
+<nav>
+  <div class="nav-inner">
     <a class="cx-brand" href="/courageaux/">
       <img src="/courageaux/assets/icon_courageaux_512.png" alt="Courageaux" width="22" height="22" loading="eager">
       Courageaux
@@ -118,18 +111,7 @@
   </div>
 </nav>
 
-<header class="hero">
-  <div class="hero__inner">
-    <div id="flash-banner">
-      <span>🔥</span>
-      <div><strong id="flash-label-text"></strong> — <span id="flash-sub-text"></span></div>
-    </div>
-    <h1>Clean, calm,<br>confident skin.</h1>
-    <p class="sub">Mobile service. Pick your time — Amari comes to you.</p>
-  </div>
-</header>
-
-<main id="main-wrap">
+<div class="wrap">
 
   <div id="loading-state" class="state">Checking availability…</div>
 
@@ -139,74 +121,63 @@
     <a href="https://instagram.com/courageuxaesthetics" target="_blank" rel="noopener">@courageuxaesthetics</a>
   </div>
 
-  <div id="success-state" class="state" style="display:none">
-    <h2>You're booked!</h2>
-    <p id="success-msg"></p>
-    <a href="/courageaux/intake/">Complete your intake form →</a>
-    <div style="margin-top:20px"><a href="/courageaux/" style="color:var(--muted2)">← Back to Courageaux</a></div>
-  </div>
-
   <div id="booking-wrap" style="display:none">
 
-    <!-- Slots -->
-    <div>
-      <div class="section-label">Choose your slot</div>
-      <div class="slots" id="slot-grid"></div>
+    <h1>Book a Facial</h1>
+    <p class="sub">Mobile service · Amari pulls up to you.</p>
+
+    <div id="flash-banner">
+      <span>🔥</span>
+      <div><strong id="flash-label-text"></strong> — <span id="flash-sub-text"></span></div>
     </div>
+
+    <!-- Services -->
+    <div class="section-label">Choose your service</div>
+    <div class="services" id="svc-grid"></div>
 
     <!-- Date -->
-    <div id="step-date" style="display:none">
-      <div class="section-label">Pick a date</div>
-      <div class="date-grid" id="date-grid"></div>
-    </div>
+    <div class="section-label" style="margin-top:22px">Pick a date</div>
+    <div class="date-grid" id="date-grid"></div>
 
     <!-- Time -->
-    <div id="step-time" style="display:none">
-      <div class="section-label">Pick a time</div>
-      <div class="time-grid" id="time-grid"></div>
-    </div>
+    <div class="section-label" style="margin-top:22px">Pick a time</div>
+    <div class="time-grid" id="time-grid"></div>
 
-    <!-- Form -->
-    <div id="step-form" class="form-section" style="display:none">
-      <div class="section-label">Your info</div>
-      <div>
-        <label for="f-name">Full Name</label>
-        <input id="f-name" type="text" autocomplete="name" placeholder="Your name" required>
-      </div>
-      <div>
-        <label for="f-phone">Mobile Number</label>
-        <input id="f-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(xxx) xxx-xxxx" required>
-      </div>
-      <div>
-        <label for="f-address">Your Address <span style="color:var(--muted2);font-weight:600">(where Amari pulls up)</span></label>
-        <textarea id="f-address" placeholder="Street, city, zip" required></textarea>
-      </div>
-    </div>
+    <!-- Your info -->
+    <div class="section-label" style="margin-top:22px">Your info</div>
+    <label for="f-name">Full Name</label>
+    <input id="f-name" type="text" autocomplete="name" placeholder="Your name">
+    <label for="f-phone">Mobile Number</label>
+    <input id="f-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(xxx) xxx-xxxx">
+    <label for="f-address">Your Address <span style="color:var(--muted2);font-weight:600">(where Amari pulls up)</span></label>
+    <textarea id="f-address" placeholder="Street, city, zip"></textarea>
 
-    <!-- Summary + submit -->
-    <div id="summary-strip">
-      <span id="sum-left"></span>
-      <span id="sum-price"></span>
+    <!-- Total -->
+    <div class="total-box">
+      <div class="total-row"><span class="total-label">Service</span><span class="total-val" id="t-service">—</span></div>
+      <div class="total-row"><span class="total-label">Date &amp; Time</span><span class="total-val" id="t-datetime">—</span></div>
+      <div class="total-row grand"><span class="total-label">Total</span><span class="total-val" id="t-total">$0.00</span></div>
     </div>
 
     <div class="error" id="form-error"></div>
 
-    <div id="step-submit" style="display:none">
-      <button class="btn btn--gold" id="submit-btn" onclick="submitBooking()">Pay &amp; Book →</button>
-      <p style="text-align:center;margin-top:8px;font-size:.76rem;color:var(--muted2)">Secure payment via Stripe. 24-hour cancellation policy applies.</p>
-    </div>
+    <button class="btn btn--gold" id="submit-btn" onclick="submitBooking()" disabled>Pay &amp; Book →</button>
+    <p class="btn-note">Secure payment via Stripe · 24-hr cancellation policy</p>
 
   </div>
 
-</main>
+</div>
 
 <footer>
   <a href="/courageaux/">Courageaux Aesthetics</a> · <a href="https://lab.squarebidness.com/" target="_blank" rel="noopener">Square Bidness Tech Lab</a>
 </footer>
 
 <script>
-const PRICES     = { 15:40,  30:65,  60:110 };
-const WED_PRICES = { 15:25,  30:65,  60:110 };
+const SERVICES = [
+  { key:15, name:"Quick Cleanse",    dur:"15 min", desc:"Fast corrective reset",  price:40, wedPrice:25 },
+  { key:30, name:"Routine Reset",    dur:"30 min", desc:"Full cleanse + treatment", price:65, wedPrice:65 },
+  { key:60, name:"Full Session",     dur:"60 min", desc:"Deep corrective care",   price:110, wedPrice:110 },
+];
 const TIMES = ["9:00 AM","9:30 AM","10:00 AM","10:30 AM","11:00 AM","11:30 AM",
                "12:00 PM","12:30 PM","1:00 PM","1:30 PM","2:00 PM","2:30 PM",
                "3:00 PM","3:30 PM","4:00 PM","4:30 PM","5:00 PM","5:30 PM","6:00 PM"];
@@ -214,24 +185,31 @@ const TIMES = ["9:00 AM","9:30 AM","10:00 AM","10:30 AM","11:00 AM","11:30 AM",
 let STATUS = {};
 let sel = { slot:null, date:null, time:null };
 
-function calcPrice(slot, dateStr) {
-  if (STATUS.flashSaleActive && STATUS.flashSaleDiscount > 0)
-    return Math.round(PRICES[slot] * (1 - STATUS.flashSaleDiscount / 100));
-  const dow = new Date((dateStr||"2000-01-03") + "T12:00:00").getDay();
-  return dow === 3 ? (WED_PRICES[slot] ?? PRICES[slot]) : (PRICES[slot] ?? 0);
+function isWed(dateStr) {
+  return new Date((dateStr||"2000-01-03")+"T12:00:00").getDay()===3;
 }
 
-function buildSlots() {
-  document.getElementById("slot-grid").innerHTML = [15,30,60].map(s => {
-    const price = sel.date ? calcPrice(s, sel.date) : (STATUS.flashSaleActive ? Math.round(PRICES[s]*(1-STATUS.flashSaleDiscount/100)) : PRICES[s]);
-    const reg = PRICES[s];
-    const disc = price < reg;
-    return `<div class="slot-card${sel.slot===s?" selected":""}" onclick="selectSlot(${s})" role="button" tabindex="0">
-      <div class="slot-dur">${s} min</div>
-      <div class="slot-price">$${price}</div>
-      ${disc?`<div class="slot-og">$${reg}</div>`:""}
-      ${s===15&&!STATUS.flashSaleActive?`<div class="slot-tag">Wed $25</div>`:""}
-      ${STATUS.flashSaleActive?`<div class="slot-tag">${STATUS.flashSaleDiscount}% OFF</div>`:""}
+function calcPrice(slot, dateStr) {
+  const svc = SERVICES.find(s=>s.key===slot);
+  if (!svc) return 0;
+  if (STATUS.flashSaleActive && STATUS.flashSaleDiscount > 0)
+    return Math.round(svc.price * (1 - STATUS.flashSaleDiscount/100));
+  return (dateStr && isWed(dateStr)) ? svc.wedPrice : svc.price;
+}
+
+function buildServices() {
+  document.getElementById("svc-grid").innerHTML = SERVICES.map(s => {
+    const price = sel.date ? calcPrice(s.key,sel.date) : (STATUS.flashSaleActive ? Math.round(s.price*(1-STATUS.flashSaleDiscount/100)) : s.price);
+    const reg   = s.price;
+    const disc  = price < reg;
+    const wedOnly = s.wedPrice < s.price && !STATUS.flashSaleActive;
+    return `<div class="svc-card${sel.slot===s.key?" selected":""}" onclick="pick('slot',${s.key})" role="button" tabindex="0" aria-label="${s.name}">
+      <div class="svc-name">${s.name}</div>
+      <div class="svc-dur">${s.dur}</div>
+      <div class="svc-price">$${price}</div>
+      ${disc?`<div class="svc-og">$${reg}</div>`:""}
+      ${wedOnly?`<div class="svc-tag">Wed $${s.wedPrice}</div>`:""}
+      ${STATUS.flashSaleActive?`<div class="svc-tag">${STATUS.flashSaleDiscount}% OFF</div>`:""}
     </div>`;
   }).join("");
 }
@@ -243,7 +221,7 @@ function buildDates() {
     const str = d.toISOString().slice(0,10);
     const day = d.toLocaleDateString("en-US",{weekday:"short"});
     const wed = d.getDay()===3;
-    return `<div class="date-pill${sel.date===str?" selected":""}" onclick="selectDate('${str}')" role="button" tabindex="0">
+    return `<div class="date-pill${sel.date===str?" selected":""}" onclick="pick('date','${str}')" role="button" tabindex="0">
       <div class="dp-day">${day}</div>
       <div class="dp-num">${d.getDate()}</div>
       ${wed?`<div class="dp-wed">$25</div>`:""}
@@ -252,47 +230,51 @@ function buildDates() {
 }
 
 function buildTimes() {
-  document.getElementById("time-grid").innerHTML = TIMES.map(t =>
-    `<div class="time-pill${sel.time===t?" selected":""}" onclick="selectTime('${t}')" role="button" tabindex="0">${t}</div>`
+  document.getElementById("time-grid").innerHTML = TIMES.map(t=>
+    `<div class="time-pill${sel.time===t?" selected":""}" onclick="pick('time','${t}')" role="button" tabindex="0">${t}</div>`
   ).join("");
 }
 
-function selectSlot(s) {
-  sel.slot=s; buildSlots();
-  show("step-date"); buildDates();
-  scroll("step-date"); updateSummary();
-}
-
-function selectDate(d) {
-  sel.date=d; buildSlots(); buildDates();
-  show("step-time"); buildTimes();
-  scroll("step-time"); updateSummary();
-}
-
-function selectTime(t) {
-  sel.time=t; buildTimes();
-  show("step-form"); show("step-submit");
-  scroll("step-form"); updateSummary();
+function pick(field, val) {
+  sel[field] = val;
+  if (field==="slot"||field==="date") buildServices();
+  if (field==="date") buildDates();
+  if (field==="time") buildTimes();
+  updateSummary();
+  checkReady();
 }
 
 function updateSummary() {
-  const strip = document.getElementById("summary-strip");
-  if (!sel.slot||!sel.date||!sel.time){strip.classList.remove("show");return;}
-  strip.classList.add("show");
-  const d = new Date(sel.date+"T12:00:00");
-  const dl = d.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"});
-  document.getElementById("sum-left").textContent = `${sel.slot} min · ${dl} at ${sel.time}`;
-  document.getElementById("sum-price").textContent = `$${calcPrice(sel.slot,sel.date)}`;
+  const svc = SERVICES.find(s=>s.key===sel.slot);
+  document.getElementById("t-service").textContent = svc ? `${svc.name} · ${svc.dur}` : "—";
+  if (sel.date && sel.time) {
+    const d = new Date(sel.date+"T12:00:00");
+    const dl = d.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"});
+    document.getElementById("t-datetime").textContent = `${dl} at ${sel.time}`;
+  } else {
+    document.getElementById("t-datetime").textContent = "—";
+  }
+  const price = (sel.slot && sel.date) ? calcPrice(sel.slot,sel.date) : 0;
+  document.getElementById("t-total").textContent = price ? `$${price}.00` : "$0.00";
+}
+
+function checkReady() {
+  const name = document.getElementById("f-name").value.trim();
+  const phone = document.getElementById("f-phone").value.trim();
+  const address = document.getElementById("f-address").value.trim();
+  const ready = sel.slot && sel.date && sel.time && name && phone && address;
+  document.getElementById("submit-btn").disabled = !ready;
 }
 
 async function submitBooking() {
   const name    = document.getElementById("f-name").value.trim();
   const phone   = document.getElementById("f-phone").value.trim();
   const address = document.getElementById("f-address").value.trim();
-  if (!sel.slot||!sel.date||!sel.time){showErr("Please select a slot, date, and time.");return;}
-  if (!name){showErr("Please enter your name.");return;}
-  if (!phone){showErr("Please enter your phone number.");return;}
-  if (!address){showErr("Please enter your address.");return;}
+
+  if (!sel.slot||!sel.date||!sel.time||!name||!phone||!address) {
+    showErr("Please fill in all fields and make your selections.");
+    return;
+  }
 
   const btn = document.getElementById("submit-btn");
   btn.disabled=true; btn.textContent="Preparing checkout…";
@@ -323,9 +305,10 @@ function showErr(msg){
   el.textContent=msg; el.classList.add("show");
   el.scrollIntoView({behavior:"smooth",block:"center"});
 }
-function show(id){document.getElementById(id).style.display="block"}
-function hide(id){document.getElementById(id).style.display="none"}
-function scroll(id){setTimeout(()=>document.getElementById(id).scrollIntoView({behavior:"smooth",block:"start"}),50)}
+
+["f-name","f-phone","f-address"].forEach(id=>{
+  document.getElementById(id).addEventListener("input",checkReady);
+});
 
 async function init() {
   try {
@@ -334,19 +317,24 @@ async function init() {
     STATUS = state||{};
   } catch { STATUS={bookingOpen:false}; }
 
-  hide("loading-state");
+  document.getElementById("loading-state").style.display="none";
 
-  if (!STATUS.bookingOpen){show("closed-state");return;}
-
-  if (STATUS.flashSaleActive&&STATUS.flashSaleLabel) {
-    const b=document.getElementById("flash-banner");
-    b.classList.add("show");
-    document.getElementById("flash-label-text").textContent=STATUS.flashSaleLabel;
-    document.getElementById("flash-sub-text").textContent=`${STATUS.flashSaleDiscount}% off all slots`;
+  if (!STATUS.bookingOpen) {
+    document.getElementById("closed-state").style.display="block";
+    return;
   }
 
-  show("booking-wrap");
-  buildSlots();
+  if (STATUS.flashSaleActive && STATUS.flashSaleLabel) {
+    const b = document.getElementById("flash-banner");
+    b.classList.add("show");
+    document.getElementById("flash-label-text").textContent = STATUS.flashSaleLabel;
+    document.getElementById("flash-sub-text").textContent   = `${STATUS.flashSaleDiscount}% off all services`;
+  }
+
+  document.getElementById("booking-wrap").style.display="block";
+  buildServices();
+  buildDates();
+  buildTimes();
 }
 
 init();
