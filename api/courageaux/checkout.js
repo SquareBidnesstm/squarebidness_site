@@ -48,10 +48,10 @@ export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ ok: false, error: "Method not allowed" });
 
   try {
-    const { name, phone, address, slot, date, time } = req.body || {};
+    const { name, phone, address, slot, date, time, concern, skinType, breakout, notes } = req.body || {};
     const slotNum = parseInt(slot);
 
-    if (!name || !phone || !address || !date || !time || ![15, 30, 60].includes(slotNum)) {
+    if (!name || !phone || !address || !date || !time || ![15, 30, 60].includes(slotNum) || !concern || !skinType || !breakout) {
       return res.status(400).json({ ok: false, error: "Missing required fields." });
     }
 
@@ -84,6 +84,10 @@ export default async function handler(req, res) {
       "metadata[date]": date,
       "metadata[time]": time,
       "metadata[price]": String(price),
+      "metadata[concern]": String(concern).slice(0, 100),
+      "metadata[skinType]": String(skinType).slice(0, 50),
+      "metadata[breakout]": String(breakout).slice(0, 10),
+      "metadata[notes]": String(notes || "").slice(0, 400),
       "success_url": `${BASE}/courageaux/book/success/?session_id={CHECKOUT_SESSION_ID}`,
       "cancel_url": `${BASE}/courageaux/book/`,
     });

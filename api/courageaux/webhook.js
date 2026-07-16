@@ -75,20 +75,24 @@ export default async function handler(req, res) {
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
-    const { name, phone, address, slot, date, time, price } = session.metadata || {};
+    const { name, phone, address, slot, date, time, price, concern, skinType, breakout, notes } = session.metadata || {};
 
     if (name && date && time && slot) {
       const bookingId = `CX-${Date.now().toString(36).toUpperCase()}`;
       const booking   = JSON.stringify({
         id: bookingId,
-        name:    String(name).slice(0, 80),
-        phone:   String(phone  || "").slice(0, 20),
-        address: String(address || "").slice(0, 200),
-        slot:    parseInt(slot),
+        name:     String(name).slice(0, 80),
+        phone:    String(phone    || "").slice(0, 20),
+        address:  String(address  || "").slice(0, 200),
+        slot:     parseInt(slot),
         date,
         time,
-        price:   parseInt(price || 0),
-        paidAt:  new Date().toISOString(),
+        price:    parseInt(price || 0),
+        concern:  concern  || "",
+        skinType: skinType || "",
+        breakout: breakout || "",
+        notes:    notes    || "",
+        paidAt:   new Date().toISOString(),
         stripeSession: session.id,
       });
 
@@ -102,15 +106,21 @@ export default async function handler(req, res) {
       try {
         const d  = new Date(date + "T12:00:00");
         const dl = d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
-        await sms(AMARI_PHONE, [
+        const lines = [
           `💳 PAID — Courageaux Booking`,
           `${slot} min · ${dl} at ${time}`,
           `Name: ${name}`,
           `Phone: ${phone}`,
           `📍 ${address}`,
           `💰 $${price} paid`,
-          `ID: ${bookingId}`,
-        ].join("\n"));
+          ``,
+          `🧴 Concern: ${concern || "—"}`,
+          `Skin type: ${skinType || "—"}`,
+          `Breakouts: ${breakout || "—"}`,
+        ];
+        if (notes) lines.push(`Notes: ${notes}`);
+        lines.push(`ID: ${bookingId}`);
+        await sms(AMARI_PHONE, lines.join("\n"));
       } catch (err) {
         console.error("SMS error:", err.message);
       }

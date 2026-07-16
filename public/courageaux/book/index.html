@@ -78,6 +78,12 @@
     input:focus,textarea:focus{border-color:#444;box-shadow:0 0 0 3px rgba(201,162,39,.12)}
     textarea{min-height:72px;resize:vertical;margin-bottom:0}
 
+    /* Intake chips */
+    .chip-grid{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
+    .chip-opt{background:var(--card);border:1px solid var(--stroke);border-radius:999px;padding:8px 14px;font-size:.84rem;font-weight:800;cursor:pointer;transition:border-color .12s,background .12s;-webkit-tap-highlight-color:transparent;user-select:none}
+    .chip-opt:hover{border-color:rgba(201,162,39,.4)}
+    .chip-opt.selected{border-color:var(--gold);background:rgba(201,162,39,.09);color:var(--gold)}
+
     /* Total box */
     .total-box{margin-top:16px;padding:14px 16px;background:var(--card);border-radius:12px;border:1px solid var(--stroke);font-size:.95rem;line-height:1.7}
     .total-row{display:flex;justify-content:space-between}
@@ -152,8 +158,23 @@
     <label for="f-address">Your Address <span style="color:var(--muted2);font-weight:600">(where Amari pulls up)</span></label>
     <textarea id="f-address" placeholder="Street, city, zip"></textarea>
 
+    <!-- Skin info -->
+    <div class="section-label" style="margin-top:22px">Skin info <span style="color:var(--muted2);font-weight:600;text-transform:none;letter-spacing:0">(helps Amari prepare)</span></div>
+
+    <label>Main skin concern</label>
+    <div class="chip-grid" id="concern-grid"></div>
+
+    <label style="margin-top:4px">Skin type</label>
+    <div class="chip-grid" id="skintype-grid"></div>
+
+    <label style="margin-top:4px">Active breakouts or irritation right now?</label>
+    <div class="chip-grid" id="breakout-grid"></div>
+
+    <label for="f-notes" style="margin-top:4px">Anything else Amari should know? <span style="color:var(--muted2);font-weight:600">(optional)</span></label>
+    <textarea id="f-notes" placeholder="Allergies, sensitivities, recent treatments…"></textarea>
+
     <!-- Total -->
-    <div class="total-box">
+    <div class="total-box" style="margin-top:16px">
       <div class="total-row"><span class="total-label">Service</span><span class="total-val" id="t-service">—</span></div>
       <div class="total-row"><span class="total-label">Date &amp; Time</span><span class="total-val" id="t-datetime">—</span></div>
       <div class="total-row grand"><span class="total-label">Total</span><span class="total-val" id="t-total">$0.00</span></div>
@@ -184,6 +205,25 @@ const TIMES = ["9:00 AM","9:30 AM","10:00 AM","10:30 AM","11:00 AM","11:30 AM",
 
 let STATUS = {};
 let sel = { slot:null, date:null, time:null };
+let intake = { concern:null, skinType:null, breakout:null };
+
+const CONCERNS   = ["Acne / breakouts","Dark spots","Dryness","Oiliness","Sensitivity / redness","Dullness","General care"];
+const SKIN_TYPES = ["Oily","Dry","Combination","Sensitive","Not sure"];
+const BREAKOUTS  = ["Yes","No"];
+
+function buildChips(gridId, opts, field) {
+  document.getElementById(gridId).innerHTML = opts.map(o =>
+    `<div class="chip-opt${intake[field]===o?" selected":""}" onclick="pickIntake('${field}',${JSON.stringify(o)})" role="button" tabindex="0">${o}</div>`
+  ).join("");
+}
+
+function pickIntake(field, val) {
+  intake[field] = val;
+  const map = { concern:"concern-grid", skinType:"skintype-grid", breakout:"breakout-grid" };
+  const optsMap = { concern:CONCERNS, skinType:SKIN_TYPES, breakout:BREAKOUTS };
+  buildChips(map[field], optsMap[field], field);
+  checkReady();
+}
 
 function isWed(dateStr) {
   return new Date((dateStr||"2000-01-03")+"T12:00:00").getDay()===3;
@@ -259,10 +299,10 @@ function updateSummary() {
 }
 
 function checkReady() {
-  const name = document.getElementById("f-name").value.trim();
-  const phone = document.getElementById("f-phone").value.trim();
+  const name    = document.getElementById("f-name").value.trim();
+  const phone   = document.getElementById("f-phone").value.trim();
   const address = document.getElementById("f-address").value.trim();
-  const ready = sel.slot && sel.date && sel.time && name && phone && address;
+  const ready   = sel.slot && sel.date && sel.time && name && phone && address && intake.concern && intake.skinType && intake.breakout;
   document.getElementById("submit-btn").disabled = !ready;
 }
 
@@ -270,9 +310,10 @@ async function submitBooking() {
   const name    = document.getElementById("f-name").value.trim();
   const phone   = document.getElementById("f-phone").value.trim();
   const address = document.getElementById("f-address").value.trim();
+  const notes   = document.getElementById("f-notes").value.trim();
 
-  if (!sel.slot||!sel.date||!sel.time||!name||!phone||!address) {
-    showErr("Please fill in all fields and make your selections.");
+  if (!sel.slot||!sel.date||!sel.time||!name||!phone||!address||!intake.concern||!intake.skinType||!intake.breakout) {
+    showErr("Please complete all fields including your skin info.");
     return;
   }
 
@@ -284,7 +325,13 @@ async function submitBooking() {
     const res = await fetch("/api/courageaux/checkout",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({name,phone,address,date:sel.date,time:sel.time,slot:sel.slot})
+      body:JSON.stringify({
+        name, phone, address, date:sel.date, time:sel.time, slot:sel.slot,
+        concern: intake.concern,
+        skinType: intake.skinType,
+        breakout: intake.breakout,
+        notes: notes.slice(0,400)
+      })
     });
     const data = await res.json();
     if (data.ok && data.url) {
@@ -335,6 +382,9 @@ async function init() {
   buildServices();
   buildDates();
   buildTimes();
+  buildChips("concern-grid",   CONCERNS,   "concern");
+  buildChips("skintype-grid",  SKIN_TYPES, "skinType");
+  buildChips("breakout-grid",  BREAKOUTS,  "breakout");
 }
 
 init();
