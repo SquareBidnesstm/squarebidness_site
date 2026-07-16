@@ -100,7 +100,7 @@
         <span class="dot" id="booking-dot"></span>
         <span id="booking-chip-text">Checking…</span>
       </div>
-      <div class="chip">
+      <div class="chip" id="mobile-chip" style="display:none">
         <span class="dot dot--gold"></span>
         <strong style="color:var(--gold)">MOBILE</strong>&nbsp;· We come to you
       </div>
@@ -136,6 +136,9 @@
             : `<strong style="color:var(--ok)">OPEN</strong> · Booking now`;
         } else {
           text.innerHTML = `<strong>CLOSED</strong> · Not taking bookings`;
+        }
+        if (state.mobileActive !== false) {
+          document.getElementById("mobile-chip").style.display = "inline-flex";
         }
       } catch {}
     })();

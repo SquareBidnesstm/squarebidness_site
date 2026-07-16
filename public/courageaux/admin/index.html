@@ -136,6 +136,21 @@
       </div>
     </div>
 
+    <!-- Mobile toggle -->
+    <div class="section">
+      <div class="section-title">Mobile Service</div>
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label" id="mobile-label">Mobile is OFF</div>
+          <div class="toggle-sub">Show "We come to you" on the site.</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="mobile-toggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
     <!-- Flash sale -->
     <div class="section">
       <div class="section-title">Flash Sale / Special</div>
@@ -268,6 +283,10 @@ function applyState(state) {
   bookingToggle.checked = !!state.bookingOpen;
   updateBookingLabel(!!state.bookingOpen);
 
+  const mobileToggle = document.getElementById("mobile-toggle");
+  mobileToggle.checked = state.mobileActive !== false;
+  updateMobileLabel(mobileToggle.checked);
+
   const saleToggle = document.getElementById("sale-toggle");
   saleToggle.checked = !!state.flashSaleActive;
   toggleFlashBody(!!state.flashSaleActive);
@@ -281,6 +300,11 @@ function applyState(state) {
 function updateBookingLabel(on) {
   document.getElementById("booking-label").textContent = on ? "Booking is ON" : "Booking is OFF";
   document.getElementById("booking-label").style.color = on ? "var(--ok)" : "var(--ink)";
+}
+
+function updateMobileLabel(on) {
+  document.getElementById("mobile-label").textContent = on ? "Mobile is ON" : "Mobile is OFF";
+  document.getElementById("mobile-label").style.color = on ? "var(--ok)" : "var(--ink)";
 }
 
 function toggleFlashBody(show) {
@@ -300,6 +324,10 @@ document.getElementById("booking-toggle").addEventListener("change", e => {
   updateBookingLabel(e.target.checked);
 });
 
+document.getElementById("mobile-toggle").addEventListener("change", e => {
+  updateMobileLabel(e.target.checked);
+});
+
 document.getElementById("sale-toggle").addEventListener("change", e => {
   toggleFlashBody(e.target.checked);
 });
@@ -315,6 +343,7 @@ async function saveStatus() {
 
   const body = {
     bookingOpen: document.getElementById("booking-toggle").checked,
+    mobileActive: document.getElementById("mobile-toggle").checked,
     flashSaleActive: document.getElementById("sale-toggle").checked,
     flashSaleLabel: document.getElementById("sale-label").value.trim(),
     flashSaleDiscount: parseInt(document.getElementById("sale-discount").value)
