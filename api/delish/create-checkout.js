@@ -829,6 +829,10 @@ export default async function handler(req, res) {
     };
 
 
+    const hasMainDish = cleanItems.some(item =>
+      !String(item.id).startsWith("drink_") && !String(item.id).startsWith("extra_side_")
+    );
+
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       payment_method_types: ["card"],
@@ -838,7 +842,7 @@ export default async function handler(req, res) {
       metadata: sharedMetadata,
       payment_intent_data: {
         metadata: sharedMetadata,
-        application_fee_amount: PLATFORM_FEE_CENTS,
+        application_fee_amount: hasMainDish ? PLATFORM_FEE_CENTS : 0,
         transfer_data: {
           destination: DELISH_DESTINATION_ACCOUNT,
         },
