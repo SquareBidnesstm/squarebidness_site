@@ -182,8 +182,14 @@
 
     <div class="error" id="form-error"></div>
 
-    <button class="btn btn--gold" id="submit-btn" onclick="submitBooking()" disabled>Pay &amp; Book →</button>
-    <p class="btn-note">Secure payment via Stripe · 24-hr cancellation policy</p>
+    <button class="btn btn--gold" id="submit-btn" onclick="submitBooking()" disabled>Request Appointment →</button>
+    <p class="btn-note">No payment now · Amari reviews and sends your payment link</p>
+
+    <div id="sent-state" style="display:none;text-align:center;padding:32px 0">
+      <div style="font-size:2rem;margin-bottom:10px">🌿</div>
+      <div style="font-size:1.2rem;font-weight:950;margin-bottom:8px">Request sent!</div>
+      <div style="color:var(--muted);font-size:.92rem;max-width:34ch;margin:0 auto">Amari got your info. She'll review and text you a payment link when she's ready.</div>
+    </div>
 
   </div>
 
@@ -257,7 +263,7 @@ function buildServices() {
 function buildDates() {
   const today = new Date();
   document.getElementById("date-grid").innerHTML = Array.from({length:14},(_,i)=>{
-    const d = new Date(today); d.setDate(today.getDate()+i);
+    const d = new Date(today); d.setDate(today.getDate()+i+1);
     const str = d.toISOString().slice(0,10);
     const day = d.toLocaleDateString("en-US",{weekday:"short"});
     const wed = d.getDay()===3;
@@ -318,11 +324,11 @@ async function submitBooking() {
   }
 
   const btn = document.getElementById("submit-btn");
-  btn.disabled=true; btn.textContent="Preparing checkout…";
+  btn.disabled=true; btn.textContent="Sending request…";
   document.getElementById("form-error").classList.remove("show");
 
   try {
-    const res = await fetch("/api/courageaux/checkout",{
+    const res = await fetch("/api/courageaux/request",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({
@@ -334,16 +340,17 @@ async function submitBooking() {
       })
     });
     const data = await res.json();
-    if (data.ok && data.url) {
-      btn.textContent="Redirecting to payment…";
-      window.location.href = data.url;
+    if (data.ok) {
+      btn.style.display="none";
+      document.querySelector(".btn-note").style.display="none";
+      document.getElementById("sent-state").style.display="block";
     } else {
       showErr(data.error||"Something went wrong. Please try again.");
-      btn.disabled=false; btn.textContent="Pay & Book →";
+      btn.disabled=false; btn.textContent="Request Appointment →";
     }
   } catch {
     showErr("Network error. Please try again.");
-    btn.disabled=false; btn.textContent="Pay & Book →";
+    btn.disabled=false; btn.textContent="Request Appointment →";
   }
 }
 
