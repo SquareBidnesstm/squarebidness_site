@@ -9,7 +9,7 @@ const redis = new Redis({
   token: process.env.DELISH_UPSTASH_REDIS_REST_TOKEN,
 });
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+const stripe = new Stripe(process.env.STRIPE_ONBOARDING_SECRET_KEY, {
   apiVersion: "2025-02-24.acacia",
 });
 
@@ -36,10 +36,10 @@ export default async function handler(req, res) {
   if (!requireDelishOperatorAuth(req, res)) return;
 
   try {
-    if (!process.env.STRIPE_SECRET_KEY) {
+    if (!process.env.STRIPE_ONBOARDING_SECRET_KEY) {
       return res.status(500).json({
         ok: false,
-        error: "Missing STRIPE_SECRET_KEY.",
+        error: "Missing STRIPE_ONBOARDING_SECRET_KEY.",
       });
     }
 
