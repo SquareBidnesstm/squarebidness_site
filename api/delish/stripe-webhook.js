@@ -123,17 +123,27 @@ function buildCateringDepositSms(metadata, existing) {
   return `Delish Catering: Deposit received for request ${requestNumber}.${eventDate ? ` Event date ${eventDate}.` : ""}${eventTime ? ` Event time ${eventTime}.` : ""}`;
 }
 
-function buildOwnerNewOrderSms(metadata) {
+function buildOwnerNewOrderSms(metadata, items = []) {
   const customerName = String(metadata.customerName || "").trim();
-  const pickupDate = String(metadata.pickupDate || "").trim();
   const pickupWindow = String(metadata.pickupWindow || "").trim();
   const total = metadata.total || metadata.amountTotal || metadata.subtotal || "";
+  const orderNumber = String(metadata.orderNumber || metadata.recordId || "").trim();
 
-  return `🚨 Delish New Order
+  const itemLines = items.length
+    ? items.map((i) => {
+        const qty = Number(i.qty || 1);
+        const extras = [i.baseName, i.side1Name, i.side2Name].filter(Boolean);
+        return `  ${qty}x ${i.name}${extras.length ? ` (${extras.join(", ")})` : ""}`;
+      }).join("\n")
+    : "";
+
+  return `NEW ORDER — Delish
+${orderNumber ? `#${orderNumber}` : ""}
 
 ${customerName || "Customer"}
-Pickup: ${pickupDate}${pickupWindow ? ` • ${pickupWindow}` : ""}
-Total: $${Number(total || 0).toFixed(2)}`;
+Pickup: ${pickupWindow || "—"}
+Total: $${Number(total || 0).toFixed(2)}
+${itemLines ? `\n${itemLines}` : ""}`.trim();
 }
 
 async function retryOnce(label, fn) {
@@ -444,7 +454,7 @@ No catering record found in Redis. Reconcile manually.`,
     if (ownerSmsTo) {
       await sendDelishSms({
         to: ownerSmsTo,
-        message: buildOwnerNewOrderSms(smsMetadata),
+        message: buildOwnerNewOrderSms(smsMetadata, items),
       });
     }
   } catch (smsError) {
