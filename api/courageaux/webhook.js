@@ -57,7 +57,7 @@ export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
 
   const sig    = req.headers["stripe-signature"];
-  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  const secret = process.env.COURAGEAUX_STRIPE_WEBHOOK_SECRET;
   if (!sig || !secret) return res.status(400).json({ error: "Missing config" });
 
   const rawBody = await rawBuffer(req);
