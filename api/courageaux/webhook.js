@@ -1,6 +1,10 @@
-import crypto from "crypto";
+import Stripe from "stripe";
 
 export const config = { api: { bodyParser: false } };
+
+const stripe = new Stripe(process.env.STRIPE_ONBOARDING_SECRET_KEY, {
+  apiVersion: "2025-02-24.acacia",
+});
 
 const AMARI_PHONE = "+19853512750";
 
@@ -38,20 +42,6 @@ async function sms(to, body) {
   });
 }
 
-function verifyStripe(rawBody, sig, secret) {
-  const parts = sig.split(",");
-  const ts    = parts.find(p => p.startsWith("t="))?.slice(2);
-  const v1    = parts.find(p => p.startsWith("v1="))?.slice(3);
-  if (!ts || !v1) return false;
-
-  const signedPayload = Buffer.concat([Buffer.from(`${ts}.`), rawBody]);
-  const expected      = crypto.createHmac("sha256", secret).update(signedPayload).digest("hex");
-
-  const a = Buffer.from(expected);
-  const b = Buffer.from(v1);
-  if (a.length !== b.length) return false;
-  return crypto.timingSafeEqual(a, b);
-}
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
@@ -62,15 +52,12 @@ export default async function handler(req, res) {
 
   const rawBody = await rawBuffer(req);
 
-  if (!verifyStripe(rawBody, sig, secret)) {
-    return res.status(400).json({ error: "Signature mismatch" });
-  }
-
   let event;
   try {
-    event = JSON.parse(rawBody.toString());
-  } catch {
-    return res.status(400).json({ error: "Invalid JSON" });
+    event = stripe.webhooks.constructEvent(rawBody, sig, secret);
+  } catch (err) {
+    console.error("COURAGEAUX webhook signature error:", err.message);
+    return res.status(400).json({ error: "Signature mismatch" });
   }
 
   if (event.type === "checkout.session.completed") {
