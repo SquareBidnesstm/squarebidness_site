@@ -192,8 +192,8 @@
     <div class="error" id="form-error"></div>
 
     <div id="step-submit" style="display:none">
-      <button class="btn btn--gold" id="submit-btn" onclick="submitBooking()">Confirm &amp; Book</button>
-      <p style="text-align:center;margin-top:8px;font-size:.76rem;color:var(--muted2)">24-hour cancellation policy applies.</p>
+      <button class="btn btn--gold" id="submit-btn" onclick="submitBooking()">Pay &amp; Book →</button>
+      <p style="text-align:center;margin-top:8px;font-size:.76rem;color:var(--muted2)">Secure payment via Stripe. 24-hour cancellation policy applies.</p>
     </div>
 
   </div>
@@ -295,31 +295,26 @@ async function submitBooking() {
   if (!address){showErr("Please enter your address.");return;}
 
   const btn = document.getElementById("submit-btn");
-  btn.disabled=true; btn.textContent="Booking…";
+  btn.disabled=true; btn.textContent="Preparing checkout…";
   document.getElementById("form-error").classList.remove("show");
 
   try {
-    const res = await fetch("/api/courageaux/book",{
+    const res = await fetch("/api/courageaux/checkout",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({name,phone,address,date:sel.date,time:sel.time,slot:sel.slot})
     });
     const data = await res.json();
-    if (data.ok) {
-      const d = new Date(sel.date+"T12:00:00");
-      const dl = d.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
-      document.getElementById("success-msg").textContent =
-        `${sel.slot}-min appointment · ${dl} at ${sel.time}. Amari will be at your door. ID: ${data.bookingId}`;
-      hide("booking-wrap");
-      show("success-state");
-      document.getElementById("success-state").scrollIntoView({behavior:"smooth"});
+    if (data.ok && data.url) {
+      btn.textContent="Redirecting to payment…";
+      window.location.href = data.url;
     } else {
       showErr(data.error||"Something went wrong. Please try again.");
-      btn.disabled=false; btn.textContent="Confirm & Book";
+      btn.disabled=false; btn.textContent="Pay & Book →";
     }
   } catch {
     showErr("Network error. Please try again.");
-    btn.disabled=false; btn.textContent="Confirm & Book";
+    btn.disabled=false; btn.textContent="Pay & Book →";
   }
 }
 
