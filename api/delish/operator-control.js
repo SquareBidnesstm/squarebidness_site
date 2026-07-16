@@ -212,13 +212,15 @@ function getCentralDateKey(date = new Date()) {
 
 async function redisSet(redisUrl, redisToken, key, value) {
   const safeValue = value == null ? "" : String(value);
-  const url = `${redisUrl.replace(/\/$/, "")}/set/${encodeURIComponent(key)}/${encodeURIComponent(safeValue)}`;
+  const url = `${redisUrl.replace(/\/$/, "")}`;
 
   const response = await fetch(url, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${redisToken}`
-    }
+      Authorization: `Bearer ${redisToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(["SET", key, safeValue]),
   });
 
   if (!response.ok) {
