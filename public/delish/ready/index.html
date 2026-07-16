@@ -18,7 +18,7 @@
     --panel-2:#13151a;
     --line:rgba(255,255,255,.10);
     --text:#f5f2ea;
-    --muted:rgba(255,255,255,.70);
+    --muted:rgba(255,255,255,.60);
     --accent:#d7ae72;
     --accent-2:#f2d8ae;
     --good:#1d6b39;
@@ -26,11 +26,11 @@
     --shadow:0 20px 50px rgba(0,0,0,.30);
   }
 
-  *{box-sizing:border-box}
+  *{box-sizing:border-box;margin:0;padding:0}
 
   html,body{
-    margin:0;
-    min-height:100%;
+    height:100%;
+    overflow:hidden;
     background:
       radial-gradient(circle at top, rgba(215,174,114,.10), transparent 35%),
       linear-gradient(180deg,#0d0e10 0%, #111318 100%);
@@ -38,11 +38,20 @@
     font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   }
 
-  body{padding:20px}
+  body{
+    display:flex;
+    flex-direction:column;
+    padding:20px;
+    height:100vh;
+  }
 
   .wrap{
-    width:min(1600px, 100%);
+    width:min(1600px,100%);
     margin:0 auto;
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    min-height:0;
   }
 
   .header{
@@ -50,8 +59,8 @@
     justify-content:space-between;
     align-items:flex-start;
     gap:18px;
-    margin-bottom:18px;
-    flex-wrap:wrap;
+    margin-bottom:14px;
+    flex-shrink:0;
   }
 
   .brand{
@@ -61,133 +70,149 @@
   }
 
   .logo{
-    width:72px;
-    height:72px;
-    border-radius:18px;
+    width:64px;
+    height:64px;
+    border-radius:16px;
     object-fit:cover;
     border:1px solid rgba(255,255,255,.08);
     background:#fff;
   }
 
   .title{
-    margin:0;
-    font-size:clamp(2rem, 4vw, 3.6rem);
+    font-size:clamp(1.8rem,3.5vw,3.2rem);
     line-height:1;
     font-weight:900;
     letter-spacing:-.04em;
   }
 
   .subline{
-    margin-top:8px;
-    font-size:1.05rem;
+    margin-top:6px;
+    font-size:1rem;
     color:var(--muted);
   }
 
   .right-meta{
     text-align:right;
     display:grid;
-    gap:10px;
-    min-width:240px;
+    gap:8px;
+    min-width:220px;
   }
 
   .time{
-    font-size:2rem;
+    font-size:1.9rem;
     font-weight:900;
     color:var(--accent-2);
   }
 
   .count{
-    font-size:1.1rem;
+    font-size:1rem;
     color:var(--muted);
     font-weight:800;
   }
 
   .banner{
-    margin-bottom:18px;
-    padding:14px 18px;
-    border-radius:18px;
-    background:linear-gradient(180deg, rgba(215,174,114,.14), rgba(215,174,114,.08));
+    margin-bottom:14px;
+    padding:12px 18px;
+    border-radius:16px;
+    background:linear-gradient(180deg,rgba(215,174,114,.14),rgba(215,174,114,.08));
     border:1px solid rgba(215,174,114,.20);
     color:var(--accent-2);
-    font-size:1.05rem;
+    font-size:1rem;
     font-weight:800;
-    box-shadow:var(--shadow);
+    flex-shrink:0;
   }
 
   .layout{
     display:grid;
     grid-template-columns:1fr 1fr;
     gap:18px;
+    flex:1;
+    min-height:0;
   }
 
   .panel{
-    border-radius:28px;
+    border-radius:24px;
     background:linear-gradient(180deg,#181b21,#14171c);
     border:1px solid var(--line);
     box-shadow:var(--shadow);
     overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    height:100%;
   }
 
   .panel-body{
     padding:22px;
+    flex:1;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
   }
 
   .panel-label{
     color:var(--muted);
-    font-size:.9rem;
+    font-size:.85rem;
     text-transform:uppercase;
     letter-spacing:.12em;
     font-weight:900;
-    margin:0 0 10px;
+    margin-bottom:10px;
+    flex-shrink:0;
   }
 
+  /* NOW SERVING */
   .now-serving{
-    min-height:320px;
-    display:flex;
-    flex-direction:column;
-    justify-content:flex-start;
-    align-items:center;
-    text-align:center;
     background:
-      radial-gradient(circle at top, rgba(29,107,57,.18), transparent 40%),
-      linear-gradient(180deg,#1a2a20 0%, #152019 100%);
+      radial-gradient(circle at top,rgba(29,107,57,.20),transparent 45%),
+      linear-gradient(180deg,#1a2a20 0%,#152019 100%);
     border:1px solid rgba(29,107,57,.30);
   }
 
   .now-serving .panel-body{
-    padding:28px 18px 18px;
-    width:100%;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:32px 24px;
   }
 
   .now-badge{
     display:inline-flex;
     align-items:center;
     justify-content:center;
-    min-height:42px;
+    min-height:38px;
     padding:0 16px;
-    margin-top:0;
     border-radius:999px;
     background:rgba(29,107,57,.24);
     border:1px solid rgba(29,107,57,.38);
     color:var(--good-2);
-    font-size:.86rem;
-    letter-spacing:.10em;
+    font-size:.82rem;
+    letter-spacing:.12em;
     text-transform:uppercase;
     font-weight:900;
+    flex-shrink:0;
   }
 
-  .now-number{
-    margin-top:14px;
-    font-size:clamp(2.8rem, 7vw, 6rem);
+  @keyframes namePulse{
+    0%  { text-shadow:0 0 0 rgba(199,245,214,0); }
+    25% { text-shadow:0 0 60px rgba(199,245,214,.55); }
+    100%{ text-shadow:0 0 0 rgba(199,245,214,0); }
+  }
+
+  .now-name{
+    margin-top:18px;
+    font-size:clamp(3.5rem,9vw,7.5rem);
     line-height:1;
     font-weight:900;
-    letter-spacing:-.04em;
+    letter-spacing:-.05em;
     word-break:break-word;
   }
 
-  .now-customer{
-    margin-top:10px;
-    font-size:1.3rem;
+  .now-name.is-fresh{
+    animation:namePulse 1.4s ease-out forwards;
+  }
+
+  .now-number{
+    margin-top:12px;
+    font-size:1.25rem;
     color:var(--muted);
     font-weight:700;
     letter-spacing:.02em;
@@ -195,46 +220,48 @@
 
   .now-window{
     margin-top:8px;
-    font-size:1.1rem;
-    color:var(--muted);
+    font-size:1rem;
+    color:var(--accent-2);
     font-weight:700;
   }
 
+  /* QUEUE */
   .queue-head{
     display:flex;
     justify-content:space-between;
     align-items:center;
     gap:12px;
     margin-bottom:14px;
+    flex-shrink:0;
   }
 
   .queue-title{
-    margin:0;
-    font-size:1.3rem;
+    font-size:1.2rem;
     font-weight:900;
     letter-spacing:-.03em;
   }
 
   .queue-sub{
     color:var(--muted);
-    font-size:.95rem;
+    font-size:.9rem;
     font-weight:700;
+    margin-top:2px;
   }
 
   .queue{
     display:grid;
-    gap:12px;
+    gap:10px;
   }
 
   .queue-card{
-    padding:18px;
-    border-radius:20px;
+    padding:16px 18px;
+    border-radius:18px;
     background:linear-gradient(180deg,#1b1e25,#15181d);
     border:1px solid var(--line);
   }
 
   .queue-card.is-new{
-    border-color:rgba(215,174,114,.45);
+    border-color:rgba(215,174,114,.50);
     box-shadow:0 0 0 1px rgba(215,174,114,.25) inset;
   }
 
@@ -245,43 +272,55 @@
     gap:12px;
   }
 
-  .queue-number{
-    font-size:2rem;
+  .queue-name{
+    font-size:1.7rem;
     font-weight:900;
-    letter-spacing:-.04em;
+    letter-spacing:-.03em;
     line-height:1;
   }
 
-  .queue-name{
-    margin-top:8px;
+  .queue-number{
+    margin-top:6px;
     color:var(--muted);
-    font-size:1rem;
+    font-size:.9rem;
+    font-weight:700;
+  }
+
+  .queue-window{
+    margin-top:6px;
+    font-size:.85rem;
+    color:var(--accent-2);
     font-weight:700;
   }
 
   .queue-time{
-    color:var(--accent-2);
-    font-size:.95rem;
+    color:var(--muted);
+    font-size:.9rem;
     font-weight:800;
     text-align:right;
     white-space:nowrap;
+    flex-shrink:0;
   }
 
   .empty{
     padding:40px 24px;
-    border-radius:24px;
-    background:var(--panel);
+    border-radius:20px;
+    background:rgba(255,255,255,.03);
     border:1px solid var(--line);
     text-align:center;
     color:var(--muted);
-    box-shadow:var(--shadow);
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
   }
 
   .empty strong{
     display:block;
-    font-size:2rem;
+    font-size:1.8rem;
     color:var(--text);
-    margin-bottom:10px;
+    margin-bottom:8px;
     letter-spacing:-.03em;
   }
 
@@ -315,24 +354,15 @@
     text-align:center;
   }
 
-  @media (max-width: 700px){
-    .layout{
-      grid-template-columns:1fr;
-    }
-
-    .now-serving{
-      min-height:300px;
-    }
-
-    body{
-      padding:12px;
-    }
-
-    .now-number{
-      font-size:3.4rem;
-    }
+  @media (max-width:700px){
+    body{ padding:12px; overflow:auto; height:auto; }
+    html,body{ overflow:auto; height:auto; }
+    .layout{ grid-template-columns:1fr; }
+    .panel{ height:auto; }
+    .now-name{ font-size:3.5rem; }
+    .qr-corner{ display:none; }
   }
-</style>
+  </style>
 </head>
 <body>
   <div class="wrap">
@@ -352,15 +382,15 @@
     </div>
 
     <div class="banner">
-      Please have your order number ready when you come to the counter.
+      Order online &nbsp;·&nbsp; Scan the QR code &nbsp;·&nbsp; Pick up here
     </div>
 
     <div class="layout">
       <section class="panel now-serving">
         <div class="panel-body">
           <div class="now-badge">Now Serving</div>
-          <div class="now-number" id="nowNumber">—</div>
-          <div class="now-customer" id="nowCustomer"></div>
+          <div class="now-name" id="nowName">—</div>
+          <div class="now-number" id="nowNumber"></div>
           <div class="now-window" id="nowWindow"></div>
         </div>
       </section>
@@ -369,7 +399,7 @@
         <div class="panel-body">
           <div class="queue-head">
             <div>
-              <h2 class="queue-title">Ready Queue</h2>
+              <div class="queue-title">Ready Queue</div>
               <div class="queue-sub">Recently completed pickup orders</div>
             </div>
           </div>
@@ -389,11 +419,8 @@
     const OPERATOR_TOKEN_KEY = "delish_operator_token";
 
     function getSavedOperatorToken() {
-      try {
-        return localStorage.getItem(OPERATOR_TOKEN_KEY) || "";
-      } catch {
-        return "";
-      }
+      try { return localStorage.getItem(OPERATOR_TOKEN_KEY) || ""; }
+      catch { return ""; }
     }
 
     function operatorHeaders() {
@@ -405,11 +432,8 @@
 
     function escapeHtml(str) {
       return String(str || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
+        .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
     }
 
     function firstName(fullName) {
@@ -420,66 +444,63 @@
 
     function updateTime() {
       const now = new Date();
-
-      const time = new Intl.DateTimeFormat("en-US", {
-        timeZone: "America/Chicago",
-        hour: "numeric",
-        minute: "2-digit"
+      document.getElementById("timeNow").textContent = new Intl.DateTimeFormat("en-US",{
+        timeZone:"America/Chicago", hour:"numeric", minute:"2-digit"
       }).format(now);
-
-      const date = new Intl.DateTimeFormat("en-US", {
-        timeZone: "America/Chicago",
-        weekday: "long",
-        month: "long",
-        day: "numeric"
+      document.getElementById("dateLine").textContent = new Intl.DateTimeFormat("en-US",{
+        timeZone:"America/Chicago", weekday:"long", month:"long", day:"numeric"
       }).format(now);
-
-      const weekday = new Intl.DateTimeFormat("en-US", {
-        timeZone: "America/Chicago",
-        weekday: "long"
+      document.getElementById("brandDay").textContent = "Delish — " + new Intl.DateTimeFormat("en-US",{
+        timeZone:"America/Chicago", weekday:"long"
       }).format(now);
-
-      document.getElementById("timeNow").textContent = time;
-      document.getElementById("dateLine").textContent = date;
-      document.getElementById("brandDay").textContent = `Delish — ${weekday}`;
     }
 
     function formatQueueTime(isoString) {
       if (!isoString) return "";
-      return new Intl.DateTimeFormat("en-US", {
-        timeZone: "America/Chicago",
-        hour: "numeric",
-        minute: "2-digit"
+      return new Intl.DateTimeFormat("en-US",{
+        timeZone:"America/Chicago", hour:"numeric", minute:"2-digit"
       }).format(new Date(isoString));
     }
 
+    function setNowServing(name, orderNumber, window) {
+      const nameEl = document.getElementById("nowName");
+      const prev = nameEl.textContent;
+      const next = name || "—";
+
+      nameEl.textContent = next;
+
+      if (prev && prev !== "—" && prev !== next) {
+        nameEl.classList.remove("is-fresh");
+        void nameEl.offsetWidth;
+        nameEl.classList.add("is-fresh");
+      }
+
+      document.getElementById("nowNumber").textContent = orderNumber || "";
+      document.getElementById("nowWindow").textContent = window || "";
+    }
+
     function renderReadyOrders(orders) {
-      const countEl = document.getElementById("count");
-      const queueEl = document.getElementById("queue");
-      const nowNumberEl = document.getElementById("nowNumber");
-      const nowCustomerEl = document.getElementById("nowCustomer");
-      const nowWindowEl = document.getElementById("nowWindow");
+      const countEl  = document.getElementById("count");
+      const queueEl  = document.getElementById("queue");
 
       countEl.textContent = `${orders.length} ${orders.length === 1 ? "Order" : "Orders"} Ready`;
 
       if (!orders.length) {
-        nowNumberEl.textContent = "—";
-        nowCustomerEl.textContent = "";
-        nowWindowEl.textContent = "No ready orders right now";
-
+        setNowServing("—", "", "No ready orders right now");
         queueEl.innerHTML = `
           <div class="empty">
             <strong>No ready orders</strong>
             Completed orders will appear here.
-          </div>
-        `;
+          </div>`;
         return;
       }
 
       const nowServing = orders[0];
-      nowNumberEl.textContent = firstName(nowServing.customerName || "") || "—";
-      nowCustomerEl.textContent = nowServing.orderNumber || "";
-      nowWindowEl.textContent = nowServing.pickupWindow || "";
+      setNowServing(
+        firstName(nowServing.customerName || ""),
+        nowServing.orderNumber || "",
+        nowServing.pickupWindow || ""
+      );
 
       const queueOrders = orders.slice(1);
 
@@ -487,60 +508,49 @@
         queueEl.innerHTML = `
           <div class="empty">
             <strong>Queue is clear</strong>
-            No additional ready orders behind the current order.
-          </div>
-        `;
+            No additional ready orders.
+          </div>`;
         return;
       }
 
       queueEl.innerHTML = queueOrders.map(order => {
         const isNew = lastIds.length && !lastIds.includes(order.id);
-
         return `
           <article class="queue-card ${isNew ? "is-new" : ""}">
             <div class="queue-top">
               <div>
-                <div class="queue-number">${escapeHtml(order.orderNumber || "")}</div>
                 <div class="queue-name">${escapeHtml(firstName(order.customerName || ""))}</div>
+                <div class="queue-number">${escapeHtml(order.orderNumber || "")}</div>
+                ${order.pickupWindow ? `<div class="queue-window">${escapeHtml(order.pickupWindow)}</div>` : ""}
               </div>
               <div class="queue-time">${escapeHtml(formatQueueTime(order.completedAt || order.createdAt || ""))}</div>
             </div>
-          </article>
-        `;
+          </article>`;
       }).join("");
     }
 
     async function loadReadyOrders() {
       try {
         const res = await fetch(`/api/delish/ready-orders/?t=${Date.now()}`, {
-          cache: "no-store",
-          headers: operatorHeaders()
+          cache:"no-store", headers:operatorHeaders()
         });
-
         const data = await res.json();
-
-        if (!res.ok || !data.ok) {
-          throw new Error(data.error || "Failed to load ready orders.");
-        }
-
-       const readyOrders = Array.isArray(data.readyOrders) ? data.readyOrders : [];
-
+        if (!res.ok || !data.ok) throw new Error(data.error || "Failed to load.");
+        const readyOrders = Array.isArray(data.readyOrders) ? data.readyOrders : [];
         renderReadyOrders(readyOrders);
         lastIds = readyOrders.map(o => o.id);
       } catch (error) {
-        console.error("READY SCREEN V3 ERROR:", error);
+        console.error("READY SCREEN ERROR:", error);
         document.getElementById("queue").innerHTML = `
           <div class="empty">
             <strong>Unable to load ready queue</strong>
             Please refresh shortly.
-          </div>
-        `;
+          </div>`;
       }
     }
 
     updateTime();
     loadReadyOrders();
-
     setInterval(updateTime, 10000);
     setInterval(loadReadyOrders, 10000);
   </script>
