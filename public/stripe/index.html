@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>Connect to Stripe | Square Bidness</title>
+  <link rel="icon" href="/favicon.ico" />
+  <script src="https://connect-js.stripe.com/v1/connect.js"></script>
+  <script defer src="/scripts/sb-analytics.js"></script>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;background:#08090b;color:#f5f2ea;font-family:Inter,system-ui,sans-serif}
+
+    /* top bar */
+    .topbar{display:flex;align-items:center;justify-content:center;padding:18px 24px;border-bottom:1px solid rgba(255,255,255,.08)}
+    .brand{font-weight:900;font-size:.82rem;letter-spacing:.13em;text-transform:uppercase;color:#d8b35a}
+
+    /* content */
+    .wrap{width:min(700px,calc(100% - 32px));margin:0 auto;padding:40px 0 60px}
+
+    /* loading */
+    #loadingView{text-align:center;padding:100px 20px}
+    .spin{width:44px;height:44px;border:3px solid rgba(216,179,90,.18);border-top-color:#d8b35a;border-radius:50%;animation:rot .75s linear infinite;margin:0 auto 22px}
+    @keyframes rot{to{transform:rotate(360deg)}}
+    #loadingView h2{font-size:1.15rem;letter-spacing:-.02em;margin:0 0 8px}
+    #loadingView p{color:#a9a59b;font-size:.9rem;margin:0}
+
+    /* stripe embed */
+    #embedView{display:none}
+    #stripeOnboarding{min-height:400px}
+
+    /* success */
+    #successView{display:none;text-align:center;padding:32px 0}
+    #successView.show{display:block}
+    .badge{display:inline-flex;align-items:center;gap:8px;background:rgba(40,209,124,.12);border:1px solid rgba(40,209,124,.30);border-radius:999px;padding:8px 18px;color:#28d17c;font-weight:800;font-size:.9rem;letter-spacing:.06em;text-transform:uppercase;margin-bottom:22px}
+    .badge-dot{width:8px;height:8px;border-radius:50%;background:#28d17c;box-shadow:0 0 10px rgba(40,209,124,.8)}
+    #successView h1{font-size:clamp(2.2rem,7vw,3.4rem);letter-spacing:-.05em;margin:0 0 8px;line-height:1}
+    .sub{color:#a9a59b;font-size:.95rem;margin:0 0 32px;line-height:1.5}
+    .qr-wrap{background:#fff;border-radius:20px;display:inline-block;padding:14px;margin-bottom:22px}
+    .qr-wrap img{display:block;width:180px;height:180px}
+    .notice{background:rgba(216,179,90,.08);border:1px solid rgba(216,179,90,.22);border-radius:14px;padding:14px 18px;font-size:.9rem;color:#dfd6c7;max-width:380px;margin:0 auto}
+    .notice b{color:#d8b35a}
+
+    /* pending */
+    #pendingView{display:none}
+    #pendingView.show{display:block;text-align:center;padding:60px 0}
+    .pcard{border:1px solid rgba(216,179,90,.22);background:rgba(216,179,90,.06);border-radius:22px;padding:32px;max-width:420px;margin:0 auto}
+    .pcard h2{margin:0 0 10px;font-size:1.3rem}
+    .pcard p{color:#a9a59b;margin:0 0 24px;font-size:.9rem;line-height:1.5}
+    .btn{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:14px 30px;background:#d8b35a;color:#15110a;font-weight:900;font-size:.95rem;text-decoration:none}
+
+    footer{text-align:center;color:#a9a59b;font-size:.8rem;padding:20px 16px;border-top:1px solid rgba(255,255,255,.06);margin-top:40px}
+    footer a{color:#a9a59b;text-decoration:none}
+    footer a:hover{color:#d8b35a}
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <span class="brand">Square Bidness Holdings, Inc.</span>
+  </div>
+
+  <div class="wrap">
+
+    <!-- loading -->
+    <div id="loadingView">
+      <div class="spin"></div>
+      <h2>Setting Up Your Account</h2>
+      <p>Getting your Stripe connection ready&hellip;</p>
+    </div>
+
+    <!-- stripe embedded onboarding -->
+    <div id="embedView">
+      <div id="stripeOnboarding"></div>
+    </div>
+
+    <!-- success -->
+    <div id="successView">
+      <div class="badge"><span class="badge-dot"></span> Connected</div>
+      <h1>You're In.</h1>
+      <p class="sub">Your Stripe account is active. Scan this code to check your status anytime.</p>
+      <div class="qr-wrap">
+        <img id="qrImg" src="" alt="Status QR Code" width="180" height="180" />
+      </div>
+      <div class="notice">
+        <b>Check back in 24 hours.</b> Your account may take up to 24 hours to be fully active for payouts.
+      </div>
+    </div>
+
+    <!-- pending / incomplete -->
+    <div id="pendingView">
+      <div class="pcard">
+        <h2>Almost There.</h2>
+        <p>You didn't finish connecting. Check your email for a link to continue, or start the process again.</p>
+        <a class="btn" href="/stripe/">Start Over</a>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    Powered by Stripe &nbsp;&middot;&nbsp;
+    <a href="/">squarebidness.com</a> &nbsp;&middot;&nbsp;
+    &copy; Square Bidness Holdings, Inc.
+  </footer>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const site   = params.get("site") || "";
+
+    let accountId = null;
+
+    async function init() {
+      try {
+        const resp = await fetch("/api/stripe/create-account-session/", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({})
+        });
+        const data = await resp.json();
+
+        if (!resp.ok || !data.client_secret) {
+          throw new Error(data.error || "No client secret returned");
+        }
+
+        accountId = data.account;
+        const publishableKey = data.publishable_key;
+
+        document.getElementById("loadingView").style.display = "none";
+        document.getElementById("embedView").style.display   = "block";
+
+        const instance = StripeConnect.loadConnectAndInitialize({
+          publishableKey,
+          fetchClientSecret: async () => data.client_secret,
+          appearance: {
+            variables: {
+              colorPrimary:    "#d8b35a",
+              colorBackground: "#171b23",
+              colorText:       "#f5f2ea",
+              borderRadius:    "12px"
+            }
+          }
+        });
+
+        const component = instance.create("account_onboarding");
+
+        component.setOnExit(async () => {
+          await checkAndShow();
+        });
+
+        component.mount("#stripeOnboarding");
+
+      } catch (err) {
+        console.error("Stripe init:", err);
+        document.getElementById("loadingView").innerHTML =
+          `<p style="color:#a9a59b;margin:0 0 16px">Something went wrong starting your session.</p>
+           <a href="/stripe/" style="color:#d8b35a;font-weight:700">Try Again</a>`;
+      }
+    }
+
+    async function checkAndShow() {
+      if (!accountId) { showPending(); return; }
+      try {
+        const r = await fetch(`/api/stripe/account-status/?account=${encodeURIComponent(accountId)}`);
+        const data = await r.json();
+        if (data.detailsSubmitted && data.chargesEnabled && data.payoutsEnabled) {
+          showSuccess();
+        } else {
+          showPending();
+        }
+      } catch (_) {
+        showPending();
+      }
+    }
+
+    function showSuccess() {
+      document.getElementById("embedView").style.display = "none";
+      document.getElementById("successView").classList.add("show");
+
+      const qrDest = (site && site.startsWith("/") && !site.startsWith("//"))
+        ? `https://www.squarebidness.com${site}`
+        : "https://www.squarebidness.com/stripe-connect/get-built/";
+      document.getElementById("qrImg").src =
+        `https://api.qrserver.com/v1/create-qr-code/?size=360x360&margin=0&data=${encodeURIComponent(qrDest)}`;
+    }
+
+    function showPending() {
+      document.getElementById("embedView").style.display     = "none";
+      document.getElementById("loadingView").style.display   = "none";
+      document.getElementById("pendingView").classList.add("show");
+    }
+
+    init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>Stripe Connect | Square Bidness</title>
+  <link rel="icon" href="/favicon.ico" />
+  <script defer src="/scripts/sb-analytics.js"></script>
+  <style>
+    body{margin:0;min-height:100vh;display:grid;place-items:center;background:#08090b;color:#f5f2ea;font-family:Inter,system-ui,sans-serif;padding:22px}
+    .card{width:min(520px,100%);border:1px solid rgba(255,255,255,.12);border-radius:30px;background:linear-gradient(180deg,#171b23,#101217);overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.45)}
+    .kicker{display:flex;align-items:center;justify-content:center;gap:10px;background:rgba(216,179,90,.10);border-bottom:1px solid rgba(216,179,90,.20);padding:14px;color:#d8b35a;font-weight:900;text-transform:uppercase;letter-spacing:.14em;font-size:.82rem}
+    .dot{width:8px;height:8px;border-radius:50%;background:#28d17c;box-shadow:0 0 14px rgba(40,209,124,.75)}
+    .body{padding:32px;text-align:center}
+    .spin{width:40px;height:40px;border:3px solid rgba(216,179,90,.18);border-top-color:#d8b35a;border-radius:50%;animation:rot .75s linear infinite;margin:0 auto 20px}
+    @keyframes rot{to{transform:rotate(360deg)}}
+    h1{font-size:clamp(1.5rem,5vw,2rem);line-height:1.1;letter-spacing:-.03em;margin:0 0 8px}
+    .sub{color:#a9a59b;font-size:.9rem;margin:0 0 24px}
+
+    .badge{display:inline-flex;align-items:center;gap:8px;background:rgba(40,209,124,.12);border:1px solid rgba(40,209,124,.30);border-radius:999px;padding:8px 18px;color:#28d17c;font-weight:800;font-size:.9rem;letter-spacing:.06em;text-transform:uppercase;margin-bottom:20px}
+    .badge-dot{width:8px;height:8px;border-radius:50%;background:#28d17c;box-shadow:0 0 10px rgba(40,209,124,.8)}
+    #successView{display:none}
+    #successView.show{display:block}
+    .qr-wrap{background:#fff;border-radius:16px;display:inline-block;padding:12px;margin-bottom:18px}
+    .qr-wrap img{display:block;width:160px;height:160px}
+    .notice{background:rgba(216,179,90,.08);border:1px solid rgba(216,179,90,.22);border-radius:14px;padding:12px 16px;font-size:.88rem;color:#dfd6c7;margin-bottom:4px}
+    .notice b{color:#d8b35a}
+
+    .btn{display:flex;align-items:center;justify-content:center;border-radius:999px;padding:14px;background:#d8b35a;color:#15110a;font-weight:900;font-size:.95rem;text-decoration:none;margin-bottom:10px}
+    .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,.18);color:#f5f2ea}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="kicker" id="kickerBar"><span class="dot"></span> Stripe Connect</div>
+    <div class="body">
+
+      <!-- checking state -->
+      <div id="checkingView">
+        <div class="spin"></div>
+        <h1>Checking Your Status</h1>
+        <p class="sub">Just a moment&hellip;</p>
+      </div>
+
+      <!-- success state -->
+      <div id="successView">
+        <div class="badge"><span class="badge-dot"></span> Connected</div>
+        <h1>You're In.</h1>
+        <p class="sub">Your Stripe account is active. Scan this code to check your status anytime.</p>
+        <div class="qr-wrap">
+          <img id="qrImg" src="" alt="Status QR Code" width="160" height="160" />
+        </div>
+        <div class="notice">
+          <b>Check back in 24 hours.</b> Your account may take up to 24 hours to be fully active for payouts.
+        </div>
+      </div>
+
+      <!-- pending state -->
+      <div id="pendingView" style="display:none">
+        <h1>Almost There.</h1>
+        <p class="sub">Your account isn't fully connected yet.</p>
+        <a class="btn" href="/stripe/">Back to Connect</a>
+        <a class="btn ghost" href="/stripe-connect/support/">Need Help?</a>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    const params  = new URLSearchParams(location.search);
+    const account = params.get("account") || "";
+    const site    = params.get("site") || "";
+
+    async function check() {
+      if (!account) { showPending(); return; }
+      try {
+        const r = await fetch(`/api/stripe/account-status/?account=${encodeURIComponent(account)}`);
+        const data = await r.json();
+        if (data.detailsSubmitted && data.chargesEnabled && data.payoutsEnabled) {
+          showSuccess();
+        } else {
+          showPending();
+        }
+      } catch (_) {
+        showPending();
+      }
+    }
+
+    function showSuccess() {
+      document.getElementById("checkingView").style.display = "none";
+      document.getElementById("successView").classList.add("show");
+      const bar = document.getElementById("kickerBar");
+      bar.style.background       = "rgba(40,209,124,.10)";
+      bar.style.borderBottomColor= "rgba(40,209,124,.20)";
+      bar.style.color            = "#28d17c";
+
+      const qrDest = (site && site.startsWith("/") && !site.startsWith("//"))
+        ? `https://www.squarebidness.com${site}`
+        : "https://www.squarebidness.com/stripe-connect/get-built/";
+      document.getElementById("qrImg").src =
+        `https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=0&data=${encodeURIComponent(qrDest)}`;
+    }
+
+    function showPending() {
+      document.getElementById("checkingView").style.display = "none";
+      document.getElementById("pendingView").style.display  = "block";
+    }
+
+    check();
+  </script>
+</body>
+</html>
