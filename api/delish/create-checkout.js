@@ -80,24 +80,19 @@ const MENU_BY_DAY = {
   ],
   friday: [
     {
-      id: "friday_crawfish_etouffee",
-      name: "Crawfish Étouffée Plate",
-      price: 16.99,
-    },
-    {
       id: "friday_shrimp_pasta",
       name: "Shrimp Pasta Plate",
-      price: 16.99,
+      price: 13.99,
     },
     {
       id: "friday_fried_catfish",
-      name: "Fried Catfish Plate (3 strips)",
-      price: 15.99,
+      name: "Catfish Plate",
+      price: 13.99,
     },
     {
-      id: "friday_baked_catfish",
-      name: "Baked Catfish Plate",
-      price: 16.99,
+      id: "friday_shrimp_pasta_with_fish",
+      name: "Shrimp Pasta with Fish Plate",
+      price: 17.99,
     },
   ],
   sunday: [
@@ -213,12 +208,24 @@ const MENU_BY_DAY = {
       name: "Extra Side - Rice Dressing",
       price: 2.5,
     },
+    {
+      id: "extra_side_jambalaya",
+      name: "Extra Side - Jambalaya",
+      price: 2.5,
+    },
+    {
+      id: "extra_side_fries",
+      name: "Extra Side - Fries",
+      price: 2.5,
+    },
   ],
 };
 
 const FRIDAY_ONLY_ITEM_IDS = new Set([
   "extra_side_potato_salad",
   "extra_side_rice_dressing",
+  "extra_side_jambalaya",
+  "extra_side_fries",
 ]);
 
 function isValidOrder(body) {

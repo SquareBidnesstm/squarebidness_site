@@ -655,8 +655,19 @@
     ? [...EXTRA_SIDES_BASE, ...EXTRA_SIDES_FRIDAY_SUNDAY]
     : [...EXTRA_SIDES_BASE];
 
+  const fridaySideIds = new Set([
+    "extra_side_jambalaya",
+    "extra_side_potato_salad",
+    "extra_side_green_beans",
+    "extra_side_corn",
+    "extra_side_fries"
+  ]);
+
   return items.filter(
-    item => isItemEnabled(item.id) && !isItemSoldOut(item.id)
+    item =>
+      (day !== "friday" || fridaySideIds.has(item.id)) &&
+      isItemEnabled(item.id) &&
+      !isItemSoldOut(item.id)
   );
 }
 
