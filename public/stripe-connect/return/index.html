@@ -70,6 +70,7 @@
     const account = params.get("account");
     const client = params.get("client") || "";
     const returnTo = params.get("returnTo") || "";
+    const site = params.get("site") || "";
 
     const clientLabels = {
       delish: "Delish", puffs: "Puff's",
@@ -89,10 +90,10 @@
       document.getElementById("kickerBar").style.borderBottomColor = "rgba(40,209,124,.20)";
       document.getElementById("kickerBar").style.color = "#28d17c";
 
-      const statusUrl = account
-        ? `https://www.squarebidness.com/stripe-connect/return/?account=${encodeURIComponent(account)}`
-        : "https://www.squarebidness.com/stripe-connect/return/";
-      const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=360x360&margin=0&data=${encodeURIComponent(statusUrl)}`;
+      const qrDest = (site && site.startsWith("/") && !site.startsWith("//"))
+        ? `https://www.squarebidness.com${site}`
+        : "https://www.squarebidness.com/stripe-connect/get-built/";
+      const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=360x360&margin=0&data=${encodeURIComponent(qrDest)}`;
       document.getElementById("qrImg").src = qrSrc;
     }
 

@@ -204,6 +204,7 @@
     const client = params.get("client") || "";
     const leadId = params.get("leadId") || "";
     const returnTo = params.get("returnTo") || "";
+    const site = params.get("site") || "";
 
     connectUrl.searchParams.set("source", source);
 
@@ -217,6 +218,10 @@
 
     if (returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//")) {
       connectUrl.searchParams.set("returnTo", returnTo);
+    }
+
+    if (site && site.startsWith("/") && !site.startsWith("//")) {
+      connectUrl.searchParams.set("site", site);
     }
 
     connectStripe.href = connectUrl.pathname + connectUrl.search;

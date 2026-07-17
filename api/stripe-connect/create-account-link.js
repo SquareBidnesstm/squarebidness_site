@@ -58,6 +58,7 @@ export default async function handler(req, res) {
     const client = cleanParam(req.query.client);
     const source = cleanParam(req.query.source, "direct_stripe_connect");
     const returnTo = cleanReturnTo(req.query.returnTo);
+    const site = cleanReturnTo(req.query.site);
     const clientLabel =
       CLIENT_LABELS[client] ||
       (source.includes("restaurant")
@@ -90,7 +91,8 @@ export default async function handler(req, res) {
       client,
       leadId,
       source,
-      returnTo
+      returnTo,
+      site
     };
 
     const accountLink = await stripe.accountLinks.create({
