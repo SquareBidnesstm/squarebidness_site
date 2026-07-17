@@ -142,12 +142,29 @@ export default function BarbersTab({ shopSlug }: { shopSlug: string }) {
       if (data.ok) {
         setBarbers(data.barbers);
         setBarberLimit(data.barberLimit ?? 0);
-        // Load bios for all barbers
-        const biosRes = await fetch(`/api/${shopSlug}/admin/barbers/bios`);
+        // Load bios and perms for all barbers in parallel
+        const [biosRes, allPerms] = await Promise.all([
+          fetch(`/api/${shopSlug}/admin/barbers/bios`),
+          Promise.all(
+            data.barbers.map((b: Barber) =>
+              fetch(`/api/${shopSlug}/admin/barbers/${b.id}/perms`).then((r) => r.json()).catch(() => ({ ok: false }))
+            )
+          ),
+        ]);
         if (biosRes.ok) {
           const biosData = await biosRes.json();
           if (biosData.ok) setBarberBios(biosData.bios ?? {});
         }
+        const newPerms: Record<string, BarberPerms> = {};
+        const newPermsLoaded: Record<string, boolean> = {};
+        data.barbers.forEach((b: Barber, i: number) => {
+          if (allPerms[i]?.ok) {
+            newPerms[b.id] = allPerms[i].perms;
+            newPermsLoaded[b.id] = true;
+          }
+        });
+        setPerms(newPerms);
+        setPermsLoaded(newPermsLoaded);
       } else {
         setError(data.error || "Failed to load barbers.");
       }
