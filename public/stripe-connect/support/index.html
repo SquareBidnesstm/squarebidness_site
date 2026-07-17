@@ -20,7 +20,10 @@
     .step-text{padding-top:6px}
     .step-text b{display:block;font-size:1rem;margin-bottom:2px}
     .step-text span{color:#a9a59b;font-size:.88rem}
+    .ack{display:flex;gap:14px;align-items:center;padding:16px 18px;border:1px solid rgba(216,179,90,.28);background:rgba(216,179,90,.08);border-radius:18px;color:#dfd6c7;font-weight:700;font-size:1rem;cursor:pointer;margin-bottom:16px}
+    .ack input{width:22px;height:22px;accent-color:#d8b35a;flex:0 0 auto;cursor:pointer}
     .btn{display:flex;align-items:center;justify-content:center;border-radius:999px;padding:16px;background:#d8b35a;color:#15110a;font-weight:900;font-size:1rem;text-decoration:none;margin-bottom:12px}
+    .btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
     .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,.18);color:#f5f2ea}
   </style>
 </head>
@@ -35,36 +38,49 @@
         <li class="step">
           <div class="num">1</div>
           <div class="step-text">
-            <b>Click "Connect to Stripe Now" below.</b>
-            <span>This takes you to the connection page.</span>
+            <b>Check the box below.</b>
+            <span>Confirms your business is ready to connect.</span>
           </div>
         </li>
         <li class="step">
           <div class="num">2</div>
           <div class="step-text">
-            <b>Check the box on that page.</b>
-            <span>It says "My business is ready to connect to Stripe." Check it.</span>
+            <b>Click "Connect to Stripe Now."</b>
+            <span>The button lights up once you check the box.</span>
           </div>
         </li>
         <li class="step">
           <div class="num">3</div>
           <div class="step-text">
-            <b>Click the gold button.</b>
-            <span>Stripe will open. Fill out everything they ask — name, business info, bank account.</span>
+            <b>Fill out everything Stripe asks.</b>
+            <span>Name, business info, bank account. Don't skip anything.</span>
           </div>
         </li>
         <li class="step">
           <div class="num">4</div>
           <div class="step-text">
-            <b>Submit and come back.</b>
-            <span>Once you finish in Stripe, you'll be sent back here automatically.</span>
+            <b>Submit — you'll come back automatically.</b>
+            <span>Stripe sends you back here when you're done.</span>
           </div>
         </li>
       </ol>
 
-      <a class="btn" href="/stripe-connect/">Connect to Stripe Now</a>
+      <label class="ack" for="readyCheck">
+        <input id="readyCheck" type="checkbox" />
+        <span>My business is ready to connect to Stripe.</span>
+      </label>
+
+      <a class="btn" id="connectBtn" href="/api/stripe-connect/create-account-link/" aria-disabled="true">Connect to Stripe Now</a>
       <a class="btn ghost" href="/stripe-connect/return/">Back to Status</a>
     </div>
   </main>
+
+  <script>
+    const check = document.getElementById("readyCheck");
+    const btn = document.getElementById("connectBtn");
+    check.addEventListener("change", () => {
+      btn.setAttribute("aria-disabled", check.checked ? "false" : "true");
+    });
+  </script>
 </body>
 </html>
