@@ -13,32 +13,59 @@
     .dot{width:8px;height:8px;border-radius:50%;background:#28d17c;box-shadow:0 0 14px rgba(40,209,124,.75)}
     .body{padding:32px}
     h1{font-size:clamp(1.7rem,5vw,2.4rem);line-height:1.05;letter-spacing:-.04em;margin:0 0 20px}
+
+    /* ── pending state ── */
     .status{border:1px solid rgba(216,179,90,.32);background:rgba(216,179,90,.08);border-radius:18px;padding:16px;color:#ddd5c9}
     .status b{display:block;color:#d8b35a;margin-bottom:4px}
-    .status[data-state="ready"]{border-color:rgba(40,209,124,.26);background:rgba(40,209,124,.08)}
-    .status[data-state="ready"] b{color:#28d17c}
     .btn{display:flex;align-items:center;justify-content:center;margin-top:20px;border-radius:999px;padding:16px;background:#d8b35a;color:#15110a;font-weight:900;font-size:1rem;text-decoration:none}
     .help{display:block;text-align:center;margin-top:14px;color:#a9a59b;font-size:.88rem;text-decoration:underline}
+
+    /* ── success state ── */
+    .success{display:none;text-align:center}
+    .success.show{display:block}
+    .badge{display:inline-flex;align-items:center;gap:8px;background:rgba(40,209,124,.12);border:1px solid rgba(40,209,124,.3);border-radius:999px;padding:8px 18px;color:#28d17c;font-weight:800;font-size:.9rem;letter-spacing:.06em;text-transform:uppercase;margin-bottom:20px}
+    .badge-dot{width:8px;height:8px;border-radius:50%;background:#28d17c;box-shadow:0 0 10px rgba(40,209,124,.8)}
+    .success h1{margin-bottom:6px}
+    .success .sub{color:#a9a59b;font-size:.95rem;margin:0 0 28px}
+    .qr-wrap{background:#fff;border-radius:20px;display:inline-block;padding:14px;margin-bottom:20px}
+    .qr-wrap img{display:block;width:180px;height:180px}
+    .notice{background:rgba(216,179,90,.08);border:1px solid rgba(216,179,90,.22);border-radius:14px;padding:14px 16px;font-size:.9rem;color:#dfd6c7;margin-bottom:4px}
+    .notice b{color:#d8b35a}
   </style>
 </head>
 <body>
   <main class="card">
-    <div class="kicker"><span class="dot"></span> Stripe Connect</div>
+    <div class="kicker" id="kickerBar"><span class="dot"></span> Stripe Connect</div>
     <div class="body">
-      <h1>Finish Connecting to Stripe</h1>
-      <div class="status" id="stripeStatus" data-state="warn">
-        <b>Stripe Account Pending.</b>
-        <span id="statusDetail"></span>
+
+      <!-- pending view -->
+      <div id="pendingView">
+        <h1>Finish Connecting to Stripe</h1>
+        <div class="status" id="stripeStatus">
+          <b>Stripe Account Pending.</b>
+          <span id="statusDetail"></span>
+        </div>
+        <a class="btn" id="nextStep" href="/stripe-connect/">Back to Stripe Connect</a>
+        <a class="help" href="/stripe-connect/support/">Need help connecting?</a>
       </div>
-      <a class="btn" id="nextStep" href="/stripe-connect/">Back to Stripe Connect</a>
-      <a class="help" href="/stripe-connect/support/">Need help connecting?</a>
+
+      <!-- success view -->
+      <div class="success" id="successView">
+        <div class="badge"><span class="badge-dot"></span> Connected</div>
+        <h1>You're In.</h1>
+        <p class="sub">Your Stripe account is active. Scan this code to check your status anytime.</p>
+        <div class="qr-wrap">
+          <img id="qrImg" src="" alt="Status QR Code" width="180" height="180" />
+        </div>
+        <div class="notice">
+          <b>Check back in 24 hours.</b> Your account may take up to 24 hours to be fully active for payouts.
+        </div>
+      </div>
+
     </div>
   </main>
 
   <script>
-    const statusBox = document.getElementById("stripeStatus");
-    const statusDetail = document.getElementById("statusDetail");
-    const nextStep = document.getElementById("nextStep");
     const params = new URLSearchParams(window.location.search);
     const account = params.get("account");
     const client = params.get("client") || "";
@@ -49,9 +76,24 @@
       philson: "Philson Le Fleuriste", restaurant: "Restaurant", foodtruck: "Food Truck"
     };
 
+    const nextStep = document.getElementById("nextStep");
     if (returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//")) {
       nextStep.href = returnTo;
       nextStep.textContent = clientLabels[client] ? `Back to ${clientLabels[client]}` : "Back to Stripe Connect";
+    }
+
+    function showSuccess() {
+      document.getElementById("pendingView").style.display = "none";
+      document.getElementById("successView").classList.add("show");
+      document.getElementById("kickerBar").style.background = "rgba(40,209,124,.10)";
+      document.getElementById("kickerBar").style.borderBottomColor = "rgba(40,209,124,.20)";
+      document.getElementById("kickerBar").style.color = "#28d17c";
+
+      const statusUrl = account
+        ? `https://www.squarebidness.com/stripe-connect/return/?account=${encodeURIComponent(account)}`
+        : "https://www.squarebidness.com/stripe-connect/return/";
+      const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=360x360&margin=0&data=${encodeURIComponent(statusUrl)}`;
+      document.getElementById("qrImg").src = qrSrc;
     }
 
     async function checkStatus() {
@@ -61,12 +103,11 @@
         const data = await r.json();
         if (!r.ok) return;
         if (data.detailsSubmitted && data.chargesEnabled && data.payoutsEnabled) {
-          statusBox.dataset.state = "ready";
-          statusBox.querySelector("b").textContent = "Stripe Account Ready.";
+          showSuccess();
           return;
         }
         const open = [...(data.currentlyDue || []), ...(data.pastDue || [])].length;
-        if (open > 0) statusDetail.textContent = `${open} requirement${open === 1 ? "" : "s"} still need attention.`;
+        if (open > 0) document.getElementById("statusDetail").textContent = `${open} requirement${open === 1 ? "" : "s"} still need attention.`;
       } catch (_) {}
     }
 
