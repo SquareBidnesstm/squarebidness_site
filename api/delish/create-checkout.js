@@ -840,9 +840,13 @@ export default async function handler(req, res) {
       !String(item.id).startsWith("drink_") && !String(item.id).startsWith("extra_side_")
     );
 
+    const platformFeeAmount = hasMainDish
+      ? Math.round(calculatedTotal * 100 * PLATFORM_FEE_PERCENT)
+      : 0;
+
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      automatic_payment_methods: { enabled: true },
+      payment_method_types: ["card"],
       on_behalf_of: DELISH_DESTINATION_ACCOUNT,
       line_items: lineItems,
       success_url: "https://www.squarebidness.com/delish/order/success/?session_id={CHECKOUT_SESSION_ID}",
@@ -853,7 +857,7 @@ export default async function handler(req, res) {
       },
       payment_intent_data: {
         metadata: sharedMetadata,
-        application_fee_amount: hasMainDish ? Math.round(calculatedTotal * 100 * PLATFORM_FEE_PERCENT) : 0,
+        ...(platformFeeAmount > 0 && { application_fee_amount: platformFeeAmount }),
         transfer_data: {
           destination: DELISH_DESTINATION_ACCOUNT,
         },
