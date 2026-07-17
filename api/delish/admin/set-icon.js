@@ -20,18 +20,18 @@ export default async function handler(req, res) {
   }
   const imgBuffer = Buffer.from(await imgRes.arrayBuffer());
 
-  // Upload to Stripe Files
-  const file = await stripe.files.create(
-    {
-      purpose: "account_requirement",
-      file: {
-        data: imgBuffer,
-        name: "delish-icon.png",
-        type: "image/png",
-      },
+  // Upload to platform account (no stripeAccount header — required for branding)
+  const file = await stripe.files.create({
+    purpose: "account_requirement",
+    file: {
+      data: imgBuffer,
+      name: "delish-icon.png",
+      type: "image/png",
     },
-    { stripeAccount: DELISH_ACCOUNT }
-  );
+  });
+
+  // Create a file link so the connected account can access it
+  const fileLink = await stripe.fileLinks.create({ file: file.id });
 
   // Set as branding icon on the connected account
   const account = await stripe.accounts.update(DELISH_ACCOUNT, {
