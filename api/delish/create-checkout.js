@@ -11,7 +11,7 @@ import {
 import { getDelishFlashSale, isFlashSaleActive } from "../_lib/delish-flash-sale.js";
 
 const stripe = new Stripe(process.env.STRIPE_ONBOARDING_SECRET_KEY, {
-  apiVersion: "2025-02-24.acacia",
+  apiVersion: "2024-06-20",
 });
 
 const DELISH_DESTINATION_ACCOUNT = "acct_1TspkpAcqVPZn6LU";
@@ -846,7 +846,7 @@ export default async function handler(req, res) {
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      payment_method_types: ["card"],
+      automatic_payment_methods: { enabled: true },
       line_items: lineItems,
       success_url: "https://www.squarebidness.com/delish/order/success/?session_id={CHECKOUT_SESSION_ID}",
       cancel_url: "https://www.squarebidness.com/delish/",
@@ -856,6 +856,7 @@ export default async function handler(req, res) {
       },
       payment_intent_data: {
         metadata: sharedMetadata,
+        on_behalf_of: DELISH_DESTINATION_ACCOUNT,
         ...(platformFeeAmount > 0 && { application_fee_amount: platformFeeAmount }),
         transfer_data: {
           destination: DELISH_DESTINATION_ACCOUNT,
