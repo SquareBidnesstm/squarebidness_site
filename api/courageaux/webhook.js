@@ -3,7 +3,7 @@ import Stripe from "stripe";
 export const config = { api: { bodyParser: false } };
 
 const stripe = new Stripe(process.env.STRIPE_ONBOARDING_SECRET_KEY, {
-  apiVersion: "2025-02-24.acacia",
+  apiVersion: "2024-06-20",
 });
 
 const AMARI_PHONE = "+19853512750";
