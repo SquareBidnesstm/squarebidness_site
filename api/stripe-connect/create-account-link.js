@@ -73,7 +73,6 @@ export default async function handler(req, res) {
       capabilities: {
         card_payments: { requested: true },
         transfers: { requested: true },
-        treasury: { requested: true },
       },
       business_profile: {
         product_description:
