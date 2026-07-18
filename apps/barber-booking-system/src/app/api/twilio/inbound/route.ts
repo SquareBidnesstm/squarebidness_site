@@ -217,7 +217,13 @@ async function handleBarberReply(barberPhone: string, messageBody: string) {
             expires_at: Math.floor(Date.now() / 1000) + 86400, // 24 hrs
             payment_intent_data: {
               metadata: { booking_id: booking.id, shop_slug: shopSlug },
-              ...(shop?.stripe_account_id ? { transfer_data: { destination: shop.stripe_account_id } } : {}),
+              ...(shop?.stripe_account_id ? {
+                transfer_data: { destination: shop.stripe_account_id },
+                application_fee_amount: (() => {
+                  const pct = parseFloat(process.env.PLATFORM_FEE_PERCENT ?? "0");
+                  return pct > 0 ? Math.max(0, Math.round(priceCents * (pct / 100))) : 0;
+                })(),
+              } : {}),
             },
           });
           checkoutUrl = session.url ?? "";

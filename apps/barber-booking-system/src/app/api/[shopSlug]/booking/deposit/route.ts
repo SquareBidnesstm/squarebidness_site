@@ -7,6 +7,15 @@ import { checkRateLimit, cleanText, isSafeOrigin, isValidEmail, isValidSlug, nor
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-04-22.dahlia" });
 
+// Platform processing fee — set PLATFORM_FEE_PERCENT in env (e.g. "2.5" = 2.5%).
+// Applied only when the shop has a connected Stripe account.
+// Returns fee in cents; minimum 0.
+function platformFeeAmount(amountCents: number): number {
+  const pct = parseFloat(process.env.PLATFORM_FEE_PERCENT ?? "0");
+  if (!pct || pct <= 0) return 0;
+  return Math.max(0, Math.round(amountCents * (pct / 100)));
+}
+
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ shopSlug: string }> }
@@ -144,7 +153,10 @@ export async function POST(
     },
     payment_intent_data: {
       metadata: { shop_id: shop.id, shop_slug: shopSlug },
-      ...(shop.stripe_account_id ? { transfer_data: { destination: shop.stripe_account_id } } : {}),
+      ...(shop.stripe_account_id ? {
+        transfer_data: { destination: shop.stripe_account_id },
+        application_fee_amount: platformFeeAmount(Math.round(depositAmount * 100)),
+      } : {}),
     },
   });
 

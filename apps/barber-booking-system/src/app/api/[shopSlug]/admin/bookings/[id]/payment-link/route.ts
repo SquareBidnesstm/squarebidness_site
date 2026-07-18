@@ -5,6 +5,12 @@ import { verifyAdminSession } from "../../../../../../../lib/auth";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-04-22.dahlia" });
 
+function platformFeeAmount(amountCents: number): number {
+  const pct = parseFloat(process.env.PLATFORM_FEE_PERCENT ?? "0");
+  if (!pct || pct <= 0) return 0;
+  return Math.max(0, Math.round(amountCents * (pct / 100)));
+}
+
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ shopSlug: string; id: string }> }
@@ -71,7 +77,10 @@ export async function POST(
     },
     payment_intent_data: {
       metadata: { booking_id: id, shop_id: shop.id, payment_type: "balance" },
-      ...(shop.stripe_account_id ? { transfer_data: { destination: shop.stripe_account_id } } : {}),
+      ...(shop.stripe_account_id ? {
+        transfer_data: { destination: shop.stripe_account_id },
+        application_fee_amount: platformFeeAmount(remaining),
+      } : {}),
     },
   });
 
