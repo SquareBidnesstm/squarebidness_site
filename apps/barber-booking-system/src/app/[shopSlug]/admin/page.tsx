@@ -139,6 +139,12 @@ export default function AdminPage() {
   const [isMobile, setIsMobile] = useState(false);
   const [showFilters, setShowFilters] = useState(true);
   const [hoursConfigured, setHoursConfigured] = useState<boolean | null>(null);
+  const [stripeStatus, setStripeStatus] = useState<{
+    connected: boolean;
+    payouts_enabled: boolean;
+    details_submitted: boolean;
+    currently_due: string[];
+  } | null>(null);
 
   useEffect(() => {
     const check = () => {
@@ -157,6 +163,14 @@ export default function AdminPage() {
       .then(r => r.json())
       .then(d => setHoursConfigured(Array.isArray(d.hours) && d.hours.length > 0))
       .catch(() => setHoursConfigured(null));
+  }, [shopSlug]);
+
+  // Fetch Stripe Connect status once on mount
+  useEffect(() => {
+    fetch(`/api/${shopSlug}/admin/stripe/status`)
+      .then(r => r.json())
+      .then(d => { if (d.ok) setStripeStatus(d); })
+      .catch(() => {});
   }, [shopSlug]);
   const [showWalkIn, setShowWalkIn] = useState(false);
   const [showBlockTime, setShowBlockTime] = useState(false);
@@ -496,6 +510,35 @@ export default function AdminPage() {
             Live shop view for bookings coming into the system.
           </p>
         </div>
+
+        {/* Stripe Connect banner — hidden once payouts are enabled */}
+        {stripeStatus && !stripeStatus.payouts_enabled && (
+          <div style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12,
+            background: stripeStatus.details_submitted ? "#001a2b" : "#0d0d0d",
+            border: `1px solid ${stripeStatus.details_submitted ? "#003344" : "#2a1500"}`,
+            borderRadius: 12, padding: "14px 18px", marginBottom: 24,
+          }}>
+            <div>
+              <p style={{ margin: 0, fontWeight: 700, fontSize: 14, color: stripeStatus.details_submitted ? "#33aaff" : "#ff9955" }}>
+                {stripeStatus.details_submitted ? "⏳ Stripe review in progress" : "⚡ Set up payouts to get paid"}
+              </p>
+              <p style={{ margin: "2px 0 0", fontSize: 13, color: "#666" }}>
+                {stripeStatus.details_submitted
+                  ? "Your info was submitted — Stripe usually approves within 1–2 business days."
+                  : "Complete Stripe verification so deposits route directly to your bank account."}
+              </p>
+            </div>
+            {!stripeStatus.details_submitted && (
+              <a
+                href={`/api/${shopSlug}/admin/stripe/connect`}
+                style={{ flexShrink: 0, padding: "10px 20px", background: "#d4af37", color: "#000", fontWeight: 800, fontSize: 13, borderRadius: 8, textDecoration: "none" }}
+              >
+                {stripeStatus.connected ? "Continue Setup →" : "Get Started →"}
+              </a>
+            )}
+          </div>
+        )}
 
         {/* Tab nav */}
         <div style={{ display: "flex", gap: 8, marginBottom: 28, flexWrap: "wrap" }}>

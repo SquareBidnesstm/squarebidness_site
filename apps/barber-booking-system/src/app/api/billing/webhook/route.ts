@@ -333,6 +333,18 @@ export async function POST(req: NextRequest) {
         break;
       }
 
+      case "account.updated": {
+        // Fires on connected accounts when their verification status changes.
+        // Requires "Connect" events to be enabled on this webhook endpoint in Stripe.
+        const account = event.data.object as Stripe.Account;
+        if (account.payouts_enabled) {
+          await supabaseServer.from("shops")
+            .update({ stripe_onboarding_complete: true })
+            .eq("stripe_account_id", account.id);
+        }
+        break;
+      }
+
       default:
         // Unhandled event — ignore
         break;
