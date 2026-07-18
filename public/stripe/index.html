@@ -4,202 +4,188 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="robots" content="noindex,nofollow" />
-  <title>Connect to Stripe | Square Bidness</title>
+  <title>Connect to Stripe | Square Bidness Holdings</title>
   <link rel="icon" href="/favicon.ico" />
-  <script src="https://connect-js.stripe.com/v1/connect.js"></script>
   <script defer src="/scripts/sb-analytics.js"></script>
   <style>
+    :root{
+      --bg:#08090b;
+      --panel2:#171b23;
+      --text:#f5f2ea;
+      --muted:#a9a59b;
+      --line:rgba(255,255,255,.12);
+      --gold:#d8b35a;
+      --green:#28d17c;
+      --shadow:0 24px 80px rgba(0,0,0,.42);
+    }
+
     *{box-sizing:border-box}
-    body{margin:0;min-height:100vh;background:#08090b;color:#f5f2ea;font-family:Inter,system-ui,sans-serif}
 
-    /* top bar */
-    .topbar{display:flex;align-items:center;justify-content:center;padding:18px 24px;border-bottom:1px solid rgba(255,255,255,.08)}
-    .brand{font-weight:900;font-size:.82rem;letter-spacing:.13em;text-transform:uppercase;color:#d8b35a}
+    body{
+      margin:0;
+      min-height:100vh;
+      background:
+        radial-gradient(circle at top left, rgba(216,179,90,.18), transparent 36%),
+        radial-gradient(circle at bottom right, rgba(40,209,124,.10), transparent 34%),
+        var(--bg);
+      color:var(--text);
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height:1.5;
+    }
 
-    /* content */
-    .wrap{width:min(700px,calc(100% - 32px));margin:0 auto;padding:40px 0 60px}
+    a{color:inherit;text-decoration:none}
 
-    /* loading */
-    #loadingView{text-align:center;padding:100px 20px}
-    .spin{width:44px;height:44px;border:3px solid rgba(216,179,90,.18);border-top-color:#d8b35a;border-radius:50%;animation:rot .75s linear infinite;margin:0 auto 22px}
-    @keyframes rot{to{transform:rotate(360deg)}}
-    #loadingView h2{font-size:1.15rem;letter-spacing:-.02em;margin:0 0 8px}
-    #loadingView p{color:#a9a59b;font-size:.9rem;margin:0}
+    .wrap{
+      width:min(520px, calc(100% - 32px));
+      margin:0 auto;
+      padding:40px 0 60px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+    }
 
-    /* stripe embed */
-    #embedView{display:none}
-    #stripeOnboarding{min-height:400px}
+    .topbar{
+      width:100%;
+      display:flex;
+      justify-content:center;
+      margin-bottom:48px;
+    }
 
-    /* success */
-    #successView{display:none;text-align:center;padding:32px 0}
-    #successView.show{display:block}
-    .badge{display:inline-flex;align-items:center;gap:8px;background:rgba(40,209,124,.12);border:1px solid rgba(40,209,124,.30);border-radius:999px;padding:8px 18px;color:#28d17c;font-weight:800;font-size:.9rem;letter-spacing:.06em;text-transform:uppercase;margin-bottom:22px}
-    .badge-dot{width:8px;height:8px;border-radius:50%;background:#28d17c;box-shadow:0 0 10px rgba(40,209,124,.8)}
-    #successView h1{font-size:clamp(2.2rem,7vw,3.4rem);letter-spacing:-.05em;margin:0 0 8px;line-height:1}
-    .sub{color:#a9a59b;font-size:.95rem;margin:0 0 32px;line-height:1.5}
-    .qr-wrap{background:#fff;border-radius:20px;display:inline-block;padding:14px;margin-bottom:22px}
-    .qr-wrap img{display:block;width:180px;height:180px}
-    .notice{background:rgba(216,179,90,.08);border:1px solid rgba(216,179,90,.22);border-radius:14px;padding:14px 18px;font-size:.9rem;color:#dfd6c7;max-width:380px;margin:0 auto}
-    .notice b{color:#d8b35a}
+    .center{width:100%}
 
-    /* pending */
-    #pendingView{display:none}
-    #pendingView.show{display:block;text-align:center;padding:60px 0}
-    .pcard{border:1px solid rgba(216,179,90,.22);background:rgba(216,179,90,.06);border-radius:22px;padding:32px;max-width:420px;margin:0 auto}
-    .pcard h2{margin:0 0 10px;font-size:1.3rem}
-    .pcard p{color:#a9a59b;margin:0 0 24px;font-size:.9rem;line-height:1.5}
-    .btn{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:14px 30px;background:#d8b35a;color:#15110a;font-weight:900;font-size:.95rem;text-decoration:none}
+    .card{
+      border:1px solid var(--line);
+      background:linear-gradient(180deg, rgba(23,27,35,.92), rgba(13,15,20,.94));
+      border-radius:32px;
+      box-shadow:var(--shadow);
+    }
 
-    footer{text-align:center;color:#a9a59b;font-size:.8rem;padding:20px 16px;border-top:1px solid rgba(255,255,255,.06);margin-top:40px}
-    footer a{color:#a9a59b;text-decoration:none}
-    footer a:hover{color:#d8b35a}
+    .main{padding:36px}
+
+    .kicker{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      color:var(--gold);
+      font-weight:900;
+      font-size:.85rem;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      background:rgba(216,179,90,.10);
+      border-bottom:1px solid rgba(216,179,90,.20);
+      padding:14px 36px;
+      margin:-36px -36px 28px;
+      border-radius:32px 32px 0 0;
+    }
+
+    .dot{
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:var(--green);
+      box-shadow:0 0 18px rgba(40,209,124,.75);
+    }
+
+    .ack{
+      display:flex;
+      gap:14px;
+      align-items:center;
+      padding:18px 20px;
+      border:1px solid rgba(216,179,90,.28);
+      background:rgba(216,179,90,.08);
+      border-radius:18px;
+      color:#dfd6c7;
+      font-weight:700;
+      font-size:1.05rem;
+      cursor:pointer;
+    }
+
+    .ack input{
+      width:22px;
+      height:22px;
+      accent-color:var(--gold);
+      flex:0 0 auto;
+      cursor:pointer;
+    }
+
+    .actions{margin-top:20px}
+
+    .btn{
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:18px 24px;
+      font-weight:900;
+      font-size:1.1rem;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      width:100%;
+    }
+
+    .btn.primary{
+      background:linear-gradient(135deg, var(--gold), #f3d47a);
+      color:#15110a;
+      border-color:rgba(255,255,255,.22);
+      box-shadow:0 18px 50px rgba(216,179,90,.25);
+    }
+
+    .btn[aria-disabled="true"]{
+      opacity:.4;
+      pointer-events:none;
+      box-shadow:none;
+    }
+
+    .footer{
+      margin-top:28px;
+      color:var(--muted);
+      font-size:.84rem;
+      text-align:center;
+    }
+
+    @media(max-width:540px){
+      .main{padding:26px}
+    }
   </style>
 </head>
+
 <body>
+  <main class="wrap">
+    <header class="topbar">
+      <a href="/" aria-label="Square Bidness Home">
+        <img src="/assets/cleantextlogo.png" alt="Square Bidness" width="156" height="26"
+          decoding="async" style="height:26px;width:auto;display:block;" />
+      </a>
+    </header>
 
-  <div class="topbar">
-    <span class="brand">Square Bidness Holdings, Inc.</span>
-  </div>
+    <section class="center">
+      <div class="card main">
+        <div class="kicker"><span class="dot"></span> Stripe Connect</div>
 
-  <div class="wrap">
+        <label class="ack" for="readyAck">
+          <input id="readyAck" type="checkbox" />
+          <span>My business is ready to connect to Stripe.</span>
+        </label>
 
-    <!-- loading -->
-    <div id="loadingView">
-      <div class="spin"></div>
-      <h2>Setting Up Your Account</h2>
-      <p>Getting your Stripe connection ready&hellip;</p>
-    </div>
-
-    <!-- stripe embedded onboarding -->
-    <div id="embedView">
-      <div id="stripeOnboarding"></div>
-    </div>
-
-    <!-- success -->
-    <div id="successView">
-      <div class="badge"><span class="badge-dot"></span> Connected</div>
-      <h1>You're In.</h1>
-      <p class="sub">Your Stripe account is active. Scan this code to check your status anytime.</p>
-      <div class="qr-wrap">
-        <img id="qrImg" src="" alt="Status QR Code" width="180" height="180" />
+        <div class="actions">
+          <a class="btn primary" id="connectBtn" href="/api/stripe/create-account-link/" aria-disabled="true">
+            Connect to Stripe Now
+          </a>
+        </div>
       </div>
-      <div class="notice">
-        <b>Check back in 24 hours.</b> Your account may take up to 24 hours to be fully active for payouts.
-      </div>
-    </div>
+    </section>
 
-    <!-- pending / incomplete -->
-    <div id="pendingView">
-      <div class="pcard">
-        <h2>Almost There.</h2>
-        <p>You didn't finish connecting. Check your email for a link to continue, or start the process again.</p>
-        <a class="btn" href="/stripe/">Start Over</a>
-      </div>
-    </div>
-
-  </div>
-
-  <footer>
-    Powered by Stripe &nbsp;&middot;&nbsp;
-    <a href="/">squarebidness.com</a> &nbsp;&middot;&nbsp;
-    &copy; Square Bidness Holdings, Inc.
-  </footer>
+    <p class="footer">Powered by Stripe &nbsp;&middot;&nbsp; &copy; Square Bidness Holdings, Inc.</p>
+  </main>
 
   <script>
-    const params = new URLSearchParams(location.search);
-    const site   = params.get("site") || "";
+    const ack = document.getElementById("readyAck");
+    const btn = document.getElementById("connectBtn");
 
-    let accountId = null;
-
-    async function init() {
-      try {
-        const resp = await fetch("/api/stripe/create-account-session/", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({})
-        });
-        const data = await resp.json();
-
-        if (!resp.ok || !data.client_secret) {
-          throw new Error(data.error || "No client secret returned");
-        }
-
-        accountId = data.account;
-        const publishableKey = data.publishable_key;
-
-        if (typeof StripeConnect === "undefined") {
-          throw new Error("Stripe Connect JS failed to load. Check your connection and try again.");
-        }
-
-        document.getElementById("loadingView").style.display = "none";
-        document.getElementById("embedView").style.display   = "block";
-
-        const instance = StripeConnect.loadConnectAndInitialize({
-          publishableKey,
-          fetchClientSecret: async () => data.client_secret,
-          appearance: {
-            variables: {
-              colorPrimary:    "#d8b35a",
-              colorBackground: "#171b23",
-              colorText:       "#f5f2ea",
-              borderRadius:    "12px"
-            }
-          }
-        });
-
-        const component = instance.create("account_onboarding");
-
-        component.setOnExit(async () => {
-          await checkAndShow();
-        });
-
-        component.mount("#stripeOnboarding");
-
-      } catch (err) {
-        console.error("Stripe init:", err);
-        const errHtml = `<p style="color:#a9a59b;margin:0 0 16px">Something went wrong starting your session.</p>
-           <a href="/stripe/" style="color:#d8b35a;font-weight:700">Try Again</a>`;
-        const loadingEl = document.getElementById("loadingView");
-        const embedEl   = document.getElementById("embedView");
-        embedEl.style.display  = "none";
-        loadingEl.style.display = "block";
-        loadingEl.innerHTML = errHtml;
-      }
-    }
-
-    async function checkAndShow() {
-      if (!accountId) { showPending(); return; }
-      try {
-        const r = await fetch(`/api/stripe/account-status/?account=${encodeURIComponent(accountId)}`);
-        const data = await r.json();
-        if (data.detailsSubmitted && data.chargesEnabled && data.payoutsEnabled) {
-          showSuccess();
-        } else {
-          showPending();
-        }
-      } catch (_) {
-        showPending();
-      }
-    }
-
-    function showSuccess() {
-      document.getElementById("embedView").style.display = "none";
-      document.getElementById("successView").classList.add("show");
-
-      const qrDest = (site && site.startsWith("/") && !site.startsWith("//"))
-        ? `https://www.squarebidness.com${site}`
-        : "https://www.squarebidness.com/stripe-connect/get-built/";
-      document.getElementById("qrImg").src =
-        `https://api.qrserver.com/v1/create-qr-code/?size=360x360&margin=0&data=${encodeURIComponent(qrDest)}`;
-    }
-
-    function showPending() {
-      document.getElementById("embedView").style.display     = "none";
-      document.getElementById("loadingView").style.display   = "none";
-      document.getElementById("pendingView").classList.add("show");
-    }
-
-    init();
+    ack.addEventListener("change", () => {
+      btn.setAttribute("aria-disabled", ack.checked ? "false" : "true");
+    });
   </script>
 </body>
 </html>
