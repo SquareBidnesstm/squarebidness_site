@@ -14,6 +14,8 @@ export default async function handler(req, res) {
     const stripe = new Stripe(process.env.STRIPE_HOLDINGS_SECRET_KEY);
 
     const account = await stripe.accounts.create({
+      type: "express",
+      country: "US",
       capabilities: {
         card_payments: { requested: true },
         transfers:     { requested: true },
