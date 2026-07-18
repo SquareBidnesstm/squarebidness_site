@@ -69,7 +69,7 @@ export default function AddHomescreenPage() {
                 </span>
               </li>
               <li style={{ margin: "8px 0" }}>Scroll down and tap <strong style={{ color: "#fff" }}>Add to Home Screen</strong>.</li>
-              <li style={{ margin: "8px 0" }}>Name it <strong style={{ color: "#fff" }}>Booking</strong> and tap <strong style={{ color: "#fff" }}>Add</strong>.</li>
+              <li style={{ margin: "8px 0" }}>Tap <strong style={{ color: "#fff" }}>Add</strong>.</li>
             </ol>
           </div>
 
