@@ -15,7 +15,7 @@ export async function POST(
   if (!authed) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
 
   const { data: shop } = await supabaseServer
-    .from("shops").select("id, name").eq("slug", shopSlug).eq("active", true).single();
+    .from("shops").select("id, name, stripe_account_id").eq("slug", shopSlug).eq("active", true).single();
   if (!shop) return NextResponse.json({ ok: false, error: "Shop not found" }, { status: 404 });
 
   const { data: booking } = await supabaseServer
@@ -68,6 +68,10 @@ export async function POST(
       booking_id: id,
       shop_id: shop.id,
       payment_type: "balance",
+    },
+    payment_intent_data: {
+      metadata: { booking_id: id, shop_id: shop.id, payment_type: "balance" },
+      ...(shop.stripe_account_id ? { transfer_data: { destination: shop.stripe_account_id } } : {}),
     },
   });
 

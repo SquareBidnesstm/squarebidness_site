@@ -31,12 +31,26 @@ export default async function BookingPage({
 
   if (!barber) notFound();
 
-  const { data: services } = await supabaseServer
+  // Only show services this barber is assigned to. Falls back to all shop services
+  // if no barber_services rows exist (e.g. legacy shops onboarded before assignments).
+  const { data: barberServiceRows } = await supabaseServer
+    .from("barber_services")
+    .select("service_id")
+    .eq("barber_id", barber.id)
+    .eq("active", true);
+
+  const assignedIds = barberServiceRows?.map((r) => r.service_id) ?? [];
+
+  const servicesQuery = supabaseServer
     .from("services")
     .select("id, slug, name, duration_minutes, price")
     .eq("shop_id", shop.id)
     .eq("active", true)
     .order("sort_order");
+
+  const { data: services } = assignedIds.length > 0
+    ? await servicesQuery.in("id", assignedIds)
+    : await servicesQuery;
 
   // Load barber-specific price overrides and bio in parallel
   const [{ data: overrideSetting }, { data: bioSetting }] = await Promise.all([

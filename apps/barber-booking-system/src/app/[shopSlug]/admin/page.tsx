@@ -934,7 +934,7 @@ export default function AdminPage() {
                           <span style={{ color: "#666" }}>Created: </span>
                           {new Date(booking.created_at).toLocaleString()}
                         </div>
-                        {booking.payment_status === "deposit_paid" && booking.status === "completed" && (() => {
+                        {booking.payment_status === "deposit_paid" && ["confirmed", "completed"].includes(booking.status) && (() => {
                           const remaining = Math.max(0, Number(booking.services?.price ?? 0) - (booking.payments?.filter(p => p.status === "succeeded").reduce((s, p) => s + Number(p.amount), 0) ?? 0));
                           return (
                             <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>

@@ -119,6 +119,28 @@ export default function BarberPage() {
   const [pricesSaving, setPricesSaving] = useState(false);
   const [pricesSaved, setPricesSaved] = useState(false);
 
+  const [statusUpdating, setStatusUpdating] = useState<string | null>(null);
+
+  const updateBookingStatus = async (bookingId: string, newStatus: "completed" | "no_show") => {
+    setStatusUpdating(bookingId);
+    try {
+      const res = await fetch(
+        `/api/${shopSlug}/barbers/${barberSlug}/appointments/${bookingId}/status`,
+        { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: newStatus }) }
+      );
+      const d = await res.json();
+      if (d.ok) {
+        setBookings((prev) => prev.map((b) => b.id === bookingId ? { ...b, status: newStatus as BookingStatus } : b));
+      } else {
+        alert(d.error ?? "Could not update status");
+      }
+    } catch {
+      alert("Network error — please try again");
+    } finally {
+      setStatusUpdating(null);
+    }
+  };
+
   const today = useMemo(() => getTodayString(), []);
 
   useEffect(() => {
@@ -478,7 +500,29 @@ export default function BarberPage() {
                           <div><span style={{ color: "#555" }}>Email: </span>{b.customer_email || "—"}</div>
                           <div><span style={{ color: "#555" }}>Duration: </span>{b.services?.duration_minutes ?? "—"} min</div>
                           <div><span style={{ color: "#555" }}>Payment: </span>{b.payment_status}</div>
-                          {b.client_notes && <div><span style={{ color: "#555" }}>Notes: </span>{b.client_notes}</div>}
+                          {b.client_notes && <div><span style={{ color: "#555" }}>Notes: </span><span style={{ color: "#ccc" }}>{b.client_notes}</span></div>}
+                          {(b.status === "confirmed" || b.status === "pending") && (
+                            <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+                              <button
+                                type="button"
+                                disabled={statusUpdating === b.id}
+                                onClick={() => updateBookingStatus(b.id, "completed")}
+                                style={{ padding: "8px 16px", borderRadius: 10, border: "none", background: "#1e4400", color: "#5cd600", fontWeight: 700, fontSize: 13, cursor: "pointer", opacity: statusUpdating === b.id ? 0.6 : 1 }}
+                              >
+                                ✓ Mark Complete
+                              </button>
+                              <button
+                                type="button"
+                                disabled={statusUpdating === b.id}
+                                onClick={() => {
+                                  if (window.confirm(`Mark ${b.customer_name} as no-show?`)) updateBookingStatus(b.id, "no_show");
+                                }}
+                                style={{ padding: "8px 16px", borderRadius: 10, border: "1px solid #331500", background: "#1a0a00", color: "#ff9955", fontWeight: 700, fontSize: 13, cursor: "pointer", opacity: statusUpdating === b.id ? 0.6 : 1 }}
+                              >
+                                No Show
+                              </button>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>

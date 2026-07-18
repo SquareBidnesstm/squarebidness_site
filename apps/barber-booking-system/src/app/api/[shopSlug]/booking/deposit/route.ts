@@ -68,7 +68,7 @@ export async function POST(
   }
 
   const { data: shop } = await supabaseServer
-    .from("shops").select("id, name, slug, timezone").eq("slug", shopSlug).eq("active", true).single();
+    .from("shops").select("id, name, slug, timezone, stripe_account_id").eq("slug", shopSlug).eq("active", true).single();
   if (!shop) return NextResponse.json({ ok: false, error: "Shop not found" }, { status: 404 });
 
   const hasActivePlan = await checkActiveSubscription(shop.id);
@@ -144,6 +144,7 @@ export async function POST(
     },
     payment_intent_data: {
       metadata: { shop_id: shop.id, shop_slug: shopSlug },
+      ...(shop.stripe_account_id ? { transfer_data: { destination: shop.stripe_account_id } } : {}),
     },
   });
 

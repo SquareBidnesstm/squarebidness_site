@@ -148,7 +148,7 @@ async function handleBarberReply(barberPhone: string, messageBody: string) {
     if (booking.is_special_session) {
       // Fetch shop slug once — used in both ACCEPT and DECLINE branches
       const { data: shop } = await supabaseServer
-        .from("shops").select("slug").eq("id", barber.shop_id).single();
+        .from("shops").select("slug, stripe_account_id").eq("id", barber.shop_id).single();
       const shopSlug = shop?.slug ?? "shop";
 
       // ── ACCEPT (with optional price override) ──────────────────────────────
@@ -215,6 +215,10 @@ async function handleBarberReply(barberPhone: string, messageBody: string) {
             cancel_url: `https://booking.squarebidness.com/${shopSlug}`,
             metadata: { booking_id: booking.id, shop_slug: shopSlug },
             expires_at: Math.floor(Date.now() / 1000) + 86400, // 24 hrs
+            payment_intent_data: {
+              metadata: { booking_id: booking.id, shop_slug: shopSlug },
+              ...(shop?.stripe_account_id ? { transfer_data: { destination: shop.stripe_account_id } } : {}),
+            },
           });
           checkoutUrl = session.url ?? "";
           checkoutSessionId = session.id;

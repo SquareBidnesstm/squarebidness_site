@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { supabaseServer } from "../../../../lib/supabase/server";
 import { sendPushToBarber, sendPushToShopAdmins } from "../../../../lib/push";
+import { sendCancellationEmail } from "../../../../lib/email";
 import { checkRateLimit, recordAttempt } from "../../../../lib/utils";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-04-22.dahlia" });
@@ -33,7 +34,7 @@ export async function POST(
 
   const { data: booking } = await supabaseServer
     .from("bookings")
-    .select(`id, status, payment_status, starts_at, customer_name, customer_phone, shop_id, barber_id,
+    .select(`id, status, payment_status, starts_at, appointment_date, customer_name, customer_phone, customer_email, booking_code, shop_id, barber_id,
       shops(id, slug, name, timezone),
       barbers(id, name, display_name),
       services(name),
@@ -150,6 +151,24 @@ export async function POST(
         }).catch(console.error);
       }
     }
+  }
+
+  // Email cancellation confirmation (non-blocking)
+  const customerEmail = (booking as any).customer_email;
+  if (customerEmail) {
+    sendCancellationEmail({
+      to: customerEmail,
+      customerName: booking.customer_name,
+      shopName: (shop as any)?.name ?? "",
+      barberName: (barber as any)?.display_name || (barber as any)?.name || "",
+      serviceName: (service as any)?.name ?? "Appointment",
+      appointmentDate: (booking as any).appointment_date,
+      startsAt: booking.starts_at,
+      bookingCode: (booking as any).booking_code,
+      timezone: (shop as any)?.timezone ?? "America/Chicago",
+      refunded,
+      refundAmount: depositPayment ? Number(depositPayment.amount) : undefined,
+    }).catch(console.error);
   }
 
   return NextResponse.json({
