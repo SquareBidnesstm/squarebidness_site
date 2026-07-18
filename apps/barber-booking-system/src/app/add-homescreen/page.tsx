@@ -59,7 +59,15 @@ export default function AddHomescreenPage() {
             <h2 style={{ margin: "0 0 14px", fontSize: "1.35rem" }}>iPhone</h2>
             <ol style={{ margin: 0, paddingLeft: 22, color: "#a1a1aa", lineHeight: 1.6 }}>
               <li style={{ margin: "8px 0" }}>Open SB Booking in <strong style={{ color: "#fff" }}>Safari</strong>.</li>
-              <li style={{ margin: "8px 0" }}>Tap the <strong style={{ color: "#fff" }}>share button</strong> (box with arrow).</li>
+              <li style={{ margin: "8px 0" }}>Tap the <strong style={{ color: "#fff" }}>share button</strong>{" "}
+                <span style={{ display: "inline-flex", alignItems: "center", verticalAlign: "middle", background: "rgba(255,255,255,.12)", borderRadius: 8, padding: "2px 7px", gap: 4, fontSize: "0.78rem", color: "#e0e0e0", fontWeight: 600 }}>
+                  <svg width="14" height="16" viewBox="0 0 14 18" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: "block" }}>
+                    <path d="M7 1v11M3 4l4-3 4 3" stroke="#e0e0e0" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                    <rect x="1" y="7" width="12" height="10" rx="2" stroke="#e0e0e0" strokeWidth="1.6" fill="none"/>
+                  </svg>
+                  Share
+                </span>
+              </li>
               <li style={{ margin: "8px 0" }}>Scroll down and tap <strong style={{ color: "#fff" }}>Add to Home Screen</strong>.</li>
               <li style={{ margin: "8px 0" }}>Name it <strong style={{ color: "#fff" }}>Booking</strong> and tap <strong style={{ color: "#fff" }}>Add</strong>.</li>
             </ol>
