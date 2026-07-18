@@ -112,7 +112,7 @@ export async function checkActiveSubscription(shopId: string): Promise<boolean> 
     .eq("shop_id", shopId)
     .maybeSingle(); // .single() throws PGRST116 if no row; .maybeSingle() returns null safely
   if (!data) return false;
-  return data.status === "active" && data.plan !== "free";
+  return ["active", "trialing"].includes(data.status) && data.plan !== "free";
 }
 
 export async function verifyAdminSession(
