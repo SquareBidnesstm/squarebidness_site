@@ -8,20 +8,58 @@
   <meta name="description" content="Your Stripe Connect onboarding link has expired. Generate a new one to continue." />
   <script defer src="/scripts/sb-analytics.js"></script>
   <style>
-    body{margin:0;min-height:100vh;display:grid;place-items:center;background:#08090b;color:#f5f2ea;font-family:Inter,system-ui,sans-serif;padding:22px}
-    .card{width:min(680px,100%);border:1px solid rgba(255,255,255,.12);border-radius:30px;background:linear-gradient(180deg,#171b23,#101217);padding:32px;box-shadow:0 24px 80px rgba(0,0,0,.45)}
-    .kicker{color:#d8b35a;font-weight:900;text-transform:uppercase;letter-spacing:.12em;font-size:.78rem}
-    h1{font-size:clamp(2.1rem,7vw,4rem);line-height:.9;letter-spacing:-.06em;margin:14px 0}
-    p{color:#cfc8ba;font-size:1.02rem}
-    .btn{display:inline-flex;margin-top:18px;border-radius:999px;padding:14px 18px;background:#d8b35a;color:#15110a;font-weight:900;text-decoration:none}
+    body{
+      margin:0;min-height:100vh;display:grid;place-items:center;
+      background:#08090b;color:#f5f2ea;
+      font-family:Inter,system-ui,sans-serif;padding:22px;
+    }
+    .card{
+      width:min(560px,100%);
+      border:1px solid rgba(255,100,60,.25);
+      border-radius:30px;
+      background:linear-gradient(180deg,#1a1110,#0e0b0a);
+      padding:40px 36px;
+      box-shadow:0 0 60px rgba(255,80,40,.08), 0 24px 80px rgba(0,0,0,.5);
+      text-align:center;
+    }
+    .warn-icon{
+      font-size:2.8rem;display:block;margin-bottom:12px;
+      animation:pulse-icon 1.4s ease-in-out infinite;
+    }
+    @keyframes pulse-icon{
+      0%,100%{transform:scale(1);opacity:1;}
+      50%{transform:scale(1.1);opacity:.7;}
+    }
+    .kicker{
+      color:#ff6b3d;font-weight:900;text-transform:uppercase;
+      letter-spacing:.14em;font-size:.78rem;margin-bottom:10px;
+    }
+    h1{
+      font-size:clamp(2.4rem,8vw,4.2rem);line-height:.92;
+      letter-spacing:-.06em;margin:0 0 18px;
+      animation:flash-warn 1.4s ease-in-out infinite;
+    }
+    @keyframes flash-warn{
+      0%,100%{color:#ff6b3d;text-shadow:0 0 24px rgba(255,107,61,.6),0 0 60px rgba(255,107,61,.2);}
+      50%{color:#ffaa88;text-shadow:0 0 8px rgba(255,107,61,.2);}
+    }
+    p{color:#cfc8ba;font-size:1rem;line-height:1.6;margin:0 0 28px;}
+    .btn{
+      display:flex;align-items:center;justify-content:center;
+      width:100%;border-radius:999px;padding:16px 24px;
+      background:#d8b35a;color:#15110a;font-weight:900;
+      font-size:1rem;text-decoration:none;
+    }
   </style>
 </head>
 <body>
   <main class="card">
+    <span class="warn-icon">⚠️</span>
     <div class="kicker">Stripe Connect</div>
-    <h1>Link Expired.</h1>
+    <h1>LINK EXPIRED</h1>
     <p>
-      This Stripe onboarding link expired or was already used. Generate a new one to continue — it only takes a second.
+      This onboarding link expired or was already used.<br>
+      Generate a new one — it only takes a second.
     </p>
     <a class="btn" id="restartStripe" href="/api/stripe-connect/create-account-link/">
       Get a New Link
@@ -38,15 +76,8 @@
     const returnTo = params.get("returnTo") || "";
 
     restartUrl.searchParams.set("source", source);
-
-    if (client) {
-      restartUrl.searchParams.set("client", client);
-    }
-
-    if (leadId) {
-      restartUrl.searchParams.set("leadId", leadId);
-    }
-
+    if (client) restartUrl.searchParams.set("client", client);
+    if (leadId) restartUrl.searchParams.set("leadId", leadId);
     if (returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//")) {
       restartUrl.searchParams.set("returnTo", returnTo);
     }
