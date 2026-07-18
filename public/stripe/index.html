@@ -127,6 +127,10 @@
         accountId = data.account;
         const publishableKey = data.publishable_key;
 
+        if (typeof StripeConnect === "undefined") {
+          throw new Error("Stripe Connect JS failed to load. Check your connection and try again.");
+        }
+
         document.getElementById("loadingView").style.display = "none";
         document.getElementById("embedView").style.display   = "block";
 
@@ -153,9 +157,13 @@
 
       } catch (err) {
         console.error("Stripe init:", err);
-        document.getElementById("loadingView").innerHTML =
-          `<p style="color:#a9a59b;margin:0 0 16px">Something went wrong starting your session.</p>
+        const errHtml = `<p style="color:#a9a59b;margin:0 0 16px">Something went wrong starting your session.</p>
            <a href="/stripe/" style="color:#d8b35a;font-weight:700">Try Again</a>`;
+        const loadingEl = document.getElementById("loadingView");
+        const embedEl   = document.getElementById("embedView");
+        embedEl.style.display  = "none";
+        loadingEl.style.display = "block";
+        loadingEl.innerHTML = errHtml;
       }
     }
 
