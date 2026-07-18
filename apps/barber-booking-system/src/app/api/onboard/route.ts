@@ -23,8 +23,6 @@ async function createStripeConnectAccount(
     const account = await stripe.accounts.create({
       type: "custom",
       country: "US",
-      business_type: "company",
-      company: { name: shopName },
       ...(ownerEmail ? { email: ownerEmail } : {}),
       business_profile: {
         name: shopName,

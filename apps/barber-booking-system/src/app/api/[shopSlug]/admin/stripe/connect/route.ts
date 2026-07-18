@@ -30,11 +30,12 @@ export async function GET(
   // Create a connected account on the fly if one doesn't exist yet
   if (!accountId) {
     try {
+      // Don't pre-set business_type — let Stripe's hosted form ask.
+      // This lets sole proprietors use SSN and businesses use EIN without
+      // us needing to know which they are before onboarding starts.
       const account = await stripe.accounts.create({
         type: "custom",
         country: "US",
-        business_type: "company",
-        company: { name: shop.name },
         business_profile: {
           name: shop.name,
           mcc: "7230",
