@@ -10,7 +10,7 @@ export async function verifyTurnstileToken(
   const secret = process.env.TURNSTILE_SECRET_KEY;
   const required = process.env.TURNSTILE_REQUIRED === "true";
   if (!secret) return !required;
-  if (!token) return false;
+  if (!token) return !required;
 
   const formData = new FormData();
   formData.set("secret", secret);
