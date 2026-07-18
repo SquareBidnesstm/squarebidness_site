@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>Stripe Connect Help | Square Bidness Holdings</title>
+  <script defer src="/scripts/sb-analytics.js"></script>
+  <style>
+    body{margin:0;min-height:100vh;display:grid;place-items:center;background:#08090b;color:#f5f2ea;font-family:Inter,system-ui,sans-serif;padding:22px}
+    .card{width:min(520px,100%);border:1px solid rgba(255,255,255,.12);border-radius:30px;background:linear-gradient(180deg,#171b23,#101217);overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.45)}
+    .kicker{display:flex;align-items:center;justify-content:center;gap:10px;background:rgba(216,179,90,.10);border-bottom:1px solid rgba(216,179,90,.20);padding:14px;color:#d8b35a;font-weight:900;text-transform:uppercase;letter-spacing:.14em;font-size:.82rem}
+    .dot{width:8px;height:8px;border-radius:50%;background:#28d17c;box-shadow:0 0 14px rgba(40,209,124,.75)}
+    .body{padding:32px}
+    h1{font-size:clamp(1.5rem,5vw,2rem);line-height:1.1;letter-spacing:-.03em;margin:0 0 8px}
+    .sub{color:#a9a59b;font-size:.95rem;margin:0 0 28px}
+    .steps{list-style:none;margin:0 0 28px;padding:0;display:flex;flex-direction:column;gap:16px}
+    .step{display:flex;gap:16px;align-items:flex-start}
+    .num{flex:0 0 auto;width:36px;height:36px;border-radius:50%;background:#d8b35a;color:#15110a;font-weight:900;font-size:1rem;display:flex;align-items:center;justify-content:center}
+    .step-text{padding-top:6px}
+    .step-text b{display:block;font-size:1rem;margin-bottom:2px}
+    .step-text span{color:#a9a59b;font-size:.88rem}
+    .ack{display:flex;gap:14px;align-items:center;padding:16px 18px;border:1px solid rgba(216,179,90,.28);background:rgba(216,179,90,.08);border-radius:18px;color:#dfd6c7;font-weight:700;font-size:1rem;cursor:pointer;margin-bottom:16px}
+    .ack input{width:22px;height:22px;accent-color:#d8b35a;flex:0 0 auto;cursor:pointer}
+    .btn{display:flex;align-items:center;justify-content:center;border-radius:999px;padding:16px;background:#d8b35a;color:#15110a;font-weight:900;font-size:1rem;text-decoration:none;margin-bottom:12px}
+    .btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
+    .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,.18);color:#f5f2ea}
+    footer{text-align:center;color:#a9a59b;font-size:.8rem;margin-top:18px}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="kicker"><span class="dot"></span> Stripe Connect Help</div>
+    <div class="body">
+      <h1>Let's Get You Connected.</h1>
+      <p class="sub">Follow these steps in order. Takes about 5 minutes.</p>
+
+      <ol class="steps">
+        <li class="step">
+          <div class="num">1</div>
+          <div class="step-text">
+            <b>Check the box below.</b>
+            <span>Confirms your business is ready to connect.</span>
+          </div>
+        </li>
+        <li class="step">
+          <div class="num">2</div>
+          <div class="step-text">
+            <b>Click "Connect to Stripe Now."</b>
+            <span>The button lights up once you check the box.</span>
+          </div>
+        </li>
+        <li class="step">
+          <div class="num">3</div>
+          <div class="step-text">
+            <b>Fill out everything Stripe asks.</b>
+            <span>Name, business info, bank account. Don't skip anything.</span>
+          </div>
+        </li>
+        <li class="step">
+          <div class="num">4</div>
+          <div class="step-text">
+            <b>Submit — you'll come back automatically.</b>
+            <span>We'll make sure you're ready to take payments and grow your business.</span>
+          </div>
+        </li>
+      </ol>
+
+      <label class="ack" for="readyCheck">
+        <input id="readyCheck" type="checkbox" />
+        <span>My business is ready to connect to Stripe.</span>
+      </label>
+
+      <a class="btn" id="connectBtn" href="/api/stripe/create-account-link/" aria-disabled="true">Connect to Stripe Now</a>
+      <a class="btn ghost" href="/stripe/return/">Back to Status</a>
+    </div>
+  </main>
+
+  <footer>Powered by Stripe &nbsp;&middot;&nbsp; &copy; Square Bidness Holdings, Inc.</footer>
+
+  <script>
+    const check = document.getElementById("readyCheck");
+    const btn = document.getElementById("connectBtn");
+    check.addEventListener("change", () => {
+      btn.setAttribute("aria-disabled", check.checked ? "false" : "true");
+    });
+  </script>
+</body>
+</html>
