@@ -1,7 +1,64 @@
 import { NextRequest, NextResponse } from "next/server";
+import Stripe from "stripe";
 import { supabaseServer } from "../../../lib/supabase/server";
 import { hashPin } from "../../../lib/utils";
 import { sendShopSignupNotification } from "../../../lib/email";
+
+function getStripe() {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) return null;
+  return new Stripe(key, { apiVersion: "2024-06-20" });
+}
+
+async function createStripeConnectAccount(
+  shopName: string,
+  ownerEmail: string | undefined,
+  city: string,
+  state: string
+): Promise<{ accountId: string | null; financialAccountId: string | null }> {
+  const stripe = getStripe();
+  if (!stripe) return { accountId: null, financialAccountId: null };
+
+  try {
+    const account = await stripe.accounts.create({
+      type: "custom",
+      country: "US",
+      business_type: "company",
+      company: { name: shopName },
+      ...(ownerEmail ? { email: ownerEmail } : {}),
+      business_profile: {
+        name: shopName,
+        mcc: "7230", // Beauty shops / barber shops
+        url: `https://booking.squarebidness.com`,
+      },
+      capabilities: {
+        transfers: { requested: true },
+        treasury: { requested: true },
+        card_issuing: { requested: true },
+      },
+      tos_acceptance: { service_agreement: "recipient" },
+      metadata: { platform: "squarebidness", city, state },
+    });
+
+    // Attempt to create a Treasury financial account for the connected account
+    let financialAccountId: string | null = null;
+    try {
+      const fa = await stripe.treasury.financialAccounts.create(
+        { supported_currencies: ["usd"], features: { inbound_transfers: { ach: { requested: true } }, outbound_payments: { ach: { requested: true } }, outbound_transfers: { ach: { requested: true } } } },
+        { stripeAccount: account.id }
+      );
+      financialAccountId = fa.id;
+    } catch (faErr) {
+      // Treasury may not be enabled yet — non-fatal, we still have the account
+      console.warn("[onboard] Treasury FA creation skipped:", (faErr as Error).message);
+    }
+
+    return { accountId: account.id, financialAccountId };
+  } catch (err) {
+    console.warn("[onboard] Stripe Connect account creation failed (non-fatal):", (err as Error).message);
+    return { accountId: null, financialAccountId: null };
+  }
+}
 
 // Protect onboard with a shared platform secret so only the internal
 // onboarding wizard (or Marcus) can create new shops.
@@ -163,6 +220,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Create Stripe Connect account + Treasury financial account (non-blocking)
+    const { accountId, financialAccountId } = await createStripeConnectAccount(
+      shopName, ownerEmail, city, state
+    );
+    if (accountId) {
+      await supabaseServer
+        .from("shops")
+        .update({
+          stripe_account_id: accountId,
+          ...(financialAccountId ? { stripe_financial_account_id: financialAccountId } : {}),
+        })
+        .eq("id", shop.id);
+    }
+
     const { data: createdServices } = await supabaseServer
       .from("services")
       .insert(
@@ -258,7 +329,13 @@ export async function POST(req: NextRequest) {
       shopType: cleanShopType,
     }).catch((err) => console.error("[onboard] signup notification error:", err));
 
-    return NextResponse.json({ ok: true, shopSlug: shop.slug, shopName: shop.name });
+    return NextResponse.json({
+      ok: true,
+      shopSlug: shop.slug,
+      shopName: shop.name,
+      ...(accountId ? { stripeAccountId: accountId } : {}),
+      ...(financialAccountId ? { stripeFinancialAccountId: financialAccountId } : {}),
+    });
   } catch (err) {
     return NextResponse.json(
       { ok: false, error: err instanceof Error ? err.message : "Unknown error" },
