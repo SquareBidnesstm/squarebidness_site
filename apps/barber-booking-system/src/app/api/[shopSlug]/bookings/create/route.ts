@@ -207,7 +207,7 @@ export async function POST(
 
     const { data: shop, error: shopError } = await supabaseServer
       .from("shops")
-      .select("id, slug, name, timezone, manual_approval")
+      .select("id, slug, name, timezone, manual_approval, stripe_onboarding_complete, bypass_stripe_requirement")
       .eq("slug", shopSlug)
       .eq("active", true)
       .single();
@@ -219,6 +219,15 @@ export async function POST(
     const hasActivePlan = await checkActiveSubscription(shop.id);
     if (!hasActivePlan) {
       return NextResponse.json({ ok: false, error: "This shop's subscription is inactive. Online booking is unavailable." }, { status: 402 });
+    }
+
+    const stripeReady =
+      !!(shop as any).stripe_onboarding_complete || !!(shop as any).bypass_stripe_requirement;
+    if (!stripeReady) {
+      return NextResponse.json(
+        { ok: false, error: "Online booking is not available yet. Please contact the shop directly." },
+        { status: 402 }
+      );
     }
 
     const { data: barber, error: barberError } = await supabaseServer

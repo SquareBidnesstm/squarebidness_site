@@ -77,12 +77,21 @@ export async function POST(
   }
 
   const { data: shop } = await supabaseServer
-    .from("shops").select("id, name, slug, timezone, stripe_account_id").eq("slug", shopSlug).eq("active", true).single();
+    .from("shops").select("id, name, slug, timezone, stripe_account_id, stripe_onboarding_complete, bypass_stripe_requirement").eq("slug", shopSlug).eq("active", true).single();
   if (!shop) return NextResponse.json({ ok: false, error: "Shop not found" }, { status: 404 });
 
   const hasActivePlan = await checkActiveSubscription(shop.id);
   if (!hasActivePlan) {
     return NextResponse.json({ ok: false, error: "This shop's subscription is inactive. Online booking is unavailable." }, { status: 402 });
+  }
+
+  const stripeReady =
+    !!(shop as any).stripe_onboarding_complete || !!(shop as any).bypass_stripe_requirement;
+  if (!stripeReady) {
+    return NextResponse.json(
+      { ok: false, error: "Online booking is not available yet. Please contact the shop directly." },
+      { status: 402 }
+    );
   }
 
   // Get deposit settings

@@ -11,13 +11,18 @@ export async function PATCH(
   if (!authed) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
 
   const { shopId } = await params;
-  const { active } = await req.json();
+  const body = await req.json();
+
+  const updates: Record<string, unknown> = {};
+  if ("active" in body) updates.active = Boolean(body.active);
+  if ("bypass_stripe_requirement" in body) updates.bypass_stripe_requirement = Boolean(body.bypass_stripe_requirement);
+  if (!Object.keys(updates).length) return NextResponse.json({ ok: false, error: "Nothing to update." }, { status: 400 });
 
   const { data, error } = await supabaseServer
     .from("shops")
-    .update({ active: Boolean(active) })
+    .update(updates)
     .eq("id", shopId)
-    .select("id, name, active")
+    .select("id, name, active, bypass_stripe_requirement")
     .single();
 
   if (error || !data) return NextResponse.json({ ok: false, error: "Shop not found." }, { status: 404 });

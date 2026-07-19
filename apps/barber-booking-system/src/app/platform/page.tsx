@@ -8,6 +8,7 @@ type ShopRow = {
   owner_name: string; active: boolean; created_at: string;
   plan: string; subscription_status: string;
   total_bookings: number; total_revenue: number; completed_revenue: number;
+  bypass_stripe_requirement: boolean;
 };
 
 type Stats = {
@@ -58,6 +59,20 @@ export default function PlatformAdminPage() {
       });
       if (res.ok) {
         setShops((prev) => prev.map((s) => s.id === shop.id ? { ...s, active: !shop.active } : s));
+      }
+    } finally { setWorking(null); }
+  }
+
+  async function toggleBypass(shop: ShopRow) {
+    setWorking(shop.id);
+    try {
+      const res = await fetch(`/api/platform/admin/shops/${shop.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bypass_stripe_requirement: !shop.bypass_stripe_requirement }),
+      });
+      if (res.ok) {
+        setShops((prev) => prev.map((s) => s.id === shop.id ? { ...s, bypass_stripe_requirement: !shop.bypass_stripe_requirement } : s));
       }
     } finally { setWorking(null); }
   }
@@ -212,6 +227,14 @@ export default function PlatformAdminPage() {
                             style={{ ...btnTiny, color: s.active ? "#f97316" : "#22c55e", borderColor: s.active ? "#3a1a00" : "#003a1a", background: s.active ? "#1a0a00" : "#001a0a", cursor: "pointer" }}
                           >
                             {s.active ? "Deactivate" : "Activate"}
+                          </button>
+                          <button
+                            onClick={() => toggleBypass(s)}
+                            disabled={working === s.id}
+                            title={s.bypass_stripe_requirement ? "Stripe gate bypassed — click to enforce" : "Bypass Stripe requirement for this shop"}
+                            style={{ ...btnTiny, color: s.bypass_stripe_requirement ? "#22c55e" : "#555", borderColor: s.bypass_stripe_requirement ? "#003a1a" : "#1f1f1f", background: s.bypass_stripe_requirement ? "#001a0a" : "#0a0a0a", cursor: "pointer" }}
+                          >
+                            {s.bypass_stripe_requirement ? "Bypass ON" : "Bypass"}
                           </button>
                           <button
                             onClick={() => setConfirmDelete(s)}

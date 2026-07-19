@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
 
   const { data: shops } = await supabaseServer
     .from("shops")
-    .select("id, slug, name, city, state, owner_name, active, created_at")
+    .select("id, slug, name, city, state, owner_name, active, created_at, bypass_stripe_requirement")
     .order("created_at", { ascending: false });
 
   if (!shops) return NextResponse.json({ ok: true, shops: [], stats: {} });

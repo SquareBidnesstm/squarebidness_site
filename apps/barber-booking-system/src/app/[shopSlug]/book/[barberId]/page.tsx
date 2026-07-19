@@ -14,12 +14,36 @@ export default async function BookingPage({
 
   const { data: shop } = await supabaseServer
     .from("shops")
-    .select("id, name, city, state, logo_url")
+    .select("id, name, city, state, logo_url, stripe_onboarding_complete, bypass_stripe_requirement")
     .eq("slug", shopSlug)
     .eq("active", true)
     .single();
 
   if (!shop) notFound();
+
+  const stripeReady =
+    (shop as any).stripe_onboarding_complete === true ||
+    (shop as any).bypass_stripe_requirement === true;
+
+  if (!stripeReady) {
+    return (
+      <main style={{ minHeight: "100vh", background: "#050505", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+        <div style={{ textAlign: "center", maxWidth: 400 }}>
+          <div style={{ fontSize: 48, marginBottom: 20 }}>🔒</div>
+          <h2 style={{ fontSize: 24, fontWeight: 900, marginBottom: 8 }}>Online Booking Unavailable</h2>
+          <p style={{ color: "#888", marginBottom: 28, lineHeight: 1.6 }}>
+            This barber isn&apos;t set up for online payments yet. Please contact the shop directly to schedule your appointment.
+          </p>
+          <a
+            href={`/${shopSlug}`}
+            style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "12px 24px", borderRadius: 10, background: "#1a1a1a", color: "#fff", fontSize: 14, fontWeight: 700, textDecoration: "none", border: "1px solid #2a2a2a" }}
+          >
+            ← Back
+          </a>
+        </div>
+      </main>
+    );
+  }
 
   const { data: barber } = await supabaseServer
     .from("barbers")
