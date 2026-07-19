@@ -13,6 +13,7 @@ import BlockTimeModal from "./BlockTimeModal";
 import ClientsTab from "./ClientsTab";
 import SmsBlastModal from "./SmsBlastModal";
 import SettingsTab from "./SettingsTab";
+import StripeTab from "./StripeTab";
 
 type BookingStatus =
   | "pending"
@@ -97,7 +98,7 @@ export default function AdminPage() {
   const shopSlug = params.shopSlug as string;
   const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<"bookings" | "clients" | "barbers" | "services" | "hours" | "deposits" | "billing" | "settings">("bookings");
+  const [activeTab, setActiveTab] = useState<"bookings" | "clients" | "barbers" | "services" | "hours" | "deposits" | "stripe" | "billing" | "settings">("bookings");
   const [shopName, setShopName] = useState("");
   const [shopLogoUrl, setShopLogoUrl] = useState<string | null>(null);
   const [shopTimezone, setShopTimezone] = useState("America/New_York");
@@ -511,38 +512,10 @@ export default function AdminPage() {
           </p>
         </div>
 
-        {/* Stripe Connect banner — hidden once payouts are enabled */}
-        {stripeStatus && !stripeStatus.payouts_enabled && (
-          <div style={{
-            display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12,
-            background: stripeStatus.details_submitted ? "#001a2b" : "#0d0d0d",
-            border: `1px solid ${stripeStatus.details_submitted ? "#003344" : "#2a1500"}`,
-            borderRadius: 12, padding: "14px 18px", marginBottom: 24,
-          }}>
-            <div>
-              <p style={{ margin: 0, fontWeight: 700, fontSize: 14, color: stripeStatus.details_submitted ? "#33aaff" : "#ff9955" }}>
-                {stripeStatus.details_submitted ? "⏳ Stripe review in progress" : "⚡ Set up payouts to get paid"}
-              </p>
-              <p style={{ margin: "2px 0 0", fontSize: 13, color: "#666" }}>
-                {stripeStatus.details_submitted
-                  ? "Your info was submitted — Stripe usually approves within 1–2 business days."
-                  : "Complete Stripe verification so deposits route directly to your bank account."}
-              </p>
-            </div>
-            {!stripeStatus.details_submitted && (
-              <a
-                href={`/api/${shopSlug}/admin/stripe/connect`}
-                style={{ flexShrink: 0, padding: "10px 20px", background: "#d4af37", color: "#000", fontWeight: 800, fontSize: 13, borderRadius: 8, textDecoration: "none" }}
-              >
-                {stripeStatus.connected ? "Continue Setup →" : "Get Started →"}
-              </a>
-            )}
-          </div>
-        )}
 
         {/* Tab nav */}
         <div style={{ display: "flex", gap: 8, marginBottom: 28, flexWrap: "wrap" }}>
-          {(["bookings", "clients", "barbers", "services", "hours", "deposits", "billing", "settings"] as const).map((tab) => (
+          {(["bookings", "clients", "barbers", "services", "hours", "deposits", "stripe", "billing", "settings"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -573,6 +546,8 @@ export default function AdminPage() {
           <HoursTab shopSlug={shopSlug} />
         ) : activeTab === "deposits" ? (
           <DepositsTab shopSlug={shopSlug} />
+        ) : activeTab === "stripe" ? (
+          <StripeTab shopSlug={shopSlug} />
         ) : activeTab === "billing" ? (
           <BillingTab shopSlug={shopSlug} />
         ) : activeTab === "settings" ? (

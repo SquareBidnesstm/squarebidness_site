@@ -16,28 +16,39 @@ export async function GET(
     return NextResponse.redirect(new URL(`/${shopSlug}/admin/login`, req.url));
   }
 
+  const barberId = req.nextUrl.searchParams.get("barberId");
+  if (!barberId) {
+    return NextResponse.json({ ok: false, error: "barberId is required." }, { status: 400 });
+  }
+
   const { data: shop } = await supabaseServer
     .from("shops")
-    .select("id, name, stripe_account_id")
+    .select("id, name")
     .eq("slug", shopSlug)
     .eq("active", true)
     .single();
 
   if (!shop) return NextResponse.json({ ok: false, error: "Shop not found" }, { status: 404 });
 
-  let accountId = shop.stripe_account_id as string | null;
+  const { data: barber } = await supabaseServer
+    .from("barbers")
+    .select("id, name, stripe_account_id")
+    .eq("id", barberId)
+    .eq("shop_id", shop.id)
+    .eq("active", true)
+    .single();
 
-  // Create a connected account on the fly if one doesn't exist yet
+  if (!barber) return NextResponse.json({ ok: false, error: "Barber not found" }, { status: 404 });
+
+  let accountId = barber.stripe_account_id as string | null;
+
   if (!accountId) {
     try {
-      // Don't pre-set business_type — let Stripe's hosted form ask.
-      // This lets sole proprietors use SSN and businesses use EIN without
-      // us needing to know which they are before onboarding starts.
       const account = await stripe.accounts.create({
         type: "custom",
         country: "US",
         business_profile: {
-          name: shop.name,
+          name: barber.name,
           mcc: "7230",
           url: "https://booking.squarebidness.com",
         },
@@ -45,28 +56,33 @@ export async function GET(
           transfers: { requested: true },
           card_payments: { requested: true },
         },
-        metadata: { platform: "squarebidness" },
+        metadata: { platform: "squarebidness", shop_slug: shopSlug, barber_id: barberId },
       });
       accountId = account.id;
-      await supabaseServer.from("shops").update({ stripe_account_id: accountId }).eq("id", shop.id);
+      await supabaseServer.from("barbers").update({ stripe_account_id: accountId }).eq("id", barberId);
     } catch (err: any) {
       console.error("[stripe/connect] account creation failed:", err);
       return NextResponse.json({ ok: false, error: "Could not create Stripe account.", detail: err?.message || String(err) }, { status: 500 });
     }
   }
 
-  // Generate an AccountLink — Stripe hosts the KYC form
   const origin = `https://booking.squarebidness.com`;
   try {
+    const returnUrl = new URL(`/${shopSlug}/admin/stripe-return`, origin);
+    returnUrl.searchParams.set("barberId", barberId);
+
+    const refreshUrl = new URL(`/api/${shopSlug}/admin/stripe/connect`, origin);
+    refreshUrl.searchParams.set("barberId", barberId);
+
     const link = await stripe.accountLinks.create({
       account: accountId,
       type: "account_onboarding",
-      return_url: `${origin}/${shopSlug}/admin/stripe-return`,
-      refresh_url: `${origin}/api/${shopSlug}/admin/stripe/connect`,
+      return_url: returnUrl.toString(),
+      refresh_url: refreshUrl.toString(),
     });
     return NextResponse.redirect(link.url);
-  } catch (err) {
+  } catch (err: any) {
     console.error("[stripe/connect] accountLinks.create failed:", err);
-    return NextResponse.json({ ok: false, error: "Could not generate Stripe setup link." }, { status: 500 });
+    return NextResponse.json({ ok: false, error: "Could not generate Stripe setup link.", detail: err?.message }, { status: 500 });
   }
 }

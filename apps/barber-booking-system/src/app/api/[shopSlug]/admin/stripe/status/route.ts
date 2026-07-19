@@ -3,7 +3,7 @@ import Stripe from "stripe";
 import { supabaseServer } from "../../../../../../lib/supabase/server";
 import { verifyAdminSession } from "../../../../../../lib/auth";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-04-22.dahlia" });
+const stripe = new Stripe(process.env.STRIPE_ONBOARDING_SECRET_KEY!, { apiVersion: "2026-04-22.dahlia" });
 
 export async function GET(
   req: NextRequest,
@@ -16,14 +16,38 @@ export async function GET(
 
   const { data: shop } = await supabaseServer
     .from("shops")
-    .select("id, stripe_account_id, stripe_onboarding_complete")
+    .select("id")
     .eq("slug", shopSlug)
     .eq("active", true)
     .single();
 
   if (!shop) return NextResponse.json({ ok: false, error: "Shop not found" }, { status: 404 });
 
-  const accountId = shop.stripe_account_id as string | null;
+  const barberId = req.nextUrl.searchParams.get("barberId");
+
+  if (!barberId) {
+    // Return all barbers with their stripe status
+    const { data: barbers } = await supabaseServer
+      .from("barbers")
+      .select("id, name, display_name, stripe_account_id, stripe_onboarding_complete")
+      .eq("shop_id", shop.id)
+      .eq("active", true)
+      .order("sort_order");
+
+    return NextResponse.json({ ok: true, barbers: barbers ?? [] });
+  }
+
+  // Single barber status
+  const { data: barber } = await supabaseServer
+    .from("barbers")
+    .select("id, name, stripe_account_id, stripe_onboarding_complete")
+    .eq("id", barberId)
+    .eq("shop_id", shop.id)
+    .single();
+
+  if (!barber) return NextResponse.json({ ok: false, error: "Barber not found" }, { status: 404 });
+
+  const accountId = barber.stripe_account_id as string | null;
 
   if (!accountId) {
     return NextResponse.json({
@@ -39,12 +63,11 @@ export async function GET(
   try {
     const account = await stripe.accounts.retrieve(accountId);
 
-    // Sync DB if payouts just became enabled
     const nowComplete = account.payouts_enabled === true;
-    if (nowComplete && !shop.stripe_onboarding_complete) {
-      await supabaseServer.from("shops")
+    if (nowComplete && !barber.stripe_onboarding_complete) {
+      await supabaseServer.from("barbers")
         .update({ stripe_onboarding_complete: true })
-        .eq("id", shop.id);
+        .eq("id", barberId);
     }
 
     return NextResponse.json({
