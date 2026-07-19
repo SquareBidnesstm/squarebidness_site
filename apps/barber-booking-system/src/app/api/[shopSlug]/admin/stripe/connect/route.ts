@@ -50,9 +50,9 @@ export async function GET(
       });
       accountId = account.id;
       await supabaseServer.from("shops").update({ stripe_account_id: accountId }).eq("id", shop.id);
-    } catch (err) {
+    } catch (err: any) {
       console.error("[stripe/connect] account creation failed:", err);
-      return NextResponse.json({ ok: false, error: "Could not create Stripe account." }, { status: 500 });
+      return NextResponse.json({ ok: false, error: "Could not create Stripe account.", detail: err?.message || String(err) }, { status: 500 });
     }
   }
 
