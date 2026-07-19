@@ -13,22 +13,31 @@ export default async function handler(req, res) {
     const { default: Stripe } = await import("stripe");
     const stripe = new Stripe(process.env.STRIPE_HOLDINGS_SECRET_KEY);
 
-    const account = await stripe.accounts.create({
-      type: "express",
-      country: "US",
-      capabilities: {
-        card_payments: { requested: true },
-        transfers:     { requested: true },
-      },
-      metadata: { platform: "squarebidness_holdings" },
-    });
+    // On refresh Stripe passes the existing account id — reuse it instead of
+    // creating a new account every time the link expires.
+    const existingAccountId = req.query?.account || null;
+
+    let accountId = existingAccountId;
+    if (!accountId) {
+      const account = await stripe.accounts.create({
+        type: "express",
+        country: "US",
+        capabilities: {
+          card_payments: { requested: true },
+          transfers:     { requested: true },
+        },
+        metadata: { platform: "squarebidness_holdings" },
+      });
+      accountId = account.id;
+    }
 
     const returnUrl  = new URL("/stripe/return/",  BASE_URL);
     const refreshUrl = new URL("/api/stripe/create-account-link/", BASE_URL);
-    returnUrl.searchParams.set("account", account.id);
+    returnUrl.searchParams.set("account", accountId);
+    refreshUrl.searchParams.set("account", accountId);
 
     const link = await stripe.accountLinks.create({
-      account: account.id,
+      account: accountId,
       type: "account_onboarding",
       return_url:  returnUrl.toString(),
       refresh_url: refreshUrl.toString(),
