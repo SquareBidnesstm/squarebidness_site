@@ -83,7 +83,7 @@ function getTodayString() {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 }
 
-type Tab = "schedule" | "earnings" | "hours" | "prices";
+type Tab = "schedule" | "earnings" | "hours" | "prices" | "stripe";
 
 export default function BarberPage() {
   const params = useParams();
@@ -412,7 +412,7 @@ export default function BarberPage() {
         {/* Tabs — only shown if admin gave edit permissions */}
         {hasTabs && (
           <div style={{ display: "flex", gap: 6, marginBottom: 28, borderBottom: "1px solid #1a1a1a", paddingBottom: 0 }}>
-            {(["schedule", "earnings", ...(perms.can_edit_hours ? ["hours"] : []), ...(perms.can_edit_prices ? ["prices"] : [])] as Tab[]).map((tab) => (
+            {(["schedule", "earnings", ...(perms.can_edit_hours ? ["hours"] : []), ...(perms.can_edit_prices ? ["prices"] : []), "stripe"] as Tab[]).map((tab) => (
               <button
                 key={tab}
                 onClick={() => handleTabChange(tab)}
@@ -430,7 +430,7 @@ export default function BarberPage() {
                   marginBottom: -1,
                 }}
               >
-                {tab === "schedule" ? "Schedule" : tab === "earnings" ? "Earnings" : tab === "hours" ? "My Hours" : "My Prices"}
+                {tab === "schedule" ? "Schedule" : tab === "earnings" ? "Earnings" : tab === "hours" ? "My Hours" : tab === "prices" ? "My Prices" : "Payouts"}
               </button>
             ))}
           </div>
@@ -670,8 +670,63 @@ export default function BarberPage() {
           </div>
         )}
 
+        {/* ── PAYOUTS (STRIPE) TAB ── */}
+        {activeTab === "stripe" && (
+          <StripeConnectPanel shopSlug={shopSlug} barberSlug={barberSlug} />
+        )}
+
       </section>
     </main>
+  );
+}
+
+function StripeConnectPanel({ shopSlug, barberSlug }: { shopSlug: string; barberSlug: string }) {
+  const [status, setStatus] = useState<{ connected: boolean; payouts_enabled: boolean; details_submitted: boolean } | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`/api/${shopSlug}/barbers/${barberSlug}/stripe/status`)
+      .then((r) => r.json())
+      .then((d) => { if (d.ok) setStatus(d); })
+      .finally(() => setLoading(false));
+  }, [shopSlug, barberSlug]);
+
+  if (loading) return null;
+
+  const connectUrl = `/api/${shopSlug}/barbers/${barberSlug}/stripe/connect`;
+
+  return (
+    <div style={{ background: "#0d0d0d", border: "1px solid #1e1e1e", borderRadius: 20, padding: 28, maxWidth: 480 }}>
+      <div style={{ color: "#d4af37", fontSize: 12, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 6 }}>Payouts</div>
+      <p style={{ color: "#555", fontSize: 13, margin: "0 0 20px" }}>
+        Connect your Stripe account so booking deposits go directly to your bank.
+      </p>
+
+      {status?.payouts_enabled ? (
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span style={{ fontSize: 22 }}>✅</span>
+          <div>
+            <div style={{ color: "#fff", fontWeight: 700, fontSize: 14 }}>Payouts Active</div>
+            <div style={{ color: "#555", fontSize: 13 }}>Deposits route directly to your bank account.</div>
+          </div>
+        </div>
+      ) : status?.details_submitted ? (
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span style={{ fontSize: 22 }}>⏳</span>
+          <div>
+            <div style={{ color: "#fff", fontWeight: 700, fontSize: 14 }}>Under Review</div>
+            <div style={{ color: "#555", fontSize: 13 }}>Stripe is reviewing your info — usually 1–2 business days.</div>
+          </div>
+        </div>
+      ) : (
+        <a
+          href={connectUrl}
+          style={{ display: "inline-block", background: "#d4af37", color: "#000", fontWeight: 800, fontSize: 14, padding: "12px 24px", borderRadius: 10, textDecoration: "none" }}
+        >
+          {status?.connected ? "Continue Setup →" : "Set Up Payouts →"}
+        </a>
+      )}
+    </div>
   );
 }
 
