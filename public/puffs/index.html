@@ -289,7 +289,8 @@
     },
     itemsOff: [],
     itemsSoldOut: [],
-    customerMessage: ""
+    customerMessage: "",
+    limitedMenu: { active: false, name: "", price: "", description: "" }
   };
 
   const cart = new Map();
@@ -456,6 +457,7 @@
         throw new Error(data.error || "Unable to load menu overrides.");
       }
 
+      const lm = data.overrides?.limitedMenu || {};
       MENU_OVERRIDES = {
         sections: {
           individual: data.overrides?.sections?.individual !== false,
@@ -465,7 +467,13 @@
         },
         itemsOff: Array.isArray(data.overrides?.itemsOff) ? data.overrides.itemsOff : [],
         itemsSoldOut: Array.isArray(data.overrides?.itemsSoldOut) ? data.overrides.itemsSoldOut : [],
-        customerMessage: String(data.overrides?.customerMessage || "").trim()
+        customerMessage: String(data.overrides?.customerMessage || "").trim(),
+        limitedMenu: {
+          active: !!lm.active,
+          name: String(lm.name || "").trim(),
+          price: String(lm.price || "").trim(),
+          description: String(lm.description || "").trim()
+        }
       };
     } catch (err) {
       console.warn("[puffs] menu overrides fallback:", err.message || err);
@@ -610,6 +618,62 @@
     const root = document.getElementById("menuContent");
     root.innerHTML = "";
 
+    const lm = MENU_OVERRIDES.limitedMenu;
+    if (lm.active && lm.name) {
+      const price = parseFloat(lm.price) || 0;
+      const itemId = "limited_menu";
+
+      const block = document.createElement("section");
+      block.className = "sectionBlock";
+
+      const head = document.createElement("div");
+      head.className = "dayHead";
+      head.style.cssText = "background:#2B1B12;color:#D4AF37;padding:14px 16px;border-radius:10px;margin:0 0 10px";
+      head.innerHTML = `<h3 style="margin:0;font-size:20px;font-weight:700">Limited Menu Today</h3>`;
+      block.appendChild(head);
+
+      if (lm.description) {
+        const note = document.createElement("div");
+        note.className = "note";
+        note.textContent = lm.description;
+        block.appendChild(note);
+      }
+
+      const row = document.createElement("div");
+      row.className = "row";
+
+      const left = document.createElement("div");
+      left.innerHTML = `<strong>${lm.name}</strong>`;
+
+      const priceEl = document.createElement("div");
+      priceEl.className = "price";
+      priceEl.textContent = price > 0 ? money(price) : "";
+
+      const qty = document.createElement("div");
+      qty.className = "qty";
+
+      const minus = document.createElement("button");
+      minus.type = "button"; minus.textContent = "–";
+      minus.disabled = !STORE_OPEN; minus.dataset.cartControl = "true";
+      minus.onclick = () => updateQty(itemId, -1);
+
+      const val = document.createElement("span");
+      val.textContent = String(cart.get(itemId) || 0);
+      val.dataset.bindQty = itemId;
+      val.style.cssText = "min-width:18px;text-align:center";
+
+      const plus = document.createElement("button");
+      plus.type = "button"; plus.textContent = "+";
+      plus.disabled = !STORE_OPEN; plus.dataset.cartControl = "true";
+      plus.onclick = () => updateQty(itemId, 1);
+
+      qty.append(minus, val, plus);
+      row.append(left, priceEl, qty);
+      block.appendChild(row);
+      root.appendChild(block);
+      return;
+    }
+
     const saturdayWrap = createDaySection("Saturday Menu");
     const sundayWrap = createDaySection("Sunday Menu");
 
@@ -685,14 +749,17 @@
   }
 
   function flattenItems() {
-    const out = [];
+    const lm = MENU_OVERRIDES.limitedMenu;
+    if (lm.active && lm.name) {
+      return [{ id: "limited_menu", name: lm.name, price: parseFloat(lm.price) || 0 }];
+    }
 
+    const out = [];
     for (const sec of MENU) {
       for (const item of (sec.items || [])) {
         if (!isItemSoldOut(item.id)) out.push(item);
       }
     }
-
     return out;
   }
 
