@@ -45,7 +45,6 @@ export async function GET(
           transfers: { requested: true },
           card_payments: { requested: true },
         },
-        tos_acceptance: { service_agreement: "recipient" },
         metadata: { platform: "squarebidness" },
       });
       accountId = account.id;
