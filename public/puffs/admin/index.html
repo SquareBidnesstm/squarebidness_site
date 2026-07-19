@@ -259,6 +259,23 @@
     </div>
 
     <div class="card">
+      <h2>Limited Menu Today</h2>
+      <p>Use this when today is a one-plate day. It resets daily and checkout blocks regular menu items while active.</p>
+      <div class="row" style="grid-template-columns:auto 1fr 140px;align-items:center;margin-bottom:12px">
+        <div class="toggle" style="grid-column:1">
+          <label for="limitedMenuToggle">Limited Menu</label>
+          <input type="checkbox" id="limitedMenuToggle" />
+        </div>
+        <input id="limitedMenuName" type="text" placeholder="Item name" value="Catfish"
+          style="min-height:48px;border:1px solid var(--line);border-radius:14px;background:var(--panel2);color:var(--text);padding:0 14px;font:inherit" />
+        <input id="limitedMenuPrice" type="text" placeholder="Price" value=""
+          style="min-height:48px;border:1px solid var(--line);border-radius:14px;background:var(--panel2);color:var(--text);padding:0 14px;font:inherit" />
+      </div>
+      <textarea id="limitedMenuDesc" placeholder="Example: Served with Potato Salad, Green Beans, and a roll."></textarea>
+      <p style="margin-top:10px;font-size:.88rem">When active, Sunday Sides and Saturday Add-ons are turned off automatically.</p>
+    </div>
+
+    <div class="card">
       <h2>Turn Off Individual Items</h2>
       <p>Checked items are hidden from Puff’s and blocked from customer ordering.</p>
       <div class="item-list" id="itemsOffList"></div>
@@ -370,6 +387,12 @@
 
       document.getElementById("customerMessage").value = overrides.customerMessage || "";
 
+      const lm = overrides.limitedMenu || {};
+      document.getElementById("limitedMenuToggle").checked = !!lm.active;
+      document.getElementById("limitedMenuName").value = lm.name || "Catfish";
+      document.getElementById("limitedMenuPrice").value = lm.price || "";
+      document.getElementById("limitedMenuDesc").value = lm.description || "";
+
       renderItemList(Array.isArray(overrides.itemsOff) ? overrides.itemsOff : []);
       renderSoldOutList(Array.isArray(overrides.itemsSoldOut) ? overrides.itemsSoldOut : []);
 
@@ -402,7 +425,13 @@
         },
         itemsOff,
         itemsSoldOut,
-        customerMessage: document.getElementById("customerMessage").value.trim()
+        customerMessage: document.getElementById("customerMessage").value.trim(),
+        limitedMenu: {
+          active: document.getElementById("limitedMenuToggle").checked,
+          name: document.getElementById("limitedMenuName").value.trim(),
+          price: document.getElementById("limitedMenuPrice").value.trim(),
+          description: document.getElementById("limitedMenuDesc").value.trim()
+        }
       };
 
       setStatus("Saving admin changes...");

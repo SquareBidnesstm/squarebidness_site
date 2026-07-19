@@ -60,8 +60,13 @@ export default async function handler(req, res) {
       itemsOff: [],
       itemsSoldOut: [],
       customerMessage: "",
+      limitedMenu: { active: false, name: "", price: "", description: "" },
       updatedAt: ""
     };
+
+    if (!overrides.limitedMenu) {
+      overrides.limitedMenu = { active: false, name: "", price: "", description: "" };
+    }
 
     return res.status(200).json({ ok: true, overrides });
   } catch (err) {

@@ -65,16 +65,25 @@ export default async function handler(req, res) {
     const body =
       typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {});
 
+    const limitedMenuActive = body?.limitedMenu?.active === true;
+
     const overrides = {
       sections: {
         individual: body?.sections?.individual !== false,
         plates: body?.sections?.plates !== false,
-        sundaySides: body?.sections?.sundaySides !== false,
-        saturdayAddOns: body?.sections?.saturdayAddOns !== false
+        // auto-disable when limited menu is on
+        sundaySides: limitedMenuActive ? false : body?.sections?.sundaySides !== false,
+        saturdayAddOns: limitedMenuActive ? false : body?.sections?.saturdayAddOns !== false
       },
       itemsOff: cleanArray(body.itemsOff),
       itemsSoldOut: cleanArray(body.itemsSoldOut),
       customerMessage: cleanString(body.customerMessage, 220),
+      limitedMenu: {
+        active: limitedMenuActive,
+        name: cleanString(body?.limitedMenu?.name || "", 80),
+        price: cleanString(body?.limitedMenu?.price || "", 12),
+        description: cleanString(body?.limitedMenu?.description || "", 300)
+      },
       updatedAt: new Date().toISOString()
     };
 
