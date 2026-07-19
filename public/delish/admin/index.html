@@ -345,6 +345,46 @@
       border:1px solid var(--line);
       font-weight:800;
     }
+    .quick-status{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 18px;
+      border-radius:999px;
+      font-weight:900;
+      font-size:1rem;
+      letter-spacing:.02em;
+      cursor:pointer;
+      border:none;
+      font:inherit;
+      transition:opacity .15s;
+    }
+    .quick-status::before{
+      content:"";
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      flex:0 0 auto;
+    }
+    .quick-status.qs-open{
+      background:rgba(32,75,45,.5);
+      border:1px solid rgba(74,155,97,.6);
+      color:#d6f5de;
+    }
+    .quick-status.qs-open::before{ background:#22c55e; box-shadow:0 0 8px #22c55e; }
+    .quick-status.qs-closed{
+      background:rgba(90,34,34,.5);
+      border:1px solid rgba(196,88,88,.6);
+      color:#ffd3d3;
+    }
+    .quick-status.qs-closed::before{ background:#ef4444; box-shadow:0 0 8px #ef4444; }
+    .quick-status.qs-loading{
+      background:#27272c;
+      border:1px solid var(--line);
+      color:var(--muted);
+      cursor:default;
+    }
+    .quick-status.qs-loading::before{ background:#555; }
     .pickup-window-list{
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
@@ -430,6 +470,7 @@
           </div>
         </div>
         <div class="token-row">
+          <button class="quick-status qs-loading" id="quickStatusBtn" type="button">Checking…</button>
           <span class="token-badge" id="tokenStatus">Token not saved</span>
           <button class="btn-secondary" id="clearTokenBtn">Clear Token</button>
         </div>
@@ -1062,6 +1103,13 @@ async function savePickupWindows() {
       const isPaused = data.orderingMode === "paused" || data.mode === "paused";
       const tone = isOpen ? "open" : (isPaused ? "warn" : "closed");
 
+      const qsBtn = document.getElementById("quickStatusBtn");
+      if (qsBtn) {
+        qsBtn.textContent = isOpen ? "OPEN" : "CLOSED";
+        qsBtn.className = `quick-status ${isOpen ? "qs-open" : "qs-closed"}`;
+        qsBtn._isOpen = isOpen;
+      }
+
       windowStatusPill.textContent = isOpen ? "Open Now" : "Closed Now";
       windowStatusPill.className = `window-pill ${tone}`;
       windowMode.textContent = `${titleCase(data.orderingMode || data.mode || "auto")} • ${titleCase(data.reason || "")}`;
@@ -1344,6 +1392,22 @@ reloadPickupWindowsBtn?.addEventListener("click", () => {
         setWindowStatus(err.message || "Close today failed.", "bad")
       );
     });
+    document.getElementById("quickStatusBtn")?.addEventListener("click", () => {
+      const btn = document.getElementById("quickStatusBtn");
+      const isOpen = btn?._isOpen;
+      if (isOpen) {
+        const confirmed = window.confirm("Close customer ordering for the rest of today?");
+        if (!confirmed) return;
+        postOrderingControl({ mode: "closed" }, "Customer ordering is closed today.").catch(err =>
+          setWindowStatus(err.message || "Close today failed.", "bad")
+        );
+      } else {
+        postOrderingControl({ mode: "open" }, "Ordering is now open.").catch(err =>
+          setWindowStatus(err.message || "Open now failed.", "bad")
+        );
+      }
+    });
+
     document.getElementById("clearTokenBtn").addEventListener("click", () => {
       clearToken();
       setStatus("Saved token cleared.");
