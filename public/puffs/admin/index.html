@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Puff’s Admin</title>
+  <title>Puff’s Smokehouse Admin</title>
   <meta name="robots" content="noindex,nofollow" />
 
   <link rel="manifest" href="/puffs/manifest.webmanifest" />
@@ -140,18 +140,59 @@
       border:1px solid var(--line);
       font-weight:800;
     }
-    .links{display:flex;gap:10px;flex-wrap:wrap}
-    .links a{
+    .quick-status{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 18px;
+      border-radius:999px;
+      font-weight:900;
+      font-size:1rem;
+      cursor:pointer;
+      border:1px solid var(--line);
+      background:#27272c;
+      color:var(--muted);
+      font:inherit;
+    }
+    .quick-status::before{
+      content:"";
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      flex:0 0 auto;
+      background:#555;
+    }
+    .quick-status.qs-open::before{ background:#22c55e; box-shadow:0 0 8px #22c55e; }
+    .quick-status.qs-open{ background:rgba(32,75,45,.5); border-color:rgba(74,155,97,.6); color:#d6f5de; }
+    .quick-status.qs-paused::before{ background:#f59e0b; box-shadow:0 0 8px #f59e0b; }
+    .quick-status.qs-paused{ background:rgba(91,69,24,.45); border-color:rgba(215,174,114,.5); color:#ffe5b8; }
+    .hub{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+      margin-top:14px;
+    }
+    .hub-link{
+      min-height:72px;
+      padding:14px 16px;
+      border-radius:18px;
+      border:1px solid var(--line);
+      background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.018));
       color:var(--text);
       text-decoration:none;
-      border:1px solid var(--line);
-      background:#202024;
-      border-radius:999px;
-      padding:10px 12px;
-      font-weight:800;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      gap:4px;
+    }
+    .hub-link strong{ font-size:.98rem; line-height:1.15; }
+    .hub-link span{ color:var(--muted); font-size:.84rem; }
+    .hub-link.primary{
+      border-color:rgba(215,174,114,.45);
+      background:linear-gradient(180deg,rgba(215,174,114,.16),rgba(215,174,114,.06));
     }
     @media (max-width:800px){
-      .row,.item-list{grid-template-columns:1fr}
+      .row,.item-list,.hub{grid-template-columns:1fr}
     }
   </style>
 </head>
@@ -162,21 +203,35 @@
         <div class="brand">
           <img src="/puffs/assets/puffs_140.png" alt="Puff’s Smokehouse" />
           <div>
-            <h1>Puff’s Admin v1</h1>
-            <p style="margin:0">Live menu controls for Puff’s Smokehouse.</p>
+            <h1>Puff’s Smokehouse Admin</h1>
+            <p style="margin:0">Menu controls, item overrides, and ordering status.</p>
           </div>
         </div>
 
         <div class="token-row">
+          <button class="quick-status" id="quickStatusBtn" type="button">Checking…</button>
           <span class="token-badge" id="tokenStatus">Token not saved</span>
           <button class="btn-secondary" id="clearTokenBtn">Clear Token</button>
         </div>
       </div>
 
-      <div class="links" style="margin-top:14px">
-        <a href="/puffs/">Public Menu</a>
-        <a href="/puffs/orders/">Pickup Orders</a>
-        <a href="/puffs/catering/orders/">Catering Orders</a>
+      <div class="hub">
+        <a class="hub-link primary" href="/puffs/orders/">
+          <strong>Pickup Orders</strong>
+          <span>Live incoming orders screen</span>
+        </a>
+        <a class="hub-link primary" href="/puffs/catering/orders/">
+          <strong>Catering Orders</strong>
+          <span>View and manage catering requests</span>
+        </a>
+        <a class="hub-link" href="/puffs/">
+          <strong>Public Menu</strong>
+          <span>What customers see</span>
+        </a>
+        <a class="hub-link" href="/puffs/catering/">
+          <strong>Catering Page</strong>
+          <span>Catering request form</span>
+        </a>
       </div>
     </div>
 
@@ -392,6 +447,28 @@
     });
 
     updateTokenStatus();
+
+    // Quick status pill — loads current operator mode, no auth needed
+    (async function loadQuickStatus() {
+      const btn = document.getElementById("quickStatusBtn");
+      try {
+        const res = await fetch("/api/puffs/operator-status/", { cache: "no-store" });
+        const data = await res.json();
+        const mode = data?.status?.mode || "auto";
+        if (mode === "force_open") {
+          btn.textContent = "OPEN (Forced)";
+          btn.className = "quick-status qs-open";
+        } else if (mode === "paused") {
+          btn.textContent = "PAUSED";
+          btn.className = "quick-status qs-paused";
+        } else {
+          btn.textContent = "AUTO";
+          btn.className = "quick-status";
+        }
+      } catch {
+        btn.textContent = "Status unavailable";
+      }
+    })();
 
     loadOverrides().catch((err) => {
       console.error(err);
