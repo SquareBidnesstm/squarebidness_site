@@ -164,7 +164,7 @@ export default async function BarberQRPage({
         <div className="cta">Scan to Book with {shortName}</div>
         <a href={scheduleUrl} className="btn">View Schedule</a>
         <br />
-        <ShareButton url={`https://booking.squarebidness.com/${shopSlug}/${barberSlug}/qr`} title={`Book with ${barberName} · ${shop.name}`} />
+        <ShareButton url={bookingUrl} title={`Book with ${barberName} · ${shop.name}`} />
         <div className="brand">Powered by SquareBidness</div>
       </div>
     </>
