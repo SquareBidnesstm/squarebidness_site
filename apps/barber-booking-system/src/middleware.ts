@@ -44,7 +44,7 @@ export async function middleware(req: NextRequest) {
     if (RESERVED_SLUGS.has(shopSlug) || RESERVED_SLUGS.has(barberSlug)) return NextResponse.next();
 
     // Allow the login and QR pages through without auth
-    if (rest === "/login" || rest === "/qr") return NextResponse.next();
+    if (rest === "/login" || rest === "/qr" || rest === "/qr/image") return NextResponse.next();
 
     const cookieName = barberSessionCookieName(shopSlug, barberSlug);
     const cookie = req.cookies.get(cookieName)?.value;
