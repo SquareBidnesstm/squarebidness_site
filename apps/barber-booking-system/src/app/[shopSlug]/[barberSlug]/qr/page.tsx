@@ -144,6 +144,10 @@ export default async function BarberQRPage({
           margin-bottom: 14px;
         }
         .brand { font-size: 11px; color: #333; margin-top: 10px; }
+        .hs-guide { margin-top: 20px; border-top: 1px solid #1e1e1e; padding-top: 16px; text-align: left; }
+        .hs-guide__title { font-size: 10px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #444; margin-bottom: 10px; text-align: center; }
+        .hs-guide__step { font-size: 12px; color: #555; line-height: 1.6; margin-bottom: 4px; }
+        .hs-guide__step span { color: #d4af37; font-weight: 700; }
         @media print {
           body { background: #fff; }
           .qr-card { border: none; box-shadow: none; max-width: 100%; }
@@ -166,6 +170,11 @@ export default async function BarberQRPage({
         <br />
         <ShareButton url={bookingUrl} title={`Book with ${barberName} · ${shop.name}`} />
         <div className="brand">Powered by SquareBidness</div>
+        <div className="hs-guide">
+          <div className="hs-guide__title">Add to Home Screen</div>
+          <div className="hs-guide__step">📱 <span>iPhone:</span> Tap the Share icon in Safari → <em>Add to Home Screen</em></div>
+          <div className="hs-guide__step">🤖 <span>Android:</span> Tap the menu (⋮) in Chrome → <em>Add to Home Screen</em></div>
+        </div>
       </div>
     </>
   );
