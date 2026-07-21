@@ -77,6 +77,7 @@ export default function AboutPage() {
                 href={v.url}
                 target="_blank"
                 rel="noopener noreferrer"
+                className="vertical-card"
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
@@ -86,10 +87,7 @@ export default function AboutPage() {
                   border: "1px solid var(--border)",
                   borderRadius: "var(--radius)",
                   gap: 16,
-                  transition: "border-color 0.15s",
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.14)")}
-                onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
               >
                 <div>
                   <div style={{ fontWeight: 800, marginBottom: 4 }}>{v.name}</div>
