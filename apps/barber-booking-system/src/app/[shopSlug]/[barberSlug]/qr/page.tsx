@@ -135,7 +135,6 @@ export default async function BarberQRPage({
             dangerouslySetInnerHTML={{ __html: svgString }}
           />
           <div className="cta">Scan to Book with {shortName}</div>
-          <div className="url">{bookingUrl}</div>
           <a href={bookingUrl} className="btn">Book Now</a>
           <div className="brand">Powered by SquareBidness</div>
         </div>

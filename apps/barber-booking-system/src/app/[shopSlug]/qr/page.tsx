@@ -108,7 +108,6 @@ export default async function ShopQRPage({
             dangerouslySetInnerHTML={{ __html: svgString }}
           />
           <div className="cta">Scan to Book an Appointment</div>
-          <div className="url">{bookingUrl}</div>
           <a href={bookingUrl} className="btn">Open Booking Page</a>
           <div className="brand">Powered by SquareBidness</div>
         </div>
