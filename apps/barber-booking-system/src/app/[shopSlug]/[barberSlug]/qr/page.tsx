@@ -63,6 +63,13 @@ export default async function BarberQRPage({
         <meta name="apple-mobile-web-app-status-bar-style" content="black" />
         <meta name="apple-mobile-web-app-title" content={`Book ${shortName}`} />
         <link rel="apple-touch-icon" href={`data:image/png;base64,${pngBase64}`} />
+        <meta property="og:title" content={`Book with ${barberName} · ${shop.name}`} />
+        <meta property="og:description" content={`Scan to book your appointment with ${shortName} at ${shop.name}.`} />
+        <meta property="og:image" content={`https://booking.squarebidness.com/${shopSlug}/${barberSlug}/qr/image`} />
+        <meta property="og:image:width" content="600" />
+        <meta property="og:image:height" content="600" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:image" content={`https://booking.squarebidness.com/${shopSlug}/${barberSlug}/qr/image`} />
         <style>{`
           * { box-sizing: border-box; margin: 0; padding: 0; }
           body {
