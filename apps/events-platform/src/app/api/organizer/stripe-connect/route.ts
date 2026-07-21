@@ -54,7 +54,10 @@ export async function GET(req: Request) {
           card_payments: { requested: true },
           transfers: { requested: true },
         },
-      });
+        tos_acceptance: {
+          service_agreement: "full",
+        },
+      } as any);
       stripeAccountId = account.id;
 
       // Save the account ID; flip onboarding flag if already fully submitted
