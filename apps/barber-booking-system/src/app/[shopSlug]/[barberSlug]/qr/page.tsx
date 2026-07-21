@@ -34,20 +34,35 @@ export default async function BarberQRPage({
   if (!shop || !barber) notFound();
 
   const bookingUrl = `https://booking.squarebidness.com/${shopSlug}/book/${barberSlug}`;
-  const svgString = await QRCode.toString(bookingUrl, {
-    type: "svg",
-    margin: 2,
-    color: { dark: "#000000", light: "#ffffff" },
-    errorCorrectionLevel: "H",
-  });
+  const [svgString, pngBuffer] = await Promise.all([
+    QRCode.toString(bookingUrl, {
+      type: "svg",
+      margin: 2,
+      color: { dark: "#000000", light: "#ffffff" },
+      errorCorrectionLevel: "H",
+    }),
+    QRCode.toBuffer(bookingUrl, {
+      type: "png",
+      width: 180,
+      margin: 2,
+      color: { dark: "#000000", light: "#ffffff" },
+      errorCorrectionLevel: "H",
+    }),
+  ]);
+  const pngBase64 = pngBuffer.toString("base64");
 
   const barberName = barber.display_name || barber.name;
+  const shortName = barberName.split(" ")[0];
 
   return (
     <html lang="en">
       <head>
         <title>{barberName} @ {shop.name} — QR Code</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="apple-mobile-web-app-title" content={`Book ${shortName}`} />
+        <link rel="apple-touch-icon" href={`data:image/png;base64,${pngBase64}`} />
         <style>{`
           * { box-sizing: border-box; margin: 0; padding: 0; }
           body {
@@ -119,7 +134,7 @@ export default async function BarberQRPage({
             className="qr-wrap"
             dangerouslySetInnerHTML={{ __html: svgString }}
           />
-          <div className="cta">Scan to Book with {barberName.split(" ")[0]}</div>
+          <div className="cta">Scan to Book with {shortName}</div>
           <div className="url">{bookingUrl}</div>
           <a href={bookingUrl} className="btn">Book Now</a>
           <div className="brand">Powered by SquareBidness</div>
