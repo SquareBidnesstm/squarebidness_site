@@ -17,13 +17,26 @@ export const metadata: Metadata = {
   },
   description:
     "Louisiana-rooted content platform from Square Bidness Holdings. Covering community, business, culture, and health across the region.",
+  icons: {
+    icon: [
+      { url: "/gold-network-16.png", sizes: "16x16", type: "image/png" },
+      { url: "/gold-network-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/gold-network-48.png", sizes: "48x48", type: "image/png" },
+      { url: "/gold-network-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: "/gold-network-180.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
   openGraph: {
     siteName: "SB Network",
     type: "website",
     url: "https://network.squarebidness.com",
+    images: [{ url: "/gold-network-512.png" }],
   },
   twitter: {
     card: "summary_large_image",
+    images: ["/gold-network-512.png"],
   },
   alternates: {
     canonical: "https://network.squarebidness.com",
