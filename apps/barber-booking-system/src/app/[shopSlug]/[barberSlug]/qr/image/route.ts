@@ -29,7 +29,7 @@ export async function GET(
     errorCorrectionLevel: "H",
   });
 
-  return new NextResponse(pngBuffer, {
+  return new NextResponse(new Uint8Array(pngBuffer), {
     headers: {
       "Content-Type": "image/png",
       "Cache-Control": "public, max-age=86400",
