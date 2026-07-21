@@ -72,6 +72,7 @@ export default async function BarberQRPage({
   if (!shop || !barber) notFound();
 
   const bookingUrl = `https://booking.squarebidness.com/${shopSlug}/book/${barberSlug}`;
+  const scheduleUrl = `https://booking.squarebidness.com/${shopSlug}/${barberSlug}`;
   const svgString = await QRCode.toString(bookingUrl, {
     type: "svg",
     margin: 2,
@@ -127,6 +128,18 @@ export default async function BarberQRPage({
           padding: 12px 28px;
           border-radius: 10px;
           text-decoration: none;
+          margin-bottom: 10px;
+        }
+        .btn--outline {
+          display: inline-block;
+          background: transparent;
+          color: #d4af37;
+          font-weight: 700;
+          font-size: 13px;
+          padding: 10px 28px;
+          border-radius: 10px;
+          text-decoration: none;
+          border: 1px solid #d4af37;
           margin-bottom: 14px;
         }
         .brand { font-size: 11px; color: #333; margin-top: 10px; }
@@ -149,6 +162,8 @@ export default async function BarberQRPage({
         <div className="qr-wrap" dangerouslySetInnerHTML={{ __html: svgString }} />
         <div className="cta">Scan to Book with {shortName}</div>
         <a href={bookingUrl} className="btn">Book Now</a>
+        <br />
+        <a href={scheduleUrl} className="btn--outline">View Schedule</a>
         <div className="brand">Powered by SquareBidness</div>
       </div>
     </>
