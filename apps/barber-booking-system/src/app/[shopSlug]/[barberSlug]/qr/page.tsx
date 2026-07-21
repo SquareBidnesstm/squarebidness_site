@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import QRCode from "qrcode";
 import { supabaseServer } from "../../../../lib/supabase/server";
+import ShareButton from "./ShareButton";
 
 export const dynamic = "force-dynamic";
 
@@ -161,9 +162,9 @@ export default async function BarberQRPage({
         <div className="divider" />
         <div className="qr-wrap" dangerouslySetInnerHTML={{ __html: svgString }} />
         <div className="cta">Scan to Book with {shortName}</div>
-        <a href={bookingUrl} className="btn">Book Now</a>
+        <a href={scheduleUrl} className="btn">View Schedule</a>
         <br />
-        <a href={scheduleUrl} className="btn--outline">View Schedule</a>
+        <ShareButton url={`https://booking.squarebidness.com/${shopSlug}/${barberSlug}/qr`} title={`Book with ${barberName} · ${shop.name}`} />
         <div className="brand">Powered by SquareBidness</div>
       </div>
     </>
