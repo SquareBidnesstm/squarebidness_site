@@ -375,7 +375,8 @@ export default function BarberPage() {
               <p style={{ color: "#666", fontSize: 15, marginTop: 8 }}>Your appointments only.</p>
             </div>
           </div>
-          <div style={{ display: "flex", gap: 8 }}>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <StripeConnectBadge shopSlug={shopSlug} barberSlug={barberSlug} />
             {"Notification" in (typeof window !== "undefined" ? window : {}) && (
               <button
                 onClick={togglePushNotifications}
@@ -677,6 +678,41 @@ export default function BarberPage() {
 
       </section>
     </main>
+  );
+}
+
+function StripeConnectBadge({ shopSlug, barberSlug }: { shopSlug: string; barberSlug: string }) {
+  const [payoutsEnabled, setPayoutsEnabled] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    fetch(`/api/${shopSlug}/barbers/${barberSlug}/stripe/status`)
+      .then((r) => r.json())
+      .then((d) => { if (d.ok) setPayoutsEnabled(d.payouts_enabled); });
+  }, [shopSlug, barberSlug]);
+
+  if (payoutsEnabled === null || payoutsEnabled) return null;
+
+  return (
+    <a
+      href={`/api/${shopSlug}/barbers/${barberSlug}/stripe/connect`}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        background: "#d4af37",
+        color: "#000",
+        fontWeight: 800,
+        fontSize: 12,
+        letterSpacing: "0.04em",
+        padding: "8px 14px",
+        borderRadius: 999,
+        textDecoration: "none",
+        animation: "stripe-pulse 1.8s ease-in-out infinite",
+      }}
+    >
+      <style>{`@keyframes stripe-pulse { 0%,100%{opacity:1} 50%{opacity:0.55} }`}</style>
+      ⚡ Connect Stripe
+    </a>
   );
 }
 
