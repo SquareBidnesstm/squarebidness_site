@@ -172,7 +172,7 @@ export default async function BarberQRPage({
         <div className="brand">Powered by SquareBidness</div>
         <div className="hs-guide">
           <div className="hs-guide__title">Add to Home Screen</div>
-          <div className="hs-guide__step">📱 <span>iPhone:</span> Tap the Share icon in Safari → <em>Add to Home Screen</em></div>
+          <div className="hs-guide__step">📱 <span>iPhone:</span> Tap <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{display:"inline",verticalAlign:"middle",marginBottom:2}}><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> in Safari → <em>Add to Home Screen</em></div>
           <div className="hs-guide__step">🤖 <span>Android:</span> Tap the menu (⋮) in Chrome → <em>Add to Home Screen</em></div>
         </div>
       </div>
