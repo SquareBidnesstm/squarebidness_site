@@ -376,6 +376,21 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // ── account.updated: flip stripe_onboarding_complete when organizer finishes ─
+  // Fires when a connected Express account completes onboarding in Stripe.
+  // Handles the case where an organizer closes the browser before the return_url redirect.
+  if (event.type === "account.updated") {
+    const account = event.data.object as Stripe.Account;
+    if (account.details_submitted) {
+      await supabaseServer
+        .from("organizers")
+        .update({ stripe_onboarding_complete: true })
+        .eq("stripe_account_id", account.id)
+        .eq("stripe_onboarding_complete", false);
+    }
+    return NextResponse.json({ ok: true });
+  }
+
   // ── charge.refunded: mark order + tickets as refunded ────────────────────────
   // Fires when a refund is created via Stripe dashboard or API (including organizer-initiated).
   // This ensures DB state stays in sync with Stripe even if the refund happens outside the app.
