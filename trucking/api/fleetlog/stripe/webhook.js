@@ -80,6 +80,8 @@ async function expire(key, seconds){
     return { ok:false, error: e?.message || String(e) };
   }
 }
+
+function tryParseRecord(raw){
   // handle weird nesting like [["{...}"]]
   if(Array.isArray(raw)){
     const first = raw[0];
