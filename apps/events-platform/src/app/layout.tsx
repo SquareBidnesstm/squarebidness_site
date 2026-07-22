@@ -4,10 +4,10 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL("https://events.squarebidness.com"),
   title: {
-    default: "Louisiana Events — Concerts, Comedy, Trail Rides & More | SB Events",
+    default: "Louisiana events, tickets & more. | SB Events",
     template: "%s | SB Events",
   },
-  description: "Find and buy tickets to the best events in Louisiana — concerts, comedy shows, trail rides, pop-ups, and community events. Powered by Square Bidness.",
+  description: "Concerts, comedy shows, trail rides, pop-ups, and community events across Louisiana. Buy tickets in seconds.",
   keywords: [
     "Louisiana events",
     "events in Louisiana",
@@ -42,16 +42,16 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   openGraph: {
     siteName: "Square Bidness Events",
-    title: "Louisiana Events — Concerts, Comedy, Trail Rides & More",
-    description: "Find and buy tickets to the best events in Louisiana — concerts, comedy shows, trail rides, pop-ups, and community events.",
+    title: "Louisiana events, tickets & more.",
+    description: "Concerts, comedy shows, trail rides, pop-ups, and community events across Louisiana. Buy tickets in seconds.",
     type: "website",
     url: "https://events.squarebidness.com",
     images: [{ url: "/events-meta.png", width: 1200, height: 630, alt: "Square Bidness Events — Louisiana" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Louisiana Events — Concerts, Comedy, Trail Rides & More",
-    description: "Find and buy tickets to the best events in Louisiana.",
+    title: "Louisiana events, tickets & more.",
+    description: "Concerts, comedy shows, trail rides, pop-ups, and community events across Louisiana. Buy tickets in seconds.",
     images: ["/events-meta.png"],
   },
   alternates: { canonical: "https://events.squarebidness.com" },
