@@ -542,53 +542,50 @@
       </div>
     </section>
 
-    <!-- SECURE ONLINE FORM (COGNITO) -->
-    <section id="secureform" class="card" style="margin-top:18px" aria-label="Secure online form">
-      <p class="kicker">Start online</p>
-      <h2>Start Your File Online (Secure Form)</h2>
+    <!-- TAX PASS -->
+    <section id="secureform" class="card" style="margin-top:18px" aria-label="Send documents with Tax Pass">
+      <p class="kicker">Send your documents online</p>
+      <h2>Start Your File with Tax Pass</h2>
 
       <div class="split" style="margin-top:10px">
         <div>
           <p class="muted" style="font-size:14px;max-width:70ch;margin-top:0">
-            Skip the paper shuffle. Start your file online and upload your documents securely.
-            If you have questions, call or text the office and we’ll guide you.
+            Skip the paper shuffle. Send your W-2s, ID, and info directly to our office from your phone — before your appointment, or anytime.
           </p>
 
           <ul class="list" style="font-size:14px">
-            <li>Submit your info and documents online before your appointment.</li>
-            <li>Upload your ID and tax forms from your phone.</li>
-            <li>Office code: <strong>EFHO7IRV</strong> (use if prompted).</li>
+            <li>Fill out your info and upload your documents in minutes.</li>
+            <li>Works on any phone — no app download required.</li>
+            <li>Goes directly to Tax Slayer — Jessica Porter. No third parties.</li>
           </ul>
 
           <div class="btnrow" style="margin-top:12px">
             <a
               class="btn primary pill"
-              href="https://www.cognitoforms.com/TaxSlayer1/TaxSubmissionForm"
+              href="https://taxpass.squarebidness.com/?office=EFHO7IRV"
               target="_blank"
               rel="noopener noreferrer"
-            >Start Secure Online Form</a>
-
-            <a class="btn ghost pill" href="sms:+13184277990?body=Hi%20Tax%20Slayer%2C%20I%27m%20starting%20the%20secure%20online%20form.%20Do%20I%20need%20the%20office%20code%3F%20Mine%20is%20EFHO7IRV.">Text for help</a>
+            >Send Documents via Tax Pass</a>
+            <a class="btn ghost pill" href="sms:+13184277990?body=Hi%20Tax%20Slayer%2C%20I%27m%20sending%20my%20documents%20via%20Tax%20Pass.%20My%20office%20code%20is%20EFHO7IRV.">Text for help</a>
           </div>
 
-          <!-- REQUIRED DISCLAIMERS (clean + honest) -->
           <p class="fineprint">
-            You’ll be taken to a secure online submission form hosted by <strong>Cognito Forms</strong>.
-            For your safety, <strong>never text</strong> Social Security numbers or other sensitive personal details — only submit them through the secure form link above.
+            Your documents go directly to our office — not to any third-party marketing platform.
+            For your safety, <strong>never text</strong> Social Security numbers or sensitive details.
+            Use the Tax Pass link above to submit securely.
           </p>
 
-          <!-- Mini panel to match flyer vibe -->
-          <div class="mini-panel" aria-label="No app required panel">
+          <div class="mini-panel" aria-label="Tax Pass panel">
             <div class="mini-grid">
               <div>
                 <p class="mini-title">No app required — works on any phone</p>
                 <p class="mini-sub">
-                  Open the online form, fill out your details, and upload clear photos/PDFs.
-                  If the form asks for an office code, use <strong>EFHO7IRV</strong>.
+                  Open Tax Pass, enter your info, and upload clear photos or PDFs of your documents.
+                  Your office code is automatically applied.
                 </p>
                 <div class="mini-badges" aria-label="Quick facts">
-                  <span class="badge"><span class="dot" aria-hidden="true"></span> Secure online submission</span>
-                  <span class="badge"><span class="dot2" aria-hidden="true"></span> Office code: EFHO7IRV</span>
+                  <span class="badge"><span class="dot" aria-hidden="true"></span> Secure · Private · Encrypted</span>
+                  <span class="badge"><span class="dot2" aria-hidden="true"></span> Powered by Tax Pass™</span>
                   <span class="badge">W-2 · 1099 · Dependents</span>
                 </div>
               </div>
@@ -612,6 +609,14 @@
           <p class="fineprint" style="margin-top:10px">
             Upload clear photos in good lighting. If you’re missing something, start anyway — the office can follow up.
           </p>
+          <div class="btnrow" style="margin-top:14px">
+            <a
+              class="btn primary pill"
+              href="https://taxpass.squarebidness.com/?office=EFHO7IRV"
+              target="_blank"
+              rel="noopener noreferrer"
+            >Open Tax Pass →</a>
+          </div>
         </div>
       </div>
     </section>
@@ -619,7 +624,7 @@
     <!-- BOOKING -->
     <section id="book" class="grid" style="margin-top:18px" aria-label="Booking section">
       <div class="split">
-        <form class="card" method="post" action="/taxslayer/book" novalidate aria-label="Booking form">
+        <form class="card" id="bookingForm" novalidate aria-label="Booking form">
           <h2>Book Your Appointment</h2>
           <p class="muted" style="font-size:14px;margin-top:-4px">
             Pick a preferred time — we’ll confirm and send prep instructions.
@@ -668,9 +673,14 @@
           </div>
 
           <div class="btnrow" style="margin-top:12px">
-            <button type="submit" class="btn primary" style="border:0">Request Booking</button>
+            <button type="submit" class="btn primary" id="bookBtn" style="border:0">Request Booking</button>
             <a class="btn ghost" href="tel:+13184277990">Call Instead</a>
           </div>
+
+          <div id="bookSuccess" style="display:none;margin-top:12px;padding:12px;border-radius:12px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.28);color:#86efac;font-size:14px;">
+            ✓ Request sent — we'll confirm your appointment soon.
+          </div>
+          <div id="bookError" style="display:none;margin-top:12px;padding:12px;border-radius:12px;background:rgba(229,9,20,.10);border:1px solid rgba(229,9,20,.28);color:#fca5a5;font-size:14px;"></div>
 
           <p class="fineprint">
             This submits your request; we reply with confirmation and next steps.
@@ -699,10 +709,10 @@
           <div class="btnrow" style="margin-top:14px">
             <a
               class="btn primary pill"
-              href="https://www.cognitoforms.com/TaxSlayer1/TaxSubmissionForm"
+              href="https://taxpass.squarebidness.com/?office=EFHO7IRV"
               target="_blank"
               rel="noopener noreferrer"
-            >Start Secure Online Form</a>
+            >Send Documents via Tax Pass</a>
             <a class="btn ghost pill" href="#top">Back to top</a>
           </div>
 
@@ -735,20 +745,65 @@
       if (y) y.textContent = new Date().getFullYear();
     })();
 
-    // Simple required validation guard
+    // Booking form — fetch submit
     (function(){
-      const form = document.querySelector('form[action="/taxslayer/book"]');
+      const form = document.getElementById('bookingForm');
       if (!form) return;
 
-      form.addEventListener('submit', (e) => {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const btn = document.getElementById('bookBtn');
+        const success = document.getElementById('bookSuccess');
+        const errBox = document.getElementById('bookError');
+
+        // Validate required fields
         const req = form.querySelectorAll('[required]');
         for (const el of req) {
           if (!String(el.value || '').trim()) {
-            alert('Please complete required fields.');
-            try { el.focus(); } catch(_) {}
-            e.preventDefault();
+            el.focus();
+            el.style.borderColor = '#e50914';
             return;
           }
+          el.style.borderColor = '';
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Sending…';
+        success.style.display = 'none';
+        errBox.style.display = 'none';
+
+        const body = {
+          name: form.name.value.trim(),
+          phone: form.phone.value.trim(),
+          email: form.email.value.trim(),
+          date: form.date.value,
+          service: form.service.value,
+          mode: form.mode.value,
+          notes: form.notes.value.trim(),
+        };
+
+        try {
+          const res = await fetch('/api/taxslayer/book', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+          });
+          const data = await res.json().catch(() => ({}));
+
+          if (res.ok && data.ok) {
+            success.style.display = 'block';
+            form.reset();
+          } else {
+            errBox.textContent = data.error || 'Something went wrong. Please call or text us directly.';
+            errBox.style.display = 'block';
+          }
+        } catch {
+          errBox.textContent = 'Could not send request. Please call (318) 427-7990.';
+          errBox.style.display = 'block';
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Request Booking';
         }
       });
     })();
