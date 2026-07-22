@@ -1,5 +1,5 @@
 const LOGIN_URL = "https://lab.squarebidness.com/tax-pass/office/login.html";
-const SIGNUP_URL = "mailto:marcusbuckner@squarebidness.com?subject=Tax Pass – Office Sign Up";
+const SIGNUP_URL = "mailto:taxpass@squarebidness.com?subject=Tax Pass – Office Sign Up";
 
 function TpLogo({ size = 32 }: { size?: number }) {
   return (
