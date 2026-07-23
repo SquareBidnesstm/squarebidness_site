@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tax Slayer — Admin</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <style>
+    :root{
+      --bg:#0a0a0a; --card:#111; --line:#1e1e1e; --text:#f2f2f2; --muted:#888;
+      --red:#e00; --ok:#22c55e; --warn:#f59e0b; --gray:#444;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;min-height:100vh;padding:20px}
+    a{color:var(--text);text-decoration:none}
+
+    /* Login */
+    .login{display:flex;align-items:center;justify-content:center;min-height:80vh}
+    .login-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:32px;width:min(400px,100%)}
+    .login-card h1{font-size:1.3rem;margin-bottom:6px}
+    .login-card p{color:var(--muted);font-size:.85rem;margin-bottom:20px}
+    input{width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--line);background:#0f0f0f;color:var(--text);font-size:1rem;outline:none;margin-bottom:10px}
+    .btn{padding:11px 20px;border-radius:10px;border:none;font-weight:700;cursor:pointer;font-size:.95rem}
+    .btn-primary{background:#fff;color:#000;width:100%}
+    .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}
+    .err{color:#f87171;font-size:.82rem;margin-top:6px}
+
+    /* App */
+    .app{max-width:1100px;margin:0 auto}
+    .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+    .topbar h1{font-size:1.2rem;font-weight:900}
+    .topbar-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .pill{padding:7px 14px;border-radius:999px;border:1px solid var(--line);font-size:.82rem;font-weight:700;cursor:pointer;background:transparent;color:var(--text)}
+    .pill.active{background:#fff;color:#000;border-color:#fff}
+    .pill-link{padding:7px 14px;border-radius:999px;border:1px solid var(--line);font-size:.82rem;font-weight:700;color:var(--text);display:inline-block}
+
+    /* Stats row */
+    .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px}
+    .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+    .stat-n{font-size:2rem;font-weight:900}
+    .stat-l{color:var(--muted);font-size:.8rem;margin-top:2px}
+
+    /* Table */
+    .table-wrap{overflow-x:auto;border-radius:14px;border:1px solid var(--line)}
+    table{width:100%;border-collapse:collapse;font-size:.85rem}
+    th{padding:10px 14px;text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--line);white-space:nowrap}
+    td{padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+    tr:last-child td{border-bottom:none}
+    tr:hover td{background:rgba(255,255,255,.03)}
+
+    .badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:.75rem;font-weight:700}
+    .badge-pending{background:rgba(245,158,11,.15);color:#fbbf24}
+    .badge-confirmed{background:rgba(34,197,94,.15);color:#4ade80}
+    .badge-completed{background:rgba(99,102,241,.15);color:#a5b4fc}
+    .badge-canceled{background:rgba(239,68,68,.1);color:#f87171}
+
+    .actions{display:flex;gap:6px;flex-wrap:wrap}
+    .act-btn{padding:5px 10px;border-radius:8px;border:1px solid var(--line);font-size:.75rem;font-weight:700;cursor:pointer;background:transparent;color:var(--text)}
+    .act-btn:hover{background:rgba(255,255,255,.07)}
+    .act-btn.confirm{border-color:rgba(34,197,94,.4);color:#4ade80}
+    .act-btn.complete{border-color:rgba(99,102,241,.4);color:#a5b4fc}
+    .act-btn.cancel{border-color:rgba(239,68,68,.3);color:#f87171}
+
+    .empty{text-align:center;padding:40px;color:var(--muted)}
+    .hidden{display:none!important}
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginWrap" class="login">
+  <div class="login-card">
+    <h1>Tax Slayer — Admin</h1>
+    <p>Enter your admin token to access the booking dashboard.</p>
+    <input id="tokenInput" type="password" placeholder="Admin token" />
+    <button class="btn btn-primary" id="loginBtn">Sign In</button>
+    <div id="loginErr" class="err hidden"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="appWrap" class="app hidden">
+
+  <div class="topbar">
+    <div>
+      <h1>Tax Slayer — Bookings</h1>
+      <div style="color:var(--muted);font-size:.82rem;margin-top:2px">Jessica Porter · Alexandria, LA</div>
+    </div>
+    <div class="topbar-right">
+      <a class="pill-link" href="https://taxpass.squarebidness.com/office/dashboard/" target="_blank" rel="noopener">Tax Pass Dashboard</a>
+      <a class="pill-link" href="/taxslayer/" target="_blank" rel="noopener">Public Page</a>
+      <button class="pill" id="refreshBtn">Refresh</button>
+      <button class="pill" id="logoutBtn">Sign Out</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats" id="statsRow">
+    <div class="stat"><div class="stat-n" id="s-pending">—</div><div class="stat-l">Pending</div></div>
+    <div class="stat"><div class="stat-n" id="s-confirmed">—</div><div class="stat-l">Confirmed</div></div>
+    <div class="stat"><div class="stat-n" id="s-completed">—</div><div class="stat-l">Completed</div></div>
+    <div class="stat"><div class="stat-n" id="s-total">—</div><div class="stat-l">Total</div></div>
+  </div>
+
+  <!-- Filter -->
+  <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+    <button class="pill active" data-filter="all">All</button>
+    <button class="pill" data-filter="pending">Pending</button>
+    <button class="pill" data-filter="confirmed">Confirmed</button>
+    <button class="pill" data-filter="completed">Completed</button>
+    <button class="pill" data-filter="canceled">Canceled</button>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Client</th>
+          <th>Service</th>
+          <th>Date</th>
+          <th>Mode</th>
+          <th>Notes</th>
+          <th>Status</th>
+          <th>Submitted</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="bookingBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  const KEY = "ts_admin_token";
+  let allBookings = [];
+  let activeFilter = "all";
+
+  function getToken() { return localStorage.getItem(KEY) || ""; }
+  function setToken(t) { localStorage.setItem(KEY, t); }
+  function clearToken() { localStorage.removeItem(KEY); }
+
+  function show(id, on) { document.getElementById(id)?.classList.toggle("hidden", !on); }
+  function $(id) { return document.getElementById(id); }
+
+  function fmt(iso) {
+    if (!iso) return "—";
+    const d = new Date(iso);
+    return d.toLocaleDateString("en-US", { month:"short", day:"numeric", year:"numeric" });
+  }
+
+  function statusBadge(s) {
+    const map = { pending:"badge-pending", confirmed:"badge-confirmed", completed:"badge-completed", canceled:"badge-canceled" };
+    return `<span class="badge ${map[s] || "badge-pending"}">${s}</span>`;
+  }
+
+  function updateStats(rows) {
+    const count = (s) => rows.filter(r => r.status === s).length;
+    $("s-pending").textContent   = count("pending");
+    $("s-confirmed").textContent = count("confirmed");
+    $("s-completed").textContent = count("completed");
+    $("s-total").textContent     = rows.length;
+  }
+
+  function renderTable(rows) {
+    const body = $("bookingBody");
+    const filtered = activeFilter === "all" ? rows : rows.filter(r => r.status === activeFilter);
+
+    if (!filtered.length) {
+      body.innerHTML = `<tr><td colspan="8" class="empty">No bookings found.</td></tr>`;
+      return;
+    }
+
+    body.innerHTML = filtered.map(b => `
+      <tr>
+        <td>
+          <div style="font-weight:700">${esc(b.name)}</div>
+          <div style="color:var(--muted);font-size:.8rem">${esc(b.phone)}</div>
+          ${b.email ? `<div style="color:var(--muted);font-size:.75rem">${esc(b.email)}</div>` : ""}
+        </td>
+        <td>${esc(b.service)}</td>
+        <td style="white-space:nowrap">${b.preferred_date ? fmt(b.preferred_date) : "—"}</td>
+        <td>${esc(b.mode || "In-Office")}</td>
+        <td style="max-width:180px;color:var(--muted);font-size:.8rem">${esc(b.notes || "—")}</td>
+        <td>${statusBadge(b.status)}</td>
+        <td style="white-space:nowrap;color:var(--muted)">${fmt(b.created_at)}</td>
+        <td>
+          <div class="actions">
+            <a class="act-btn" href="tel:${esc(b.phone)}">Call</a>
+            <a class="act-btn" href="sms:${esc(b.phone)}">Text</a>
+            ${b.status !== "confirmed"  ? `<button class="act-btn confirm"  onclick="setStatus('${b.id}','confirmed')">Confirm</button>` : ""}
+            ${b.status !== "completed"  ? `<button class="act-btn complete" onclick="setStatus('${b.id}','completed')">Complete</button>` : ""}
+            ${b.status !== "canceled"   ? `<button class="act-btn cancel"   onclick="setStatus('${b.id}','canceled')">Cancel</button>` : ""}
+          </div>
+        </td>
+      </tr>
+    `).join("");
+  }
+
+  function esc(s) {
+    return String(s ?? "").replace(/[&<>"']/g, c =>
+      ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  }
+
+  async function loadBookings() {
+    try {
+      const r = await fetch("/api/taxslayer/bookings", {
+        headers: { "x-admin-token": getToken() }
+      });
+      const j = await r.json();
+      if (!j.ok) throw new Error(j.error || "Failed");
+      allBookings = j.bookings || [];
+      updateStats(allBookings);
+      renderTable(allBookings);
+    } catch(e) {
+      $("bookingBody").innerHTML = `<tr><td colspan="8" class="empty" style="color:#f87171">Error: ${e.message}</td></tr>`;
+    }
+  }
+
+  async function setStatus(id, status) {
+    try {
+      const r = await fetch("/api/taxslayer/bookings", {
+        method: "PATCH",
+        headers: { "Content-Type":"application/json", "x-admin-token": getToken() },
+        body: JSON.stringify({ id, status }),
+      });
+      const j = await r.json();
+      if (!j.ok) throw new Error(j.error);
+      // optimistic update
+      const idx = allBookings.findIndex(b => b.id === id);
+      if (idx > -1) allBookings[idx].status = status;
+      updateStats(allBookings);
+      renderTable(allBookings);
+    } catch(e) {
+      alert("Update failed: " + e.message);
+    }
+  }
+
+  async function tryLogin() {
+    const token = $("tokenInput").value.trim();
+    if (!token) return;
+    // validate by hitting the API
+    const r = await fetch("/api/taxslayer/bookings", {
+      headers: { "x-admin-token": token }
+    });
+    if (r.status === 401) {
+      $("loginErr").textContent = "Invalid token.";
+      $("loginErr").classList.remove("hidden");
+      return;
+    }
+    setToken(token);
+    showApp();
+    const j = await r.json();
+    allBookings = j.bookings || [];
+    updateStats(allBookings);
+    renderTable(allBookings);
+  }
+
+  function showApp() {
+    show("loginWrap", false);
+    show("appWrap", true);
+  }
+
+  function showLogin() {
+    show("loginWrap", true);
+    show("appWrap", false);
+  }
+
+  // Filter pills
+  document.querySelectorAll("[data-filter]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      activeFilter = btn.dataset.filter;
+      document.querySelectorAll("[data-filter]").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      renderTable(allBookings);
+    });
+  });
+
+  $("loginBtn").addEventListener("click", tryLogin);
+  $("tokenInput").addEventListener("keydown", e => { if (e.key === "Enter") tryLogin(); });
+  $("refreshBtn").addEventListener("click", loadBookings);
+  $("logoutBtn").addEventListener("click", () => { clearToken(); showLogin(); });
+
+  // Boot
+  const saved = getToken();
+  if (saved) { showApp(); loadBookings(); }
+</script>
+</body>
+</html>
