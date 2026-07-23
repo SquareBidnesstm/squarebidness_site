@@ -1,6 +1,6 @@
 import { sendInstallSms } from "../_lib/send-install-sms.js";
 
-const JESSICA_PHONE = process.env.TAXSLAYER_NOTIFY_PHONE || "+19856236792";
+const JESSICA_PHONE = process.env.TAXSLAYER_NOTIFY_PHONE || "+13186236792";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
