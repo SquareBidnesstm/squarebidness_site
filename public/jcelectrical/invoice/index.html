@@ -3,14 +3,37 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Invoice Generator — JC Electrical Services LLC</title>
+  <title>Invoice Builder — JC Electrical Services LLC</title>
   <meta name="robots" content="noindex,nofollow" />
-  <meta property="og:image" content="https://www.squarebidness.com/jcelectrical/assets/icons/jc-og-512.png" />
-  <link rel="icon" type="image/png" sizes="32x32" href="/jcelectrical/assets/icons/favicon-32x32.png" />
-  <link rel="apple-touch-icon" href="/jcelectrical/assets/icons/jc-og-512.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/jcelectrical/assets/jc-edit-16.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/jcelectrical/assets/jc-edit-32.png" />
+  <link rel="icon" type="image/png" sizes="48x48" href="/jcelectrical/assets/jc-edit-48.png" />
+  <link rel="apple-touch-icon" href="/jcelectrical/assets/jc-text-only-180.png" />
   <style>
+    :root {
+      --bg:    #06080f;
+      --panel: #0b0f1c;
+      --panel2:#0e1324;
+      --text:  #eef0f8;
+      --muted: #8a93b0;
+      --line:  rgba(255,255,255,.09);
+      --blue:  #1a56ff;
+      --blue2: #5080ff;
+      --gold:  #f5a80a;
+      --gold2: #ffc926;
+      --red:   #f87171;
+      --input-bg:    rgba(255,255,255,.04);
+      --input-bd:    rgba(26,86,255,.22);
+      --input-focus: rgba(26,86,255,.55);
+      --item-bg:     rgba(26,86,255,.07);
+    }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0f0f0f; color: #111; min-height: 100vh; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
 
     .app {
       display: grid;
@@ -23,67 +46,133 @@
 
     /* ---- form panel ---- */
     .form-panel {
-      background: #111114;
-      color: #e5e7eb;
+      background: var(--panel);
+      border-right: 1px solid rgba(26,86,255,.28);
       padding: 1.5rem;
       overflow-y: auto;
       position: sticky;
       top: 0;
       height: 100vh;
-      border-right: 1px solid rgba(255,211,77,.12);
     }
     @media (max-width: 860px) {
       .form-panel { position: static; height: auto; }
     }
-    .form-panel h2 {
-      font-size: 1rem;
-      font-weight: 700;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: #ffd34d;
-      margin-bottom: 1.25rem;
+
+    .form-panel-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 1.5rem;
     }
+    .form-panel-logo {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 1px solid rgba(245,168,10,.3);
+      flex-shrink: 0;
+    }
+    .form-panel-title {
+      font-size: .95rem;
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+    .form-panel-title span {
+      font-size: .65rem;
+      color: var(--muted);
+      display: block;
+      letter-spacing: .04em;
+      font-weight: 500;
+      text-transform: none;
+      margin-top: 1px;
+    }
+
     .form-section {
       margin-bottom: 1.4rem;
       padding-bottom: 1.4rem;
-      border-bottom: 1px solid #1e1e22;
+      border-bottom: 1px solid rgba(255,255,255,.06);
     }
     .form-section:last-of-type { border-bottom: none; }
     .form-section h3 {
-      font-size: .72rem;
+      font-size: .68rem;
       font-weight: 700;
-      letter-spacing: .12em;
+      letter-spacing: .14em;
       text-transform: uppercase;
-      color: #666;
+      color: var(--blue2);
       margin-bottom: .75rem;
     }
     label {
       display: block;
-      font-size: .8rem;
-      color: #aaa;
+      font-size: .78rem;
+      color: var(--muted);
       margin-bottom: .25rem;
       margin-top: .6rem;
     }
     input, textarea, select {
       width: 100%;
-      background: #1a1a1e;
-      border: 1px solid #2a2a30;
+      background: var(--input-bg);
+      border: 1px solid var(--input-bd);
       border-radius: 6px;
-      color: #e5e7eb;
+      color: var(--text);
       font-size: .9rem;
       padding: .5rem .65rem;
       outline: none;
-      transition: border-color .15s;
+      transition: border-color .15s, box-shadow .15s;
       font-family: inherit;
     }
-    input:focus, textarea:focus, select:focus { border-color: #ffd34d; }
-    select option { background: #1a1a1e; }
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px var(--input-focus);
+    }
+    select option { background: #10152b; }
     textarea { resize: vertical; min-height: 52px; }
     .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
 
+    /* discount chips */
+    .disc-chips {
+      display: flex;
+      gap: .45rem;
+      flex-wrap: wrap;
+      margin-top: .25rem;
+    }
+    .disc-chip {
+      padding: .45rem .85rem;
+      border-radius: 999px;
+      border: 1px solid var(--input-bd);
+      background: var(--input-bg);
+      color: var(--muted);
+      font-size: .8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .15s;
+      font-family: inherit;
+    }
+    .disc-chip:hover {
+      border-color: var(--blue2);
+      color: var(--text);
+    }
+    .disc-chip.active {
+      background: rgba(26,86,255,.18);
+      border-color: var(--blue);
+      color: var(--text);
+    }
+    .disc-chip.veteran.active {
+      background: rgba(245,168,10,.15);
+      border-color: var(--gold);
+      color: var(--gold2);
+    }
+    .disc-chip.senior.active {
+      background: rgba(80,128,255,.18);
+      border-color: var(--blue2);
+      color: #a0b8ff;
+    }
+
     /* ---- line items ---- */
     .item-block {
-      background: #1a1a1e;
+      background: var(--item-bg);
+      border: 1px solid rgba(26,86,255,.15);
       border-radius: 8px;
       padding: .75rem;
       margin-bottom: .6rem;
@@ -95,58 +184,62 @@
       right: .5rem;
       background: none;
       border: none;
-      color: #555;
+      color: #444;
       cursor: pointer;
       font-size: 1rem;
       line-height: 1;
       padding: .2rem .4rem;
       border-radius: 4px;
     }
-    .item-block .remove-btn:hover { color: #f87171; background: rgba(248,113,113,.1); }
+    .item-block .remove-btn:hover { color: var(--red); background: rgba(248,113,113,.1); }
     .add-item-btn {
       width: 100%;
       background: none;
-      border: 1px dashed #2a2a30;
+      border: 1px dashed rgba(26,86,255,.3);
       border-radius: 6px;
-      color: #666;
+      color: var(--muted);
       font-size: .85rem;
       padding: .55rem;
       cursor: pointer;
       transition: border-color .15s, color .15s;
       font-family: inherit;
     }
-    .add-item-btn:hover { border-color: #ffd34d; color: #e5e7eb; }
+    .add-item-btn:hover { border-color: var(--blue2); color: var(--text); }
 
     /* ---- action buttons ---- */
     .actions { margin-top: 1.5rem; display: flex; flex-direction: column; gap: .6rem; }
     .btn-print {
-      background: #ffd34d;
-      color: #111;
+      background: linear-gradient(180deg, var(--gold2), #e89500);
+      color: #0a0700;
       border: none;
       border-radius: 8px;
       font-size: .95rem;
       font-weight: 800;
-      padding: .8rem 1rem;
+      padding: .85rem 1rem;
       cursor: pointer;
       letter-spacing: .03em;
       font-family: inherit;
+      box-shadow: 0 0 18px rgba(245,168,10,.22);
     }
-    .btn-print:hover { background: #ffe28a; }
+    .btn-print:hover { background: linear-gradient(180deg, #ffe566, #f0a800); }
     .btn-reset {
       background: none;
-      color: #555;
-      border: 1px solid #2a2a30;
+      color: var(--muted);
+      border: 1px solid rgba(255,255,255,.1);
       border-radius: 8px;
       font-size: .85rem;
       padding: .6rem 1rem;
       cursor: pointer;
       font-family: inherit;
     }
-    .btn-reset:hover { color: #aaa; border-color: #444; }
+    .btn-reset:hover { color: var(--text); border-color: rgba(255,255,255,.25); }
 
     /* ---- preview panel ---- */
     .preview-panel {
-      background: #1a1a1e;
+      background:
+        radial-gradient(700px 500px at 0% 30%, rgba(26,86,255,.07), transparent 60%),
+        radial-gradient(600px 400px at 100% 70%, rgba(245,168,10,.05), transparent 60%),
+        var(--bg);
       display: flex;
       align-items: flex-start;
       justify-content: center;
@@ -160,14 +253,14 @@
       width: 720px;
       max-width: 100%;
       font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-      box-shadow: 0 4px 32px rgba(0,0,0,.4);
-      border-radius: 4px;
+      box-shadow: 0 8px 48px rgba(0,0,0,.55), 0 0 0 1px rgba(26,86,255,.15);
+      border-radius: 5px;
       overflow: hidden;
     }
 
-    /* ---- company header block ---- */
+    /* company header */
     .inv-company-header {
-      background: #0b0b0b;
+      background: #06080f;
       color: #fff;
       padding: 24px 40px 22px;
       display: flex;
@@ -178,7 +271,8 @@
       width: 62px;
       height: 62px;
       border-radius: 12px;
-      border: 1.5px solid rgba(255,211,77,.35);
+      border: 1.5px solid rgba(245,168,10,.35);
+      box-shadow: 0 0 18px rgba(26,86,255,.3);
       flex-shrink: 0;
       display: block;
       object-fit: cover;
@@ -193,31 +287,28 @@
     }
     .inv-company-sub {
       font-size: .88rem;
-      color: rgba(255,255,255,.70);
+      color: rgba(255,255,255,.65);
       line-height: 1.65;
     }
     .inv-company-phone {
       font-size: 1.1rem;
       font-weight: 800;
-      color: #ffd34d;
+      color: #f5a80a;
       margin-top: 7px;
       letter-spacing: .01em;
     }
 
-    /* yellow rule */
+    /* dual-accent rule: blue left → gold right */
     .inv-rule {
       border: none;
       height: 3px;
-      background: #ffd34d;
+      background: linear-gradient(90deg, #1a56ff 0%, #1a56ff 40%, #f5a80a 60%, #f5a80a 100%);
       margin: 0;
     }
 
-    /* invoice body padding */
-    .inv-body {
-      padding: 0 40px 36px;
-    }
+    /* invoice body */
+    .inv-body { padding: 0 40px 36px; }
 
-    /* header row */
     .inv-header {
       display: flex;
       justify-content: space-between;
@@ -230,12 +321,9 @@
       font-size: 1.4rem;
       font-weight: 900;
       letter-spacing: .04em;
+      color: #111;
     }
-    .inv-header-meta {
-      font-size: .83rem;
-      color: #555;
-      text-align: right;
-    }
+    .inv-header-meta { font-size: .83rem; color: #555; text-align: right; }
 
     /* bill to / job details */
     .inv-info-row {
@@ -245,9 +333,9 @@
       margin: 20px 0;
     }
     .inv-info-box {
-      border-left: 3px solid #ffd34d;
+      border-left: 3px solid #1a56ff;
       padding: 10px 12px;
-      background: #fafafa;
+      background: #f8f9ff;
       border-radius: 0 4px 4px 0;
     }
     .inv-info-label {
@@ -255,30 +343,18 @@
       font-weight: 900;
       letter-spacing: .12em;
       text-transform: uppercase;
-      color: #b8920a;
+      color: #1a56ff;
       margin-bottom: 6px;
     }
-    .inv-info-name { font-weight: 700; font-size: .95rem; }
+    .inv-info-name { font-weight: 700; font-size: .95rem; color: #111; }
     .inv-info-line { font-size: .85rem; color: #555; margin-top: 2px; }
-    .inv-info-detail {
-      font-size: .85rem;
-      display: flex;
-      gap: 8px;
-      margin-top: 3px;
-    }
+    .inv-info-detail { font-size: .85rem; display: flex; gap: 8px; margin-top: 3px; }
     .inv-info-detail-key { color: #888; min-width: 72px; font-weight: 600; }
     .inv-info-detail-val { color: #333; }
 
     /* table */
-    .inv-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 8px 0 0;
-    }
-    .inv-table thead tr {
-      background: #0b0b0b;
-      color: #fff;
-    }
+    .inv-table { width: 100%; border-collapse: collapse; margin: 8px 0 0; }
+    .inv-table thead tr { background: #06080f; color: #fff; }
     .inv-table th {
       font-size: .78rem;
       font-weight: 700;
@@ -292,22 +368,22 @@
       padding: 14px 14px;
       border-bottom: 1px solid #eee;
       vertical-align: top;
+      color: #111;
     }
-    .inv-table td:last-child { text-align: right; font-weight: 700; font-size: 1rem; }
-    .inv-item-desc { font-weight: 700; font-size: .95rem; }
+    .inv-table td:last-child { text-align: right; font-weight: 700; font-size: 1rem; color: #111; }
+    .inv-item-desc { font-weight: 700; font-size: .95rem; color: #111; }
     .inv-item-sub { font-size: .82rem; color: #777; margin-top: 3px; }
+    .inv-table .no-items td {
+      color: #bbb; font-style: italic; font-size: .88rem; text-align: center;
+    }
 
     /* totals */
-    .inv-totals {
-      display: flex;
-      justify-content: flex-end;
-      margin: 16px 0;
-    }
+    .inv-totals { display: flex; justify-content: flex-end; margin: 16px 0; }
     .inv-totals-box {
-      background: #0b0b0b;
+      background: #06080f;
       color: #fff;
       border-radius: 6px;
-      min-width: 220px;
+      min-width: 240px;
       overflow: hidden;
     }
     .inv-totals-row {
@@ -316,20 +392,35 @@
       padding: 9px 16px;
       font-size: .85rem;
       color: #aaa;
-      border-bottom: 1px solid rgba(255,211,77,.3);
+      border-bottom: 1px solid rgba(255,255,255,.08);
     }
+    .inv-totals-discount {
+      display: flex;
+      justify-content: space-between;
+      padding: 9px 16px;
+      font-size: .85rem;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .inv-discount-label { color: #f5a80a; font-weight: 600; }
+    .inv-discount-amt { color: #f87171; font-weight: 700; }
     .inv-totals-row-total {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 10px 16px;
     }
-    .inv-total-label { color: #ffd34d; font-weight: 700; font-size: .88rem; letter-spacing: .06em; text-transform: uppercase; }
-    .inv-total-amount { font-size: 1.4rem; font-weight: 900; }
+    .inv-total-label {
+      color: #f5a80a;
+      font-weight: 700;
+      font-size: .88rem;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    .inv-total-amount { font-size: 1.4rem; font-weight: 900; color: #fff; }
 
-    /* payment instructions */
+    /* payment */
     .inv-payment {
-      border: 1.5px solid #ffd34d;
+      border: 1.5px solid #f5a80a;
       border-radius: 6px;
       padding: 14px 16px;
       background: #fffdf0;
@@ -344,40 +435,18 @@
       margin-bottom: 6px;
     }
     .inv-payment-note { font-size: .88rem; color: #555; }
-    .inv-payment-name { font-weight: 700; font-size: .95rem; margin-top: 2px; }
+    .inv-payment-name { font-weight: 700; font-size: .95rem; color: #111; margin-top: 2px; }
 
-    .inv-table .no-items td {
-      color: #bbb;
-      font-style: italic;
-      font-size: .88rem;
-      text-align: center;
-    }
+    .inv-notes { margin-top: 12px; font-size: .82rem; color: #888; font-style: italic; }
 
-    .inv-notes {
-      margin-top: 12px;
-      font-size: .82rem;
-      color: #888;
-      font-style: italic;
-    }
-
-    /* ---- print styles ---- */
+    /* ---- print ---- */
     @media print {
       * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
       body { background: #fff; }
       .form-panel { display: none !important; }
       .app { display: block; }
-      .preview-panel {
-        display: block;
-        padding: 0;
-        background: #fff;
-        min-height: auto;
-      }
-      .invoice-doc {
-        width: 100%;
-        max-width: 100%;
-        box-shadow: none;
-        border-radius: 0;
-      }
+      .preview-panel { display: block; padding: 0; background: #fff; min-height: auto; }
+      .invoice-doc { width: 100%; max-width: 100%; box-shadow: none; border-radius: 0; }
       .inv-body { padding: 0 32px 28px; }
       .inv-company-header { padding: 22px 32px 18px; }
       .inv-header { padding: 10px 32px; margin: 0 -32px; }
@@ -389,12 +458,18 @@
 
     <!-- FORM PANEL -->
     <aside class="form-panel">
-      <h2>⚡ Invoice Builder</h2>
+      <div class="form-panel-header">
+        <img class="form-panel-logo" src="/jcelectrical/assets/jc-og-192.png" alt="" />
+        <div class="form-panel-title">
+          ⚡ Invoice Builder
+          <span>JC Electrical Services LLC</span>
+        </div>
+      </div>
 
       <div class="form-section">
         <h3>Invoice Info</h3>
-        <label>Invoice # <span id="inv-number-badge" style="font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:#1a1a00;color:#ffd34d;border-radius:4px;padding:.1rem .35rem;margin-left:.3rem;">auto</span></label>
-        <input type="text" id="inv-number" value="Loading…" readonly style="opacity:.6;cursor:default;" />
+        <label>Invoice # <span id="inv-number-badge" style="font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:rgba(245,168,10,.15);color:var(--gold);border-radius:4px;padding:.1rem .35rem;margin-left:.3rem;">AUTO</span></label>
+        <input type="text" id="inv-number" value="Loading…" readonly style="opacity:.5;cursor:default;" />
         <label>Date</label>
         <input type="date" id="inv-date" />
       </div>
@@ -443,6 +518,19 @@
       </div>
 
       <div class="form-section">
+        <h3>Discount</h3>
+        <div class="disc-chips">
+          <button type="button" class="disc-chip active" data-type="" onclick="setDiscount('')">None</button>
+          <button type="button" class="disc-chip veteran" data-type="veteran" onclick="setDiscount('veteran')">🎖 Veteran</button>
+          <button type="button" class="disc-chip senior" data-type="senior" onclick="setDiscount('senior')">👴 Senior</button>
+        </div>
+        <div id="discount-pct-row" style="display:none;margin-top:.6rem">
+          <label>Discount %</label>
+          <input type="number" id="discount-pct" min="0" max="100" step="0.5" value="10" oninput="updatePreview()" />
+        </div>
+      </div>
+
+      <div class="form-section">
         <h3>Payment</h3>
         <label>Checks Payable To</label>
         <input type="text" id="pay-to" value="JC Electrical Services LLC" />
@@ -462,7 +550,7 @@
 
         <!-- Company Header -->
         <div class="inv-company-header">
-          <img class="inv-company-logo" src="/jcelectrical/assets/icons/jc-og-512.png" alt="JC Electrical Services LLC" />
+          <img class="inv-company-logo" src="/jcelectrical/assets/jc-og-192.png" alt="JC Electrical Services LLC" />
           <div class="inv-company-text">
             <div class="inv-company-name">JC Electrical Services LLC</div>
             <div class="inv-company-sub">
@@ -515,9 +603,7 @@
               </tr>
             </thead>
             <tbody id="p-items-body">
-              <tr class="no-items">
-                <td colspan="2">No items added yet</td>
-              </tr>
+              <tr class="no-items"><td colspan="2">No items added yet</td></tr>
             </tbody>
           </table>
 
@@ -526,6 +612,10 @@
               <div class="inv-totals-row">
                 <span>SUBTOTAL</span>
                 <span id="p-subtotal">$0.00</span>
+              </div>
+              <div class="inv-totals-discount" id="p-discount-row" style="display:none">
+                <span class="inv-discount-label" id="p-discount-label">VETERAN DISCOUNT (10%)</span>
+                <span class="inv-discount-amt" id="p-discount-amt">-$0.00</span>
               </div>
               <div class="inv-totals-row-total">
                 <span class="inv-total-label">Total Due</span>
@@ -542,7 +632,7 @@
 
           <div class="inv-notes" id="p-notes" style="display:none"></div>
 
-        </div><!-- /inv-body -->
+        </div>
       </div>
     </div>
 
@@ -550,6 +640,17 @@
 
   <script>
     document.getElementById('inv-date').valueAsDate = new Date();
+
+    let discountType = '';
+
+    function setDiscount(type) {
+      discountType = type;
+      document.querySelectorAll('.disc-chip').forEach(c => {
+        c.classList.toggle('active', c.dataset.type === type);
+      });
+      document.getElementById('discount-pct-row').style.display = type ? '' : 'none';
+      updatePreview();
+    }
 
     async function loadNextNumber() {
       try {
@@ -565,7 +666,7 @@
       const el = document.getElementById('inv-number');
       const badge = document.getElementById('inv-number-badge');
       el.value = num;
-      el.style.opacity = auto ? '.6' : '1';
+      el.style.opacity = auto ? '.5' : '1';
       el.style.cursor = auto ? 'default' : 'text';
       el.readOnly = auto;
       badge.style.display = auto ? '' : 'none';
@@ -646,9 +747,9 @@
       document.getElementById('p-inv-number').textContent = document.getElementById('inv-number').value || '—';
       document.getElementById('p-inv-date').textContent = formatDate(document.getElementById('inv-date').value);
 
-      const btName = document.getElementById('bt-name').value;
-      const btAddr = document.getElementById('bt-addr1').value;
-      const btCity = document.getElementById('bt-city').value;
+      const btName  = document.getElementById('bt-name').value;
+      const btAddr  = document.getElementById('bt-addr1').value;
+      const btCity  = document.getElementById('bt-city').value;
       const btState = document.getElementById('bt-state').value;
       document.getElementById('p-bt-name').textContent = btName || '—';
       const addrEl = document.getElementById('p-bt-addr1');
@@ -692,10 +793,25 @@
         });
       }
 
-      const total = items.reduce((sum, i) => sum + (parseFloat(i.amount) || 0), 0);
-      document.getElementById('p-subtotal').textContent = formatMoney(total);
-      document.getElementById('p-total').textContent = formatMoney(total);
+      const subtotal = items.reduce((sum, i) => sum + (parseFloat(i.amount) || 0), 0);
+      const pct = discountType ? Math.min(100, Math.max(0, parseFloat(document.getElementById('discount-pct').value) || 0)) : 0;
+      const discAmt = subtotal * pct / 100;
+      const total = subtotal - discAmt;
 
+      document.getElementById('p-subtotal').textContent = formatMoney(subtotal);
+
+      const discRow = document.getElementById('p-discount-row');
+      if (discountType && pct > 0) {
+        const typeName = discountType === 'veteran' ? 'VETERAN DISCOUNT' : 'SENIOR DISCOUNT';
+        const pctLabel = pct % 1 === 0 ? pct : pct.toFixed(1);
+        document.getElementById('p-discount-label').textContent = `${typeName} (${pctLabel}%)`;
+        document.getElementById('p-discount-amt').textContent = `-${formatMoney(discAmt)}`;
+        discRow.style.display = '';
+      } else {
+        discRow.style.display = 'none';
+      }
+
+      document.getElementById('p-total').textContent = formatMoney(total);
       document.getElementById('p-pay-to').textContent = document.getElementById('pay-to').value || 'JC Electrical Services LLC';
 
       const notes = document.getElementById('inv-notes').value;
@@ -718,6 +834,7 @@
       document.getElementById('pay-to').value = 'JC Electrical Services LLC';
       items = [];
       itemCounter = 0;
+      setDiscount('');
       renderItemBlocks();
       updatePreview();
       loadNextNumber();
