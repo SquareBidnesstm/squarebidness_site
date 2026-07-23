@@ -1,5 +1,5 @@
-const BASE = String(process.env.SUPABASE_URL || "").replace(/\/$/, "");
-const KEY  = String(process.env.SUPABASE_SERVICE_ROLE_KEY || "").trim();
+const BASE = String(process.env.TAXSLAYER_SUPABASE_URL || "").replace(/\/$/, "");
+const KEY  = String(process.env.TAXSLAYER_SUPABASE_SERVICE_ROLE_KEY || "").trim();
 
 const headers = () => ({
   apikey: KEY,
