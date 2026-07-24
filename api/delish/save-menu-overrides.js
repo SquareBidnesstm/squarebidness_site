@@ -25,6 +25,39 @@ function normalizeBasesSoldOut(basesSoldOut) {
   return [...new Set(basesSoldOut.map((x) => String(x || "").trim()).filter(Boolean))];
 }
 
+function normalizeSpecialMenu(specialMenu = {}) {
+  const active = specialMenu?.active === true;
+  const rawItems = Array.isArray(specialMenu?.items) ? specialMenu.items : [];
+  const items = rawItems
+    .map((item, i) => {
+      const p = Number(item?.price);
+      return {
+        id: `special_${i}`,
+        name: String(item?.name || "").trim().slice(0, 80),
+        price: Number.isFinite(p) && p >= 0 ? Math.round(p * 100) / 100 : 0,
+        baseOptions: [],
+        sideSelectionRequired: false,
+        desc: "Today's special.",
+      };
+    })
+    .filter(item => item.name && item.price > 0);
+  return { active, items };
+}
+
+function normalizeDessertItems(items) {
+  if (!Array.isArray(items)) return [];
+  return items
+    .map((item, i) => {
+      const p = Number(item?.price);
+      return {
+        id: `override_dessert_${i}`,
+        name: String(item?.name || "").trim().slice(0, 80),
+        price: Number.isFinite(p) && p >= 0 ? Math.round(p * 100) / 100 : 0,
+      };
+    })
+    .filter(item => item.name && item.price > 0);
+}
+
 function normalizeLimitedMenu(limitedMenu = {}) {
   const active = limitedMenu?.active === true;
   const price = Number(limitedMenu?.price);
@@ -71,17 +104,16 @@ export default async function handler(req, res) {
     const itemsSoldOut = normalizeItemsSoldOut(body.itemsSoldOut);
     const basesSoldOut = normalizeBasesSoldOut(body.basesSoldOut);
     const limitedMenu = normalizeLimitedMenu(body.limitedMenu);
+    const specialMenu = normalizeSpecialMenu(body.specialMenu);
+    const dessertItems = normalizeDessertItems(body.dessertItems);
 
     const next = {
       ...current,
       sections: {
-        lagniappe: limitedMenu.active && limitedMenu.blockLagniappe
-          ? false
-          : body?.sections?.lagniappe !== false,
+        lagniappe: body?.sections?.lagniappe !== false,
         drinks: body?.sections?.drinks !== false,
-        extraSides: limitedMenu.active && limitedMenu.blockExtraSides
-          ? false
-          : body?.sections?.extraSides !== false,
+        extraSides: body?.sections?.extraSides !== false,
+        desserts: body?.sections?.desserts !== false,
       },
       sectionsDate: getCentralDateKey(),
       itemsOff,
@@ -92,6 +124,10 @@ export default async function handler(req, res) {
       basesSoldOutDate: getCentralDateKey(),
       limitedMenu,
       limitedMenuDate: getCentralDateKey(),
+      specialMenu,
+      specialMenuDate: getCentralDateKey(),
+      dessertItems,
+      dessertItemsDate: getCentralDateKey(),
       customerMessage: String(body.customerMessage || "").trim().slice(0, 180),
       updatedAt: new Date().toISOString(),
       updatedBy: "operator",

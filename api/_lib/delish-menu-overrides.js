@@ -10,6 +10,7 @@ export const DEFAULT_DELISH_MENU_OVERRIDES = {
     lagniappe: true,
     drinks: true,
     extraSides: true,
+    desserts: true,
   },
   sectionsDate: "",
   itemsOff: [],
@@ -29,6 +30,10 @@ export const DEFAULT_DELISH_MENU_OVERRIDES = {
     blockLagniappe: true,
   },
   limitedMenuDate: "",
+  specialMenu: { active: false, items: [] },
+  specialMenuDate: "",
+  dessertItems: [],
+  dessertItemsDate: "",
   customerMessage: "",
   updatedAt: "",
   updatedBy: "system",
@@ -83,6 +88,18 @@ export async function getDelishMenuOverrides() {
       ? saved.limitedMenu
       : {};
 
+  const specialMenuDate = String(saved.specialMenuDate || "");
+  const savedSpecialMenu =
+    specialMenuDate === todayKey && saved.specialMenu && typeof saved.specialMenu === "object"
+      ? saved.specialMenu
+      : {};
+
+  const dessertItemsDate = String(saved.dessertItemsDate || "");
+  const savedDessertItems =
+    dessertItemsDate === todayKey && Array.isArray(saved.dessertItems)
+      ? saved.dessertItems
+      : [];
+
   return {
     ...DEFAULT_DELISH_MENU_OVERRIDES,
     ...saved,
@@ -103,5 +120,12 @@ export async function getDelishMenuOverrides() {
       active: savedLimitedMenu.active === true,
     },
     limitedMenuDate: Object.keys(savedLimitedMenu).length ? limitedMenuDate : todayKey,
+    specialMenu: {
+      active: savedSpecialMenu.active === true,
+      items: Array.isArray(savedSpecialMenu.items) ? savedSpecialMenu.items : [],
+    },
+    specialMenuDate: Object.keys(savedSpecialMenu).length ? specialMenuDate : todayKey,
+    dessertItems: savedDessertItems,
+    dessertItemsDate: savedDessertItems.length ? dessertItemsDate : todayKey,
   };
 }

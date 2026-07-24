@@ -320,6 +320,12 @@
   <div class="optionNote">Stand-alone Lagniappe items available for pickup.</div>
 </div>
 
+  <div class="section">
+  <h3>Desserts</h3>
+  <div id="dessertItems"></div>
+  <div class="optionNote">Add dessert to your order.</div>
+</div>
+
    <div class="section">
   <h3>Drinks</h3>
   <div id="drinkItems"></div>
@@ -362,6 +368,7 @@
   let EXTRA_SIDES_BASE = [];
   let EXTRA_SIDES_FRIDAY_SUNDAY = [];
   let LAGNIAPPE = [];
+  let DESSERTS = [];
   let FLASH_SALE = null;
 
   const customerName = document.getElementById("customerName");
@@ -379,6 +386,7 @@
   const statusEl = document.getElementById("status");
   const orderingBanner = document.getElementById("orderingBanner");
   const lagniappeItems = document.getElementById("lagniappeItems");
+  const dessertItems = document.getElementById("dessertItems");
   const taxDisplay = document.getElementById("taxDisplay");
   const flashSaleSection = document.getElementById("flashSaleSection");
   const flashSaleTitle = document.getElementById("flashSaleTitle");
@@ -407,6 +415,7 @@
     EXTRA_SIDES_BASE = MENU_DATA.extraSidesBase || [];
     EXTRA_SIDES_FRIDAY_SUNDAY = MENU_DATA.extraSidesFridaySunday || [];
     LAGNIAPPE = MENU_DATA.lagniappe || [];
+    DESSERTS = MENU_DATA.desserts || [];
   }
 
   async function loadOrderingStatus() {
@@ -687,17 +696,26 @@
     };
   }
 
-  function getActiveMenuForDay(day) {
-    const limitedMenu = getLimitedMenuOverride();
-    if (limitedMenu) {
-      return {
-        title: "Delish — Limited Menu",
-        note: "Today only. One plate available while supplies last.",
-        mains: [buildLimitedMenuItem(limitedMenu)]
-      };
-    }
+  function getSpecialMenuItems() {
+    const sm = MENU_OVERRIDES?.specialMenu;
+    if (!sm?.active || !Array.isArray(sm.items) || !sm.items.length) return [];
+    return sm.items;
+  }
 
-    return MENU_BY_DAY[day] || null;
+  function getActiveDesserts() {
+    const overrideItems = Array.isArray(MENU_OVERRIDES?.dessertItems) ? MENU_OVERRIDES.dessertItems : [];
+    return [...DESSERTS, ...overrideItems];
+  }
+
+  function getActiveMenuForDay(day) {
+    const dayMenu = MENU_BY_DAY[day];
+    if (!dayMenu) return null;
+    const specialItems = getSpecialMenuItems();
+    if (!specialItems.length) return dayMenu;
+    return {
+      ...dayMenu,
+      mains: [...(dayMenu.mains || []), ...specialItems],
+    };
   }
 
   function isFlashSaleActiveClient() {
@@ -814,6 +832,7 @@
   function renderMainItem(item, day) {
   const hasBaseOptions = Array.isArray(item.baseOptions) && item.baseOptions.length > 0;
   const needsSides = item.sideSelectionRequired !== false;
+  const hasSideContent = hasBaseOptions || needsSides;
   const soldOut = isItemSoldOut(item.id);
 
   function renderPlateBlock(index) {
@@ -855,9 +874,9 @@
         </div>
       </div>
 
-      <div class="plateSides" id="${item.id}SidesWrap">
+      ${hasSideContent ? `<div class="plateSides" id="${item.id}SidesWrap">
         ${[0,1,2].map(i => renderPlateBlock(i)).join("")}
-      </div>
+      </div>` : ""}
     </div>
   `;
 }
@@ -871,6 +890,25 @@
       <div class="menuTop">
         <div class="menuCopy">
           <span>${cleanName} ($${Number(item.price).toFixed(2)})</span>
+          ${soldOut ? `<div class="soldOutBadge">Sold Out</div>` : ""}
+        </div>
+        <div class="qtyWrap ${soldOut ? "is-disabled" : ""}">
+          <button type="button" class="qtyBtn" data-target="${item.id}Qty" data-action="decrease" ${soldOut ? "disabled" : ""}>−</button>
+          <input type="number" min="0" max="20" value="0" id="${item.id}Qty" class="qty" ${soldOut ? "disabled" : ""} />
+          <button type="button" class="qtyBtn" data-target="${item.id}Qty" data-action="increase" ${soldOut ? "disabled" : ""}>+</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+  function renderDessertItem(item) {
+  const soldOut = isItemSoldOut(item.id);
+  return `
+    <div class="menuItem ${soldOut ? "is-soldout" : ""}">
+      <div class="menuTop">
+        <div class="menuCopy">
+          <span>${item.name} ($${Number(item.price).toFixed(2)})</span>
           ${soldOut ? `<div class="soldOutBadge">Sold Out</div>` : ""}
         </div>
         <div class="qtyWrap ${soldOut ? "is-disabled" : ""}">
@@ -982,14 +1020,11 @@
 
 if (state.today && getActiveMenuForDay(state.today)) {
   const menu = getActiveMenuForDay(state.today);
-  const limitedMenu = getLimitedMenuOverride();
   menuDayTitle.textContent = menu.title;
   menuDayNote.textContent = "Order online, pickup on arrival · Alexandria, Louisiana";
   mainMenuNote.textContent = menu.note;
 
-  const visibleMains = limitedMenu
-    ? (menu.mains || [])
-    : (menu.mains || []).filter(item => isItemEnabled(item.id));
+  const visibleMains = (menu.mains || []).filter(item => isItemEnabled(item.id));
   mainMenuItems.innerHTML = visibleMains.map(item => renderMainItem(item, state.today)).join("");
 
   const visibleDrinks = isSectionEnabled("drinks")
@@ -997,7 +1032,7 @@ if (state.today && getActiveMenuForDay(state.today)) {
     : [];
   drinkItems.innerHTML = visibleDrinks.map(renderDrinkItem).join("");
 
-if (!limitedMenu && isExtraSideAllowedForDay(state.today) && isSectionEnabled("extraSides")) {
+if (isExtraSideAllowedForDay(state.today) && isSectionEnabled("extraSides")) {
   renderSelectOptions(
     extraSideSelect,
     getExtraSidesForDay(state.today).filter(
@@ -1021,7 +1056,7 @@ if (!limitedMenu && isExtraSideAllowedForDay(state.today) && isSectionEnabled("e
   extraSideSelect.disabled = true;
 }
 
-  if (limitedMenu || !isSectionEnabled("lagniappe")) {
+  if (!isSectionEnabled("lagniappe")) {
   lagniappeItems.innerHTML = `
     <div class="menuNotice">
       Sorry, Lagniappe items are not available today.
@@ -1030,6 +1065,16 @@ if (!limitedMenu && isExtraSideAllowedForDay(state.today) && isSectionEnabled("e
 } else {
   const visibleLagniappe = LAGNIAPPE.filter(item => isItemEnabled(item.id));
   lagniappeItems.innerHTML = visibleLagniappe.map(renderLagniappeItem).join("");
+}
+
+  if (!isSectionEnabled("desserts")) {
+  dessertItems.innerHTML = `<div class="menuNotice">Desserts not available today.</div>`;
+} else {
+  const allDesserts = getActiveDesserts();
+  const visibleDesserts = allDesserts.filter(item => isItemEnabled(item.id));
+  dessertItems.innerHTML = visibleDesserts.length
+    ? visibleDesserts.map(renderDessertItem).join("")
+    : `<div class="menuNotice">No desserts available today.</div>`;
 }
 
   attachQtyButtons();
@@ -1052,6 +1097,7 @@ if (!limitedMenu && isExtraSideAllowedForDay(state.today) && isSectionEnabled("e
     drinkItems.innerHTML = "";
     renderSelectOptions(extraSideSelect, [], "Extra Side (optional)");
     lagniappeItems.innerHTML = "";
+    dessertItems.innerHTML = "";
     renderFlashSale();
     attachQtyButtons();
   } else {
@@ -1069,6 +1115,7 @@ if (!limitedMenu && isExtraSideAllowedForDay(state.today) && isSectionEnabled("e
     drinkItems.innerHTML = "";
     renderSelectOptions(extraSideSelect, [], "Extra Side (optional)");
     lagniappeItems.innerHTML = "";
+    dessertItems.innerHTML = "";
     renderFlashSale();
     attachQtyButtons();
   }
@@ -1146,6 +1193,14 @@ function getLagniappeSelections() {
   }, []);
 }
 
+function getDessertSelections() {
+  return getActiveDesserts().reduce((items, item) => {
+    const qty = Number(document.getElementById(`${item.id}Qty`)?.value || 0);
+    if (qty > 0) items.push({ id: item.id, name: item.name, price: item.price, qty });
+    return items;
+  }, []);
+}
+
 function getDrinkSelections() {
   return DRINKS.reduce((items, item) => {
     const qtyEl = document.getElementById(`${item.id}Qty`);
@@ -1209,6 +1264,9 @@ function getFlashSaleSelections() {
 
   const lagniappeItemsSelected = getLagniappeSelections();
   items.push(...lagniappeItemsSelected);
+
+  const dessertItemsSelected = getDessertSelections();
+  items.push(...dessertItemsSelected);
 
   const flashSaleItemsSelected = getFlashSaleSelections();
   items.push(...flashSaleItemsSelected);
@@ -1303,11 +1361,13 @@ function getFlashSaleSelections() {
     const pickupOk = pickupWindow.value.trim().length > 0;
 const plateItems = getPlateSelections().items;
 const lagniappeItemsSelected = getLagniappeSelections();
+const dessertItemsSelected = getDessertSelections();
 const drinkItemsSelected = getDrinkSelections();
 const flashSaleItemsSelected = getFlashSaleSelections();
 const hasOrderItem =
   plateItems.length > 0 ||
   lagniappeItemsSelected.length > 0 ||
+  dessertItemsSelected.length > 0 ||
   drinkItemsSelected.length > 0 ||
   flashSaleItemsSelected.length > 0;
 const sidesOk = plateItems.length > 0 ? selectedPlatesHaveSides() : true;
