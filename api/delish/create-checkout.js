@@ -870,6 +870,7 @@ export default async function handler(req, res) {
       line_items: lineItems,
       success_url: "https://www.squarebidness.com/delish/order/success/?session_id={CHECKOUT_SESSION_ID}",
       cancel_url: "https://www.squarebidness.com/delish/",
+      on_behalf_of: DELISH_DESTINATION_ACCOUNT,
       metadata: sharedMetadata,
       custom_text: {
         submit: { message: "Your order will be ready for pickup at Delish in Alexandria, LA." },
