@@ -94,6 +94,16 @@ const MENU_BY_DAY = {
       name: "Shrimp Pasta with Fish Plate",
       price: 17.99,
     },
+    {
+      id: "friday_lasagna",
+      name: "Lasagna Plate",
+      price: 13.99,
+    },
+    {
+      id: "friday_baked_chicken",
+      name: "Baked Chicken Plate",
+      price: 10.99,
+    },
   ],
   sunday: [
     {
@@ -218,6 +228,11 @@ const MENU_BY_DAY = {
       name: "Extra Side - Fries",
       price: 2.5,
     },
+    {
+      id: "dessert_strawberry_cheesecake",
+      name: "Strawberry Cheesecake",
+      price: 3.99,
+    },
   ],
 };
 
@@ -293,7 +308,11 @@ function getAllowedItemsForToday(todayDay, overrides = {}) {
 
   const dayItems = MENU_BY_DAY[todayDay] || [];
   const everydayItems = MENU_BY_DAY.everyday || [];
-  return [...dayItems, ...everydayItems];
+  const specialItems = (overrides?.specialMenu?.active && Array.isArray(overrides?.specialMenu?.items))
+    ? overrides.specialMenu.items
+    : [];
+  const dessertOverrides = Array.isArray(overrides?.dessertItems) ? overrides.dessertItems : [];
+  return [...dayItems, ...everydayItems, ...specialItems, ...dessertOverrides];
 }
 
 function buildAllowedMap(items) {
@@ -331,6 +350,7 @@ function isSectionEnabledBackend(itemId, overrides = {}) {
   if (String(itemId).startsWith("drink_")) return sections.drinks !== false;
   if (String(itemId).startsWith("lagniappe_")) return sections.lagniappe !== false;
   if (String(itemId).startsWith("extra_side_")) return sections.extraSides !== false;
+  if (String(itemId).startsWith("dessert_") || String(itemId).startsWith("override_dessert_")) return sections.desserts !== false;
 
   return true;
 }
