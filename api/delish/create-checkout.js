@@ -228,6 +228,16 @@ const MENU_BY_DAY = {
       name: "Extra Side - Fries",
       price: 2.5,
     },
+    {
+      id: "dessert_banana_pudding_with_bananas",
+      name: "Banana Pudding (with Bananas)",
+      price: 3.99,
+    },
+    {
+      id: "dessert_banana_pudding_without_bananas",
+      name: "Banana Pudding (without Bananas)",
+      price: 3.99,
+    },
   ],
 };
 
