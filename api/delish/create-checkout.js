@@ -228,11 +228,6 @@ const MENU_BY_DAY = {
       name: "Extra Side - Fries",
       price: 2.5,
     },
-    {
-      id: "dessert_strawberry_cheesecake",
-      name: "Strawberry Cheesecake",
-      price: 3.99,
-    },
   ],
 };
 
