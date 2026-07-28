@@ -276,6 +276,7 @@
 
       <div class="meta">
         <a class="admin-link" href="/delish/admin/">Admin</a>
+        <button class="admin-link" id="setTokenBtn" style="background:var(--panel);color:var(--muted);border:1px solid var(--line);font-size:.85rem;">Set Token</button>
         <div class="meta-box">
           <div class="meta-label">Refresh</div>
           <div class="meta-value">Every 10 seconds</div>
@@ -312,10 +313,30 @@
       catch { return ""; }
     }
 
+    function saveOperatorToken(token) {
+      try { localStorage.setItem(OPERATOR_TOKEN_KEY, token); } catch {}
+    }
+
+    function promptForToken(required = false) {
+      const msg = required
+        ? "Operator token required to mark orders as picked up.\n\nEnter Delish operator token:"
+        : "Enter Delish operator token:";
+      const token = window.prompt(msg, "");
+      if (token && token.trim()) {
+        saveOperatorToken(token.trim());
+        return true;
+      }
+      return false;
+    }
+
     function operatorHeaders(extra = {}) {
       const token = getSavedOperatorToken();
       return { ...extra, ...(token ? { "x-operator-token": token.trim() } : {}) };
     }
+
+    document.getElementById("setTokenBtn").addEventListener("click", () => {
+      promptForToken(false);
+    });
 
     function escapeHtml(str) {
       return String(str || "")
@@ -397,6 +418,13 @@
           headers:operatorHeaders({ "Content-Type":"application/json" }),
           body:JSON.stringify({ id })
         });
+        if (res.status === 401) {
+          button.disabled = false;
+          button.textContent = originalText;
+          setStatus("Token required — tap Set Token and try again.", "bad");
+          promptForToken(true);
+          return;
+        }
         const data = await res.json();
         if (!res.ok || !data.ok) throw new Error(data.error || "Failed to mark picked up.");
         setStatus("Order cleared from ready screen.", "good");
@@ -409,6 +437,7 @@
       }
     }
 
+    if (!getSavedOperatorToken()) promptForToken(true);
     loadReadyOrders();
     setInterval(loadReadyOrders, 10000);
   </script>
