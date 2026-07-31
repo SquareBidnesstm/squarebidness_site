@@ -79,31 +79,9 @@ const MENU_BY_DAY = {
     },
   ],
   friday: [
-    {
-      id: "friday_shrimp_pasta",
-      name: "Shrimp Pasta Plate",
-      price: 13.99,
-    },
-    {
-      id: "friday_fried_catfish",
-      name: "Catfish Plate",
-      price: 13.99,
-    },
-    {
-      id: "friday_shrimp_pasta_with_fish",
-      name: "Shrimp Pasta with Fish Plate",
-      price: 17.99,
-    },
-    {
-      id: "friday_lasagna",
-      name: "Lasagna Plate",
-      price: 13.99,
-    },
-    {
-      id: "friday_baked_chicken",
-      name: "Baked Chicken Plate",
-      price: 10.99,
-    },
+    { id: "friday_shrimp_pasta", name: "Shrimp Pasta Plate", price: 12.99 },
+    { id: "friday_lasagna", name: "Lasagna Plate", price: 12.99 },
+    { id: "friday_chicken_pasta", name: "Chicken Pasta Plate", price: 12.99 },
   ],
   sunday: [
     {
@@ -237,7 +215,7 @@ const MENU_BY_DAY = {
       id: "dessert_banana_pudding_without_bananas",
       name: "Banana Pudding (without Bananas)",
       price: 3.99,
-    },
+    }, { id: "dessert_strawberry_cheesecake", name: "Strawberry Cheesecake", price: 3.99 },
   ],
 };
 
