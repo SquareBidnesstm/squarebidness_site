@@ -16,7 +16,7 @@ export const DELISH_HOURS = {
 const TEMPORARY_CLOSURE_UNTIL = {
   isoDate: "2026-08-06",
   minutes: 11 * 60,
-  message: "Delish is closed Monday and Tuesday. Online ordering resumes Wednesday, August 6 at 11:00 AM."
+  message: "Delish is closed Monday and Tuesday. Back Wednesday, August 6 at 11:00 AM. Wednesday menu: Pork Neckbones Plate, Baked Chicken Plate, Country Fried Steak Plate — all plates $10."
 };
 
 export function getCentralNowParts(date = new Date()) {
