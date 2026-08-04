@@ -26,17 +26,36 @@ export default async function handler(req, res) {
       });
     }
 
-    const [modeRes, resumeRes, messageRes, closedDateRes] = await Promise.all([
+    const [modeRes, resumeRes, messageRes, closedDateRes, closedDaysRes] = await Promise.all([
       redisGet(redisUrl, redisToken, "delish:ordering:mode"),
       redisGet(redisUrl, redisToken, "delish:ordering:resume_at"),
       redisGet(redisUrl, redisToken, "delish:ordering:message"),
-      redisGet(redisUrl, redisToken, "delish:ordering:closed_date")
+      redisGet(redisUrl, redisToken, "delish:ordering:closed_date"),
+      redisGet(redisUrl, redisToken, "delish:closed:days"),
     ]);
 
     const redisMode = normalizeMode(modeRes);
     const resumeAt = typeof resumeRes === "string" ? resumeRes : "";
     const message = typeof messageRes === "string" ? messageRes : "";
     const closedDate = typeof closedDateRes === "string" ? closedDateRes : "";
+
+    // Check scheduled closed days
+    const closedDays = Array.isArray(closedDaysRes) ? closedDaysRes : [];
+    const todayIso = fallbackState.now?.isoDate || "";
+    if (todayIso && closedDays.includes(todayIso)) {
+      return res.status(200).json({
+        ok: true,
+        orderingMode: "closed",
+        mode: "closed",
+        today: fallbackState.today,
+        now: fallbackState.now,
+        openNow: false,
+        reason: "scheduled_closure",
+        openTime: fallbackState.openTime || "11:00 AM",
+        closeTime: fallbackState.closeTime || "3:00 PM",
+        message: `Delish is closed today. Online ordering resumes ${getNextOpenDayLabel(closedDays, todayIso, fallbackState.today)} at 11:00 AM.`,
+      });
+    }
 
     if (!redisMode) {
       return res.status(200).json({
@@ -255,6 +274,22 @@ function getNextServiceDayLabel(today) {
   }
 
   return "Monday";
+}
+
+function getNextOpenDayLabel(closedDays, todayIso, todayWeekday) {
+  const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const closedSet = new Set(closedDays);
+  const d = new Date(todayIso + "T12:00:00Z");
+  for (let i = 1; i <= 14; i++) {
+    d.setUTCDate(d.getUTCDate() + 1);
+    const iso = d.toISOString().slice(0, 10);
+    if (!closedSet.has(iso)) {
+      const month = MONTHS[d.getUTCMonth()];
+      const day = d.getUTCDate();
+      return `${month} ${day}`;
+    }
+  }
+  return "soon";
 }
 
 async function redisGet(redisUrl, redisToken, key) {
