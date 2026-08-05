@@ -27,7 +27,7 @@ const PAYROLL_TURN_INS_KEY = "delish:timeclock:payroll_turn_ins";
 const MAX_RECENT = 25;
 const MAX_SHIFTS = 1000;
 const BREAK_DURATION_MINUTES = 15;
-const CLOCK_IN_START_MINUTES = 5 * 60;
+const CLOCK_IN_START_MINUTES = 3 * 60;
 const CLOCK_IN_END_MINUTES = 22 * 60;
 const AUTO_CLOCK_OUT_DEVICE = "auto-midnight-clockout";
 
@@ -870,7 +870,7 @@ export default async function handler(req, res) {
       }
 
       if (!isWithinClockInWindow()) {
-        return send(res, 403, { ok: false, error: "Outside clock-in hours. Clock-in is open from 5:00 AM to 10:00 PM." });
+        return send(res, 403, { ok: false, error: "Outside clock-in hours. Clock-in is open from 3:00 AM to 10:00 PM." });
       }
 
       const activeMap = await getActiveMap();
