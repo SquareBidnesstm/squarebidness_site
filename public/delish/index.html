@@ -1375,11 +1375,7 @@ const flashSaleOnly =
       checkoutBtn.disabled = true;
 
       if (state.reason === "manual_closed") {
-        checkoutBtn.textContent = state.orderingMode === "closed"
-          ? "Opening Soon"
-          : "Ordering Paused";
-      } else if (state.reason === "outside_service_window") {
-        checkoutBtn.textContent = "Opening Soon";
+        checkoutBtn.textContent = "Online Orders Closed For Today";
       } else {
         checkoutBtn.textContent = "Opening Soon";
       }
@@ -1449,9 +1445,7 @@ const flashSaleOnly =
 
     if (!state.openNow && !flashSaleOnly) {
       if (state.reason === "manual_closed") {
-        showStatus(state.orderingMode === "closed"
-          ? "Opening soon. Online ordering is not live yet."
-          : "Online ordering is currently paused.");
+        showStatus("Online ordering is closed for today.");
             } else if (state.reason === "outside_service_window") {
         showStatus(`Ordering is available from ${formatTo12Hour(state.openTime)} to ${formatTo12Hour(state.closeTime)}.`);
       } else if (state.reason === "not_a_service_day") {
