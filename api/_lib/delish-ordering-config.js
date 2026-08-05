@@ -14,9 +14,9 @@ export const DELISH_HOURS = {
 };
 
 const TEMPORARY_CLOSURE_UNTIL = {
-  isoDate: "2026-08-06",
+  isoDate: "2026-08-01",
   minutes: 11 * 60,
-  message: "Delish is closed Monday and Tuesday. Back Wednesday, August 6 at 11:00 AM."
+  message: ""
 };
 
 export function getCentralNowParts(date = new Date()) {
