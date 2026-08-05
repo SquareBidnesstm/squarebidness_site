@@ -14,16 +14,6 @@ export default async function handler(req, res) {
       });
     }
 
-    // Env-level force-open overrides Redis closed state
-    if (fallbackState.reason === "manual_open") {
-      return res.status(200).json({
-        ok: true,
-        orderingMode: "open",
-        ...fallbackState,
-        message: ""
-      });
-    }
-
     const redisUrl = process.env.DELISH_UPSTASH_REDIS_REST_URL;
     const redisToken = process.env.DELISH_UPSTASH_REDIS_REST_TOKEN;
 
