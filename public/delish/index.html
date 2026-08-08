@@ -703,14 +703,23 @@
     return [...DESSERTS, ...overrideItems];
   }
 
+  function getFridayMenuOverride() {
+    const fm = MENU_OVERRIDES?.fridayMenu;
+    if (!fm?.active || !Array.isArray(fm.items) || !fm.items.length) return null;
+    return fm.items;
+  }
+
   function getActiveMenuForDay(day) {
     const dayMenu = MENU_BY_DAY[day];
     if (!dayMenu) return null;
+
+    const fridayOverrideItems = day === "friday" ? getFridayMenuOverride() : null;
+    const baseMains = fridayOverrideItems || (dayMenu.mains || []);
+
     const specialItems = getSpecialMenuItems();
-    if (!specialItems.length) return dayMenu;
     return {
       ...dayMenu,
-      mains: [...(dayMenu.mains || []), ...specialItems],
+      mains: [...baseMains, ...specialItems],
     };
   }
 

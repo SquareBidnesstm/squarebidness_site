@@ -58,6 +58,24 @@ function normalizeDessertItems(items) {
     .filter(item => item.name && item.price > 0);
 }
 
+function normalizeFridayMenu(fridayMenu = {}) {
+  const active = fridayMenu?.active === true;
+  const rawItems = Array.isArray(fridayMenu?.items) ? fridayMenu.items : [];
+  const items = rawItems
+    .map((item, i) => {
+      const p = Number(item?.price);
+      return {
+        id: `friday_override_${i}`,
+        name: String(item?.name || "").trim().slice(0, 80),
+        price: Number.isFinite(p) && p >= 0 ? Math.round(p * 100) / 100 : 0,
+        desc: "Choose 2 sides.",
+        baseOptions: [],
+      };
+    })
+    .filter(item => item.name && item.price > 0);
+  return { active, items, updatedAt: new Date().toISOString() };
+}
+
 function normalizeLimitedMenu(limitedMenu = {}) {
   const active = limitedMenu?.active === true;
   const price = Number(limitedMenu?.price);
@@ -106,6 +124,9 @@ export default async function handler(req, res) {
     const limitedMenu = normalizeLimitedMenu(body.limitedMenu);
     const specialMenu = normalizeSpecialMenu(body.specialMenu);
     const dessertItems = normalizeDessertItems(body.dessertItems);
+    const fridayMenu = body.fridayMenu !== undefined
+      ? normalizeFridayMenu(body.fridayMenu)
+      : (current.fridayMenu || { active: false, items: [], updatedAt: "" });
 
     const next = {
       ...current,
@@ -126,6 +147,7 @@ export default async function handler(req, res) {
       limitedMenuDate: getCentralDateKey(),
       specialMenu,
       specialMenuDate: getCentralDateKey(),
+      fridayMenu,
       dessertItems,
       dessertItemsDate: getCentralDateKey(),
       customerMessage: String(body.customerMessage || "").trim().slice(0, 180),

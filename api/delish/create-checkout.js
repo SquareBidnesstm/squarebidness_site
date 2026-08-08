@@ -290,13 +290,21 @@ function getAllowedItemsForToday(todayDay, overrides = {}) {
     return [buildLimitedMenuItem(limitedMenu), ...drinkItems];
   }
 
-  const dayItems = MENU_BY_DAY[todayDay] || [];
+  const fridayMenu = overrides?.fridayMenu;
+  const fridayItems =
+    todayDay === "friday" &&
+    fridayMenu?.active === true &&
+    Array.isArray(fridayMenu.items) &&
+    fridayMenu.items.length > 0
+      ? fridayMenu.items
+      : MENU_BY_DAY[todayDay] || [];
+
   const everydayItems = MENU_BY_DAY.everyday || [];
   const specialItems = (overrides?.specialMenu?.active && Array.isArray(overrides?.specialMenu?.items))
     ? overrides.specialMenu.items
     : [];
   const dessertOverrides = Array.isArray(overrides?.dessertItems) ? overrides.dessertItems : [];
-  return [...dayItems, ...everydayItems, ...specialItems, ...dessertOverrides];
+  return [...fridayItems, ...everydayItems, ...specialItems, ...dessertOverrides];
 }
 
 function buildAllowedMap(items) {

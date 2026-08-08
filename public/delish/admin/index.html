@@ -680,6 +680,24 @@
       <button type="button" class="btn-secondary" id="addSpecialItemBtn" style="margin-top:8px;width:auto;padding:8px 16px;">+ Add Item</button>
     </div>
 
+    <div class="card control-section" id="friday-menu-control">
+      <div class="section-heading">
+        <div>
+          <h2>Friday Menu</h2>
+          <p class="section-kicker">Set the main plates for every Friday. Stays active until you change it — does not reset daily.</p>
+        </div>
+        <div id="fridayMenuStatus" style="font-size:.8rem;color:var(--muted);text-align:right;flex-shrink:0;"></div>
+      </div>
+      <div class="row" style="margin-bottom:10px;">
+        <div class="toggle">
+          <label for="fridayMenuToggle">Use this menu on Fridays</label>
+          <input type="checkbox" id="fridayMenuToggle" />
+        </div>
+      </div>
+      <div id="fridayMenuItemsList"></div>
+      <button type="button" class="btn-secondary" id="addFridayItemBtn" style="margin-top:8px;width:auto;padding:8px 16px;">+ Add Item</button>
+    </div>
+
     <div class="card control-section" id="desserts-today-control">
       <div class="section-heading">
         <div>
@@ -1309,6 +1327,49 @@ function renderSoldOutList(selected = []) {
       })).filter(item => item.name && item.price > 0);
     }
 
+    function renderFridayMenuItems(items = []) {
+      const list = document.getElementById("fridayMenuItemsList");
+      if (!items.length) {
+        list.innerHTML = '<p class="muted" style="margin:4px 0;font-size:.83rem;">No items yet. Click "+ Add Item" to build this week\'s Friday menu.</p>';
+        return;
+      }
+      list.innerHTML = items.map((item, i) => `
+        <div class="row" style="align-items:center;gap:8px;margin-bottom:6px;" data-friday-index="${i}">
+          <input type="text" placeholder="Item name (e.g. Fried Catfish Plate)" value="${escAttr(item.name)}" data-friday-name="${i}" style="flex:2;margin:0;" />
+          <input type="number" min="0" step="0.01" placeholder="Price" value="${Number(item.price).toFixed(2)}" data-friday-price="${i}" style="flex:1;margin:0;" />
+          <button type="button" class="btn-flash" data-remove-friday="${i}" style="flex:0 0 auto;white-space:nowrap;">Remove</button>
+        </div>
+      `).join("");
+      list.querySelectorAll("[data-remove-friday]").forEach(btn => {
+        btn.addEventListener("click", () => btn.closest("[data-friday-index]").remove());
+      });
+    }
+
+    function addFridayItem() {
+      const list = document.getElementById("fridayMenuItemsList");
+      if (list.querySelector("p")) list.innerHTML = "";
+      const idx = Date.now();
+      const div = document.createElement("div");
+      div.className = "row";
+      div.style.cssText = "align-items:center;gap:8px;margin-bottom:6px;";
+      div.dataset.fridayIndex = idx;
+      div.innerHTML = `
+        <input type="text" placeholder="Item name (e.g. Fried Catfish Plate)" data-friday-name="${idx}" style="flex:2;margin:0;" />
+        <input type="number" min="0" step="0.01" placeholder="Price" data-friday-price="${idx}" style="flex:1;margin:0;" />
+        <button type="button" class="btn-flash" style="flex:0 0 auto;white-space:nowrap;">Remove</button>
+      `;
+      div.querySelector(".btn-flash").addEventListener("click", () => div.remove());
+      list.appendChild(div);
+      div.querySelector("[data-friday-name]")?.focus();
+    }
+
+    function collectFridayMenuItems() {
+      return [...document.querySelectorAll("[data-friday-index]")].map(div => ({
+        name: (div.querySelector("[data-friday-name]")?.value || "").trim(),
+        price: Number(div.querySelector("[data-friday-price]")?.value || 0),
+      })).filter(item => item.name && item.price > 0);
+    }
+
     function renderDessertItems(items = []) {
       const list = document.getElementById("dessertItemsList");
       if (!items.length) {
@@ -1384,6 +1445,12 @@ function renderSoldOutList(selected = []) {
       document.getElementById("dessertsToggle").checked = overrides?.sections?.desserts !== false;
       document.getElementById("specialMenuToggle").checked = overrides?.specialMenu?.active === true;
       renderSpecialMenuItems(Array.isArray(overrides?.specialMenu?.items) ? overrides.specialMenu.items : []);
+      document.getElementById("fridayMenuToggle").checked = overrides?.fridayMenu?.active === true;
+      renderFridayMenuItems(Array.isArray(overrides?.fridayMenu?.items) ? overrides.fridayMenu.items : []);
+      const fridayUpdatedAt = overrides?.fridayMenu?.updatedAt;
+      document.getElementById("fridayMenuStatus").textContent = fridayUpdatedAt
+        ? "Last updated " + new Date(fridayUpdatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+        : "";
       renderDessertItems(Array.isArray(overrides?.dessertItems) ? overrides.dessertItems : []);
       document.getElementById("customerMessage").value = overrides.customerMessage || "";
       renderItemList(Array.isArray(overrides.itemsOff) ? overrides.itemsOff : []);
@@ -1411,22 +1478,26 @@ function renderSoldOutList(selected = []) {
       const basesSoldOut = [...document.querySelectorAll("#basesSoldOutList input:checked")].map(el => el.value);
 
       const payload = {
-  sections: {
-    lagniappe: document.getElementById("lagniappeToggle").checked,
-    drinks: document.getElementById("drinksToggle").checked,
-    extraSides: document.getElementById("extraSidesToggle").checked,
-    desserts: document.getElementById("dessertsToggle").checked,
-  },
-  specialMenu: {
-    active: document.getElementById("specialMenuToggle").checked,
-    items: collectSpecialMenuItems(),
-  },
-  dessertItems: collectDessertItems(),
-  itemsOff,
-  itemsSoldOut,
-  basesSoldOut,
-  customerMessage: document.getElementById("customerMessage").value.trim()
-};
+        sections: {
+          lagniappe: document.getElementById("lagniappeToggle").checked,
+          drinks: document.getElementById("drinksToggle").checked,
+          extraSides: document.getElementById("extraSidesToggle").checked,
+          desserts: document.getElementById("dessertsToggle").checked,
+        },
+        specialMenu: {
+          active: document.getElementById("specialMenuToggle").checked,
+          items: collectSpecialMenuItems(),
+        },
+        fridayMenu: {
+          active: document.getElementById("fridayMenuToggle").checked,
+          items: collectFridayMenuItems(),
+        },
+        dessertItems: collectDessertItems(),
+        itemsOff,
+        itemsSoldOut,
+        basesSoldOut,
+        customerMessage: document.getElementById("customerMessage").value.trim()
+      };
       setStatus("Saving admin changes...");
 
       const res = await fetch("/api/delish/save-menu-overrides/", {
@@ -1531,6 +1602,7 @@ reloadPickupWindowsBtn?.addEventListener("click", () => {
     });
 
     document.getElementById("addSpecialItemBtn").addEventListener("click", addSpecialItem);
+    document.getElementById("addFridayItemBtn").addEventListener("click", addFridayItem);
     document.getElementById("addDessertItemBtn").addEventListener("click", addDessertItem);
 
     updateTokenStatus();
