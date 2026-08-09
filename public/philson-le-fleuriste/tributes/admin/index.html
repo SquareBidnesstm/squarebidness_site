@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Philson — Tribute Manager</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <style>
+    :root{
+      --bg:#f8f5ef;
+      --paper:#fff;
+      --soft:#f2ede4;
+      --line:#e6ddd0;
+      --text:#1a1410;
+      --muted:#7a6e62;
+      --gold:#8b6914;
+      --gold-light:#c49a28;
+      --red:#b03030;
+      --green:#1a5c30;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:Georgia,serif;min-height:100vh}
+    .wrap{max-width:900px;margin:0 auto;padding:24px 16px 60px}
+    header{display:flex;align-items:center;gap:16px;padding-bottom:20px;border-bottom:2px solid var(--gold-light);margin-bottom:28px}
+    header img{width:52px;height:52px;border-radius:10px;object-fit:cover}
+    header h1{font-size:1.4rem;font-weight:normal;letter-spacing:.02em}
+    header p{font-size:.82rem;color:var(--muted);font-family:system-ui,sans-serif}
+    .card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:18px}
+    h2{font-size:1.1rem;font-weight:normal;margin-bottom:14px;letter-spacing:.03em}
+    label{display:block;font-size:.78rem;font-family:system-ui,sans-serif;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;margin-top:12px}
+    label:first-of-type{margin-top:0}
+    input[type=text],input[type=date],textarea,input[type=url]{
+      width:100%;border:1px solid var(--line);border-radius:10px;
+      padding:11px 13px;font:inherit;font-size:.95rem;background:var(--soft);
+      color:var(--text);font-family:system-ui,sans-serif;
+    }
+    input:focus,textarea:focus{outline:2px solid var(--gold-light);outline-offset:2px}
+    textarea{min-height:72px;resize:vertical}
+    .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media(max-width:560px){.row2{grid-template-columns:1fr}}
+    .photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+    .photo-slot{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--soft);border:1px dashed var(--line);cursor:pointer;display:flex;align-items:center;justify-content:center}
+    .photo-slot img{width:100%;height:100%;object-fit:cover;display:block}
+    .photo-slot .remove-photo{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:.7rem;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:system-ui}
+    .photo-slot .add-icon{font-size:1.5rem;color:var(--muted)}
+    .photo-slot input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+    button{border:none;border-radius:999px;padding:12px 22px;font-weight:700;cursor:pointer;font:inherit;font-size:.9rem;transition:opacity .15s}
+    .btn-primary{background:var(--gold-light);color:#fff}
+    .btn-secondary{background:var(--soft);color:var(--text);border:1px solid var(--line)}
+    .btn-danger{background:var(--red);color:#fff}
+    .btn-small{padding:7px 14px;font-size:.8rem}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+    .status-msg{margin-top:12px;padding:10px 14px;border-radius:10px;font-family:system-ui,sans-serif;font-size:.88rem;display:none}
+    .status-msg.good{display:block;background:#e8f4ec;border:1px solid #a8d4b4;color:var(--green)}
+    .status-msg.bad{display:block;background:#f9e8e8;border:1px solid #d4a8a8;color:var(--red)}
+    .tribute-list{display:grid;gap:10px}
+    .tribute-row{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .tribute-row .tr-name{font-size:1rem;flex:1 1 160px}
+    .tribute-row .tr-date{font-size:.8rem;color:var(--muted);font-family:system-ui,sans-serif}
+    .tribute-row .tr-badge{font-size:.72rem;padding:3px 8px;border-radius:999px;font-family:system-ui,sans-serif;font-weight:700}
+    .tr-badge.active{background:#e8f4ec;color:var(--green)}
+    .tr-badge.inactive{background:#f0ede8;color:var(--muted)}
+    .tribute-row .tr-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .sep{border:none;border-top:1px solid var(--line);margin:8px 0}
+    .empty-state{text-align:center;padding:32px;color:var(--muted);font-family:system-ui,sans-serif;font-size:.9rem}
+    .token-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:20px}
+    .token-row input{flex:1 1 200px;font-family:system-ui,sans-serif}
+    .token-row button{flex:0 0 auto}
+    .slug-preview{font-family:system-ui,sans-serif;font-size:.78rem;color:var(--muted);margin-top:4px}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img src="/philson-le-fleuriste/assets/icons/favicon-48.png" alt="Philson" onerror="this.style.display='none'" />
+    <div>
+      <h1>Philson Le Fleuriste — Tribute Manager</h1>
+      <p>Create and manage QR tribute pages for funeral arrangements</p>
+    </div>
+  </header>
+
+  <!-- Token -->
+  <div class="card" id="token-card">
+    <h2>Operator Access</h2>
+    <div class="token-row">
+      <div style="flex:1 1 200px">
+        <label for="tokenInput">Operator Token</label>
+        <input type="text" id="tokenInput" placeholder="Enter your token" autocomplete="off" />
+      </div>
+      <button class="btn-primary" onclick="saveToken()">Save &amp; Connect</button>
+      <button class="btn-secondary" onclick="clearToken()">Clear</button>
+    </div>
+    <div class="status-msg" id="tokenStatus"></div>
+  </div>
+
+  <!-- Create / Edit form -->
+  <div class="card" id="form-card">
+    <h2 id="formTitle">New Tribute Page</h2>
+    <input type="hidden" id="editSlug" />
+
+    <div class="row2">
+      <div>
+        <label for="tributeName">Service / Family Name *</label>
+        <input type="text" id="tributeName" placeholder="e.g. Johnson Family" oninput="updateSlugPreview()" />
+        <div class="slug-preview" id="slugPreview"></div>
+      </div>
+      <div>
+        <label for="tributeDate">Service Date</label>
+        <input type="date" id="tributeDate" />
+      </div>
+    </div>
+
+    <label for="tributeNotes">Optional note shown on the page</label>
+    <textarea id="tributeNotes" placeholder="e.g. Celebration of life held at First Baptist Church"></textarea>
+
+    <label>Photos (up to 6 — tap each slot to add)</label>
+    <div class="photo-grid" id="photoGrid"></div>
+
+    <div style="margin-top:10px;display:flex;align-items:center;gap:10px">
+      <label for="activeToggle" style="margin:0;text-transform:none;font-size:.9rem;letter-spacing:0">Page is active (visible to guests)</label>
+      <input type="checkbox" id="activeToggle" checked style="width:18px;height:18px" />
+    </div>
+
+    <div class="actions">
+      <button class="btn-primary" onclick="submitTribute()">Save Tribute Page</button>
+      <button class="btn-secondary" id="cancelEditBtn" style="display:none" onclick="cancelEdit()">Cancel Edit</button>
+    </div>
+    <div class="status-msg" id="formStatus"></div>
+  </div>
+
+  <!-- Tribute list -->
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <h2 style="margin:0">All Tribute Pages</h2>
+      <button class="btn-secondary btn-small" onclick="loadTributes()">Refresh</button>
+    </div>
+    <div class="tribute-list" id="tributeList">
+      <div class="empty-state">Connect with your token above to load tributes.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const TOKEN_KEY = "philson_tribute_token";
+let PHOTOS = [null, null, null, null, null, null]; // up to 6 slots
+
+function getToken() {
+  return localStorage.getItem(TOKEN_KEY) || "";
+}
+function saveToken() {
+  const t = document.getElementById("tokenInput").value.trim();
+  if (!t) return showStatus("tokenStatus", "Enter a token first.", false);
+  localStorage.setItem(TOKEN_KEY, t);
+  showStatus("tokenStatus", "Token saved. Loading tributes...", true);
+  loadTributes();
+}
+function clearToken() {
+  localStorage.removeItem(TOKEN_KEY);
+  document.getElementById("tokenInput").value = "";
+  showStatus("tokenStatus", "Token cleared.", true);
+}
+
+function showStatus(id, msg, good) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.className = "status-msg " + (good ? "good" : "bad");
+  setTimeout(() => { el.className = "status-msg"; }, 5000);
+}
+
+function slugify(text) {
+  return String(text || "").toLowerCase().trim()
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80);
+}
+
+function updateSlugPreview() {
+  const name = document.getElementById("tributeName").value;
+  const date = document.getElementById("tributeDate").value;
+  const datePart = date ? "-" + date.slice(0,10).replace(/-/g, "") : "";
+  const slug = slugify(name) + datePart;
+  document.getElementById("slugPreview").textContent = slug ? "URL: ...tributes/view/?id=" + slug : "";
+}
+
+function buildPhotoGrid() {
+  const grid = document.getElementById("photoGrid");
+  grid.innerHTML = "";
+  for (let i = 0; i < 6; i++) {
+    const slot = document.createElement("div");
+    slot.className = "photo-slot";
+    if (PHOTOS[i]) {
+      slot.innerHTML = `<img src="${PHOTOS[i]}" alt="Photo ${i+1}" />
+        <button class="remove-photo" onclick="removePhoto(${i})">✕</button>`;
+    } else {
+      slot.innerHTML = `<span class="add-icon">+</span>
+        <input type="file" accept="image/*" onchange="addPhoto(event, ${i})" />`;
+    }
+    grid.appendChild(slot);
+  }
+}
+
+function addPhoto(event, index) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    compressImage(e.target.result, 800, 0.65, (compressed) => {
+      PHOTOS[index] = compressed;
+      buildPhotoGrid();
+    });
+  };
+  reader.readAsDataURL(file);
+}
+
+function compressImage(dataUrl, maxSize, quality, cb) {
+  const img = new Image();
+  img.onload = () => {
+    let w = img.width, h = img.height;
+    if (w > maxSize || h > maxSize) {
+      if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
+      else { w = Math.round(w * maxSize / h); h = maxSize; }
+    }
+    const canvas = document.createElement("canvas");
+    canvas.width = w; canvas.height = h;
+    canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+    cb(canvas.toDataURL("image/jpeg", quality));
+  };
+  img.src = dataUrl;
+}
+
+function removePhoto(index) {
+  PHOTOS[index] = null;
+  buildPhotoGrid();
+}
+
+async function submitTribute() {
+  const token = getToken();
+  if (!token) return showStatus("formStatus", "Save your token first.", false);
+
+  const name = document.getElementById("tributeName").value.trim();
+  if (!name) return showStatus("formStatus", "Service name is required.", false);
+
+  const date = document.getElementById("tributeDate").value;
+  const notes = document.getElementById("tributeNotes").value.trim();
+  const active = document.getElementById("activeToggle").checked;
+  const editSlug = document.getElementById("editSlug").value;
+  const photos = PHOTOS.filter(Boolean);
+
+  const datePart = date ? "-" + date.slice(0,10).replace(/-/g, "") : "";
+  const slug = editSlug || (slugify(name) + datePart);
+
+  showStatus("formStatus", "Saving...", true);
+
+  const res = await fetch("/api/philson/tributes/create/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "x-operator-token": token },
+    body: JSON.stringify({ slug, name, date, notes, photos, active, isUpdate: !!editSlug, createdAt: "" })
+  });
+  const data = await res.json();
+
+  if (!res.ok || !data.ok) {
+    return showStatus("formStatus", data.error || "Save failed.", false);
+  }
+
+  showStatus("formStatus", "Saved! " + (editSlug ? "Updated." : "New tribute created."), true);
+  clearForm();
+  loadTributes();
+}
+
+function clearForm() {
+  document.getElementById("tributeName").value = "";
+  document.getElementById("tributeDate").value = "";
+  document.getElementById("tributeNotes").value = "";
+  document.getElementById("activeToggle").checked = true;
+  document.getElementById("editSlug").value = "";
+  document.getElementById("formTitle").textContent = "New Tribute Page";
+  document.getElementById("cancelEditBtn").style.display = "none";
+  document.getElementById("slugPreview").textContent = "";
+  PHOTOS = [null,null,null,null,null,null];
+  buildPhotoGrid();
+}
+
+function cancelEdit() { clearForm(); }
+
+async function loadTributes() {
+  const token = getToken();
+  if (!token) return;
+
+  const list = document.getElementById("tributeList");
+  list.innerHTML = '<div class="empty-state">Loading...</div>';
+
+  const res = await fetch("/api/philson/tributes/list/", {
+    headers: { "x-operator-token": token }
+  });
+  const data = await res.json();
+
+  if (!res.ok || !data.ok) {
+    list.innerHTML = `<div class="empty-state" style="color:var(--red)">${data.error || "Failed to load."}</div>`;
+    return;
+  }
+
+  const tributes = data.tributes || [];
+  if (!tributes.length) {
+    list.innerHTML = '<div class="empty-state">No tributes yet. Create one above.</div>';
+    return;
+  }
+
+  list.innerHTML = tributes.map(t => {
+    const url = `${location.origin}/philson-le-fleuriste/tributes/view/?id=${t.slug}`;
+    const cardUrl = `${location.origin}/philson-le-fleuriste/tributes/card/?id=${t.slug}`;
+    const dateStr = t.date ? new Date(t.date + "T12:00:00").toLocaleDateString("en-US", {month:"short", day:"numeric", year:"numeric"}) : "";
+    return `<div class="tribute-row">
+      <div style="flex:1 1 160px">
+        <div class="tr-name">${escHtml(t.name || t.slug)}</div>
+        <div class="tr-date">${dateStr} &nbsp;·&nbsp; ${t.photoCount || 0} photo${t.photoCount !== 1 ? "s" : ""}</div>
+      </div>
+      <span class="tr-badge ${t.active ? "active" : "inactive"}">${t.active ? "Live" : "Hidden"}</span>
+      <div class="tr-actions">
+        <button class="btn-secondary btn-small" onclick="window.open('${url}','_blank')">View</button>
+        <button class="btn-secondary btn-small" onclick="window.open('${cardUrl}','_blank')">QR Card</button>
+        <button class="btn-secondary btn-small" onclick="copyLink('${url}', this)">Copy Link</button>
+        <button class="btn-secondary btn-small" onclick="editTribute('${t.slug}')">Edit</button>
+        <button class="btn-danger btn-small" onclick="deleteTribute('${t.slug}', this)">Delete</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function copyLink(url, btn) {
+  navigator.clipboard.writeText(url).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = "Copied!";
+    setTimeout(() => { btn.textContent = orig; }, 1800);
+  });
+}
+
+async function editTribute(slug) {
+  const token = getToken();
+  const res = await fetch(`/api/philson/tributes/get/?slug=${slug}&admin=1`, {
+    headers: { "x-operator-token": token }
+  });
+  const data = await res.json();
+  if (!data.ok) return alert("Could not load tribute.");
+  const t = data.tribute;
+  document.getElementById("tributeName").value = t.name || "";
+  document.getElementById("tributeDate").value = t.date || "";
+  document.getElementById("tributeNotes").value = t.notes || "";
+  document.getElementById("activeToggle").checked = t.active !== false;
+  document.getElementById("editSlug").value = t.slug;
+  document.getElementById("formTitle").textContent = "Edit Tribute Page";
+  document.getElementById("cancelEditBtn").style.display = "";
+  PHOTOS = Array.isArray(t.photos) ? [...t.photos, null,null,null,null,null,null].slice(0,6) : [null,null,null,null,null,null];
+  buildPhotoGrid();
+  updateSlugPreview();
+  document.getElementById("form-card").scrollIntoView({ behavior: "smooth" });
+}
+
+async function deleteTribute(slug, btn) {
+  if (!confirm("Delete this tribute page? This cannot be undone.")) return;
+  const token = getToken();
+  const res = await fetch(`/api/philson/tributes/delete/?slug=${slug}`, {
+    method: "DELETE",
+    headers: { "x-operator-token": token }
+  });
+  const data = await res.json();
+  if (data.ok) loadTributes();
+  else alert(data.error || "Delete failed.");
+}
+
+function escHtml(s) {
+  return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+// Init
+window.addEventListener("DOMContentLoaded", () => {
+  const saved = getToken();
+  if (saved) document.getElementById("tokenInput").value = saved;
+  buildPhotoGrid();
+  if (saved) loadTributes();
+  document.getElementById("tributeDate").value = new Date().toISOString().slice(0,10);
+});
+</script>
+</body>
+</html>

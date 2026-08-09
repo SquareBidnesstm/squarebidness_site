@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Floral Tribute — Philson Le Fleuriste</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#f8f5ef" />
+  <style>
+    :root{
+      --bg:#f8f5ef;
+      --paper:#fff;
+      --soft:#f2ede4;
+      --line:#e6ddd0;
+      --text:#1a1410;
+      --muted:#7a6e62;
+      --gold:#8b6914;
+      --gold-light:#c49a28;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:Georgia,serif;min-height:100vh}
+
+    .hero{
+      background:var(--paper);
+      border-bottom:1px solid var(--line);
+      padding:32px 20px 28px;
+      text-align:center;
+    }
+    .hero-brand{
+      display:flex;align-items:center;justify-content:center;gap:10px;
+      margin-bottom:18px;
+    }
+    .hero-brand img{width:38px;height:38px;border-radius:8px;object-fit:cover}
+    .hero-brand span{font-size:.82rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-family:system-ui,sans-serif}
+    .hero-name{font-size:1.8rem;font-weight:normal;line-height:1.25;letter-spacing:.02em}
+    .hero-date{margin-top:6px;font-size:.85rem;color:var(--muted);font-family:system-ui,sans-serif;letter-spacing:.06em}
+    .hero-note{margin-top:14px;font-size:.95rem;color:var(--muted);font-style:italic;max-width:460px;margin-left:auto;margin-right:auto;line-height:1.6}
+
+    .section{padding:28px 20px}
+    .section-label{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-family:system-ui,sans-serif;margin-bottom:16px;text-align:center}
+
+    /* Photo grid */
+    .photos-wrap{max-width:900px;margin:0 auto}
+    .photo-grid-1{display:grid;grid-template-columns:1fr;gap:10px}
+    .photo-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .photo-grid-3{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .photo-grid-3 .photo-item:first-child{grid-column:1/-1}
+    .photo-grid-4,.photo-grid-5,.photo-grid-6{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .photo-item{border-radius:12px;overflow:hidden;background:var(--soft);aspect-ratio:4/3}
+    .photo-item img{width:100%;height:100%;object-fit:cover;display:block}
+
+    /* CTA */
+    .cta-section{background:var(--paper);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:36px 20px;text-align:center}
+    .cta-section h2{font-size:1.3rem;font-weight:normal;margin-bottom:8px;letter-spacing:.02em}
+    .cta-section p{color:var(--muted);font-family:system-ui,sans-serif;font-size:.9rem;line-height:1.6;max-width:400px;margin:0 auto 20px}
+    .cta-btn{display:inline-block;background:var(--gold-light);color:#fff;text-decoration:none;padding:14px 28px;border-radius:999px;font-family:system-ui,sans-serif;font-weight:700;font-size:.95rem;letter-spacing:.03em}
+    .cta-btn:hover{opacity:.88}
+
+    /* Gallery strip */
+    .strip{max-width:900px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .strip-item{border-radius:10px;overflow:hidden;aspect-ratio:1;background:var(--soft)}
+    .strip-item img{width:100%;height:100%;object-fit:cover;display:block}
+
+    /* Footer */
+    footer{padding:24px 20px;text-align:center;border-top:1px solid var(--line)}
+    footer p{font-family:system-ui,sans-serif;font-size:.8rem;color:var(--muted);line-height:1.7}
+    footer a{color:var(--gold);text-decoration:none}
+
+    /* Loading / Error */
+    .state-wrap{min-height:50vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center;gap:12px}
+    .state-wrap p{font-family:system-ui,sans-serif;color:var(--muted);font-size:.9rem}
+
+    @media(min-width:600px){
+      .hero-name{font-size:2.2rem}
+      .photo-grid-3{grid-template-columns:1fr 1fr 1fr}
+      .photo-grid-3 .photo-item:first-child{grid-column:auto}
+      .photo-grid-5 .photo-item:last-child{grid-column:1/-1}
+    }
+  </style>
+</head>
+<body>
+
+<div id="loading-state" class="state-wrap">
+  <p>Loading arrangements&hellip;</p>
+</div>
+
+<div id="error-state" class="state-wrap" style="display:none">
+  <p>This tribute page is not available.</p>
+  <a href="/philson-le-fleuriste/" style="color:var(--gold);font-family:system-ui,sans-serif;font-size:.9rem">Visit Philson Le Fleuriste →</a>
+</div>
+
+<div id="tribute-content" style="display:none">
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-brand">
+      <img src="/philson-le-fleuriste/assets/icons/favicon-48.png" alt="Philson" onerror="this.style.display='none'" />
+      <span>Philson Le Fleuriste</span>
+    </div>
+    <div class="hero-name" id="tribute-name"></div>
+    <div class="hero-date" id="tribute-date"></div>
+    <div class="hero-note" id="tribute-note"></div>
+  </div>
+
+  <!-- Photos -->
+  <div class="section" id="photos-section" style="display:none">
+    <div class="section-label">Floral Arrangements</div>
+    <div class="photos-wrap">
+      <div class="photo-grid-1" id="photo-grid"></div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-section">
+    <h2>Request Custom Florals</h2>
+    <p>Eddie Philson creates one-of-a-kind arrangements for memorial services, weddings, celebrations, and events throughout Louisiana and beyond.</p>
+    <a class="cta-btn" href="/philson-le-fleuriste/deposit/">Request a Custom Quote</a>
+  </div>
+
+  <!-- Gallery strip -->
+  <div class="section">
+    <div class="section-label">More Work by Philson</div>
+    <div class="strip" id="gallery-strip"></div>
+    <div style="text-align:center;margin-top:16px">
+      <a href="/philson-le-fleuriste/" style="font-family:system-ui,sans-serif;font-size:.85rem;color:var(--gold);text-decoration:none;letter-spacing:.06em">View Full Portfolio →</a>
+    </div>
+  </div>
+
+  <footer>
+    <p>
+      Arrangements by <strong>Philson Le Fleuriste</strong><br>
+      <a href="/philson-le-fleuriste/">philson-le-fleuriste.com</a> &nbsp;·&nbsp;
+      <a href="/philson-le-fleuriste/deposit/">Request a Quote</a>
+    </p>
+  </footer>
+</div>
+
+<script>
+const GALLERY_ASSETS = [
+  "/philson-le-fleuriste/assets/casket-spray-10_800.webp",
+  "/philson-le-fleuriste/assets/casket-spray-11_800.webp",
+  "/philson-le-fleuriste/assets/casket-spray-12_800.webp",
+  "/philson-le-fleuriste/assets/135-roses_800.webp",
+  "/philson-le-fleuriste/assets/1200_3.jpg",
+  "/philson-le-fleuriste/assets/1200_4.jpg",
+];
+
+function getSlug() {
+  const params = new URLSearchParams(location.search);
+  return params.get("id") || params.get("slug") || "";
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return "";
+  const d = new Date(dateStr + "T12:00:00");
+  return d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+}
+
+function gridClass(count) {
+  if (count <= 1) return "photo-grid-1";
+  if (count === 2) return "photo-grid-2";
+  if (count === 3) return "photo-grid-3";
+  if (count === 4) return "photo-grid-4";
+  if (count === 5) return "photo-grid-5";
+  return "photo-grid-6";
+}
+
+async function loadTribute() {
+  const slug = getSlug();
+  if (!slug) { showError(); return; }
+
+  try {
+    const res = await fetch(`/api/philson/tributes/get/?id=${encodeURIComponent(slug)}`);
+    if (!res.ok) { showError(); return; }
+    const data = await res.json();
+    if (!data.ok || !data.tribute) { showError(); return; }
+    render(data.tribute);
+  } catch {
+    showError();
+  }
+}
+
+function render(t) {
+  // Hero
+  document.getElementById("tribute-name").textContent = t.name || "Floral Tribute";
+  const dateEl = document.getElementById("tribute-date");
+  dateEl.textContent = t.date ? formatDate(t.date) : "";
+  dateEl.style.display = t.date ? "" : "none";
+  const noteEl = document.getElementById("tribute-note");
+  noteEl.textContent = t.notes || "";
+  noteEl.style.display = t.notes ? "" : "none";
+
+  // Update page title
+  document.title = (t.name ? t.name + " — " : "") + "Philson Le Fleuriste";
+
+  // Photos
+  const photos = Array.isArray(t.photos) ? t.photos.filter(Boolean) : [];
+  if (photos.length) {
+    const grid = document.getElementById("photo-grid");
+    grid.className = gridClass(photos.length);
+    grid.innerHTML = photos.map((src, i) =>
+      `<div class="photo-item"><img src="${src}" alt="Arrangement ${i+1}" loading="lazy" /></div>`
+    ).join("");
+    document.getElementById("photos-section").style.display = "";
+  }
+
+  // Gallery strip
+  const strip = document.getElementById("gallery-strip");
+  strip.innerHTML = GALLERY_ASSETS.slice(0, 6).map(src =>
+    `<div class="strip-item"><img src="${src}" alt="Philson arrangement" loading="lazy" /></div>`
+  ).join("");
+
+  // Show content
+  document.getElementById("loading-state").style.display = "none";
+  document.getElementById("tribute-content").style.display = "";
+}
+
+function showError() {
+  document.getElementById("loading-state").style.display = "none";
+  document.getElementById("error-state").style.display = "";
+}
+
+loadTribute();
+</script>
+</body>
+</html>
