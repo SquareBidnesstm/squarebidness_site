@@ -107,11 +107,17 @@ export async function POST(
   }
 
   const { data: barber } = await supabaseServer
-    .from("barbers").select("id").eq("shop_id", shop.id).eq("slug", barber_id).eq("active", true).single();
+    .from("barbers").select("id, stripe_account_id, stripe_onboarding_complete").eq("shop_id", shop.id).eq("slug", barber_id).eq("active", true).single();
   // BC-2: Must guard here — if barber is null, Stripe checkout would be created for a
   // non-existent barber. The webhook/confirm route would then silently abandon booking
   // creation, leaving the customer charged with no appointment.
   if (!barber) return NextResponse.json({ ok: false, error: "Barber not found or no longer active." }, { status: 404 });
+
+  // Independent operators route to their own Stripe account; otherwise fall back to shop account.
+  const destinationAccountId =
+    (barber as any).stripe_account_id && (barber as any).stripe_onboarding_complete
+      ? (barber as any).stripe_account_id
+      : shop.stripe_account_id;
 
   const { data: svc } = await supabaseServer
     .from("services").select("id, name, price, duration_minutes").eq("shop_id", shop.id).eq("slug", service).eq("active", true).single();
@@ -162,8 +168,8 @@ export async function POST(
     },
     payment_intent_data: {
       metadata: { shop_id: shop.id, shop_slug: shopSlug },
-      ...(shop.stripe_account_id ? {
-        transfer_data: { destination: shop.stripe_account_id },
+      ...(destinationAccountId ? {
+        transfer_data: { destination: destinationAccountId },
         application_fee_amount: platformFeeAmount(Math.round(depositAmount * 100)),
       } : {}),
     },

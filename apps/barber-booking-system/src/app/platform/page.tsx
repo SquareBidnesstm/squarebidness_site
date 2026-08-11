@@ -11,6 +11,8 @@ type ShopRow = {
   bypass_stripe_requirement: boolean;
 };
 
+type PlanModal = { shop: ShopRow; plan: string; status: string };
+
 type Stats = {
   totalShops: number; activeShops: number; proShops: number;
   totalBookingsAll: number; totalRevenueAll: number;
@@ -30,6 +32,7 @@ export default function PlatformAdminPage() {
   const [filterActive, setFilterActive] = useState<"all" | "active" | "inactive">("all");
   const [confirmDelete, setConfirmDelete] = useState<ShopRow | null>(null);
   const [working, setWorking] = useState<string | null>(null); // shopId of in-flight action
+  const [planModal, setPlanModal] = useState<PlanModal | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -73,6 +76,25 @@ export default function PlatformAdminPage() {
       });
       if (res.ok) {
         setShops((prev) => prev.map((s) => s.id === shop.id ? { ...s, bypass_stripe_requirement: !shop.bypass_stripe_requirement } : s));
+      }
+    } finally { setWorking(null); }
+  }
+
+  async function savePlan(modal: PlanModal) {
+    setWorking(modal.shop.id);
+    setPlanModal(null);
+    try {
+      const res = await fetch(`/api/platform/admin/shops/${modal.shop.id}/subscription`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan: modal.plan, status: modal.status }),
+      });
+      if (res.ok) {
+        setShops((prev) => prev.map((s) =>
+          s.id === modal.shop.id
+            ? { ...s, plan: modal.plan, subscription_status: modal.status }
+            : s
+        ));
       }
     } finally { setWorking(null); }
   }
@@ -183,14 +205,20 @@ export default function PlatformAdminPage() {
                       <td style={{ padding: "13px 12px", color: "#ccc" }}>{s.owner_name}</td>
                       <td style={{ padding: "13px 12px", color: "#777" }}>{s.city}, {s.state}</td>
                       <td style={{ padding: "13px 12px" }}>
-                        <span style={{
-                          padding: "3px 9px", borderRadius: 999, fontSize: 11, fontWeight: 700,
-                          background: s.plan === "pro" ? "#1a1200" : "#111",
-                          color: s.plan === "pro" ? "#d4af37" : "#555",
-                          border: `1px solid ${s.plan === "pro" ? "#3a2a00" : "#1f1f1f"}`,
-                        }}>
-                          {s.plan === "pro" ? "Pro" : "Free"}
-                        </span>
+                        {(() => {
+                          const isPaid = s.plan !== "free";
+                          const isTrialing = s.subscription_status === "trialing";
+                          return (
+                            <span style={{
+                              padding: "3px 9px", borderRadius: 999, fontSize: 11, fontWeight: 700,
+                              background: isPaid ? "#1a1200" : "#111",
+                              color: isPaid ? (isTrialing ? "#f97316" : "#d4af37") : "#555",
+                              border: `1px solid ${isPaid ? "#3a2a00" : "#1f1f1f"}`,
+                            }}>
+                              {isPaid ? `${s.plan.charAt(0).toUpperCase() + s.plan.slice(1)}${isTrialing ? " (trial)" : ""}` : "Free"}
+                            </span>
+                          );
+                        })()}
                       </td>
                       <td style={{ padding: "13px 12px" }}>
                         <span style={{
@@ -237,6 +265,13 @@ export default function PlatformAdminPage() {
                             {s.bypass_stripe_requirement ? "Bypass ON" : "Bypass"}
                           </button>
                           <button
+                            onClick={() => setPlanModal({ shop: s, plan: s.plan, status: s.subscription_status })}
+                            disabled={working === s.id}
+                            style={{ ...btnTiny, color: "#38bdf8", borderColor: "#002a3a", background: "#00111a", cursor: "pointer" }}
+                          >
+                            Set Plan
+                          </button>
+                          <button
                             onClick={() => setConfirmDelete(s)}
                             disabled={working === s.id}
                             style={{ ...btnTiny, color: "#ef4444", borderColor: "#3a0000", background: "#1a0000", cursor: "pointer" }}
@@ -253,6 +288,59 @@ export default function PlatformAdminPage() {
           )}
         </div>
       </section>
+
+      {/* Set Plan modal */}
+      {planModal && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 24 }}>
+          <div style={{ background: "#0d0d0d", border: "1px solid #002a3a", borderRadius: 20, padding: 32, maxWidth: 400, width: "100%" }}>
+            <h3 style={{ margin: "0 0 4px", fontSize: 20, fontWeight: 900, color: "#38bdf8" }}>Set Subscription</h3>
+            <p style={{ color: "#555", fontSize: 13, marginBottom: 20 }}>{planModal.shop.name} / /{planModal.shop.slug}</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 24 }}>
+              <div>
+                <div style={{ color: "#888", fontSize: 12, marginBottom: 6 }}>PLAN</div>
+                <select
+                  value={planModal.plan}
+                  onChange={(e) => setPlanModal({ ...planModal, plan: e.target.value, status: e.target.value === "free" ? "free" : planModal.status === "free" ? "trialing" : planModal.status })}
+                  style={{ width: "100%", padding: "10px 12px", background: "#111", border: "1px solid #222", color: "#fff", borderRadius: 8, fontSize: 14 }}
+                >
+                  <option value="free">Free</option>
+                  <option value="solo">Solo</option>
+                  <option value="pro">Pro</option>
+                  <option value="enterprise">Enterprise</option>
+                </select>
+              </div>
+              {planModal.plan !== "free" && (
+                <div>
+                  <div style={{ color: "#888", fontSize: 12, marginBottom: 6 }}>STATUS</div>
+                  <select
+                    value={planModal.status}
+                    onChange={(e) => setPlanModal({ ...planModal, status: e.target.value })}
+                    style={{ width: "100%", padding: "10px 12px", background: "#111", border: "1px solid #222", color: "#fff", borderRadius: 8, fontSize: 14 }}
+                  >
+                    <option value="trialing">Trialing (bookings allowed)</option>
+                    <option value="active">Active (bookings allowed)</option>
+                    <option value="free">Free (bookings blocked)</option>
+                  </select>
+                </div>
+              )}
+            </div>
+            <div style={{ display: "flex", gap: 12 }}>
+              <button
+                onClick={() => savePlan(planModal)}
+                style={{ flex: 1, padding: "12px", borderRadius: 10, border: "none", background: "#38bdf8", color: "#000", fontWeight: 800, fontSize: 15, cursor: "pointer" }}
+              >
+                Save
+              </button>
+              <button
+                onClick={() => setPlanModal(null)}
+                style={{ flex: 1, padding: "12px", borderRadius: 10, border: "1px solid #222", background: "#111", color: "#fff", fontWeight: 700, fontSize: 15, cursor: "pointer" }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Delete confirmation modal */}
       {confirmDelete && (
