@@ -33,6 +33,10 @@ export default function PlatformAdminPage() {
   const [confirmDelete, setConfirmDelete] = useState<ShopRow | null>(null);
   const [working, setWorking] = useState<string | null>(null); // shopId of in-flight action
   const [planModal, setPlanModal] = useState<PlanModal | null>(null);
+  const [addShopOpen, setAddShopOpen] = useState(false);
+  const [addShopForm, setAddShopForm] = useState({ name: "", slug: "", ownerName: "", city: "", state: "LA", barberName: "", pin: "" });
+  const [addShopError, setAddShopError] = useState("");
+  const [addShopWorking, setAddShopWorking] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -78,6 +82,29 @@ export default function PlatformAdminPage() {
         setShops((prev) => prev.map((s) => s.id === shop.id ? { ...s, bypass_stripe_requirement: !shop.bypass_stripe_requirement } : s));
       }
     } finally { setWorking(null); }
+  }
+
+  async function createShop() {
+    setAddShopError("");
+    setAddShopWorking(true);
+    try {
+      const res = await fetch("/api/platform/admin/shops", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: addShopForm.name, slug: addShopForm.slug,
+          ownerName: addShopForm.ownerName, city: addShopForm.city, state: addShopForm.state,
+          barberName: addShopForm.barberName, pin: addShopForm.pin,
+          timezone: "America/Chicago",
+        }),
+      });
+      const data = await res.json();
+      if (!data.ok) { setAddShopError(data.error || "Failed."); return; }
+      setAddShopOpen(false);
+      setAddShopForm({ name: "", slug: "", ownerName: "", city: "", state: "LA", barberName: "", pin: "" });
+      await load();
+      alert(`✅ ${data.shopName} created!\nBooking: ${data.bookingUrl}\nAdmin: ${data.adminUrl}\nPIN: ${addShopForm.pin}`);
+    } finally { setAddShopWorking(false); }
   }
 
   async function savePlan(modal: PlanModal) {
@@ -130,7 +157,10 @@ export default function PlatformAdminPage() {
             <h1 style={{ fontSize: 42, fontWeight: 900, margin: 0 }}>Platform Admin</h1>
             <p style={{ color: "#444", marginTop: 6, fontSize: 14 }}>Full control over all shops on the platform.</p>
           </div>
-          <button onClick={handleLogout} style={btnSecondary}>Sign out</button>
+          <div style={{ display: "flex", gap: 10 }}>
+            <button onClick={() => setAddShopOpen(true)} style={{ ...btnSecondary, background: "#d4af37", color: "#000", border: "none" }}>+ Add Shop</button>
+            <button onClick={handleLogout} style={btnSecondary}>Sign out</button>
+          </div>
         </div>
 
         {/* Stats — two rows */}
@@ -288,6 +318,54 @@ export default function PlatformAdminPage() {
           )}
         </div>
       </section>
+
+      {/* Add Shop modal */}
+      {addShopOpen && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.9)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 24 }}>
+          <div style={{ background: "#0d0d0d", border: "1px solid #2a1a00", borderRadius: 20, padding: 32, maxWidth: 480, width: "100%" }}>
+            <h3 style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 900, color: "#d4af37" }}>Add Shop</h3>
+            <p style={{ color: "#555", fontSize: 13, marginBottom: 20 }}>Lifetime free · bypass enabled · bookings open immediately</p>
+            {addShopError && <div style={{ color: "#ef4444", fontSize: 13, marginBottom: 14, padding: "8px 12px", background: "#1a0000", borderRadius: 8 }}>{addShopError}</div>}
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24 }}>
+              {[
+                { label: "SHOP NAME", key: "name", placeholder: "e.g. Green Kutz Barbershop" },
+                { label: "URL SLUG", key: "slug", placeholder: "e.g. greenkutz" },
+                { label: "OWNER NAME", key: "ownerName", placeholder: "e.g. Sedrick Rogers" },
+                { label: "CITY", key: "city", placeholder: "e.g. Natchitoches" },
+                { label: "STATE", key: "state", placeholder: "LA" },
+                { label: "PRIMARY BARBER NAME", key: "barberName", placeholder: "e.g. Sedrick Rogers" },
+                { label: "ADMIN + BARBER PIN (4 digits)", key: "pin", placeholder: "e.g. 1234" },
+              ].map(({ label, key, placeholder }) => (
+                <div key={key}>
+                  <div style={{ color: "#888", fontSize: 11, letterSpacing: "0.1em", marginBottom: 4 }}>{label}</div>
+                  <input
+                    type={key === "pin" ? "password" : "text"}
+                    value={(addShopForm as Record<string, string>)[key]}
+                    onChange={(e) => setAddShopForm({ ...addShopForm, [key]: e.target.value })}
+                    placeholder={placeholder}
+                    style={{ width: "100%", padding: "10px 12px", background: "#111", border: "1px solid #222", color: "#fff", borderRadius: 8, fontSize: 14, boxSizing: "border-box" }}
+                  />
+                </div>
+              ))}
+            </div>
+            <div style={{ display: "flex", gap: 12 }}>
+              <button
+                onClick={createShop}
+                disabled={addShopWorking}
+                style={{ flex: 1, padding: "13px", borderRadius: 10, border: "none", background: "#d4af37", color: "#000", fontWeight: 800, fontSize: 15, cursor: "pointer", opacity: addShopWorking ? 0.6 : 1 }}
+              >
+                {addShopWorking ? "Creating..." : "Create Shop"}
+              </button>
+              <button
+                onClick={() => { setAddShopOpen(false); setAddShopError(""); }}
+                style={{ flex: 1, padding: "13px", borderRadius: 10, border: "1px solid #222", background: "#111", color: "#fff", fontWeight: 700, fontSize: 15, cursor: "pointer" }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Set Plan modal */}
       {planModal && (
