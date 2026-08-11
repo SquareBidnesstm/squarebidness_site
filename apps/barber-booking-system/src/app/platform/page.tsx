@@ -300,7 +300,7 @@ export default function PlatformAdminPage() {
                 <div style={{ color: "#888", fontSize: 12, marginBottom: 6 }}>PLAN</div>
                 <select
                   value={planModal.plan}
-                  onChange={(e) => setPlanModal({ ...planModal, plan: e.target.value, status: e.target.value === "free" ? "free" : planModal.status === "free" ? "trialing" : planModal.status })}
+                  onChange={(e) => setPlanModal({ ...planModal, plan: e.target.value })}
                   style={{ width: "100%", padding: "10px 12px", background: "#111", border: "1px solid #222", color: "#fff", borderRadius: 8, fontSize: 14 }}
                 >
                   <option value="free">Free</option>
@@ -309,20 +309,18 @@ export default function PlatformAdminPage() {
                   <option value="enterprise">Enterprise</option>
                 </select>
               </div>
-              {planModal.plan !== "free" && (
-                <div>
-                  <div style={{ color: "#888", fontSize: 12, marginBottom: 6 }}>STATUS</div>
-                  <select
-                    value={planModal.status}
-                    onChange={(e) => setPlanModal({ ...planModal, status: e.target.value })}
-                    style={{ width: "100%", padding: "10px 12px", background: "#111", border: "1px solid #222", color: "#fff", borderRadius: 8, fontSize: 14 }}
-                  >
-                    <option value="trialing">Trialing (bookings allowed)</option>
-                    <option value="active">Active (bookings allowed)</option>
-                    <option value="free">Free (bookings blocked)</option>
-                  </select>
-                </div>
-              )}
+              <div>
+                <div style={{ color: "#888", fontSize: 12, marginBottom: 6 }}>STATUS</div>
+                <select
+                  value={planModal.status}
+                  onChange={(e) => setPlanModal({ ...planModal, status: e.target.value })}
+                  style={{ width: "100%", padding: "10px 12px", background: "#111", border: "1px solid #222", color: "#fff", borderRadius: 8, fontSize: 14 }}
+                >
+                  <option value="active">Active (bookings allowed)</option>
+                  <option value="trialing">Trialing (bookings allowed)</option>
+                  <option value="free">Inactive (bookings blocked)</option>
+                </select>
+              </div>
             </div>
             <div style={{ display: "flex", gap: 12 }}>
               <button
