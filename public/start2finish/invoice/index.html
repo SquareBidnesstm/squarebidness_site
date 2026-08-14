@@ -1443,15 +1443,26 @@
     cancelBtn.addEventListener('click', closeModal);
     backdrop.addEventListener('click', e => { if (e.target === backdrop) closeModal(); });
 
+    function applySig(dataUrl) {
+      display.innerHTML = `
+        <img src="${dataUrl}" class="sig-saved-img" alt="Authorized signature" />
+        <button class="sig-clear-btn" id="sig-redo" type="button">Re-sign</button>`;
+      document.getElementById('sig-redo').addEventListener('click', openModal);
+    }
+
     saveBtn.addEventListener('click', () => {
       if (!hasMark) { alert('Please draw your signature first.'); return; }
       const dataUrl = canvas.toDataURL('image/png');
-      display.innerHTML = `
-        <img src="${dataUrl}" class="sig-saved-img" alt="Authorized signature" />
-        <button class="sig-clear-btn" id="sig-redo" type="button" title="Re-sign">Re-sign</button>`;
-      document.getElementById('sig-redo').addEventListener('click', openModal);
+      try { localStorage.setItem('s2f_diante_sig', dataUrl); } catch(e) {}
+      applySig(dataUrl);
       closeModal();
     });
+
+    // Load saved signature on startup
+    try {
+      const saved = localStorage.getItem('s2f_diante_sig');
+      if (saved) applySig(saved);
+    } catch(e) {}
   }
 
   /* ── MOBILE TABS ────────────────────────────────────────────── */
