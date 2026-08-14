@@ -126,9 +126,44 @@
       gap: 24px;
       align-items: start;
     }
+    /* ── MOBILE TABS ────────────────────────────────────────── */
+    .mob-tabs {
+      display: none;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 56px;
+      z-index: 150;
+    }
+    .mob-tabs-inner {
+      display: flex;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .mob-tab {
+      flex: 1;
+      padding: 11px 0;
+      font-size: 13px;
+      font-weight: 700;
+      font-family: var(--font);
+      color: var(--muted);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: color .15s, border-color .15s;
+    }
+    .mob-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
     @media (max-width: 960px) {
-      .workspace { grid-template-columns: 1fr; }
-      .preview-col { order: -1; }
+      .workspace { grid-template-columns: 1fr; padding-top: 12px; }
+      .mob-tabs { display: block; }
+      .preview-label { display: none; }
+      /* JS toggles .mob-hidden */
+      .mob-hidden { display: none !important; }
     }
 
     /* ── BUILDER PANEL ──────────────────────────────────────── */
@@ -635,6 +670,14 @@
 </header>
 
 <!-- ── WORKSPACE ─────────────────────────────────────────────── -->
+<!-- Mobile tab bar (hidden on desktop via CSS) -->
+<nav class="mob-tabs" aria-label="Mobile view switcher">
+  <div class="mob-tabs-inner">
+    <button class="mob-tab active" id="tab-builder" type="button">Builder</button>
+    <button class="mob-tab" id="tab-preview" type="button">Preview</button>
+  </div>
+</nav>
+
 <main class="workspace">
 
   <!-- ── BUILDER ─────────────────────────────────────────────── -->
@@ -1159,8 +1202,45 @@
     return `${months[m-1]} ${d}, ${y}`;
   }
 
+  /* ── MOBILE TABS ────────────────────────────────────────────── */
+  function initTabs() {
+    const tabBuilder = document.getElementById('tab-builder');
+    const tabPreview = document.getElementById('tab-preview');
+    const builder    = document.querySelector('.builder');
+    const previewCol = document.querySelector('.preview-col');
+    if (!tabBuilder) return;
+
+    function setTab(active) {
+      const isMobile = window.innerWidth <= 960;
+      if (!isMobile) {
+        builder.classList.remove('mob-hidden');
+        previewCol.classList.remove('mob-hidden');
+        return;
+      }
+      if (active === 'builder') {
+        builder.classList.remove('mob-hidden');
+        previewCol.classList.add('mob-hidden');
+        tabBuilder.classList.add('active');
+        tabPreview.classList.remove('active');
+      } else {
+        builder.classList.add('mob-hidden');
+        previewCol.classList.remove('mob-hidden');
+        tabBuilder.classList.remove('active');
+        tabPreview.classList.add('active');
+      }
+    }
+
+    tabBuilder.addEventListener('click', () => setTab('builder'));
+    tabPreview.addEventListener('click', () => { render(); setTab('preview'); });
+    window.addEventListener('resize', () => {
+      const cur = tabBuilder.classList.contains('active') ? 'builder' : 'preview';
+      setTab(cur);
+    });
+    setTab('builder');
+  }
+
   /* ── BOOT ───────────────────────────────────────────────────── */
-  document.addEventListener('DOMContentLoaded', init);
+  document.addEventListener('DOMContentLoaded', () => { init(); initTabs(); });
 </script>
 </body>
 </html>
