@@ -1229,11 +1229,17 @@
     // Sync state on input within builder table
     tbody.querySelectorAll('tr').forEach(tr => {
       const id = Number(tr.dataset.id);
-      tr.querySelector('.item-desc').addEventListener('input', e => {
+
+      function on(el, handler) {
+        el.addEventListener('input',  handler);
+        el.addEventListener('change', handler);
+      }
+
+      on(tr.querySelector('.item-desc'), e => {
         const it = items.find(i => i.id === id);
         if (it) { it.desc = e.target.value; render(); }
       });
-      tr.querySelector('.item-qty').addEventListener('input', e => {
+      on(tr.querySelector('.item-qty'), e => {
         const it = items.find(i => i.id === id);
         if (it) {
           it.qty = e.target.value;
@@ -1242,7 +1248,7 @@
           render();
         }
       });
-      tr.querySelector('.item-rate').addEventListener('input', e => {
+      on(tr.querySelector('.item-rate'), e => {
         const it = items.find(i => i.id === id);
         if (it) {
           it.rate = e.target.value;
