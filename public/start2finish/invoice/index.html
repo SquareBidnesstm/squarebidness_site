@@ -1107,8 +1107,14 @@
           </div>
           <div class="inv-sig-block">
             <div class="inv-sig-label">Client Signature &amp; Date</div>
+            <div id="cli-sig-display" style="min-height:32px; margin-bottom:4px;">
+              <button class="sig-sign-btn" id="cli-sig-open-btn" type="button">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 12.5l9-9 2.5 2.5-9 9H2v-2.5Z" stroke="#cc1515" stroke-width="1.5" stroke-linejoin="round"/><path d="M11 3.5l1.5-1.5 2 2L13 5.5" stroke="#cc1515" stroke-width="1.5" stroke-linejoin="round"/></svg>
+                Sign
+              </button>
+            </div>
             <hr class="inv-sig-line" />
-            <div class="inv-sig-name">&nbsp;</div>
+            <div class="inv-sig-name" id="cli-sig-date">&nbsp;</div>
           </div>
         </div>
 
@@ -1448,18 +1454,18 @@
 
   /* ── SIGNATURE PAD ──────────────────────────────────────────── */
   function initSignaturePad() {
-    const backdrop  = document.getElementById('sig-modal-backdrop');
-    const canvas    = document.getElementById('sig-canvas');
-    const openBtn   = document.getElementById('sig-open-btn');
-    const clearBtn  = document.getElementById('sig-clear');
-    const cancelBtn = document.getElementById('sig-cancel');
-    const saveBtn   = document.getElementById('sig-save');
-    const display   = document.getElementById('sig-display');
+    const backdrop   = document.getElementById('sig-modal-backdrop');
+    const canvas     = document.getElementById('sig-canvas');
+    const clearBtn   = document.getElementById('sig-clear');
+    const cancelBtn  = document.getElementById('sig-cancel');
+    const saveBtn    = document.getElementById('sig-save');
+    const modalTitle = document.querySelector('.sig-modal-title');
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
     let drawing = false;
     let hasMark = false;
+    let currentSigner = null; // 'diante' | 'client'
 
     function canvasPos(e) {
       const r = canvas.getBoundingClientRect();
@@ -1506,8 +1512,12 @@
       hasMark = false;
     }
 
-    function openModal() {
+    function openModal(signer) {
+      currentSigner = signer;
       clearCanvas();
+      if (modalTitle) {
+        modalTitle.textContent = signer === 'client' ? 'Client Signature' : 'Authorized Signature';
+      }
       backdrop.classList.add('open');
       document.body.style.overflow = 'hidden';
     }
@@ -1516,30 +1526,49 @@
       document.body.style.overflow = '';
     }
 
-    openBtn.addEventListener('click', openModal);
+    function applyDianteSig(dataUrl) {
+      const display = document.getElementById('sig-display');
+      display.innerHTML = `
+        <img src="${dataUrl}" class="sig-saved-img" alt="Authorized signature" />
+        <button class="sig-clear-btn" id="sig-redo" type="button">Re-sign</button>`;
+      document.getElementById('sig-redo').addEventListener('click', () => openModal('diante'));
+    }
+
+    function applyClientSig(dataUrl) {
+      const display = document.getElementById('cli-sig-display');
+      const dateEl  = document.getElementById('cli-sig-date');
+      display.innerHTML = `
+        <img src="${dataUrl}" class="sig-saved-img" alt="Client signature" />
+        <button class="sig-clear-btn" id="cli-sig-redo" type="button">Re-sign</button>`;
+      document.getElementById('cli-sig-redo').addEventListener('click', () => openModal('client'));
+      if (dateEl) {
+        const now = new Date();
+        dateEl.textContent = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      }
+    }
+
+    document.getElementById('sig-open-btn').addEventListener('click', () => openModal('diante'));
+    document.getElementById('cli-sig-open-btn').addEventListener('click', () => openModal('client'));
     clearBtn.addEventListener('click', clearCanvas);
     cancelBtn.addEventListener('click', closeModal);
     backdrop.addEventListener('click', e => { if (e.target === backdrop) closeModal(); });
 
-    function applySig(dataUrl) {
-      display.innerHTML = `
-        <img src="${dataUrl}" class="sig-saved-img" alt="Authorized signature" />
-        <button class="sig-clear-btn" id="sig-redo" type="button">Re-sign</button>`;
-      document.getElementById('sig-redo').addEventListener('click', openModal);
-    }
-
     saveBtn.addEventListener('click', () => {
       if (!hasMark) { alert('Please draw your signature first.'); return; }
       const dataUrl = canvas.toDataURL('image/png');
-      try { localStorage.setItem('s2f_diante_sig', dataUrl); } catch(e) {}
-      applySig(dataUrl);
+      if (currentSigner === 'client') {
+        applyClientSig(dataUrl);
+      } else {
+        try { localStorage.setItem('s2f_diante_sig', dataUrl); } catch(e) {}
+        applyDianteSig(dataUrl);
+      }
       closeModal();
     });
 
-    // Load saved signature on startup
+    // Load Diante's saved signature on startup
     try {
       const saved = localStorage.getItem('s2f_diante_sig');
-      if (saved) applySig(saved);
+      if (saved) applyDianteSig(saved);
     } catch(e) {}
   }
 
