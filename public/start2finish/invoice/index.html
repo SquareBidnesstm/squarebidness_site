@@ -1180,6 +1180,10 @@
     document.getElementById('btn-print').addEventListener('click', () => window.print());
     document.getElementById('btn-reset').addEventListener('click', resetAll);
 
+    // Auto-fill ZIP on city change
+    document.getElementById('cli-city').addEventListener('change', autoZip);
+    autoZip(); // fill on load
+
     // Live update on any input change
     document.addEventListener('input', onInput);
     document.addEventListener('change', onInput);
@@ -1397,6 +1401,43 @@
     const [y, m, d] = str.split('-').map(Number);
     const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     return `${months[m-1]} ${d}, ${y}`;
+  }
+
+  /* ── ZIP AUTO-FILL ──────────────────────────────────────────── */
+  const PARISH_ZIPS = {
+    'Alexandria':       '71301',
+    'Ball':             '71405',
+    'Boyce':            '71409',
+    'Buckeye':          '71407',
+    'Cheneyville':      '71325',
+    'Deville':          '71328',
+    'Echo':             '71330',
+    'Elmer':            '71424',
+    'Flatwoods':        '71427',
+    'Forest Hill':      '71430',
+    'Gardner':          '71431',
+    'Glenmora':         '71433',
+    'Hineston':         '71438',
+    'Holloway Prairie': '71360',
+    'Lamourie':         '71418',
+    'Lecompte':         '71346',
+    'Lena':             '71447',
+    'Libuse':           '71348',
+    'McNary':           '71454',
+    'Meeker':           '71454',
+    'Otis':             '71463',
+    'Pineville':        '71360',
+    'Ruby':             '71467',
+    'Sieper':           '71472',
+    'Tioga':            '71477',
+    'Woodworth':        '71485',
+  };
+
+  function autoZip() {
+    const city   = document.getElementById('cli-city').value;
+    const zipEl  = document.getElementById('cli-zip');
+    const zip    = PARISH_ZIPS[city];
+    if (zip) { zipEl.value = zip; render(); }
   }
 
   /* ── SIGNATURE PAD ──────────────────────────────────────────── */
