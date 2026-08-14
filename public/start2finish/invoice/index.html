@@ -882,11 +882,38 @@
           <div class="field-row trio">
             <div class="field">
               <label for="cli-city">City</label>
-              <input id="cli-city" type="text" placeholder="Alexandria" />
+              <select id="cli-city">
+                <option value="Alexandria" selected>Alexandria</option>
+                <option value="Ball">Ball</option>
+                <option value="Boyce">Boyce</option>
+                <option value="Buckeye">Buckeye</option>
+                <option value="Cheneyville">Cheneyville</option>
+                <option value="Deville">Deville</option>
+                <option value="Echo">Echo</option>
+                <option value="Elmer">Elmer</option>
+                <option value="Flatwoods">Flatwoods</option>
+                <option value="Forest Hill">Forest Hill</option>
+                <option value="Gardner">Gardner</option>
+                <option value="Glenmora">Glenmora</option>
+                <option value="Hineston">Hineston</option>
+                <option value="Holloway Prairie">Holloway Prairie</option>
+                <option value="Lamourie">Lamourie</option>
+                <option value="Lecompte">Lecompte</option>
+                <option value="Lena">Lena</option>
+                <option value="Libuse">Libuse</option>
+                <option value="McNary">McNary</option>
+                <option value="Meeker">Meeker</option>
+                <option value="Otis">Otis</option>
+                <option value="Pineville">Pineville</option>
+                <option value="Ruby">Ruby</option>
+                <option value="Sieper">Sieper</option>
+                <option value="Tioga">Tioga</option>
+                <option value="Woodworth">Woodworth</option>
+              </select>
             </div>
             <div class="field">
               <label for="cli-state">State</label>
-              <input id="cli-state" type="text" placeholder="LA" maxlength="2" style="text-transform:uppercase" />
+              <input id="cli-state" type="text" value="LA" maxlength="2" style="text-transform:uppercase" />
             </div>
             <div class="field">
               <label for="cli-zip">ZIP</label>
@@ -1135,6 +1162,10 @@
     document.getElementById('inv-date').value = today;
     document.getElementById('inv-due').value = dueStr;
 
+    // Default city/state
+    document.getElementById('cli-city').value  = 'Alexandria';
+    document.getElementById('cli-state').value = 'LA';
+
     // Default notes
     document.getElementById('inv-notes').value =
       'Payment due within 30 days of invoice date.\n' +
@@ -1327,7 +1358,7 @@
     items = [];
     itemId = 0;
     ['inv-num','inv-date','inv-due','inv-service',
-     'cli-name','cli-addr','cli-city','cli-state','cli-zip',
+     'cli-name','cli-addr','cli-zip',
      'cli-phone','cli-email','inv-notes','tax-rate','deposit']
       .forEach(id => {
         const el = document.getElementById(id);
