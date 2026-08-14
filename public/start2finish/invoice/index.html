@@ -612,6 +612,113 @@
       color: #999;
     }
 
+    /* Signature pad & saved image */
+    .sig-saved-img {
+      display: block;
+      max-height: 52px;
+      max-width: 100%;
+      margin-bottom: 4px;
+      object-fit: contain;
+      object-position: left bottom;
+    }
+    .sig-sign-btn {
+      background: transparent;
+      border: 1px dashed rgba(204,21,21,.5);
+      border-radius: 6px;
+      color: #cc1515;
+      font-size: 11px;
+      font-weight: 700;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      padding: 5px 10px;
+      cursor: pointer;
+      margin-bottom: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: background .15s;
+    }
+    .sig-sign-btn:hover { background: rgba(204,21,21,.07); }
+    .sig-clear-btn {
+      background: transparent;
+      border: none;
+      color: #bbb;
+      font-size: 10px;
+      cursor: pointer;
+      padding: 0;
+      margin-left: 8px;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+    .sig-clear-btn:hover { color: #ef4444; }
+    @media print {
+      .sig-sign-btn, .sig-clear-btn { display: none !important; }
+    }
+
+    /* Signature modal */
+    .sig-modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.75);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .sig-modal-backdrop.open { display: flex; }
+    .sig-modal {
+      background: #fff;
+      border-radius: 14px;
+      padding: 20px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.4);
+    }
+    .sig-modal-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: #111;
+      margin-bottom: 4px;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+    .sig-modal-sub {
+      font-size: 11px;
+      color: #888;
+      margin-bottom: 14px;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+    #sig-canvas {
+      display: block;
+      width: 100%;
+      height: 160px;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      background: #fafafa;
+      cursor: crosshair;
+      touch-action: none;
+    }
+    .sig-modal-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 14px;
+      gap: 10px;
+    }
+    .sig-btn {
+      padding: 9px 18px;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 700;
+      font-family: var(--font);
+      border: none;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+    .sig-btn-clear { background: #f3f3f3; color: #555; }
+    .sig-btn-clear:hover { background: #eaeaea; }
+    .sig-btn-cancel { background: transparent; color: #888; border: 1px solid #ddd; }
+    .sig-btn-save { background: #cc1515; color: #fff; margin-left: auto; }
+    .sig-btn-save:hover { opacity: .88; }
+
     /* Footer */
     .inv-footer {
       border-top: 1px solid #eee;
@@ -962,6 +1069,12 @@
         <div class="inv-sig">
           <div class="inv-sig-block">
             <div class="inv-sig-label">Authorized Signature</div>
+            <div id="sig-display" style="min-height:32px; margin-bottom:4px;">
+              <button class="sig-sign-btn" id="sig-open-btn" type="button">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 12.5l9-9 2.5 2.5-9 9H2v-2.5Z" stroke="#cc1515" stroke-width="1.5" stroke-linejoin="round"/><path d="M11 3.5l1.5-1.5 2 2L13 5.5" stroke="#cc1515" stroke-width="1.5" stroke-linejoin="round"/></svg>
+                Sign
+              </button>
+            </div>
             <hr class="inv-sig-line" />
             <div class="inv-sig-name">Diante Culvert · Start 2 Finish LLC</div>
           </div>
@@ -986,6 +1099,20 @@
   </div><!-- /preview-col -->
 
 </main>
+
+<!-- Signature modal -->
+<div class="sig-modal-backdrop" id="sig-modal-backdrop" role="dialog" aria-modal="true" aria-label="Draw signature">
+  <div class="sig-modal">
+    <div class="sig-modal-title">Draw Your Signature</div>
+    <div class="sig-modal-sub">Use your finger or mouse to sign below.</div>
+    <canvas id="sig-canvas" width="880" height="320" aria-label="Signature pad"></canvas>
+    <div class="sig-modal-actions">
+      <button class="sig-btn sig-btn-clear" id="sig-clear" type="button">Clear</button>
+      <button class="sig-btn sig-btn-cancel" id="sig-cancel" type="button">Cancel</button>
+      <button class="sig-btn sig-btn-save" id="sig-save" type="button">Save Signature</button>
+    </div>
+  </div>
+</div>
 
 <script>
   /* ── STATE ─────────────────────────────────────────────────── */
@@ -1241,6 +1368,92 @@
     return `${months[m-1]} ${d}, ${y}`;
   }
 
+  /* ── SIGNATURE PAD ──────────────────────────────────────────── */
+  function initSignaturePad() {
+    const backdrop  = document.getElementById('sig-modal-backdrop');
+    const canvas    = document.getElementById('sig-canvas');
+    const openBtn   = document.getElementById('sig-open-btn');
+    const clearBtn  = document.getElementById('sig-clear');
+    const cancelBtn = document.getElementById('sig-cancel');
+    const saveBtn   = document.getElementById('sig-save');
+    const display   = document.getElementById('sig-display');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
+    let hasMark = false;
+
+    function canvasPos(e) {
+      const r = canvas.getBoundingClientRect();
+      const scaleX = canvas.width  / r.width;
+      const scaleY = canvas.height / r.height;
+      const src = e.touches ? e.touches[0] : e;
+      return {
+        x: (src.clientX - r.left) * scaleX,
+        y: (src.clientY - r.top)  * scaleY,
+      };
+    }
+
+    function startDraw(e) {
+      e.preventDefault();
+      drawing = true;
+      const p = canvasPos(e);
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+    }
+    function moveDraw(e) {
+      if (!drawing) return;
+      e.preventDefault();
+      hasMark = true;
+      const p = canvasPos(e);
+      ctx.lineTo(p.x, p.y);
+      ctx.strokeStyle = '#111';
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+    }
+    function endDraw(e) { e.preventDefault(); drawing = false; }
+
+    canvas.addEventListener('mousedown',  startDraw);
+    canvas.addEventListener('mousemove',  moveDraw);
+    canvas.addEventListener('mouseup',    endDraw);
+    canvas.addEventListener('mouseleave', endDraw);
+    canvas.addEventListener('touchstart', startDraw, { passive: false });
+    canvas.addEventListener('touchmove',  moveDraw,  { passive: false });
+    canvas.addEventListener('touchend',   endDraw,   { passive: false });
+
+    function clearCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      hasMark = false;
+    }
+
+    function openModal() {
+      clearCanvas();
+      backdrop.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal() {
+      backdrop.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    openBtn.addEventListener('click', openModal);
+    clearBtn.addEventListener('click', clearCanvas);
+    cancelBtn.addEventListener('click', closeModal);
+    backdrop.addEventListener('click', e => { if (e.target === backdrop) closeModal(); });
+
+    saveBtn.addEventListener('click', () => {
+      if (!hasMark) { alert('Please draw your signature first.'); return; }
+      const dataUrl = canvas.toDataURL('image/png');
+      display.innerHTML = `
+        <img src="${dataUrl}" class="sig-saved-img" alt="Authorized signature" />
+        <button class="sig-clear-btn" id="sig-redo" type="button" title="Re-sign">Re-sign</button>`;
+      document.getElementById('sig-redo').addEventListener('click', openModal);
+      closeModal();
+    });
+  }
+
   /* ── MOBILE TABS ────────────────────────────────────────────── */
   function initTabs() {
     const tabBuilder = document.getElementById('tab-builder');
@@ -1279,7 +1492,7 @@
   }
 
   /* ── BOOT ───────────────────────────────────────────────────── */
-  document.addEventListener('DOMContentLoaded', () => { init(); initTabs(); });
+  document.addEventListener('DOMContentLoaded', () => { init(); initTabs(); initSignaturePad(); });
 </script>
 </body>
 </html>
