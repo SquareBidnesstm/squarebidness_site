@@ -255,6 +255,7 @@
       font-size: 1.3rem; font-weight: 900; color: #7ecf3a; letter-spacing: -.02em; line-height: 1.2;
     }
     .cc-result-sub { font-size: .73rem; color: #5a8a28; margin-top: 3px; }
+    .cc-result-total { font-size: .95rem; font-weight: 800; color: #c9a227; margin-top: 7px; padding-top: 7px; border-top: 1px solid #2a4a10; letter-spacing: -.01em; }
     .btn-cc-add {
       width: 100%; border-radius: 8px; border: 1px solid #3a5c1a;
       background: #0f1a08; color: #7ecf3a; padding: 8px;
@@ -286,7 +287,7 @@
       </div>
       <div>
         <div class="brand-name">TTM Construction Solution LLC</div>
-        <div class="brand-sub">Jay · (318) 709-6563</div>
+        <div class="brand-sub">Toby Love · (318) 709-6563</div>
       </div>
     </div>
     <div class="top-btns">
@@ -429,9 +430,14 @@
           <label>Thickness (inches) — e.g. 4" slab</label>
           <input id="cc-thick" type="number" min="0" step="0.5" placeholder="4" />
         </div>
+        <div>
+          <label>Price per cubic yard ($)</label>
+          <input id="cc-price" type="number" min="0" step="0.01" placeholder="e.g. 150" />
+        </div>
         <div class="cc-result" id="cc-result" style="display:none;">
           <div class="cc-result-main" id="cc-yards"></div>
           <div class="cc-result-sub" id="cc-yards-waste"></div>
+          <div class="cc-result-total" id="cc-total" style="display:none;"></div>
         </div>
         <button class="btn-cc-add" id="cc-add-btn" type="button" style="display:none;">
           + Add to estimate
@@ -493,7 +499,7 @@
             <div class="inv-logo-name" id="pv-logo-text">TTM <span>Construction</span></div>
             <div class="inv-logo-tag">No Job Is Too Small or Too Large · (318) 709-6563</div>
             <div class="inv-from">
-              Jay<br />
+              Toby Love<br />
               marcvmns2@gmail.com
             </div>
           </div>
@@ -549,7 +555,7 @@
               <button class="sig-sign-btn" id="pv-sig-open-btn" type="button" style="display:none;"></button>
             </div>
             <hr class="inv-sig-line" />
-            <div class="inv-sig-name">Marc / Toby · TTM Construction Solution LLC</div>
+            <div class="inv-sig-name">Toby Love · TTM Construction Solution LLC</div>
           </div>
           <div class="inv-sig-block">
             <div class="inv-sig-label">Client Signature &amp; Date</div>
@@ -751,36 +757,51 @@
 
   /* ── CONCRETE CALCULATOR ── */
   function initConcreteCalc() {
-    const lenEl   = document.getElementById('cc-length');
-    const widEl   = document.getElementById('cc-width');
-    const thkEl   = document.getElementById('cc-thick');
-    const result  = document.getElementById('cc-result');
-    const yardsEl = document.getElementById('cc-yards');
-    const wasteEl = document.getElementById('cc-yards-waste');
-    const addBtn  = document.getElementById('cc-add-btn');
+    const lenEl    = document.getElementById('cc-length');
+    const widEl    = document.getElementById('cc-width');
+    const thkEl    = document.getElementById('cc-thick');
+    const priceEl  = document.getElementById('cc-price');
+    const result   = document.getElementById('cc-result');
+    const yardsEl  = document.getElementById('cc-yards');
+    const wasteEl  = document.getElementById('cc-yards-waste');
+    const totalEl  = document.getElementById('cc-total');
+    const addBtn   = document.getElementById('cc-add-btn');
 
     function calc() {
-      const l = parseFloat(lenEl.value) || 0;
-      const w = parseFloat(widEl.value) || 0;
-      const t = parseFloat(thkEl.value) || 0;
+      const l = parseFloat(lenEl.value)  || 0;
+      const w = parseFloat(widEl.value)  || 0;
+      const t = parseFloat(thkEl.value)  || 0;
+      const p = parseFloat(priceEl.value)|| 0;
       if (!l || !w || !t) { result.style.display = 'none'; addBtn.style.display = 'none'; return; }
-      // cubic yards = (L × W × T_inches/12) / 27
-      const rawYds  = (l * w * (t / 12)) / 27;
-      const withWaste = rawYds * 1.10; // standard 10% waste
+
+      const rawYds    = (l * w * (t / 12)) / 27;
+      const withWaste = rawYds * 1.10;
+
       yardsEl.textContent = rawYds.toFixed(2) + ' cubic yards';
       wasteEl.textContent = 'With 10% waste: ' + withWaste.toFixed(2) + ' yds³  ·  ' +
         l + '×' + w + ' ft  @  ' + t + '" thick';
+
+      if (p) {
+        const total = withWaste * p;
+        totalEl.textContent = '$' + total.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) +
+          '  (' + withWaste.toFixed(2) + ' yds × $' + p.toFixed(2) + '/yd³)';
+        totalEl.style.display = '';
+        addBtn.dataset.rate = p.toFixed(2);
+      } else {
+        totalEl.style.display = 'none';
+        addBtn.dataset.rate = '0';
+      }
+
       result.style.display = '';
       addBtn.style.display = '';
       addBtn.dataset.yards = withWaste.toFixed(2);
       addBtn.dataset.desc  = 'Concrete — ' + withWaste.toFixed(2) + ' cu. yds (' + l + '×' + w + ' ft @ ' + t + '" thick)';
     }
 
-    [lenEl, widEl, thkEl].forEach(el => el.addEventListener('input', calc));
+    [lenEl, widEl, thkEl, priceEl].forEach(el => el.addEventListener('input', calc));
 
     addBtn.addEventListener('click', () => {
-      addItem(addBtn.dataset.desc, 1, 0);
-      // scroll to line items
+      addItem(addBtn.dataset.desc, parseFloat(addBtn.dataset.yards), parseFloat(addBtn.dataset.rate) || 0);
       document.getElementById('line-items-wrap').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     });
   }
