@@ -124,8 +124,8 @@
       background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px;
       padding: 10px 10px 8px;
     }
-    .line-item-top { display: grid; grid-template-columns: 1fr 72px 80px 28px; gap: 6px; align-items: center; margin-bottom: 6px; }
-    .line-item-desc { grid-column: 1; }
+    .line-item-top { display: grid; grid-template-columns: 1fr 68px 76px 28px; gap: 6px; align-items: center; margin-bottom: 6px; }
+    .line-item-detail { margin-top: 4px; }
     .li-input {
       background: #111; border: 1px solid #333; border-radius: 6px;
       color: var(--fg); font-family: var(--font); font-size: .8rem;
@@ -600,6 +600,32 @@
 </div>
 
 <script>
+  /* ── SERVICES ── */
+  const TTM_SERVICES = [
+    'Concrete',
+    'Sidewalks',
+    'House Pads',
+    'New Construction',
+    'Driveways',
+    'Re-hab Houses',
+    'Concrete Repair',
+    'Sheetrock',
+    'Patios',
+    'Pressure Washing',
+    'Roofing',
+    'Fencing',
+    'Painting',
+    'Floors',
+    'Landscaping',
+    'Clearing',
+    'Drainage',
+    'Brick Mail Boxes',
+    'Other',
+  ];
+  const SERVICE_OPTS = TTM_SERVICES.map(s =>
+    `<option value="${s}"${s === 'Concrete' ? ' selected' : ''}>${s}</option>`
+  ).join('');
+
   /* ── STATE ── */
   let items = [];
   let itemId = 0;
@@ -677,8 +703,11 @@
     tbody.innerHTML = items.map(it => {
       const amt = (it.qty || 0) * (it.rate || 0);
       subtotal += amt;
+      const descHtml = it.service
+        ? (it.detail ? `<strong>${esc(it.service)}</strong><br><span style="color:#888;font-size:9px;">${esc(it.detail)}</span>` : `<strong>${esc(it.service)}</strong>`)
+        : '<span style="color:#aaa;">—</span>';
       return `<tr>
-        <td>${esc(it.desc) || '<span style="color:#aaa;">—</span>'}</td>
+        <td>${descHtml}</td>
         <td style="text-align:center;">${it.qty || 0}</td>
         <td style="text-align:right;">${fmt(it.rate)}</td>
         <td>${fmt(amt)}</td>
@@ -692,19 +721,22 @@
   }
 
   /* ── LINE ITEMS ── */
-  function addItem(desc='', qty=1, rate=0) {
+  function addItem(service='Concrete', detail='', qty=1, rate=0) {
     const id = ++itemId;
-    items.push({ id, desc, qty, rate });
+    items.push({ id, service, detail, qty, rate });
     const wrap = document.getElementById('line-items-wrap');
     const div = document.createElement('div');
     div.className = 'line-item';
     div.dataset.id = id;
     div.innerHTML = `
       <div class="line-item-top">
-        <input class="li-input" placeholder="Description" value="${esc(desc)}" data-field="desc" />
+        <select class="li-input" data-field="service" style="font-weight:700;">${SERVICE_OPTS.replace(`value="${service}"`, `value="${service}" selected`)}</select>
         <input class="li-input" type="number" placeholder="Qty" value="${qty}" min="0" step="any" data-field="qty" style="text-align:center;" />
         <input class="li-input" type="number" placeholder="Rate $" value="${rate||''}" min="0" step="0.01" data-field="rate" />
         <button class="btn-remove" title="Remove" data-id="${id}">×</button>
+      </div>
+      <div class="line-item-detail">
+        <input class="li-input" placeholder="Details / notes (optional)" value="${esc(detail)}" data-field="detail" style="font-size:.75rem;color:#aaa;" />
       </div>`;
     wrap.appendChild(div);
 
@@ -716,9 +748,10 @@
       on(el, () => {
         const item = items.find(i => i.id === id);
         if (!item) return;
-        if (el.dataset.field === 'desc') item.desc = el.value;
-        if (el.dataset.field === 'qty')  item.qty  = parseFloat(el.value) || 0;
-        if (el.dataset.field === 'rate') item.rate = parseFloat(el.value) || 0;
+        if (el.dataset.field === 'service') item.service = el.value;
+        if (el.dataset.field === 'detail')  item.detail  = el.value;
+        if (el.dataset.field === 'qty')     item.qty     = parseFloat(el.value) || 0;
+        if (el.dataset.field === 'rate')    item.rate    = parseFloat(el.value) || 0;
         render();
       });
     });
@@ -797,14 +830,14 @@
 
       result.style.display = '';
       addBtn.style.display = '';
-      addBtn.dataset.yards = withWaste.toFixed(2);
-      addBtn.dataset.desc  = 'Concrete — ' + withWaste.toFixed(2) + ' cu. yds (' + l + '×' + w + ' ft @ ' + t + '" thick)';
+      addBtn.dataset.yards  = withWaste.toFixed(2);
+      addBtn.dataset.detail = withWaste.toFixed(2) + ' cu. yds — ' + l + '×' + w + ' ft @ ' + t + '" thick';
     }
 
     [lenEl, widEl, thkEl, priceEl].forEach(el => el.addEventListener('input', calc));
 
     addBtn.addEventListener('click', () => {
-      addItem(addBtn.dataset.desc, parseFloat(addBtn.dataset.yards), parseFloat(addBtn.dataset.rate) || 0);
+      addItem('Concrete', addBtn.dataset.detail, parseFloat(addBtn.dataset.yards), parseFloat(addBtn.dataset.rate) || 0);
       document.getElementById('line-items-wrap').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     });
   }
@@ -925,7 +958,7 @@
     initTabs();
     initConcreteCalc();
     initSignaturePad();
-    document.getElementById('btn-add-line').addEventListener('click', () => addItem());
+    document.getElementById('btn-add-line').addEventListener('click', () => addItem('Concrete'));
   });
 </script>
 </body>
