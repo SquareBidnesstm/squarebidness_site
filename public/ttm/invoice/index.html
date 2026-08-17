@@ -1,0 +1,929 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TTM Construction Solution LLC</title>
+  <meta name="theme-color" content="#0a0a0a" />
+  <meta name="description" content="Built Right. Done Right. — Estimates &amp; Invoices for TTM Construction Solution LLC" />
+  <meta property="og:title" content="TTM Construction Solution LLC" />
+  <meta property="og:description" content="Built Right. Done Right." />
+  <meta property="og:image" content="/ttm/og.png" />
+  <meta property="og:type" content="website" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/ttm/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/ttm/favicon-16.png" />
+  <link rel="apple-touch-icon" href="/ttm/apple-touch.png" />
+  <link rel="manifest" href="/ttm/manifest.webmanifest" />
+
+  <style>
+    :root {
+      --bg:      #0a0a0a;
+      --panel:   #111111;
+      --border:  #2a2a2a;
+      --accent:  #c9a227;
+      --fg:      #f5f5f5;
+      --muted:   #888888;
+      --font:    system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: var(--bg); color: var(--fg); font-family: var(--font); }
+    a { color: inherit; text-decoration: none; }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(10,10,10,.96); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .topbar-inner {
+      max-width: 1400px; margin: 0 auto;
+      padding: 10px 16px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand-icon {
+      width: 34px; height: 34px; border-radius: 8px;
+      background: #000; border: 1px solid var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0; overflow: hidden;
+    }
+    .brand-icon img { width: 100%; height: 100%; object-fit: cover; border-radius: 7px; }
+    .brand-name { font-size: .92rem; font-weight: 800; letter-spacing: -.01em; }
+    .brand-sub  { font-size: .72rem; color: var(--muted); }
+    .top-btns { display: flex; gap: 8px; }
+    .btn-top {
+      border-radius: 999px; border: 1px solid #333; background: #111;
+      color: var(--fg); padding: 6px 14px; font-size: .78rem;
+      font-weight: 600; cursor: pointer; transition: border-color .15s;
+    }
+    .btn-top:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-top.primary {
+      background: var(--accent); border-color: var(--accent);
+      color: #000; font-weight: 700;
+    }
+    .btn-top.primary:hover { background: #d9b030; border-color: #d9b030; color: #000; }
+
+    /* ── MOBILE TABS ── */
+    .mob-tabs { display: none; background: var(--panel); border-bottom: 1px solid var(--border); position: sticky; top: 56px; z-index: 90; }
+    .mob-tabs-inner { display: flex; max-width: 1400px; margin: 0 auto; }
+    .mob-tab { flex: 1; padding: 11px 0; font-size: 13px; font-weight: 700; font-family: var(--font); color: var(--muted); background: transparent; border: none; cursor: pointer; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; }
+    .mob-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    @media (max-width: 960px) {
+      .mob-tabs { display: block; }
+      .workspace { grid-template-columns: 1fr !important; padding-top: 12px; }
+      .preview-label { display: none; }
+      .mob-hidden { display: none !important; }
+    }
+
+    /* ── WORKSPACE ── */
+    .workspace {
+      max-width: 1400px; margin: 0 auto;
+      display: grid; grid-template-columns: 420px 1fr;
+      gap: 20px; padding: 20px 16px; align-items: start;
+    }
+
+    /* ── BUILDER ── */
+    .builder {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 14px;
+    }
+    .section-label {
+      font-size: .7rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .field-group { display: flex; flex-direction: column; gap: 8px; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    label { font-size: .75rem; color: var(--muted); display: block; margin-bottom: 3px; }
+    input, select, textarea {
+      width: 100%; background: #1a1a1a; border: 1px solid #333;
+      border-radius: 8px; color: var(--fg); font-family: var(--font);
+      font-size: .82rem; padding: 8px 10px; outline: none;
+      transition: border-color .15s;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+    textarea { resize: vertical; min-height: 60px; }
+    select option { background: #1a1a1a; }
+    .divider { border: none; border-top: 1px solid var(--border); }
+
+    /* doc type toggle */
+    .doc-toggle { display: flex; gap: 6px; }
+    .doc-btn {
+      flex: 1; padding: 7px 0; border-radius: 8px; border: 1px solid #333;
+      background: #1a1a1a; color: var(--muted); font-size: .8rem;
+      font-weight: 700; cursor: pointer; transition: all .15s; text-align: center;
+    }
+    .doc-btn.active { background: var(--accent); border-color: var(--accent); color: #000; }
+
+    /* line items */
+    .line-items { display: flex; flex-direction: column; gap: 6px; }
+    .line-item {
+      background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px;
+      padding: 10px 10px 8px;
+    }
+    .line-item-top { display: grid; grid-template-columns: 1fr 72px 80px 28px; gap: 6px; align-items: center; margin-bottom: 6px; }
+    .line-item-desc { grid-column: 1; }
+    .li-input {
+      background: #111; border: 1px solid #333; border-radius: 6px;
+      color: var(--fg); font-family: var(--font); font-size: .8rem;
+      padding: 6px 8px; width: 100%; outline: none;
+    }
+    .li-input:focus { border-color: var(--accent); }
+    .btn-remove {
+      background: transparent; border: none; color: #555; cursor: pointer;
+      font-size: 16px; line-height: 1; padding: 2px; transition: color .15s;
+    }
+    .btn-remove:hover { color: #ef4444; }
+    .btn-add {
+      border-radius: 8px; border: 1px dashed #444; background: transparent;
+      color: var(--muted); padding: 8px; font-size: .78rem;
+      cursor: pointer; width: 100%; transition: border-color .15s, color .15s;
+    }
+    .btn-add:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* signature sign button */
+    .sig-sign-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      border-radius: 999px; border: 1px solid #333; background: #1a1a1a;
+      color: var(--muted); font-size: .72rem; font-weight: 600;
+      padding: 4px 10px; cursor: pointer; transition: border-color .15s, color .15s;
+    }
+    .sig-sign-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .sig-saved-img { max-height: 36px; display: block; }
+    .sig-clear-btn {
+      display: inline-flex; align-items: center; gap: 4px;
+      border-radius: 999px; border: 1px solid #333; background: transparent;
+      color: var(--muted); font-size: .7rem; padding: 3px 8px; cursor: pointer;
+      margin-top: 4px; transition: border-color .15s;
+    }
+    .sig-clear-btn:hover { border-color: var(--accent); }
+
+    /* ── PREVIEW ── */
+    .preview-label { font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+    .preview-col { position: sticky; top: 80px; }
+    .preview-wrap { background: #1a1a1a; border-radius: 14px; padding: 12px; border: 1px solid var(--border); }
+
+    /* ── INVOICE DOC ── */
+    #invoice-doc {
+      background: #fff; color: #111;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      padding: 32px 36px; border-radius: 8px;
+      box-shadow: 0 4px 32px rgba(0,0,0,.4);
+      font-size: 12px; line-height: 1.5;
+    }
+
+    .inv-accent-bar { height: 5px; background: #c9a227; border-radius: 2px; margin-bottom: 22px; }
+
+    .inv-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 22px; gap: 16px; }
+    .inv-logo-block {}
+    .inv-logo-name { font-size: 18px; font-weight: 900; color: #111; letter-spacing: -.02em; line-height: 1.1; }
+    .inv-logo-name span { color: #c9a227; }
+    .inv-logo-tag { font-size: 8px; color: #666; text-transform: uppercase; letter-spacing: .1em; margin-top: 2px; }
+    .inv-from { font-size: 10px; color: #555; margin-top: 8px; line-height: 1.6; }
+
+    .inv-doc-meta { text-align: right; }
+    .inv-doc-type { font-size: 20px; font-weight: 900; color: #c9a227; letter-spacing: -.02em; }
+    .inv-doc-number { font-size: 10px; color: #888; margin-top: 2px; }
+    .inv-meta-grid { margin-top: 8px; font-size: 10px; color: #555; }
+    .inv-meta-grid table { border-collapse: collapse; margin-left: auto; }
+    .inv-meta-grid td { padding: 1px 0 1px 10px; }
+    .inv-meta-grid td:first-child { color: #888; text-align: right; padding-left: 0; }
+
+    .inv-rule { border: none; border-top: 2px solid #c9a227; margin: 0 0 16px; }
+
+    .inv-addresses { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .inv-addr-label { font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: #c9a227; margin-bottom: 4px; }
+    .inv-addr-body { font-size: 10px; color: #333; line-height: 1.7; }
+
+    /* line items table */
+    .inv-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 10px; }
+    .inv-table thead tr { background: #111; color: #fff; }
+    .inv-table thead th { padding: 7px 8px; text-align: left; font-size: 8px; letter-spacing: .08em; text-transform: uppercase; }
+    .inv-table thead th:last-child { text-align: right; }
+    .inv-table tbody tr:nth-child(even) { background: #f8f8f8; }
+    .inv-table tbody td { padding: 7px 8px; border-bottom: 1px solid #eee; }
+    .inv-table tbody td:last-child { text-align: right; font-weight: 600; }
+    .inv-table tfoot td { padding: 5px 8px; font-size: 10px; }
+    .inv-table tfoot tr.total-row td { font-weight: 800; font-size: 12px; border-top: 2px solid #c9a227; padding-top: 8px; }
+    .inv-table tfoot tr.total-row td:last-child { color: #c9a227; }
+
+    .inv-note { font-size: 9px; color: #666; background: #f8f8f8; border-left: 3px solid #c9a227; padding: 8px 10px; margin-bottom: 16px; border-radius: 0 4px 4px 0; }
+
+    /* signature blocks */
+    .inv-sig-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 20px; }
+    .inv-sig-block {}
+    .inv-sig-label { font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: #888; margin-bottom: 6px; }
+    .inv-sig-line { border: none; border-top: 1px solid #bbb; margin: 0; }
+    .inv-sig-name { font-size: 9px; color: #888; margin-top: 3px; }
+
+    .inv-footer { margin-top: 20px; padding-top: 10px; border-top: 1px solid #e5e5e5; display: flex; justify-content: space-between; align-items: center; }
+    .inv-footer-left { font-size: 8px; color: #aaa; }
+    .inv-footer-right { font-size: 8px; color: #aaa; text-align: right; }
+
+    /* ── TOTALS SIDEBAR ── */
+    .totals-block { margin-bottom: 16px; }
+    .total-row-preview { display: flex; justify-content: space-between; padding: 3px 0; font-size: .78rem; }
+    .total-row-preview.grand { font-weight: 800; font-size: .9rem; border-top: 2px solid var(--accent); padding-top: 8px; margin-top: 4px; color: var(--accent); }
+
+    /* ── SIG MODAL ── */
+    .sig-modal-backdrop {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.78); z-index: 1000;
+      align-items: center; justify-content: center; padding: 16px;
+    }
+    .sig-modal-backdrop.open { display: flex; }
+    .sig-modal {
+      background: #fff; border-radius: 14px; padding: 20px;
+      width: 100%; max-width: 480px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.5);
+    }
+    .sig-modal-title { font-size: 14px; font-weight: 800; color: #111; margin-bottom: 4px; font-family: "Helvetica Neue", sans-serif; }
+    .sig-modal-sub { font-size: 11px; color: #777; margin-bottom: 12px; font-family: "Helvetica Neue", sans-serif; }
+    #sig-canvas { width: 100%; height: 140px; border: 1px solid #ddd; border-radius: 8px; background: #fafafa; display: block; touch-action: none; }
+    .sig-modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; }
+    .sig-btn { border-radius: 999px; font-size: .78rem; font-weight: 700; padding: 7px 16px; cursor: pointer; border: none; font-family: "Helvetica Neue", sans-serif; }
+    .sig-btn-clear  { background: #f3f4f6; color: #374151; }
+    .sig-btn-cancel { background: #f3f4f6; color: #374151; }
+    .sig-btn-save   { background: #c9a227; color: #000; font-weight: 800; }
+
+    /* ── CONCRETE CALCULATOR ── */
+    .cc-result {
+      background: #0f1a08; border: 1px solid #3a5c1a;
+      border-radius: 10px; padding: 10px 12px;
+    }
+    .cc-result-main {
+      font-size: 1.3rem; font-weight: 900; color: #7ecf3a; letter-spacing: -.02em; line-height: 1.2;
+    }
+    .cc-result-sub { font-size: .73rem; color: #5a8a28; margin-top: 3px; }
+    .cc-result-total { font-size: .95rem; font-weight: 800; color: #c9a227; margin-top: 7px; padding-top: 7px; border-top: 1px solid #2a4a10; letter-spacing: -.01em; }
+    .btn-cc-add {
+      width: 100%; border-radius: 8px; border: 1px solid #3a5c1a;
+      background: #0f1a08; color: #7ecf3a; padding: 8px;
+      font-size: .78rem; font-weight: 700; font-family: var(--font);
+      cursor: pointer; transition: background .15s, border-color .15s;
+    }
+    .btn-cc-add:hover { background: #1a2e0e; border-color: #7ecf3a; }
+
+    /* ── PRINT ── */
+    @media print {
+      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      body { background: #fff; }
+      .topbar, .mob-tabs, .builder, .preview-label { display: none !important; }
+      .workspace { display: block; padding: 0; max-width: 100%; }
+      .preview-col, .preview-col.mob-hidden { position: static; display: block !important; }
+      .preview-wrap { background: transparent; border: none; padding: 0; border-radius: 0; }
+      #invoice-doc { box-shadow: none; padding: 28px 32px; border-radius: 0; }
+      .sig-sign-btn, .sig-clear-btn { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-icon">
+        <img src="/ttm/icon.png" alt="TTM" onerror="this.style.display='none';this.parentElement.textContent='🏗';" />
+      </div>
+      <div>
+        <div class="brand-name">TTM Construction Solution LLC</div>
+        <div class="brand-sub">Toby Love · (318) 709-6563</div>
+      </div>
+    </div>
+    <div class="top-btns">
+      <button class="btn-top" onclick="resetDoc()">New</button>
+      <button class="btn-top primary" onclick="window.print()">Print / Save PDF</button>
+    </div>
+  </div>
+</header>
+
+<nav class="mob-tabs">
+  <div class="mob-tabs-inner">
+    <button class="mob-tab active" id="tab-builder" type="button">Builder</button>
+    <button class="mob-tab" id="tab-preview" type="button">Preview</button>
+  </div>
+</nav>
+
+<div class="workspace">
+  <!-- ── BUILDER ── -->
+  <div class="builder">
+
+    <!-- Doc type -->
+    <div>
+      <div class="section-label">Document Type</div>
+      <div class="doc-toggle">
+        <button class="doc-btn active" id="btn-estimate" onclick="setDocType('ESTIMATE')">Estimate</button>
+        <button class="doc-btn" id="btn-invoice"  onclick="setDocType('INVOICE')">Invoice</button>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- Doc meta -->
+    <div>
+      <div class="section-label">Document Info</div>
+      <div class="field-group">
+        <div class="field-row">
+          <div>
+            <label id="lbl-num">Estimate #</label>
+            <input id="doc-num" type="text" value="EST-001" />
+          </div>
+          <div>
+            <label>Date</label>
+            <input id="doc-date" type="date" />
+          </div>
+        </div>
+        <div class="field-row">
+          <div id="wrap-expiry">
+            <label>Valid Until</label>
+            <input id="doc-expiry" type="date" />
+          </div>
+          <div id="wrap-due" style="display:none;">
+            <label>Due Date</label>
+            <input id="doc-due" type="date" />
+          </div>
+          <div>
+            <label>Service Type</label>
+            <select id="doc-service">
+              <option value="">— Select —</option>
+              <option>Concrete</option>
+              <option>Sidewalks</option>
+              <option>House Pads</option>
+              <option>New Construction</option>
+              <option>Driveways</option>
+              <option>Re-hab Houses</option>
+              <option>Concrete Repair</option>
+              <option>Sheetrock</option>
+              <option>Patios</option>
+              <option>Pressure Washing</option>
+              <option>Roofing</option>
+              <option>Fencing</option>
+              <option>Painting</option>
+              <option>Landscaping</option>
+              <option>Drainage</option>
+              <option>Clearing</option>
+              <option>Brick Mail Boxes</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- Client info -->
+    <div>
+      <div class="section-label">Client / Customer</div>
+      <div class="field-group">
+        <div>
+          <label>Full name or company</label>
+          <input id="cli-name" type="text" placeholder="Full name or company" />
+        </div>
+        <div>
+          <label>Job site address</label>
+          <input id="cli-addr" type="text" placeholder="123 Main St" />
+        </div>
+        <div class="field-row">
+          <div>
+            <label>City</label>
+            <input id="cli-city" type="text" placeholder="City" />
+          </div>
+          <div>
+            <label>State</label>
+            <input id="cli-state" type="text" value="LA" maxlength="2" style="text-transform:uppercase;" />
+          </div>
+        </div>
+        <div class="field-row">
+          <div>
+            <label>Phone</label>
+            <input id="cli-phone" type="tel" placeholder="(318) 000-0000" />
+          </div>
+          <div>
+            <label>Email</label>
+            <input id="cli-email" type="email" placeholder="client@email.com" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- Concrete Calculator -->
+    <div>
+      <div class="section-label" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>Concrete Calculator</span>
+        <span style="font-size:.65rem;color:#555;font-weight:400;letter-spacing:.04em;text-transform:none;">ft → cu. yds</span>
+      </div>
+      <div class="field-group">
+        <div class="field-row">
+          <div>
+            <label>Length (ft)</label>
+            <input id="cc-length" type="number" min="0" step="any" placeholder="0" />
+          </div>
+          <div>
+            <label>Width (ft)</label>
+            <input id="cc-width" type="number" min="0" step="any" placeholder="0" />
+          </div>
+        </div>
+        <div>
+          <label>Thickness (inches) — e.g. 4" slab</label>
+          <input id="cc-thick" type="number" min="0" step="0.5" placeholder="4" />
+        </div>
+        <div>
+          <label>Price per cubic yard ($)</label>
+          <input id="cc-price" type="number" min="0" step="0.01" placeholder="e.g. 150" />
+        </div>
+        <div class="cc-result" id="cc-result" style="display:none;">
+          <div class="cc-result-main" id="cc-yards"></div>
+          <div class="cc-result-sub" id="cc-yards-waste"></div>
+          <div class="cc-result-total" id="cc-total" style="display:none;"></div>
+        </div>
+        <button class="btn-cc-add" id="cc-add-btn" type="button" style="display:none;">
+          + Add to estimate
+        </button>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- Line items -->
+    <div>
+      <div class="section-label">Line Items</div>
+      <div class="line-items" id="line-items-wrap"></div>
+      <button class="btn-add" id="btn-add-line" type="button">+ Add Line Item</button>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- Notes -->
+    <div>
+      <div class="section-label">Notes</div>
+      <textarea id="doc-notes" rows="3" placeholder="Payment terms, scope notes, conditions…">Make checks payable to TTM Construction Solution LLC.</textarea>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- Toby signature -->
+    <div>
+      <div class="section-label">Contractor Signature</div>
+      <div id="sig-display" style="min-height:36px;margin-bottom:6px;">
+        <button class="sig-sign-btn" id="sig-open-btn" type="button">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M2 12.5l9-9 2.5 2.5-9 9H2v-2.5Z" stroke="#c9a227" stroke-width="1.5" stroke-linejoin="round"/>
+            <path d="M11 3.5l1.5-1.5 2 2L13 5.5" stroke="#c9a227" stroke-width="1.5" stroke-linejoin="round"/>
+          </svg>
+          Sign
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /builder -->
+
+  <!-- ── PREVIEW ── -->
+  <div class="preview-col">
+    <div class="preview-label">Live Preview</div>
+    <div class="preview-wrap">
+      <div id="invoice-doc" role="document">
+
+        <div class="inv-accent-bar"></div>
+
+        <div class="inv-header">
+          <div class="inv-logo-block">
+            <div style="margin-bottom:6px;">
+              <img src="/ttm/logo.png" alt="TTM Construction Solution LLC"
+                style="height:72px;width:72px;object-fit:contain;display:block;"
+                onload="document.getElementById('pv-logo-text').style.display='none';"
+                onerror="this.style.display='none';" />
+            </div>
+            <div class="inv-logo-name" id="pv-logo-text">TTM <span>Construction</span></div>
+            <div class="inv-logo-tag">No Job Is Too Small or Too Large · (318) 709-6563</div>
+            <div class="inv-from">
+              Toby Love<br />
+              marcvmns2@gmail.com
+            </div>
+          </div>
+          <div class="inv-doc-meta">
+            <div class="inv-doc-type" id="pv-doc-type">ESTIMATE</div>
+            <div class="inv-doc-number" id="pv-doc-num">EST-001</div>
+            <div class="inv-meta-grid">
+              <table>
+                <tr><td>Date</td><td id="pv-date">—</td></tr>
+                <tr id="pv-expiry-row"><td>Valid Until</td><td id="pv-expiry">—</td></tr>
+                <tr id="pv-due-row" style="display:none;"><td>Due Date</td><td id="pv-due">—</td></tr>
+                <tr><td>Service</td><td id="pv-service">—</td></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <hr class="inv-rule" />
+
+        <div class="inv-addresses">
+          <div>
+            <div class="inv-addr-label">Prepared For</div>
+            <div class="inv-addr-body" id="pv-client">—</div>
+          </div>
+          <div>
+            <div class="inv-addr-label">Job Site</div>
+            <div class="inv-addr-body" id="pv-jobsite">—</div>
+          </div>
+        </div>
+
+        <table class="inv-table">
+          <thead>
+            <tr>
+              <th style="width:50%;">Description</th>
+              <th style="width:15%;text-align:center;">Qty</th>
+              <th style="width:17%;text-align:right;">Rate</th>
+              <th style="width:18%;text-align:right;">Amount</th>
+            </tr>
+          </thead>
+          <tbody id="pv-items"></tbody>
+          <tfoot>
+            <tr><td colspan="3" style="text-align:right;color:#888;">Subtotal</td><td style="text-align:right;" id="pv-subtotal">$0.00</td></tr>
+            <tr class="total-row"><td colspan="3" style="text-align:right;">Total Due</td><td id="pv-total">$0.00</td></tr>
+          </tfoot>
+        </table>
+
+        <div class="inv-note" id="pv-note">Make checks payable to TTM Construction Solution LLC.</div>
+
+        <div class="inv-sig-row">
+          <div class="inv-sig-block">
+            <div class="inv-sig-label">Contractor Signature</div>
+            <div id="pv-sig-display" style="min-height:32px;margin-bottom:4px;">
+              <button class="sig-sign-btn" id="pv-sig-open-btn" type="button" style="display:none;"></button>
+            </div>
+            <hr class="inv-sig-line" />
+            <div class="inv-sig-name">Toby Love · TTM Construction Solution LLC</div>
+          </div>
+          <div class="inv-sig-block">
+            <div class="inv-sig-label">Client Signature &amp; Date</div>
+            <div id="cli-sig-display" style="min-height:32px;margin-bottom:4px;">
+              <button class="sig-sign-btn" id="cli-sig-open-btn" type="button">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M2 12.5l9-9 2.5 2.5-9 9H2v-2.5Z" stroke="#c9a227" stroke-width="1.5" stroke-linejoin="round"/>
+                  <path d="M11 3.5l1.5-1.5 2 2L13 5.5" stroke="#c9a227" stroke-width="1.5" stroke-linejoin="round"/>
+                </svg>
+                Sign
+              </button>
+            </div>
+            <hr class="inv-sig-line" />
+            <div class="inv-sig-name" id="cli-sig-date">&nbsp;</div>
+          </div>
+        </div>
+
+        <div class="inv-footer">
+          <div class="inv-footer-left">TTM Construction Solution LLC · Alexandria &amp; Cenla, LA</div>
+        </div>
+
+      </div><!-- /invoice-doc -->
+    </div>
+  </div><!-- /preview-col -->
+</div><!-- /workspace -->
+
+<!-- Signature modal -->
+<div class="sig-modal-backdrop" id="sig-modal-backdrop">
+  <div class="sig-modal">
+    <div class="sig-modal-title" id="sig-modal-title">Draw Your Signature</div>
+    <div class="sig-modal-sub">Use your finger or mouse to sign below.</div>
+    <canvas id="sig-canvas" width="880" height="280"></canvas>
+    <div class="sig-modal-actions">
+      <button class="sig-btn sig-btn-clear"  id="sig-clear"  type="button">Clear</button>
+      <button class="sig-btn sig-btn-cancel" id="sig-cancel" type="button">Cancel</button>
+      <button class="sig-btn sig-btn-save"   id="sig-save"   type="button">Save Signature</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ── STATE ── */
+  let items = [];
+  let itemId = 0;
+  let docType = 'ESTIMATE';
+
+  function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function fmt(n) { return '$' + (Number(n)||0).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+  function fmtDate(v) {
+    if (!v) return '—';
+    const [y,m,d] = v.split('-');
+    return new Date(y,m-1,d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  }
+
+  /* ── DOC TYPE ── */
+  function setDocType(type) {
+    docType = type;
+    document.getElementById('btn-estimate').classList.toggle('active', type === 'ESTIMATE');
+    document.getElementById('btn-invoice').classList.toggle('active',  type === 'INVOICE');
+    document.getElementById('lbl-num').textContent = type === 'ESTIMATE' ? 'Estimate #' : 'Invoice #';
+    const numEl = document.getElementById('doc-num');
+    if (type === 'ESTIMATE' && numEl.value.startsWith('INV')) numEl.value = 'EST-001';
+    if (type === 'INVOICE'  && numEl.value.startsWith('EST')) numEl.value = 'INV-001';
+    document.getElementById('wrap-expiry').style.display = type === 'ESTIMATE' ? '' : 'none';
+    document.getElementById('wrap-due').style.display    = type === 'INVOICE'  ? '' : 'none';
+    render();
+  }
+
+  /* ── RENDER ── */
+  function render() {
+    const num     = document.getElementById('doc-num').value;
+    const date    = document.getElementById('doc-date').value;
+    const expiry  = document.getElementById('doc-expiry').value;
+    const due     = document.getElementById('doc-due').value;
+    const service = document.getElementById('doc-service').value;
+    const cliName = document.getElementById('cli-name').value;
+    const cliAddr = document.getElementById('cli-addr').value;
+    const cliCity = document.getElementById('cli-city').value;
+    const cliSt   = document.getElementById('cli-state').value;
+    const cliPh   = document.getElementById('cli-phone').value;
+    const cliEm   = document.getElementById('cli-email').value;
+    const notes   = document.getElementById('doc-notes').value;
+
+    document.getElementById('pv-doc-type').textContent = docType;
+    document.getElementById('pv-doc-num').textContent  = num || '—';
+    document.getElementById('pv-date').textContent     = fmtDate(date);
+    document.getElementById('pv-service').textContent  = service || '—';
+
+    const expiryRow = document.getElementById('pv-expiry-row');
+    const dueRow    = document.getElementById('pv-due-row');
+    if (docType === 'ESTIMATE') {
+      expiryRow.style.display = '';
+      dueRow.style.display    = 'none';
+      document.getElementById('pv-expiry').textContent = fmtDate(expiry);
+    } else {
+      expiryRow.style.display = 'none';
+      dueRow.style.display    = '';
+      document.getElementById('pv-due').textContent = fmtDate(due);
+    }
+
+    // Client block
+    let clientHtml = esc(cliName) || '—';
+    if (cliPh) clientHtml += '<br>' + esc(cliPh);
+    if (cliEm) clientHtml += '<br>' + esc(cliEm);
+    document.getElementById('pv-client').innerHTML = clientHtml;
+
+    // Job site
+    let siteHtml = '';
+    if (cliAddr) siteHtml += esc(cliAddr) + '<br>';
+    if (cliCity || cliSt) siteHtml += [esc(cliCity), esc(cliSt)].filter(Boolean).join(', ');
+    document.getElementById('pv-jobsite').innerHTML = siteHtml || '—';
+
+    // Line items
+    let subtotal = 0;
+    const tbody = document.getElementById('pv-items');
+    tbody.innerHTML = items.map(it => {
+      const amt = (it.qty || 0) * (it.rate || 0);
+      subtotal += amt;
+      return `<tr>
+        <td>${esc(it.desc) || '<span style="color:#aaa;">—</span>'}</td>
+        <td style="text-align:center;">${it.qty || 0}</td>
+        <td style="text-align:right;">${fmt(it.rate)}</td>
+        <td>${fmt(amt)}</td>
+      </tr>`;
+    }).join('');
+    if (!items.length) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#aaa;padding:12px;">No line items yet.</td></tr>';
+    document.getElementById('pv-subtotal').textContent = fmt(subtotal);
+    document.getElementById('pv-total').textContent    = fmt(subtotal);
+
+    document.getElementById('pv-note').textContent = notes;
+  }
+
+  /* ── LINE ITEMS ── */
+  function addItem(desc='', qty=1, rate=0) {
+    const id = ++itemId;
+    items.push({ id, desc, qty, rate });
+    const wrap = document.getElementById('line-items-wrap');
+    const div = document.createElement('div');
+    div.className = 'line-item';
+    div.dataset.id = id;
+    div.innerHTML = `
+      <div class="line-item-top">
+        <input class="li-input" placeholder="Description" value="${esc(desc)}" data-field="desc" />
+        <input class="li-input" type="number" placeholder="Qty" value="${qty}" min="0" step="any" data-field="qty" style="text-align:center;" />
+        <input class="li-input" type="number" placeholder="Rate $" value="${rate||''}" min="0" step="0.01" data-field="rate" />
+        <button class="btn-remove" title="Remove" data-id="${id}">×</button>
+      </div>`;
+    wrap.appendChild(div);
+
+    function on(el, handler) {
+      el.addEventListener('input',  handler);
+      el.addEventListener('change', handler);
+    }
+    div.querySelectorAll('[data-field]').forEach(el => {
+      on(el, () => {
+        const item = items.find(i => i.id === id);
+        if (!item) return;
+        if (el.dataset.field === 'desc') item.desc = el.value;
+        if (el.dataset.field === 'qty')  item.qty  = parseFloat(el.value) || 0;
+        if (el.dataset.field === 'rate') item.rate = parseFloat(el.value) || 0;
+        render();
+      });
+    });
+    div.querySelector('.btn-remove').addEventListener('click', () => {
+      items = items.filter(i => i.id !== id);
+      div.remove();
+      render();
+    });
+    render();
+  }
+
+  function resetDoc() {
+    items = []; itemId = 0;
+    document.getElementById('line-items-wrap').innerHTML = '';
+    ['doc-num','doc-date','doc-expiry','doc-due','cli-name','cli-addr','cli-city','cli-phone','cli-email'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    document.getElementById('cli-state').value = 'LA';
+    document.getElementById('doc-service').value = '';
+    document.getElementById('doc-notes').value = 'Make checks payable to TTM Construction Solution LLC.';
+    setDocType('ESTIMATE');
+    render();
+  }
+
+  /* ── INIT ── */
+  function init() {
+    const today = new Date().toISOString().slice(0,10);
+    document.getElementById('doc-date').value = today;
+    const exp = new Date(); exp.setDate(exp.getDate() + 30);
+    document.getElementById('doc-expiry').value = exp.toISOString().slice(0,10);
+    addItem();
+    document.querySelectorAll('input:not([type=number]), select, textarea').forEach(el => {
+      el.addEventListener('input', render);
+      el.addEventListener('change', render);
+    });
+    render();
+  }
+
+  /* ── CONCRETE CALCULATOR ── */
+  function initConcreteCalc() {
+    const lenEl    = document.getElementById('cc-length');
+    const widEl    = document.getElementById('cc-width');
+    const thkEl    = document.getElementById('cc-thick');
+    const priceEl  = document.getElementById('cc-price');
+    const result   = document.getElementById('cc-result');
+    const yardsEl  = document.getElementById('cc-yards');
+    const wasteEl  = document.getElementById('cc-yards-waste');
+    const totalEl  = document.getElementById('cc-total');
+    const addBtn   = document.getElementById('cc-add-btn');
+
+    function calc() {
+      const l = parseFloat(lenEl.value)  || 0;
+      const w = parseFloat(widEl.value)  || 0;
+      const t = parseFloat(thkEl.value)  || 0;
+      const p = parseFloat(priceEl.value)|| 0;
+      if (!l || !w || !t) { result.style.display = 'none'; addBtn.style.display = 'none'; return; }
+
+      const rawYds    = (l * w * (t / 12)) / 27;
+      const withWaste = rawYds * 1.10;
+
+      yardsEl.textContent = rawYds.toFixed(2) + ' cubic yards';
+      wasteEl.textContent = 'With 10% waste: ' + withWaste.toFixed(2) + ' yds³  ·  ' +
+        l + '×' + w + ' ft  @  ' + t + '" thick';
+
+      if (p) {
+        const total = withWaste * p;
+        totalEl.textContent = '$' + total.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) +
+          '  (' + withWaste.toFixed(2) + ' yds × $' + p.toFixed(2) + '/yd³)';
+        totalEl.style.display = '';
+        addBtn.dataset.rate = p.toFixed(2);
+      } else {
+        totalEl.style.display = 'none';
+        addBtn.dataset.rate = '0';
+      }
+
+      result.style.display = '';
+      addBtn.style.display = '';
+      addBtn.dataset.yards = withWaste.toFixed(2);
+      addBtn.dataset.desc  = 'Concrete — ' + withWaste.toFixed(2) + ' cu. yds (' + l + '×' + w + ' ft @ ' + t + '" thick)';
+    }
+
+    [lenEl, widEl, thkEl, priceEl].forEach(el => el.addEventListener('input', calc));
+
+    addBtn.addEventListener('click', () => {
+      addItem(addBtn.dataset.desc, parseFloat(addBtn.dataset.yards), parseFloat(addBtn.dataset.rate) || 0);
+      document.getElementById('line-items-wrap').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  }
+
+  /* ── SIGNATURE PAD ── */
+  function initSignaturePad() {
+    const backdrop   = document.getElementById('sig-modal-backdrop');
+    const canvas     = document.getElementById('sig-canvas');
+    const clearBtn   = document.getElementById('sig-clear');
+    const cancelBtn  = document.getElementById('sig-cancel');
+    const saveBtn    = document.getElementById('sig-save');
+    const modalTitle = document.getElementById('sig-modal-title');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let drawing = false, hasMark = false, currentSigner = null;
+
+    function canvasPos(e) {
+      const r = canvas.getBoundingClientRect();
+      const src = e.touches ? e.touches[0] : e;
+      return { x: (src.clientX - r.left) * (canvas.width / r.width), y: (src.clientY - r.top) * (canvas.height / r.height) };
+    }
+    function startDraw(e) { e.preventDefault(); drawing = true; const p = canvasPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }
+    function moveDraw(e) {
+      if (!drawing) return; e.preventDefault(); hasMark = true;
+      const p = canvasPos(e); ctx.lineTo(p.x, p.y);
+      ctx.strokeStyle = '#111'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke();
+    }
+    function endDraw(e) { e.preventDefault(); drawing = false; }
+
+    canvas.addEventListener('mousedown', startDraw); canvas.addEventListener('mousemove', moveDraw);
+    canvas.addEventListener('mouseup', endDraw);     canvas.addEventListener('mouseleave', endDraw);
+    canvas.addEventListener('touchstart', startDraw, {passive:false});
+    canvas.addEventListener('touchmove',  moveDraw,  {passive:false});
+    canvas.addEventListener('touchend',   endDraw,   {passive:false});
+
+    function clearCanvas() { ctx.clearRect(0,0,canvas.width,canvas.height); hasMark = false; }
+
+    function openModal(signer) {
+      currentSigner = signer;
+      clearCanvas();
+      modalTitle.textContent = signer === 'client' ? 'Client Signature' : 'Contractor Signature';
+      backdrop.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal() { backdrop.classList.remove('open'); document.body.style.overflow = ''; }
+
+    function applyTobySignature(dataUrl) {
+      // Show in builder panel
+      document.getElementById('sig-display').innerHTML = `
+        <img src="${dataUrl}" class="sig-saved-img" alt="Contractor signature" />
+        <button class="sig-clear-btn" id="sig-redo" type="button">Re-sign</button>`;
+      document.getElementById('sig-redo').addEventListener('click', () => openModal('toby'));
+      // Show in invoice preview
+      document.getElementById('pv-sig-display').innerHTML =
+        `<img src="${dataUrl}" class="sig-saved-img" alt="Contractor signature" />`;
+    }
+
+    function applyClientSig(dataUrl) {
+      const display = document.getElementById('cli-sig-display');
+      display.innerHTML = `
+        <img src="${dataUrl}" class="sig-saved-img" alt="Client signature" />
+        <button class="sig-clear-btn" id="cli-sig-redo" type="button">Re-sign</button>`;
+      document.getElementById('cli-sig-redo').addEventListener('click', () => openModal('client'));
+      const dateEl = document.getElementById('cli-sig-date');
+      if (dateEl) dateEl.textContent = new Date().toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'});
+    }
+
+    document.getElementById('sig-open-btn').addEventListener('click', () => openModal('toby'));
+    document.getElementById('cli-sig-open-btn').addEventListener('click', () => openModal('client'));
+    clearBtn.addEventListener('click', clearCanvas);
+    cancelBtn.addEventListener('click', closeModal);
+    backdrop.addEventListener('click', e => { if (e.target === backdrop) closeModal(); });
+
+    saveBtn.addEventListener('click', () => {
+      if (!hasMark) { alert('Please draw your signature first.'); return; }
+      const dataUrl = canvas.toDataURL('image/png');
+      if (currentSigner === 'client') {
+        applyClientSig(dataUrl);
+      } else {
+        try { localStorage.setItem('ttm_toby_sig', dataUrl); } catch(e) {}
+        applyTobySignature(dataUrl);
+      }
+      closeModal();
+    });
+
+    try {
+      const saved = localStorage.getItem('ttm_toby_sig');
+      if (saved) applyTobySignature(saved);
+    } catch(e) {}
+  }
+
+  /* ── MOBILE TABS ── */
+  function initTabs() {
+    const tabBuilder = document.getElementById('tab-builder');
+    const tabPreview = document.getElementById('tab-preview');
+    const builder    = document.querySelector('.builder');
+    const previewCol = document.querySelector('.preview-col');
+    if (!tabBuilder) return;
+    function setTab(active) {
+      const isMobile = window.innerWidth <= 960;
+      if (!isMobile) { builder.classList.remove('mob-hidden'); previewCol.classList.remove('mob-hidden'); return; }
+      if (active === 'builder') {
+        builder.classList.remove('mob-hidden'); previewCol.classList.add('mob-hidden');
+        tabBuilder.classList.add('active'); tabPreview.classList.remove('active');
+      } else {
+        builder.classList.add('mob-hidden'); previewCol.classList.remove('mob-hidden');
+        tabBuilder.classList.remove('active'); tabPreview.classList.add('active');
+      }
+    }
+    tabBuilder.addEventListener('click', () => setTab('builder'));
+    tabPreview.addEventListener('click', () => { render(); setTab('preview'); });
+    window.addEventListener('resize', () => setTab(tabBuilder.classList.contains('active') ? 'builder' : 'preview'));
+    setTab('builder');
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    init();
+    initTabs();
+    initConcreteCalc();
+    initSignaturePad();
+    document.getElementById('btn-add-line').addEventListener('click', () => addItem());
+  });
+</script>
+</body>
+</html>
