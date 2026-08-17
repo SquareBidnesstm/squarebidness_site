@@ -141,7 +141,7 @@
       display:grid;
       grid-template-columns:repeat(2,minmax(0,1fr));
       gap:12px;
-      margin-top:16px;
+      margin-top:8px;
     }
     .admin-link{
       min-height:86px;
@@ -155,6 +155,11 @@
       flex-direction:column;
       justify-content:center;
       gap:5px;
+      transition: border-color .15s, background .15s;
+    }
+    .admin-link:hover {
+      border-color: rgba(215,174,114,.35);
+      background: linear-gradient(180deg,rgba(215,174,114,.08),rgba(215,174,114,.02));
     }
     .admin-link strong{
       font-size:1.02rem;
@@ -476,42 +481,71 @@
         </div>
       </div>
 
+      <!-- Section label -->
+      <div style="margin:18px 0 8px;font-size:.72rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);">MENU MANAGEMENT</div>
       <div class="admin-hub" aria-label="Delish admin quick links">
-        <a class="admin-link primary" href="#labor-control">
-          <strong>Labor Control</strong>
-          <span>Timeclock, labor cost, hours, and payroll export.</span>
+        <a class="admin-link primary" href="/delish/admin/menu-editor/" style="grid-column:1/-1;flex-direction:row;align-items:center;gap:16px;">
+          <div style="font-size:1.6rem;flex-shrink:0;">🍽️</div>
+          <div>
+            <strong>Weekly Menu Editor</strong>
+            <span>Add or remove items from any day's regular menu — no code changes needed. Changes go live immediately.</span>
+          </div>
         </a>
-        <a class="admin-link" href="#pickup-window-times">
-          <strong>Pickup Window Times</strong>
-          <span>Enable or disable customer pickup windows.</span>
+        <a class="admin-link" href="#special-menu-control">
+          <strong>Today's Special</strong>
+          <span>Add a one-time item to today's menu only. Resets at midnight.</span>
+        </a>
+        <a class="admin-link" href="#friday-menu-control">
+          <strong>Friday Menu</strong>
+          <span>Set the plates that show every Friday. Stays until you change it.</span>
+        </a>
+        <a class="admin-link" href="#desserts-today-control">
+          <strong>Desserts Today</strong>
+          <span>Add extra desserts for today's menu. Resets at midnight.</span>
         </a>
         <a class="admin-link" href="#section-toggles">
-          <strong>Menu Section Toggles</strong>
-          <span>Lagniappe, drinks, and extra sides on/off.</span>
+          <strong>Section On / Off</strong>
+          <span>Turn Lagniappe, drinks, sides, or desserts completely off for today.</span>
         </a>
+      </div>
+
+      <div style="margin:18px 0 8px;font-size:.72rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);">ITEM CONTROLS — resets daily at midnight</div>
+      <div class="admin-hub">
         <a class="admin-link" href="#turn-off-items">
-          <strong>Turn Off Items</strong>
-          <span>Hide items completely and block checkout.</span>
+          <strong>Hide an Item</strong>
+          <span>Item disappears from the menu completely and is blocked at checkout. Use when you're not making it today.</span>
         </a>
         <a class="admin-link" href="#mark-soldout-items">
           <strong>Mark Sold Out</strong>
-          <span>Keep items visible but stop new orders.</span>
+          <span>Item stays visible but shows "Sold Out" and customers can't order it. Use when you run out mid-day.</span>
         </a>
         <a class="admin-link" href="#base-item-toggle-control">
-          <strong>Base Item Control</strong>
-          <span>Disable rice, dressing, or mashed potato bases.</span>
+          <strong>Side Base Sold Out</strong>
+          <span>Mark rice, mashed potatoes, or cornbread dressing as unavailable as a base choice.</span>
+        </a>
+      </div>
+
+      <div style="margin:18px 0 8px;font-size:.72rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);">OPERATIONS</div>
+      <div class="admin-hub">
+        <a class="admin-link primary" href="#labor-control">
+          <strong>Labor Control</strong>
+          <span>Timeclock, clock-ins, hours worked, estimated labor cost, and payroll export.</span>
         </a>
         <a class="admin-link" href="#ordering-window">
-          <strong>Ordering Window</strong>
-          <span>Live open/closed status, health, and operator tools.</span>
+          <strong>Open / Close Ordering</strong>
+          <span>Open now, pause for 30 min, close for the day, or switch to auto mode.</span>
         </a>
-        <a class="admin-link" href="/delish/admin/closed-days/">
-          <strong>Closed Days</strong>
-          <span>Schedule future dates when ordering will be off.</span>
+        <a class="admin-link" href="#pickup-window-times">
+          <strong>Pickup Window Times</strong>
+          <span>Check or uncheck which time slots customers can pick from at checkout.</span>
         </a>
         <a class="admin-link" href="#customer-banner">
           <strong>Customer Banner</strong>
-          <span>Post the live message shown on the order page.</span>
+          <span>Post a live message at the top of the order page — announcements, wait times, or today's update.</span>
+        </a>
+        <a class="admin-link" href="/delish/admin/closed-days/">
+          <strong>Scheduled Closed Days</strong>
+          <span>Pick future dates (holidays, events) when online ordering will be off.</span>
         </a>
       </div>
     </div>
@@ -638,8 +672,8 @@
     <div class="card control-section" id="section-toggles">
       <div class="section-heading">
         <div>
-          <h2>Menu Section Toggles</h2>
-          <p class="section-kicker">Fast section-level control. Turn a whole lane on or off.</p>
+          <h2>Section On / Off</h2>
+          <p class="section-kicker">Turn an entire category on or off for today. Toggling off hides it from customers and blocks orders from that section.</p>
         </div>
         <a class="button-link btn-secondary" href="#top">Top</a>
       </div>
@@ -710,20 +744,35 @@
     </div>
 
     <div class="card control-section" id="turn-off-items">
-      <h2>Turn Off Individual Items</h2>
-      <p class="muted">Checked items are hidden from Delish and blocked in checkout. This list resets every day at midnight.</p>
+      <div class="section-heading">
+        <div>
+          <h2>Hide an Item</h2>
+          <p class="section-kicker">Checked items disappear from the menu completely and are blocked at checkout. Use this when you're not making something today. Resets at midnight.</p>
+        </div>
+        <a class="button-link btn-secondary" href="#top">Top</a>
+      </div>
       <div class="item-list" id="itemsOffList"></div>
     </div>
 
     <div class="card control-section" id="mark-soldout-items">
-      <h2>Mark Individual Items Sold Out</h2>
-      <p class="muted">Checked items stay visible on Delish but show Sold Out and cannot be ordered. This list resets every day at midnight.</p>
+      <div class="section-heading">
+        <div>
+          <h2>Mark Sold Out</h2>
+          <p class="section-kicker">Checked items stay on the menu but show "Sold Out" so customers can see what you had but can't order it. Resets at midnight.</p>
+        </div>
+        <a class="button-link btn-secondary" href="#top">Top</a>
+      </div>
       <div class="item-list" id="itemsSoldOutList"></div>
     </div>
 
     <div class="card control-section" id="base-item-toggle-control">
-      <h2>Mark Base Options Sold Out</h2>
-      <p class="muted">Checked bases are disabled on plate choices and blocked in checkout. This list resets every day at midnight.</p>
+      <div class="section-heading">
+        <div>
+          <h2>Side Base Sold Out</h2>
+          <p class="section-kicker">Checked bases are removed as a plate choice and blocked in checkout. Use when you're out of rice, mashed potatoes, or dressing. Resets at midnight.</p>
+        </div>
+        <a class="button-link btn-secondary" href="#top">Top</a>
+      </div>
       <div class="item-list" id="basesSoldOutList"></div>
     </div>
 
@@ -765,7 +814,7 @@ const pickupWindowStatusBox = document.getElementById("pickupWindowStatusBox");
 const savePickupWindowsBtn = document.getElementById("savePickupWindowsBtn");
 const reloadPickupWindowsBtn = document.getElementById("reloadPickupWindowsBtn");
 
-    const ITEM_CATALOG = [
+    let ITEM_CATALOG = [
       { id: "monday_red_beans_fried_chicken", name: "Monday - Red Beans with Fried Chicken" },
       { id: "monday_okra_fried_chicken", name: "Monday - Okra with Fried Chicken" },
       { id: "monday_hamburger_steak", name: "Monday - Hamburger Steak Plate" },
@@ -1430,6 +1479,28 @@ function renderSoldOutList(selected = []) {
     if (match) match.checked = false;
   });
 }
+    async function loadWeeklyMenuIntoAdminCatalog() {
+      try {
+        const res = await fetch(`/api/delish/weekly-menu/?t=${Date.now()}`, { cache: "no-store" });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok || !data.weeklyMenu) return;
+
+        const DAY_LABELS = { monday:"Monday", tuesday:"Tuesday", wednesday:"Wednesday", thursday:"Thursday", friday:"Friday", sunday:"Sunday" };
+        const DAYS = ["monday","tuesday","wednesday","thursday","friday","sunday"];
+        const existingIds = new Set(ITEM_CATALOG.map(x => x.id));
+
+        for (const day of DAYS) {
+          const items = Array.isArray(data.weeklyMenu[day]) ? data.weeklyMenu[day] : [];
+          for (const item of items) {
+            if (item.id && !existingIds.has(item.id)) {
+              ITEM_CATALOG.push({ id: item.id, name: `${DAY_LABELS[day]} - ${item.name} ✦` });
+              existingIds.add(item.id);
+            }
+          }
+        }
+      } catch (_) {}
+    }
+
     async function loadOverrides() {
       setStatus("Loading current overrides...");
       const res = await fetch("/api/delish/menu-overrides/", { cache: "no-store" });
@@ -1624,12 +1695,14 @@ reloadPickupWindowsBtn?.addEventListener("click", () => {
     setInterval(() => {
       loadOrderingWindow().catch(() => {});
     }, 30000);
-    loadOverrides().catch((err) => {
-      console.error(err);
-      setStatus(err.message || "Unable to load admin.", "bad");
-      renderItemList([]);
-      renderSoldOutList([]);
-      renderBaseSoldOutList([]);
+    loadWeeklyMenuIntoAdminCatalog().then(() => {
+      loadOverrides().catch((err) => {
+        console.error(err);
+        setStatus(err.message || "Unable to load admin.", "bad");
+        renderItemList([]);
+        renderSoldOutList([]);
+        renderBaseSoldOutList([]);
+      });
     });
     loadPickupWindows().catch((err) => {
       console.error(err);

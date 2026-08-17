@@ -9,6 +9,7 @@ import {
   isFuturePickupWindow,
 } from "../_lib/delish-pickup-windows.js";
 import { getDelishFlashSale, isFlashSaleActive } from "../_lib/delish-flash-sale.js";
+import { getDelishWeeklyMenu } from "../_lib/delish-weekly-menu.js";
 
 const stripe = new Stripe(process.env.STRIPE_ONBOARDING_SECRET_KEY, {
   apiVersion: "2024-06-20",
@@ -286,7 +287,7 @@ function buildLimitedMenuItem(limitedMenu = {}) {
   };
 }
 
-function getAllowedItemsForToday(todayDay, overrides = {}) {
+function getAllowedItemsForToday(todayDay, overrides = {}, weeklyMenu = {}) {
   const limitedMenu = getLimitedMenuOverride(overrides);
   if (limitedMenu) {
     const drinkItems = (MENU_BY_DAY.everyday || []).filter((item) =>
@@ -304,12 +305,13 @@ function getAllowedItemsForToday(todayDay, overrides = {}) {
       ? fridayMenu.items
       : MENU_BY_DAY[todayDay] || [];
 
+  const weeklyItems = Array.isArray(weeklyMenu[todayDay]) ? weeklyMenu[todayDay] : [];
   const everydayItems = MENU_BY_DAY.everyday || [];
   const specialItems = (overrides?.specialMenu?.active && Array.isArray(overrides?.specialMenu?.items))
     ? overrides.specialMenu.items
     : [];
   const dessertOverrides = Array.isArray(overrides?.dessertItems) ? overrides.dessertItems : [];
-  return [...fridayItems, ...everydayItems, ...specialItems, ...dessertOverrides];
+  return [...fridayItems, ...weeklyItems, ...everydayItems, ...specialItems, ...dessertOverrides];
 }
 
 function buildAllowedMap(items) {
@@ -615,8 +617,11 @@ export default async function handler(req, res) {
     const orderingState = await getEffectiveOrderingState();
     const todayIso = orderingState.now.isoDate;
     const todayDay = orderingState.today;
-    const menuOverrides = await getDelishMenuOverrides();
-    const flashSale = await getDelishFlashSale();
+    const [menuOverrides, weeklyMenuData, flashSale] = await Promise.all([
+      getDelishMenuOverrides(),
+      getDelishWeeklyMenu(),
+      getDelishFlashSale(),
+    ]);
     const flashSaleMap = buildFlashSaleMap(flashSale);
     const requestedItems = aggregateDuplicateItems(body.items);
     const requestedItemIds = requestedItems.map((item) => String(item.id || "").trim());
@@ -688,7 +693,7 @@ export default async function handler(req, res) {
 
     const limitedMenu = getLimitedMenuOverride(menuOverrides);
     const limitedMenuItemId = limitedMenu ? buildLimitedMenuItem(limitedMenu).id : "";
-    const allowedItems = getAllowedItemsForToday(todayDay, menuOverrides);
+    const allowedItems = getAllowedItemsForToday(todayDay, menuOverrides, weeklyMenuData);
     const allowedMap = buildAllowedMap(allowedItems);
 
     // ------------------------------------------------------------

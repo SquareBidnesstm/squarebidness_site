@@ -370,6 +370,7 @@
   let LAGNIAPPE = [];
   let DESSERTS = [];
   let FLASH_SALE = null;
+  let WEEKLY_MENU = {};
 
   const customerName = document.getElementById("customerName");
   const customerPhone = document.getElementById("customerPhone");
@@ -416,6 +417,16 @@
     EXTRA_SIDES_FRIDAY_SUNDAY = MENU_DATA.extraSidesFridaySunday || [];
     LAGNIAPPE = MENU_DATA.lagniappe || [];
     DESSERTS = MENU_DATA.desserts || [];
+  }
+
+  async function loadWeeklyMenu() {
+    try {
+      const res = await fetch(`/api/delish/weekly-menu/?t=${Date.now()}`, { cache: "no-store" });
+      const data = await res.json().catch(() => ({}));
+      WEEKLY_MENU = (res.ok && data.ok && data.weeklyMenu) ? data.weeklyMenu : {};
+    } catch (_) {
+      WEEKLY_MENU = {};
+    }
   }
 
   async function loadOrderingStatus() {
@@ -716,10 +727,11 @@
     const fridayOverrideItems = day === "friday" ? getFridayMenuOverride() : null;
     const baseMains = fridayOverrideItems || (dayMenu.mains || []);
 
+    const weeklyItems = Array.isArray(WEEKLY_MENU[day]) ? WEEKLY_MENU[day] : [];
     const specialItems = getSpecialMenuItems();
     return {
       ...dayMenu,
-      mains: [...baseMains, ...specialItems],
+      mains: [...baseMains, ...weeklyItems, ...specialItems],
     };
   }
 
@@ -1534,8 +1546,7 @@ const flashSaleOnly =
 
   (async function init() {
     try {
-      await loadMenuData();
-      await loadMenuOverrides();
+      await Promise.all([loadMenuData(), loadMenuOverrides(), loadWeeklyMenu()]);
       await loadOrderingStatus();
       await loadPickupWindows();
       setInterval(renderPickupWindows, 60 * 1000);

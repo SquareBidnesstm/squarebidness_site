@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Delish Menu Editor</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <link rel="icon" sizes="32x32" href="/delish/assets/delish-favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/delish/assets/delish-logo-mark-180.png" />
+  <style>
+    :root {
+      --bg:#0f0f10; --panel:#18181b; --panel2:#212126; --line:#32323a;
+      --text:#f6f2ea; --muted:#bfb7aa; --accent:#d7ae72; --accent-dim:rgba(215,174,114,.12);
+      --good-bg:rgba(32,75,45,.28); --good-border:rgba(74,155,97,.5); --good-text:#d6f5de;
+      --bad-bg:rgba(90,34,34,.28); --bad-border:rgba(196,88,88,.45); --bad-text:#ffd3d3;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; }
+    body {
+      background: linear-gradient(180deg,#0e0e10 0%,#09090a 100%);
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100svh;
+    }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 22px 18px 60px; }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    h1 { font-size: 1.5rem; font-weight: 900; letter-spacing: -.025em; }
+    h2 { font-size: 1.1rem; font-weight: 900; letter-spacing: -.02em; }
+    p, .muted { color: var(--muted); font-size: .92rem; margin-top: 4px; line-height: 1.5; }
+    .topline { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+    .brandRow { display: flex; align-items: center; gap: 14px; }
+    .brandMark { width: 64px; height: 64px; object-fit: contain; border-radius: 16px; flex-shrink: 0; }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+    button, .btn-link {
+      border: none; border-radius: 999px; padding: 12px 18px;
+      font: inherit; font-weight: 900; cursor: pointer;
+      text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      transition: opacity .15s;
+    }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    .btn-primary { background: var(--accent); color: #181410; }
+    .btn-secondary { background: #27272c; color: var(--text); border: 1px solid var(--line); }
+    .btn-danger { background: rgba(90,34,34,.7); color: #ffd3d3; border: 1px solid rgba(196,88,88,.45); }
+
+    /* Day tabs */
+    .day-tabs {
+      display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px;
+    }
+    .day-tab {
+      padding: 9px 16px; border-radius: 999px; font-weight: 800; font-size: .88rem;
+      cursor: pointer; border: 1px solid var(--line); background: var(--panel2); color: var(--muted);
+      transition: background .12s, color .12s, border-color .12s;
+    }
+    .day-tab.active {
+      background: var(--accent-dim); border-color: rgba(215,174,114,.45); color: var(--accent);
+    }
+    .day-tab .count {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 18px; height: 18px; border-radius: 999px;
+      background: rgba(215,174,114,.2); color: var(--accent);
+      font-size: .72rem; font-weight: 900; margin-left: 5px;
+    }
+
+    /* Day panel */
+    .day-panel { display: none; }
+    .day-panel.active { display: block; }
+
+    .day-header {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      margin-bottom: 14px; flex-wrap: wrap;
+    }
+    .day-title { font-size: 1.05rem; font-weight: 900; }
+    .day-subtitle { color: var(--muted); font-size: .85rem; margin-top: 2px; }
+
+    /* Item row */
+    .item-list { display: flex; flex-direction: column; gap: 10px; }
+    .item-row {
+      background: var(--panel2); border: 1px solid var(--line); border-radius: 16px;
+      padding: 14px; display: grid;
+      grid-template-columns: 1fr 110px auto;
+      gap: 10px; align-items: start;
+    }
+    .item-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field label { font-size: .78rem; font-weight: 900; color: var(--muted); letter-spacing: .05em; text-transform: uppercase; }
+    input[type="text"], input[type="number"], textarea {
+      background: #111; border: 1px solid var(--line); color: var(--text);
+      border-radius: 10px; padding: 10px 12px; font: inherit; font-size: .92rem; width: 100%;
+    }
+    input:focus, textarea:focus { outline: 2px solid rgba(215,174,114,.4); outline-offset: 2px; border-color: transparent; }
+    textarea { min-height: 56px; resize: vertical; }
+    .field--full { grid-column: 1 / -1; }
+
+    /* Sides toggle */
+    .sides-toggle {
+      display: flex; align-items: center; gap: 10px;
+      background: #111; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px;
+      cursor: pointer; font-size: .9rem; font-weight: 700;
+    }
+    .sides-toggle input { width: auto; accent-color: var(--accent); }
+    .sides-hint { font-size: .75rem; color: var(--muted); margin-top: 3px; }
+
+    /* Price display */
+    .item-price-col { display: flex; flex-direction: column; gap: 5px; }
+    .price-label { font-size: .78rem; font-weight: 900; color: var(--muted); letter-spacing: .05em; text-transform: uppercase; }
+    .price-display { font-size: 1.3rem; font-weight: 900; color: var(--accent); }
+
+    /* Delete button */
+    .delete-btn {
+      width: 36px; height: 36px; border-radius: 10px; padding: 0;
+      background: rgba(90,34,34,.5); border: 1px solid rgba(196,88,88,.3); color: #ffd3d3;
+      font-size: 1rem; line-height: 1; align-self: start; margin-top: 22px;
+    }
+    .delete-btn:hover { background: rgba(130,34,34,.7); }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center; padding: 32px 20px; color: var(--muted); font-size: .92rem;
+      border: 1px dashed var(--line); border-radius: 14px;
+    }
+    .empty-state strong { display: block; font-size: 1rem; color: var(--text); margin-bottom: 4px; }
+
+    /* Add item form */
+    .add-form {
+      background: rgba(215,174,114,.06); border: 1px solid rgba(215,174,114,.18);
+      border-radius: 16px; padding: 16px; margin-top: 14px;
+    }
+    .add-form h3 { font-size: .95rem; font-weight: 900; color: var(--accent); margin-bottom: 12px; }
+    .add-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .add-grid .field--full { grid-column: 1 / -1; }
+
+    /* Status */
+    .status {
+      margin-top: 12px; padding: 12px 14px; border-radius: 14px;
+      background: #1a1a1f; border: 1px solid var(--line); color: var(--muted); font-size: .9rem;
+      display: none;
+    }
+    .status.visible { display: block; }
+    .status.good { background: var(--good-bg); border-color: var(--good-border); color: var(--good-text); }
+    .status.bad { background: var(--bad-bg); border-color: var(--bad-border); color: var(--bad-text); }
+
+    /* Save bar */
+    .save-bar {
+      position: sticky; bottom: 0; z-index: 40;
+      background: rgba(18,18,20,.95); backdrop-filter: blur(12px);
+      border-top: 1px solid var(--line);
+      padding: 14px 18px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    .save-bar .save-hint { color: var(--muted); font-size: .85rem; flex: 1; }
+
+    @media (max-width: 640px) {
+      .item-row { grid-template-columns: 1fr auto; }
+      .item-price-col { display: none; }
+      .item-fields { grid-template-columns: 1fr; }
+      .add-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="card">
+    <div class="topline">
+      <div class="brandRow">
+        <img class="brandMark" src="/delish/assets/delish-logo-mark-512.png" alt="Delish" />
+        <div>
+          <h1>Menu Editor</h1>
+          <p>Add or remove items from any day's regular menu. Changes go live immediately and stay until you remove them.</p>
+        </div>
+      </div>
+      <div>
+        <div id="lastSaved" style="color:var(--muted);font-size:.82rem;text-align:right;"></div>
+      </div>
+    </div>
+    <div class="actions">
+      <a class="btn-link btn-secondary" href="/delish/admin/">← Back to Admin</a>
+      <a class="btn-link btn-secondary" href="/delish/" target="_blank">View Menu ↗</a>
+    </div>
+  </div>
+
+  <!-- Main editor -->
+  <div class="card">
+    <div class="day-tabs" id="dayTabs"></div>
+
+    <div id="dayPanels"></div>
+
+    <div class="status" id="globalStatus"></div>
+  </div>
+
+</div>
+
+<!-- Sticky save bar -->
+<div class="save-bar">
+  <span class="save-hint" id="saveHint">Make changes above, then save.</span>
+  <button class="btn-secondary" id="reloadBtn">Reload Saved</button>
+  <button class="btn-primary" id="saveBtn">Save All Changes</button>
+</div>
+
+<script>
+const TOKEN_KEY = "delish_operator_token";
+const DAYS = ["monday","tuesday","wednesday","thursday","friday","sunday"];
+const DAY_LABELS = {
+  monday: "Monday", tuesday: "Tuesday", wednesday: "Wednesday",
+  thursday: "Thursday", friday: "Friday", sunday: "Sunday"
+};
+const DAY_NOTES = {
+  monday: "Items appear every Monday alongside the base menu.",
+  tuesday: "Items appear every Tuesday alongside the base menu.",
+  wednesday: "Items appear every Wednesday alongside the base menu.",
+  thursday: "Items appear every Thursday alongside the base menu.",
+  friday: "Items appear every Friday alongside the Friday menu.",
+  sunday: "Items appear every 1st and 3rd Sunday.",
+};
+
+let weeklyMenu = { monday:[], tuesday:[], wednesday:[], thursday:[], friday:[], sunday:[] };
+let activeDay = "monday";
+let dirty = false;
+
+// ── TOKEN ──────────────────────────────────────────────────────────────────
+
+function getSavedToken() {
+  return localStorage.getItem(TOKEN_KEY) || "";
+}
+
+function saveToken(t) {
+  localStorage.setItem(TOKEN_KEY, t);
+}
+
+function requireToken() {
+  let t = getSavedToken();
+  if (!t) {
+    t = prompt("Enter Delish operator token:");
+    if (!t) return null;
+    if (confirm("Save token on this device?")) saveToken(t.trim());
+  }
+  return t.trim();
+}
+
+// ── STATUS ──────────────────────────────────────────────────────────────────
+
+function setStatus(msg, tone) {
+  const el = document.getElementById("globalStatus");
+  el.textContent = msg;
+  el.className = "status visible" + (tone ? ` ${tone}` : "");
+}
+
+function clearStatus() {
+  const el = document.getElementById("globalStatus");
+  el.className = "status";
+}
+
+function markDirty() {
+  dirty = true;
+  document.getElementById("saveHint").textContent = "You have unsaved changes.";
+  document.getElementById("saveHint").style.color = "#f59e0b";
+}
+
+function markClean(updatedAt) {
+  dirty = false;
+  const hint = document.getElementById("saveHint");
+  hint.textContent = "All changes saved.";
+  hint.style.color = "var(--good-text)";
+  if (updatedAt) {
+    document.getElementById("lastSaved").textContent =
+      "Last saved: " + new Date(updatedAt).toLocaleString("en-US", { timeZone: "America/Chicago", dateStyle: "short", timeStyle: "short" });
+  }
+}
+
+// ── RENDER ──────────────────────────────────────────────────────────────────
+
+function countForDay(day) {
+  return (weeklyMenu[day] || []).length;
+}
+
+function renderTabs() {
+  const tabs = document.getElementById("dayTabs");
+  tabs.innerHTML = DAYS.map(day => {
+    const count = countForDay(day);
+    return `<button class="day-tab ${day === activeDay ? "active" : ""}" data-day="${day}">
+      ${DAY_LABELS[day]}${count > 0 ? `<span class="count">${count}</span>` : ""}
+    </button>`;
+  }).join("");
+
+  tabs.querySelectorAll(".day-tab").forEach(btn => {
+    btn.addEventListener("click", () => {
+      activeDay = btn.dataset.day;
+      renderAll();
+    });
+  });
+}
+
+function escHtml(s) {
+  return String(s || "")
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+}
+
+function renderDayPanel(day) {
+  const items = weeklyMenu[day] || [];
+  const isEmpty = items.length === 0;
+
+  return `
+    <div class="day-panel ${day === activeDay ? "active" : ""}" id="panel-${day}">
+      <div class="day-header">
+        <div>
+          <div class="day-title">${DAY_LABELS[day]} Menu Additions</div>
+          <div class="day-subtitle">${DAY_NOTES[day]}</div>
+        </div>
+        <button class="btn-secondary" id="addBtn-${day}" style="padding:10px 16px;font-size:.88rem;">+ Add Item</button>
+      </div>
+
+      <div class="item-list" id="list-${day}">
+        ${isEmpty ? `<div class="empty-state"><strong>No items added yet.</strong>Hit "+ Add Item" to put something on ${DAY_LABELS[day]}'s menu.</div>` : ""}
+        ${items.map((item, i) => renderItemRow(day, item, i)).join("")}
+      </div>
+
+      <div class="add-form" id="addForm-${day}" style="display:none;">
+        <h3>New Item for ${DAY_LABELS[day]}</h3>
+        <div class="add-grid">
+          <div class="field">
+            <label>Item Name *</label>
+            <input type="text" id="new-name-${day}" placeholder="e.g. Spaghetti Plate" maxlength="80" />
+          </div>
+          <div class="field">
+            <label>Price *</label>
+            <input type="number" id="new-price-${day}" placeholder="13.99" min="0.01" step="0.01" />
+          </div>
+          <div class="field field--full">
+            <label>Description (shown to customers)</label>
+            <textarea id="new-desc-${day}" placeholder="e.g. Choose 2 sides. Served with garlic bread." maxlength="180" rows="2"></textarea>
+          </div>
+          <div class="field field--full">
+            <label class="sides-toggle">
+              <input type="checkbox" id="new-sides-${day}" checked />
+              Customer picks 2 sides
+            </label>
+            <div class="sides-hint">Check this for plates that come with side choices. Uncheck for items like cornbread plates that have no side picker.</div>
+          </div>
+        </div>
+        <div class="actions" style="margin-top:12px;">
+          <button class="btn-primary" id="confirmAdd-${day}">Add to Menu</button>
+          <button class="btn-secondary" id="cancelAdd-${day}">Cancel</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderItemRow(day, item, i) {
+  return `
+    <div class="item-row" id="item-${day}-${i}">
+      <div class="item-fields">
+        <div class="field">
+          <label>Item Name</label>
+          <input type="text" data-field="name" data-day="${day}" data-index="${i}"
+            value="${escHtml(item.name)}" maxlength="80" placeholder="Item name" />
+        </div>
+        <div class="field">
+          <label>Price</label>
+          <input type="number" data-field="price" data-day="${day}" data-index="${i}"
+            value="${Number(item.price).toFixed(2)}" min="0.01" step="0.01" />
+        </div>
+        <div class="field field--full">
+          <label>Description</label>
+          <textarea data-field="desc" data-day="${day}" data-index="${i}"
+            maxlength="180" rows="2" placeholder="Shown on the menu to customers">${escHtml(item.desc)}</textarea>
+        </div>
+        <div class="field field--full">
+          <label class="sides-toggle">
+            <input type="checkbox" data-field="sideSelectionRequired" data-day="${day}" data-index="${i}"
+              ${item.sideSelectionRequired ? "checked" : ""} />
+            Customer picks 2 sides
+          </label>
+        </div>
+      </div>
+      <div class="item-price-col">
+        <div class="price-label">Price</div>
+        <div class="price-display" id="price-display-${day}-${i}">$${Number(item.price).toFixed(2)}</div>
+      </div>
+      <button class="delete-btn" data-day="${day}" data-index="${i}" title="Remove item">✕</button>
+    </div>
+  `;
+}
+
+function renderPanels() {
+  document.getElementById("dayPanels").innerHTML = DAYS.map(renderDayPanel).join("");
+  attachPanelEvents();
+}
+
+function renderAll() {
+  renderTabs();
+  renderPanels();
+}
+
+// ── EVENTS ──────────────────────────────────────────────────────────────────
+
+function attachPanelEvents() {
+  // Field changes
+  document.querySelectorAll("[data-field][data-day][data-index]").forEach(el => {
+    el.addEventListener("input", () => {
+      const { field, day, index } = el.dataset;
+      const i = Number(index);
+      if (!weeklyMenu[day] || !weeklyMenu[day][i]) return;
+
+      if (field === "price") {
+        const v = parseFloat(el.value);
+        weeklyMenu[day][i].price = isNaN(v) ? 0 : Math.round(v * 100) / 100;
+        const disp = document.getElementById(`price-display-${day}-${i}`);
+        if (disp) disp.textContent = "$" + weeklyMenu[day][i].price.toFixed(2);
+      } else if (field === "sideSelectionRequired") {
+        weeklyMenu[day][i].sideSelectionRequired = el.checked;
+      } else {
+        weeklyMenu[day][i][field] = el.value.trim();
+      }
+      markDirty();
+    });
+  });
+
+  // Delete buttons
+  document.querySelectorAll(".delete-btn[data-day][data-index]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const { day, index } = btn.dataset;
+      const i = Number(index);
+      if (confirm(`Remove "${weeklyMenu[day][i]?.name || "this item"}" from ${DAY_LABELS[day]}?`)) {
+        weeklyMenu[day].splice(i, 1);
+        markDirty();
+        renderAll();
+      }
+    });
+  });
+
+  // Add form toggles
+  DAYS.forEach(day => {
+    const addBtn = document.getElementById(`addBtn-${day}`);
+    const form   = document.getElementById(`addForm-${day}`);
+    const confirm_= document.getElementById(`confirmAdd-${day}`);
+    const cancel  = document.getElementById(`cancelAdd-${day}`);
+
+    if (!addBtn || !form) return;
+
+    addBtn.addEventListener("click", () => {
+      form.style.display = form.style.display === "none" ? "block" : "none";
+      if (form.style.display === "block") {
+        document.getElementById(`new-name-${day}`)?.focus();
+      }
+    });
+
+    cancel?.addEventListener("click", () => { form.style.display = "none"; });
+
+    confirm_?.addEventListener("click", () => {
+      const name  = document.getElementById(`new-name-${day}`)?.value.trim() || "";
+      const price = parseFloat(document.getElementById(`new-price-${day}`)?.value || "");
+      const desc  = document.getElementById(`new-desc-${day}`)?.value.trim() || "";
+      const sides = document.getElementById(`new-sides-${day}`)?.checked ?? true;
+
+      if (!name) { alert("Enter an item name."); return; }
+      if (isNaN(price) || price <= 0) { alert("Enter a valid price (e.g. 13.99)."); return; }
+
+      if (!weeklyMenu[day]) weeklyMenu[day] = [];
+      weeklyMenu[day].push({ name, price: Math.round(price * 100) / 100, desc, sideSelectionRequired: sides });
+
+      markDirty();
+      form.style.display = "none";
+      renderAll();
+    });
+  });
+}
+
+// ── API ──────────────────────────────────────────────────────────────────────
+
+async function loadMenu() {
+  try {
+    const res = await fetch(`/api/delish/weekly-menu/?t=${Date.now()}`, { cache: "no-store" });
+    const data = await res.json();
+    if (!res.ok || !data.ok) throw new Error(data.error || "Failed to load.");
+
+    for (const day of DAYS) {
+      weeklyMenu[day] = Array.isArray(data.weeklyMenu?.[day]) ? data.weeklyMenu[day] : [];
+    }
+
+    markClean(data.weeklyMenu?.updatedAt);
+    clearStatus();
+    return data.weeklyMenu;
+  } catch (err) {
+    setStatus("Failed to load menu: " + err.message, "bad");
+    throw err;
+  }
+}
+
+async function saveMenu() {
+  const token = requireToken();
+  if (!token) { setStatus("Save cancelled — no token.", "bad"); return; }
+
+  const btn = document.getElementById("saveBtn");
+  btn.disabled = true;
+  btn.textContent = "Saving…";
+  clearStatus();
+
+  try {
+    const payload = {};
+    for (const day of DAYS) payload[day] = weeklyMenu[day] || [];
+
+    const res = await fetch("/api/delish/weekly-menu/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-operator-token": token },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+
+    if (!res.ok || !data.ok) {
+      if (res.status === 401) {
+        localStorage.removeItem(TOKEN_KEY);
+        setStatus("Wrong token. Try again.", "bad");
+      } else {
+        setStatus("Save failed: " + (data.error || "Unknown error"), "bad");
+      }
+      return;
+    }
+
+    // Sync back with server-assigned IDs
+    for (const day of DAYS) {
+      weeklyMenu[day] = Array.isArray(data.weeklyMenu?.[day]) ? data.weeklyMenu[day] : weeklyMenu[day];
+    }
+
+    markClean(data.weeklyMenu?.updatedAt);
+    setStatus("Saved! Menu is live.", "good");
+    renderAll();
+  } catch (err) {
+    setStatus("Save error: " + err.message, "bad");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Save All Changes";
+  }
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+
+document.getElementById("saveBtn").addEventListener("click", saveMenu);
+document.getElementById("reloadBtn").addEventListener("click", async () => {
+  if (dirty && !confirm("Reload from server? Unsaved changes will be lost.")) return;
+  try {
+    await loadMenu();
+    renderAll();
+    setStatus("Reloaded from server.", "good");
+  } catch (_) {}
+});
+
+(async function init() {
+  try {
+    await loadMenu();
+  } catch (_) {}
+  renderAll();
+})();
+</script>
+</body>
+</html>
