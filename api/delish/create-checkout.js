@@ -41,6 +41,11 @@ const MENU_BY_DAY = {
       name: "Hamburger Steak Plate",
       price: 13.99,
     },
+    {
+      id: "monday_spaghetti",
+      name: "Spaghetti Plate",
+      price: 13.99,
+    },
   ],
   tuesday: [
     {
