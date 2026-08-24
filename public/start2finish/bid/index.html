@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Bid Builder — Start2Finish</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#cc1515" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/start2finish/assets/icons/favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/start2finish/assets/icons/apple-touch-icon.png" />
+
+  <style>
+    :root {
+      --bg:          #0a0a0a;
+      --panel:       #111111;
+      --card:        #171717;
+      --card2:       #1e1e1e;
+      --border:      #262626;
+      --border2:     #2e2e2e;
+      --fg:          #f5f5f5;
+      --muted:       #888;
+      --subtle:      #555;
+      --accent:      #cc1515;
+      --accent-dim:  rgba(204,21,21,.13);
+      --accent-ring: rgba(204,21,21,.35);
+      --green:       #22c55e;
+      --radius:      10px;
+      --font: system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 14px; line-height: 1.5; min-height: 100vh; }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      background: rgba(10,10,10,.96);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      position: sticky; top: 0; z-index: 200;
+    }
+    .topbar-inner {
+      max-width: 1100px; margin: 0 auto;
+      padding: 0 20px; height: 56px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .brand { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 16px; color: var(--fg); text-decoration: none; }
+    .brand-dot { color: var(--accent); }
+    .brand-badge {
+      font-size: 10px; font-weight: 700; letter-spacing: .8px;
+      background: var(--accent-dim); color: var(--accent);
+      border: 1px solid var(--accent-ring); border-radius: 999px;
+      padding: 2px 8px; text-transform: uppercase;
+    }
+    .topbar-actions { display: flex; gap: 8px; align-items: center; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 600;
+      border: none; cursor: pointer; transition: opacity .15s, background .15s; white-space: nowrap;
+    }
+    .btn:hover { opacity: .85; }
+    .btn-ghost { background: var(--card); color: var(--muted); border: 1px solid var(--border2); }
+    .btn-ghost:hover { color: var(--fg); border-color: var(--subtle); opacity: 1; }
+    .btn-red { background: var(--accent); color: #fff; }
+    .btn-outline { background: transparent; color: var(--fg); border: 1px solid var(--border2); }
+    .btn-outline:hover { border-color: var(--muted); opacity: 1; }
+    .btn-sm { padding: 5px 10px; font-size: 12px; }
+    .btn-icon { padding: 7px; border-radius: 8px; background: var(--card); color: var(--muted); border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: color .15s; }
+    .btn-icon:hover { color: var(--fg); border-color: var(--subtle); }
+    .btn-danger { background: transparent; border: 1px solid transparent; color: var(--subtle); cursor: pointer; border-radius: 6px; padding: 3px 6px; font-size: 12px; transition: color .15s, border-color .15s, background .15s; }
+    .btn-danger:hover { color: var(--accent); border-color: var(--accent-ring); background: var(--accent-dim); }
+
+    /* ── LAYOUT ── */
+    .page { max-width: 1100px; margin: 0 auto; padding: 24px 20px 80px; }
+
+    /* ── PROPERTY INFO ── */
+    .info-card {
+      background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 20px; margin-bottom: 24px;
+    }
+    .info-card-title {
+      font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 14px;
+    }
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+    .info-field { display: flex; flex-direction: column; gap: 4px; }
+    .info-label { font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: .4px; }
+    .info-input {
+      background: var(--card); border: 1px solid var(--border2); border-radius: 8px;
+      padding: 8px 12px; color: var(--fg); font-size: 13px; font-family: var(--font);
+      transition: border-color .15s;
+    }
+    .info-input:focus { outline: none; border-color: var(--accent); }
+    .info-input.wide { grid-column: 1 / -1; }
+
+    /* ── GRAND TOTAL BANNER ── */
+    .total-banner {
+      background: var(--accent-dim); border: 1px solid var(--accent-ring); border-radius: var(--radius);
+      padding: 16px 20px; margin-bottom: 24px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    }
+    .total-banner-left { display: flex; flex-direction: column; gap: 2px; }
+    .total-banner-label { font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--accent); }
+    .total-banner-phases { font-size: 12px; color: var(--muted); }
+    .total-banner-amount { font-size: 36px; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; letter-spacing: -.5px; }
+
+    /* ── CATEGORIES ── */
+    .cats-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 12px;
+    }
+    .cats-title { font-size: 13px; font-weight: 700; color: var(--fg); }
+    .cat-block {
+      background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+      margin-bottom: 10px; overflow: hidden;
+    }
+    .cat-header-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 16px; cursor: pointer; user-select: none;
+      transition: background .15s;
+    }
+    .cat-header-row:hover { background: var(--card); }
+    .cat-chevron { font-size: 10px; color: var(--muted); transition: transform .2s; flex-shrink: 0; }
+    .cat-block.open .cat-chevron { transform: rotate(90deg); }
+    .cat-name-input {
+      background: transparent; border: none; color: var(--fg); font-size: 14px; font-weight: 700;
+      font-family: var(--font); flex: 1; min-width: 0;
+      border-bottom: 1px solid transparent; transition: border-color .15s;
+    }
+    .cat-name-input:focus { outline: none; border-bottom-color: var(--accent); }
+    .cat-subtotal {
+      font-size: 14px; font-weight: 700; color: var(--accent); white-space: nowrap;
+      font-variant-numeric: tabular-nums; min-width: 80px; text-align: right;
+    }
+    .cat-body { display: none; border-top: 1px solid var(--border); }
+    .cat-block.open .cat-body { display: block; }
+
+    /* ── LINE ITEMS ── */
+    .line-items-table { width: 100%; border-collapse: collapse; }
+    .line-items-table thead tr { background: var(--card2); }
+    .line-items-table th {
+      padding: 7px 12px; font-size: 10px; font-weight: 700; letter-spacing: .8px;
+      text-transform: uppercase; color: var(--muted); text-align: left;
+    }
+    .line-items-table th.right { text-align: right; }
+    .line-items-table td { padding: 4px 6px; border-bottom: 1px solid var(--border); }
+    .line-items-table tr:last-child td { border-bottom: none; }
+    .line-input {
+      background: transparent; border: 1px solid transparent; border-radius: 6px;
+      padding: 5px 8px; color: var(--fg); font-size: 13px; font-family: var(--font);
+      width: 100%; transition: border-color .15s, background .15s;
+    }
+    .line-input:focus { outline: none; border-color: var(--accent); background: var(--card); }
+    .line-input.amt { text-align: right; font-variant-numeric: tabular-nums; }
+    .line-desc-col { width: 45%; }
+    .line-unit-col { width: 25%; }
+    .line-amt-col  { width: 20%; }
+    .line-del-col  { width: 10%; text-align: center; }
+    .line-row-total { text-align: right; font-size: 13px; font-weight: 600; color: var(--fg); font-variant-numeric: tabular-nums; white-space: nowrap; padding-right: 12px; }
+    .cat-footer {
+      padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      background: var(--card2);
+    }
+    .cat-subtotal-row {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .cat-subtotal-label { font-size: 11px; color: var(--muted); }
+    .cat-subtotal-val { font-size: 13px; font-weight: 700; color: var(--fg); font-variant-numeric: tabular-nums; }
+
+    /* ── SAVE / LOAD TOAST ── */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(120%);
+      background: var(--panel); border: 1px solid var(--border2); border-radius: 10px;
+      padding: 10px 18px; font-size: 13px; color: var(--fg); z-index: 500;
+      transition: transform .25s ease; white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast-dot { color: var(--green); margin-right: 6px; }
+
+    /* ── FLOATING TOTAL ── */
+    .float-total {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: rgba(10,10,10,.97); border-top: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      z-index: 100;
+    }
+    .float-total-label { font-size: 12px; color: var(--muted); }
+    .float-total-amt { font-size: 22px; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }
+
+    /* ── PRINT ── */
+    @media print {
+      .topbar, .float-total, .btn-danger, .cat-footer .btn, .cats-header .btn,
+      .btn-ghost, .btn-red, .btn-outline, .btn-icon, .toast { display: none !important; }
+      body { background: #fff; color: #111; }
+      .page { max-width: 100%; padding: 0; }
+      .info-card, .cat-block, .total-banner { border: 1px solid #ddd; box-shadow: none; background: #fff; }
+      .cat-body { display: block !important; }
+      .cat-chevron { display: none; }
+      .cat-name-input, .line-input, .info-input { color: #111; background: transparent; border-color: transparent; }
+      .cat-header-row { cursor: default; }
+      .cat-subtotal { color: #cc1515; }
+      .total-banner { background: #f8f8f8; border-color: #ddd; }
+      .total-banner-label, .total-banner-amount { color: #cc1515; }
+      .cat-footer { background: #f5f5f5; }
+      .cat-block { break-inside: avoid; margin-bottom: 8px; }
+      .info-input { -webkit-text-fill-color: #111; }
+      .line-input { -webkit-text-fill-color: #111; }
+
+      .print-header {
+        display: flex !important;
+        flex-direction: column; align-items: center;
+        border-bottom: 2px solid #cc1515;
+        padding-bottom: 12px; margin-bottom: 20px;
+      }
+      .print-header h1 { font-size: 16px; font-weight: 800; color: #111; text-transform: uppercase; margin-top: 8px; }
+      .print-header p { font-size: 11px; color: #555; margin-top: 2px; }
+    }
+
+    .print-header { display: none; }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <a href="/start2finish/" class="brand">
+      START<span class="brand-dot">2</span>FINISH
+      <span class="brand-badge">Bid Builder</span>
+    </a>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-sm" onclick="newBid()">+ New</button>
+      <button class="btn btn-ghost btn-sm" onclick="loadBid()">Load</button>
+      <button class="btn btn-ghost btn-sm" onclick="saveBid()">Save</button>
+      <button class="btn btn-red btn-sm" onclick="window.print()">&#128438; Print / PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- Print-only letterhead -->
+<div class="print-header" id="printHeader">
+  <h1>START 2 FINISH — Construction &amp; Renovation</h1>
+  <p>From Start to Finish, We Build It Right. &nbsp;|&nbsp; start2finish@squarebidness.com &nbsp;|&nbsp; (318) 612-2114</p>
+</div>
+
+<div class="page">
+
+  <!-- Property Info -->
+  <div class="info-card">
+    <div class="info-card-title">Property &amp; Client Info</div>
+    <div class="info-grid">
+      <div class="info-field" style="grid-column:1/-1">
+        <label class="info-label">Property Address</label>
+        <input class="info-input" id="propAddress" type="text" placeholder="123 Main St, City, LA 00000" />
+      </div>
+      <div class="info-field">
+        <label class="info-label">Client / Owner Name</label>
+        <input class="info-input" id="propClient" type="text" placeholder="Name or Company" />
+      </div>
+      <div class="info-field">
+        <label class="info-label">Estimator</label>
+        <input class="info-input" id="propEstimator" type="text" placeholder="Start2Finish" value="Start2Finish" />
+      </div>
+      <div class="info-field">
+        <label class="info-label">Date</label>
+        <input class="info-input" id="propDate" type="date" />
+      </div>
+      <div class="info-field">
+        <label class="info-label">Bid / Estimate #</label>
+        <input class="info-input" id="propBidNum" type="text" placeholder="S2F-001" />
+      </div>
+      <div class="info-field" style="grid-column:1/-1">
+        <label class="info-label">Scope Notes</label>
+        <input class="info-input" id="propNotes" type="text" placeholder="Full renovation, make-ready, etc." />
+      </div>
+    </div>
+  </div>
+
+  <!-- Grand Total Banner -->
+  <div class="total-banner">
+    <div class="total-banner-left">
+      <div class="total-banner-label">Project Estimate Total</div>
+      <div class="total-banner-phases" id="phaseBreakdown">—</div>
+    </div>
+    <div class="total-banner-amount" id="grandTotalDisplay">$0.00</div>
+  </div>
+
+  <!-- Categories -->
+  <div class="cats-header">
+    <div class="cats-title" id="catCount">0 Categories</div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost btn-sm" onclick="loadTemplate()">Load Renovation Template</button>
+      <button class="btn btn-outline btn-sm" onclick="addCategory()">+ Add Category</button>
+    </div>
+  </div>
+
+  <div id="catContainer"></div>
+
+</div>
+
+<!-- Floating total -->
+<div class="float-total">
+  <div>
+    <div class="float-total-label">Grand Total</div>
+  </div>
+  <div class="float-total-amt" id="floatTotal">$0.00</div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"><span class="toast-dot">●</span><span id="toastMsg">Saved.</span></div>
+
+<script>
+// ── DATA ───────────────────────────────────────────────────────────────
+let categories = [];
+let nextCatId = 1;
+let nextLineId = 1;
+
+const TEMPLATE = [
+  { name: "Clean Out", lines: [
+    { desc: "Labor — 3-person crew, 2 days", unit: "24 man-hrs", amt: 1800 },
+    { desc: "Interior debris clearing & bagging", unit: "whole house", amt: 1400 },
+    { desc: "Exterior site debris clearing", unit: "lot perimeter", amt: 1200 },
+    { desc: "Staging, tarps & protective materials", unit: "materials", amt: 600 }
+  ]},
+  { name: "Dump Trailer & Disposal", lines: [
+    { desc: "Dumpster rental", unit: "4 hauls", amt: 2600 },
+    { desc: "Transfer station / tipping fees", unit: "est. 10 tons", amt: 1200 },
+    { desc: "Landfill disposal fees", unit: "bulk debris", amt: 2200 },
+    { desc: "Specialty / hazardous material disposal", unit: "as needed", amt: 2000 },
+    { desc: "Hauling labor", unit: "loading & transport", amt: 2000 }
+  ]},
+  { name: "Demo — Inside", lines: [
+    { desc: "Kitchen selective demo & cabinet removal", unit: "kitchen", amt: 900 },
+    { desc: "Bath fixture removal (3 full baths)", unit: "per bath", amt: 900 },
+    { desc: "Flooring tear-out & stacking", unit: "as needed", amt: 400 },
+    { desc: "Wall openings & framing demo", unit: "misc", amt: 300 }
+  ]},
+  { name: "Landscape & Tree Removal", lines: [
+    { desc: "Tree removal — large diameter", unit: "est. 6 trees", amt: 8400 },
+    { desc: "Stump grinding", unit: "6 stumps", amt: 1800 },
+    { desc: "Brush & undergrowth clearing", unit: "lot", amt: 3200 },
+    { desc: "Rough grading & drainage shaping", unit: "lot grade", amt: 3600 },
+    { desc: "Topsoil, sod / seed & finish grade", unit: "disturbed areas", amt: 3000 }
+  ]},
+  { name: "Privacy Fence", lines: [
+    { desc: "6' dog-ear wood fence panels", unit: "est. 160 LF", amt: 3840 },
+    { desc: "Steel posts & concrete footings", unit: "per post", amt: 1600 },
+    { desc: "Gate, hardware & trim", unit: "1 gate", amt: 560 },
+    { desc: "Installation labor", unit: "160 LF", amt: 2000 }
+  ]},
+  { name: "Pool Restoration", lines: [
+    { desc: "Drain, clean & acid wash", unit: "prep", amt: 1200 },
+    { desc: "Replaster — pebble finish", unit: "pool surface", amt: 8500 },
+    { desc: "Coping stone replacement", unit: "perimeter", amt: 4200 },
+    { desc: "Pool tile (waterline)", unit: "est. 60 LF", amt: 2600 },
+    { desc: "Pump, filter & equipment upgrade", unit: "equipment", amt: 5500 },
+    { desc: "Pool deck repair & resurfacing", unit: "deck area", amt: 3000 }
+  ]},
+  { name: "Concrete & Driveway", lines: [
+    { desc: "Demo & removal of existing surface", unit: "saw cut & haul", amt: 900 },
+    { desc: "Gravel sub-base & compaction", unit: '4" base', amt: 700 },
+    { desc: '4" reinforced concrete pour', unit: "est. 400 SF", amt: 2400 },
+    { desc: "Broom finish & penetrating sealer", unit: "finish", amt: 1000 }
+  ]},
+  { name: "Roof Replace & Repairs", lines: [
+    { desc: "Tear-off & haul", unit: "est. 28 SQ", amt: 3500 },
+    { desc: "Decking / sheathing replacement", unit: "damaged sections", amt: 2800 },
+    { desc: "Synthetic felt underlayment", unit: "28 SQ", amt: 1200 },
+    { desc: "Architectural shingles", unit: "28 SQ", amt: 11200 },
+    { desc: "Ridge cap & hip starters", unit: "LF", amt: 1300 },
+    { desc: "Flashing, drip edge & pipe boots", unit: "all penetrations", amt: 1500 },
+    { desc: "Gutters & downspouts", unit: "est. 180 LF", amt: 3500 }
+  ]},
+  { name: "HVAC — Replace & Repair", lines: [
+    { desc: "Existing system removal & disposal", unit: "unit + coil", amt: 800 },
+    { desc: "New 3.5-ton condenser unit", unit: "equipment", amt: 4600 },
+    { desc: "Air handler / evaporator coil", unit: "equipment", amt: 2600 },
+    { desc: "Ductwork repair, seal & balance", unit: "whole house", amt: 4200 },
+    { desc: "Electrical disconnect & hook-up", unit: "service", amt: 1800 },
+    { desc: "Smart thermostat & low-voltage wiring", unit: "1 zone", amt: 500 },
+    { desc: "Refrigerant charge & commissioning", unit: "startup", amt: 700 },
+    { desc: "Permits & city inspection", unit: "mechanical", amt: 1800 }
+  ]},
+  { name: "Electrical — Updates & Fixtures", lines: [
+    { desc: "Panel upgrade — 200A main service", unit: "panel + meter", amt: 4200 },
+    { desc: "New circuits & wiring runs", unit: "whole house", amt: 8500 },
+    { desc: "Outlet & switch replacements", unit: "est. 60 devices", amt: 4200 },
+    { desc: "Lighting fixtures — ceiling & recessed", unit: "all rooms", amt: 6800 },
+    { desc: "Exterior & security lighting", unit: "porch + lot", amt: 2300 },
+    { desc: "GFCI / AFCI protection", unit: "code req.", amt: 1500 },
+    { desc: "Smoke & CO detector installation", unit: "all rooms", amt: 700 },
+    { desc: "Permits & inspection", unit: "electrical", amt: 1800 }
+  ]},
+  { name: "Plumbing — Repairs, Drains & Fixtures", lines: [
+    { desc: "Supply line repair & replacement", unit: "whole house", amt: 5400 },
+    { desc: "Drain, waste & vent repairs", unit: "DWV system", amt: 4800 },
+    { desc: "Fixture replacements (3 baths + kitchen)", unit: "4 locations", amt: 5200 },
+    { desc: "Water heater replacement — 50 gal", unit: "unit + install", amt: 1800 },
+    { desc: "Exterior hose bibs & shutoff valves", unit: "2 locations", amt: 600 },
+    { desc: "Sewer line inspection & hydro-jetting", unit: "main line", amt: 1400 },
+    { desc: "Permits & inspection", unit: "plumbing", amt: 1500 },
+    { desc: "Miscellaneous fittings & materials", unit: "misc", amt: 1500 }
+  ]},
+  { name: "Windows", lines: [
+    { desc: "Window units — double-hung, vinyl", unit: "est. 10 windows", amt: 5600 },
+    { desc: "Removal & installation labor", unit: "10 openings", amt: 2800 },
+    { desc: "Interior trim, casing & stools", unit: "10 windows", amt: 1200 },
+    { desc: "Exterior caulk, sealant & weatherstrip", unit: "all openings", amt: 400 }
+  ]},
+  { name: "Sheetrock Repair & Replace", lines: [
+    { desc: 'Drywall material — 5/8" & 1/2"', unit: "est. 120 sheets", amt: 2400 },
+    { desc: "Hang & screw", unit: "labor", amt: 2000 },
+    { desc: "Tape, bed & coat", unit: "3-coat finish", amt: 2000 },
+    { desc: "Skim coat / level-5 finish on ceilings", unit: "smooth finish", amt: 1000 },
+    { desc: "Corner bead & arch repairs", unit: "all edges", amt: 600 }
+  ]},
+  { name: "Flooring — Ceramic & Laminate", lines: [
+    { desc: "Ceramic tile — material", unit: "est. 600 SF", amt: 4800 },
+    { desc: "Laminate flooring — material", unit: "est. 1,200 SF", amt: 3600 },
+    { desc: "Underlayment & moisture barrier", unit: "1,200 SF", amt: 900 },
+    { desc: "Tile installation labor", unit: "600 SF", amt: 4200 },
+    { desc: "Laminate installation labor", unit: "1,200 SF", amt: 3600 },
+    { desc: "Transitions, thresholds & reducer strips", unit: "all doorways", amt: 900 },
+    { desc: "Floor prep, leveling & patching", unit: "subfloor", amt: 1200 }
+  ]},
+  { name: "Kitchen Remodel", lines: [
+    { desc: "Cabinetry — new uppers & lowers", unit: "full kitchen", amt: 3200 },
+    { desc: "Countertops", unit: "laminate or tile", amt: 2400 },
+    { desc: "Tile backsplash", unit: "est. 30 SF", amt: 900 },
+    { desc: "Sink & faucet", unit: "single bowl", amt: 800 },
+    { desc: "Cabinet hardware & pulls", unit: "full set", amt: 400 },
+    { desc: "Appliance connections — gas & electrical", unit: "hookup only", amt: 600 },
+    { desc: "Labor — installation & finish", unit: "full kitchen", amt: 4200 }
+  ]},
+  { name: "Bathroom Remodel — Bath 1", lines: [
+    { desc: "Tub / shower surround & pan", unit: "unit", amt: 1200 },
+    { desc: "Vanity, sink & faucet", unit: "single", amt: 900 },
+    { desc: "Toilet", unit: "standard", amt: 400 },
+    { desc: "Mirror & accessories", unit: "set", amt: 300 },
+    { desc: "Tile — floor & walls", unit: "est. 80 SF", amt: 1000 },
+    { desc: "Labor & finish", unit: "full bath", amt: 700 }
+  ]},
+  { name: "Bathroom Remodel — Bath 2", lines: [
+    { desc: "Tub / shower surround", unit: "unit", amt: 1400 },
+    { desc: "Vanity, sink & faucet", unit: "single", amt: 1000 },
+    { desc: "Toilet", unit: "standard", amt: 450 },
+    { desc: "Mirror, lighting & accessories", unit: "set", amt: 450 },
+    { desc: "Tile — floor & walls", unit: "est. 100 SF", amt: 1200 },
+    { desc: "Labor & finish", unit: "full bath", amt: 1000 }
+  ]},
+  { name: "Bathroom Remodel — Master Bath", lines: [
+    { desc: "Walk-in shower — pan, glass & fixtures", unit: "custom", amt: 2200 },
+    { desc: "Double vanity & faucets", unit: '72" double', amt: 1600 },
+    { desc: "Toilet — elongated", unit: "comfort height", amt: 500 },
+    { desc: "Tile — floor & walls", unit: "est. 140 SF", amt: 1700 },
+    { desc: "Mirrors, lighting & accessories", unit: "set", amt: 600 },
+    { desc: "Labor & finish", unit: "master bath", amt: 900 }
+  ]},
+  { name: "Half Bath", lines: [
+    { desc: "Vanity & faucet", unit: "pedestal or cabinet", amt: 500 },
+    { desc: "Toilet", unit: "standard", amt: 350 },
+    { desc: "Mirror & accessories", unit: "set", amt: 200 },
+    { desc: "Tile — floor", unit: "est. 20 SF", amt: 250 },
+    { desc: "Labor & finish", unit: "half bath", amt: 200 }
+  ]},
+  { name: "Paint — Interior", lines: [
+    { desc: "Surface prep — sanding, filling & patching", unit: "whole house", amt: 2400 },
+    { desc: "Primer coat", unit: "full interior", amt: 2800 },
+    { desc: "Walls — 2-coat finish", unit: "est. 4,200 SF", amt: 5600 },
+    { desc: "Ceilings — 2-coat finish", unit: "all rooms", amt: 2400 },
+    { desc: "Trim, baseboards & doors", unit: "semi-gloss", amt: 2400 }
+  ]},
+  { name: "Paint — Exterior", lines: [
+    { desc: "Pressure wash & surface prep", unit: "full exterior", amt: 600 },
+    { desc: "Caulk, prime & spot repair", unit: "siding & trim", amt: 800 },
+    { desc: "Exterior paint — 2 coats", unit: "body", amt: 2000 },
+    { desc: "Soffits, fascia & trim", unit: "accent coat", amt: 800 }
+  ]}
+];
+
+// ── RENDER ─────────────────────────────────────────────────────────────
+function fmt(n) {
+  return '$' + (parseFloat(n) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function catTotal(cat) {
+  return cat.lines.reduce((s, l) => s + (parseFloat(l.amt) || 0), 0);
+}
+
+function grandTotal() {
+  return categories.reduce((s, c) => s + catTotal(c), 0);
+}
+
+function updateTotals() {
+  const gt = grandTotal();
+  const fmtGt = fmt(gt);
+  document.getElementById('grandTotalDisplay').textContent = fmtGt;
+  document.getElementById('floatTotal').textContent = fmtGt;
+
+  // per-category subtotals
+  categories.forEach(cat => {
+    const el = document.getElementById('subtotal-' + cat.id);
+    if (el) el.textContent = fmt(catTotal(cat));
+    const el2 = document.getElementById('catsubtotal-' + cat.id);
+    if (el2) el2.textContent = fmt(catTotal(cat));
+  });
+
+  // phase breakdown
+  const phases = categories.map(c => `${c.name}: ${fmt(catTotal(c))}`).join(' · ');
+  document.getElementById('phaseBreakdown').textContent = phases || '—';
+
+  // cat count
+  document.getElementById('catCount').textContent = `${categories.length} Categor${categories.length === 1 ? 'y' : 'ies'}`;
+}
+
+function renderAll() {
+  const container = document.getElementById('catContainer');
+  container.innerHTML = '';
+  categories.forEach(cat => {
+    container.appendChild(buildCatEl(cat));
+  });
+  updateTotals();
+}
+
+function buildCatEl(cat) {
+  const block = document.createElement('div');
+  block.className = 'cat-block open';
+  block.id = 'cat-' + cat.id;
+
+  block.innerHTML = `
+    <div class="cat-header-row" onclick="toggleCat(${cat.id})">
+      <span class="cat-chevron">&#9658;</span>
+      <input class="cat-name-input" value="${escHtml(cat.name)}" placeholder="Category name"
+             oninput="updateCatName(${cat.id}, this.value)" onclick="event.stopPropagation()" />
+      <span class="cat-subtotal" id="subtotal-${cat.id}">${fmt(catTotal(cat))}</span>
+      <button class="btn-danger" onclick="event.stopPropagation(); removeCategory(${cat.id})" title="Remove category">&#10005;</button>
+    </div>
+    <div class="cat-body">
+      <div style="overflow-x:auto;">
+        <table class="line-items-table">
+          <thead>
+            <tr>
+              <th class="line-desc-col">Description</th>
+              <th class="line-unit-col">Unit / Note</th>
+              <th class="line-amt-col right">Amount</th>
+              <th class="line-del-col"></th>
+            </tr>
+          </thead>
+          <tbody id="lines-${cat.id}">
+          </tbody>
+        </table>
+      </div>
+      <div class="cat-footer">
+        <button class="btn btn-ghost btn-sm" onclick="addLine(${cat.id})">+ Add Line Item</button>
+        <div class="cat-subtotal-row">
+          <span class="cat-subtotal-label">Subtotal</span>
+          <span class="cat-subtotal-val" id="catsubtotal-${cat.id}">${fmt(catTotal(cat))}</span>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // render lines
+  const tbody = block.querySelector(`#lines-${cat.id}`);
+  cat.lines.forEach(line => {
+    tbody.appendChild(buildLineEl(cat.id, line));
+  });
+
+  return block;
+}
+
+function buildLineEl(catId, line) {
+  const tr = document.createElement('tr');
+  tr.id = 'line-' + line.id;
+  tr.innerHTML = `
+    <td class="line-desc-col">
+      <input class="line-input" type="text" value="${escHtml(line.desc)}" placeholder="Description"
+             oninput="updateLine(${catId}, ${line.id}, 'desc', this.value)" />
+    </td>
+    <td class="line-unit-col">
+      <input class="line-input" type="text" value="${escHtml(line.unit)}" placeholder="Unit / note"
+             oninput="updateLine(${catId}, ${line.id}, 'unit', this.value)" />
+    </td>
+    <td class="line-amt-col">
+      <input class="line-input amt" type="number" step="0.01" min="0" value="${line.amt || ''}" placeholder="0.00"
+             oninput="updateLine(${catId}, ${line.id}, 'amt', this.value)" />
+    </td>
+    <td class="line-del-col">
+      <button class="btn-danger" onclick="removeLine(${catId}, ${line.id})" title="Remove line">&#10005;</button>
+    </td>
+  `;
+  return tr;
+}
+
+function escHtml(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── ACTIONS ────────────────────────────────────────────────────────────
+function toggleCat(id) {
+  document.getElementById('cat-' + id).classList.toggle('open');
+}
+
+function updateCatName(id, val) {
+  const cat = categories.find(c => c.id === id);
+  if (cat) cat.name = val;
+  updateTotals();
+}
+
+function addCategory(name) {
+  const cat = { id: nextCatId++, name: name || 'New Category', lines: [] };
+  categories.push(cat);
+  const container = document.getElementById('catContainer');
+  container.appendChild(buildCatEl(cat));
+  updateTotals();
+  // focus name input
+  const input = document.querySelector(`#cat-${cat.id} .cat-name-input`);
+  if (input && !name) { input.select(); }
+}
+
+function removeCategory(id) {
+  if (!confirm('Remove this category and all its line items?')) return;
+  categories = categories.filter(c => c.id !== id);
+  const el = document.getElementById('cat-' + id);
+  if (el) el.remove();
+  updateTotals();
+}
+
+function addLine(catId) {
+  const cat = categories.find(c => c.id === catId);
+  if (!cat) return;
+  const line = { id: nextLineId++, desc: '', unit: '', amt: 0 };
+  cat.lines.push(line);
+  const tbody = document.getElementById('lines-' + catId);
+  const tr = buildLineEl(catId, line);
+  tbody.appendChild(tr);
+  tr.querySelector('.line-input').focus();
+  updateTotals();
+}
+
+function removeLine(catId, lineId) {
+  const cat = categories.find(c => c.id === catId);
+  if (!cat) return;
+  cat.lines = cat.lines.filter(l => l.id !== lineId);
+  const el = document.getElementById('line-' + lineId);
+  if (el) el.remove();
+  updateTotals();
+}
+
+function updateLine(catId, lineId, field, val) {
+  const cat = categories.find(c => c.id === catId);
+  if (!cat) return;
+  const line = cat.lines.find(l => l.id === lineId);
+  if (!line) return;
+  line[field] = field === 'amt' ? parseFloat(val) || 0 : val;
+  updateTotals();
+}
+
+// ── TEMPLATE ───────────────────────────────────────────────────────────
+function loadTemplate() {
+  if (categories.length > 0 && !confirm('This will replace all current categories with the renovation template. Continue?')) return;
+  categories = [];
+  nextCatId = 1;
+  nextLineId = 1;
+  TEMPLATE.forEach(t => {
+    const cat = { id: nextCatId++, name: t.name, lines: t.lines.map(l => ({ id: nextLineId++, desc: l.desc, unit: l.unit, amt: l.amt })) };
+    categories.push(cat);
+  });
+  renderAll();
+  showToast('Renovation template loaded');
+}
+
+// ── SAVE / LOAD ────────────────────────────────────────────────────────
+function saveBid() {
+  const data = {
+    info: {
+      address: document.getElementById('propAddress').value,
+      client: document.getElementById('propClient').value,
+      estimator: document.getElementById('propEstimator').value,
+      date: document.getElementById('propDate').value,
+      bidNum: document.getElementById('propBidNum').value,
+      notes: document.getElementById('propNotes').value,
+    },
+    categories, nextCatId, nextLineId
+  };
+  localStorage.setItem('s2f_bid_draft', JSON.stringify(data));
+  showToast('Draft saved');
+}
+
+function loadBid() {
+  const raw = localStorage.getItem('s2f_bid_draft');
+  if (!raw) { showToast('No saved draft found'); return; }
+  if (!confirm('Load saved draft? This will replace current data.')) return;
+  const data = JSON.parse(raw);
+  document.getElementById('propAddress').value = data.info.address || '';
+  document.getElementById('propClient').value = data.info.client || '';
+  document.getElementById('propEstimator').value = data.info.estimator || 'Start2Finish';
+  document.getElementById('propDate').value = data.info.date || '';
+  document.getElementById('propBidNum').value = data.info.bidNum || '';
+  document.getElementById('propNotes').value = data.info.notes || '';
+  categories = data.categories || [];
+  nextCatId = data.nextCatId || 100;
+  nextLineId = data.nextLineId || 1000;
+  renderAll();
+  showToast('Draft loaded');
+}
+
+function newBid() {
+  if (!confirm('Start a new blank bid? Unsaved changes will be lost.')) return;
+  categories = [];
+  nextCatId = 1;
+  nextLineId = 1;
+  ['propAddress','propClient','propBidNum','propNotes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('propEstimator').value = 'Start2Finish';
+  document.getElementById('propDate').value = new Date().toISOString().slice(0,10);
+  renderAll();
+}
+
+// ── TOAST ──────────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── INIT ───────────────────────────────────────────────────────────────
+document.getElementById('propDate').value = new Date().toISOString().slice(0,10);
+
+// Auto-save on input changes
+document.addEventListener('input', () => {
+  clearTimeout(window._autoSave);
+  window._autoSave = setTimeout(saveBid, 1500);
+});
+
+// Load last draft on open if exists
+if (localStorage.getItem('s2f_bid_draft')) {
+  loadBid();
+} else {
+  // Pre-load today's Huntwick bid as starting point
+  document.getElementById('propAddress').value = '4015 Huntwick Blvd, Alexandria, LA 71303';
+  document.getElementById('propBidNum').value = 'S2F-001';
+  loadTemplate();
+}
+</script>
+</body>
+</html>
