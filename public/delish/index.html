@@ -262,15 +262,21 @@
 
 <body>
 
-<div id="sept1Banner" style="background:#140f00;border-bottom:2px solid #D4AF37;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
-  <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">
-    <span style="font-size:18px;flex-shrink:0;">🍽️</span>
-    <div>
-      <span style="color:#D4AF37;font-weight:800;font-size:14px;letter-spacing:.3px;">New Menu Starts September 1st</span>
-      <span style="color:#c8c8c8;font-size:13px;margin-left:10px;">Lasagna Tuesdays · Hamburger Steak &amp; Beef Tips on Fridays · Wednesday plates now $13.99</span>
-    </div>
+<style>
+#sept1Banner{background:#140f00;border-bottom:2px solid #D4AF37;overflow:hidden;position:relative;height:36px;cursor:pointer;}
+#sept1Banner:hover .sept1-track{animation-play-state:paused;}
+.sept1-track{display:flex;width:max-content;animation:sept1scroll 28s linear infinite;}
+.sept1-track span{display:flex;align-items:center;height:36px;white-space:nowrap;font-size:13px;font-weight:700;letter-spacing:.4px;color:#D4AF37;padding:0 24px;}
+.sept1-tag{color:#D4AF37;opacity:.5;margin:0 10px;}
+.sept1-close{position:absolute;right:0;top:0;height:36px;padding:0 14px;background:linear-gradient(to right,transparent,#140f00 30%);display:flex;align-items:center;cursor:pointer;color:#D4AF37;font-size:13px;font-weight:800;border:none;}
+@keyframes sept1scroll{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+</style>
+<div id="sept1Banner">
+  <div class="sept1-track">
+    <span>🍽️ NEW MENU STARTS SEPTEMBER 1ST <span class="sept1-tag">•</span> LASAGNA ON TUESDAYS <span class="sept1-tag">•</span> HAMBURGER STEAK &amp; BEEF TIPS ON FRIDAYS <span class="sept1-tag">•</span> WEDNESDAY PLATES NOW $13.99 <span class="sept1-tag">•</span> NEW SIDES LINEUP <span class="sept1-tag">•</span> SAME GREAT DELISH QUALITY <span class="sept1-tag">•</span></span>
+    <span>🍽️ NEW MENU STARTS SEPTEMBER 1ST <span class="sept1-tag">•</span> LASAGNA ON TUESDAYS <span class="sept1-tag">•</span> HAMBURGER STEAK &amp; BEEF TIPS ON FRIDAYS <span class="sept1-tag">•</span> WEDNESDAY PLATES NOW $13.99 <span class="sept1-tag">•</span> NEW SIDES LINEUP <span class="sept1-tag">•</span> SAME GREAT DELISH QUALITY <span class="sept1-tag">•</span></span>
   </div>
-  <button onclick="document.getElementById('sept1Banner').style.display='none';localStorage.setItem('sept1BannerDismissed','1')" style="background:none;border:1px solid #D4AF37;color:#D4AF37;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;white-space:nowrap;">Got it ✕</button>
+  <button class="sept1-close" onclick="document.getElementById('sept1Banner').style.display='none';localStorage.setItem('sept1BannerDismissed','1')">✕</button>
 </div>
 <script>
 (function(){
