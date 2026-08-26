@@ -88,6 +88,14 @@
       margin-bottom: .6rem;
       position: relative;
     }
+    .item-header {
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: #8b1a1a;
+      margin-bottom: .5rem;
+    }
     .item-block .remove-btn {
       position: absolute;
       top: .5rem;
@@ -102,6 +110,36 @@
       border-radius: 4px;
     }
     .item-block .remove-btn:hover { color: #cc3333; background: rgba(204,51,51,.1); }
+    .row-qty-price { display: grid; grid-template-columns: 76px 1fr; gap: .5rem; margin-top: .4rem; }
+    .item-line-total { font-size: .73rem; color: #666; text-align: right; margin-top: .3rem; min-height: 1rem; }
+    .add-sub-btn {
+      background: none;
+      border: none;
+      color: #555;
+      font-size: .78rem;
+      cursor: pointer;
+      padding: .3rem 0 0;
+      font-family: inherit;
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      display: block;
+    }
+    .add-sub-btn:hover { color: #aaa; }
+    .sub-field-row { position: relative; }
+    .sub-remove-btn {
+      position: absolute;
+      top: 1.6rem;
+      right: .3rem;
+      background: none;
+      border: none;
+      color: #555;
+      cursor: pointer;
+      font-size: .75rem;
+      padding: .25rem;
+      line-height: 1;
+    }
+    .sub-remove-btn:hover { color: #cc3333; }
+    .sub-field-row input { padding-right: 1.6rem; }
     .add-item-btn {
       width: 100%;
       background: none;
@@ -561,9 +599,9 @@
     let items = [];
     let itemCounter = 0;
 
-    function addItem(desc = '', sub = '', amount = '') {
+    function addItem(desc = '', sub = '', qty = 1, unitPrice = '') {
       const id = ++itemCounter;
-      items.push({ id, desc, sub, amount });
+      items.push({ id, desc, sub, qty, unitPrice, hasSub: !!sub });
       renderItemBlocks();
       updatePreview();
     }
@@ -574,20 +612,46 @@
       updatePreview();
     }
 
+    function toggleSub(id, show) {
+      const item = items.find(i => i.id === id);
+      if (!item) return;
+      item.hasSub = show;
+      if (!show) item.sub = '';
+      renderItemBlocks();
+      updatePreview();
+    }
+
     function renderItemBlocks() {
       const container = document.getElementById('items-container');
       container.innerHTML = '';
       items.forEach((item, idx) => {
+        const num = idx + 1;
+        const lineTotal = (parseFloat(item.qty) || 1) * (parseFloat(item.unitPrice) || 0);
         const block = document.createElement('div');
         block.className = 'item-block';
         block.innerHTML = `
+          <div class="item-header">Item #${num}</div>
           <button class="remove-btn" onclick="removeItem(${item.id})" title="Remove">&#x2715;</button>
           <label>Description</label>
           <input type="text" value="${esc(item.desc)}" oninput="updateItem(${item.id},'desc',this.value)" placeholder="Jones Casket Spray — White and Gold" />
-          <label>Sub-description (optional)</label>
-          <input type="text" value="${esc(item.sub)}" oninput="updateItem(${item.id},'sub',this.value)" placeholder="Floral arrangement — Saturday, June 27, 2026" />
-          <label>Amount ($)</label>
-          <input type="number" step="0.01" min="0" value="${esc(item.amount)}" oninput="updateItem(${item.id},'amount',this.value)" placeholder="425.00" />
+          ${item.hasSub ? `
+            <div class="sub-field-row">
+              <label>Sub-description</label>
+              <input type="text" value="${esc(item.sub)}" oninput="updateItem(${item.id},'sub',this.value)" placeholder="Floral arrangement — Saturday, June 27, 2026" />
+              <button class="sub-remove-btn" onclick="toggleSub(${item.id}, false)" title="Remove">&#x2715;</button>
+            </div>
+          ` : `<button class="add-sub-btn" onclick="toggleSub(${item.id}, true)">+ Add sub-description</button>`}
+          <div class="row-qty-price">
+            <div>
+              <label>Qty</label>
+              <input type="number" min="1" step="1" value="${esc(item.qty)}" oninput="updateItem(${item.id},'qty',this.value)" placeholder="1" />
+            </div>
+            <div>
+              <label>Unit Price ($)</label>
+              <input type="number" step="0.01" min="0" value="${esc(item.unitPrice)}" oninput="updateItem(${item.id},'unitPrice',this.value)" placeholder="425.00" />
+            </div>
+          </div>
+          <div class="item-line-total">${lineTotal > 0 ? 'Total: ' + formatMoney(lineTotal) : ''}</div>
         `;
         container.appendChild(block);
       });
@@ -599,7 +663,15 @@
 
     function updateItem(id, field, value) {
       const item = items.find(i => i.id === id);
-      if (item) { item[field] = value; updatePreview(); }
+      if (!item) return;
+      item[field] = value;
+      // refresh line total display
+      const lt = document.getElementById(`item-lt-${id}`);
+      if (lt) {
+        const total = (parseFloat(item.qty)||1) * (parseFloat(item.unitPrice)||0);
+        lt.textContent = total > 0 ? 'Total: ' + formatMoney(total) : '';
+      }
+      updatePreview();
     }
 
     function formatMoney(val) {
@@ -649,21 +721,23 @@
         tr.innerHTML = '<td colspan="2">No items added yet</td>';
         tbody.appendChild(tr);
       } else {
-        items.forEach(item => {
+        items.forEach((item, idx) => {
+          const lineTotal = (parseFloat(item.qty) || 1) * (parseFloat(item.unitPrice) || 0);
+          const qtyLabel = (parseFloat(item.qty) || 1) > 1 ? ` <span style="color:#999;font-size:.82em;font-weight:400">(×${item.qty})</span>` : '';
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td>
-              <div class="inv-item-desc">${escHtml(item.desc || '—')}</div>
+              <div class="inv-item-desc">${escHtml(item.desc || '—')}${qtyLabel}</div>
               ${item.sub ? `<div class="inv-item-sub">${escHtml(item.sub)}</div>` : ''}
             </td>
-            <td>${formatMoney(item.amount)}</td>
+            <td>${formatMoney(lineTotal)}</td>
           `;
           tbody.appendChild(tr);
         });
       }
 
       // Totals
-      const subtotal = items.reduce((sum, i) => sum + (parseFloat(i.amount) || 0), 0);
+      const subtotal = items.reduce((sum, i) => sum + ((parseFloat(i.qty)||1) * (parseFloat(i.unitPrice)||0)), 0);
       const discountPct = Math.min(100, Math.max(0, parseFloat(document.getElementById('discount-pct').value) || 0));
       const discountAmt = subtotal * (discountPct / 100);
       const total = subtotal - discountAmt;
@@ -703,7 +777,7 @@
       document.getElementById('pay-to').value = 'Eddie Philson';
       items = [];
       itemCounter = 0;
-      renderItemBlocks();
+      addItem();
       updatePreview();
       loadNextNumber();
     }
