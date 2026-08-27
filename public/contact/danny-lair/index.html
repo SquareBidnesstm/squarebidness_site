@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Danny Lair — Realtor</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Barlow:wght@400;500;600&display=swap" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      font-family: "Barlow", system-ui, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem 1rem;
+      background: #0c1828;
+      background-image:
+        radial-gradient(ellipse at 20% 80%, rgba(201, 168, 76, 0.07) 0%, transparent 50%),
+        radial-gradient(ellipse at 85% 10%, rgba(201, 168, 76, 0.05) 0%, transparent 45%);
+    }
+
+    .card {
+      width: 100%;
+      max-width: 390px;
+    }
+
+    /* gold top bar */
+    .top-bar {
+      background: #c9a84c;
+      border-radius: 16px 16px 0 0;
+      padding: .55rem 1.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .top-bar-label {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: rgba(12, 24, 40, 0.7);
+    }
+    .top-bar-badge {
+      background: rgba(12, 24, 40, 0.15);
+      border-radius: 4px;
+      padding: .15rem .55rem;
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: rgba(12, 24, 40, 0.65);
+    }
+
+    .card-body {
+      background: #111e30;
+      border-left: 1px solid #1e3050;
+      border-right: 1px solid #1e3050;
+      padding: 2rem 1.75rem 1.75rem;
+    }
+
+    .name-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.1rem;
+      margin-bottom: 1.35rem;
+    }
+
+    .monogram {
+      flex-shrink: 0;
+      width: 64px;
+      height: 64px;
+      background: #c9a84c;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: #0c1828;
+      letter-spacing: .02em;
+    }
+
+    .name-block { padding-top: .25rem; }
+
+    .name {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 2rem;
+      font-weight: 900;
+      letter-spacing: .01em;
+      line-height: 1;
+      color: #fff;
+      text-transform: uppercase;
+    }
+
+    .title {
+      font-size: .82rem;
+      font-weight: 600;
+      color: #c9a84c;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      margin-top: .4rem;
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, #c9a84c 0%, #1e3050 55%);
+      margin-bottom: 1.4rem;
+    }
+
+    /* specialty highlight */
+    .specialty {
+      background: rgba(201, 168, 76, 0.07);
+      border: 1px solid rgba(201, 168, 76, 0.18);
+      border-left: 3px solid #c9a84c;
+      border-radius: 0 8px 8px 0;
+      padding: .8rem 1rem;
+      margin-bottom: 1.4rem;
+    }
+    .specialty-headline {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: .95rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: #c9a84c;
+      margin-bottom: .2rem;
+    }
+    .specialty-sub {
+      font-size: .81rem;
+      color: #4a6080;
+      line-height: 1.4;
+    }
+
+    .phone-link {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      color: #fff;
+      text-decoration: none;
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: .01em;
+      margin-bottom: 1.5rem;
+      padding: .85rem 1rem;
+      background: #0c1828;
+      border-radius: 10px;
+      border: 1px solid #1e3050;
+      transition: border-color .15s;
+    }
+    .phone-link:hover { border-color: #c9a84c; }
+    .phone-icon {
+      width: 36px; height: 36px;
+      background: #c9a84c;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .qr-section {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      background: #0c1828;
+      border-radius: 12px;
+      border: 1px solid #1e3050;
+      padding: 1rem;
+    }
+    .qr-box {
+      background: #fff;
+      border-radius: 8px;
+      padding: 8px;
+      flex-shrink: 0;
+    }
+    .qr-info { flex: 1; }
+    .qr-headline {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-bottom: .25rem;
+    }
+    .qr-sub {
+      font-size: .78rem;
+      color: #4a6080;
+      line-height: 1.4;
+      margin-bottom: .4rem;
+    }
+    .qr-region {
+      font-size: .68rem;
+      color: #2a4060;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+
+    /* bottom bar */
+    .bottom-bar {
+      background: #c9a84c;
+      border-radius: 0 0 16px 16px;
+      display: flex;
+      overflow: hidden;
+    }
+    .action-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .45rem;
+      padding: .9rem .75rem;
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: .95rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #0c1828;
+      text-decoration: none;
+      background: rgba(0,0,0,0.08);
+      border-right: 1px solid rgba(12,24,40,0.15);
+      transition: background .15s;
+    }
+    .action-btn:last-child { border-right: none; }
+    .action-btn:hover { background: rgba(0,0,0,0.18); }
+
+    .built-by {
+      text-align: center;
+      margin-top: 1.2rem;
+      font-size: .68rem;
+      color: #1a2a40;
+      letter-spacing: .05em;
+    }
+    .built-by a { color: #2a4060; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="card">
+
+    <div class="top-bar">
+      <div class="top-bar-label">Licensed Realtor</div>
+      <div class="top-bar-badge">318</div>
+    </div>
+
+    <div class="card-body">
+
+      <div class="name-row">
+        <div class="monogram">DL</div>
+        <div class="name-block">
+          <div class="name">Danny<br>Lair</div>
+          <div class="title">Realtor</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="specialty">
+        <div class="specialty-headline">Buy · Sell · Invest</div>
+        <div class="specialty-sub">Ready to help you find the right property or get top dollar for yours.</div>
+      </div>
+
+      <a class="phone-link" href="tel:+13182291318">
+        <div class="phone-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0c1828" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.06 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21 16z"/>
+          </svg>
+        </div>
+        +1 (318) 229-1318
+      </a>
+
+      <div class="qr-section">
+        <div class="qr-box">
+          <canvas id="qr-canvas"></canvas>
+        </div>
+        <div class="qr-info">
+          <div class="qr-headline">Scan to Call</div>
+          <div class="qr-sub">Point your camera here to reach Danny directly.</div>
+          <div class="qr-region">318 · Northwest Louisiana</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="bottom-bar">
+      <a class="action-btn" href="data:text/vcard;charset=utf-8,BEGIN%3AVCARD%0AVERSION%3A3.0%0AFN%3ADanny%20Lair%0AN%3ALair%3BDanny%3B%3B%3B%0ATITLE%3ARealtor%0ATEL%3BTYPE%3DCELL%3A%2B13182291318%0AEND%3AVCARD" download="Danny_Lair.vcf">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Save Contact
+      </a>
+      <a class="action-btn" href="tel:+13182291318">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.06 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21 16z"/></svg>
+        Call Now
+      </a>
+    </div>
+
+    <div class="built-by">Built by <a href="https://squarebidness.com" target="_blank">Square Bidness</a></div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <script>
+    QRCode.toCanvas(
+      document.getElementById('qr-canvas'),
+      'tel:+13182291318',
+      { width: 130, margin: 1, color: { dark: '#0c1828', light: '#ffffff' }, errorCorrectionLevel: 'M' }
+    );
+  </script>
+</body>
+</html>
