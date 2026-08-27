@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hands on Property Preservation LLC — Lawn Service</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Barlow:wght@400;500;600&display=swap" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      font-family: "Barlow", system-ui, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem 1rem;
+      background: #0f1a0f;
+      background-image:
+        radial-gradient(ellipse at 15% 85%, rgba(34, 100, 34, 0.2) 0%, transparent 50%),
+        radial-gradient(ellipse at 85% 10%, rgba(20, 80, 20, 0.15) 0%, transparent 50%);
+    }
+
+    .card {
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .top-strip {
+      background: #2d6a2d;
+      border-radius: 16px 16px 0 0;
+      padding: .5rem 1.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .top-strip-label {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: .75rem;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.6);
+    }
+    .badge {
+      background: rgba(255,255,255,0.15);
+      border-radius: 4px;
+      padding: .15rem .55rem;
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: #a3e6a3;
+    }
+
+    .card-body {
+      background: #1a2a1a;
+      border-left: 1px solid #2a3d2a;
+      border-right: 1px solid #2a3d2a;
+      padding: 1.75rem;
+    }
+
+    .company {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 1.5rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .02em;
+      color: #fff;
+      line-height: 1.05;
+      margin-bottom: .5rem;
+    }
+    .company span { color: #5cb85c; }
+
+    .owner-row {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      margin-bottom: 1.25rem;
+    }
+    .owner-avatar {
+      width: 36px; height: 36px;
+      background: #2d6a2d;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: .95rem;
+      font-weight: 900;
+      color: #a3e6a3;
+      flex-shrink: 0;
+    }
+    .owner-name {
+      font-size: .95rem;
+      font-weight: 600;
+      color: #c8e6c8;
+    }
+    .owner-title {
+      font-size: .75rem;
+      color: #5cb85c;
+      letter-spacing: .04em;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .4rem;
+      margin-bottom: 1.4rem;
+    }
+    .tag {
+      background: rgba(92, 184, 92, 0.1);
+      border: 1px solid rgba(92, 184, 92, 0.25);
+      border-radius: 4px;
+      padding: .22rem .6rem;
+      font-size: .74rem;
+      font-weight: 600;
+      color: #8ed48e;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, #2d6a2d, #1a2a1a);
+      margin-bottom: 1.4rem;
+    }
+
+    .free-quote {
+      background: rgba(92,184,92,0.08);
+      border: 1px solid rgba(92,184,92,0.2);
+      border-left: 3px solid #5cb85c;
+      border-radius: 0 8px 8px 0;
+      padding: .8rem 1rem;
+      margin-bottom: 1.4rem;
+    }
+    .free-quote-headline {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 1rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: #5cb85c;
+      margin-bottom: .2rem;
+    }
+    .free-quote-sub {
+      font-size: .82rem;
+      color: #6b8c6b;
+    }
+
+    .phone-link {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      color: #fff;
+      text-decoration: none;
+      font-size: 1.2rem;
+      font-weight: 600;
+      padding: .85rem 1rem;
+      background: #111d11;
+      border-radius: 10px;
+      border: 1px solid #2a3d2a;
+      margin-bottom: 1.4rem;
+      transition: border-color .15s;
+    }
+    .phone-link:hover { border-color: #5cb85c; }
+    .phone-icon {
+      width: 36px; height: 36px;
+      background: #2d6a2d;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .qr-section {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      background: #111d11;
+      border-radius: 12px;
+      border: 1px solid #2a3d2a;
+      padding: 1rem;
+    }
+    .qr-box {
+      background: #fff;
+      border-radius: 8px;
+      padding: 8px;
+      flex-shrink: 0;
+    }
+    .qr-info { flex: 1; }
+    .qr-headline {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-bottom: .25rem;
+    }
+    .qr-sub {
+      font-size: .78rem;
+      color: #4a6b4a;
+      line-height: 1.4;
+      margin-bottom: .5rem;
+    }
+    .qr-region {
+      font-size: .68rem;
+      color: #3a5a3a;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .bottom-bar {
+      background: #2d6a2d;
+      border-radius: 0 0 16px 16px;
+      display: flex;
+      overflow: hidden;
+    }
+    .action-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .45rem;
+      padding: .9rem .75rem;
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: .95rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #fff;
+      text-decoration: none;
+      background: rgba(0,0,0,0.1);
+      border-right: 1px solid rgba(255,255,255,0.12);
+      transition: background .15s;
+    }
+    .action-btn:last-child { border-right: none; }
+    .action-btn:hover { background: rgba(0,0,0,0.22); }
+
+    .built-by {
+      text-align: center;
+      margin-top: 1.2rem;
+      font-size: .68rem;
+      color: #243324;
+      letter-spacing: .05em;
+    }
+    .built-by a { color: #2d6a2d; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="card">
+
+    <div class="top-strip">
+      <div class="top-strip-label">Lawn &amp; Property Services</div>
+      <div class="badge">318</div>
+    </div>
+
+    <div class="card-body">
+
+      <div class="company">Hands on<br><span>Property Preservation</span> LLC</div>
+
+      <div class="owner-row">
+        <div class="owner-avatar">WB</div>
+        <div>
+          <div class="owner-name">William Brown</div>
+          <div class="owner-title">Owner · 10+ Years Experience</div>
+        </div>
+      </div>
+
+      <div class="tags">
+        <div class="tag">Lawn Care</div>
+        <div class="tag">Licensed</div>
+        <div class="tag">Insured</div>
+        <div class="tag">Commercial</div>
+        <div class="tag">Residential</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="free-quote">
+        <div class="free-quote-headline">Free Quotes &amp; Estimates</div>
+        <div class="free-quote-sub">Call or scan to get your free estimate today.</div>
+      </div>
+
+      <a class="phone-link" href="tel:+13182901889">
+        <div class="phone-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a3e6a3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.06 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21 16z"/>
+          </svg>
+        </div>
+        +1 (318) 290-1889
+      </a>
+
+      <div class="qr-section">
+        <div class="qr-box">
+          <canvas id="qr-canvas"></canvas>
+        </div>
+        <div class="qr-info">
+          <div class="qr-headline">Scan to Call</div>
+          <div class="qr-sub">Get your free quote — scan and William picks up.</div>
+          <div class="qr-region">Alexandria, Louisiana</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="bottom-bar">
+      <a class="action-btn" href="data:text/vcard;charset=utf-8,BEGIN%3AVCARD%0AVERSION%3A3.0%0AFN%3AWilliam%20Brown%0AN%3ABrown%3BWilliam%3B%3B%3B%0ATITLE%3AOwner%2C%20Hands%20on%20Property%20Preservation%20LLC%0ATEL%3BTYPE%3DCELL%3A%2B13182901889%0AORG%3AHands%20on%20Property%20Preservation%20LLC%0AEND%3AVCARD" download="William_Brown.vcf">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Save Contact
+      </a>
+      <a class="action-btn" href="tel:+13182901889">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.06 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21 16z"/></svg>
+        Call Now
+      </a>
+    </div>
+
+    <div class="built-by">Built by <a href="https://squarebidness.com" target="_blank">Square Bidness</a></div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <script>
+    QRCode.toCanvas(
+      document.getElementById('qr-canvas'),
+      'tel:+13182901889',
+      { width: 130, margin: 1, color: { dark: '#0f1a0f', light: '#ffffff' }, errorCorrectionLevel: 'M' }
+    );
+  </script>
+</body>
+</html>
