@@ -383,6 +383,40 @@
       .actions { display: none; }
     }
 
+    /* ---- pay online section ---- */
+    .inv-pay-online {
+      margin-top: 10px;
+      border: 1.5px solid #1a1a1a;
+      border-radius: 6px;
+      padding: 14px 16px;
+      background: #f9f9f9;
+    }
+    .inv-pay-online-label {
+      font-size: .65rem;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: #1a1a1a;
+      margin-bottom: 4px;
+    }
+    .inv-pay-online-methods {
+      font-size: .76rem;
+      color: #888;
+      margin-bottom: 8px;
+    }
+    .inv-pay-link {
+      display: block;
+      font-size: .76rem;
+      color: #1a1a1a;
+      word-break: break-all;
+      font-weight: 600;
+      text-decoration: underline;
+      text-decoration-color: #ccc;
+    }
+    @media print {
+      .inv-pay-link { color: #000; text-decoration: none; }
+    }
+
     /* ---- notes area ---- */
     .inv-notes {
       margin-top: 12px;
@@ -535,6 +569,12 @@
           <div class="inv-payment-label">Payment Instructions</div>
           <div class="inv-payment-note">Please make checks payable to:</div>
           <div class="inv-payment-name" id="p-pay-to">Eddie Philson</div>
+        </div>
+
+        <div class="inv-pay-online" id="p-pay-online" style="display:none">
+          <div class="inv-pay-online-label">Pay Online</div>
+          <div class="inv-pay-online-methods">Klarna &nbsp;·&nbsp; Affirm &nbsp;·&nbsp; Afterpay &nbsp;·&nbsp; Cash App &nbsp;·&nbsp; Card &nbsp;·&nbsp; ACH &nbsp;·&nbsp; Link</div>
+          <a class="inv-pay-link" id="p-pay-link" href="#" target="_blank"></a>
         </div>
 
         <div class="inv-notes" id="p-notes"></div>
@@ -754,6 +794,24 @@
 
       // Payment
       document.getElementById('p-pay-to').textContent = document.getElementById('pay-to').value || 'Eddie Philson';
+
+      // Pay online link
+      const payOnline = document.getElementById('p-pay-online');
+      const payLink   = document.getElementById('p-pay-link');
+      const readyToShow = total > 0 && num && num !== '—' && num !== 'Loading…';
+      if (readyToShow) {
+        const totalCents = Math.round(total * 100);
+        const evNameVal  = document.getElementById('ev-name').value;
+        const payParams  = new URLSearchParams({ inv: num, amt: totalCents });
+        if (btName)    payParams.set('name', btName);
+        if (evNameVal) payParams.set('desc', evNameVal);
+        const payUrl = 'https://www.squarebidness.com/philson-le-fleuriste/pay/?' + payParams.toString();
+        payLink.href = payUrl;
+        payLink.textContent = payUrl;
+        payOnline.style.display = '';
+      } else {
+        payOnline.style.display = 'none';
+      }
 
       // Notes
       const notes = document.getElementById('inv-notes').value;

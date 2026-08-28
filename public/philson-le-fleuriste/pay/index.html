@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>Pay Invoice — Philson Le Fleuriste</title>
+  <link rel="icon" href="/philson-le-fleuriste/assets/icons/favicon-48.png" type="image/png" />
+  <style>
+    :root{
+      --bg:#f8f5ef;--paper:#fff;--line:#e6ddd0;--text:#1d1a16;
+      --muted:#6f675e;--dark:#111;--shadow:0 16px 46px rgba(0,0,0,.08);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;min-height:100vh;
+      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+      background:radial-gradient(900px 500px at 0% 0%,rgba(184,147,85,.10),transparent 55%),var(--bg);
+      color:var(--text);display:grid;place-items:center;padding:32px 16px;
+    }
+    .card{
+      width:min(480px,100%);background:var(--paper);border:1px solid var(--line);
+      border-radius:28px;box-shadow:var(--shadow);overflow:hidden;text-align:center;
+    }
+    .top-band{
+      background:#1a1a1a;padding:18px 32px;display:flex;align-items:center;
+      justify-content:center;gap:10px;color:#fff;font-weight:900;font-size:.82rem;
+      letter-spacing:.12em;text-transform:uppercase;
+    }
+    .body{padding:36px 32px 28px}
+    .logo{margin:0 auto 20px;display:block}
+    .logo img{width:min(220px,100%);height:auto}
+    .inv-meta{
+      background:#f2ede4;border:1px solid var(--line);border-radius:14px;
+      padding:14px 18px;margin-bottom:24px;text-align:left;
+    }
+    .inv-meta-row{display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px}
+    .inv-meta-row:last-child{margin-bottom:0}
+    .inv-meta-label{color:var(--muted)}
+    .inv-meta-value{font-weight:700}
+    .amount{font-size:clamp(2rem,5vw,2.8rem);font-weight:900;letter-spacing:-.04em;margin:0 0 6px}
+    .sub{color:var(--muted);font-size:14px;margin:0 0 24px}
+    .methods{font-size:12px;color:var(--muted);margin-bottom:20px}
+    .btn{
+      display:flex;align-items:center;justify-content:center;width:100%;
+      padding:16px 22px;border-radius:999px;border:none;
+      background:var(--dark);color:#fff;font-size:16px;font-weight:900;
+      text-decoration:none;cursor:pointer;transition:.16s ease;font-family:inherit;
+    }
+    .btn:hover{opacity:.88;transform:translateY(-1px)}
+    .btn:disabled{opacity:.5;cursor:default;transform:none}
+    .error-box{
+      background:#fff0f0;border:1px solid #fca5a5;border-radius:12px;
+      padding:14px 18px;font-size:14px;color:#991b1b;margin-bottom:16px;display:none;
+    }
+    footer{margin-top:10px;padding:16px 32px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="top-band">Philson Le Fleuriste &nbsp;·&nbsp; Secure Payment</div>
+    <div class="body">
+      <a class="logo" href="/philson-le-fleuriste/">
+        <img src="/philson-le-fleuriste/assets/logo/philson-2014_1200.png" alt="Philson Le Fleuriste" />
+      </a>
+
+      <div class="inv-meta" id="inv-meta" style="display:none">
+        <div class="inv-meta-row">
+          <span class="inv-meta-label">Invoice</span>
+          <span class="inv-meta-value" id="meta-inv">&mdash;</span>
+        </div>
+        <div class="inv-meta-row" id="meta-client-row" style="display:none">
+          <span class="inv-meta-label">Client</span>
+          <span class="inv-meta-value" id="meta-client"></span>
+        </div>
+        <div class="inv-meta-row" id="meta-desc-row" style="display:none">
+          <span class="inv-meta-label">For</span>
+          <span class="inv-meta-value" id="meta-desc"></span>
+        </div>
+      </div>
+
+      <div class="amount" id="display-amount">—</div>
+      <p class="sub">Pay your Philson Le Fleuriste invoice securely.</p>
+      <p class="methods">Klarna &nbsp;·&nbsp; Affirm &nbsp;·&nbsp; Afterpay &nbsp;·&nbsp; Cash App &nbsp;·&nbsp; Card &nbsp;·&nbsp; ACH &nbsp;·&nbsp; Link</p>
+
+      <div class="error-box" id="error-box"></div>
+
+      <button class="btn" id="pay-btn" onclick="startPayment()">Pay Now</button>
+    </div>
+    <footer>© <span id="y"></span> Philson Le Fleuriste &nbsp;·&nbsp; Powered by Square Bidness Holdings</footer>
+  </div>
+
+  <script>
+    document.getElementById("y").textContent = new Date().getFullYear();
+
+    const params = new URLSearchParams(location.search);
+    const inv    = params.get("inv")  || "";
+    const amt    = parseInt(params.get("amt") || "0", 10);
+    const name   = params.get("name") || "";
+    const desc   = params.get("desc") || "";
+
+    function fmtMoney(cents) {
+      return "$" + (cents / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    // Populate display
+    if (inv || name || desc) {
+      document.getElementById("inv-meta").style.display = "";
+      document.getElementById("meta-inv").textContent = inv || "—";
+      if (name) {
+        document.getElementById("meta-client").textContent = name;
+        document.getElementById("meta-client-row").style.display = "";
+      }
+      if (desc) {
+        document.getElementById("meta-desc").textContent = desc;
+        document.getElementById("meta-desc-row").style.display = "";
+      }
+    }
+    if (amt > 0) {
+      document.getElementById("display-amount").textContent = fmtMoney(amt);
+    } else {
+      document.getElementById("pay-btn").disabled = true;
+      showError("No invoice amount found. Please use the link from your invoice.");
+    }
+
+    function showError(msg) {
+      const el = document.getElementById("error-box");
+      el.textContent = msg;
+      el.style.display = "";
+    }
+
+    async function startPayment() {
+      const btn = document.getElementById("pay-btn");
+      btn.disabled = true;
+      btn.textContent = "Preparing…";
+      document.getElementById("error-box").style.display = "none";
+
+      try {
+        const res = await fetch("/api/philson/pay-invoice", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ invoiceNumber: inv, totalCents: amt, clientName: name, description: desc }),
+        });
+        const data = await res.json();
+        if (data.ok && data.checkout_url) {
+          location.href = data.checkout_url;
+        } else {
+          showError(data.error || "Something went wrong. Please try again.");
+          btn.disabled = false;
+          btn.textContent = "Pay Now";
+        }
+      } catch (err) {
+        showError("Connection error. Please try again.");
+        btn.disabled = false;
+        btn.textContent = "Pay Now";
+      }
+    }
+  </script>
+</body>
+</html>
