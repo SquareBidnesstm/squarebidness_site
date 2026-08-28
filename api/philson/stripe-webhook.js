@@ -24,7 +24,7 @@ function normalizePhone(phone) {
 async function sendSms({ to, message }) {
   const sid   = process.env.TWILIO_ACCOUNT_SID;
   const token = process.env.TWILIO_AUTH_TOKEN;
-  const from  = process.env.DELISH_TWILIO_FROM_NUMBER;
+  const from  = process.env.PHILSON_TWILIO_FROM_NUMBER;
   if (!sid || !token || !from || !to) {
     console.warn("PHILSON SMS skipped — missing env or no recipient");
     return;
