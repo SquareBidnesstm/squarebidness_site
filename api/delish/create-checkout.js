@@ -86,7 +86,7 @@ const MENU_BY_DAY = {
   ],
   friday: [
     { id: "friday_shrimp_pasta", name: "Shrimp Pasta Plate", price: 12.99 }, { id: "friday_lasagna", name: "Lasagna Plate", price: 12.99 }, { id: "friday_chicken_pasta", name: "Chicken Pasta Plate", price: 12.99 },
-,
+  ],
   sunday: [
     {
       id: "sunday_pork_steak_gravy",
