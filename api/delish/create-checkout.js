@@ -11,11 +11,11 @@ import {
 import { getDelishFlashSale, isFlashSaleActive } from "../_lib/delish-flash-sale.js";
 import { getDelishWeeklyMenu } from "../_lib/delish-weekly-menu.js";
 
-const stripe = new Stripe(process.env.STRIPE_ONBOARDING_SECRET_KEY, {
+const stripe = new Stripe(process.env.STRIPE_HOLDINGS_SECRET_KEY, {
   apiVersion: "2024-06-20",
 });
 
-const DELISH_DESTINATION_ACCOUNT = "acct_1TspkpAcqVPZn6LU";
+const DELISH_DESTINATION_ACCOUNT = "acct_1U9TKsPdN2nfIzd8F";
 const PLATFORM_FEE_PERCENT = 0.10; // 10% of order total
 
 const redis = new Redis({

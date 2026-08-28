@@ -9,7 +9,7 @@ const redis = new Redis({
   token: process.env.DELISH_UPSTASH_REDIS_REST_TOKEN,
 });
 
-const stripe = new Stripe(process.env.STRIPE_ONBOARDING_SECRET_KEY, {
+const stripe = new Stripe(process.env.STRIPE_HOLDINGS_SECRET_KEY, {
   apiVersion: "2024-06-20",
 });
 
