@@ -534,7 +534,7 @@
     function calculateDeposit(totalAmount) {
       const total = Number(totalAmount);
       if (!Number.isFinite(total) || total <= 0) return "";
-      return (Math.round(total * 100 * 0.10) / 100).toFixed(2);
+      return (Math.round(total * 100 * 0.25) / 100).toFixed(2);
     }
 
     function updateDepositPreview(id) {
@@ -544,7 +544,7 @@
 
       const deposit = calculateDeposit(input.value);
       preview.textContent = deposit
-        ? `10% deposit will be $${deposit}.`
+        ? `25% deposit will be $${deposit}.`
         : "Enter the full catering total. Deposit is calculated automatically.";
     }
 
@@ -561,7 +561,7 @@
       }
 
       btn.disabled = true;
-      status.textContent = "Calculating 10% deposit and creating link...";
+      status.textContent = "Calculating 25% deposit and creating link...";
 
       try {
         const res = await fetch("/api/delish/approve-catering/", {
@@ -576,7 +576,7 @@
           throw new Error(data.error || "Failed to approve catering request.");
         }
 
-        status.textContent = `10% deposit sent: $${data.depositAmount}`;
+        status.textContent = `25% deposit sent: $${data.depositAmount}`;
         await loadOrders();
       } catch (error) {
         status.textContent = error.message || "Unable to send deposit.";
@@ -745,10 +745,10 @@
             data-approve-btn="${escapeHtml(order.id)}"
             onclick="approveCatering('${escapeHtml(order.id)}')"
           >
-            Approve + Send 10% Deposit
+            Approve + Send 25% Deposit
           </button>
           <div class="mini-status" data-deposit-preview="${escapeHtml(order.id)}">
-            ${depositPreview ? `10% deposit will be $${escapeHtml(depositPreview)}.` : "Enter the full catering total. Deposit is calculated automatically."}
+            ${depositPreview ? `25% deposit will be $${escapeHtml(depositPreview)}.` : "Enter the full catering total. Deposit is calculated automatically."}
           </div>
         ` : `
           <div class="mini-status">

@@ -67,8 +67,9 @@ export default async function handler(req, res) {
     }
 
     const totalCents = moneyToCents(total);
-    const depositPercent = 10;
+    const depositPercent = 25;
     const depositCents = Math.max(1, Math.round(totalCents * (depositPercent / 100)));
+    const platformFeeCents = Math.round(depositCents * 0.10);
     const totalFormatted = centsToMoney(totalCents);
     const depositFormatted = centsToMoney(depositCents);
 
@@ -101,7 +102,7 @@ export default async function handler(req, res) {
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      payment_method_types: ["card", "cashapp", "affirm", "afterpay_clearpay"],
+      payment_method_types: ["card", "affirm", "afterpay_clearpay"],
       success_url: `${successUrl}?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${cancelUrl}?request_id=${encodeURIComponent(id)}`,
       customer_email: existing.email || undefined,
@@ -138,13 +139,17 @@ export default async function handler(req, res) {
             unit_amount: depositCents,
             product_data: {
               name: `Delish Catering Deposit — ${existing.requestNumber}`,
-              description: `10% deposit on $${totalFormatted} catering total • ${existing.eventDate || "Event date TBD"}${
+              description: `25% deposit on $${totalFormatted} catering total • ${existing.eventDate || "Event date TBD"}${
                 existing.eventTime ? ` • ${existing.eventTime}` : ""
               }`,
             },
           },
         },
       ],
+      payment_intent_data: {
+        application_fee_amount: platformFeeCents,
+        transfer_data: { destination: DELISH_DESTINATION_ACCOUNT },
+      },
     });
 
     const updated = {
@@ -176,7 +181,7 @@ Request #: ${existing.requestNumber}
 Event Date: ${existing.eventDate || "Not provided"}
 Event Time: ${existing.eventTime || "Not provided"}
 Total Catering Amount: $${updated.totalAmount}
-Deposit Due: $${updated.depositAmount} (10% deposit to secure your date)
+Deposit Due: $${updated.depositAmount} (${updated.depositPercent}%)
 
 Use the link below to pay your deposit and secure your date:
 ${session.url}
@@ -191,7 +196,7 @@ Delish Catering
     if (twilioClient && existing.phone && existing.smsConsent === "yes") {
       try {
         await twilioClient.messages.create({
-          body: `Delish Catering: Your request ${existing.requestNumber} is approved. Pay your 10% deposit of $${updated.depositAmount} here: ${session.url}`,
+          body: `Delish Catering: Your request ${existing.requestNumber} is approved. Pay your 25% deposit of $${updated.depositAmount} here: ${session.url}`,
           from: twilioFromNumber,
           to: existing.phone,
         });
