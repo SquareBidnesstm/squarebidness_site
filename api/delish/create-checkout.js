@@ -15,7 +15,7 @@ const stripe = new Stripe(process.env.STRIPE_HOLDINGS_SECRET_KEY, {
   apiVersion: "2024-06-20",
 });
 
-const DELISH_DESTINATION_ACCOUNT = "acct_1U9TKsPdN2nfIzd8F";
+const DELISH_DESTINATION_ACCOUNT = "acct_1U9SuOBlL6MmbsS1";
 const PLATFORM_FEE_PERCENT = 0.10; // 10% of order total
 
 const redis = new Redis({
