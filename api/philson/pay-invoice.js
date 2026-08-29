@@ -32,7 +32,7 @@ export default async function handler(req, res) {
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      payment_method_types: ["card", "affirm", "afterpay_clearpay", "link", "us_bank_account"],
+      payment_method_types: ["card", "affirm", "afterpay_clearpay", "us_bank_account"],
       line_items: [{
         price_data: {
           currency: "usd",
