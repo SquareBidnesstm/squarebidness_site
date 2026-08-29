@@ -1,7 +1,6 @@
 // FILE: /api/delish/approve-catering.js
 import { Redis } from "@upstash/redis";
 import Stripe from "stripe";
-import nodemailer from "nodemailer";
 import twilio from "twilio";
 import { requireDelishOperatorAuth } from "../_lib/delish-operator-auth.js";
 
@@ -16,13 +15,16 @@ const stripe = new Stripe(process.env.STRIPE_HOLDINGS_SECRET_KEY, {
   apiVersion: "2024-06-20",
 });
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.DELISH_SMTP_USER,
-    pass: process.env.DELISH_SMTP_PASS,
-  },
-});
+async function sendEmail({ to, subject, text }) {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) { console.warn("DELISH CATERING EMAIL skipped — no RESEND_API_KEY"); return; }
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ from: "Delish Catering <noreply@squarebidness.com>", to, subject, text }),
+  });
+  if (!res.ok) console.error("DELISH APPROVE CATERING EMAIL ERROR:", await res.text());
+}
 
 const twilioFromNumber =
   process.env.DELISH_TWILIO_FROM_NUMBER ||
@@ -168,12 +170,10 @@ export default async function handler(req, res) {
 
     // 📧 EMAIL
     if (existing.email) {
-      await transporter.sendMail({
-        from: `"Delish Catering" <${process.env.DELISH_SMTP_USER}>`,
+      await sendEmail({
         to: existing.email,
         subject: `Delish Catering Deposit — ${existing.requestNumber}`,
-        text: `
-Hello ${existing.customerName || ""},
+        text: `Hello ${existing.customerName || ""},
 
 Your Delish catering request has been approved.
 
@@ -187,8 +187,7 @@ Use the link below to pay your deposit and secure your date:
 ${session.url}
 
 Thank you,
-Delish Catering
-        `.trim(),
+Delish Catering`.trim(),
       });
     }
 

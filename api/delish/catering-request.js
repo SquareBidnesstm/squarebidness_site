@@ -1,7 +1,6 @@
 // FILE: /api/delish/catering-request.js
 import { Redis } from "@upstash/redis";
 import crypto from "node:crypto";
-import nodemailer from "nodemailer";
 import twilio from "twilio";
 
 const redis = new Redis({
@@ -9,13 +8,16 @@ const redis = new Redis({
   token: process.env.DELISH_UPSTASH_REDIS_REST_TOKEN,
 });
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.DELISH_SMTP_USER,
-    pass: process.env.DELISH_SMTP_PASS,
-  },
-});
+async function sendEmail({ to, subject, text }) {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) { console.warn("DELISH CATERING EMAIL skipped — no RESEND_API_KEY"); return; }
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ from: "Delish Catering <noreply@squarebidness.com>", to, subject, text }),
+  });
+  if (!res.ok) console.error("DELISH CATERING EMAIL ERROR:", await res.text());
+}
 
 const twilioFromNumber =
   process.env.DELISH_TWILIO_FROM_NUMBER ||
@@ -110,13 +112,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    if (!process.env.DELISH_SMTP_USER || !process.env.DELISH_SMTP_PASS) {
-      return res.status(500).json({
-        ok: false,
-        error: "Missing Delish email environment variables.",
-      });
-    }
-
     if (
       !process.env.DELISH_UPSTASH_REDIS_REST_URL ||
       !process.env.DELISH_UPSTASH_REDIS_REST_TOKEN
@@ -270,15 +265,10 @@ ${line("Page", record.page)}
 ${line("Submitted At", record.submittedAt)}
     `.trim();
 
-    await transporter.sendMail({
-      from: `"Delish Catering" <${process.env.DELISH_SMTP_USER}>`,
+    await sendEmail({
       to: process.env.DELISH_NOTIFY_EMAIL || "delishcatering33@gmail.com",
       subject,
       text,
-      replyTo:
-        record.email ||
-        process.env.DELISH_NOTIFY_EMAIL ||
-        "delishcatering33@gmail.com",
     });
 
     if (twilioClient && process.env.TWILIO_TO_NUMBER) {
