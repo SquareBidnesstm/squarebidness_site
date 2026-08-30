@@ -331,7 +331,7 @@
 
       <section id="deposit-form">
         <div class="section-head">
-          <h2>Deposit request form</h2>
+          <h2 id="formHeading">Pay Your Deposit</h2>
         </div>
 
         <div class="card">
@@ -461,11 +461,15 @@
       form.details.value =
         "Selected Design: " + incomingDesign + "\n" +
         "Listed Price: " + (incomingPrice || "Not listed") + "\n\n" +
-        "Please include service date, city, delivery location, color preferences, and any family notes.";
+        "Please include service date, city, delivery or pickup preference, color notes, and any family details.";
+
+      const heading = document.getElementById("formHeading");
+      if (heading) heading.textContent = "Pay Deposit — " + incomingDesign;
 
       showStatus(
         "ok",
-        "<strong>" + incomingDesign + " selected.</strong><br>Continue filling out your request below."
+        "<strong>" + incomingDesign + (incomingPrice ? " — " + incomingPrice : "") + "</strong><br>" +
+        "Fill in your details below. 25% is collected at checkout to hold your order. Philson will confirm timing and delivery after payment."
       );
     }
 
