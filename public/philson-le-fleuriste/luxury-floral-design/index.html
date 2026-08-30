@@ -629,6 +629,7 @@
             <a href="/philson-le-fleuriste/tributes/" data-sb-action="hero_tributes" data-sb-component="hero-menu" data-sb-label="tributes">View Tribute Gallery</a>
             <a href="/philson-le-fleuriste/wedding-florals/" data-sb-action="hero_weddings" data-sb-component="hero-menu" data-sb-label="wedding-florals">Wedding Florals</a>
             <a href="/philson-le-fleuriste/socials/" data-sb-action="hero_socials" data-sb-component="hero-menu" data-sb-label="socials">Contact / Socials</a>
+            <button id="btn-135-hero" class="primary" style="cursor:pointer;border:none;font-size:15px;font-weight:900;min-height:74px;padding:16px 18px;border-radius:999px;transition:.16s ease" data-sb-action="hero_buy_135" data-sb-component="hero-menu" data-sb-label="135-roses">135 Roses — $400</button>
           </div>
         </div>
       </section>
@@ -669,6 +670,12 @@
               The 135 Roses piece gives Philson a clean luxury offer while the larger custom work continues to anchor the brand.
               It is built for moments where the florals need to feel intentional, premium, and memorable.
             </p>
+            <div style="margin-top:24px">
+              <button id="btn-135" class="btn primary" style="cursor:pointer;border:none;font-size:16px;padding:17px 28px" data-sb-action="buy_135_roses" data-sb-component="spotlight" data-sb-label="135-roses">
+                Order This Arrangement
+              </button>
+              <div id="btn-135-err" style="margin-top:10px;font-size:13px;color:#c0392b;display:none"></div>
+            </div>
           </div>
 
           <div class="spotlight-image">
@@ -775,6 +782,36 @@
 
   <script>
     document.getElementById("y").textContent = new Date().getFullYear();
+
+    async function checkout135(btn, errEl) {
+      btn.disabled = true;
+      btn.textContent = "Loading…";
+      if (errEl) errEl.style.display = "none";
+      try {
+        const res = await fetch("/api/philson/product-checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ product: "135-roses" }),
+        });
+        const data = await res.json();
+        if (data.ok && data.checkout_url) {
+          window.location.href = data.checkout_url;
+        } else {
+          throw new Error(data.error || "Something went wrong.");
+        }
+      } catch (e) {
+        btn.disabled = false;
+        btn.textContent = btn.dataset.label === "135-roses" && btn.id === "btn-135-hero" ? "135 Roses — $400" : "Order This Arrangement";
+        if (errEl) { errEl.textContent = e.message; errEl.style.display = "block"; }
+      }
+    }
+
+    const btn135 = document.getElementById("btn-135");
+    const btn135Hero = document.getElementById("btn-135-hero");
+    const err135 = document.getElementById("btn-135-err");
+
+    if (btn135) btn135.addEventListener("click", () => checkout135(btn135, err135));
+    if (btn135Hero) btn135Hero.addEventListener("click", () => checkout135(btn135Hero, null));
 
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", function () {

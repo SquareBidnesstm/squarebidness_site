@@ -128,6 +128,44 @@ export default async function handler(req, res) {
       }
     }
 
+    // ---- PRODUCT CHECKOUT ----
+    else if (source === "philson-product-checkout") {
+      const productName = metadata.product === "135-roses" ? "135 Roses — Luxury Bouquet" : (metadata.product || "your order");
+      const phone       = normalizePhone(metadata.phone);
+
+      if (phone) {
+        await sendSms({
+          to: phone,
+          message: `Philson Le Fleuriste\n\nYour order is confirmed!\n\n${productName}\nAmount: ${amountFmt}\n\nPhilson will reach out to arrange pickup or delivery.\n\nReply STOP to opt out.`,
+        });
+      }
+
+      if (custEmail) {
+        await sendEmail({
+          to: custEmail,
+          subject: "Order Confirmed — Philson Le Fleuriste",
+          text: `Your order is confirmed!\n\n${productName}\nAmount: ${amountFmt}\n\nPhilson will reach out to arrange pickup or delivery.\n\n— Philson Le Fleuriste\nLuxury Florals · Timeless Memories`,
+          html: `
+<div style="font-family:Helvetica,Arial,sans-serif;max-width:520px;margin:0 auto;color:#1d1a16">
+  <div style="text-align:center;padding:24px 0 16px">
+    <img src="https://www.squarebidness.com/philson-le-fleuriste/assets/logo/philson-2014_1200.png" alt="Philson Le Fleuriste" style="width:200px;height:auto" />
+  </div>
+  <div style="background:#e7f6ec;border-radius:8px;padding:12px 20px;margin-bottom:20px;color:#20482c;font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase">
+    ✓ Order Confirmed
+  </div>
+  <p style="font-size:15px;margin:0 0 20px;color:#555">Thank you! Your order is confirmed and Philson will be in touch to arrange pickup or delivery.</p>
+  <table style="width:100%;border-collapse:collapse;margin-bottom:24px">
+    <tr><td style="padding:8px 12px;background:#f8f5ef;border-radius:6px 6px 0 0;font-size:13px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:.06em">Item</td><td style="padding:8px 12px;background:#f8f5ef;border-radius:6px 6px 0 0;font-size:14px;font-weight:700;text-align:right">${productName}</td></tr>
+    <tr><td style="padding:8px 12px;background:#1a1a1a;border-radius:0 0 6px 6px;font-size:13px;color:#aaa;font-weight:600;text-transform:uppercase;letter-spacing:.06em">Amount Paid</td><td style="padding:8px 12px;background:#1a1a1a;border-radius:0 0 6px 6px;font-size:18px;font-weight:900;color:#fff;text-align:right">${amountFmt}</td></tr>
+  </table>
+  <div style="text-align:center;padding:16px 0;border-top:1px solid #e6ddd0;font-size:12px;color:#888">
+    Philson Le Fleuriste &nbsp;·&nbsp; Luxury Florals · Timeless Memories
+  </div>
+</div>`,
+        });
+      }
+    }
+
     // ---- INVOICE PAYMENT ----
     else if (source === "philson-invoice-payment") {
       const invoiceNumber = metadata.invoiceNumber || "";

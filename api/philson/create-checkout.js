@@ -44,6 +44,24 @@ export default async function handler(req, res) {
     }).catch(() => {});
   }
 
+  // Alert Philson immediately on new request submission (pre-payment)
+  const alertTo = process.env.PHILSON_ALERT_TO;
+  const twilioSid = process.env.TWILIO_ACCOUNT_SID;
+  const twilioToken = process.env.TWILIO_AUTH_TOKEN;
+  const twilioFrom = process.env.PHILSON_TWILIO_FROM_NUMBER;
+  if (alertTo && twilioSid && twilioToken && twilioFrom) {
+    const auth = Buffer.from(`${twilioSid}:${twilioToken}`).toString("base64");
+    fetch(`https://api.twilio.com/2010-04-01/Accounts/${twilioSid}/Messages.json`, {
+      method: "POST",
+      headers: { Authorization: `Basic ${auth}`, "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        To: alertTo,
+        From: twilioFrom,
+        Body: `NEW PHILSON REQUEST\n\n${fullName}\n${phone}${email ? `\n${email}` : ""}\n\nProject: ${projectType}\nDate: ${eventDate || "TBD"}\nBudget: ${budget}\n\nDetails: ${details.slice(0, 120)}${details.length > 120 ? "..." : ""}`,
+      }),
+    }).catch(() => {});
+  }
+
   const depositCents = DEPOSIT_AMOUNTS[budget] ?? 10000;
 
   try {
