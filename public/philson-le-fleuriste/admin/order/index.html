@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Order Review — Philson Le Fleuriste</title>
+  <meta name="robots" content="noindex,nofollow"/>
+  <link rel="icon" href="/philson-le-fleuriste/assets/icons/favicon-48.png" type="image/png"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0d0d0d;--card:#1a1a1a;--line:#2a2a2a;
+      --text:#f0ece6;--muted:#888;--accent:#c9a96e;
+      --green:#2ecc71;--red:#e74c3c;--orange:#f39c12;
+      --blue:#3498db;
+    }
+    body{background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,sans-serif;min-height:100vh;padding:20px 16px 60px}
+    .logo{text-align:center;padding:20px 0 28px}
+    .logo img{width:180px;height:auto;opacity:.9}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:24px;margin-bottom:16px}
+    .label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:4px}
+    .value{font-size:16px;font-weight:600;color:var(--text);word-break:break-word}
+    .row{display:flex;gap:16px;margin-bottom:14px}
+    .col{flex:1;min-width:0}
+    .badge{display:inline-flex;align-items:center;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+    .badge-pending{background:rgba(243,156,18,.15);color:var(--orange)}
+    .badge-approved,.badge-payment_sent{background:rgba(46,204,113,.15);color:var(--green)}
+    .badge-declined,.badge-expired,.badge-canceled{background:rgba(231,76,60,.15);color:var(--red)}
+    .badge-paid{background:rgba(52,152,219,.15);color:var(--blue)}
+    h2{font-size:22px;font-weight:700;color:var(--accent);margin-bottom:20px;text-align:center}
+    .action-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
+    .btn{display:flex;align-items:center;justify-content:center;padding:16px;border-radius:14px;font-size:15px;font-weight:800;border:none;cursor:pointer;transition:.15s}
+    .btn-approve{background:var(--green);color:#fff}
+    .btn-decline{background:var(--red);color:#fff}
+    .btn-alter{background:var(--orange);color:#fff;grid-column:1/-1}
+    .btn:disabled{opacity:.4;cursor:not-allowed}
+    .divider{border:none;border-top:1px solid var(--line);margin:20px 0}
+    textarea,input{width:100%;background:#111;border:1px solid var(--line);border-radius:10px;padding:12px;color:var(--text);font-size:14px;font-family:inherit;resize:vertical;margin-top:6px}
+    textarea:focus,input:focus{outline:1px solid var(--accent)}
+    .alter-form{display:none;margin-top:16px}
+    .alter-form.show{display:block}
+    .msg{padding:14px 16px;border-radius:12px;font-size:14px;font-weight:600;text-align:center;margin-top:16px}
+    .msg-ok{background:rgba(46,204,113,.15);color:var(--green)}
+    .msg-err{background:rgba(231,76,60,.15);color:var(--red)}
+    .rush-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(231,76,60,.2);color:#ff6b6b;font-size:13px;font-weight:800;padding:8px 14px;border-radius:999px;margin-bottom:16px}
+    #loading{text-align:center;padding:60px 20px;color:var(--muted);font-size:16px}
+    #content{display:none}
+    #error-view{display:none;text-align:center;padding:60px 20px;color:var(--red)}
+    .done-msg{text-align:center;padding:24px;font-size:18px;font-weight:700;color:var(--green)}
+  </style>
+</head>
+<body>
+
+<div class="logo">
+  <img src="/philson-le-fleuriste/assets/logo/philson-2014_1200.png" alt="Philson Le Fleuriste"/>
+</div>
+
+<div id="loading">Loading order…</div>
+<div id="error-view">Order not found or link expired.</div>
+<div id="content"></div>
+
+<script>
+const params = new URLSearchParams(location.search);
+const token = params.get("token");
+
+if (!token) {
+  document.getElementById("loading").style.display = "none";
+  document.getElementById("error-view").style.display = "block";
+} else {
+  fetch(`/api/philson/get-order/?token=${encodeURIComponent(token)}`)
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById("loading").style.display = "none";
+      if (!data.ok || !data.order) {
+        document.getElementById("error-view").style.display = "block";
+        return;
+      }
+      renderOrder(data.order);
+    })
+    .catch(() => {
+      document.getElementById("loading").style.display = "none";
+      document.getElementById("error-view").style.display = "block";
+    });
+}
+
+function statusBadge(s) {
+  const map = {
+    pending_review: "badge-pending",
+    approved: "badge-approved",
+    payment_sent: "badge-payment_sent",
+    altered: "badge-approved",
+    declined: "badge-declined",
+    paid: "badge-paid",
+    expired: "badge-expired",
+    canceled: "badge-canceled",
+  };
+  return `<span class="badge ${map[s] || "badge-pending"}">${s.replace("_"," ")}</span>`;
+}
+
+function renderOrder(o) {
+  const content = document.getElementById("content");
+  const actionable = ["pending_review"].includes(o.status);
+  const alreadyDone = !actionable;
+
+  const rushBadge = o.is_rush ? `<div class="rush-badge">⚡ RUSH ORDER — 24-48 HOUR</div>` : "";
+
+  content.innerHTML = `
+    <h2>Order Review</h2>
+    ${rushBadge}
+
+    <div class="card">
+      <div class="row">
+        <div class="col"><div class="label">Status</div><div class="value">${statusBadge(o.status)}</div></div>
+        <div class="col"><div class="label">Received</div><div class="value">${new Date(o.created_at).toLocaleString()}</div></div>
+      </div>
+      <div class="row">
+        <div class="col"><div class="label">Design</div><div class="value">${o.design || o.project_type || "—"}</div></div>
+        <div class="col"><div class="label">Listed Price</div><div class="value">${o.listed_price || "—"}</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <div class="col"><div class="label">Customer</div><div class="value">${o.full_name}</div></div>
+        <div class="col"><div class="label">Phone</div><div class="value"><a href="tel:${o.phone}" style="color:var(--accent)">${o.phone}</a></div></div>
+      </div>
+      ${o.email ? `<div><div class="label">Email</div><div class="value">${o.email}</div></div>` : ""}
+      ${o.event_date ? `<div style="margin-top:14px"><div class="label">Date Needed</div><div class="value">${o.event_date}</div></div>` : ""}
+      ${o.delivery_type ? `<div style="margin-top:14px"><div class="label">Pickup / Delivery</div><div class="value">${o.delivery_type}</div></div>` : ""}
+    </div>
+
+    ${o.details ? `<div class="card"><div class="label">Customer Notes</div><div class="value" style="white-space:pre-wrap;margin-top:6px">${o.details}</div></div>` : ""}
+
+    ${alreadyDone ? `<div class="done-msg">${o.status === "paid" ? "✓ Paid" : o.status === "payment_sent" ? "Payment link sent — awaiting customer" : o.status === "declined" ? "Order declined" : o.status === "expired" ? "Order expired" : "Already processed"}</div>` : ""}
+
+    ${actionable ? `
+    <div class="card">
+      <div class="label" style="margin-bottom:12px">Check availability — respond within 1 hour</div>
+
+      <div class="action-grid">
+        <button class="btn btn-approve" id="btn-approve" onclick="submitAction('approve')">✓ Approve</button>
+        <button class="btn btn-decline" id="btn-decline" onclick="submitAction('decline')">✗ Decline</button>
+        <button class="btn btn-alter" id="btn-alter" onclick="toggleAlter()">⟳ Alter / Counter</button>
+      </div>
+
+      <div class="alter-form" id="alter-form">
+        <hr class="divider"/>
+        <div class="label">Revised Price (leave blank to keep original)</div>
+        <input id="alter-price" type="text" placeholder="e.g. $600"/>
+        <div class="label" style="margin-top:14px">Message to Customer</div>
+        <textarea id="alter-notes" rows="3" placeholder="e.g. That design uses white lilies which aren't available — I can substitute gardenias for the same look at $600."></textarea>
+        <button class="btn btn-alter" style="margin-top:12px" onclick="submitAction('alter')">Send Counter to Customer</button>
+      </div>
+
+      <div class="alter-form" id="decline-form">
+        <hr class="divider"/>
+        <div class="label">Reason / Alternatives (sent to customer)</div>
+        <textarea id="decline-notes" rows="3" placeholder="e.g. This design requires flowers that won't be available that week. I have Spray 3 and Spray 8 ready to go."></textarea>
+        <button class="btn btn-decline" style="margin-top:12px" onclick="submitAction('decline')">Confirm Decline</button>
+      </div>
+
+      <div id="action-msg"></div>
+    </div>` : ""}
+  `;
+
+  content.style.display = "block";
+}
+
+let alterOpen = false;
+let declineOpen = false;
+
+function toggleAlter() {
+  alterOpen = !alterOpen;
+  document.getElementById("alter-form").classList.toggle("show", alterOpen);
+  declineOpen = false;
+  const df = document.getElementById("decline-form");
+  if (df) df.classList.remove("show");
+}
+
+function showMsg(type, text) {
+  const el = document.getElementById("action-msg");
+  if (el) { el.className = `msg msg-${type}`; el.textContent = text; }
+}
+
+async function submitAction(action) {
+  const btns = document.querySelectorAll(".btn");
+  btns.forEach(b => b.disabled = true);
+
+  const notes = action === "decline"
+    ? (document.getElementById("decline-notes")?.value || "")
+    : (document.getElementById("alter-notes")?.value || "");
+  const alteredPrice = document.getElementById("alter-price")?.value || "";
+
+  // Show decline form if not open yet
+  if (action === "decline" && !declineOpen) {
+    declineOpen = true;
+    const df = document.getElementById("decline-form");
+    if (df) df.classList.add("show");
+    alterOpen = false;
+    const af = document.getElementById("alter-form");
+    if (af) af.classList.remove("show");
+    btns.forEach(b => b.disabled = false);
+    return;
+  }
+
+  showMsg("ok", "Processing…");
+
+  try {
+    const res = await fetch("/api/philson/eddie-action/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token, action, notes, alteredPrice }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      if (action === "approve" || action === "alter") {
+        showMsg("ok", "✓ Customer notified with payment link. 1-hour window started.");
+      } else {
+        showMsg("ok", "✓ Customer notified that the order can't be fulfilled.");
+      }
+      setTimeout(() => location.reload(), 2500);
+    } else {
+      showMsg("err", data.error || "Something went wrong. Try again.");
+      btns.forEach(b => b.disabled = false);
+    }
+  } catch (e) {
+    showMsg("err", "Network error. Try again.");
+    btns.forEach(b => b.disabled = false);
+  }
+}
+</script>
+</body>
+</html>

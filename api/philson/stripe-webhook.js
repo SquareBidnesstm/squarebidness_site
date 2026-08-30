@@ -1,4 +1,5 @@
 import Stripe from "stripe";
+import { updateOrder } from "../_lib/supabase-philson.js";
 
 const stripe = new Stripe(process.env.STRIPE_HOLDINGS_SECRET_KEY, {
   apiVersion: "2024-06-20",
@@ -158,6 +159,58 @@ export default async function handler(req, res) {
     <tr><td style="padding:8px 12px;background:#f8f5ef;border-radius:6px 6px 0 0;font-size:13px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:.06em">Item</td><td style="padding:8px 12px;background:#f8f5ef;border-radius:6px 6px 0 0;font-size:14px;font-weight:700;text-align:right">${productName}</td></tr>
     <tr><td style="padding:8px 12px;background:#1a1a1a;border-radius:0 0 6px 6px;font-size:13px;color:#aaa;font-weight:600;text-transform:uppercase;letter-spacing:.06em">Amount Paid</td><td style="padding:8px 12px;background:#1a1a1a;border-radius:0 0 6px 6px;font-size:18px;font-weight:900;color:#fff;text-align:right">${amountFmt}</td></tr>
   </table>
+  <div style="text-align:center;padding:16px 0;border-top:1px solid #e6ddd0;font-size:12px;color:#888">
+    Philson Le Fleuriste &nbsp;·&nbsp; Luxury Florals · Timeless Memories
+  </div>
+</div>`,
+        });
+      }
+    }
+
+    // ---- ORDER CHECKOUT (casket spray approval flow) ----
+    else if (source === "philson-order-checkout") {
+      const orderId  = metadata.orderId  || "";
+      const fullName = metadata.fullName || "Valued Client";
+      const design   = metadata.design   || "your order";
+      const phone    = normalizePhone(metadata.phone);
+
+      // Mark order paid in Supabase
+      if (orderId) {
+        try {
+          await updateOrder(orderId, { status: "paid", paid_at: new Date().toISOString() });
+        } catch (err) {
+          console.error("PHILSON ORDER PAID UPDATE ERROR:", err.message);
+        }
+      }
+
+      // Customer SMS
+      if (phone) {
+        await sendSms({
+          to: phone,
+          message: `Philson Le Fleuriste\n\nThank you, ${fullName}! Your payment for ${design} is confirmed.\nAmount: ${amountFmt}\n\nPhilson will be in touch to finalize delivery and timing.\n\nReply STOP to opt out.`,
+        });
+      }
+
+      // Customer email
+      if (custEmail) {
+        await sendEmail({
+          to: custEmail,
+          subject: "Payment Confirmed — Philson Le Fleuriste",
+          text: `Thank you, ${fullName}!\n\nYour payment for ${design} is confirmed.\nAmount: ${amountFmt}\n\nPhilson will reach out to finalize delivery and timing.\n\n— Philson Le Fleuriste\nLuxury Florals · Timeless Memories`,
+          html: `
+<div style="font-family:Helvetica,Arial,sans-serif;max-width:520px;margin:0 auto;color:#1d1a16">
+  <div style="text-align:center;padding:24px 0 16px">
+    <img src="https://www.squarebidness.com/philson-le-fleuriste/assets/logo/philson-2014_1200.png" alt="Philson Le Fleuriste" style="width:200px;height:auto" />
+  </div>
+  <div style="background:#e7f6ec;border-radius:8px;padding:12px 20px;margin-bottom:20px;color:#20482c;font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase">
+    ✓ Payment Confirmed
+  </div>
+  <p style="font-size:16px;margin:0 0 16px">Thank you, <strong>${fullName}</strong>!</p>
+  <table style="width:100%;border-collapse:collapse;margin-bottom:24px">
+    <tr><td style="padding:8px 12px;background:#f8f5ef;border-radius:6px 6px 0 0;font-size:13px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:.06em">Design</td><td style="padding:8px 12px;background:#f8f5ef;border-radius:6px 6px 0 0;font-size:14px;font-weight:700;text-align:right">${design}</td></tr>
+    <tr><td style="padding:8px 12px;background:#1a1a1a;border-radius:0 0 6px 6px;font-size:13px;color:#aaa;font-weight:600;text-transform:uppercase;letter-spacing:.06em">Amount Paid</td><td style="padding:8px 12px;background:#1a1a1a;border-radius:0 0 6px 6px;font-size:18px;font-weight:900;color:#fff;text-align:right">${amountFmt}</td></tr>
+  </table>
+  <p style="font-size:14px;color:#555;margin:0 0 24px">Philson will reach out to finalize delivery and timing.</p>
   <div style="text-align:center;padding:16px 0;border-top:1px solid #e6ddd0;font-size:12px;color:#888">
     Philson Le Fleuriste &nbsp;·&nbsp; Luxury Florals · Timeless Memories
   </div>

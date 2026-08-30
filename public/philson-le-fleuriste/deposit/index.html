@@ -473,10 +473,28 @@
       );
     }
 
+    // Detect casket spray flow — route to submit-order (no upfront payment)
+    const isCasketSpray = incomingProjectType === "Casket Spray";
+
+    if (isCasketSpray) {
+      // Pre-fill projectType
+      if (form.projectType) form.projectType.value = "Casket Spray";
+
+      // Hide budget (we know the price from the URL)
+      const budgetField = form.budget?.closest("div")?.parentElement;
+      if (budgetField) budgetField.style.display = "none";
+      if (form.budget) form.budget.required = false;
+
+      // Change submit button
+      const btn = form.querySelector(‘button[type="submit"]’);
+      if (btn) btn.textContent = "Submit Order Request";
+    }
+
     form.addEventListener("submit", async function (e) {
       e.preventDefault();
 
       const submitBtn = form.querySelector(‘button[type="submit"]’);
+      const usingCasketFlow = isCasketSpray || form.projectType.value === "Casket Spray";
 
       const data = {
         fullName:     form.fullName.value.trim(),
@@ -484,45 +502,90 @@
         email:        form.email.value.trim(),
         projectType:  form.projectType.value,
         eventDate:    form.eventDate.value,
-        budget:       form.budget.value,
+        budget:       form.budget.value || incomingPrice || "",
         deliveryType: form.deliveryType.value,
         details:      form.details.value.trim(),
-        source:       "philson-deposit-bnpl",
+        design:       incomingDesign || "",
+        listedPrice:  incomingPrice || "",
       };
 
-      if (!data.fullName || !data.phone || !data.email || !data.projectType || !data.eventDate || !data.budget || !data.details) {
-        showStatus("err", "Please complete all required fields, including your email — it’s required for Klarna, Affirm, and Afterpay.");
+      // Casket spray: relax budget requirement
+      const requiredFields = usingCasketFlow
+        ? [data.fullName, data.phone, data.projectType, data.eventDate, data.details]
+        : [data.fullName, data.phone, data.email, data.projectType, data.eventDate, data.budget, data.details];
+
+      if (requiredFields.some(f => !f)) {
+        showStatus("err", usingCasketFlow
+          ? "Please fill in your name, phone, date needed, and details."
+          : "Please complete all required fields, including your email — it’s required for Klarna, Affirm, and Afterpay."
+        );
         return;
       }
 
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = usingCasketFlow ? "Submitting…" : "Preparing checkout...";
+      }
+
       try {
-        if (submitBtn) {
-          submitBtn.disabled = true;
-          submitBtn.textContent = "Preparing checkout...";
+        if (usingCasketFlow) {
+          // ── CASKET SPRAY: availability-first flow ──────────────────────
+          showStatus("ok", "Sending your request to Philson&hellip;");
+
+          const res = await fetch("/api/philson/submit-order/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              fullName:     data.fullName,
+              phone:        data.phone,
+              email:        data.email,
+              projectType:  data.projectType,
+              eventDate:    data.eventDate,
+              deliveryType: data.deliveryType,
+              details:      data.details,
+              design:       data.design,
+              listedPrice:  data.listedPrice,
+            }),
+          });
+
+          const result = await res.json();
+          if (!res.ok || !result.ok) throw new Error(result.error || "Submission failed.");
+
+          // Success — no Stripe redirect
+          form.reset();
+          showStatus("ok",
+            "<strong>Request received!</strong><br>" +
+            "Philson is checking availability and will reach out within the hour. " +
+            "If confirmed, you’ll receive a secure payment link via text" +
+            (data.email ? " and email" : "") + "."
+          );
+          if (submitBtn) submitBtn.style.display = "none";
+
+        } else {
+          // ── STANDARD FLOW: direct deposit checkout ─────────────────────
+          showStatus("ok", "One moment — setting up your payment options&hellip;");
+
+          const res = await fetch("/api/philson/create-checkout", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...data, source: "philson-deposit-bnpl" }),
+          });
+
+          const result = await res.json();
+          if (!res.ok || !result.ok || !result.checkout_url) throw new Error(result.error || "Could not start checkout.");
+
+          window.location.href = result.checkout_url;
         }
-
-        showStatus("ok", "One moment — setting up your payment options&hellip;");
-
-        const response = await fetch("/api/philson/create-checkout", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
-
-        const result = await response.json();
-
-        if (!response.ok || !result.ok || !result.checkout_url) {
-          throw new Error(result.error || "Could not start checkout.");
-        }
-
-        window.location.href = result.checkout_url;
 
       } catch (error) {
-        showStatus("err", "Something went wrong starting checkout. Please try again or call Philson directly.");
-        console.error("Philson checkout error:", error);
+        const errMsg = usingCasketFlow
+          ? "Something went wrong. Please try again or call Philson directly."
+          : "Something went wrong starting checkout. Please try again or call Philson directly.";
+        showStatus("err", errMsg);
+        console.error("Philson form error:", error);
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.textContent = "Pay Deposit — Klarna · Affirm · Card";
+          submitBtn.textContent = usingCasketFlow ? "Submit Order Request" : "Pay Deposit — Klarna · Affirm · Card";
         }
       }
     });

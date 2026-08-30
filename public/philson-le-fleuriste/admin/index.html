@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Orders — Philson Le Fleuriste</title>
+  <meta name="robots" content="noindex,nofollow"/>
+  <link rel="icon" href="/philson-le-fleuriste/assets/icons/favicon-48.png" type="image/png"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0d0d0d;--card:#1a1a1a;--line:#2a2a2a;
+      --text:#f0ece6;--muted:#777;--accent:#c9a96e;
+      --green:#2ecc71;--red:#e74c3c;--orange:#f39c12;--blue:#3498db;
+    }
+    body{background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,sans-serif;min-height:100vh;padding:20px 16px 80px}
+    .logo{text-align:center;padding:16px 0 24px}
+    .logo img{width:160px;height:auto;opacity:.9}
+    h1{font-size:20px;font-weight:800;color:var(--accent);margin-bottom:20px;text-align:center}
+    .auth-card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:28px;max-width:380px;margin:60px auto}
+    .auth-card h2{font-size:18px;font-weight:700;margin-bottom:16px;text-align:center}
+    input{width:100%;background:#111;border:1px solid var(--line);border-radius:10px;padding:12px;color:var(--text);font-size:15px;font-family:inherit;margin-bottom:12px}
+    input:focus{outline:1px solid var(--accent)}
+    .btn{display:flex;align-items:center;justify-content:center;padding:14px;border-radius:12px;font-size:15px;font-weight:800;border:none;cursor:pointer;width:100%;transition:.15s}
+    .btn-accent{background:var(--accent);color:#1a1a1a}
+    .btn-sm{padding:8px 14px;font-size:13px;border-radius:8px;width:auto;display:inline-flex}
+    .tabs{display:flex;gap:8px;margin-bottom:20px;overflow-x:auto;padding-bottom:4px}
+    .tab{padding:8px 16px;border-radius:999px;font-size:13px;font-weight:700;cursor:pointer;border:none;white-space:nowrap}
+    .tab.active{background:var(--accent);color:#1a1a1a}
+    .tab:not(.active){background:var(--card);color:var(--muted);border:1px solid var(--line)}
+    .count{font-size:10px;font-weight:900;background:rgba(201,169,110,.2);color:var(--accent);padding:2px 7px;border-radius:999px;margin-left:6px;display:inline-block}
+    .badge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em}
+    .badge-pending{background:rgba(243,156,18,.15);color:var(--orange)}
+    .badge-payment_sent,.badge-approved,.badge-altered{background:rgba(46,204,113,.15);color:var(--green)}
+    .badge-declined,.badge-expired,.badge-canceled{background:rgba(231,76,60,.15);color:var(--red)}
+    .badge-paid{background:rgba(52,152,219,.15);color:var(--blue)}
+    .order-row{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:12px;cursor:pointer;transition:.1s}
+    .order-row:hover{border-color:var(--accent)}
+    .order-head{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+    .order-name{font-size:15px;font-weight:700}
+    .order-meta{font-size:12px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap}
+    .order-design{font-size:13px;color:var(--accent);font-weight:600;margin-bottom:4px}
+    .rush{font-size:11px;font-weight:900;color:#ff6b6b;background:rgba(231,76,60,.15);padding:3px 8px;border-radius:999px}
+    .empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:15px}
+    .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px}
+    .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:center}
+    .stat-num{font-size:24px;font-weight:900;color:var(--accent)}
+    .stat-label{font-size:11px;color:var(--muted);margin-top:4px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+    #auth-view{display:block}
+    #main-view{display:none}
+    #loading-indicator{text-align:center;padding:40px;color:var(--muted);display:none}
+    .msg-err{padding:12px;border-radius:10px;background:rgba(231,76,60,.15);color:var(--red);font-size:13px;font-weight:600;margin-bottom:12px;text-align:center}
+    a.order-link{color:var(--accent);text-decoration:none;font-size:12px}
+  </style>
+</head>
+<body>
+
+<div class="logo">
+  <img src="/philson-le-fleuriste/assets/logo/philson-2014_1200.png" alt="Philson Le Fleuriste"/>
+</div>
+
+<!-- Auth gate -->
+<div id="auth-view">
+  <div class="auth-card">
+    <h2>Admin Access</h2>
+    <input id="key-input" type="password" placeholder="Admin key" autocomplete="current-password"/>
+    <div id="auth-err" style="display:none" class="msg-err">Incorrect key.</div>
+    <button class="btn btn-accent" onclick="authenticate()">Enter</button>
+  </div>
+</div>
+
+<!-- Main view -->
+<div id="main-view">
+  <h1>Philson Orders</h1>
+
+  <div class="stat-row" id="stats-row">
+    <div class="stat"><div class="stat-num" id="stat-pending">—</div><div class="stat-label">Pending</div></div>
+    <div class="stat"><div class="stat-num" id="stat-payment">—</div><div class="stat-label">Awaiting Pay</div></div>
+    <div class="stat"><div class="stat-num" id="stat-paid">—</div><div class="stat-label">Paid</div></div>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <button class="tab active" data-status="all" onclick="setTab(this,'all')">All</button>
+    <button class="tab" data-status="pending_review" onclick="setTab(this,'pending_review')">Pending</button>
+    <button class="tab" data-status="payment_sent" onclick="setTab(this,'payment_sent')">Awaiting Pay</button>
+    <button class="tab" data-status="paid" onclick="setTab(this,'paid')">Paid</button>
+    <button class="tab" data-status="declined" onclick="setTab(this,'declined')">Declined</button>
+    <button class="tab" data-status="expired" onclick="setTab(this,'expired')">Expired</button>
+  </div>
+
+  <div id="loading-indicator">Loading orders…</div>
+  <div id="orders-list"></div>
+</div>
+
+<script>
+let adminKey = "";
+let allOrders = [];
+let currentStatus = "all";
+
+function authenticate() {
+  const val = document.getElementById("key-input").value.trim();
+  if (!val) return;
+  adminKey = val;
+  loadOrders();
+}
+
+document.getElementById("key-input").addEventListener("keydown", e => {
+  if (e.key === "Enter") authenticate();
+});
+
+function setTab(el, status) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  el.classList.add("active");
+  currentStatus = status;
+  renderOrders();
+}
+
+async function loadOrders() {
+  document.getElementById("loading-indicator").style.display = "block";
+  try {
+    const res = await fetch(`/api/philson/admin-orders/?key=${encodeURIComponent(adminKey)}&limit=500`);
+    const data = await res.json();
+    if (!data.ok) {
+      document.getElementById("auth-err").style.display = "block";
+      document.getElementById("loading-indicator").style.display = "none";
+      adminKey = "";
+      return;
+    }
+    document.getElementById("auth-err").style.display = "none";
+    document.getElementById("auth-view").style.display = "none";
+    document.getElementById("main-view").style.display = "block";
+    allOrders = data.orders || [];
+    updateStats();
+    renderOrders();
+  } catch (e) {
+    document.getElementById("loading-indicator").style.display = "none";
+    document.getElementById("auth-err").textContent = "Network error. Try again.";
+    document.getElementById("auth-err").style.display = "block";
+    adminKey = "";
+  }
+}
+
+function updateStats() {
+  const pending = allOrders.filter(o => o.status === "pending_review").length;
+  const payment = allOrders.filter(o => o.status === "payment_sent").length;
+  const paid = allOrders.filter(o => o.status === "paid").length;
+  document.getElementById("stat-pending").textContent = pending;
+  document.getElementById("stat-payment").textContent = payment;
+  document.getElementById("stat-paid").textContent = paid;
+}
+
+function statusBadge(s) {
+  const map = {
+    pending_review: "badge-pending",
+    payment_sent: "badge-payment_sent",
+    approved: "badge-approved",
+    altered: "badge-altered",
+    declined: "badge-declined",
+    paid: "badge-paid",
+    expired: "badge-expired",
+    canceled: "badge-canceled",
+  };
+  return `<span class="badge ${map[s] || "badge-pending"}">${s.replace("_"," ")}</span>`;
+}
+
+function timeAgo(ts) {
+  const diff = Date.now() - new Date(ts).getTime();
+  const min = Math.floor(diff / 60000);
+  if (min < 60) return `${min}m ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}h ago`;
+  return `${Math.floor(hr / 24)}d ago`;
+}
+
+function renderOrders() {
+  document.getElementById("loading-indicator").style.display = "none";
+  const filtered = currentStatus === "all"
+    ? allOrders
+    : allOrders.filter(o => o.status === currentStatus);
+
+  const list = document.getElementById("orders-list");
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty">No orders in this category.</div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(o => {
+    const rush = o.is_rush ? `<span class="rush">⚡ RUSH</span>` : "";
+    const design = o.design || o.project_type || "Custom";
+    const price = o.altered_price || o.listed_price || "";
+    const reviewLink = o.status === "pending_review"
+      ? `<a class="order-link" href="/philson-le-fleuriste/admin/order/?token=${o.eddie_token}" target="_blank">Open Review →</a>`
+      : "";
+    return `
+      <div class="order-row" onclick="openOrder('${o.eddie_token}')">
+        <div class="order-head">
+          ${statusBadge(o.status)}
+          ${rush}
+          <span style="margin-left:auto;font-size:12px;color:var(--muted)">${timeAgo(o.created_at)}</span>
+        </div>
+        <div class="order-design">${design}${price ? ` · ${price}` : ""}</div>
+        <div class="order-name">${o.full_name}</div>
+        <div class="order-meta">
+          <span>${o.phone}</span>
+          ${o.event_date ? `<span>📅 ${o.event_date}</span>` : ""}
+          ${o.delivery_type ? `<span>${o.delivery_type}</span>` : ""}
+        </div>
+        ${reviewLink ? `<div style="margin-top:10px">${reviewLink}</div>` : ""}
+        ${o.eddie_notes ? `<div style="margin-top:8px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:8px">${o.eddie_notes}</div>` : ""}
+      </div>`;
+  }).join("");
+}
+
+function openOrder(token) {
+  window.location.href = `/philson-le-fleuriste/admin/order/?token=${token}`;
+}
+</script>
+</body>
+</html>
