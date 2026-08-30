@@ -1119,29 +1119,30 @@
       </section>
 <section>
   <div class="section-head">
-    <h2>How booking works</h2>
+    <h2>Two ways to order</h2>
+    <p>Some pieces are ready to purchase now. Custom work moves through a structured process so the build is right.</p>
   </div>
 
   <div class="grid grid-4">
 
     <div class="card">
-      <h3>1. Start Request</h3>
-      <p>Send the date, city, project type, and floral direction.</p>
+      <h3>Order Directly</h3>
+      <p>Fixed-price pieces — like the 135 Roses — can be purchased now. Payment is collected at checkout.</p>
     </div>
 
     <div class="card">
-      <h3>2. Review</h3>
-      <p>Availability and scope are reviewed before anything is confirmed.</p>
+      <h3>Select a Design</h3>
+      <p>For custom work and casket sprays, select the design and pay your deposit to start the order. 25% is collected at checkout to hold your build.</p>
     </div>
 
     <div class="card">
-      <h3>3. Deposit</h3>
-      <p>Approved requests move into deposit and booking.</p>
+      <h3>Philson Confirms</h3>
+      <p>Timing, delivery, and any custom details are confirmed after the deposit lands. Balance is due before delivery.</p>
     </div>
 
     <div class="card">
-      <h3>4. Build + Deliver</h3>
-      <p>The work is produced and delivered or installed.</p>
+      <h3>Build + Deliver</h3>
+      <p>The work is produced, finished, and delivered or set up on-site.</p>
     </div>
 
   </div>
@@ -1150,17 +1151,32 @@
 <section>
   <div class="cta">
     <div>
-      <h3>Start your request.</h3>
-      <p>Submit your details so the project can be reviewed and scheduled.</p>
+      <h3>Ready to order.</h3>
+      <p>Purchase a fixed-price piece now, or select a design and pay your deposit to get custom work started.</p>
     </div>
 
     <div class="cta-actions">
-      <a class="btn primary"
-         href="/philson-le-fleuriste/deposit/"
-         data-sb-action="home_start_request"
+      <button id="cta-135"
+         class="btn primary"
+         style="cursor:pointer;border:none"
+         data-sb-action="home_order_135"
          data-sb-component="cta"
-         data-sb-label="start-request">
-         Start Request
+         data-sb-label="135-roses">
+         135 Roses — $400
+      </button>
+      <a class="btn"
+         href="/philson-le-fleuriste/casket-sprays/"
+         data-sb-action="home_casket_sprays"
+         data-sb-component="cta"
+         data-sb-label="casket-sprays">
+         Casket Sprays
+      </a>
+      <a class="btn"
+         href="/philson-le-fleuriste/deposit/"
+         data-sb-action="home_custom_request"
+         data-sb-component="cta"
+         data-sb-label="custom-request">
+         Custom Request
       </a>
     </div>
   </div>
@@ -1202,6 +1218,27 @@
 
   <script>
   document.getElementById("y").textContent = new Date().getFullYear();
+
+  const cta135 = document.getElementById("cta-135");
+  if (cta135) {
+    cta135.addEventListener("click", async () => {
+      cta135.disabled = true;
+      cta135.textContent = "Loading…";
+      try {
+        const res = await fetch("/api/philson/product-checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ product: "135-roses" }),
+        });
+        const data = await res.json();
+        if (data.ok && data.checkout_url) { window.location.href = data.checkout_url; }
+        else { throw new Error(data.error || "Something went wrong."); }
+      } catch (e) {
+        cta135.disabled = false;
+        cta135.textContent = "135 Roses — $400";
+      }
+    });
+  }
 
   const lightbox = document.getElementById("lightbox");
   const lightboxImg = document.getElementById("lightboxImg");
