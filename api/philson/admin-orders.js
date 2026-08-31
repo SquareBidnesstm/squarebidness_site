@@ -10,7 +10,7 @@ export default async function handler(req, res) {
   if (!ADMIN_KEY || key !== ADMIN_KEY) {
     return res.status(401).json({ ok: false, error: "Unauthorized" });
   }
-  if (!isConfigured()) return res.status(500).json({ ok: false, error: "DB unavailable" });
+  if (!isConfigured()) return res.status(200).json({ ok: true, orders: [], warning: "db_unavailable" });
 
   const orders = await getOrders({
     status: status || undefined,
