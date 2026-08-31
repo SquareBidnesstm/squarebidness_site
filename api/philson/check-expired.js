@@ -1,9 +1,13 @@
-import { getExpiredPaymentOrders, updateOrder } from "../_lib/supabase-philson.js";
+import { getExpiredPaymentOrders, updateOrder, isConfigured } from "../_lib/supabase-philson.js";
 
 export default async function handler(req, res) {
   // Allow Vercel cron (GET) or internal calls (POST)
   if (req.method !== "GET" && req.method !== "POST") {
     return res.status(405).json({ ok: false });
+  }
+
+  if (!isConfigured()) {
+    return res.status(200).json({ ok: true, expired: 0, reason: "supabase_not_configured" });
   }
 
   const expired = await getExpiredPaymentOrders();
