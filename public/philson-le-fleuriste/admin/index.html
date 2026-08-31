@@ -97,6 +97,12 @@ let adminKey = "";
 let allOrders = [];
 let currentStatus = "all";
 
+// Auto-login if key stored in browser
+try {
+  const saved = localStorage.getItem("philson_admin_key");
+  if (saved) { adminKey = saved; loadOrders(); }
+} catch(e) {}
+
 function authenticate() {
   const val = document.getElementById("key-input").value.trim();
   if (!val) return;
@@ -124,8 +130,11 @@ async function loadOrders() {
       document.getElementById("auth-err").style.display = "block";
       document.getElementById("loading-indicator").style.display = "none";
       adminKey = "";
+      try { localStorage.removeItem("philson_admin_key"); } catch(e) {}
       return;
     }
+    // Save key so Eddie stays logged in on this device
+    try { localStorage.setItem("philson_admin_key", adminKey); } catch(e) {}
     document.getElementById("auth-err").style.display = "none";
     document.getElementById("auth-view").style.display = "none";
     document.getElementById("main-view").style.display = "block";
