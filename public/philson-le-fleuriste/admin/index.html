@@ -9,47 +9,47 @@
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     :root{
-      --bg:#0d0d0d;--card:#1a1a1a;--line:#2a2a2a;
-      --text:#f0ece6;--muted:#777;--accent:#c9a96e;
-      --green:#2ecc71;--red:#e74c3c;--orange:#f39c12;--blue:#3498db;
+      --bg:#f9f7f4;--card:#ffffff;--line:#e8e2da;
+      --text:#1c1815;--muted:#9a8f85;--accent:#c9a96e;
+      --green:#1e8c4e;--red:#c0392b;--orange:#b7770a;--blue:#2471a3;
     }
     body{background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,sans-serif;min-height:100vh;padding:20px 16px 80px}
     .logo{text-align:center;padding:16px 0 24px}
-    .logo img{width:160px;height:auto;opacity:.9}
-    h1{font-size:20px;font-weight:800;color:var(--accent);margin-bottom:20px;text-align:center}
-    .auth-card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:28px;max-width:380px;margin:60px auto}
-    .auth-card h2{font-size:18px;font-weight:700;margin-bottom:16px;text-align:center}
-    input{width:100%;background:#111;border:1px solid var(--line);border-radius:10px;padding:12px;color:var(--text);font-size:15px;font-family:inherit;margin-bottom:12px}
-    input:focus{outline:1px solid var(--accent)}
+    .logo img{width:160px;height:auto}
+    h1{font-size:20px;font-weight:800;color:var(--accent);margin-bottom:20px;text-align:center;letter-spacing:.02em}
+    .auth-card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:28px;max-width:380px;margin:60px auto;box-shadow:0 2px 16px rgba(0,0,0,.06)}
+    .auth-card h2{font-size:18px;font-weight:700;margin-bottom:16px;text-align:center;color:var(--text)}
+    input{width:100%;background:#faf9f7;border:1px solid var(--line);border-radius:10px;padding:12px;color:var(--text);font-size:15px;font-family:inherit;margin-bottom:12px}
+    input:focus{outline:1px solid var(--accent);background:#fff}
     .btn{display:flex;align-items:center;justify-content:center;padding:14px;border-radius:12px;font-size:15px;font-weight:800;border:none;cursor:pointer;width:100%;transition:.15s}
-    .btn-accent{background:var(--accent);color:#1a1a1a}
+    .btn-accent{background:var(--accent);color:#fff}
     .btn-sm{padding:8px 14px;font-size:13px;border-radius:8px;width:auto;display:inline-flex}
     .tabs{display:flex;gap:8px;margin-bottom:20px;overflow-x:auto;padding-bottom:4px}
     .tab{padding:8px 16px;border-radius:999px;font-size:13px;font-weight:700;cursor:pointer;border:none;white-space:nowrap}
-    .tab.active{background:var(--accent);color:#1a1a1a}
+    .tab.active{background:var(--accent);color:#fff}
     .tab:not(.active){background:var(--card);color:var(--muted);border:1px solid var(--line)}
-    .count{font-size:10px;font-weight:900;background:rgba(201,169,110,.2);color:var(--accent);padding:2px 7px;border-radius:999px;margin-left:6px;display:inline-block}
+    .count{font-size:10px;font-weight:900;background:rgba(201,169,110,.15);color:var(--accent);padding:2px 7px;border-radius:999px;margin-left:6px;display:inline-block}
     .badge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em}
-    .badge-pending{background:rgba(243,156,18,.15);color:var(--orange)}
-    .badge-payment_sent,.badge-approved,.badge-altered{background:rgba(46,204,113,.15);color:var(--green)}
-    .badge-declined,.badge-expired,.badge-canceled{background:rgba(231,76,60,.15);color:var(--red)}
-    .badge-paid{background:rgba(52,152,219,.15);color:var(--blue)}
-    .order-row{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:12px;cursor:pointer;transition:.1s}
-    .order-row:hover{border-color:var(--accent)}
+    .badge-pending{background:rgba(183,119,10,.1);color:var(--orange)}
+    .badge-payment_sent,.badge-approved,.badge-altered{background:rgba(30,140,78,.1);color:var(--green)}
+    .badge-declined,.badge-expired,.badge-canceled{background:rgba(192,57,43,.1);color:var(--red)}
+    .badge-paid{background:rgba(36,113,163,.1);color:var(--blue)}
+    .order-row{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:12px;cursor:pointer;transition:.1s;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+    .order-row:hover{border-color:var(--accent);box-shadow:0 2px 12px rgba(201,169,110,.15)}
     .order-head{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
     .order-name{font-size:15px;font-weight:700}
     .order-meta{font-size:12px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap}
     .order-design{font-size:13px;color:var(--accent);font-weight:600;margin-bottom:4px}
-    .rush{font-size:11px;font-weight:900;color:#ff6b6b;background:rgba(231,76,60,.15);padding:3px 8px;border-radius:999px}
+    .rush{font-size:11px;font-weight:900;color:#c0392b;background:rgba(192,57,43,.1);padding:3px 8px;border-radius:999px}
     .empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:15px}
     .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px}
-    .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:center}
+    .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.04)}
     .stat-num{font-size:24px;font-weight:900;color:var(--accent)}
     .stat-label{font-size:11px;color:var(--muted);margin-top:4px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
     #auth-view{display:block}
     #main-view{display:none}
     #loading-indicator{text-align:center;padding:40px;color:var(--muted);display:none}
-    .msg-err{padding:12px;border-radius:10px;background:rgba(231,76,60,.15);color:var(--red);font-size:13px;font-weight:600;margin-bottom:12px;text-align:center}
+    .msg-err{padding:12px;border-radius:10px;background:rgba(192,57,43,.08);color:var(--red);font-size:13px;font-weight:600;margin-bottom:12px;text-align:center}
     a.order-link{color:var(--accent);text-decoration:none;font-size:12px}
   </style>
 </head>
