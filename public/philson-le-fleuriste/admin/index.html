@@ -63,7 +63,10 @@
 <div id="auth-view">
   <div class="auth-card">
     <h2>Admin Access</h2>
-    <input id="key-input" type="password" placeholder="Admin key" autocomplete="current-password"/>
+    <div style="position:relative;">
+      <input id="key-input" type="password" placeholder="Admin key" autocomplete="current-password" style="padding-right:2.8rem;width:100%;box-sizing:border-box;"/>
+      <button type="button" id="show-key-btn" onclick="toggleKeyVisibility()" style="position:absolute;right:.6rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1rem;opacity:.6;padding:.2rem;" title="Show / hide key">👁</button>
+    </div>
     <div id="auth-err" style="display:none" class="msg-err">Incorrect key.</div>
     <button class="btn btn-accent" onclick="authenticate()">Enter</button>
   </div>
@@ -96,6 +99,11 @@
 let adminKey = "";
 let allOrders = [];
 let currentStatus = "all";
+
+function toggleKeyVisibility() {
+  const inp = document.getElementById("key-input");
+  inp.type = inp.type === "password" ? "text" : "password";
+}
 
 // Auto-login if key stored in browser
 try {
