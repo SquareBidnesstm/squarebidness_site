@@ -27,82 +27,29 @@ const PENDING_ORDER_TTL_SECONDS = 60 * 60 * 24;
 
 const MENU_BY_DAY = {
   monday: [
-    {
-      id: "monday_red_beans_fried_chicken",
-      name: "Red Beans with Fried Chicken",
-      price: 13.99,
-    },
-    {
-      id: "monday_okra_fried_chicken",
-      name: "Okra with Fried Chicken",
-      price: 13.99,
-    },
-    {
-      id: "monday_hamburger_steak",
-      name: "Hamburger Steak Plate",
-      price: 13.99,
-    },
-    {
-      id: "monday_spaghetti",
-      name: "Spaghetti Plate",
-      price: 13.99,
-    },
+    { id: "monday_red_beans_fried_chicken", name: "Red Beans & Fried Chicken", price: 13.99 },
+    { id: "monday_smothered_okra_fried_chicken", name: "Smothered Okra & Fried Chicken", price: 13.99 },
   ],
   tuesday: [
-    {
-      id: "tuesday_beef_tips",
-      name: "Beef Tips Plate",
-      price: 13.99,
-    },
-    {
-      id: "tuesday_meatloaf",
-      name: "Meatloaf Plate",
-      price: 13.99,
-    },
+    { id: "tuesday_lasagna", name: "Lasagna Plate", price: 13.99 },
+    { id: "tuesday_meatloaf", name: "Meatloaf Plate", price: 13.99 },
   ],
   wednesday: [
-    {
-      id: "wednesday_pork_neckbones",
-      name: "Pork Neckbones Plate",
-      price: 10.0,
-    },
-    {
-      id: "wednesday_baked_chicken",
-      name: "Baked Chicken Plate",
-      price: 10.0,
-    },
-    {
-      id: "wednesday_country_fried_steak",
-      name: "Country Fried Steak Plate",
-      price: 10.0,
-    },
+    { id: "wednesday_pork_neckbones", name: "Neck Bones Plate", price: 13.99 },
+    { id: "wednesday_country_fried_steak", name: "Country Fried Steak Plate", price: 13.99 },
+    { id: "wednesday_baked_chicken", name: "Baked Chicken Plate", price: 13.99 },
   ],
   thursday: [
-    {
-      id: "thursday_turkey_wings",
-      name: "Turkey Wings Plate",
-      price: 16.99,
-    },
+    { id: "thursday_turkey_wings", name: "Turkey Wings Plate", price: 16.99 },
   ],
   friday: [
-    { id: "friday_shrimp_pasta", name: "Shrimp Pasta Plate", price: 12.99 }, { id: "friday_lasagna", name: "Lasagna Plate", price: 12.99 }, { id: "friday_chicken_pasta", name: "Chicken Pasta Plate", price: 12.99 },
+    { id: "friday_hamburger_steak", name: "Hamburger Steak Plate", price: 13.99 },
+    { id: "friday_beef_tips", name: "Beef Tips Plate", price: 13.99 },
   ],
   sunday: [
-    {
-      id: "sunday_pork_steak_gravy",
-      name: "Pork Steak and Gravy Plate",
-      price: 15.99,
-    },
-    {
-      id: "sunday_oxtails",
-      name: "Oxtails Plate",
-      price: 24.99,
-    },
-    {
-      id: "sunday_baked_chicken",
-      name: "Baked Chicken Plate",
-      price: 13.99,
-    },
+    { id: "sunday_pork_steak_gravy", name: "Pork Steak and Gravy Plate", price: 15.99 },
+    { id: "sunday_oxtails", name: "Oxtails Plate", price: 24.99 },
+    { id: "sunday_baked_chicken", name: "Baked Chicken Plate", price: 13.99 },
   ],
   everyday: [
     {
