@@ -648,7 +648,19 @@
     `;
   }
 
-  function applyDailyMenu() {
+  async function applyDailyMenu() {
+    try {
+      const or = await fetch("/api/delish/menu-overrides/", { cache: "no-store" });
+      const orData = await or.json().catch(() => ({}));
+      if (orData?.overrides?.mustardGreens?.available === true) {
+        Object.values(MENU_BY_DAY).forEach(day => {
+          if (!day.extraSides.includes("Mustard Greens")) {
+            day.extraSides.push("Mustard Greens");
+          }
+        });
+      }
+    } catch (_) {}
+
     const parts = getCentralNowParts();
     const { mode, today } = getServiceMode();
 

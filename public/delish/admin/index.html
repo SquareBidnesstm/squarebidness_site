@@ -703,6 +703,15 @@
           <input type="checkbox" id="dessertsToggle" checked />
         </div>
       </div>
+      <div class="row" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line-color,#2a2a2a);">
+        <div class="toggle">
+          <label for="mustardGreensToggle" style="display:flex;flex-direction:column;gap:2px;">
+            <span>Mustard Greens</span>
+            <span style="font-size:11px;opacity:.65;font-weight:400;">Persistent — stays on until turned off</span>
+          </label>
+          <input type="checkbox" id="mustardGreensToggle" />
+        </div>
+      </div>
     </div>
 
     <div class="card control-section" id="special-menu-control">
@@ -1523,6 +1532,7 @@ function renderSoldOutList(selected = []) {
       document.getElementById("drinksToggle").checked = overrides?.sections?.drinks !== false;
       document.getElementById("extraSidesToggle").checked = overrides?.sections?.extraSides !== false;
       document.getElementById("dessertsToggle").checked = overrides?.sections?.desserts !== false;
+      document.getElementById("mustardGreensToggle").checked = overrides?.mustardGreens?.available === true;
       document.getElementById("specialMenuToggle").checked = overrides?.specialMenu?.active === true;
       renderSpecialMenuItems(Array.isArray(overrides?.specialMenu?.items) ? overrides.specialMenu.items : []);
       document.getElementById("fridayMenuToggle").checked = overrides?.fridayMenu?.active === true;
@@ -1563,6 +1573,9 @@ function renderSoldOutList(selected = []) {
           drinks: document.getElementById("drinksToggle").checked,
           extraSides: document.getElementById("extraSidesToggle").checked,
           desserts: document.getElementById("dessertsToggle").checked,
+        },
+        mustardGreens: {
+          available: document.getElementById("mustardGreensToggle").checked,
         },
         specialMenu: {
           active: document.getElementById("specialMenuToggle").checked,

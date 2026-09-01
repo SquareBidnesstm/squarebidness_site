@@ -128,6 +128,8 @@ export default async function handler(req, res) {
       ? normalizeFridayMenu(body.fridayMenu)
       : (current.fridayMenu || { active: false, items: [], updatedAt: "" });
 
+    const mustardGreens = { available: body?.mustardGreens?.available === true };
+
     const next = {
       ...current,
       sections: {
@@ -150,6 +152,7 @@ export default async function handler(req, res) {
       fridayMenu,
       dessertItems,
       dessertItemsDate: getCentralDateKey(),
+      mustardGreens,
       customerMessage: String(body.customerMessage || "").trim().slice(0, 180),
       updatedAt: new Date().toISOString(),
       updatedBy: "operator",

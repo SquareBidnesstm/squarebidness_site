@@ -35,6 +35,7 @@ export const DEFAULT_DELISH_MENU_OVERRIDES = {
   fridayMenu: { active: false, items: [] },
   dessertItems: [],
   dessertItemsDate: "",
+  mustardGreens: { available: false },
   customerMessage: "",
   updatedAt: "",
   updatedBy: "system",
@@ -105,6 +106,10 @@ export async function getDelishMenuOverrides() {
     ? saved.fridayMenu
     : {};
 
+  const savedMustardGreens = saved.mustardGreens && typeof saved.mustardGreens === "object"
+    ? saved.mustardGreens
+    : {};
+
   return {
     ...DEFAULT_DELISH_MENU_OVERRIDES,
     ...saved,
@@ -137,5 +142,8 @@ export async function getDelishMenuOverrides() {
     },
     dessertItems: savedDessertItems,
     dessertItemsDate: savedDessertItems.length ? dessertItemsDate : todayKey,
+    mustardGreens: {
+      available: savedMustardGreens.available === true,
+    },
   };
 }
