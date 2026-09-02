@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Delish Receipt — DL-260826-1023</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#0b0b0b" />
+  <link rel="icon" sizes="32x32" href="/delish/assets/delish-favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/delish/assets/delish-logo-mark-180.png" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0b0b0b;
+      color: #ffffff;
+      font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+      min-height: 100vh;
+      padding: 40px 16px 64px;
+    }
+
+    .receipt { max-width: 520px; margin: 0 auto; }
+
+    .header { text-align: center; margin-bottom: 32px; }
+    .brand-name { font-size: 28px; font-weight: 700; letter-spacing: -0.03em; color: #D4AF37; }
+    .brand-sub { font-size: 12px; color: #6b6b6b; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 4px; }
+
+    .card { background: #121212; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; overflow: hidden; }
+
+    .confirmed-strip {
+      background: rgba(212,175,55,0.12);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .check-circle {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: #D4AF37;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .check-circle svg { width: 12px; height: 12px; }
+    .confirmed-text { font-size: 13px; font-weight: 600; color: #D4AF37; letter-spacing: 0.04em; }
+
+    .meta { padding: 24px 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .order-number { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 16px; }
+    .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .meta-item label { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #6b6b6b; margin-bottom: 3px; }
+    .meta-item span { font-size: 14px; color: #e0e0e0; font-weight: 500; }
+    .pickup-window { font-size: 14px; color: #D4AF37; font-weight: 600; }
+
+    .items-section { padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .section-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #6b6b6b; margin-bottom: 14px; }
+
+    .item-row {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      gap: 16px; padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .item-row:last-child { border-bottom: none; }
+    .item-name { font-size: 14px; color: #e8e8e8; font-weight: 500; flex: 1; }
+    .item-name .sides { display: block; font-size: 12px; color: #7a7a7a; font-weight: 400; margin-top: 2px; }
+    .item-qty { font-size: 13px; color: #7a7a7a; white-space: nowrap; padding-top: 1px; }
+    .item-price { font-size: 14px; font-weight: 600; color: #e8e8e8; font-variant-numeric: tabular-nums; white-space: nowrap; padding-top: 1px; min-width: 52px; text-align: right; }
+
+    .totals { padding: 18px 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .total-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; }
+    .total-row .label { font-size: 13px; color: #8a8a8a; }
+    .total-row .value { font-size: 13px; color: #c8c8c8; font-variant-numeric: tabular-nums; }
+    .total-row.grand { margin-top: 10px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.1); }
+    .total-row.grand .label { font-size: 15px; font-weight: 700; color: #ffffff; }
+    .total-row.grand .value { font-size: 18px; font-weight: 700; color: #D4AF37; }
+
+    .payment-section {
+      padding: 18px 24px; border-bottom: 1px solid rgba(255,255,255,0.07);
+      display: flex; align-items: center; gap: 12px;
+    }
+    .amex-badge { background: #2176C7; color: #fff; font-size: 10px; font-weight: 800; letter-spacing: 0.06em; padding: 3px 7px; border-radius: 4px; flex-shrink: 0; }
+    .payment-detail { font-size: 13px; color: #a0a0a0; }
+    .payment-detail strong { color: #d0d0d0; font-weight: 600; }
+
+    .footer { padding: 20px 24px; text-align: center; }
+    .footer p { font-size: 12px; color: #5a5a5a; line-height: 1.6; }
+    .footer a { color: #D4AF37; text-decoration: none; }
+
+    .support-note { text-align: center; margin-top: 28px; font-size: 13px; color: #555; }
+  </style>
+</head>
+<body>
+  <div class="receipt">
+    <div class="header">
+      <div class="brand-name">Delish</div>
+      <div class="brand-sub">Alexandria, Louisiana · Pickup Only</div>
+    </div>
+
+    <div class="card">
+      <div class="confirmed-strip">
+        <div class="check-circle">
+          <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2 6l3 3 5-5" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="confirmed-text">Payment Confirmed</span>
+      </div>
+
+      <div class="meta">
+        <div class="order-number">Order #DL-260826-1023</div>
+        <div class="meta-grid">
+          <div class="meta-item">
+            <label>Customer</label>
+            <span>Derrick Howard</span>
+          </div>
+          <div class="meta-item">
+            <label>Date</label>
+            <span>August 26, 2026</span>
+          </div>
+          <div class="meta-item">
+            <label>Pickup Window</label>
+            <span class="pickup-window">11:30 AM – 12:00 PM</span>
+          </div>
+          <div class="meta-item">
+            <label>Receipt #</label>
+            <span>1563-9109</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="items-section">
+        <div class="section-label">Items</div>
+
+        <div class="item-row">
+          <div class="item-name">Baked Chicken Plate<span class="sides">Rice, Mac and Cheese, Yams</span></div>
+          <div class="item-qty">×1</div>
+          <div class="item-price">$10.00</div>
+        </div>
+        <div class="item-row">
+          <div class="item-name">Baked Chicken Plate<span class="sides">Rice, Cabbage, Black Eyed Peas</span></div>
+          <div class="item-qty">×1</div>
+          <div class="item-price">$10.00</div>
+        </div>
+        <div class="item-row">
+          <div class="item-name">Country Fried Steak Plate<span class="sides">Mashed Potatoes, Cabbage, Mac and Cheese</span></div>
+          <div class="item-qty">×1</div>
+          <div class="item-price">$10.00</div>
+        </div>
+        <div class="item-row">
+          <div class="item-name">Country Fried Steak Plate<span class="sides">Mashed Potatoes, Cabbage, Green Beans</span></div>
+          <div class="item-qty">×1</div>
+          <div class="item-price">$10.00</div>
+        </div>
+        <div class="item-row">
+          <div class="item-name">Country Fried Steak Plate<span class="sides">Mashed Potatoes, Mac and Cheese, Mac and Cheese</span></div>
+          <div class="item-qty">×1</div>
+          <div class="item-price">$10.00</div>
+        </div>
+        <div class="item-row">
+          <div class="item-name">Banana Pudding (with Bananas)</div>
+          <div class="item-qty">×2</div>
+          <div class="item-price">$7.98</div>
+        </div>
+        <div class="item-row">
+          <div class="item-name">Banana Pudding (without Bananas)</div>
+          <div class="item-qty">×2</div>
+          <div class="item-price">$7.98</div>
+        </div>
+        <div class="item-row">
+          <div class="item-name">Strawberry Cheesecake</div>
+          <div class="item-qty">×1</div>
+          <div class="item-price">$3.99</div>
+        </div>
+      </div>
+
+      <div class="totals">
+        <div class="total-row">
+          <span class="label">Subtotal</span>
+          <span class="value">$69.95</span>
+        </div>
+        <div class="total-row">
+          <span class="label">Sales Tax</span>
+          <span class="value">$7.34</span>
+        </div>
+        <div class="total-row grand">
+          <span class="label">Total Paid</span>
+          <span class="value">$77.29</span>
+        </div>
+      </div>
+
+      <div class="payment-section">
+        <span class="amex-badge">AMEX</span>
+        <span class="payment-detail"><strong>American Express</strong> ending in 1000 · Charged Aug 26, 2026</span>
+      </div>
+
+      <div class="footer">
+        <p>
+          Questions? Contact us at <a href="mailto:delishcatering33@gmail.com">delishcatering33@gmail.com</a><br>
+          or call <a href="tel:+19859817001">985-981-7001</a>
+        </p>
+      </div>
+    </div>
+
+    <div class="support-note">Delish · Alexandria, Louisiana · Pickup orders only</div>
+  </div>
+</body>
+</html>
