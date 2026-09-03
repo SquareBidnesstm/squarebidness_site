@@ -1,7 +1,3 @@
-// FILE: /api/delish/receipt-render.js
-// Dynamic receipt renderer — serves HTML for orders not yet baked to static files.
-// Static files in public/delish/receipt/[ORDER]/ take priority (served by Vercel first).
-// This endpoint handles everything else via the vercel.json rewrite.
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_HOLDINGS_SECRET_KEY, {
@@ -18,6 +14,13 @@ function formatPickupDate(dateStr) {
   return d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 }
 
+function formatPhone(raw) {
+  const digits = (raw || "").replace(/\D/g, "");
+  if (digits.length === 10) return `(${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6)}`;
+  if (digits.length === 11 && digits[0] === "1") return `(${digits.slice(1,4)}) ${digits.slice(4,7)}-${digits.slice(7)}`;
+  return raw || "";
+}
+
 function cardBrandLabel(brand) {
   const map = {
     amex: "American Express",
@@ -25,16 +28,17 @@ function cardBrandLabel(brand) {
     mastercard: "Mastercard",
     discover: "Discover",
     cashapp: "Cash App",
+    link: "Stripe Link",
   };
   return map[(brand || "").toLowerCase()] || brand || "";
 }
 
 function cardBrandBadge(brand) {
-  const bg = { amex: "#2176C7", visa: "#1A1F71", mastercard: "#EB001B", discover: "#FF6600", cashapp: "#00D632" };
-  const abbrev = { amex: "AMEX", visa: "VISA", mastercard: "MC", discover: "DISC", cashapp: "CASH" };
+  const bg = { amex: "#2176C7", visa: "#1A1F71", mastercard: "#EB001B", discover: "#FF6600", cashapp: "#00D632", link: "#635BFF" };
+  const abbrev = { amex: "AMEX", visa: "VISA", mastercard: "MC", discover: "DISC", cashapp: "CASH", link: "LINK" };
   const b = (brand || "").toLowerCase();
   const color = bg[b] || "#555";
-  const text = abbrev[b] || (brand || "").toUpperCase().slice(0, 4);
+  const text = abbrev[b] || (brand || "").toUpperCase().slice(0, 4) || "CARD";
   return `<span style="background:${color};color:#fff;font-size:10px;font-weight:800;letter-spacing:.06em;padding:3px 7px;border-radius:4px;flex-shrink:0;">${text}</span>`;
 }
 
@@ -45,14 +49,15 @@ function parseItemName(fullName) {
 }
 
 function renderItemRows(lineItems) {
-  return lineItems
-    .filter((li) => li.description !== "Sales Tax")
+  const items = lineItems.filter((li) => li.description !== "Sales Tax");
+  if (!items.length) {
+    return `<div style="color:#5a5a5a;font-size:13px;text-align:center;padding:12px 0;">No items found</div>`;
+  }
+  return items
     .map((li) => {
       const { name, sides } = parseItemName(li.description);
       const amount = `$${((li.amount_total || 0) / 100).toFixed(2)}`;
-      const sidesHtml = sides
-        ? `<span class="sides">${sides}</span>`
-        : "";
+      const sidesHtml = sides ? `<span class="sides">${sides}</span>` : "";
       return `
         <div class="item-row">
           <div class="item-name">${name}${sidesHtml}</div>
@@ -63,8 +68,46 @@ function renderItemRows(lineItems) {
     .join("");
 }
 
-function buildHtml({ orderNumber, customerName, pickupDate, pickupWindow, cardBrand, cardLast4, chargedDate, subtotal, tax, total, lineItems }) {
-  const pickupDateFmt = formatPickupDate(pickupDate) || chargedDate;
+function errorPage(code, heading, body) {
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Delish — ${heading}</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#0b0b0b" />
+  <link rel="icon" sizes="32x32" href="/delish/assets/delish-favicon-32.png" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0b0b0b; color: #fff; font-family: 'DM Sans', system-ui, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 40px 16px; }
+    .wrap { max-width: 400px; text-align: center; }
+    .logo { font-size: 28px; font-weight: 700; color: #D4AF37; letter-spacing: -0.03em; margin-bottom: 6px; }
+    .sub { font-size: 12px; color: #4a4a4a; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 40px; }
+    .code { font-size: 72px; font-weight: 700; color: #1e1e1e; line-height: 1; margin-bottom: 16px; }
+    h2 { font-size: 20px; font-weight: 600; color: #e0e0e0; margin-bottom: 10px; }
+    p { font-size: 14px; color: #666; line-height: 1.6; }
+    a { color: #D4AF37; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="logo">Delish</div>
+    <div class="sub">3710 S MacArthur · Alexandria, LA</div>
+    <div class="code">${code}</div>
+    <h2>${heading}</h2>
+    <p>${body}</p>
+  </div>
+</body>
+</html>`;
+}
+
+function buildHtml({ orderNumber, customerName, customerPhone, pickupDate, pickupWindow, cardBrand, cardLast4, chargedDate, subtotal, tax, total, lineItems }) {
+  const pickupDateFmt = formatPickupDate(pickupDate);
+  const dateLabel = pickupDateFmt ? "Pickup Date" : "Order Date";
+  const dateValue = pickupDateFmt || chargedDate;
+  const phoneFmt = formatPhone(customerPhone);
   const itemsHtml = renderItemRows(lineItems);
 
   return `<!doctype html>
@@ -141,9 +184,9 @@ function buildHtml({ orderNumber, customerName, pickupDate, pickupWindow, cardBr
         <div class="order-number">Order #${orderNumber}</div>
         <div class="meta-grid">
           <div class="meta-item"><label>Customer</label><span>${customerName || "—"}</span></div>
-          <div class="meta-item"><label>Date</label><span>${pickupDateFmt}</span></div>
+          <div class="meta-item"><label>${dateLabel}</label><span>${dateValue}</span></div>
           <div class="meta-item"><label>Pickup Window</label><span class="pickup-window">${pickupWindow || "—"}</span></div>
-          <div class="meta-item"><label>Order #</label><span>${orderNumber}</span></div>
+          <div class="meta-item"><label>Phone</label><span>${phoneFmt || "—"}</span></div>
         </div>
       </div>
       <div class="items-section">
@@ -156,9 +199,10 @@ function buildHtml({ orderNumber, customerName, pickupDate, pickupWindow, cardBr
         <div class="total-row grand"><span class="label">Total Paid</span><span class="value">$${total}</span></div>
       </div>
       <div class="payment-section">
-        ${cardBrandBadge(cardBrand)}
+        ${cardBrand ? cardBrandBadge(cardBrand) : cardBrandBadge("")}
         <span class="payment-detail">
-          <strong>${cardBrandLabel(cardBrand)}</strong>${cardLast4 ? ` ending in ${cardLast4}` : ""} · Charged ${chargedDate}
+          ${cardBrand ? `<strong>${cardBrandLabel(cardBrand)}</strong>${cardLast4 ? ` ending in ${cardLast4}` : ""}` : "<strong>Card on file</strong>"}
+          · Charged ${chargedDate}
         </span>
       </div>
       <div class="footer">
@@ -180,7 +224,9 @@ export default async function handler(req, res) {
 
   const orderNumber = String(req.query.order || "").trim().toUpperCase();
   if (!orderNumber || !orderNumber.startsWith("DL-")) {
-    return res.status(400).send("<h1>Invalid order number</h1>");
+    return res.status(400).send(
+      errorPage(400, "Invalid order number", "Please check the link in your confirmation text and try again.")
+    );
   }
 
   try {
@@ -191,11 +237,9 @@ export default async function handler(req, res) {
     });
 
     if (!result.data.length) {
-      return res
-        .status(404)
-        .send(
-          `<!doctype html><html><head><meta charset="utf-8"><title>Not Found</title></head><body style="font-family:sans-serif;padding:40px;background:#0b0b0b;color:#fff;"><h2 style="color:#D4AF37;">Order not found</h2><p>Order ${orderNumber} could not be located.</p></body></html>`
-        );
+      return res.status(404).send(
+        errorPage(404, "Order not found", `Order ${orderNumber} could not be located. If you placed this order recently, please try again in a few minutes or call <a href="tel:+13187879407">(318) 787-9407</a>.`)
+      );
     }
 
     const session = result.data[0];
@@ -214,6 +258,8 @@ export default async function handler(req, res) {
           cardLast4 = pm.card.last4;
         } else if (pm?.cashapp) {
           cardBrand = "cashapp";
+        } else if (pm?.link) {
+          cardBrand = "link";
         }
       } catch (_) {}
     }
@@ -223,33 +269,40 @@ export default async function handler(req, res) {
     }
 
     const lineItems = session.line_items?.data || [];
-    const subtotal = Number(meta.subtotal || 0).toFixed(2);
-    const tax = Number(meta.tax || 0).toFixed(2);
-    const total = Number(
-      meta.total || (session.amount_total || 0) / 100
-    ).toFixed(2);
+
+    // Subtotal: prefer metadata value, fall back to summing non-tax line items
+    let subtotal = Number(meta.subtotal || 0);
+    if (!subtotal) {
+      subtotal = lineItems
+        .filter((li) => li.description !== "Sales Tax")
+        .reduce((sum, li) => sum + (li.amount_total || 0) / 100, 0);
+    }
+
+    const tax = Number(meta.tax || 0);
+    const total = Number(meta.total || 0) || (session.amount_total || 0) / 100;
 
     const html = buildHtml({
       orderNumber,
       customerName: meta.customerName || "",
+      customerPhone: meta.customerPhone || "",
       pickupDate: meta.pickupDate || "",
       pickupWindow: meta.pickupWindow || "",
       cardBrand,
       cardLast4,
       chargedDate,
-      subtotal,
-      tax,
-      total,
+      subtotal: subtotal.toFixed(2),
+      tax: tax.toFixed(2),
+      total: total.toFixed(2),
       lineItems,
     });
 
     res.setHeader("Content-Type", "text/html; charset=utf-8");
-    res.setHeader("Cache-Control", "private, max-age=3600");
+    res.setHeader("Cache-Control", "private, no-store");
     return res.status(200).send(html);
   } catch (err) {
     console.error("DELISH RECEIPT RENDER ERROR:", err);
     return res.status(500).send(
-      `<!doctype html><html><head><meta charset="utf-8"><title>Error</title></head><body style="font-family:sans-serif;padding:40px;background:#0b0b0b;color:#fff;"><h2 style="color:#D4AF37;">Error loading receipt</h2><p>${err.message}</p></body></html>`
+      errorPage(500, "Something went wrong", `We couldn't load your receipt right now. Call us at <a href="tel:+13187879407">(318) 787-9407</a> and we'll sort it out.`)
     );
   }
 }

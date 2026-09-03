@@ -78,6 +78,13 @@ export default async function handler(req, res) {
   const session    = event.data.object;
   const metadata   = session.metadata || {};
   const source     = metadata.source  || "";
+
+  // Hard gate: this webhook only processes Philson payments. Drop everything else immediately.
+  if (!source.startsWith("philson-")) {
+    console.log(`PHILSON WEBHOOK: ignored source="${source}" session=${session.id}`);
+    return res.status(200).json({ received: true, ignored: source || "no-source" });
+  }
+
   const custEmail  = session.customer_details?.email || session.customer_email || "";
   const amountFmt  = typeof session.amount_total === "number"
     ? `$${(session.amount_total / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
