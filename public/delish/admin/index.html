@@ -1347,19 +1347,43 @@ function renderSoldOutList(selected = []) {
       return String(v || "").replace(/&/g, "&amp;").replace(/"/g, "&quot;");
     }
 
+    const SPECIAL_BASES = [
+      { id: "base_rice", label: "Rice" },
+      { id: "base_cornbread_dressing", label: "Cornbread Dressing" },
+      { id: "base_mashed_potatoes", label: "Mashed Potatoes" },
+    ];
+
+    function specialBaseCheckboxes(idx, selected = []) {
+      return SPECIAL_BASES.map(b => `
+        <label style="display:inline-flex;align-items:center;gap:4px;font-size:.78rem;color:var(--muted);white-space:nowrap;cursor:pointer;">
+          <input type="checkbox" data-special-base="${idx}" value="${b.id}" ${selected.includes(b.id) ? "checked" : ""} style="margin:0;width:auto;" />
+          ${b.label}
+        </label>
+      `).join("");
+    }
+
     function renderSpecialMenuItems(items = []) {
       const list = document.getElementById("specialMenuItemsList");
       if (!items.length) {
         list.innerHTML = '<p class="muted" style="margin:4px 0;font-size:.83rem;">No special items yet. Click "+ Add Item" to add one.</p>';
         return;
       }
-      list.innerHTML = items.map((item, i) => `
-        <div class="row" style="align-items:center;gap:8px;margin-bottom:6px;" data-special-index="${i}">
-          <input type="text" placeholder="Item name" value="${escAttr(item.name)}" data-special-name="${i}" style="flex:2;margin:0;" />
-          <input type="number" min="0" step="0.01" placeholder="Price" value="${Number(item.price).toFixed(2)}" data-special-price="${i}" style="flex:1;margin:0;" />
-          <button type="button" class="btn-flash" data-remove-special="${i}" style="flex:0 0 auto;white-space:nowrap;">Remove</button>
-        </div>
-      `).join("");
+      list.innerHTML = items.map((item, i) => {
+        const selectedBases = Array.isArray(item.baseOptions) ? item.baseOptions.map(b => b.id) : [];
+        return `
+          <div style="margin-bottom:10px;padding:10px;border-radius:8px;background:#1a1a1a;border:1px solid rgba(255,255,255,.06);" data-special-index="${i}">
+            <div class="row" style="align-items:center;gap:8px;margin:0 0 6px;">
+              <input type="text" placeholder="Item name" value="${escAttr(item.name)}" data-special-name="${i}" style="flex:2;margin:0;" />
+              <input type="number" min="0" step="0.01" placeholder="Price" value="${Number(item.price).toFixed(2)}" data-special-price="${i}" style="flex:1;margin:0;" />
+              <button type="button" class="btn-flash" data-remove-special="${i}" style="flex:0 0 auto;white-space:nowrap;">Remove</button>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:4px;">
+              <span style="font-size:.75rem;color:var(--muted);align-self:center;">Base:</span>
+              ${specialBaseCheckboxes(i, selectedBases)}
+            </div>
+          </div>
+        `;
+      }).join("");
       list.querySelectorAll("[data-remove-special]").forEach(btn => {
         btn.addEventListener("click", () => {
           btn.closest("[data-special-index]").remove();
@@ -1372,23 +1396,34 @@ function renderSoldOutList(selected = []) {
       if (list.querySelector("p")) list.innerHTML = "";
       const idx = Date.now();
       const div = document.createElement("div");
-      div.className = "row";
-      div.style.cssText = "align-items:center;gap:8px;margin-bottom:6px;";
+      div.style.cssText = "margin-bottom:10px;padding:10px;border-radius:8px;background:#1a1a1a;border:1px solid rgba(255,255,255,.06);";
       div.dataset.specialIndex = idx;
       div.innerHTML = `
-        <input type="text" placeholder="Item name" data-special-name="${idx}" style="flex:2;margin:0;" />
-        <input type="number" min="0" step="0.01" placeholder="Price" data-special-price="${idx}" style="flex:1;margin:0;" />
-        <button type="button" class="btn-flash" style="flex:0 0 auto;white-space:nowrap;">Remove</button>
+        <div class="row" style="align-items:center;gap:8px;margin:0 0 6px;">
+          <input type="text" placeholder="Item name" data-special-name="${idx}" style="flex:2;margin:0;" />
+          <input type="number" min="0" step="0.01" placeholder="Price" data-special-price="${idx}" style="flex:1;margin:0;" />
+          <button type="button" class="btn-flash" style="flex:0 0 auto;white-space:nowrap;">Remove</button>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:4px;">
+          <span style="font-size:.75rem;color:var(--muted);align-self:center;">Base:</span>
+          ${specialBaseCheckboxes(idx)}
+        </div>
       `;
       div.querySelector(".btn-flash").addEventListener("click", () => div.remove());
       list.appendChild(div);
     }
 
     function collectSpecialMenuItems() {
-      return [...document.querySelectorAll("[data-special-index]")].map(div => ({
-        name: (div.querySelector("[data-special-name]")?.value || "").trim(),
-        price: Number(div.querySelector("[data-special-price]")?.value || 0),
-      })).filter(item => item.name && item.price > 0);
+      return [...document.querySelectorAll("[data-special-index]")].map(div => {
+        const idx = div.dataset.specialIndex;
+        const checkedBases = [...div.querySelectorAll(`[data-special-base="${idx}"]:checked`)]
+          .map(cb => ({ id: cb.value, name: SPECIAL_BASES.find(b => b.id === cb.value)?.label || cb.value }));
+        return {
+          name: (div.querySelector("[data-special-name]")?.value || "").trim(),
+          price: Number(div.querySelector("[data-special-price]")?.value || 0),
+          baseOptions: checkedBases,
+        };
+      }).filter(item => item.name && item.price > 0);
     }
 
     function renderFridayMenuItems(items = []) {

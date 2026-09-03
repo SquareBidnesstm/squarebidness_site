@@ -25,17 +25,28 @@ function normalizeBasesSoldOut(basesSoldOut) {
   return [...new Set(basesSoldOut.map((x) => String(x || "").trim()).filter(Boolean))];
 }
 
+const VALID_BASE_IDS = new Set(["base_rice", "base_cornbread_dressing", "base_mashed_potatoes"]);
+const BASE_NAMES = {
+  base_rice: "Rice",
+  base_cornbread_dressing: "Cornbread Dressing",
+  base_mashed_potatoes: "Mashed Potatoes",
+};
+
 function normalizeSpecialMenu(specialMenu = {}) {
   const active = specialMenu?.active === true;
   const rawItems = Array.isArray(specialMenu?.items) ? specialMenu.items : [];
   const items = rawItems
     .map((item, i) => {
       const p = Number(item?.price);
+      const rawBases = Array.isArray(item?.baseOptions) ? item.baseOptions : [];
+      const baseOptions = rawBases
+        .filter(b => b && VALID_BASE_IDS.has(String(b.id || "")))
+        .map(b => ({ id: String(b.id), name: BASE_NAMES[b.id] || String(b.name || b.id) }));
       return {
         id: `special_${i}`,
         name: String(item?.name || "").trim().slice(0, 80),
         price: Number.isFinite(p) && p >= 0 ? Math.round(p * 100) / 100 : 0,
-        baseOptions: [],
+        baseOptions,
         sideSelectionRequired: false,
         desc: "Today's special.",
       };
