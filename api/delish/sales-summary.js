@@ -25,9 +25,7 @@ async function redis(command, ...args) {
       Authorization: `Bearer ${REDIS_TOKEN}`,
       "Content-Type": "application/json"
     },
-    body: JSON.stringify({
-      command: [command, ...args]
-    })
+    body: JSON.stringify([command, ...args])
   });
 
   const data = await res.json();
