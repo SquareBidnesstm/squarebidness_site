@@ -256,9 +256,9 @@ export default async function handler(req, res) {
       // Note: invoice flow doesn't collect phone, so no SMS to customer
     }
 
-    // ---- ALERT PHILSON on every payment ----
+    // ---- ALERT PHILSON on Philson payments only ----
     const alertTo = normalizePhone(process.env.PHILSON_ALERT_TO || "");
-    if (alertTo) {
+    if (alertTo && source.startsWith("philson-")) {
       const who = source === "philson-invoice-payment"
         ? `${metadata.clientName || "Client"} — Invoice ${metadata.invoiceNumber || "?"}`
         : `${metadata.fullName || "Client"} — ${metadata.projectType || "Deposit"}`;
