@@ -116,7 +116,7 @@ export default async function handler(req, res) {
 
     session = await stripe.checkout.sessions.create({
       mode: "payment",
-      payment_method_types: ["card", "affirm", "afterpay_clearpay", "us_bank_account"],
+      automatic_payment_methods: { enabled: true },
       expires_at: expiresAt,
       line_items: [{
         price_data: {
