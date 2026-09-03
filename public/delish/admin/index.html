@@ -1381,6 +1381,12 @@ function renderSoldOutList(selected = []) {
               <span style="font-size:.75rem;color:var(--muted);align-self:center;">Base:</span>
               ${specialBaseCheckboxes(i, selectedBases)}
             </div>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:6px;">
+              <label style="display:inline-flex;align-items:center;gap:4px;font-size:.78rem;color:var(--muted);cursor:pointer;">
+                <input type="checkbox" data-special-sides="${i}" ${item.sideSelectionRequired ? "checked" : ""} style="margin:0;width:auto;" />
+                Include 2 sides
+              </label>
+            </div>
           </div>
         `;
       }).join("");
@@ -1408,6 +1414,12 @@ function renderSoldOutList(selected = []) {
           <span style="font-size:.75rem;color:var(--muted);align-self:center;">Base:</span>
           ${specialBaseCheckboxes(idx)}
         </div>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:6px;">
+          <label style="display:inline-flex;align-items:center;gap:4px;font-size:.78rem;color:var(--muted);cursor:pointer;">
+            <input type="checkbox" data-special-sides="${idx}" style="margin:0;width:auto;" />
+            Include 2 sides
+          </label>
+        </div>
       `;
       div.querySelector(".btn-flash").addEventListener("click", () => div.remove());
       list.appendChild(div);
@@ -1422,6 +1434,7 @@ function renderSoldOutList(selected = []) {
           name: (div.querySelector("[data-special-name]")?.value || "").trim(),
           price: Number(div.querySelector("[data-special-price]")?.value || 0),
           baseOptions: checkedBases,
+          sideSelectionRequired: !!(div.querySelector(`[data-special-sides="${idx}"]`)?.checked),
         };
       }).filter(item => item.name && item.price > 0);
     }
