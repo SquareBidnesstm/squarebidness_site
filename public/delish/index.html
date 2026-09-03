@@ -734,7 +734,7 @@
   function getSpecialMenuItems() {
     const sm = MENU_OVERRIDES?.specialMenu;
     if (!sm?.active || !Array.isArray(sm.items) || !sm.items.length) return [];
-    return sm.items;
+    return sm.items.map(item => ({ ...item, sideSelectionRequired: true }));
   }
 
   function getActiveDesserts() {

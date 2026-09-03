@@ -47,7 +47,7 @@ function normalizeSpecialMenu(specialMenu = {}) {
         name: String(item?.name || "").trim().slice(0, 80),
         price: Number.isFinite(p) && p >= 0 ? Math.round(p * 100) / 100 : 0,
         baseOptions,
-        sideSelectionRequired: item?.sideSelectionRequired === true,
+        sideSelectionRequired: item?.sideSelectionRequired !== false,
         desc: "Today's special.",
       };
     })
