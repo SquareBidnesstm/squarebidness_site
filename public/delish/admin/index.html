@@ -1594,70 +1594,80 @@ function renderSoldOutList(selected = []) {
       setStatus("Overrides loaded.", "good");
     }
 
+    let _saving = false;
     async function saveOverrides() {
-      let token = getSavedToken();
+      if (_saving) return;
+      _saving = true;
+      const saveBtn = document.getElementById("saveBtn");
+      if (saveBtn) saveBtn.disabled = true;
+      try {
+        let token = getSavedToken();
 
-      if (!token) {
-        token = window.prompt("Enter Delish operator token");
         if (!token) {
-          setStatus("Save cancelled.");
-          return;
+          token = window.prompt("Enter Delish operator token");
+          if (!token) {
+            setStatus("Save cancelled.");
+            return;
+          }
+          if (window.confirm("Save token on this device?")) {
+            saveToken(token.trim());
+          }
         }
-        if (window.confirm("Save token on this device?")) {
-          saveToken(token.trim());
+
+        const itemsOff = [...document.querySelectorAll("#itemsOffList input:checked")].map(el => el.value);
+        const itemsSoldOut = [...document.querySelectorAll("#itemsSoldOutList input:checked")].map(el => el.value);
+        const basesSoldOut = [...document.querySelectorAll("#basesSoldOutList input:checked")].map(el => el.value);
+
+        const payload = {
+          sections: {
+            lagniappe: document.getElementById("lagniappeToggle").checked,
+            drinks: document.getElementById("drinksToggle").checked,
+            extraSides: document.getElementById("extraSidesToggle").checked,
+            desserts: document.getElementById("dessertsToggle").checked,
+          },
+          mustardGreens: {
+            available: document.getElementById("mustardGreensToggle").checked,
+          },
+          specialMenu: {
+            active: document.getElementById("specialMenuToggle").checked,
+            items: collectSpecialMenuItems(),
+          },
+          fridayMenu: {
+            active: document.getElementById("fridayMenuToggle").checked,
+            items: collectFridayMenuItems(),
+          },
+          dessertItems: collectDessertItems(),
+          itemsOff,
+          itemsSoldOut,
+          basesSoldOut,
+          customerMessage: document.getElementById("customerMessage").value.trim()
+        };
+        setStatus("Saving admin changes...");
+
+        const res = await fetch("/api/delish/save-menu-overrides/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-operator-token": token.trim()
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || !data.ok) {
+          if (res.status === 401) {
+            clearToken();
+          }
+          throw new Error(data.error || "Failed to save overrides.");
         }
+
+        setStatus("Admin changes saved.", "good");
+        await loadOverrides();
+      } finally {
+        _saving = false;
+        if (saveBtn) saveBtn.disabled = false;
       }
-
-      const itemsOff = [...document.querySelectorAll("#itemsOffList input:checked")].map(el => el.value);
-      const itemsSoldOut = [...document.querySelectorAll("#itemsSoldOutList input:checked")].map(el => el.value);
-      const basesSoldOut = [...document.querySelectorAll("#basesSoldOutList input:checked")].map(el => el.value);
-
-      const payload = {
-        sections: {
-          lagniappe: document.getElementById("lagniappeToggle").checked,
-          drinks: document.getElementById("drinksToggle").checked,
-          extraSides: document.getElementById("extraSidesToggle").checked,
-          desserts: document.getElementById("dessertsToggle").checked,
-        },
-        mustardGreens: {
-          available: document.getElementById("mustardGreensToggle").checked,
-        },
-        specialMenu: {
-          active: document.getElementById("specialMenuToggle").checked,
-          items: collectSpecialMenuItems(),
-        },
-        fridayMenu: {
-          active: document.getElementById("fridayMenuToggle").checked,
-          items: collectFridayMenuItems(),
-        },
-        dessertItems: collectDessertItems(),
-        itemsOff,
-        itemsSoldOut,
-        basesSoldOut,
-        customerMessage: document.getElementById("customerMessage").value.trim()
-      };
-      setStatus("Saving admin changes...");
-
-      const res = await fetch("/api/delish/save-menu-overrides/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-operator-token": token.trim()
-        },
-        body: JSON.stringify(payload)
-      });
-
-      const data = await res.json().catch(() => ({}));
-
-      if (!res.ok || !data.ok) {
-        if (res.status === 401) {
-          clearToken();
-        }
-        throw new Error(data.error || "Failed to save overrides.");
-      }
-
-      setStatus("Admin changes saved.", "good");
-      await loadOverrides();
     }
 
     document.getElementById("saveBtn").addEventListener("click", () => {
