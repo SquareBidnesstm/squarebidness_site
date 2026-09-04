@@ -45,6 +45,7 @@ const MENU_BY_DAY = {
   friday: [
     { id: "friday_hamburger_steak", name: "Hamburger Steak Plate", price: 13.99 },
     { id: "friday_beef_tips", name: "Beef Tips Plate", price: 13.99 },
+    { id: "friday_pork_neckbones", name: "Pork Neckbones Plate", price: 13.99 },
   ],
   sunday: [
     { id: "sunday_pork_steak_gravy", name: "Pork Steak and Gravy Plate", price: 15.99 },
