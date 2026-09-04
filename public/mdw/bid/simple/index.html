@@ -220,9 +220,10 @@
 
     /* ── PRINT ── */
     @media print {
+      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
       .topbar, .float-total, .btn-danger, .services-footer .btn, .services-header-right,
       .toast, .modal-overlay { display: none !important; }
-      body { background: #fff; color: #111; }
+      body { background: #fff; color: #111; font-family: Arial, Helvetica, sans-serif; }
       .page { max-width: 100%; padding: 0; }
       .client-card, .services-card, .totals-card, .notes-card, .total-banner { border: 1px solid #ddd; background: #fff; box-shadow: none; }
       .svc-input, .field-input, .notes-textarea { color: #111; background: transparent; border-color: transparent; -webkit-text-fill-color: #111; }
@@ -232,9 +233,94 @@
       .total-banner { background: #f0f4ff; border-color: #c7d2fe; }
       .total-banner-label, .total-banner-amount { color: #2563eb; }
       .totals-val.grand-val { color: #2563eb; }
-      .print-header { display: block !important; border-bottom: 2px solid #2563eb; padding-bottom: 14px; margin-bottom: 18px; }
+
+      /* ── LETTERHEAD HEADER ── */
+      .print-header { display: block !important; margin-bottom: 22px; }
+      .ph-banner {
+        background: linear-gradient(135deg, #050d1c 0%, #0c1a38 45%, #0c1a38 55%, #050d1c 100%);
+        padding: 14px 22px;
+        display: flex; align-items: center; gap: 0;
+      }
+      .ph-logo-wrap {
+        flex-shrink: 0;
+        border: 1.5px solid #3a6aaa;
+        border-radius: 10px;
+        padding: 3px;
+        background: linear-gradient(160deg, #4a7ac8 0%, #1a3060 40%, #080e22 100%);
+        box-shadow: 0 0 0 1px #8ab0d8;
+      }
+      .ph-logo-wrap img { width: 60px; height: 60px; display: block; border-radius: 8px; }
+      .ph-vdiv {
+        width: 1px; height: 60px; flex-shrink: 0; margin: 0 18px;
+        background: linear-gradient(180deg, transparent, #3a6aaa 30%, #3a6aaa 70%, transparent);
+      }
+      .ph-center { flex: 1; text-align: center; }
+      .ph-c-main {
+        font-size: 10.5px; font-weight: 800; letter-spacing: 3.5px;
+        color: #dde8ff; line-height: 1.65; text-transform: uppercase; font-family: Arial, sans-serif;
+      }
+      .ph-c-divider { height: 1px; background: linear-gradient(90deg, transparent, #3a6aaa, transparent); margin: 7px auto; width: 60%; }
+      .ph-c-sub {
+        font-size: 8.5px; font-weight: 700; letter-spacing: 4.5px;
+        color: #4a72aa; text-transform: uppercase; font-family: Arial, sans-serif;
+        line-height: 1.7;
+      }
+      .ph-contact { display: flex; flex-direction: column; gap: 8px; min-width: 215px; }
+      .ph-ci { font-size: 10px; color: #c0d2ea; display: flex; align-items: center; gap: 9px; font-family: Arial, sans-serif; }
+      .ph-icon {
+        width: 17px; height: 17px; border: 1px solid #3a6aaa; border-radius: 50%;
+        display: inline-flex; align-items: center; justify-content: center;
+        font-size: 9px; background: rgba(37,99,235,.18); color: #7ab0f0; flex-shrink: 0;
+      }
+      .ph-tagline {
+        background: #020810; border-top: 1px solid #182a50;
+        padding: 6px 22px; text-align: center;
+        font-size: 7.5px; font-weight: 700; letter-spacing: 2.5px;
+        color: #5a80a8; text-transform: uppercase; font-family: Arial, sans-serif;
+      }
+      .ph-tagline strong { color: #2563eb; font-weight: 700; }
+
+      /* ── WATERMARK ── */
+      .print-watermark {
+        display: block !important;
+        position: fixed; top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 76px; font-weight: 900;
+        color: rgba(37,99,235,.055);
+        letter-spacing: 6px; text-align: center; line-height: 1.05;
+        pointer-events: none; z-index: -1;
+        text-transform: uppercase; font-family: Arial, sans-serif;
+      }
+
+      /* ── FOOTER ── */
+      .print-footer { display: block !important; margin-top: 36px; }
+      .pf-services {
+        display: flex; justify-content: center; gap: 22px; flex-wrap: wrap;
+        padding: 9px 24px; border-top: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0;
+      }
+      .pf-svc {
+        font-size: 7.5px; font-weight: 800; letter-spacing: 1.2px;
+        color: #2563eb; text-transform: uppercase; font-family: Arial, sans-serif;
+        display: flex; align-items: center; gap: 5px;
+      }
+      .pf-bottom {
+        background: linear-gradient(135deg, #050d1c 0%, #0c1a38 50%, #050d1c 100%);
+        padding: 9px 24px; display: flex; align-items: center; justify-content: center; position: relative;
+      }
+      .pf-tagline {
+        font-size: 8px; font-weight: 700; letter-spacing: 3px;
+        color: #8ab0d8; text-transform: uppercase; font-family: Arial, sans-serif;
+      }
+      .pf-tagline strong { color: #2563eb; }
+      .pf-sig {
+        position: absolute; right: 24px; text-align: right; font-family: Arial, sans-serif;
+      }
+      .pf-sig-name { font-style: italic; font-size: 13px; color: #c0d8f0; display: block; }
+      .pf-sig-co { font-size: 7px; letter-spacing: 1.5px; color: #5a80a8; text-transform: uppercase; display: block; margin-top: 1px; }
     }
-    .print-header { display: none; }
+    .print-header  { display: none; }
+    .print-watermark { display: none; }
+    .print-footer  { display: none; }
   </style>
 </head>
 <body>
@@ -254,15 +340,31 @@
   </div>
 </div>
 
-<!-- Print letterhead -->
+<!-- Print-only letterhead -->
 <div class="print-header" id="printHeader">
-  <div style="margin-bottom:6px;">
-    <span style="font-size:26px;font-weight:900;color:#111;letter-spacing:-.5px;">MDW<span style="color:#2563eb;"> Investments LLC</span></span>
+  <div class="ph-banner">
+    <div class="ph-logo-wrap">
+      <img src="/mdw/assets/icons/mdw-blue-512.png" alt="MDW Investments LLC" />
+    </div>
+    <div class="ph-vdiv"></div>
+    <div class="ph-center">
+      <div class="ph-c-main">COMMERCIAL<br>REAL ESTATE</div>
+      <div class="ph-c-divider"></div>
+      <div class="ph-c-sub">ACROSS<br>LOUISIANA</div>
+    </div>
+    <div class="ph-vdiv"></div>
+    <div class="ph-contact">
+      <div class="ph-ci"><span class="ph-icon">&#9990;</span> (318) 542-8050</div>
+      <div class="ph-ci"><span class="ph-icon">&#9993;</span> mdwinvestmentsllc@gmail.com</div>
+      <div class="ph-ci"><span class="ph-icon">&#8853;</span> squarebidness.com/mdw</div>
+      <div class="ph-ci"><span class="ph-icon">&#9679;</span> Alexandria, Louisiana</div>
+    </div>
   </div>
-  <p style="color:#555;font-size:13px;margin-bottom:4px;">Commercial Real Estate · Louisiana</p>
-  <p style="color:#333;font-size:12px;font-weight:600;">Marcus D. Buckner</p>
-  <p style="color:#555;font-size:12px;">mdwinvestmentsllc@gmail.com</p>
+  <div class="ph-tagline">STRATEGIC SPACES. &nbsp;<strong>SMART INVESTMENTS.</strong>&nbsp; STRONG RESULTS.</div>
 </div>
+
+<!-- Watermark -->
+<div class="print-watermark" aria-hidden="true">MDW<br>INVESTMENTS<br>LLC</div>
 
 <div class="page">
 
@@ -368,6 +470,24 @@
 
 <!-- Toast -->
 <div class="toast" id="toast"><span class="toast-dot">●</span><span id="toastMsg">Saved.</span></div>
+
+<!-- Print footer -->
+<div class="print-footer" id="printFooter">
+  <div class="pf-services">
+    <span class="pf-svc">&#127970; Buy Properties</span>
+    <span class="pf-svc">&#127968; Sell Properties</span>
+    <span class="pf-svc">&#128273; Lease Spaces</span>
+    <span class="pf-svc">&#128200; Investment Properties</span>
+    <span class="pf-svc">&#129309; Off-Market Deals</span>
+  </div>
+  <div class="pf-bottom">
+    <div class="pf-tagline">OPPORTUNITY IS <strong>EVERYWHERE.</strong></div>
+    <div class="pf-sig">
+      <span class="pf-sig-name">Dale Williams</span>
+      <span class="pf-sig-co">MDW Investments LLC</span>
+    </div>
+  </div>
+</div>
 
 <!-- Quick Services Modal -->
 <div class="modal-overlay" id="quickModal" onclick="if(event.target===this)closeQuickServices()">
