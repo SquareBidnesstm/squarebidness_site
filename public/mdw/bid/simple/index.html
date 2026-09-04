@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Quick Quote — MDW Investments</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#2563eb" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/mdw/assets/icons/mdw-blue-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/mdw/assets/icons/apple-touch-icon.png" />
+
+  <style>
+    :root {
+      --bg:          #0a0a0a;
+      --panel:       #111111;
+      --card:        #171717;
+      --card2:       #1e1e1e;
+      --border:      #262626;
+      --border2:     #2e2e2e;
+      --fg:          #f5f5f5;
+      --muted:       #888;
+      --subtle:      #555;
+      --accent:      #2563eb;
+      --accent-dim:  rgba(37,99,235,.13);
+      --accent-ring: rgba(37,99,235,.35);
+      --green:       #22c55e;
+      --radius:      10px;
+      --font: system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 14px; line-height: 1.5; min-height: 100vh; }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      background: rgba(10,10,10,.96);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      position: sticky; top: 0; z-index: 200;
+    }
+    .topbar-inner {
+      max-width: 760px; margin: 0 auto;
+      padding: 0 20px; height: 56px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .brand { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 16px; color: var(--fg); text-decoration: none; }
+    .brand-dot { color: var(--accent); }
+    .brand-badge {
+      font-size: 10px; font-weight: 700; letter-spacing: .8px;
+      background: var(--accent-dim); color: var(--accent);
+      border: 1px solid var(--accent-ring); border-radius: 999px;
+      padding: 2px 8px; text-transform: uppercase;
+    }
+    .topbar-actions { display: flex; gap: 8px; align-items: center; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 600;
+      border: none; cursor: pointer; transition: opacity .15s, background .15s; white-space: nowrap;
+    }
+    .btn:hover { opacity: .85; }
+    .btn-ghost { background: var(--card); color: var(--muted); border: 1px solid var(--border2); }
+    .btn-ghost:hover { color: var(--fg); border-color: var(--subtle); opacity: 1; }
+    .btn-blue { background: var(--accent); color: #fff; }
+    .btn-sm { padding: 5px 10px; font-size: 12px; }
+    .btn-danger { background: transparent; border: 1px solid transparent; color: var(--subtle); cursor: pointer; border-radius: 6px; padding: 3px 7px; font-size: 13px; transition: color .15s, border-color .15s, background .15s; flex-shrink: 0; }
+    .btn-danger:hover { color: var(--accent); border-color: var(--accent-ring); background: var(--accent-dim); }
+
+    /* ── LAYOUT ── */
+    .page { max-width: 760px; margin: 0 auto; padding: 24px 20px 100px; }
+
+    /* ── SECTION LABEL ── */
+    .section-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 10px;
+    }
+
+    /* ── CLIENT CARD ── */
+    .client-card {
+      background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 18px 20px; margin-bottom: 20px;
+    }
+    .client-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .field { display: flex; flex-direction: column; gap: 4px; }
+    .field.full { grid-column: 1 / -1; }
+    .field-label { font-size: 11px; font-weight: 600; color: var(--muted); }
+    .field-input {
+      background: var(--card); border: 1px solid var(--border2); border-radius: 8px;
+      padding: 8px 12px; color: var(--fg); font-size: 13px; font-family: var(--font);
+      transition: border-color .15s;
+    }
+    .field-input:focus { outline: none; border-color: var(--accent); }
+    @media (max-width: 540px) { .client-grid { grid-template-columns: 1fr; } .field.full { grid-column: 1; } }
+
+    /* ── TOTAL BANNER ── */
+    .total-banner {
+      background: var(--accent-dim); border: 1px solid var(--accent-ring); border-radius: var(--radius);
+      padding: 14px 20px; margin-bottom: 20px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .total-banner-label { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--accent); }
+    .total-banner-amount { font-size: 32px; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }
+
+    /* ── SERVICES ── */
+    .services-card {
+      background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+      margin-bottom: 20px; overflow: hidden;
+    }
+    .services-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--card2);
+    }
+    .services-header-title { font-size: 11px; font-weight: 700; letter-spacing: .6px; color: var(--muted); text-transform: uppercase; }
+    .services-header-right { display: flex; gap: 8px; }
+
+    .service-row {
+      display: grid; grid-template-columns: 1fr 130px 36px;
+      gap: 8px; align-items: center;
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .service-row:last-child { border-bottom: none; }
+    .svc-input {
+      background: transparent; border: 1px solid transparent; border-radius: 6px;
+      padding: 6px 8px; color: var(--fg); font-size: 13px; font-family: var(--font);
+      width: 100%; transition: border-color .15s, background .15s;
+    }
+    .svc-input:focus { outline: none; border-color: var(--accent); background: var(--card); }
+    .svc-amt { text-align: right; font-variant-numeric: tabular-nums; }
+    .services-footer {
+      padding: 10px 14px; background: var(--card2); border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    @media (max-width: 480px) {
+      .service-row { grid-template-columns: 1fr 100px 36px; }
+    }
+
+    /* ── TOTALS SECTION ── */
+    .totals-card {
+      background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 16px 20px; margin-bottom: 20px;
+    }
+    .totals-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 6px 0; border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .totals-row:last-child { border-bottom: none; }
+    .totals-row.grand { padding-top: 10px; margin-top: 2px; }
+    .totals-label { color: var(--muted); }
+    .totals-label.strong { color: var(--fg); font-weight: 700; }
+    .totals-val { font-variant-numeric: tabular-nums; color: var(--fg); font-weight: 600; }
+    .totals-val.grand-val { font-size: 22px; font-weight: 800; color: var(--accent); }
+    .totals-input-row { display: flex; align-items: center; gap: 8px; }
+    .totals-mini-input {
+      background: var(--card); border: 1px solid var(--border2); border-radius: 6px;
+      padding: 4px 8px; color: var(--fg); font-size: 12px; font-family: var(--font);
+      width: 70px; text-align: right; font-variant-numeric: tabular-nums;
+    }
+    .totals-mini-input:focus { outline: none; border-color: var(--accent); }
+
+    /* ── NOTES ── */
+    .notes-card {
+      background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 18px 20px; margin-bottom: 20px;
+    }
+    .notes-textarea {
+      width: 100%; background: var(--card); border: 1px solid var(--border2); border-radius: 8px;
+      padding: 10px 12px; color: var(--fg); font-size: 13px; font-family: var(--font);
+      resize: vertical; min-height: 80px; line-height: 1.5;
+    }
+    .notes-textarea:focus { outline: none; border-color: var(--accent); }
+
+    /* ── FLOAT TOTAL ── */
+    .float-total {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: rgba(10,10,10,.97); border-top: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      z-index: 100;
+    }
+    .float-total-label { font-size: 12px; color: var(--muted); }
+    .float-total-amt { font-size: 22px; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%) translateY(120%);
+      background: var(--panel); border: 1px solid var(--border2); border-radius: 10px;
+      padding: 10px 18px; font-size: 13px; color: var(--fg); z-index: 500;
+      transition: transform .25s ease; white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast-dot { color: var(--green); margin-right: 6px; }
+
+    /* ── QUICK SERVICES MODAL ── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.75);
+      z-index: 400; align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--panel); border: 1px solid var(--border2); border-radius: 14px;
+      max-width: 480px; width: 100%; max-height: 80vh; display: flex; flex-direction: column; overflow: hidden;
+    }
+    .modal-header {
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-title { font-size: 14px; font-weight: 700; }
+    .modal-close { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 18px; line-height: 1; padding: 2px 6px; border-radius: 6px; }
+    .modal-close:hover { color: var(--fg); background: var(--card2); }
+    .modal-body { overflow-y: auto; padding: 12px 0; flex: 1; }
+    .quick-item {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 10px 20px; cursor: pointer; transition: background .12s;
+    }
+    .quick-item:hover { background: var(--card2); }
+    .quick-item-desc { font-size: 13px; color: var(--fg); }
+    .quick-item-amt { font-size: 13px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+    /* ── PRINT ── */
+    @media print {
+      .topbar, .float-total, .btn-danger, .services-footer .btn, .services-header-right,
+      .toast, .modal-overlay { display: none !important; }
+      body { background: #fff; color: #111; }
+      .page { max-width: 100%; padding: 0; }
+      .client-card, .services-card, .totals-card, .notes-card, .total-banner { border: 1px solid #ddd; background: #fff; box-shadow: none; }
+      .svc-input, .field-input, .notes-textarea { color: #111; background: transparent; border-color: transparent; -webkit-text-fill-color: #111; }
+      .totals-mini-input { color: #111; background: transparent; border-color: transparent; -webkit-text-fill-color: #111; }
+      .service-row { border-bottom: 1px solid #eee; }
+      .services-header { background: #f5f5f5; }
+      .total-banner { background: #f0f4ff; border-color: #c7d2fe; }
+      .total-banner-label, .total-banner-amount { color: #2563eb; }
+      .totals-val.grand-val { color: #2563eb; }
+      .print-header { display: block !important; border-bottom: 2px solid #2563eb; padding-bottom: 14px; margin-bottom: 18px; }
+    }
+    .print-header { display: none; }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <a href="/mdw/" class="brand">
+      MDW<span class="brand-dot">.</span>
+      <span class="brand-badge">Quick Quote</span>
+    </a>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-sm" onclick="newQuote()">+ New</button>
+      <button class="btn btn-ghost btn-sm" onclick="loadQuote()">Load</button>
+      <button class="btn btn-ghost btn-sm" onclick="saveQuote()">Save</button>
+      <button class="btn btn-blue btn-sm" onclick="window.print()">&#128438; Print / PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- Print letterhead -->
+<div class="print-header" id="printHeader">
+  <div style="margin-bottom:6px;">
+    <span style="font-size:26px;font-weight:900;color:#111;letter-spacing:-.5px;">MDW<span style="color:#2563eb;"> Investments LLC</span></span>
+  </div>
+  <p style="color:#555;font-size:13px;margin-bottom:4px;">Commercial Real Estate · Louisiana</p>
+  <p style="color:#333;font-size:12px;font-weight:600;">Marcus D. Buckner</p>
+  <p style="color:#555;font-size:12px;">mdwinvestmentsllc@gmail.com</p>
+</div>
+
+<div class="page">
+
+  <!-- Grand Total Banner -->
+  <div class="total-banner">
+    <div class="total-banner-label">Quote Total</div>
+    <div class="total-banner-amount" id="bannerTotal">$0.00</div>
+  </div>
+
+  <!-- Client Info -->
+  <div class="client-card">
+    <div class="section-label">Client &amp; Property Info</div>
+    <div class="client-grid">
+      <div class="field full">
+        <label class="field-label">Client / Owner Name</label>
+        <input class="field-input" id="clientName" type="text" placeholder="Name or Company" />
+      </div>
+      <div class="field full">
+        <label class="field-label">Property Address</label>
+        <input class="field-input" id="jobAddress" type="text" placeholder="123 Commercial Dr, City, LA" />
+      </div>
+      <div class="field">
+        <label class="field-label">Phone</label>
+        <input class="field-input" id="clientPhone" type="tel" placeholder="(318) 000-0000" />
+      </div>
+      <div class="field">
+        <label class="field-label">Email</label>
+        <input class="field-input" id="clientEmail" type="email" placeholder="client@email.com" />
+      </div>
+      <div class="field">
+        <label class="field-label">Date</label>
+        <input class="field-input" id="quoteDate" type="date" />
+      </div>
+      <div class="field">
+        <label class="field-label">Quote #</label>
+        <input class="field-input" id="quoteNum" type="text" placeholder="MDW-001" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Services -->
+  <div class="services-card">
+    <div class="services-header">
+      <span class="services-header-title">Services &amp; Line Items</span>
+      <div class="services-header-right">
+        <button class="btn btn-ghost btn-sm" onclick="openQuickServices()">&#9889; Quick Add</button>
+      </div>
+    </div>
+    <div id="serviceRows"></div>
+    <div class="services-footer">
+      <button class="btn btn-ghost btn-sm" onclick="addRow()">+ Add Line</button>
+      <span style="font-size:12px;color:var(--muted);" id="rowCount">0 items</span>
+    </div>
+  </div>
+
+  <!-- Totals -->
+  <div class="totals-card">
+    <div class="section-label">Totals</div>
+    <div class="totals-row">
+      <span class="totals-label">Subtotal</span>
+      <span class="totals-val" id="subtotalDisplay">$0.00</span>
+    </div>
+    <div class="totals-row">
+      <div class="totals-input-row">
+        <span class="totals-label">Tax</span>
+        <input class="totals-mini-input" id="taxPct" type="number" min="0" max="30" step="0.1" value="0" placeholder="0" />
+        <span class="totals-label">%</span>
+      </div>
+      <span class="totals-val" id="taxDisplay">$0.00</span>
+    </div>
+    <div class="totals-row grand">
+      <span class="totals-label strong">Total</span>
+      <span class="totals-val grand-val" id="grandDisplay">$0.00</span>
+    </div>
+    <div class="totals-row" style="margin-top:4px;">
+      <div class="totals-input-row">
+        <span class="totals-label">Deposit Required</span>
+        <input class="totals-mini-input" id="depositAmt" type="number" min="0" step="1" value="" placeholder="0.00" style="width:90px;" />
+      </div>
+      <span class="totals-val" id="depositDisplay" style="color:var(--muted);"></span>
+    </div>
+    <div class="totals-row">
+      <div class="totals-input-row">
+        <span class="totals-label">Balance Due</span>
+      </div>
+      <span class="totals-val" id="balanceDisplay" style="color:var(--muted);">—</span>
+    </div>
+  </div>
+
+  <!-- Notes -->
+  <div class="notes-card">
+    <div class="section-label" style="margin-bottom:10px;">Notes &amp; Terms</div>
+    <textarea class="notes-textarea" id="quoteNotes" placeholder="Payment terms, warranty, scope limits, start date, etc."></textarea>
+  </div>
+
+</div>
+
+<!-- Float total -->
+<div class="float-total">
+  <div class="float-total-label">Quote Total</div>
+  <div class="float-total-amt" id="floatTotal">$0.00</div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"><span class="toast-dot">●</span><span id="toastMsg">Saved.</span></div>
+
+<!-- Quick Services Modal -->
+<div class="modal-overlay" id="quickModal" onclick="if(event.target===this)closeQuickServices()">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Quick Add — Common Services</span>
+      <button class="modal-close" onclick="closeQuickServices()">&#10005;</button>
+    </div>
+    <div class="modal-body" id="quickModalBody"></div>
+  </div>
+</div>
+
+<script>
+// ── DATA ───────────────────────────────────────────────────────────
+let rows = [];
+let nextId = 1;
+
+const QUICK_SERVICES = [
+  { desc: "Property inspection & condition report", amt: 200 },
+  { desc: "Lockbox install & key duplication", amt: 85 },
+  { desc: "Lawn maintenance — mow, edge & blow", amt: 125 },
+  { desc: "Interior clean-out & debris removal", amt: 350 },
+  { desc: "Touch-up paint — single room", amt: 450 },
+  { desc: "Pressure wash — exterior & parking", amt: 350 },
+  { desc: "Drywall repair & patch", amt: 250 },
+  { desc: "Gutter clean-out", amt: 175 },
+  { desc: "Concrete crack repair & seal", amt: 275 },
+  { desc: "Minor plumbing repair", amt: 185 },
+  { desc: "Light fixture replacement (per fixture)", amt: 150 },
+  { desc: "Contractor coordination (half-day)", amt: 300 },
+  { desc: "Lock re-key (per door)", amt: 65 },
+  { desc: "Permit research & filing assistance", amt: 200 },
+  { desc: "General labor — hourly", amt: 85 },
+];
+
+// ── RENDER ─────────────────────────────────────────────────────────
+function fmt(n) {
+  return '$' + (parseFloat(n) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function updateTotals() {
+  const sub = rows.reduce((s, r) => s + (parseFloat(r.amt) || 0), 0);
+  const taxPct = parseFloat(document.getElementById('taxPct').value) || 0;
+  const tax = sub * (taxPct / 100);
+  const grand = sub + tax;
+  const deposit = parseFloat(document.getElementById('depositAmt').value) || 0;
+  const balance = deposit > 0 ? grand - deposit : null;
+
+  document.getElementById('subtotalDisplay').textContent = fmt(sub);
+  document.getElementById('taxDisplay').textContent = fmt(tax);
+  document.getElementById('grandDisplay').textContent = fmt(grand);
+  document.getElementById('bannerTotal').textContent = fmt(grand);
+  document.getElementById('floatTotal').textContent = fmt(grand);
+  document.getElementById('depositDisplay').textContent = deposit > 0 ? fmt(deposit) : '';
+  document.getElementById('balanceDisplay').textContent = balance !== null ? fmt(balance) : '—';
+  document.getElementById('balanceDisplay').style.color = balance !== null ? 'var(--fg)' : 'var(--muted)';
+
+  document.getElementById('rowCount').textContent = `${rows.length} item${rows.length !== 1 ? 's' : ''}`;
+}
+
+function renderRows() {
+  const container = document.getElementById('serviceRows');
+  container.innerHTML = '';
+  rows.forEach(row => {
+    const div = document.createElement('div');
+    div.className = 'service-row';
+    div.id = 'row-' + row.id;
+    div.innerHTML = `
+      <input class="svc-input" type="text" value="${escHtml(row.desc)}" placeholder="Describe the service or work..."
+             oninput="updateRow(${row.id},'desc',this.value)" />
+      <input class="svc-input svc-amt" type="number" step="0.01" min="0" value="${row.amt || ''}" placeholder="0.00"
+             oninput="updateRow(${row.id},'amt',this.value)" />
+      <button class="btn-danger" onclick="removeRow(${row.id})">&#10005;</button>
+    `;
+    container.appendChild(div);
+  });
+  updateTotals();
+}
+
+function escHtml(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── ACTIONS ────────────────────────────────────────────────────────
+function addRow(desc, amt) {
+  const row = { id: nextId++, desc: desc || '', amt: amt || 0 };
+  rows.push(row);
+  renderRows();
+  if (!desc) {
+    const container = document.getElementById('serviceRows');
+    const last = container.lastElementChild;
+    if (last) last.querySelector('.svc-input').focus();
+  }
+}
+
+function removeRow(id) {
+  rows = rows.filter(r => r.id !== id);
+  const el = document.getElementById('row-' + id);
+  if (el) el.remove();
+  updateTotals();
+}
+
+function updateRow(id, field, val) {
+  const row = rows.find(r => r.id === id);
+  if (!row) return;
+  row[field] = field === 'amt' ? parseFloat(val) || 0 : val;
+  updateTotals();
+}
+
+// ── QUICK SERVICES ─────────────────────────────────────────────────
+function openQuickServices() {
+  const body = document.getElementById('quickModalBody');
+  body.innerHTML = QUICK_SERVICES.map((s, i) => `
+    <div class="quick-item" onclick="addQuickService(${i})">
+      <span class="quick-item-desc">${escHtml(s.desc)}</span>
+      <span class="quick-item-amt">${fmt(s.amt)}</span>
+    </div>
+  `).join('');
+  document.getElementById('quickModal').classList.add('open');
+}
+
+function addQuickService(i) {
+  const s = QUICK_SERVICES[i];
+  addRow(s.desc, s.amt);
+  closeQuickServices();
+  showToast('Added: ' + s.desc.split('—')[0].trim());
+}
+
+function closeQuickServices() {
+  document.getElementById('quickModal').classList.remove('open');
+}
+
+// ── SAVE / LOAD / NEW ─────────────────────────────────────────────
+function collectInfo() {
+  return {
+    clientName: document.getElementById('clientName').value,
+    jobAddress: document.getElementById('jobAddress').value,
+    clientPhone: document.getElementById('clientPhone').value,
+    clientEmail: document.getElementById('clientEmail').value,
+    quoteDate: document.getElementById('quoteDate').value,
+    quoteNum: document.getElementById('quoteNum').value,
+    quoteNotes: document.getElementById('quoteNotes').value,
+    taxPct: document.getElementById('taxPct').value,
+    depositAmt: document.getElementById('depositAmt').value,
+  };
+}
+
+function applyInfo(info) {
+  document.getElementById('clientName').value = info.clientName || '';
+  document.getElementById('jobAddress').value = info.jobAddress || '';
+  document.getElementById('clientPhone').value = info.clientPhone || '';
+  document.getElementById('clientEmail').value = info.clientEmail || '';
+  document.getElementById('quoteDate').value = info.quoteDate || '';
+  document.getElementById('quoteNum').value = info.quoteNum || '';
+  document.getElementById('quoteNotes').value = info.quoteNotes || '';
+  document.getElementById('taxPct').value = info.taxPct || '0';
+  document.getElementById('depositAmt').value = info.depositAmt || '';
+}
+
+function saveQuote() {
+  const data = { info: collectInfo(), rows, nextId };
+  localStorage.setItem('mdw_quick_draft', JSON.stringify(data));
+  showToast('Draft saved');
+}
+
+function loadQuote() {
+  const raw = localStorage.getItem('mdw_quick_draft');
+  if (!raw) { showToast('No saved draft found'); return; }
+  if (!confirm('Load saved draft? Current data will be replaced.')) return;
+  const data = JSON.parse(raw);
+  applyInfo(data.info || {});
+  rows = data.rows || [];
+  nextId = data.nextId || 100;
+  renderRows();
+  showToast('Draft loaded');
+}
+
+function newQuote() {
+  if (!confirm('Start a new blank quote? Unsaved changes will be lost.')) return;
+  rows = [];
+  nextId = 1;
+  applyInfo({ quoteDate: new Date().toISOString().slice(0,10) });
+  renderRows();
+}
+
+// ── TOAST ──────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── INIT ───────────────────────────────────────────────────────────
+document.getElementById('quoteDate').value = new Date().toISOString().slice(0,10);
+
+document.addEventListener('input', () => {
+  clearTimeout(window._autoSave);
+  window._autoSave = setTimeout(saveQuote, 1500);
+});
+
+const _draft = localStorage.getItem('mdw_quick_draft');
+if (_draft) {
+  try {
+    const data = JSON.parse(_draft);
+    applyInfo(data.info || {});
+    rows = data.rows || [];
+    nextId = data.nextId || 100;
+    renderRows();
+  } catch(e) {
+    addRow();
+  }
+} else {
+  addRow();
+}
+</script>
+</body>
+</html>
