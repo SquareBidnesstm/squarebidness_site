@@ -699,12 +699,22 @@
   orderingBanner.textContent = "Check today’s menu and ordering status below.";
 }
    function getExtraSidesForDay(day) {
-  const items = day === "friday" || day === "sunday"
+  const fridaySideIds = new Set([
+    "extra_side_mac_and_cheese",
+    "extra_side_green_beans",
+    "extra_side_cabbage",
+    "extra_side_corn",
+    "extra_side_yams",
+    "extra_side_black_eyed_peas"
+  ]);
+
+  const items = day === "sunday"
     ? [...EXTRA_SIDES_BASE, ...EXTRA_SIDES_FRIDAY_SUNDAY]
     : [...EXTRA_SIDES_BASE];
 
   return items.filter(
     item =>
+      (day !== "friday" || fridaySideIds.has(item.id)) &&
       isItemEnabled(item.id) &&
       !isItemSoldOut(item.id)
   );
