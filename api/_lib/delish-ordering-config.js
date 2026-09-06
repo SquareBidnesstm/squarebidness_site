@@ -14,9 +14,9 @@ export const DELISH_HOURS = {
 };
 
 const TEMPORARY_CLOSURE_UNTIL = {
-  isoDate: "2026-08-01",
+  isoDate: "2026-09-08",
   minutes: 11 * 60,
-  message: ""
+  message: "Delish is closed for Labor Day weekend. We'll see you Tuesday, September 8!"
 };
 
 export function getCentralNowParts(date = new Date()) {
@@ -74,7 +74,7 @@ function getTemporaryClosureState(now, day, config) {
     openNow: false,
     openTime: config?.open || "11:00",
     closeTime: config?.close || "",
-    resumeAt: "2026-08-06T11:00:00-05:00",
+    resumeAt: "2026-09-08T11:00:00-05:00",
     message: TEMPORARY_CLOSURE_UNTIL.message
   };
 }
