@@ -462,6 +462,8 @@
             <input type="text" id="bt-state" placeholder="LA 71360" />
           </div>
         </div>
+        <label>Phone</label>
+        <input type="text" id="bt-phone" placeholder="(318) 442-7300" />
       </div>
 
       <div class="form-section">
@@ -520,6 +522,7 @@
             <div class="inv-info-name" id="p-bt-name">&mdash;</div>
             <div class="inv-info-line" id="p-bt-addr1"></div>
             <div class="inv-info-line" id="p-bt-citystate"></div>
+            <div class="inv-info-line" id="p-bt-phone"></div>
           </div>
           <div class="inv-info-box">
             <div class="inv-info-label">Event Details</div>
@@ -742,6 +745,9 @@
       const cityState = [btCity, btState].filter(Boolean).join(', ');
       document.getElementById('p-bt-citystate').textContent = cityState;
       document.getElementById('p-bt-citystate').style.display = cityState ? '' : 'none';
+      const btPhone = document.getElementById('bt-phone').value;
+      document.getElementById('p-bt-phone').textContent = btPhone;
+      document.getElementById('p-bt-phone').style.display = btPhone ? '' : 'none';
 
       // Event
       document.getElementById('p-ev-name').textContent = document.getElementById('ev-name').value || '—';
@@ -834,7 +840,7 @@
       if (!confirm('Clear the form and start over?')) return;
       document.getElementById('inv-date').valueAsDate = new Date();
       document.getElementById('customer-quickfill').value = '';
-      ['bt-name','bt-addr1','bt-city','bt-state','ev-name','ev-date','ev-location','inv-notes'].forEach(id => {
+      ['bt-name','bt-addr1','bt-city','bt-state','bt-phone','ev-name','ev-date','ev-location','inv-notes'].forEach(id => {
         document.getElementById(id).value = '';
       });
       document.getElementById('pay-to').value = 'Eddie Philson';
@@ -846,7 +852,7 @@
     }
 
     // Wire up all inputs to live update
-    const formInputs = ['inv-number','inv-date','bt-name','bt-addr1','bt-city','bt-state',
+    const formInputs = ['inv-number','inv-date','bt-name','bt-addr1','bt-city','bt-state','bt-phone',
                         'ev-name','ev-date','ev-location','pay-to','inv-notes'];
     formInputs.forEach(id => {
       const el = document.getElementById(id);
@@ -857,9 +863,20 @@
     // Add more here as they come up — only Bill To fields get filled;
     // Event Details always stays blank since that varies per invoice.
     const COMMON_CUSTOMERS = [
-      { name: 'Robinson Family Mortuary', addr1: '1815 Military Hwy', city: 'Pineville', state: 'LA 71360' },
-      { name: 'Miller & Hill Funeral Directors', addr1: '103 Bolton Ave', city: 'Alexandria', state: 'LA 71301' },
-      { name: 'Wright & Calvey Funeral Home', addr1: '304 S Cherry St', city: 'Hammond', state: 'LA 70403' },
+      { name: 'Robinson Family Mortuary', addr1: '1815 Military Hwy', city: 'Pineville', state: 'LA 71360', phone: '(318) 442-7300' },
+      { name: 'Miller & Hill Funeral Directors', addr1: '103 Bolton Ave', city: 'Alexandria', state: 'LA 71301', phone: '(318) 704-0880' },
+      { name: 'Wright & Calvey Funeral Home', addr1: '304 S Cherry St', city: 'Hammond', state: 'LA 70403', phone: '(985) 542-2222' },
+      { name: 'Kramer Funeral Home', addr1: '2905 Masonic Dr', city: 'Alexandria', state: 'LA 71301', phone: '(318) 445-6311' },
+      { name: 'Hixson Brothers Funeral Homes — Alexandria', addr1: '701 Jackson St', city: 'Alexandria', state: 'LA 71301', phone: '(318) 442-3363' },
+      { name: 'Winnfield Funeral Home', addr1: '2033 3rd St', city: 'Alexandria', state: 'LA 71302', phone: '(318) 445-5002' },
+      { name: 'Gonzaque Williams Mortuary', addr1: '720 St James St', city: 'Alexandria', state: 'LA 71301', phone: '(318) 443-5748' },
+      { name: 'Progressive Funeral Home', addr1: '2308 Broadway Ave', city: 'Alexandria', state: 'LA 71302', phone: '(318) 443-1979' },
+      { name: 'Fall Creek Funeral Home of Louisiana', addr1: '1800 Military Hwy', city: 'Pineville', state: 'LA 71360', phone: '(318) 767-6115' },
+      { name: 'Gallagher Funeral Home', addr1: '3994 Monroe Hwy', city: 'Ball', state: 'LA 71405', phone: '(318) 640-1375' },
+      { name: 'Magnolia Funeral Home', addr1: '7357 Masonic Dr', city: 'Alexandria', state: 'LA 71301', phone: '(318) 487-1197' },
+      { name: 'Rush Funeral Home Pineville', addr1: '3307 Monroe Hwy', city: 'Pineville', state: 'LA 71360', phone: '(318) 448-0846' },
+      { name: 'Hixson Brothers Funeral Homes — Pineville', addr1: '2701 Military Hwy', city: 'Pineville', state: 'LA 71360', phone: '(318) 640-1678' },
+      { name: 'Alexandria Crematory', addr1: '803 Twin Bridges Rd', city: 'Alexandria', state: 'LA 71301', phone: '(318) 880-0343' },
     ];
 
     function populateQuickFillOptions() {
@@ -880,6 +897,7 @@
       document.getElementById('bt-addr1').value = customer.addr1;
       document.getElementById('bt-city').value = customer.city;
       document.getElementById('bt-state').value = customer.state;
+      document.getElementById('bt-phone').value = customer.phone || '';
       updatePreview();
     }
 
