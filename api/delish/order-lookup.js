@@ -1,9 +1,15 @@
 // FILE: /api/delish/order-lookup.js
 import Stripe from "stripe";
-import { requireDelishOperatorAuth } from "../_lib/delish-operator-auth.js";
+import { Redis } from "@upstash/redis";
+import { requireDelishRefundAuth } from "../_lib/delish-operator-auth.js";
 
 const stripe = new Stripe(process.env.STRIPE_HOLDINGS_SECRET_KEY, {
   apiVersion: "2024-06-20",
+});
+
+const redis = new Redis({
+  url: process.env.DELISH_UPSTASH_REDIS_REST_URL,
+  token: process.env.DELISH_UPSTASH_REDIS_REST_TOKEN,
 });
 
 function detectQueryType(q) {
@@ -52,7 +58,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ ok: false, error: "Method not allowed." });
   }
 
-  if (!requireDelishOperatorAuth(req, res)) return;
+  if (!requireDelishRefundAuth(req, res)) return;
 
   const q = String(req.query.q || "").trim();
   if (q.length < 2) {
@@ -100,13 +106,35 @@ export default async function handler(req, res) {
       }
     }
 
-    const results = sessions
+    const filtered = sessions
       .filter((s) =>
         (s.metadata?.orderNumber || s.metadata?.recordId || "").startsWith("DL-")
       )
       .sort((a, b) => b.created - a.created)
       .slice(0, 20)
       .map(formatSession);
+
+    // Attach the internal order id + refund status so callers (like the
+    // refunds page) don't need a second lookup before they can act on it.
+    const results = await Promise.all(
+      filtered.map(async (order) => {
+        try {
+          const orderId = await redis.get(`delish:order:by-session:${order.sessionId}`);
+          if (!orderId) return order;
+
+          const record = await redis.get(`delish:order:${orderId}`);
+          return {
+            ...order,
+            orderId,
+            status: record?.status || record?.orderState || "",
+            refunded:
+              record?.status === "refunded" || record?.paymentStatus === "refunded",
+          };
+        } catch {
+          return order;
+        }
+      })
+    );
 
     return res.status(200).json({ ok: true, results, query: q, type });
   } catch (err) {

@@ -1,7 +1,7 @@
 // FILE: /api/delish/refund-order.js
 import { Redis } from "@upstash/redis";
 import Stripe from "stripe";
-import { requireDelishOperatorAuth } from "../_lib/delish-operator-auth.js";
+import { requireDelishRefundAuth } from "../_lib/delish-operator-auth.js";
 import { sendDelishSms } from "../_lib/send-delish-sms.js";
 
 const redis = new Redis({
@@ -9,7 +9,7 @@ const redis = new Redis({
   token: process.env.DELISH_UPSTASH_REDIS_REST_TOKEN,
 });
 
-const stripe = new Stripe(process.env.STRIPE_ONBOARDING_SECRET_KEY, {
+const stripe = new Stripe(process.env.STRIPE_HOLDINGS_SECRET_KEY, {
   apiVersion: "2024-06-20",
 });
 
@@ -33,13 +33,13 @@ export default async function handler(req, res) {
     return res.status(405).json({ ok: false, error: "Method not allowed." });
   }
 
-  if (!requireDelishOperatorAuth(req, res)) return;
+  if (!requireDelishRefundAuth(req, res)) return;
 
   try {
-    if (!process.env.STRIPE_ONBOARDING_SECRET_KEY) {
+    if (!process.env.STRIPE_HOLDINGS_SECRET_KEY) {
       return res.status(500).json({
         ok: false,
-        error: "Missing STRIPE_ONBOARDING_SECRET_KEY.",
+        error: "Missing STRIPE_HOLDINGS_SECRET_KEY.",
       });
     }
 
