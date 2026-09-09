@@ -64,7 +64,7 @@
       margin-bottom: .25rem;
       margin-top: .6rem;
     }
-    input, textarea {
+    input, textarea, select {
       width: 100%;
       background: #242424;
       border: 1px solid #333;
@@ -76,7 +76,7 @@
       transition: border-color .15s;
       font-family: inherit;
     }
-    input:focus, textarea:focus { border-color: #8b1a1a; }
+    input:focus, textarea:focus, select:focus { border-color: #8b1a1a; }
     textarea { resize: vertical; min-height: 52px; }
     .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
 
@@ -444,6 +444,10 @@
 
       <div class="form-section">
         <h3>Bill To</h3>
+        <label>Quick Fill Customer</label>
+        <select id="customer-quickfill" onchange="applyQuickFillCustomer(this.value)">
+          <option value="">— Select a saved customer —</option>
+        </select>
         <label>Company / Name</label>
         <input type="text" id="bt-name" placeholder="Robinson Family Mortuary" />
         <label>Address</label>
@@ -829,6 +833,7 @@
     function resetForm() {
       if (!confirm('Clear the form and start over?')) return;
       document.getElementById('inv-date').valueAsDate = new Date();
+      document.getElementById('customer-quickfill').value = '';
       ['bt-name','bt-addr1','bt-city','bt-state','ev-name','ev-date','ev-location','inv-notes'].forEach(id => {
         document.getElementById(id).value = '';
       });
@@ -848,7 +853,38 @@
       if (el) el.addEventListener('input', updatePreview);
     });
 
+    // ---- Saved customers quick-fill ----
+    // Add more here as they come up — only Bill To fields get filled;
+    // Event Details always stays blank since that varies per invoice.
+    const COMMON_CUSTOMERS = [
+      { name: 'Robinson Family Mortuary', addr1: '1815 Military Hwy', city: 'Pineville', state: 'LA 71360' },
+      { name: 'Miller & Hill Funeral Directors', addr1: '103 Bolton Ave', city: 'Alexandria', state: 'LA 71301' },
+      { name: 'Wright & Calvey Funeral Home', addr1: '304 S Cherry St', city: 'Hammond', state: 'LA 70403' },
+    ];
+
+    function populateQuickFillOptions() {
+      const select = document.getElementById('customer-quickfill');
+      COMMON_CUSTOMERS.forEach((customer, i) => {
+        const opt = document.createElement('option');
+        opt.value = String(i);
+        opt.textContent = customer.name;
+        select.appendChild(opt);
+      });
+    }
+
+    function applyQuickFillCustomer(index) {
+      if (index === '') return;
+      const customer = COMMON_CUSTOMERS[Number(index)];
+      if (!customer) return;
+      document.getElementById('bt-name').value = customer.name;
+      document.getElementById('bt-addr1').value = customer.addr1;
+      document.getElementById('bt-city').value = customer.city;
+      document.getElementById('bt-state').value = customer.state;
+      updatePreview();
+    }
+
     // Initial render
+    populateQuickFillOptions();
     addItem();
     updatePreview();
     loadNextNumber();
