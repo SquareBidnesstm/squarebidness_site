@@ -6,11 +6,6 @@
   <title>Square Bidness Holdings — Investor Pitch</title>
   <meta name="description" content="Investor pitch lines for Square Bidness Holdings. TechCrunch Disrupt 2026.">
   <meta name="robots" content="noindex, nofollow">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="SB Pitch">
-<meta name="theme-color" content="#070A11">
-<link rel="apple-touch-icon" href="/icons/icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Crimson+Pro:wght@400;600&family=DM+Sans:opsz,wght@9..40,400;9..40,500&display=swap">
@@ -53,7 +48,10 @@
       padding: 52px 24px 80px;
     }
 
-    .header { margin-bottom: 52px; }
+    /* Header */
+    .header {
+      margin-bottom: 52px;
+    }
 
     .header-eyebrow {
       font-family: 'Bebas Neue', 'Arial Narrow', Arial, sans-serif;
@@ -80,7 +78,11 @@
       font-weight: 400;
     }
 
-    .pitches { display: flex; flex-direction: column; }
+    /* Pitch blocks */
+    .pitches {
+      display: flex;
+      flex-direction: column;
+    }
 
     .pitch {
       border-top: 1px solid var(--rule);
@@ -90,8 +92,13 @@
       transition: border-left-color 0.18s ease;
     }
 
-    .pitch:last-child { border-bottom: 1px solid var(--rule); }
-    .pitch:hover { border-left-color: var(--border-accent); }
+    .pitch:last-child {
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .pitch:hover {
+      border-left-color: var(--border-accent);
+    }
 
     .pitch-label {
       font-family: 'Bebas Neue', 'Arial Narrow', Arial, sans-serif;
@@ -127,11 +134,27 @@
       justify-content: center;
     }
 
-    .pitch:hover .pitch-copy { opacity: 1; }
-    .pitch-copy:hover { color: var(--accent); }
-    .pitch-copy:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; opacity: 1; }
-    .pitch-copy svg { display: block; width: 15px; height: 15px; }
+    .pitch:hover .pitch-copy {
+      opacity: 1;
+    }
 
+    .pitch-copy:hover {
+      color: var(--accent);
+    }
+
+    .pitch-copy:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+      opacity: 1;
+    }
+
+    .pitch-copy svg {
+      display: block;
+      width: 15px;
+      height: 15px;
+    }
+
+    /* Stats */
     .stats {
       margin-top: 60px;
       padding: 28px 24px;
@@ -149,7 +172,11 @@
       text-transform: uppercase;
     }
 
-    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 32px; }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px 32px;
+    }
 
     .stat-value {
       font-family: 'Bebas Neue', 'Arial Narrow', Arial, sans-serif;
@@ -161,8 +188,13 @@
       margin-bottom: 3px;
     }
 
-    .stat-desc { font-size: 0.76rem; color: var(--text-secondary); line-height: 1.35; }
+    .stat-desc {
+      font-size: 0.76rem;
+      color: var(--text-secondary);
+      line-height: 1.35;
+    }
 
+    /* Footer */
     .footer {
       margin-top: 44px;
       font-size: 0.76rem;
@@ -174,6 +206,7 @@
       gap: 8px;
     }
 
+    /* Toast */
     .toast {
       position: fixed;
       bottom: 28px;
@@ -245,7 +278,7 @@
   <div class="toast" id="toast">Copied</div>
 
   <script>
-    var pitches = [
+    const pitches = [
       {
         label: "Infrastructure",
         quote: "Most tech companies rent their infrastructure from Amazon or Google. We own ours — two nodes, two locations, rural Louisiana. That means our data stays here, our costs don't scale with usage, and no one can price us out of the market we're building for."
@@ -272,12 +305,12 @@
       }
     ];
 
-    var container = document.getElementById('pitches');
-    var toast = document.getElementById('toast');
-    var toastTimer;
+    const container = document.getElementById('pitches');
+    const toast = document.getElementById('toast');
+    let toastTimer;
 
-    var copyIcon = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="5" width="9" height="9" rx="1"/><path d="M3 11V3a1 1 0 0 1 1-1h8"/></svg>';
-    var checkIcon = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2 8 6 12 14 4"/></svg>';
+    const copyIcon = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="5" width="9" height="9" rx="1"/><path d="M3 11V3a1 1 0 0 1 1-1h8"/></svg>';
+    const checkIcon = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2 8 6 12 14 4"/></svg>';
 
     pitches.forEach(function(p) {
       var div = document.createElement('div');
