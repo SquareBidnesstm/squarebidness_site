@@ -37,6 +37,11 @@ const nextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+      { source: "/api/billing/webhook/", destination: "/api/billing/webhook" },
+    ];
+  },
 };
 
 export default nextConfig;

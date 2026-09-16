@@ -44,6 +44,11 @@ const nextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+      { source: "/api/webhooks/stripe/", destination: "/api/webhooks/stripe" },
+    ];
+  },
 };
 
 export default nextConfig;
