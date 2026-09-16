@@ -29,6 +29,7 @@ const securityHeaders = [
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  skipTrailingSlashRedirect: true,
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "events.squarebidness.com" },
