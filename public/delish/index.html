@@ -839,7 +839,7 @@
   function getBaseLabel(item) {
     const bases = item.baseOptions || [
       { id: "base_rice", name: "Rice" },
-      { id: "base_mashed_potatoes", name: "Mashed Potatoes" }
+      { id: "base_cornbread_dressing", name: "Cornbread Dressing" }
     ];
 
     if (!bases.length) return "Choose Base";
@@ -851,7 +851,7 @@
   function renderBaseOptions(item) {
     const bases = item.baseOptions || [
       { id: "base_rice", name: "Rice" },
-      { id: "base_mashed_potatoes", name: "Mashed Potatoes" }
+      { id: "base_cornbread_dressing", name: "Cornbread Dressing" }
     ];
 
     return [
@@ -1429,7 +1429,9 @@ const flashSaleOnly =
       checkoutBtn.disabled = true;
 
       if (state.reason === "manual_closed") {
-        checkoutBtn.textContent = "Online Orders Closed For Today";
+        checkoutBtn.textContent = state.orderingMode === "paused"
+          ? "Back Shortly · Check Back Soon"
+          : "Online Orders Closed For Today";
       } else {
         checkoutBtn.textContent = "Open at 11 AM";
       }

@@ -90,6 +90,85 @@
       background:var(--panel2);
       border:1px solid var(--line);
     }
+    .day-group{
+      border:1px solid var(--line);
+      border-radius:14px;
+      overflow:hidden;
+      margin-bottom:6px;
+    }
+    .day-summary{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:12px 16px;
+      cursor:pointer;
+      font-weight:700;
+      font-size:.95rem;
+      list-style:none;
+      user-select:none;
+      background:var(--panel2);
+    }
+    .day-summary::-webkit-details-marker{display:none;}
+    .day-group[open] .day-summary{border-bottom:1px solid var(--line);}
+    .day-label{display:flex;align-items:center;gap:8px;}
+    .day-badge{
+      background:var(--gold,#C09840);
+      color:#000;
+      font-size:.7rem;
+      font-weight:800;
+      border-radius:99px;
+      padding:1px 7px;
+      line-height:1.6;
+    }
+    .day-chevron{
+      font-size:.8rem;
+      color:var(--muted);
+      transition:transform .2s;
+    }
+    .day-group[open] .day-chevron{transform:rotate(180deg);}
+    .day-items{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:8px;
+      padding:12px;
+      background:var(--panel,#0B0E18);
+    }
+    .ctrl-item-row{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      padding:9px 12px;
+      background:var(--panel2);
+      border-radius:10px;
+      border:1px solid var(--line);
+      grid-column:1/-1;
+    }
+    .ctrl-item-name{flex:1;font-size:.86rem;font-weight:500;}
+    .ctrl-pill{
+      font-size:.68rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;
+      padding:4px 10px;border-radius:99px;border:1.5px solid var(--line);
+      background:transparent;color:var(--muted);cursor:pointer;white-space:nowrap;
+      transition:all .15s;
+    }
+    .ctrl-pill:hover{border-color:var(--text);color:var(--text);}
+    .ctrl-pill-hide.pill-active{background:#7f1d1d;border-color:#b91c1c;color:#fecaca;}
+    .ctrl-pill-sold.pill-active{background:#78350f;border-color:#b45309;color:#fde68a;}
+    .day-add-row{
+      grid-column:1/-1;margin-top:4px;padding:10px 12px;
+      background:var(--panel2);border-radius:10px;border:1.5px dashed var(--line);
+    }
+    .day-add-trigger{
+      background:transparent;border:none;color:var(--muted);
+      font-size:.78rem;font-weight:700;cursor:pointer;padding:0;
+      letter-spacing:.03em;text-transform:uppercase;
+    }
+    .day-add-trigger:hover{color:var(--gold,#C09840);}
+    .day-add-form{display:none;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px;}
+    .day-add-form.open{display:flex;}
+    .day-add-form input[type="text"],.day-add-form input[type="number"]{
+      font-size:.82rem;padding:6px 10px;border-radius:8px;margin:0;
+    }
+    .day-add-status{font-size:.75rem;color:var(--muted);margin-top:4px;}
     textarea{
       width:100%;
       min-height:90px;
@@ -448,7 +527,7 @@
       }
     }
     @media (max-width: 800px){
-      .row,.item-list,.window-grid,.labor-rate,.admin-hub,.compact-actions{grid-template-columns:1fr}
+      .row,.item-list,.window-grid,.labor-rate,.admin-hub,.compact-actions,.day-items{grid-template-columns:1fr}
       .labor-actions .button-link,
       .labor-actions button{
         flex:1 1 100%;
@@ -459,6 +538,12 @@
         border-right:1px solid rgba(215,174,114,.5);
         border-radius:999px;
       }
+      .ctrl-item-row{flex-wrap:wrap;gap:8px;}
+      .ctrl-item-name{flex:1 1 100%;}
+      .ctrl-pill{flex:1;text-align:center;padding:8px 10px;font-size:.75rem;}
+      .day-add-form{flex-direction:column;}
+      .day-add-form input[type="text"],.day-add-form input[type="number"]{width:100%;box-sizing:border-box;}
+      .day-add-form button{width:100%;}
     }
   </style>
 </head>
@@ -484,24 +569,16 @@
       <!-- Section label -->
       <div style="margin:18px 0 8px;font-size:.72rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);">MENU MANAGEMENT</div>
       <div class="admin-hub" aria-label="Delish admin quick links">
-        <a class="admin-link primary" href="/delish/admin/menu-editor/" style="grid-column:1/-1;flex-direction:row;align-items:center;gap:16px;">
-          <div style="font-size:1.6rem;flex-shrink:0;">🍽️</div>
+        <a class="admin-link primary" href="#item-controls" style="grid-column:1/-1;flex-direction:row;align-items:center;gap:16px;">
+          <div style="font-size:1.6rem;flex-shrink:0;">🗂️</div>
           <div>
-            <strong>Weekly Menu Editor</strong>
-            <span>Add or remove items from any day's regular menu — no code changes needed. Changes go live immediately.</span>
+            <strong>Daily Menu Items Control</strong>
+            <span>Hide items, mark sold out, or add items to any day — all in one place. Resets at midnight.</span>
           </div>
         </a>
-        <a class="admin-link" href="#special-menu-control">
-          <strong>Today's Special</strong>
-          <span>Add a one-time item to today's menu only. Resets at midnight.</span>
-        </a>
-        <a class="admin-link" href="#friday-menu-control">
-          <strong>Friday Menu</strong>
-          <span>Set the plates that show every Friday. Stays until you change it.</span>
-        </a>
-        <a class="admin-link" href="#desserts-today-control">
-          <strong>Desserts Today</strong>
-          <span>Add extra desserts for today's menu. Resets at midnight.</span>
+        <a class="admin-link" href="/delish/admin/menu-editor/">
+          <strong>Weekly Menu Editor</strong>
+          <span>Edit the full permanent menu — add, remove, or reorder items for any day.</span>
         </a>
         <a class="admin-link" href="#section-toggles">
           <strong>Section On / Off</strong>
@@ -509,105 +586,85 @@
         </a>
       </div>
 
-      <div style="margin:18px 0 8px;font-size:.72rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);">ITEM CONTROLS — resets daily at midnight</div>
-      <div class="admin-hub">
-        <a class="admin-link" href="#turn-off-items">
-          <strong>Hide an Item</strong>
-          <span>Item disappears from the menu completely and is blocked at checkout. Use when you're not making it today.</span>
-        </a>
-        <a class="admin-link" href="#mark-soldout-items">
-          <strong>Mark Sold Out</strong>
-          <span>Item stays visible but shows "Sold Out" and customers can't order it. Use when you run out mid-day.</span>
-        </a>
-        <a class="admin-link" href="#base-item-toggle-control">
-          <strong>Side Base Sold Out</strong>
-          <span>Mark rice, mashed potatoes, or cornbread dressing as unavailable as a base choice.</span>
-        </a>
-      </div>
-
       <div style="margin:18px 0 8px;font-size:.72rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);">OPERATIONS</div>
       <div class="admin-hub">
-        <a class="admin-link primary" href="#labor-control">
-          <strong>Labor Control</strong>
-          <span>Timeclock, clock-ins, hours worked, estimated labor cost, and payroll export.</span>
-        </a>
-        <a class="admin-link" href="#ordering-window">
-          <strong>Open / Close Ordering</strong>
-          <span>Open now, pause for 30 min, close for the day, or switch to auto mode.</span>
-        </a>
-        <a class="admin-link" href="#pickup-window-times">
-          <strong>Pickup Window Times</strong>
-          <span>Check or uncheck which time slots customers can pick from at checkout.</span>
+        <a class="admin-link primary" href="#ordering-window" style="grid-column:1/-1;flex-direction:row;align-items:center;gap:16px;">
+          <div style="font-size:1.6rem;flex-shrink:0;">🔦</div>
+          <div>
+            <strong>Open / Close Ordering</strong>
+            <span>Open now, pause for 30 min, close for the day, or switch to auto mode.</span>
+          </div>
         </a>
         <a class="admin-link" href="#customer-banner">
           <strong>Customer Banner</strong>
-          <span>Post a live message at the top of the order page — announcements, wait times, or today's update.</span>
+          <span>Post a live message at the top of the order page.</span>
         </a>
-        <a class="admin-link primary" href="/delish/order-lookup/" style="grid-column:1/-1;">
+        <a class="admin-link" href="/delish/order-lookup/">
           <strong>Order Lookup</strong>
-          <span>Search by customer name, phone, or order number — pull up any order and send a receipt link.</span>
+          <span>Search by customer name, phone, or order number.</span>
+        </a>
+        <a class="admin-link" href="#labor-control">
+          <strong>Labor Control</strong>
+          <span>Timeclock, hours, estimated labor cost, and payroll export.</span>
+        </a>
+        <a class="admin-link" href="#pickup-window-times">
+          <strong>Pickup Window Times</strong>
+          <span>Set which time slots customers can pick from at checkout.</span>
         </a>
         <a class="admin-link" href="/delish/admin/closed-days/">
           <strong>Scheduled Closed Days</strong>
-          <span>Pick future dates (holidays, events) when online ordering will be off.</span>
+          <span>Pick future dates when online ordering will be off.</span>
         </a>
         <a class="admin-link" href="/delish/catering/orders/">
           <strong>Catering Orders</strong>
-          <span>Review incoming catering requests, enter the total, and send the 25% deposit link.</span>
-        </a>
-        <a class="admin-link" href="/delish/catering/orders/cleared/">
-          <strong>Cleared Catering</strong>
-          <span>Archive of completed and cleared catering requests.</span>
+          <span>Review requests, enter totals, send deposit links.</span>
         </a>
       </div>
     </div>
 
-    <div class="card labor-control control-section" id="labor-control">
-      <div class="labor-head">
+    <div class="card control-section" id="labor-control">
+      <div class="section-heading">
         <div>
           <h2>Labor Control</h2>
-          <p>Track clock-ins, labor hours, estimated labor cost, and payroll-ready exports.</p>
+          <p class="section-kicker">Clock-ins, hours worked, estimated labor cost, and payroll export.</p>
         </div>
-        <div class="labor-actions">
-          <a class="button-link btn-primary" href="/delish/timeclock/admin/">Open Labor Control</a>
-          <a class="button-link btn-secondary" href="/delish/timeclock/">Open Time Clock</a>
-          <button class="btn-secondary" id="refreshLaborBtn" type="button">Refresh Labor</button>
-        </div>
+        <a class="button-link btn-secondary" href="#top">Top</a>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:4px;">
+        <a class="button-link btn-primary" href="/delish/timeclock/admin/" style="flex:1;min-width:140px;text-align:center;">Open Labor Control</a>
+        <a class="button-link btn-secondary" href="/delish/timeclock/" style="flex:1;min-width:120px;text-align:center;">Time Clock</a>
+        <button class="btn-secondary" id="refreshLaborBtn" type="button" style="flex:0 0 auto;">↻</button>
       </div>
 
       <div class="window-grid">
         <div class="window-panel">
           <div class="window-label">Active Now</div>
-          <div class="window-value" id="laborActive">Loading</div>
+          <div class="window-value" id="laborActive">—</div>
         </div>
         <div class="window-panel">
           <div class="window-label">Today Hours</div>
-          <div class="window-value" id="laborHours">Loading</div>
+          <div class="window-value" id="laborHours">—</div>
         </div>
         <div class="window-panel">
-          <div class="window-label">Estimated Labor Cost</div>
-          <div class="window-value" id="laborCost">Loading</div>
+          <div class="window-label">Est. Labor Cost</div>
+          <div class="window-value" id="laborCost">—</div>
         </div>
         <div class="window-panel">
           <div class="window-label">Labor % of Sales</div>
-          <div class="window-value" id="laborPercent">Loading</div>
+          <div class="window-value" id="laborPercent">—</div>
         </div>
       </div>
 
-      <div class="labor-rate">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px;">
         <div>
-          <label for="laborRateInput">Average hourly labor rate</label>
-          <p class="muted" style="margin:0;">Local estimate only. Adjust this number on the admin device when wages change.</p>
+          <div class="window-label" style="margin-bottom:6px;">Avg. Hourly Rate</div>
+          <input id="laborRateInput" type="number" min="0" step="0.25" value="12.00" inputmode="decimal" style="width:100%;border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:var(--text);padding:11px 14px;font:inherit;font-weight:900;" />
         </div>
-        <input id="laborRateInput" type="number" min="0" step="0.25" value="12.00" inputmode="decimal" />
-      </div>
-
-      <div class="labor-rate">
         <div>
-          <label for="laborManualSalesInput">Manual daily sales fallback</label>
-          <p class="muted" style="margin:0;">Used only if live order sales do not load.</p>
+          <div class="window-label" style="margin-bottom:6px;">Sales Fallback</div>
+          <input id="laborManualSalesInput" type="number" min="0" step="0.01" placeholder="Daily sales" inputmode="decimal" style="width:100%;border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:var(--text);padding:11px 14px;font:inherit;font-weight:900;" />
         </div>
-        <input id="laborManualSalesInput" type="number" min="0" step="0.01" placeholder="Daily sales" inputmode="decimal" />
       </div>
 
       <div class="status" id="laborStatusBox">Loading labor control...</div>
@@ -707,94 +764,20 @@
           <input type="checkbox" id="dessertsToggle" checked />
         </div>
       </div>
-      <div class="row" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line-color,#2a2a2a);">
-        <div class="toggle">
-          <label for="mustardGreensToggle" style="display:flex;flex-direction:column;gap:2px;">
-            <span>Mustard Greens</span>
-            <span style="font-size:11px;opacity:.65;font-weight:400;">Persistent — stays on until turned off</span>
-          </label>
-          <input type="checkbox" id="mustardGreensToggle" />
-        </div>
-      </div>
     </div>
 
-    <div class="card control-section" id="special-menu-control">
-      <div class="section-heading">
-        <div>
-          <h2>Special Menu Today</h2>
-          <p class="section-kicker">Add extra dishes for today. They appear alongside the regular menu. Resets daily.</p>
-        </div>
-      </div>
-      <div class="row" style="margin-bottom:10px;">
-        <div class="toggle">
-          <label for="specialMenuToggle">Active</label>
-          <input type="checkbox" id="specialMenuToggle" />
-        </div>
-      </div>
-      <div id="specialMenuItemsList"></div>
-      <button type="button" class="btn-secondary" id="addSpecialItemBtn" style="margin-top:8px;width:auto;padding:8px 16px;">+ Add Item</button>
-    </div>
+    <!-- Special/Friday menu UI removed — use Item Controls → Add Item per day -->
 
-    <div class="card control-section" id="friday-menu-control">
-      <div class="section-heading">
-        <div>
-          <h2>Friday Menu</h2>
-          <p class="section-kicker">Set the main plates for every Friday. Stays active until you change it — does not reset daily.</p>
-        </div>
-        <div id="fridayMenuStatus" style="font-size:.8rem;color:var(--muted);text-align:right;flex-shrink:0;"></div>
-      </div>
-      <div class="row" style="margin-bottom:10px;">
-        <div class="toggle">
-          <label for="fridayMenuToggle">Use this menu on Fridays</label>
-          <input type="checkbox" id="fridayMenuToggle" />
-        </div>
-      </div>
-      <div id="fridayMenuItemsList"></div>
-      <button type="button" class="btn-secondary" id="addFridayItemBtn" style="margin-top:8px;width:auto;padding:8px 16px;">+ Add Item</button>
-    </div>
 
-    <div class="card control-section" id="desserts-today-control">
+    <div class="card control-section" id="item-controls">
       <div class="section-heading">
         <div>
-          <h2>Desserts Today</h2>
-          <p class="section-kicker">Add desserts for today. These appear in the Desserts section alongside the standing menu. Resets daily.</p>
-        </div>
-      </div>
-      <div id="dessertItemsList"></div>
-      <button type="button" class="btn-secondary" id="addDessertItemBtn" style="margin-top:8px;width:auto;padding:8px 16px;">+ Add Dessert</button>
-    </div>
-
-    <div class="card control-section" id="turn-off-items">
-      <div class="section-heading">
-        <div>
-          <h2>Hide an Item</h2>
-          <p class="section-kicker">Checked items disappear from the menu completely and are blocked at checkout. Use this when you're not making something today. Resets at midnight.</p>
+          <h2>Item Controls</h2>
+          <p class="section-kicker">Tap HIDE to pull an item completely, or SOLD OUT to keep it visible but blocked. Add new items to any day below. Resets at midnight.</p>
         </div>
         <a class="button-link btn-secondary" href="#top">Top</a>
       </div>
-      <div class="item-list" id="itemsOffList"></div>
-    </div>
-
-    <div class="card control-section" id="mark-soldout-items">
-      <div class="section-heading">
-        <div>
-          <h2>Mark Sold Out</h2>
-          <p class="section-kicker">Checked items stay on the menu but show "Sold Out" so customers can see what you had but can't order it. Resets at midnight.</p>
-        </div>
-        <a class="button-link btn-secondary" href="#top">Top</a>
-      </div>
-      <div class="item-list" id="itemsSoldOutList"></div>
-    </div>
-
-    <div class="card control-section" id="base-item-toggle-control">
-      <div class="section-heading">
-        <div>
-          <h2>Side Base Sold Out</h2>
-          <p class="section-kicker">Checked bases are removed as a plate choice and blocked in checkout. Use when you're out of rice, mashed potatoes, or dressing. Resets at midnight.</p>
-        </div>
-        <a class="button-link btn-secondary" href="#top">Top</a>
-      </div>
-      <div class="item-list" id="basesSoldOutList"></div>
+      <div id="itemControlsList"></div>
     </div>
 
     <div class="card control-section save-panel" id="customer-banner">
@@ -874,10 +857,15 @@ const reloadPickupWindowsBtn = document.getElementById("reloadPickupWindowsBtn")
       { id: "extra_side_rice_dressing", name: "Extra Side - Rice Dressing" },
       { id: "extra_side_jambalaya", name: "Extra Side - Jambalaya" },
       { id: "extra_side_fries", name: "Extra Side - Fries" },
+      { id: "extra_side_mustard_greens", name: "Extra Side - Mustard Greens" },
 
       { id: "dessert_strawberry_cheesecake", name: "Dessert - Strawberry Cheesecake" },
       { id: "dessert_banana_pudding_with_bananas", name: "Dessert - Banana Pudding (with Bananas)" },
       { id: "dessert_banana_pudding_without_bananas", name: "Dessert - Banana Pudding (without Bananas)" },
+
+      { id: "base_cornbread_dressing", name: "Plate Base - Cornbread Dressing" },
+      { id: "base_rice", name: "Plate Base - Rice" },
+      { id: "base_mashed_potatoes", name: "Plate Base - Mashed Potatoes" },
     ];
 
     const BASE_CATALOG = [
@@ -1311,38 +1299,217 @@ async function savePickupWindows() {
       tokenStatus.textContent = getSavedToken() ? "Token saved" : "Token not saved";
     }
 
-    function renderItemList(selected = []) {
-      const selectedSet = new Set(selected);
-      const wrap = document.getElementById("itemsOffList");
-      wrap.innerHTML = ITEM_CATALOG.map(item => `
-        <label class="item">
-          <input type="checkbox" value="${item.id}" ${selectedSet.has(item.id) ? "checked" : ""} />
-          <span>${item.name}</span>
-        </label>
-      `).join("");
+    const GROUP_ORDER = ["Monday","Tuesday","Wednesday","Thursday","Friday","Sunday","Drinks","Lagniappe","Extra Sides","Plate Base","Desserts","Other"];
+
+    function getItemGroup(item) {
+      const id = item.id.toLowerCase();
+      if (id.startsWith("monday")) return "Monday";
+      if (id.startsWith("tuesday")) return "Tuesday";
+      if (id.startsWith("wednesday")) return "Wednesday";
+      if (id.startsWith("thursday")) return "Thursday";
+      if (id.startsWith("friday")) return "Friday";
+      if (id.startsWith("sunday")) return "Sunday";
+      if (id.startsWith("drink")) return "Drinks";
+      if (id.startsWith("lagniappe")) return "Lagniappe";
+      if (id.startsWith("extra_side")) return "Extra Sides";
+      if (id.startsWith("base_")) return "Plate Base";
+      if (id.startsWith("dessert")) return "Desserts";
+      return "Other";
     }
 
-function renderSoldOutList(selected = []) {
-  const selectedSet = new Set(selected);
-  const wrap = document.getElementById("itemsSoldOutList");
-  wrap.innerHTML = ITEM_CATALOG.map(item => `
-    <label class="item">
-      <input type="checkbox" value="${item.id}" ${selectedSet.has(item.id) ? "checked" : ""} />
-      <span>${item.name}</span>
-    </label>
-  `).join("");
-}
-
-    function renderBaseSoldOutList(selected = []) {
-      const selectedSet = new Set(selected);
-      const wrap = document.getElementById("basesSoldOutList");
-      wrap.innerHTML = BASE_CATALOG.map(base => `
-        <label class="item">
-          <input type="checkbox" value="${base.id}" ${selectedSet.has(base.id) ? "checked" : ""} />
-          <span>${base.name}</span>
-        </label>
-      `).join("");
+    function getTodayGroupName() {
+      return ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][new Date().getDay()];
     }
+
+    function renderItemControls(itemsOff = [], itemsSoldOut = []) {
+      const wrap = document.getElementById("itemControlsList");
+      const offSet = new Set(itemsOff);
+      const soldSet = new Set(itemsSoldOut);
+      const today = getTodayGroupName();
+      const groups = {};
+      GROUP_ORDER.forEach(g => { groups[g] = []; });
+      ITEM_CATALOG.forEach(item => {
+        const g = getItemGroup(item);
+        if (!groups[g]) groups[g] = [];
+        groups[g].push(item);
+      });
+
+      wrap.innerHTML = GROUP_ORDER.filter(g => groups[g].length > 0).map(g => {
+        const isToday = g === today;
+        const offCount = groups[g].filter(item => offSet.has(item.id)).length;
+        const soldCount = groups[g].filter(item => soldSet.has(item.id)).length;
+        let badge = "";
+        if (offCount) badge += `<span class="day-badge">${offCount} hidden</span>`;
+        if (soldCount) badge += `<span class="day-badge" style="background:var(--warn);">${soldCount} sold out</span>`;
+
+        const items = groups[g].map(item => {
+          const label = item.name.replace(/^[A-Za-z]+(?: [A-Za-z]+)? - /, "");
+          const delBtn = item.weekly
+            ? `<button class="ctrl-pill ctrl-pill-del" data-del-id="${item.id}" data-del-day="${item.weeklyDay}" style="background:#5a1a1a;color:#ff9999;border-color:#7a2a2a;">DEL</button>`
+            : "";
+          return `
+          <div class="ctrl-item-row" id="ctrl-row-${item.id}">
+            <span class="ctrl-item-name">${label}</span>
+            <button class="ctrl-pill ctrl-pill-hide${offSet.has(item.id) ? " pill-active" : ""}" data-for="${item.id}">HIDE</button>
+            <button class="ctrl-pill ctrl-pill-sold${soldSet.has(item.id) ? " pill-active" : ""}" data-for="${item.id}">SOLD OUT</button>
+            ${delBtn}
+          </div>`;
+        }).join("");
+
+        const dayKey = g.toLowerCase();
+        const isDayGroup = ["monday","tuesday","wednesday","thursday","friday","sunday"].includes(dayKey);
+        const addForm = `
+          <div class="day-add-row">
+            <button class="day-add-trigger" data-day="${dayKey}">+ Add Item to ${g}</button>
+            <div class="day-add-form" id="day-add-form-${dayKey}">
+              <input type="text" placeholder="Item name" id="day-add-name-${dayKey}" style="flex:2;min-width:120px;" />
+              <input type="number" min="0" step="0.01" placeholder="Price" id="day-add-price-${dayKey}" style="flex:1;min-width:70px;" />
+              ${isDayGroup ? `<select id="day-add-base-${dayKey}" style="flex:1.5;min-width:140px;background:#1c1c1c;color:#e0e0e0;border:1px solid #333;border-radius:6px;padding:6px 10px;font-size:.78rem;">
+                <option value="none">No Base</option>
+                <option value="rice_dressing">Rice or Cornbread Dressing</option>
+                <option value="rice_mashed">Rice or Mashed Potatoes</option>
+                <option value="dressing_mashed">Cornbread Dressing or Mashed Potatoes</option>
+                <option value="rice_only">Rice Only</option>
+                <option value="dressing_only">Cornbread Dressing Only</option>
+                <option value="mashed_only">Mashed Potatoes Only</option>
+              </select>` : ""}
+              <button class="btn-primary" style="padding:6px 14px;font-size:.78rem;" data-save-day="${dayKey}">Save</button>
+              <div class="day-add-status" id="day-add-status-${dayKey}"></div>
+            </div>
+          </div>`;
+
+        return `<details class="day-group" data-group="${g}" ${isToday ? "open" : ""}><summary class="day-summary"><span class="day-label">${g}${badge}</span><span class="day-chevron">▾</span></summary><div class="day-items">${items}${addForm}</div></details>`;
+      }).join("");
+
+      function updateGroupBadge(detailsEl) {
+        if (!detailsEl) return;
+        const g = detailsEl.dataset.group;
+        const offCount = detailsEl.querySelectorAll(".ctrl-pill-hide.pill-active").length;
+        const soldCount = detailsEl.querySelectorAll(".ctrl-pill-sold.pill-active").length;
+        let badge = "";
+        if (offCount) badge += `<span class="day-badge">${offCount} hidden</span>`;
+        if (soldCount) badge += `<span class="day-badge" style="background:var(--warn);">${soldCount} sold out</span>`;
+        const labelEl = detailsEl.querySelector(".day-label");
+        if (labelEl) labelEl.innerHTML = `${g}${badge}`;
+      }
+
+      wrap.querySelectorAll(".ctrl-pill-hide").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.for;
+          const active = btn.classList.toggle("pill-active");
+          if (active) wrap.querySelector(`.ctrl-pill-sold[data-for="${id}"]`)?.classList.remove("pill-active");
+          updateGroupBadge(btn.closest("details"));
+        });
+      });
+      wrap.querySelectorAll(".ctrl-pill-sold").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.for;
+          const active = btn.classList.toggle("pill-active");
+          if (active) wrap.querySelector(`.ctrl-pill-hide[data-for="${id}"]`)?.classList.remove("pill-active");
+          updateGroupBadge(btn.closest("details"));
+        });
+      });
+      wrap.querySelectorAll(".day-add-trigger").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.getElementById(`day-add-form-${btn.dataset.day}`)?.classList.toggle("open");
+        });
+      });
+      wrap.querySelectorAll("[data-save-day]").forEach(btn => {
+        btn.addEventListener("click", () => saveItemToDay(btn.dataset.saveDay));
+      });
+      wrap.querySelectorAll(".ctrl-pill-del").forEach(btn => {
+        btn.addEventListener("click", () => deleteWeeklyItem(btn.dataset.delId, btn.dataset.delDay));
+      });
+    }
+
+    async function deleteWeeklyItem(itemId, day) {
+      if (!window.confirm(`Delete this item? This cannot be undone.`)) return;
+      let token = getSavedToken();
+      if (!token) {
+        token = window.prompt("Enter Delish operator token");
+        if (!token) return;
+        if (window.confirm("Save token on this device?")) saveToken(token.trim());
+      }
+      try {
+        const res = await fetch(`/api/delish/weekly-menu/?t=${Date.now()}`, { cache: "no-store" });
+        const data = await res.json().catch(() => ({}));
+        const weeklyMenu = data.weeklyMenu || {};
+        weeklyMenu[day] = (Array.isArray(weeklyMenu[day]) ? weeklyMenu[day] : []).filter(i => i.id !== itemId);
+        const saveRes = await fetch("/api/delish/weekly-menu/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-operator-token": token.trim() },
+          body: JSON.stringify(weeklyMenu)
+        });
+        const saveData = await saveRes.json().catch(() => ({}));
+        if (!saveRes.ok || !saveData.ok) throw new Error(saveData.error || "Delete failed.");
+        document.getElementById(`ctrl-row-${itemId}`)?.remove();
+        ITEM_CATALOG.splice(ITEM_CATALOG.findIndex(x => x.id === itemId), 1);
+      } catch (err) {
+        alert(err.message || "Failed to delete item.");
+      }
+    }
+
+    const BASE_OPTION_MAP = {
+      rice_dressing: [{ id: "base_rice", name: "Rice" }, { id: "base_cornbread_dressing", name: "Cornbread Dressing" }],
+      rice_mashed:   [{ id: "base_rice", name: "Rice" }, { id: "base_mashed_potatoes", name: "Mashed Potatoes" }],
+      dressing_mashed: [{ id: "base_cornbread_dressing", name: "Cornbread Dressing" }, { id: "base_mashed_potatoes", name: "Mashed Potatoes" }],
+      rice_only:     [{ id: "base_rice", name: "Rice" }],
+      dressing_only: [{ id: "base_cornbread_dressing", name: "Cornbread Dressing" }],
+      mashed_only:   [{ id: "base_mashed_potatoes", name: "Mashed Potatoes" }],
+      none:          []
+    };
+
+    async function saveItemToDay(day) {
+      const nameEl = document.getElementById(`day-add-name-${day}`);
+      const priceEl = document.getElementById(`day-add-price-${day}`);
+      const baseEl = document.getElementById(`day-add-base-${day}`);
+      const statusEl = document.getElementById(`day-add-status-${day}`);
+      const name = (nameEl?.value || "").trim();
+      const price = parseFloat(priceEl?.value || "0");
+      if (!name || !(price > 0)) {
+        if (statusEl) statusEl.textContent = "Name and price required.";
+        return;
+      }
+      const baseKey = baseEl?.value || "none";
+      const baseOptions = BASE_OPTION_MAP[baseKey] || [];
+      const sideSelectionRequired = baseOptions.length > 0;
+      const desc = sideSelectionRequired ? "Choose 2 sides." : "";
+      let token = getSavedToken();
+      if (!token) {
+        token = window.prompt("Enter Delish operator token");
+        if (!token) return;
+        if (window.confirm("Save token on this device?")) saveToken(token.trim());
+      }
+      if (statusEl) statusEl.textContent = "Saving...";
+      try {
+        const res = await fetch(`/api/delish/weekly-menu/?t=${Date.now()}`, { cache: "no-store" });
+        const data = await res.json().catch(() => ({}));
+        const weeklyMenu = data.weeklyMenu || {};
+        const dayItems = Array.isArray(weeklyMenu[day]) ? [...weeklyMenu[day]] : [];
+        const newId = `${day}_${name.toLowerCase().replace(/[^a-z0-9]+/g, "_")}_${Date.now()}`;
+        dayItems.push({ id: newId, name, price, desc, sideSelectionRequired, baseOptions });
+        weeklyMenu[day] = dayItems;
+        const saveRes = await fetch("/api/delish/weekly-menu/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-operator-token": token.trim() },
+          body: JSON.stringify(weeklyMenu)
+        });
+        const saveData = await saveRes.json().catch(() => ({}));
+        if (!saveRes.ok || !saveData.ok) throw new Error(saveData.error || "Save failed.");
+        if (statusEl) statusEl.textContent = "Saved!";
+        if (nameEl) nameEl.value = "";
+        if (priceEl) priceEl.value = "";
+        if (baseEl) baseEl.value = "none";
+        await loadWeeklyMenuIntoAdminCatalog();
+        const offNow = [...document.querySelectorAll("#itemControlsList .ctrl-pill-hide.pill-active")].map(b => b.dataset.for);
+        const soldNow = [...document.querySelectorAll("#itemControlsList .ctrl-pill-sold.pill-active")].map(b => b.dataset.for);
+        renderItemControls(offNow, soldNow);
+        setTimeout(() => { if (statusEl) statusEl.textContent = ""; }, 3000);
+      } catch (err) {
+        if (statusEl) statusEl.textContent = err.message || "Failed.";
+      }
+    }
+
 
     function escAttr(v) {
       return String(v || "").replace(/&/g, "&amp;").replace(/"/g, "&quot;");
@@ -1556,13 +1723,16 @@ function renderSoldOutList(selected = []) {
           const items = Array.isArray(data.weeklyMenu[day]) ? data.weeklyMenu[day] : [];
           for (const item of items) {
             if (item.id && !existingIds.has(item.id)) {
-              ITEM_CATALOG.push({ id: item.id, name: `${DAY_LABELS[day]} - ${item.name} ✦` });
+              ITEM_CATALOG.push({ id: item.id, name: `${DAY_LABELS[day]} - ${item.name} ✦`, weekly: true, weeklyDay: day });
               existingIds.add(item.id);
             }
           }
         }
       } catch (_) {}
     }
+
+    let _lastSpecialMenu = { active: false, items: [] };
+    let _lastFridayMenu = { active: false, items: [] };
 
     async function loadOverrides() {
       setStatus("Loading current overrides...");
@@ -1578,20 +1748,15 @@ function renderSoldOutList(selected = []) {
       document.getElementById("drinksToggle").checked = overrides?.sections?.drinks !== false;
       document.getElementById("extraSidesToggle").checked = overrides?.sections?.extraSides !== false;
       document.getElementById("dessertsToggle").checked = overrides?.sections?.desserts !== false;
-      document.getElementById("mustardGreensToggle").checked = overrides?.mustardGreens?.available === true;
-      document.getElementById("specialMenuToggle").checked = overrides?.specialMenu?.active === true;
-      renderSpecialMenuItems(Array.isArray(overrides?.specialMenu?.items) ? overrides.specialMenu.items : []);
-      document.getElementById("fridayMenuToggle").checked = overrides?.fridayMenu?.active === true;
-      renderFridayMenuItems(Array.isArray(overrides?.fridayMenu?.items) ? overrides.fridayMenu.items : []);
-      const fridayUpdatedAt = overrides?.fridayMenu?.updatedAt;
-      document.getElementById("fridayMenuStatus").textContent = fridayUpdatedAt
-        ? "Last updated " + new Date(fridayUpdatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-        : "";
-      renderDessertItems(Array.isArray(overrides?.dessertItems) ? overrides.dessertItems : []);
+      _lastSpecialMenu = overrides?.specialMenu || { active: false, items: [] };
+      _lastFridayMenu = overrides?.fridayMenu || { active: false, items: [] };
       document.getElementById("customerMessage").value = overrides.customerMessage || "";
-      renderItemList(Array.isArray(overrides.itemsOff) ? overrides.itemsOff : []);
-      renderSoldOutList(Array.isArray(overrides.itemsSoldOut) ? overrides.itemsSoldOut : []);
-      renderBaseSoldOutList(Array.isArray(overrides.basesSoldOut) ? overrides.basesSoldOut : []);
+      const legacyBasesSoldOut = Array.isArray(overrides.basesSoldOut) ? overrides.basesSoldOut : [];
+      const mergedSoldOut = [...new Set([...(Array.isArray(overrides.itemsSoldOut) ? overrides.itemsSoldOut : []), ...legacyBasesSoldOut])];
+      renderItemControls(
+        Array.isArray(overrides.itemsOff) ? overrides.itemsOff : [],
+        mergedSoldOut
+      );
       setStatus("Overrides loaded.", "good");
     }
 
@@ -1615,9 +1780,9 @@ function renderSoldOutList(selected = []) {
           }
         }
 
-        const itemsOff = [...document.querySelectorAll("#itemsOffList input:checked")].map(el => el.value);
-        const itemsSoldOut = [...document.querySelectorAll("#itemsSoldOutList input:checked")].map(el => el.value);
-        const basesSoldOut = [...document.querySelectorAll("#basesSoldOutList input:checked")].map(el => el.value);
+        const itemsOff = [...document.querySelectorAll("#itemControlsList .ctrl-pill-hide.pill-active")].map(b => b.dataset.for);
+        const itemsSoldOut = [...document.querySelectorAll("#itemControlsList .ctrl-pill-sold.pill-active")].map(b => b.dataset.for);
+        const basesSoldOut = [...new Set([...itemsSoldOut, ...itemsOff])].filter(id => id.startsWith("base_"));
 
         const payload = {
           sections: {
@@ -1626,17 +1791,8 @@ function renderSoldOutList(selected = []) {
             extraSides: document.getElementById("extraSidesToggle").checked,
             desserts: document.getElementById("dessertsToggle").checked,
           },
-          mustardGreens: {
-            available: document.getElementById("mustardGreensToggle").checked,
-          },
-          specialMenu: {
-            active: document.getElementById("specialMenuToggle").checked,
-            items: collectSpecialMenuItems(),
-          },
-          fridayMenu: {
-            active: document.getElementById("fridayMenuToggle").checked,
-            items: collectFridayMenuItems(),
-          },
+          specialMenu: _lastSpecialMenu,
+          fridayMenu: _lastFridayMenu,
           dessertItems: collectDessertItems(),
           itemsOff,
           itemsSoldOut,
@@ -1750,14 +1906,9 @@ reloadPickupWindowsBtn?.addEventListener("click", () => {
       setStatus("Saved token cleared.");
     });
 
-    document.getElementById("addSpecialItemBtn").addEventListener("click", addSpecialItem);
-    document.getElementById("addFridayItemBtn").addEventListener("click", addFridayItem);
-    document.getElementById("addDessertItemBtn").addEventListener("click", addDessertItem);
-
     updateTokenStatus();
     loadSavedLaborRate();
     loadSavedManualSales();
-    bindMutualExclusion();
     loadLaborSnapshot().catch((err) => {
       console.error(err);
       setLaborStatus(err.message || "Unable to load labor control.", "bad");
@@ -1776,9 +1927,7 @@ reloadPickupWindowsBtn?.addEventListener("click", () => {
       loadOverrides().catch((err) => {
         console.error(err);
         setStatus(err.message || "Unable to load admin.", "bad");
-        renderItemList([]);
-        renderSoldOutList([]);
-        renderBaseSoldOutList([]);
+        renderItemControls([], []);
       });
     });
     loadPickupWindows().catch((err) => {
