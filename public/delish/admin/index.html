@@ -1751,12 +1751,10 @@ async function savePickupWindows() {
       _lastSpecialMenu = overrides?.specialMenu || { active: false, items: [] };
       _lastFridayMenu = overrides?.fridayMenu || { active: false, items: [] };
       document.getElementById("customerMessage").value = overrides.customerMessage || "";
-      const legacyBasesSoldOut = Array.isArray(overrides.basesSoldOut) ? overrides.basesSoldOut : [];
+      const itemsOffArr = Array.isArray(overrides.itemsOff) ? overrides.itemsOff : [];
+      const legacyBasesSoldOut = (Array.isArray(overrides.basesSoldOut) ? overrides.basesSoldOut : []).filter(id => !itemsOffArr.includes(id));
       const mergedSoldOut = [...new Set([...(Array.isArray(overrides.itemsSoldOut) ? overrides.itemsSoldOut : []), ...legacyBasesSoldOut])];
-      renderItemControls(
-        Array.isArray(overrides.itemsOff) ? overrides.itemsOff : [],
-        mergedSoldOut
-      );
+      renderItemControls(itemsOffArr, mergedSoldOut);
       setStatus("Overrides loaded.", "good");
     }
 
@@ -1782,7 +1780,7 @@ async function savePickupWindows() {
 
         const itemsOff = [...document.querySelectorAll("#itemControlsList .ctrl-pill-hide.pill-active")].map(b => b.dataset.for);
         const itemsSoldOut = [...document.querySelectorAll("#itemControlsList .ctrl-pill-sold.pill-active")].map(b => b.dataset.for);
-        const basesSoldOut = [...new Set([...itemsSoldOut, ...itemsOff])].filter(id => id.startsWith("base_"));
+        const basesSoldOut = itemsSoldOut.filter(id => id.startsWith("base_"));
 
         const payload = {
           sections: {
