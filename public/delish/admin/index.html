@@ -941,17 +941,26 @@ function renderPickupWindows(windows = [], disabledWindows = []) {
 
   const disabledSet = new Set(disabledWindows || []);
 
+  pickupWindowList.style.cssText = "display:flex;flex-direction:column;gap:8px;margin-top:8px;";
   pickupWindowList.innerHTML = windows.map(windowValue => {
     const isAvailable = !disabledSet.has(windowValue);
+    const pillStyle = isAvailable
+      ? "background:#14532d;border-color:#16a34a;color:#bbf7d0;"
+      : "background:#7f1d1d;border-color:#b91c1c;color:#fecaca;";
 
     return `
-      <label class="pickup-window-item">
-        <span>
-          ${windowValue}
-          <small>${isAvailable ? "Available" : "Disabled"}</small>
-        </span>
-        <input type="checkbox" value="${windowValue}" ${isAvailable ? "checked" : ""} />
-      </label>
+      <div class="ctrl-item-row" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:8px;background:#1a1a1a;border:1px solid #2a2a2a;">
+        <span class="ctrl-item-name">${windowValue}</span>
+        <input type="checkbox" value="${windowValue}" ${isAvailable ? "checked" : ""} style="display:none;" />
+        <button type="button" class="ctrl-pill pickup-pill" style="min-width:64px;text-align:center;font-size:.75rem;padding:6px 14px;${pillStyle}"
+          onclick="(function(btn){
+            var row=btn.closest('div');
+            var cb=row.querySelector('input[type=checkbox]');
+            cb.checked=!cb.checked;
+            if(cb.checked){btn.textContent='ON';btn.style.background='#14532d';btn.style.borderColor='#16a34a';btn.style.color='#bbf7d0';}
+            else{btn.textContent='OFF';btn.style.background='#7f1d1d';btn.style.borderColor='#b91c1c';btn.style.color='#fecaca';}
+          })(this)">${isAvailable ? "ON" : "OFF"}</button>
+      </div>
     `;
   }).join("");
 }
