@@ -342,19 +342,19 @@
   <div class="optionNote">Optional extra side outside of your 2 plate sides.</div>
 </div>
 
-  <div class="section">
+  <div class="section" id="lagniappeSection">
   <h3>Lagniappe Menu</h3>
   <div id="lagniappeItems"></div>
   <div class="optionNote">Stand-alone Lagniappe items available for pickup.</div>
 </div>
 
-  <div class="section">
+  <div class="section" id="dessertsSection">
   <h3>Desserts</h3>
   <div id="dessertItems"></div>
   <div class="optionNote">Add dessert to your order.</div>
 </div>
 
-   <div class="section">
+   <div class="section" id="drinksSection">
   <h3>Drinks</h3>
   <div id="drinkItems"></div>
   <div class="optionNote">Add drinks to any order.</div>
@@ -1077,9 +1077,11 @@ if (state.today && getActiveMenuForDay(state.today)) {
   const visibleMains = (menu.mains || []).filter(item => isItemEnabled(item.id));
   mainMenuItems.innerHTML = visibleMains.map(item => renderMainItem(item, state.today)).join("");
 
+  const drinksSection = document.getElementById("drinksSection");
   if (!isSectionEnabled("drinks")) {
-    drinkItems.innerHTML = `<div class="menuNotice">Sorry, drinks are not available today.</div>`;
+    if (drinksSection) drinksSection.style.display = "none";
   } else {
+    if (drinksSection) drinksSection.style.display = "";
     const visibleDrinks = DRINKS.filter(item => isItemEnabled(item.id));
     drinkItems.innerHTML = visibleDrinks.map(renderDrinkItem).join("");
   }
@@ -1108,20 +1110,21 @@ if (isExtraSideAllowedForDay(state.today) && isSectionEnabled("extraSides")) {
   extraSideSelect.disabled = true;
 }
 
+  const lagniappeSection = document.getElementById("lagniappeSection");
   if (!isSectionEnabled("lagniappe")) {
-  lagniappeItems.innerHTML = `
-    <div class="menuNotice">
-      Sorry, Lagniappe items are not available today.
-    </div>
-  `;
-} else {
-  const visibleLagniappe = LAGNIAPPE.filter(item => isItemEnabled(item.id));
-  lagniappeItems.innerHTML = visibleLagniappe.map(renderLagniappeItem).join("");
-}
+    if (lagniappeSection) lagniappeSection.style.display = "none";
+  } else {
+    if (lagniappeSection) lagniappeSection.style.display = "";
+    const visibleLagniappe = LAGNIAPPE.filter(item => isItemEnabled(item.id));
+    lagniappeItems.innerHTML = visibleLagniappe.map(renderLagniappeItem).join("");
+  }
 
+  const dessertsSection = document.getElementById("dessertsSection");
   if (!isSectionEnabled("desserts")) {
-  dessertItems.innerHTML = `<div class="menuNotice">Desserts not available today.</div>`;
-} else {
+    if (dessertsSection) dessertsSection.style.display = "none";
+  } else {
+    if (dessertsSection) dessertsSection.style.display = "";
+
   const allDesserts = getActiveDesserts();
   const visibleDesserts = allDesserts.filter(item => isItemEnabled(item.id));
   dessertItems.innerHTML = visibleDesserts.length

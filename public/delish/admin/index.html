@@ -1411,7 +1411,11 @@ async function savePickupWindows() {
                 <option value="rice_only">Rice Only</option>
                 <option value="dressing_only">Cornbread Dressing Only</option>
                 <option value="mashed_only">Mashed Potatoes Only</option>
-              </select>` : ""}
+              </select>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.75rem;color:#aaa;white-space:nowrap;cursor:pointer;">
+                <input type="checkbox" id="day-add-sides-${dayKey}" style="margin:0;width:auto;" />
+                Customer picks 2 sides
+              </label>` : ""}
               <button class="btn-primary" style="padding:6px 14px;font-size:.78rem;" data-save-day="${dayKey}">Save</button>
               <div class="day-add-status" id="day-add-status-${dayKey}"></div>
             </div>
@@ -1509,9 +1513,10 @@ async function savePickupWindows() {
         if (statusEl) statusEl.textContent = "Name and price required.";
         return;
       }
+      const sidesEl = document.getElementById(`day-add-sides-${day}`);
       const baseKey = baseEl?.value || "none";
       const baseOptions = BASE_OPTION_MAP[baseKey] || [];
-      const sideSelectionRequired = baseOptions.length > 0;
+      const sideSelectionRequired = !!(sidesEl?.checked);
       const desc = sideSelectionRequired ? "Choose 2 sides." : "";
       let token = getSavedToken();
       if (!token) {
@@ -1539,6 +1544,7 @@ async function savePickupWindows() {
         if (nameEl) nameEl.value = "";
         if (priceEl) priceEl.value = "";
         if (baseEl) baseEl.value = "none";
+        if (sidesEl) sidesEl.checked = false;
         await loadWeeklyMenuIntoAdminCatalog();
         const offNow = [...document.querySelectorAll("#itemControlsList .ctrl-pill-hide.pill-active")].map(b => b.dataset.for);
         const soldNow = [...document.querySelectorAll("#itemControlsList .ctrl-pill-sold.pill-active")].map(b => b.dataset.for);
