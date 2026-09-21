@@ -746,24 +746,63 @@
         </div>
         <a class="button-link btn-secondary" href="#top">Top</a>
       </div>
-      <div class="row">
-        <div class="toggle">
-          <label for="lagniappeToggle">Lagniappe</label>
-          <input type="checkbox" id="lagniappeToggle" checked />
-        </div>
-        <div class="toggle">
-          <label for="drinksToggle">Drinks</label>
-          <input type="checkbox" id="drinksToggle" checked />
-        </div>
-        <div class="toggle">
-          <label for="extraSidesToggle">Extra Sides</label>
-          <input type="checkbox" id="extraSidesToggle" checked />
-        </div>
-        <div class="toggle">
-          <label for="dessertsToggle">Desserts</label>
-          <input type="checkbox" id="dessertsToggle" checked />
-        </div>
-      </div>
+      <div id="sectionToggleRows" style="display:flex;flex-direction:column;gap:8px;margin-top:8px;"></div>
+      <script>
+      (function(){
+        const SECTIONS = [
+          { id: "lagniappeToggle", label: "Lagniappe" },
+          { id: "drinksToggle", label: "Drinks" },
+          { id: "extraSidesToggle", label: "Extra Sides" },
+          { id: "dessertsToggle", label: "Desserts" },
+        ];
+        const container = document.getElementById("sectionToggleRows");
+        SECTIONS.forEach(s => {
+          const cb = document.createElement("input");
+          cb.type = "checkbox";
+          cb.id = s.id;
+          cb.checked = true;
+          cb.style.display = "none";
+
+          const row = document.createElement("div");
+          row.className = "ctrl-item-row";
+          row.style.cssText = "display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:8px;background:#1a1a1a;border:1px solid #2a2a2a;";
+
+          const name = document.createElement("span");
+          name.className = "ctrl-item-name";
+          name.textContent = s.label;
+
+          const pill = document.createElement("button");
+          pill.type = "button";
+          pill.className = "ctrl-pill";
+          pill.style.cssText = "min-width:64px;text-align:center;font-size:.75rem;padding:6px 14px;";
+
+          function updatePill() {
+            if (cb.checked) {
+              pill.textContent = "ON";
+              pill.style.background = "#14532d";
+              pill.style.borderColor = "#16a34a";
+              pill.style.color = "#bbf7d0";
+            } else {
+              pill.textContent = "OFF";
+              pill.style.background = "#7f1d1d";
+              pill.style.borderColor = "#b91c1c";
+              pill.style.color = "#fecaca";
+            }
+          }
+
+          pill.addEventListener("click", () => {
+            cb.checked = !cb.checked;
+            updatePill();
+          });
+
+          updatePill();
+          row.appendChild(name);
+          row.appendChild(cb);
+          row.appendChild(pill);
+          container.appendChild(row);
+        });
+      })();
+      </script>
     </div>
 
     <!-- Special/Friday menu UI removed — use Item Controls → Add Item per day -->
@@ -1744,10 +1783,29 @@ async function savePickupWindows() {
       }
 
       const overrides = data.overrides || {};
-      document.getElementById("lagniappeToggle").checked = overrides?.sections?.lagniappe !== false;
-      document.getElementById("drinksToggle").checked = overrides?.sections?.drinks !== false;
-      document.getElementById("extraSidesToggle").checked = overrides?.sections?.extraSides !== false;
-      document.getElementById("dessertsToggle").checked = overrides?.sections?.desserts !== false;
+      [
+        ["lagniappeToggle", overrides?.sections?.lagniappe !== false],
+        ["drinksToggle",    overrides?.sections?.drinks !== false],
+        ["extraSidesToggle",overrides?.sections?.extraSides !== false],
+        ["dessertsToggle",  overrides?.sections?.desserts !== false],
+      ].forEach(([id, on]) => {
+        const cb = document.getElementById(id);
+        if (!cb) return;
+        cb.checked = on;
+        const pill = cb.nextElementSibling;
+        if (!pill) return;
+        if (on) {
+          pill.textContent = "ON";
+          pill.style.background = "#14532d";
+          pill.style.borderColor = "#16a34a";
+          pill.style.color = "#bbf7d0";
+        } else {
+          pill.textContent = "OFF";
+          pill.style.background = "#7f1d1d";
+          pill.style.borderColor = "#b91c1c";
+          pill.style.color = "#fecaca";
+        }
+      });
       _lastSpecialMenu = overrides?.specialMenu || { active: false, items: [] };
       _lastFridayMenu = overrides?.fridayMenu || { active: false, items: [] };
       document.getElementById("customerMessage").value = overrides.customerMessage || "";

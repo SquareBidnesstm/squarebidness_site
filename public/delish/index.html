@@ -1077,10 +1077,12 @@ if (state.today && getActiveMenuForDay(state.today)) {
   const visibleMains = (menu.mains || []).filter(item => isItemEnabled(item.id));
   mainMenuItems.innerHTML = visibleMains.map(item => renderMainItem(item, state.today)).join("");
 
-  const visibleDrinks = isSectionEnabled("drinks")
-    ? DRINKS.filter(item => isItemEnabled(item.id))
-    : [];
-  drinkItems.innerHTML = visibleDrinks.map(renderDrinkItem).join("");
+  if (!isSectionEnabled("drinks")) {
+    drinkItems.innerHTML = `<div class="menuNotice">Sorry, drinks are not available today.</div>`;
+  } else {
+    const visibleDrinks = DRINKS.filter(item => isItemEnabled(item.id));
+    drinkItems.innerHTML = visibleDrinks.map(renderDrinkItem).join("");
+  }
 
 if (isExtraSideAllowedForDay(state.today) && isSectionEnabled("extraSides")) {
   renderSelectOptions(
