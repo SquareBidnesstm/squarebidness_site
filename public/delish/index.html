@@ -753,6 +753,23 @@
     return fm.items;
   }
 
+  const DAY_BASE_OPTIONS = {
+    rice_mashed: [{id:"base_rice",name:"Rice"},{id:"base_mashed_potatoes",name:"Mashed Potatoes"}],
+    rice_dressing: [{id:"base_rice",name:"Rice"},{id:"base_cornbread_dressing",name:"Cornbread Dressing"}],
+    dressing_mashed: [{id:"base_cornbread_dressing",name:"Cornbread Dressing"},{id:"base_mashed_potatoes",name:"Mashed Potatoes"}],
+  };
+
+  function applyDayBaseOverride(mains, day) {
+    const overrideKey = MENU_OVERRIDES?.dayBase?.[day];
+    if (!overrideKey || !DAY_BASE_OPTIONS[overrideKey]) return mains;
+    const opts = DAY_BASE_OPTIONS[overrideKey];
+    return mains.map(item =>
+      Array.isArray(item.baseOptions) && item.baseOptions.length > 0
+        ? { ...item, baseOptions: opts }
+        : item
+    );
+  }
+
   function getActiveMenuForDay(day) {
     const dayMenu = MENU_BY_DAY[day];
     if (!dayMenu) return null;
@@ -762,9 +779,10 @@
 
     const weeklyItems = Array.isArray(WEEKLY_MENU[day]) ? WEEKLY_MENU[day] : [];
     const specialItems = getSpecialMenuItems();
+    const allMains = [...baseMains, ...weeklyItems, ...specialItems];
     return {
       ...dayMenu,
-      mains: [...baseMains, ...weeklyItems, ...specialItems],
+      mains: applyDayBaseOverride(allMains, day),
     };
   }
 

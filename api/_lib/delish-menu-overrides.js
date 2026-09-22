@@ -37,6 +37,14 @@ export const DEFAULT_DELISH_MENU_OVERRIDES = {
   dessertItemsDate: "",
   mustardGreens: { available: false },
   customerMessage: "",
+  dayBase: {
+    monday: null,
+    tuesday: null,
+    wednesday: null,
+    thursday: null,
+    friday: null,
+    sunday: null,
+  },
   updatedAt: "",
   updatedBy: "system",
 };
@@ -145,5 +153,15 @@ export async function getDelishMenuOverrides() {
     mustardGreens: {
       available: savedMustardGreens.available === true,
     },
+    dayBase: saved.dayBase && typeof saved.dayBase === "object"
+      ? {
+          monday: saved.dayBase.monday || null,
+          tuesday: saved.dayBase.tuesday || null,
+          wednesday: saved.dayBase.wednesday || null,
+          thursday: saved.dayBase.thursday || null,
+          friday: saved.dayBase.friday || null,
+          sunday: saved.dayBase.sunday || null,
+        }
+      : { ...DEFAULT_DELISH_MENU_OVERRIDES.dayBase },
   };
 }
