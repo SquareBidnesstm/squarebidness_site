@@ -167,17 +167,8 @@
     .day-add-form.open{display:flex;}
     .day-base-row{
       grid-column:1/-1;margin-top:4px;padding:10px 12px;
-      background:var(--panel2);border-radius:10px;border:1.5px dashed rgba(215,174,114,.35);
+      background:var(--panel2);border-radius:10px;border:1.5px solid rgba(215,174,114,.22);
     }
-    .day-base-trigger{
-      background:transparent;border:none;color:var(--accent);
-      font-size:.78rem;font-weight:700;cursor:pointer;padding:0;
-      letter-spacing:.03em;text-transform:uppercase;
-    }
-    .day-base-trigger:hover{color:#f0cc88;}
-    .day-base-form{display:none;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px;}
-    .day-base-form.open{display:flex;}
-    .day-base-current{font-size:.72rem;color:var(--muted);margin-left:6px;}
     .day-add-form input[type="text"],.day-add-form input[type="number"]{
       font-size:.82rem;padding:6px 10px;border-radius:8px;margin:0;
     }
@@ -1443,22 +1434,28 @@ async function savePickupWindows() {
             </div>
           </div>`;
 
-        const BASE_LABELS = { rice_mashed: "Rice + Mashed Potatoes", rice_dressing: "Rice + Cornbread Dressing", dressing_mashed: "Cornbread Dressing + Mashed Potatoes" };
-        const currentBase = _currentDayBase[dayKey] || null;
-        const baseRow = isDayGroup ? `
-          <div class="day-base-row">
-            <button class="day-base-trigger" data-day="${dayKey}">⇄ Change Plate Base for ${g}</button>
-            <span class="day-base-current">${currentBase ? `(currently: ${BASE_LABELS[currentBase] || currentBase})` : "(using menu default)"}</span>
-            <div class="day-base-form" id="day-base-form-${dayKey}">
-              <select id="day-base-select-${dayKey}" style="flex:1.5;min-width:200px;background:#1c1c1c;color:#e0e0e0;border:1px solid #333;border-radius:6px;padding:6px 10px;font-size:.78rem;">
-                <option value="">Use menu default</option>
-                <option value="rice_mashed"${currentBase==="rice_mashed"?" selected":""}>Rice + Mashed Potatoes</option>
-                <option value="rice_dressing"${currentBase==="rice_dressing"?" selected":""}>Rice + Cornbread Dressing</option>
-                <option value="dressing_mashed"${currentBase==="dressing_mashed"?" selected":""}>Cornbread Dressing + Mashed Potatoes</option>
-              </select>
-              <button class="btn-primary" style="padding:6px 14px;font-size:.78rem;" data-save-base="${dayKey}">Save Base</button>
-              <div class="day-add-status" id="day-base-status-${dayKey}"></div>
-            </div>
+        const ALL_BASES = [
+          { id: "base_rice", label: "Rice" },
+          { id: "base_mashed_potatoes", label: "Mash Potatoes" },
+          { id: "base_cornbread_dressing", label: "Cornbread Dressing" },
+        ];
+        const dayDefaults = new Set(DAY_BASE_DEFAULTS[dayKey] || []);
+        const dayOverride = _currentDayBaseOn[dayKey];
+        const activeSet = new Set(dayOverride !== undefined ? dayOverride : [...dayDefaults]);
+        const basePills = ALL_BASES.map(b => {
+          const isOn = activeSet.has(b.id);
+          const isDefault = dayDefaults.has(b.id);
+          if (!isDefault && !isOn) return ""; // hide bases never relevant to this day by default unless turned on
+          const pillStyle = isOn
+            ? `background:#14532d;border-color:#16a34a;color:#bbf7d0;`
+            : `background:#7f1d1d;border-color:#b91c1c;color:#fecaca;`;
+          return `<button class="ctrl-pill day-base-pill${isOn?" pill-on":""}" data-base-id="${b.id}" data-day="${dayKey}" style="${pillStyle}">${b.label}: ${isOn?"ON":"OFF"}</button>`;
+        }).filter(Boolean).join("");
+        const baseRow = isDayGroup && basePills ? `
+          <div class="day-base-row" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
+            <span style="font-size:.72rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);white-space:nowrap;">Plate Base</span>
+            ${basePills}
+            <span class="day-add-status" id="day-base-status-${dayKey}" style="font-size:.72rem;color:var(--muted);"></span>
           </div>` : "";
 
         return `<details class="day-group" data-group="${g}" ${isToday ? "open" : ""}><summary class="day-summary"><span class="day-label">${g}${badge}</span><span class="day-chevron">▾</span></summary><div class="day-items">${items}${addForm}${baseRow}</div></details>`;
@@ -1503,43 +1500,49 @@ async function savePickupWindows() {
       wrap.querySelectorAll(".ctrl-pill-del").forEach(btn => {
         btn.addEventListener("click", () => deleteWeeklyItem(btn.dataset.delId, btn.dataset.delDay));
       });
-      wrap.querySelectorAll(".day-base-trigger").forEach(btn => {
-        btn.addEventListener("click", () => {
-          document.getElementById(`day-base-form-${btn.dataset.day}`)?.classList.toggle("open");
-        });
-      });
-      wrap.querySelectorAll("[data-save-base]").forEach(btn => {
-        btn.addEventListener("click", () => saveDayBase(btn.dataset.saveBase));
+      wrap.querySelectorAll(".day-base-pill").forEach(btn => {
+        btn.addEventListener("click", () => toggleDayBase(btn.dataset.day, btn.dataset.baseId, btn));
       });
     }
 
-    async function saveDayBase(day) {
+    async function toggleDayBase(day, baseId, btn) {
       let token = getSavedToken();
       if (!token) {
         token = window.prompt("Enter Delish operator token");
         if (!token) return;
         if (window.confirm("Save token on this device?")) saveToken(token.trim());
       }
-      const select = document.getElementById(`day-base-select-${day}`);
       const statusEl = document.getElementById(`day-base-status-${day}`);
-      const base = select?.value || null;
-      if (statusEl) { statusEl.textContent = "Saving…"; statusEl.style.color = "var(--muted)"; }
+
+      // Compute new active set
+      const dayDefaults = new Set(DAY_BASE_DEFAULTS[day] || []);
+      const current = _currentDayBaseOn[day] !== undefined ? new Set(_currentDayBaseOn[day]) : new Set(dayDefaults);
+      if (current.has(baseId)) current.delete(baseId);
+      else current.add(baseId);
+      const baseOn = [...current];
+
+      if (statusEl) { statusEl.textContent = "Saving…"; }
       try {
         const res = await fetch("/api/delish/save-day-base/", {
           method: "POST",
           headers: { "Content-Type": "application/json", "x-operator-token": token.trim() },
-          body: JSON.stringify({ day, base: base || null })
+          body: JSON.stringify({ day, baseOn })
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok || !data.ok) throw new Error(data.error || "Save failed.");
-        _currentDayBase[day] = base || null;
+
+        _currentDayBaseOn[day] = baseOn;
+        const isOn = baseOn.includes(baseId);
+        btn.classList.toggle("pill-on", isOn);
+        btn.style.cssText = isOn
+          ? `background:#14532d;border-color:#16a34a;color:#bbf7d0;`
+          : `background:#7f1d1d;border-color:#b91c1c;color:#fecaca;`;
+        const label = btn.textContent.split(":")[0];
+        btn.textContent = `${label}: ${isOn ? "ON" : "OFF"}`;
         if (statusEl) { statusEl.textContent = "Saved!"; statusEl.style.color = "#d6f5de"; }
-        const currentSpan = document.querySelector(`.day-base-trigger[data-day="${day}"]`)?.nextElementSibling;
-        const BASE_LABELS = { rice_mashed: "Rice + Mashed Potatoes", rice_dressing: "Rice + Cornbread Dressing", dressing_mashed: "Cornbread Dressing + Mashed Potatoes" };
-        if (currentSpan) currentSpan.textContent = base ? `(currently: ${BASE_LABELS[base] || base})` : "(using menu default)";
-        setTimeout(() => { if (statusEl) statusEl.textContent = ""; }, 3000);
+        setTimeout(() => { if (statusEl) statusEl.textContent = ""; }, 2000);
       } catch (err) {
-        if (statusEl) { statusEl.textContent = err.message || "Error saving."; statusEl.style.color = "#ffd3d3"; }
+        if (statusEl) { statusEl.textContent = err.message || "Error."; statusEl.style.color = "#ffd3d3"; }
       }
     }
 
@@ -1855,7 +1858,17 @@ async function savePickupWindows() {
     }
 
     let _lastSpecialMenu = { active: false, items: [] };
-    let _currentDayBase = {};
+    let _currentDayBaseOn = {};
+
+    // What menu.json has set per day — default ON bases
+    const DAY_BASE_DEFAULTS = {
+      monday: [],
+      tuesday: ["base_rice", "base_mashed_potatoes"],
+      wednesday: ["base_rice", "base_mashed_potatoes"],
+      thursday: ["base_cornbread_dressing", "base_rice"],
+      friday: ["base_rice", "base_mashed_potatoes"],
+      sunday: ["base_rice", "base_mashed_potatoes"],
+    };
     let _lastFridayMenu = { active: false, items: [] };
 
     async function loadOverrides() {
@@ -1893,7 +1906,7 @@ async function savePickupWindows() {
       });
       _lastSpecialMenu = overrides?.specialMenu || { active: false, items: [] };
       _lastFridayMenu = overrides?.fridayMenu || { active: false, items: [] };
-      _currentDayBase = overrides?.dayBase || {};
+      _currentDayBaseOn = overrides?.dayBaseOn?.overrides || {};
       document.getElementById("customerMessage").value = overrides.customerMessage || "";
       const itemsOffArr = Array.isArray(overrides.itemsOff) ? overrides.itemsOff : [];
       const legacyBasesSoldOut = (Array.isArray(overrides.basesSoldOut) ? overrides.basesSoldOut : []).filter(id => !itemsOffArr.includes(id));

@@ -753,21 +753,15 @@
     return fm.items;
   }
 
-  const DAY_BASE_OPTIONS = {
-    rice_mashed: [{id:"base_rice",name:"Rice"},{id:"base_mashed_potatoes",name:"Mashed Potatoes"}],
-    rice_dressing: [{id:"base_rice",name:"Rice"},{id:"base_cornbread_dressing",name:"Cornbread Dressing"}],
-    dressing_mashed: [{id:"base_cornbread_dressing",name:"Cornbread Dressing"},{id:"base_mashed_potatoes",name:"Mashed Potatoes"}],
-  };
-
   function applyDayBaseOverride(mains, day) {
-    const overrideKey = MENU_OVERRIDES?.dayBase?.[day];
-    if (!overrideKey || !DAY_BASE_OPTIONS[overrideKey]) return mains;
-    const opts = DAY_BASE_OPTIONS[overrideKey];
-    return mains.map(item =>
-      Array.isArray(item.baseOptions) && item.baseOptions.length > 0
-        ? { ...item, baseOptions: opts }
-        : item
-    );
+    const dayBaseOn = MENU_OVERRIDES?.dayBaseOn;
+    if (!dayBaseOn || !dayBaseOn.date || !dayBaseOn.overrides?.[day]) return mains;
+    const allowedIds = new Set(dayBaseOn.overrides[day]);
+    return mains.map(item => {
+      if (!Array.isArray(item.baseOptions) || !item.baseOptions.length) return item;
+      const filtered = item.baseOptions.filter(b => allowedIds.has(b.id));
+      return { ...item, baseOptions: filtered };
+    });
   }
 
   function getActiveMenuForDay(day) {

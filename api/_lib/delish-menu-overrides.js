@@ -37,14 +37,7 @@ export const DEFAULT_DELISH_MENU_OVERRIDES = {
   dessertItemsDate: "",
   mustardGreens: { available: false },
   customerMessage: "",
-  dayBase: {
-    monday: null,
-    tuesday: null,
-    wednesday: null,
-    thursday: null,
-    friday: null,
-    sunday: null,
-  },
+  dayBaseOn: { date: "", overrides: {} },
   updatedAt: "",
   updatedBy: "system",
 };
@@ -153,15 +146,14 @@ export async function getDelishMenuOverrides() {
     mustardGreens: {
       available: savedMustardGreens.available === true,
     },
-    dayBase: saved.dayBase && typeof saved.dayBase === "object"
-      ? {
-          monday: saved.dayBase.monday || null,
-          tuesday: saved.dayBase.tuesday || null,
-          wednesday: saved.dayBase.wednesday || null,
-          thursday: saved.dayBase.thursday || null,
-          friday: saved.dayBase.friday || null,
-          sunday: saved.dayBase.sunday || null,
-        }
-      : { ...DEFAULT_DELISH_MENU_OVERRIDES.dayBase },
+    dayBaseOn: (() => {
+      const stored = saved.dayBaseOn;
+      if (!stored || typeof stored !== "object") return { date: "", overrides: {} };
+      const isToday = String(stored.date || "") === todayKey;
+      return {
+        date: isToday ? todayKey : "",
+        overrides: isToday && stored.overrides && typeof stored.overrides === "object" ? stored.overrides : {},
+      };
+    })(),
   };
 }

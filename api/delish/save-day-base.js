@@ -1,5 +1,5 @@
 import { Redis } from "@upstash/redis";
-import { getDelishMenuOverrides } from "../_lib/delish-menu-overrides.js";
+import { getDelishMenuOverrides, getCentralDateKey } from "../_lib/delish-menu-overrides.js";
 
 const redis = new Redis({
   url: process.env.DELISH_UPSTASH_REDIS_REST_URL,
@@ -7,7 +7,7 @@ const redis = new Redis({
 });
 
 const VALID_DAYS = new Set(["monday", "tuesday", "wednesday", "thursday", "friday", "sunday"]);
-const VALID_BASES = new Set(["rice_mashed", "rice_dressing", "dressing_mashed", null]);
+const VALID_BASE_IDS = new Set(["base_rice", "base_cornbread_dressing", "base_mashed_potatoes"]);
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -24,22 +24,24 @@ export default async function handler(req, res) {
 
     const body = req.body || {};
     const day = String(body.day || "").toLowerCase().trim();
-    const base = body.base === null ? null : String(body.base || "").trim();
+    const baseOn = Array.isArray(body.baseOn) ? body.baseOn : [];
 
     if (!VALID_DAYS.has(day)) return res.status(400).json({ ok: false, error: "Invalid day." });
-    if (!VALID_BASES.has(base)) return res.status(400).json({ ok: false, error: "Invalid base value." });
+    const cleanBaseOn = [...new Set(baseOn.map(String).filter(id => VALID_BASE_IDS.has(id)))];
 
     const current = await getDelishMenuOverrides();
-    const dayBase = { ...(current.dayBase || {}), [day]: base };
+    const todayKey = getCentralDateKey();
+    const prevOverrides = current.dayBaseOn?.date === todayKey ? (current.dayBaseOn.overrides || {}) : {};
+    const dayBaseOn = { date: todayKey, overrides: { ...prevOverrides, [day]: cleanBaseOn } };
 
     await redis.set("delish:menu:overrides", {
       ...current,
-      dayBase,
+      dayBaseOn,
       updatedAt: new Date().toISOString(),
       updatedBy: "operator",
     });
 
-    return res.status(200).json({ ok: true, day, base });
+    return res.status(200).json({ ok: true, day, baseOn: cleanBaseOn });
   } catch (error) {
     console.error("DELISH SAVE-DAY-BASE ERROR:", error);
     return res.status(500).json({ ok: false, error: error?.message || "Failed to save." });
