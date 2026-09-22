@@ -1163,7 +1163,8 @@ async function savePickupWindows() {
         : {};
 
       const [timeclock, sales] = await Promise.all([
-        fetchJson(timeclockUrl, timeclockOptions),
+        fetchJson(timeclockUrl, timeclockOptions)
+          .catch(() => ({ ok: false, active: [], summary: {}, laborSummary: null })),
         fetchJson(`/api/delish/sales-summary/?date=${encodeURIComponent(today)}&t=${Date.now()}`, salesOptions)
           .catch(() => ({ ok: false, orderCount: 0, grossSales: 0 }))
       ]);
