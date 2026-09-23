@@ -721,16 +721,19 @@
         <a class="button-link btn-secondary" href="#top">Top</a>
       </div>
 
-      <div class="pickup-window-list" id="pickupWindowList">
-        <div class="muted">Loading pickup windows...</div>
-      </div>
+      <button class="collapse-toggle" id="pickupWindowToggle" onclick="togglePanel('pickupWindowDetail',this)">▸ Loading windows...</button>
+      <div id="pickupWindowDetail" style="display:none;">
+        <div class="pickup-window-list" id="pickupWindowList">
+          <div class="muted">Loading pickup windows...</div>
+        </div>
 
-      <div class="actions">
-        <button class="btn-primary" id="savePickupWindowsBtn">Save Pickup Windows</button>
-        <button class="btn-secondary" id="reloadPickupWindowsBtn">Reload Pickup Windows</button>
-      </div>
+        <div class="actions">
+          <button class="btn-primary" id="savePickupWindowsBtn">Save Pickup Windows</button>
+          <button class="btn-secondary" id="reloadPickupWindowsBtn">Reload Pickup Windows</button>
+        </div>
 
-      <div class="status" id="pickupWindowStatusBox">Ready.</div>
+        <div class="status" id="pickupWindowStatusBox">Ready.</div>
+      </div>
     </div>
 
     <div class="card control-section" id="ordering-window">
@@ -1037,6 +1040,27 @@ function renderPickupWindows(windows = [], disabledWindows = []) {
   if (!pickupWindowList) return;
 
   const disabledSet = new Set(disabledWindows || []);
+  const onCount = windows.filter(w => !disabledSet.has(w)).length;
+  const total = windows.length;
+  const allOff = total > 0 && onCount === 0;
+
+  // Update toggle label + color
+  const toggle = document.getElementById("pickupWindowToggle");
+  if (toggle) {
+    const open = document.getElementById("pickupWindowDetail")?.style.display !== "none";
+    const arrow = open ? "▾" : "▸";
+    toggle.textContent = `${arrow} ${onCount} of ${total} windows ON`;
+    toggle.style.color = allOff ? "#fecaca" : onCount < total ? "#fbbf24" : "#bbf7d0";
+  }
+
+  // Auto-expand if all windows are off (problem state)
+  if (allOff) {
+    const panel = document.getElementById("pickupWindowDetail");
+    if (panel && panel.style.display === "none") {
+      panel.style.display = "block";
+      if (toggle) toggle.textContent = `▾ ${onCount} of ${total} windows ON`;
+    }
+  }
 
   pickupWindowList.style.cssText = "display:flex;flex-direction:column;gap:8px;margin-top:8px;";
   pickupWindowList.innerHTML = windows.map(windowValue => {
@@ -1072,6 +1096,10 @@ async function loadPickupWindows() {
   const data = await res.json().catch(() => ({}));
 
   if (!res.ok || !data.ok) {
+    const toggle = document.getElementById("pickupWindowToggle");
+    if (toggle) { toggle.textContent = "▾ ⚠ Load failed — tap to view"; toggle.style.color = "#fecaca"; }
+    const panel = document.getElementById("pickupWindowDetail");
+    if (panel) panel.style.display = "block";
     throw new Error(data.error || "Failed to load pickup windows.");
   }
 
