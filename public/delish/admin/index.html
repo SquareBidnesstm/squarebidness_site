@@ -549,6 +549,41 @@
       .day-add-form input[type="text"],.day-add-form input[type="number"]{width:100%;box-sizing:border-box;}
       .day-add-form button{width:100%;}
     }
+    .sticky-save-bar{
+      position:fixed;
+      bottom:0;left:0;right:0;
+      background:#0f0e0b;
+      border-top:1px solid #2a2a2a;
+      padding:10px 16px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      z-index:200;
+      box-shadow:0 -4px 20px rgba(0,0,0,.6);
+    }
+    .sticky-save-bar .sticky-status{
+      flex:1;
+      font-size:.78rem;
+      color:#888;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    body{ padding-bottom:72px; }
+    .collapse-toggle{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      background:none;
+      border:none;
+      color:#888;
+      font:inherit;
+      font-size:.78rem;
+      cursor:pointer;
+      padding:6px 0;
+      margin-top:6px;
+    }
+    .collapse-toggle:hover{ color:var(--text); }
   </style>
 </head>
 <body>
@@ -641,37 +676,40 @@
         <button class="btn-secondary" id="refreshLaborBtn" type="button" style="flex:0 0 auto;">↻</button>
       </div>
 
-      <div class="window-grid">
-        <div class="window-panel">
-          <div class="window-label">Active Now</div>
-          <div class="window-value" id="laborActive">—</div>
+      <button class="collapse-toggle" onclick="togglePanel('laborDetail',this)">▸ Show Details</button>
+      <div id="laborDetail" style="display:none;">
+        <div class="window-grid" style="margin-top:8px;">
+          <div class="window-panel">
+            <div class="window-label">Active Now</div>
+            <div class="window-value" id="laborActive">—</div>
+          </div>
+          <div class="window-panel">
+            <div class="window-label">Today Hours</div>
+            <div class="window-value" id="laborHours">—</div>
+          </div>
+          <div class="window-panel">
+            <div class="window-label">Est. Labor Cost</div>
+            <div class="window-value" id="laborCost">—</div>
+          </div>
+          <div class="window-panel">
+            <div class="window-label">Labor % of Sales</div>
+            <div class="window-value" id="laborPercent">—</div>
+          </div>
         </div>
-        <div class="window-panel">
-          <div class="window-label">Today Hours</div>
-          <div class="window-value" id="laborHours">—</div>
-        </div>
-        <div class="window-panel">
-          <div class="window-label">Est. Labor Cost</div>
-          <div class="window-value" id="laborCost">—</div>
-        </div>
-        <div class="window-panel">
-          <div class="window-label">Labor % of Sales</div>
-          <div class="window-value" id="laborPercent">—</div>
-        </div>
-      </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px;">
-        <div>
-          <div class="window-label" style="margin-bottom:6px;">Avg. Hourly Rate</div>
-          <input id="laborRateInput" type="number" min="0" step="0.25" value="12.00" inputmode="decimal" style="width:100%;border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:var(--text);padding:11px 14px;font:inherit;font-weight:900;" />
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px;">
+          <div>
+            <div class="window-label" style="margin-bottom:6px;">Avg. Hourly Rate</div>
+            <input id="laborRateInput" type="number" min="0" step="0.25" value="12.00" inputmode="decimal" style="width:100%;border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:var(--text);padding:11px 14px;font:inherit;font-weight:900;" />
+          </div>
+          <div>
+            <div class="window-label" style="margin-bottom:6px;">Sales Fallback</div>
+            <input id="laborManualSalesInput" type="number" min="0" step="0.01" placeholder="Daily sales" inputmode="decimal" style="width:100%;border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:var(--text);padding:11px 14px;font:inherit;font-weight:900;" />
+          </div>
         </div>
-        <div>
-          <div class="window-label" style="margin-bottom:6px;">Sales Fallback</div>
-          <input id="laborManualSalesInput" type="number" min="0" step="0.01" placeholder="Daily sales" inputmode="decimal" style="width:100%;border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:var(--text);padding:11px 14px;font:inherit;font-weight:900;" />
-        </div>
-      </div>
 
-      <div class="status" id="laborStatusBox">Loading labor control...</div>
+        <div class="status" id="laborStatusBox">Loading labor control...</div>
+      </div>
     </div>
 
     <div class="card control-section" id="pickup-window-times">
@@ -710,26 +748,28 @@
         <a class="button-link btn-secondary" href="/delish/ready/complete/">Ready Complete</a>
       </div>
 
-      <div class="window-grid">
-        <div class="window-panel">
-          <div class="window-label">Current Status</div>
-          <div class="window-value"><span class="window-pill" id="windowStatusPill">Checking...</span></div>
+      <button class="collapse-toggle" onclick="togglePanel('windowDetail',this)">▸ Show Status Grid</button>
+      <div id="windowDetail" style="display:none;">
+        <div class="window-grid" style="margin-top:8px;">
+          <div class="window-panel">
+            <div class="window-label">Current Status</div>
+            <div class="window-value"><span class="window-pill" id="windowStatusPill">Checking...</span></div>
+          </div>
+          <div class="window-panel">
+            <div class="window-label">Mode</div>
+            <div class="window-value" id="windowMode">Loading</div>
+          </div>
+          <div class="window-panel">
+            <div class="window-label">Today / Central Time</div>
+            <div class="window-value" id="windowNow">Loading</div>
+          </div>
+          <div class="window-panel">
+            <div class="window-label">Ordering Window</div>
+            <div class="window-value" id="windowHours">Loading</div>
+          </div>
         </div>
-        <div class="window-panel">
-          <div class="window-label">Mode</div>
-          <div class="window-value" id="windowMode">Loading</div>
-        </div>
-        <div class="window-panel">
-          <div class="window-label">Today / Central Time</div>
-          <div class="window-value" id="windowNow">Loading</div>
-        </div>
-        <div class="window-panel">
-          <div class="window-label">Ordering Window</div>
-          <div class="window-value" id="windowHours">Loading</div>
-        </div>
+        <div class="status" id="windowStatusBox">Checking ordering window...</div>
       </div>
-
-      <div class="status" id="windowStatusBox">Checking ordering window...</div>
 
       <div class="actions" aria-label="Ordering mode controls">
         <button class="btn-primary" id="adminOpenBtn" type="button">Open Now</button>
@@ -2278,6 +2318,30 @@ reloadPickupWindowsBtn?.addEventListener("click", () => {
       console.error(err);
       setPickupWindowStatus(err.message || "Unable to load pickup windows.", "bad");
     });
+    function togglePanel(id, btn) {
+      const panel = document.getElementById(id);
+      if (!panel) return;
+      const open = panel.style.display !== "none";
+      panel.style.display = open ? "none" : "block";
+      btn.textContent = (open ? "▸ " : "▾ ") + btn.textContent.slice(2);
+    }
+  </script>
+
+  <!-- Sticky Save Bar -->
+  <div class="sticky-save-bar">
+    <span class="sticky-status" id="stickyStatus">Ready.</span>
+    <button class="btn-secondary" onclick="document.getElementById('reloadBtn').click()" style="white-space:nowrap;font-size:.82rem;padding:8px 14px;">Reload</button>
+    <button class="btn-primary" onclick="document.getElementById('saveBtn').click()" style="white-space:nowrap;font-size:.82rem;padding:8px 18px;font-weight:900;">Save</button>
+  </div>
+  <script>
+    (function(){
+      const src = document.getElementById("statusBox");
+      const dst = document.getElementById("stickyStatus");
+      if (!src || !dst) return;
+      const obs = new MutationObserver(() => { dst.textContent = src.textContent; });
+      obs.observe(src, { childList: true, subtree: true, characterData: true });
+      dst.textContent = src.textContent;
+    })();
   </script>
 </body>
 </html>
