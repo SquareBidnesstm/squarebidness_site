@@ -600,8 +600,13 @@
         </div>
         <div class="token-row">
           <button class="quick-status qs-loading" id="quickStatusBtn" type="button">Checking…</button>
-          <span class="token-badge" id="tokenStatus">Token not saved</span>
-          <button class="btn-secondary" id="clearTokenBtn">Clear Token</button>
+          <button type="button" id="tokenGearBtn" onclick="togglePanel('tokenDetail',this)" style="background:none;border:none;color:#888;font-size:1.1rem;cursor:pointer;padding:4px 6px;line-height:1;" title="Token settings">⚙</button>
+        </div>
+        <div id="tokenDetail" style="display:none;margin-top:6px;padding:8px 12px;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <span class="token-badge" id="tokenStatus">Token not saved</span>
+            <button class="btn-secondary" id="clearTokenBtn" style="font-size:.78rem;padding:6px 12px;">Clear Token</button>
+          </div>
         </div>
       </div>
 
@@ -791,7 +796,10 @@
         </div>
         <a class="button-link btn-secondary" href="#top">Top</a>
       </div>
-      <div id="sectionToggleRows" style="display:flex;flex-direction:column;gap:8px;margin-top:8px;"></div>
+      <button class="collapse-toggle" id="sectionToggleBtn" onclick="togglePanel('sectionToggleDetail',this);syncSectionSummary();">▸ All sections ON</button>
+      <div id="sectionToggleDetail" style="display:none;">
+        <div id="sectionToggleRows" style="display:flex;flex-direction:column;gap:8px;margin-top:8px;"></div>
+      </div>
       <script>
       (function(){
         const SECTIONS = [
@@ -838,6 +846,7 @@
           pill.addEventListener("click", () => {
             cb.checked = !cb.checked;
             updatePill();
+            if (typeof syncSectionSummary === "function") syncSectionSummary();
           });
 
           updatePill();
@@ -1973,6 +1982,38 @@ async function savePickupWindows() {
       syncLmOptionPills();
     }
 
+    function syncSectionSummary() {
+      const SECTIONS = [
+        { id: "lagniappeToggle", label: "Lagniappe" },
+        { id: "drinksToggle", label: "Drinks" },
+        { id: "extraSidesToggle", label: "Extra Sides" },
+        { id: "dessertsToggle", label: "Desserts" },
+      ];
+      const offLabels = SECTIONS.filter(s => {
+        const cb = document.getElementById(s.id);
+        return cb && !cb.checked;
+      }).map(s => s.label);
+
+      const btn = document.getElementById("sectionToggleBtn");
+      const panel = document.getElementById("sectionToggleDetail");
+      if (!btn) return;
+
+      const open = panel && panel.style.display !== "none";
+      const arrow = open ? "▾" : "▸";
+
+      if (offLabels.length === 0) {
+        btn.textContent = arrow + " All sections ON";
+        btn.style.color = "#bbf7d0";
+      } else {
+        btn.textContent = arrow + " OFF: " + offLabels.join(", ");
+        btn.style.color = "#fecaca";
+        if (panel && panel.style.display === "none") {
+          panel.style.display = "block";
+          btn.textContent = "▾ OFF: " + offLabels.join(", ");
+        }
+      }
+    }
+
     function collectLimitedMenu() {
       return {
         active: !!_lastLimitedMenu.active,
@@ -2168,6 +2209,7 @@ async function savePickupWindows() {
       const legacyBasesSoldOut = (Array.isArray(overrides.basesSoldOut) ? overrides.basesSoldOut : []).filter(id => !itemsOffArr.includes(id));
       const mergedSoldOut = [...new Set([...(Array.isArray(overrides.itemsSoldOut) ? overrides.itemsSoldOut : []), ...legacyBasesSoldOut])];
       renderItemControls(itemsOffArr, mergedSoldOut);
+      syncSectionSummary();
       setStatus("Overrides loaded.", "good");
     }
 
