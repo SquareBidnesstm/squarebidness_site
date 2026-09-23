@@ -819,7 +819,59 @@
         <a class="button-link btn-secondary" href="#top">Top</a>
       </div>
       <div id="itemControlsList"></div>
-      <div style="margin-top:6px;">
+
+      <!-- Limited Menu Mode -->
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid #2a2a2a;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-weight:700;font-size:.9rem;color:#e8e8e8;">Limited Menu Mode</div>
+            <div style="font-size:.76rem;color:#888;margin-top:2px;">Replace the full menu with one featured item</div>
+          </div>
+          <button type="button" id="limitedMenuPill" class="ctrl-pill" style="min-width:64px;text-align:center;font-size:.75rem;padding:6px 14px;background:#7f1d1d;border-color:#b91c1c;color:#fecaca;" onclick="toggleLimitedMenu()">OFF</button>
+        </div>
+        <div id="limitedMenuForm" style="display:none;margin-top:12px;background:#111;border:1px solid #2a2a2a;border-radius:10px;padding:12px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+            <div>
+              <label style="font-size:.75rem;color:#888;display:block;margin-bottom:3px;">Item Name</label>
+              <input id="lmName" type="text" placeholder="e.g. Catfish Plate" style="width:100%;box-sizing:border-box;" />
+            </div>
+            <div>
+              <label style="font-size:.75rem;color:#888;display:block;margin-bottom:3px;">Price</label>
+              <input id="lmPrice" type="number" step="0.01" min="0" placeholder="12.99" style="width:100%;box-sizing:border-box;" />
+            </div>
+          </div>
+          <div style="margin-bottom:8px;">
+            <label style="font-size:.75rem;color:#888;display:block;margin-bottom:3px;">Description</label>
+            <input id="lmDesc" type="text" placeholder="Served with Potato Salad, Green Beans, and a roll." style="width:100%;box-sizing:border-box;" />
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+            <button type="button" id="lmHideSidesPill" class="ctrl-pill" style="font-size:.75rem;padding:5px 12px;" onclick="toggleLmOption('hideSides')">Hide Sides: ON</button>
+            <button type="button" id="lmBlockExtraPill" class="ctrl-pill" style="font-size:.75rem;padding:5px 12px;" onclick="toggleLmOption('blockExtraSides')">Block Extra Sides: ON</button>
+            <button type="button" id="lmBlockLagnPill" class="ctrl-pill" style="font-size:.75rem;padding:5px 12px;" onclick="toggleLmOption('blockLagniappe')">Block Lagniappe: ON</button>
+          </div>
+          <button type="button" class="btn-primary" onclick="saveLimitedMenu()" style="font-size:.82rem;padding:8px 16px;">Save Limited Menu</button>
+        </div>
+      </div>
+
+      <!-- Friday Menu Override -->
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid #2a2a2a;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-weight:700;font-size:.9rem;color:#e8e8e8;">Friday Menu Override</div>
+            <div style="font-size:.76rem;color:#888;margin-top:2px;">Replace Friday's menu with a custom item list</div>
+          </div>
+          <button type="button" id="fridayMenuPill" class="ctrl-pill" style="min-width:64px;text-align:center;font-size:.75rem;padding:6px 14px;background:#7f1d1d;border-color:#b91c1c;color:#fecaca;" onclick="toggleFridayMenuUI()">OFF</button>
+        </div>
+        <div id="fridayMenuForm" style="display:none;margin-top:12px;background:#111;border:1px solid #2a2a2a;border-radius:10px;padding:12px;">
+          <div id="fridayMenuItemsList"></div>
+          <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+            <button type="button" class="btn-secondary" onclick="addFridayItem()" style="font-size:.82rem;padding:8px 14px;">+ Add Item</button>
+            <button type="button" class="btn-primary" onclick="saveFridayMenu()" style="font-size:.82rem;padding:8px 16px;">Save Friday Menu</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;">
         <a class="button-link btn-flash" href="/delish/admin/flashsale/" style="width:100%;padding:12px 16px;font-size:.88rem;font-weight:900;border-radius:12px;justify-content:center;">Flash Sale</a>
       </div>
     </div>
@@ -1776,6 +1828,136 @@ async function savePickupWindows() {
       })).filter(item => item.name && item.price > 0);
     }
 
+    function setPillState(pill, on) {
+      if (!pill) return;
+      if (on) {
+        pill.textContent = "ON";
+        pill.style.background = "#14532d";
+        pill.style.borderColor = "#16a34a";
+        pill.style.color = "#bbf7d0";
+      } else {
+        pill.textContent = "OFF";
+        pill.style.background = "#7f1d1d";
+        pill.style.borderColor = "#b91c1c";
+        pill.style.color = "#fecaca";
+      }
+    }
+
+    function syncLimitedMenuPill() {
+      const on = !!_lastLimitedMenu.active;
+      setPillState(document.getElementById("limitedMenuPill"), on);
+      const form = document.getElementById("limitedMenuForm");
+      if (!form) return;
+      form.style.display = on ? "block" : "none";
+      if (on) {
+        const n = document.getElementById("lmName");
+        const p = document.getElementById("lmPrice");
+        const d = document.getElementById("lmDesc");
+        if (n) n.value = _lastLimitedMenu.name || "";
+        if (p) p.value = _lastLimitedMenu.price ?? "";
+        if (d) d.value = _lastLimitedMenu.desc || "";
+        syncLmOptionPills();
+      }
+    }
+
+    function syncFridayMenuPill() {
+      const on = !!_lastFridayMenu.active;
+      setPillState(document.getElementById("fridayMenuPill"), on);
+      const form = document.getElementById("fridayMenuForm");
+      if (!form) return;
+      form.style.display = on ? "block" : "none";
+      if (on) renderFridayMenuItems(_lastFridayMenu.items || []);
+    }
+
+    function toggleLimitedMenu() {
+      _lastLimitedMenu.active = !_lastLimitedMenu.active;
+      syncLimitedMenuPill();
+    }
+
+    function toggleFridayMenuUI() {
+      _lastFridayMenu.active = !_lastFridayMenu.active;
+      syncFridayMenuPill();
+    }
+
+    const _lmLabels = { hideSides: "Hide Sides", blockExtraSides: "Block Extra Sides", blockLagniappe: "Block Lagniappe" };
+    const _lmPillIds = { hideSides: "lmHideSidesPill", blockExtraSides: "lmBlockExtraPill", blockLagniappe: "lmBlockLagnPill" };
+
+    function syncLmOptionPills() {
+      Object.entries(_lmPillIds).forEach(([key, id]) => {
+        const pill = document.getElementById(id);
+        if (!pill) return;
+        const on = _lmOptions[key] !== false;
+        pill.textContent = _lmLabels[key] + ": " + (on ? "ON" : "OFF");
+        if (on) {
+          pill.style.background = "#14532d";
+          pill.style.borderColor = "#16a34a";
+          pill.style.color = "#bbf7d0";
+        } else {
+          pill.style.background = "#7f1d1d";
+          pill.style.borderColor = "#b91c1c";
+          pill.style.color = "#fecaca";
+        }
+      });
+    }
+
+    function toggleLmOption(key) {
+      _lmOptions[key] = !_lmOptions[key];
+      syncLmOptionPills();
+    }
+
+    function collectLimitedMenu() {
+      return {
+        active: !!_lastLimitedMenu.active,
+        itemId: _lastLimitedMenu.itemId || "friday_fried_catfish",
+        name: ((document.getElementById("lmName")?.value || _lastLimitedMenu.name || "Catfish")).trim(),
+        price: Number(document.getElementById("lmPrice")?.value ?? _lastLimitedMenu.price ?? 12.99),
+        desc: ((document.getElementById("lmDesc")?.value || _lastLimitedMenu.desc || "")).trim(),
+        hideSides: _lmOptions.hideSides !== false,
+        blockExtraSides: _lmOptions.blockExtraSides !== false,
+        blockLagniappe: _lmOptions.blockLagniappe !== false,
+      };
+    }
+
+    async function saveLimitedMenu() {
+      const token = getSavedToken() || window.prompt("Enter Delish operator token");
+      if (!token) return;
+      const lm = collectLimitedMenu();
+      _lastLimitedMenu = lm;
+      setStatus("Saving limited menu...");
+      try {
+        const res = await fetch("/api/delish/save-menu-overrides/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-operator-token": token.trim() },
+          body: JSON.stringify({ limitedMenu: lm }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.error || "Save failed.");
+        setStatus("Limited Menu saved.", "good");
+      } catch (e) {
+        setStatus("Save error: " + e.message, "error");
+      }
+    }
+
+    async function saveFridayMenu() {
+      const token = getSavedToken() || window.prompt("Enter Delish operator token");
+      if (!token) return;
+      const items = collectFridayMenuItems();
+      _lastFridayMenu.items = items;
+      setStatus("Saving Friday menu...");
+      try {
+        const res = await fetch("/api/delish/save-menu-overrides/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-operator-token": token.trim() },
+          body: JSON.stringify({ fridayMenu: _lastFridayMenu }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.error || "Save failed.");
+        setStatus("Friday Menu saved.", "good");
+      } catch (e) {
+        setStatus("Save error: " + e.message, "error");
+      }
+    }
+
     function renderDessertItems(items = []) {
       const list = document.getElementById("dessertItemsList");
       if (!items.length) {
@@ -1870,6 +2052,8 @@ async function savePickupWindows() {
       sunday: ["base_rice", "base_mashed_potatoes"],
     };
     let _lastFridayMenu = { active: false, items: [] };
+    let _lastLimitedMenu = { active: false, itemId: "friday_fried_catfish", name: "Catfish", price: 12.99, desc: "Served with Potato Salad, Green Beans, and a roll.", hideSides: true, blockExtraSides: true, blockLagniappe: true };
+    let _lmOptions = { hideSides: true, blockExtraSides: true, blockLagniappe: true };
 
     async function loadOverrides() {
       setStatus("Loading current overrides...");
@@ -1906,6 +2090,10 @@ async function savePickupWindows() {
       });
       _lastSpecialMenu = overrides?.specialMenu || { active: false, items: [] };
       _lastFridayMenu = overrides?.fridayMenu || { active: false, items: [] };
+      _lastLimitedMenu = overrides?.limitedMenu || { active: false, itemId: "friday_fried_catfish", name: "Catfish", price: 12.99, desc: "Served with Potato Salad, Green Beans, and a roll.", hideSides: true, blockExtraSides: true, blockLagniappe: true };
+      _lmOptions = { hideSides: _lastLimitedMenu.hideSides !== false, blockExtraSides: _lastLimitedMenu.blockExtraSides !== false, blockLagniappe: _lastLimitedMenu.blockLagniappe !== false };
+      syncLimitedMenuPill();
+      syncFridayMenuPill();
       _currentDayBaseOn = overrides?.dayBaseOn?.overrides || {};
       document.getElementById("customerMessage").value = overrides.customerMessage || "";
       const itemsOffArr = Array.isArray(overrides.itemsOff) ? overrides.itemsOff : [];
@@ -1948,6 +2136,7 @@ async function savePickupWindows() {
           },
           specialMenu: _lastSpecialMenu,
           fridayMenu: _lastFridayMenu,
+          limitedMenu: collectLimitedMenu(),
           dessertItems: collectDessertItems(),
           itemsOff,
           itemsSoldOut,
