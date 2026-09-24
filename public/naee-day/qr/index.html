@@ -211,6 +211,13 @@
       font-weight: 800;
     }
 
+    .btn--share {
+      background: transparent;
+      border-color: rgba(255,61,143,.45);
+      color: var(--gold);
+      font-weight: 700;
+    }
+
     /* Home screen hint */
     .hint {
       font-size: 12px;
@@ -245,6 +252,7 @@
 
     <div class="actions">
       <a class="btn btn--save" id="saveContact">Save Contact</a>
+      <a class="btn btn--share" id="shareLink">Share via Text</a>
 
       <div class="btn--row">
         <a class="btn btn--gold" href="/naee-doll/linkme/">Booking / Collabs</a>
@@ -296,6 +304,18 @@
         URL.revokeObjectURL(url);
       });
     });
+
+      // Share via text
+      document.getElementById("shareLink").addEventListener("click", function (e) {
+        e.preventDefault();
+        const url = "https://www.squarebidness.com/naee-day/qr/";
+        const msg = "Naee Doll — save my contact " + url;
+        if (navigator.share) {
+          navigator.share({ title: "Naee Doll", text: msg, url: url }).catch(function(){});
+        } else {
+          window.location.href = "sms:&body=" + encodeURIComponent(msg);
+        }
+      });
 
     // Defer QR init if script loads after DOMContentLoaded
     window.addEventListener("load", function () {
