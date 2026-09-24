@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+
+  <title>Naee Doll</title>
+  <meta name="description" content="Biker Girl Naee — save contact" />
+  <link rel="canonical" href="https://www.squarebidness.com/naee-day/qr/" />
+
+  <meta name="theme-color" content="#000000" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Naee QR" />
+
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="/naee-day/qr/manifest.json" />
+
+  <!-- Icons -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/naee-doll/assets/icons/naee-doll-2-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/naee-doll/assets/icons/naee-doll-2-16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/naee-doll/assets/icons/naee-doll-2-180.png" />
+  <link rel="apple-touch-icon" sizes="192x192" href="/naee-doll/assets/icons/naee-doll-2-192.png" />
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
+
+  <style>
+    :root {
+      --bg: #000;
+      --card: #0b0b0b;
+      --gold: #FF3D8F;
+      --gold-dim: rgba(255,61,143,.18);
+      --stroke: rgba(255,255,255,.10);
+      --fg: #fff;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100svh;
+      padding: env(safe-area-inset-top, 24px) 24px env(safe-area-inset-bottom, 24px);
+      gap: 0;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 360px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: #000;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .brand-icon img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-name {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--fg);
+    }
+
+    .brand-sub {
+      font-size: 12px;
+      color: var(--gold);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .person-name {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      color: var(--fg);
+      text-align: center;
+    }
+
+    .person-tag {
+      font-size: 13px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: .9;
+    }
+
+    /* QR */
+    .qr-wrap {
+      background: #fff;
+      border-radius: 18px;
+      padding: 18px;
+      width: 240px;
+      height: 240px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #qr canvas,
+    #qr img {
+      display: block;
+    }
+
+    /* Buttons */
+    .actions {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 14px 20px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.06);
+      color: var(--fg);
+      font-size: 15px;
+      font-weight: 650;
+      letter-spacing: .02em;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn--gold {
+      background: var(--gold-dim);
+      border-color: rgba(199,166,92,.55);
+      color: var(--gold);
+    }
+
+    .btn--row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn--row .btn {
+      flex: 1;
+    }
+
+    /* Save contact button */
+    .btn--save {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: #000;
+      font-weight: 800;
+    }
+
+    /* Home screen hint */
+    .hint {
+      font-size: 12px;
+      color: rgba(255,255,255,.38);
+      text-align: center;
+      letter-spacing: .01em;
+      padding-bottom: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <div class="header">
+      <div class="brand">
+        <div class="brand-icon">
+          <img src="/naee-doll/assets/icons/naee-doll-2-192.png" alt="Naee Doll" />
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">Square Bidness</span>
+          <span class="brand-sub">squarebidness.com</span>
+        </div>
+      </div>
+      <div class="person-name">Naee Doll</div>
+      <div class="person-tag">Biker Girl Naee</div>
+    </div>
+
+    <div class="qr-wrap">
+      <div id="qr"></div>
+    </div>
+
+    <div class="actions">
+      <a class="btn btn--save" id="saveContact">Save Contact</a>
+
+      <div class="btn--row">
+        <a class="btn btn--gold" href="/naee-doll/linkme/">Booking / Collabs</a>
+        <a class="btn" href="/naee-doll/modeling/">Modeling</a>
+      </div>
+
+      <a class="btn" href="/naee-doll/">Public Record</a>
+    </div>
+
+    <p class="hint">Add this page to Home Screen as "Naee QR"</p>
+
+  </div>
+
+  <script>
+    // Generate QR from vCard
+    const vcard = [
+      "BEGIN:VCARD",
+      "VERSION:3.0",
+      "FN:Naee Doll",
+      "N:Doll;Naee;;;",
+      "TEL;TYPE=CELL:+19854742284",
+      "BDAY:--0211",
+      "URL:https://www.squarebidness.com/naee-doll/",
+      "NOTE:Biker Girl Naee",
+      "END:VCARD"
+    ].join("\r\n");
+
+    window.addEventListener("DOMContentLoaded", function () {
+      if (typeof QRCode !== "undefined") {
+        new QRCode(document.getElementById("qr"), {
+          text: vcard,
+          width: 204,
+          height: 204,
+          colorDark: "#000000",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      }
+
+      // Save contact as .vcf download
+      document.getElementById("saveContact").addEventListener("click", function (e) {
+        e.preventDefault();
+        const blob = new Blob([vcard], { type: "text/vcard" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "naee-doll.vcf";
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+    });
+
+    // Defer QR init if script loads after DOMContentLoaded
+    window.addEventListener("load", function () {
+      const el = document.getElementById("qr");
+      if (el && !el.innerHTML && typeof QRCode !== "undefined") {
+        new QRCode(el, {
+          text: vcard,
+          width: 204,
+          height: 204,
+          colorDark: "#000000",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      }
+    });
+  </script>
+</body>
+</html>
