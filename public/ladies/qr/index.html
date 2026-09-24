@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+
+  <title>Monica Denise</title>
+  <meta name="description" content="Monica Denise — Head of Ladies, Square Bidness" />
+  <link rel="canonical" href="https://www.squarebidness.com/ladies/qr/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Monica Denise" />
+  <meta property="og:description" content="Head of Ladies — Square Bidness" />
+  <meta property="og:url" content="https://www.squarebidness.com/ladies/qr/" />
+  <meta property="og:site_name" content="Square Bidness" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Monica Denise" />
+  <meta name="twitter:description" content="Head of Ladies — Square Bidness" />
+
+  <meta name="theme-color" content="#0a0a0a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Monica D." />
+
+  <link rel="manifest" href="/ladies/qr/manifest.json" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/sb-icon-32.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
+
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card: #111111;
+      --plum: #9B4F7A;
+      --plum-dim: rgba(155,79,122,.18);
+      --plum-border: rgba(155,79,122,.5);
+      --gold: #C8A96E;
+      --stroke: rgba(255,255,255,.08);
+      --fg: #fff;
+      --muted: rgba(255,255,255,.55);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'Inter', system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100svh;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100svh;
+      padding: env(safe-area-inset-top, 28px) 24px env(safe-area-inset-bottom, 28px);
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 360px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 22px;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      width: 100%;
+    }
+
+    .monogram {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #2a1420, #1a0f18);
+      border: 1.5px solid var(--plum-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 4px;
+    }
+
+    .monogram span {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--plum);
+      letter-spacing: .04em;
+    }
+
+    .person-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      color: var(--fg);
+      text-align: center;
+    }
+
+    .person-title {
+      font-size: 11px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--plum);
+      font-weight: 600;
+    }
+
+    .person-brand {
+      font-size: 11px;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: .8;
+    }
+
+    /* QR */
+    .qr-wrap {
+      background: #fff;
+      border-radius: 16px;
+      padding: 16px;
+      width: 232px;
+      height: 232px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 0 1px rgba(155,79,122,.25), 0 8px 32px rgba(0,0,0,.5);
+    }
+
+    #qr canvas, #qr img { display: block; }
+
+    /* Buttons */
+    .actions {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 14px 20px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.05);
+      color: var(--fg);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: .02em;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn--primary {
+      background: var(--plum);
+      border-color: var(--plum);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .btn--outline {
+      background: transparent;
+      border-color: var(--plum-border);
+      color: var(--plum);
+      font-weight: 600;
+    }
+
+    .btn--row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn--row .btn { flex: 1; }
+
+    .hint {
+      font-size: 11px;
+      color: var(--muted);
+      text-align: center;
+      letter-spacing: .01em;
+      padding-bottom: 4px;
+    }
+
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: var(--stroke);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <div class="header">
+      <div class="monogram"><span>MD</span></div>
+      <div class="person-name">Monica Denise</div>
+      <div class="person-title">Head of Ladies</div>
+      <div class="person-brand">Square Bidness</div>
+    </div>
+
+    <div class="qr-wrap">
+      <div id="qr"></div>
+    </div>
+
+    <div class="actions">
+      <a class="btn btn--primary" id="saveContact">Save Contact</a>
+      <a class="btn btn--outline" id="shareLink">Share via Text</a>
+
+      <div class="divider"></div>
+
+      <div class="btn--row">
+        <a class="btn" href="/ladies/">Ladies</a>
+        <a class="btn" href="mailto:squarebidnessladies@gmail.com">Email</a>
+      </div>
+    </div>
+
+    <p class="hint">Add to Home Screen as "Monica D."</p>
+
+  </div>
+
+  <script>
+    const vcard = [
+      "BEGIN:VCARD",
+      "VERSION:3.0",
+      "FN:Monica Denise",
+      "N:Denise;Monica;;;",
+      "TITLE:Head of Ladies",
+      "ORG:Square Bidness",
+      "TEL;TYPE=CELL:+19855514389",
+      "EMAIL;TYPE=WORK:squarebidnessladies@gmail.com",
+      "EMAIL;TYPE=HOME:monica.carter_74@icloud.com",
+      "BDAY:--0414",
+      "URL:https://www.squarebidness.com/ladies/",
+      "END:VCARD"
+    ].join("\r\n");
+
+    function initQR() {
+      const el = document.getElementById("qr");
+      if (el && !el.innerHTML && typeof QRCode !== "undefined") {
+        new QRCode(el, {
+          text: vcard,
+          width: 200,
+          height: 200,
+          colorDark: "#000000",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", function () {
+      initQR();
+
+      document.getElementById("saveContact").addEventListener("click", function (e) {
+        e.preventDefault();
+        const blob = new Blob([vcard], { type: "text/vcard" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "monica-denise.vcf";
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+
+      document.getElementById("shareLink").addEventListener("click", function (e) {
+        e.preventDefault();
+        const url = "https://www.squarebidness.com/ladies/qr/";
+        const msg = "Monica Denise — Head of Ladies, Square Bidness " + url;
+        if (navigator.share) {
+          navigator.share({ title: "Monica Denise", text: msg, url: url }).catch(function(){});
+        } else {
+          window.location.href = "sms:&body=" + encodeURIComponent(msg);
+        }
+      });
+    });
+
+    window.addEventListener("load", initQR);
+  </script>
+</body>
+</html>
