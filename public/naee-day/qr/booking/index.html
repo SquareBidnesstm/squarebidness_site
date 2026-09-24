@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+
+  <title>Book Naee Doll</title>
+  <meta name="description" content="Book Naee Doll — modeling, appearances, and brand work" />
+  <link rel="canonical" href="https://www.squarebidness.com/naee-day/qr/booking/" />
+
+  <meta name="theme-color" content="#000000" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Book Naee" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Book Naee Doll" />
+  <meta property="og:description" content="Modeling, appearances, and brand work" />
+  <meta property="og:image" content="https://www.squarebidness.com/naee-doll/assets/icons/naee-doll-2-512.png" />
+  <meta property="og:image:width" content="512" />
+  <meta property="og:image:height" content="512" />
+  <meta property="og:url" content="https://www.squarebidness.com/naee-day/qr/booking/" />
+  <meta property="og:site_name" content="Square Bidness" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Book Naee Doll" />
+  <meta name="twitter:description" content="Modeling, appearances, and brand work" />
+  <meta name="twitter:image" content="https://www.squarebidness.com/naee-doll/assets/icons/naee-doll-2-512.png" />
+
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="/naee-day/qr/booking/manifest.json" />
+
+  <!-- Icons -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/naee-doll/assets/icons/naee-doll-2-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/naee-doll/assets/icons/naee-doll-2-16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/naee-doll/assets/icons/naee-doll-2-180.png" />
+  <link rel="apple-touch-icon" sizes="192x192" href="/naee-doll/assets/icons/naee-doll-2-192.png" />
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
+
+  <style>
+    :root {
+      --bg: #000;
+      --pink: #FF3D8F;
+      --pink-dim: rgba(255,61,143,.18);
+      --stroke: rgba(255,255,255,.10);
+      --fg: #fff;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100svh;
+      padding: env(safe-area-inset-top, 24px) 24px env(safe-area-inset-bottom, 24px);
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 360px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: #000;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .brand-icon img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .person-name {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      color: var(--fg);
+      text-align: center;
+    }
+
+    .person-tag {
+      font-size: 13px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--pink);
+      opacity: .9;
+    }
+
+    /* QR */
+    .qr-wrap {
+      background: #fff;
+      border-radius: 18px;
+      padding: 18px;
+      width: 240px;
+      height: 240px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #qr canvas,
+    #qr img { display: block; }
+
+    /* Buttons */
+    .actions {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 14px 20px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.06);
+      color: var(--fg);
+      font-size: 15px;
+      font-weight: 650;
+      letter-spacing: .02em;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn--book {
+      background: var(--pink);
+      border-color: var(--pink);
+      color: #000;
+      font-weight: 800;
+    }
+
+    .btn--outline {
+      background: transparent;
+      border-color: rgba(255,61,143,.45);
+      color: var(--pink);
+      font-weight: 700;
+    }
+
+    .btn--row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn--row .btn { flex: 1; }
+
+    .hint {
+      font-size: 12px;
+      color: rgba(255,255,255,.38);
+      text-align: center;
+      letter-spacing: .01em;
+      padding-bottom: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <div class="header">
+      <div class="brand-icon">
+        <img src="/naee-doll/assets/icons/naee-doll-2-192.png" alt="Naee Doll" />
+      </div>
+      <div class="person-name">Naee Doll</div>
+      <div class="person-tag">Book · Modeling · Brand Work</div>
+    </div>
+
+    <div class="qr-wrap">
+      <div id="qr"></div>
+    </div>
+
+    <div class="actions">
+      <a class="btn btn--book" href="/naee-doll/book/">Book Naee →</a>
+
+      <div class="btn--row">
+        <a class="btn btn--outline" id="shareLink">Share</a>
+        <a class="btn" href="/naee-doll/modeling/">Modeling</a>
+      </div>
+
+      <a class="btn" href="/naee-doll/linkme/">All Links</a>
+    </div>
+
+    <p class="hint">Add this page to Home Screen as "Book Naee"</p>
+
+  </div>
+
+  <script>
+    const bookingUrl = "https://www.squarebidness.com/naee-doll/book/";
+
+    window.addEventListener("DOMContentLoaded", function () {
+      if (typeof QRCode !== "undefined") {
+        new QRCode(document.getElementById("qr"), {
+          text: bookingUrl,
+          width: 204,
+          height: 204,
+          colorDark: "#000000",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      }
+
+      document.getElementById("shareLink").addEventListener("click", function (e) {
+        e.preventDefault();
+        const url = "https://www.squarebidness.com/naee-day/qr/booking/";
+        const msg = "Book Naee Doll — modeling & appearances " + url;
+        if (navigator.share) {
+          navigator.share({ title: "Book Naee Doll", text: msg, url: url }).catch(function(){});
+        } else {
+          window.location.href = "sms:&body=" + encodeURIComponent(msg);
+        }
+      });
+    });
+
+    window.addEventListener("load", function () {
+      const el = document.getElementById("qr");
+      if (el && !el.innerHTML && typeof QRCode !== "undefined") {
+        new QRCode(el, {
+          text: bookingUrl,
+          width: 204,
+          height: 204,
+          colorDark: "#000000",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      }
+    });
+  </script>
+</body>
+</html>
