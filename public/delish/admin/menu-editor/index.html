@@ -178,6 +178,23 @@
       .item-fields { grid-template-columns: 1fr; }
       .add-grid { grid-template-columns: 1fr; }
     }
+
+    /* Custom modal */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,.72); backdrop-filter: blur(4px);
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-overlay.visible { display: flex; }
+    .modal-box {
+      background: var(--panel); border: 1px solid var(--line);
+      border-radius: 20px; padding: 24px; width: 100%; max-width: 400px;
+    }
+    .modal-title { font-size: 1.05rem; font-weight: 900; margin-bottom: 8px; }
+    .modal-msg { color: var(--muted); font-size: .92rem; margin-bottom: 16px; line-height: 1.5; }
+    .modal-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+    .modal-check-row { display: flex; align-items: center; gap: 8px; font-size: .88rem; color: var(--muted); margin-bottom: 4px; }
+    .modal-check-row input { width: auto; accent-color: var(--accent); }
   </style>
 </head>
 <body>
@@ -221,6 +238,11 @@
   <button class="btn-primary" id="saveBtn">Save All Changes</button>
 </div>
 
+<!-- Custom modal overlay -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box" id="modal"></div>
+</div>
+
 <script>
 const TOKEN_KEY = "delish_operator_token";
 const DAYS = ["monday","tuesday","wednesday","thursday","friday","sunday"];
@@ -250,6 +272,33 @@ let weeklyMenu = { monday:[], tuesday:[], wednesday:[], thursday:[], friday:[], 
 let activeDay = "monday";
 let dirty = false;
 
+// ── MODAL ─────────────────────────────────────────────────────────────────
+
+function showModal(innerHtml, onReady) {
+  document.getElementById("modal").innerHTML = innerHtml;
+  document.getElementById("modalOverlay").classList.add("visible");
+  if (onReady) onReady();
+}
+
+function hideModal() {
+  document.getElementById("modalOverlay").classList.remove("visible");
+  document.getElementById("modal").innerHTML = "";
+}
+
+function showConfirm(message, onYes) {
+  showModal(`
+    <div class="modal-title">Confirm</div>
+    <div class="modal-msg">${escHtml(message)}</div>
+    <div class="modal-actions">
+      <button class="btn-danger" id="mdlYes">Yes, do it</button>
+      <button class="btn-secondary" id="mdlNo">Cancel</button>
+    </div>
+  `, () => {
+    document.getElementById("mdlYes").addEventListener("click", () => { hideModal(); onYes(); });
+    document.getElementById("mdlNo").addEventListener("click", hideModal);
+  });
+}
+
 // ── TOKEN ──────────────────────────────────────────────────────────────────
 
 function getSavedToken() {
@@ -261,13 +310,42 @@ function saveToken(t) {
 }
 
 function requireToken() {
-  let t = getSavedToken();
-  if (!t) {
-    t = prompt("Enter Delish operator token:");
-    if (!t) return null;
-    if (confirm("Save token on this device?")) saveToken(t.trim());
-  }
-  return t.trim();
+  return new Promise(resolve => {
+    const saved = getSavedToken();
+    if (saved) { resolve(saved); return; }
+
+    showModal(`
+      <div class="modal-title">Operator Token</div>
+      <div class="modal-msg">Enter the Delish operator token to save changes.</div>
+      <div class="field" style="margin-bottom:12px;">
+        <input type="password" id="mdlTokenInput" placeholder="Token" style="width:100%;" />
+      </div>
+      <label class="modal-check-row">
+        <input type="checkbox" id="mdlSaveCheck" checked /> Remember on this device
+      </label>
+      <div class="modal-actions">
+        <button class="btn-primary" id="mdlTokenSubmit">Save Changes</button>
+        <button class="btn-secondary" id="mdlTokenCancel">Cancel</button>
+      </div>
+    `, () => {
+      const input = document.getElementById("mdlTokenInput");
+      input.focus();
+      input.addEventListener("keydown", e => {
+        if (e.key === "Enter") document.getElementById("mdlTokenSubmit").click();
+      });
+      document.getElementById("mdlTokenSubmit").addEventListener("click", () => {
+        const t = input.value.trim();
+        if (!t) return;
+        if (document.getElementById("mdlSaveCheck").checked) saveToken(t);
+        hideModal();
+        resolve(t);
+      });
+      document.getElementById("mdlTokenCancel").addEventListener("click", () => {
+        hideModal();
+        resolve(null);
+      });
+    });
+  });
 }
 
 // ── STATUS ──────────────────────────────────────────────────────────────────
@@ -464,11 +542,12 @@ function attachPanelEvents() {
     btn.addEventListener("click", () => {
       const { day, index } = btn.dataset;
       const i = Number(index);
-      if (confirm(`Remove "${weeklyMenu[day][i]?.name || "this item"}" from ${DAY_LABELS[day]}?`)) {
+      const name = weeklyMenu[day][i]?.name || "this item";
+      showConfirm(`Remove "${name}" from ${DAY_LABELS[day]}?`, () => {
         weeklyMenu[day].splice(i, 1);
         markDirty();
         renderAll();
-      }
+      });
     });
   });
 
@@ -513,8 +592,8 @@ function attachPanelEvents() {
         if (btn.dataset.base === "cornbread") baseOptions.push({ id: "base_cornbread_dressing", name: "Cornbread Dressing" });
       });
 
-      if (!name) { alert("Enter an item name."); return; }
-      if (isNaN(price) || price <= 0) { alert("Enter a valid price (e.g. 13.99)."); return; }
+      if (!name) { setStatus("Enter an item name.", "bad"); return; }
+      if (isNaN(price) || price <= 0) { setStatus("Enter a valid price (e.g. 13.99).", "bad"); return; }
 
       if (!weeklyMenu[day]) weeklyMenu[day] = [];
       weeklyMenu[day].push({ name, price: Math.round(price * 100) / 100, desc, sideSelectionRequired: sides, baseOptions });
@@ -548,7 +627,7 @@ async function loadMenu() {
 }
 
 async function saveMenu() {
-  const token = requireToken();
+  const token = await requireToken();
   if (!token) { setStatus("Save cancelled — no token.", "bad"); return; }
 
   const btn = document.getElementById("saveBtn");
@@ -596,13 +675,19 @@ async function saveMenu() {
 // ── INIT ─────────────────────────────────────────────────────────────────────
 
 document.getElementById("saveBtn").addEventListener("click", saveMenu);
-document.getElementById("reloadBtn").addEventListener("click", async () => {
-  if (dirty && !confirm("Reload from server? Unsaved changes will be lost.")) return;
-  try {
-    await loadMenu();
-    renderAll();
-    setStatus("Reloaded from server.", "good");
-  } catch (_) {}
+document.getElementById("reloadBtn").addEventListener("click", () => {
+  const doReload = async () => {
+    try {
+      await loadMenu();
+      renderAll();
+      setStatus("Reloaded from server.", "good");
+    } catch (_) {}
+  };
+  if (dirty) {
+    showConfirm("Reload from server? Unsaved changes will be lost.", doReload);
+  } else {
+    doReload();
+  }
 });
 
 (async function init() {
