@@ -106,6 +106,24 @@
     .sides-toggle input { width: auto; accent-color: var(--accent); }
     .sides-hint { font-size: .75rem; color: var(--muted); margin-top: 3px; }
 
+    /* Plate base individual toggles */
+    .base-toggle-row {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      background: #111; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px;
+    }
+    .base-toggle-label {
+      font-size: .75rem; font-weight: 900; letter-spacing: .08em;
+      color: var(--muted); text-transform: uppercase; margin-right: 4px; white-space: nowrap;
+    }
+    .base-toggle-btn {
+      padding: 5px 14px; border-radius: 999px; border: 2px solid var(--line);
+      font-size: .75rem; font-weight: 900; letter-spacing: .06em; text-transform: uppercase;
+      cursor: pointer; background: var(--panel2); color: var(--muted); transition: all .15s;
+    }
+    .base-toggle-btn.on {
+      background: #14532d; color: #4ade80; border-color: #16a34a;
+    }
+
     /* Price display */
     .item-price-col { display: flex; flex-direction: column; gap: 5px; }
     .price-label { font-size: .78rem; font-weight: 900; color: var(--muted); letter-spacing: .05em; text-transform: uppercase; }
@@ -206,6 +224,15 @@
 <script>
 const TOKEN_KEY = "delish_operator_token";
 const DAYS = ["monday","tuesday","wednesday","thursday","friday","sunday"];
+const BASE_OPTION_MAP = {
+  rice_dressing:   [{ id: "base_rice", name: "Rice" }, { id: "base_cornbread_dressing", name: "Cornbread Dressing" }],
+  rice_mashed:     [{ id: "base_rice", name: "Rice" }, { id: "base_mashed_potatoes", name: "Mashed Potatoes" }],
+  dressing_mashed: [{ id: "base_cornbread_dressing", name: "Cornbread Dressing" }, { id: "base_mashed_potatoes", name: "Mashed Potatoes" }],
+  rice_only:       [{ id: "base_rice", name: "Rice" }],
+  dressing_only:   [{ id: "base_cornbread_dressing", name: "Cornbread Dressing" }],
+  mashed_only:     [{ id: "base_mashed_potatoes", name: "Mashed Potatoes" }],
+  none:            []
+};
 const DAY_LABELS = {
   monday: "Monday", tuesday: "Tuesday", wednesday: "Wednesday",
   thursday: "Thursday", friday: "Friday", sunday: "Sunday"
@@ -337,6 +364,15 @@ function renderDayPanel(day) {
             <textarea id="new-desc-${day}" placeholder="e.g. Choose 2 sides. Served with garlic bread." maxlength="180" rows="2"></textarea>
           </div>
           <div class="field field--full">
+            <label>Plate Base (optional)</label>
+            <div class="base-toggle-row" id="base-toggles-${day}">
+              <span class="base-toggle-label">Plate Base</span>
+              <button type="button" class="base-toggle-btn" data-base="rice" data-day="${day}">RICE: OFF</button>
+              <button type="button" class="base-toggle-btn" data-base="mashed" data-day="${day}">MASH POTATOES: OFF</button>
+              <button type="button" class="base-toggle-btn" data-base="cornbread" data-day="${day}">CORNBREAD DRESSING: OFF</button>
+            </div>
+          </div>
+          <div class="field field--full">
             <label class="sides-toggle">
               <input type="checkbox" id="new-sides-${day}" checked />
               Customer picks 2 sides
@@ -436,6 +472,16 @@ function attachPanelEvents() {
     });
   });
 
+  // Base toggle buttons
+  document.querySelectorAll(".base-toggle-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const isOn = btn.classList.toggle("on");
+      const label = btn.dataset.base === "rice" ? "RICE" :
+                    btn.dataset.base === "mashed" ? "MASH POTATOES" : "CORNBREAD DRESSING";
+      btn.textContent = label + (isOn ? ": ON" : ": OFF");
+    });
+  });
+
   // Add form toggles
   DAYS.forEach(day => {
     const addBtn = document.getElementById(`addBtn-${day}`);
@@ -459,12 +505,19 @@ function attachPanelEvents() {
       const price = parseFloat(document.getElementById(`new-price-${day}`)?.value || "");
       const desc  = document.getElementById(`new-desc-${day}`)?.value.trim() || "";
       const sides = document.getElementById(`new-sides-${day}`)?.checked ?? true;
+      const baseOptions = [];
+      document.querySelectorAll(`.base-toggle-btn[data-day="${day}"]`).forEach(btn => {
+        if (!btn.classList.contains("on")) return;
+        if (btn.dataset.base === "rice")      baseOptions.push({ id: "base_rice", name: "Rice" });
+        if (btn.dataset.base === "mashed")    baseOptions.push({ id: "base_mashed_potatoes", name: "Mashed Potatoes" });
+        if (btn.dataset.base === "cornbread") baseOptions.push({ id: "base_cornbread_dressing", name: "Cornbread Dressing" });
+      });
 
       if (!name) { alert("Enter an item name."); return; }
       if (isNaN(price) || price <= 0) { alert("Enter a valid price (e.g. 13.99)."); return; }
 
       if (!weeklyMenu[day]) weeklyMenu[day] = [];
-      weeklyMenu[day].push({ name, price: Math.round(price * 100) / 100, desc, sideSelectionRequired: sides });
+      weeklyMenu[day].push({ name, price: Math.round(price * 100) / 100, desc, sideSelectionRequired: sides, baseOptions });
 
       markDirty();
       form.style.display = "none";
