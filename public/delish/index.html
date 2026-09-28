@@ -1607,7 +1607,11 @@ const flashSaleOnly =
       await Promise.all([loadMenuData(), loadMenuOverrides(), loadWeeklyMenu()]);
       await loadOrderingStatus();
       await loadPickupWindows();
-      setInterval(renderPickupWindows, 60 * 1000);
+      setInterval(async () => {
+        await loadOrderingStatus().catch(() => {});
+        applyDailyMenu();
+        renderPickupWindows();
+      }, 60 * 1000);
       await loadFlashSale();
       applyDailyMenu();
     } catch (error) {
