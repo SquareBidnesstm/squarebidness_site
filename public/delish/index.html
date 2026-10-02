@@ -877,6 +877,11 @@
       { id: "base_cornbread_dressing", name: "Cornbread Dressing" }
     ];
 
+    const autoSelect = bases.length === 1 && !isBaseSoldOut(bases[0].id);
+    if (autoSelect) {
+      return `<option value="${bases[0].id}" selected>${bases[0].name}</option>`;
+    }
+
     return [
       `<option value="">${getBaseLabel(item)}</option>`,
       ...bases.map(base => {
