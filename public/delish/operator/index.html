@@ -247,6 +247,18 @@
         <button class="secondary" onclick="saveMessage()">Save Message</button>
       </div>
     </section>
+
+    <section class="card">
+      <h2 style="margin-top:0">Today’s Plate Bases</h2>
+      <div class="small" style="margin-bottom:14px">Toggle which base options are available on today’s menu. Turning one OFF removes it from all plates for today only.</div>
+      <div id="baseToggleRow" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+        <button id="baseBtn-rice"      class="secondary" onclick="toggleBase(‘rice’)"      style="min-width:120px">RICE: —</button>
+        <button id="baseBtn-mashed"    class="secondary" onclick="toggleBase(‘mashed’)"    style="min-width:160px">MASH POTATOES: —</button>
+        <button id="baseBtn-cornbread" class="secondary" onclick="toggleBase(‘cornbread’)" style="min-width:200px">CORNBREAD DRESSING: —</button>
+      </div>
+      <button class="secondary" onclick="saveBases()">Save Bases for Today</button>
+      <div id="baseNotice" style="margin-top:10px;font-size:.85rem;color:#a8b0bd"></div>
+    </section>
   </main>
 
   <script>
@@ -338,9 +350,80 @@
       await postControl({ messageOnly: true, message });
     }
 
+    // ── Plate Bases ──────────────────────────────────────────────────────────
+    const BASE_IDS = {
+      rice:      "base_rice",
+      mashed:    "base_mashed_potatoes",
+      cornbread: "base_cornbread_dressing",
+    };
+    let activeBaseKeys = new Set(["rice", "mashed", "cornbread"]); // default: all on
+
+    function getTodayDay() {
+      const days = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"];
+      return days[new Date().getDay()];
+    }
+
+    function renderBaseBtns() {
+      for (const key of Object.keys(BASE_IDS)) {
+        const btn = document.getElementById(`baseBtn-${key}`);
+        if (!btn) continue;
+        const on = activeBaseKeys.has(key);
+        const labels = { rice:"RICE", mashed:"MASH POTATOES", cornbread:"CORNBREAD DRESSING" };
+        btn.textContent = `${labels[key]}: ${on ? "ON" : "OFF"}`;
+        btn.style.background = on ? "#14532d" : "";
+        btn.style.color = on ? "#4ade80" : "";
+        btn.style.borderColor = on ? "#16a34a" : "";
+      }
+    }
+
+    function toggleBase(key) {
+      if (activeBaseKeys.has(key)) activeBaseKeys.delete(key);
+      else activeBaseKeys.add(key);
+      renderBaseBtns();
+    }
+
+    async function loadBases() {
+      try {
+        const res = await fetch("/api/delish/menu-overrides", { cache: "no-store" });
+        const data = await res.json();
+        const overrides = data.overrides?.dayBaseOn?.overrides;
+        const day = getTodayDay();
+        if (overrides && Array.isArray(overrides[day])) {
+          activeBaseKeys = new Set(
+            overrides[day].map(id => Object.entries(BASE_IDS).find(([,v]) => v === id)?.[0]).filter(Boolean)
+          );
+        }
+      } catch (e) { /* leave defaults */ }
+      renderBaseBtns();
+    }
+
+    async function saveBases() {
+      const token = getToken() || document.getElementById("tokenInput").value.trim();
+      const notice = document.getElementById("baseNotice");
+      if (!token) { notice.textContent = "Operator token required."; notice.style.color = "#fca5a5"; return; }
+      const day = getTodayDay();
+      const baseOn = [...activeBaseKeys].map(k => BASE_IDS[k]);
+      try {
+        notice.textContent = "Saving...";
+        const res = await fetch("/api/delish/save-day-base", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-operator-token": token },
+          body: JSON.stringify({ day, baseOn }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.error || "Failed");
+        notice.textContent = `Saved. Active bases for ${day}: ${baseOn.join(", ") || "none"}`;
+        notice.style.color = "#4ade80";
+      } catch (err) {
+        notice.textContent = err.message || "Could not save.";
+        notice.style.color = "#fca5a5";
+      }
+    }
+
     window.addEventListener("load", async () => {
       document.getElementById("tokenInput").value = getToken();
       await loadStatus();
+      await loadBases();
     });
   </script>
 </body>
