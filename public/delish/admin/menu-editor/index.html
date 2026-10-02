@@ -487,6 +487,20 @@ function renderItemRow(day, item, i) {
             maxlength="180" rows="2" placeholder="Shown on the menu to customers">${escHtml(item.desc)}</textarea>
         </div>
         <div class="field field--full">
+          <label>Plate Base</label>
+          <div class="base-toggle-row">
+            <span class="base-toggle-label">Plate Base</span>
+            ${[
+              {base:"rice", id:"base_rice", label:"RICE"},
+              {base:"mashed", id:"base_mashed_potatoes", label:"MASH POTATOES"},
+              {base:"cornbread", id:"base_cornbread_dressing", label:"CORNBREAD DRESSING"},
+            ].map(({base, id, label}) => {
+              const isOn = Array.isArray(item.baseOptions) && item.baseOptions.some(b => b.id === id);
+              return `<button type="button" class="base-toggle-btn existing-base-btn ${isOn ? "on" : ""}" data-base="${base}" data-day="${day}" data-index="${i}">${label}: ${isOn ? "ON" : "OFF"}</button>`;
+            }).join("")}
+          </div>
+        </div>
+        <div class="field field--full">
           <label class="sides-toggle">
             <input type="checkbox" data-field="sideSelectionRequired" data-day="${day}" data-index="${i}"
               ${item.sideSelectionRequired ? "checked" : ""} />
@@ -533,6 +547,35 @@ function attachPanelEvents() {
       } else {
         weeklyMenu[day][i][field] = el.value.trim();
       }
+      markDirty();
+    });
+  });
+
+  // Base toggles on existing items
+  document.querySelectorAll(".existing-base-btn[data-day][data-index]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const { base, day, index } = btn.dataset;
+      const i = Number(index);
+      if (!weeklyMenu[day] || !weeklyMenu[day][i]) return;
+
+      const idMap = { rice: "base_rice", mashed: "base_mashed_potatoes", cornbread: "base_cornbread_dressing" };
+      const nameMap = { rice: "Rice", mashed: "Mashed Potatoes", cornbread: "Cornbread Dressing" };
+      const id = idMap[base];
+      const name = nameMap[base];
+      if (!id) return;
+
+      let opts = Array.isArray(weeklyMenu[day][i].baseOptions) ? [...weeklyMenu[day][i].baseOptions] : [];
+      const exists = opts.some(b => b.id === id);
+      if (exists) {
+        opts = opts.filter(b => b.id !== id);
+        btn.classList.remove("on");
+        btn.textContent = `${btn.textContent.split(":")[0]}: OFF`;
+      } else {
+        opts.push({ id, name });
+        btn.classList.add("on");
+        btn.textContent = `${btn.textContent.split(":")[0]}: ON`;
+      }
+      weeklyMenu[day][i].baseOptions = opts;
       markDirty();
     });
   });
