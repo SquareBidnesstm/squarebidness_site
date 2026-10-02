@@ -760,13 +760,22 @@
   ];
 
   function applyDayBaseOverride(mains, day) {
+    // Step 1: apply per-item base overrides (admin sets which bases are active for a specific item today)
+    const itemOverrides = MENU_OVERRIDES?.itemBaseOverrides?.overrides;
+    let result = mains.map(item => {
+      if (!itemOverrides || !Array.isArray(itemOverrides[item.id])) return item;
+      const allowed = new Set(itemOverrides[item.id]);
+      const filtered = (item.baseOptions || []).filter(b => allowed.has(b.id));
+      return { ...item, baseOptions: filtered };
+    });
+
+    // Step 2: apply day-level base filter (operator panel toggles a base off for all plates today)
     const dayBaseOn = MENU_OVERRIDES?.dayBaseOn;
-    if (!dayBaseOn || !dayBaseOn.date || !dayBaseOn.overrides?.[day]) return mains;
+    if (!dayBaseOn || !dayBaseOn.date || !dayBaseOn.overrides?.[day]) return result;
     const allowedIds = new Set(dayBaseOn.overrides[day]);
-    const activeOptions = ALL_BASE_OPTIONS.filter(b => allowedIds.has(b.id));
-    return mains.map(item => {
+    return result.map(item => {
       if (!Array.isArray(item.baseOptions) || !item.baseOptions.length) return item;
-      return { ...item, baseOptions: activeOptions };
+      return { ...item, baseOptions: item.baseOptions.filter(b => allowedIds.has(b.id)) };
     });
   }
 

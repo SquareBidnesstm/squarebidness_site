@@ -38,6 +38,7 @@ export const DEFAULT_DELISH_MENU_OVERRIDES = {
   mustardGreens: { available: false },
   customerMessage: "",
   dayBaseOn: { date: "", overrides: {} },
+  itemBaseOverrides: { date: "", overrides: {} },
   updatedAt: "",
   updatedBy: "system",
 };
@@ -148,6 +149,15 @@ export async function getDelishMenuOverrides() {
     },
     dayBaseOn: (() => {
       const stored = saved.dayBaseOn;
+      if (!stored || typeof stored !== "object") return { date: "", overrides: {} };
+      const isToday = String(stored.date || "") === todayKey;
+      return {
+        date: isToday ? todayKey : "",
+        overrides: isToday && stored.overrides && typeof stored.overrides === "object" ? stored.overrides : {},
+      };
+    })(),
+    itemBaseOverrides: (() => {
+      const stored = saved.itemBaseOverrides;
       if (!stored || typeof stored !== "object") return { date: "", overrides: {} };
       const isToday = String(stored.date || "") === todayKey;
       return {

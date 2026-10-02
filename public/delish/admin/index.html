@@ -153,6 +153,23 @@
     .ctrl-pill:hover{border-color:var(--text);color:var(--text);}
     .ctrl-pill-hide.pill-active{background:#7f1d1d;border-color:#b91c1c;color:#fecaca;}
     .ctrl-pill-sold.pill-active{background:#78350f;border-color:#b45309;color:#fde68a;}
+    .item-bases-panel{
+      grid-column:1/-1;
+      display:none;
+      flex-wrap:wrap;
+      align-items:center;
+      gap:8px;
+      padding:10px 14px;
+      background:rgba(215,174,114,.07);
+      border-radius:10px;
+      border:1.5px solid rgba(215,174,114,.28);
+      margin-top:-4px;
+    }
+    .item-bases-panel.open{ display:flex; }
+    .ctrl-pill-bases{ border-color:rgba(215,174,114,.5);color:var(--accent); }
+    .ctrl-pill-bases.pill-active{ background:rgba(215,174,114,.18);border-color:var(--accent);color:var(--accent); }
+    .ctrl-pill-base-on{ background:#14532d;border-color:#16a34a;color:#bbf7d0; }
+    .ctrl-pill-base-off{ background:#7f1d1d;border-color:#b91c1c;color:#fecaca; }
     .day-add-row{
       grid-column:1/-1;margin-top:4px;padding:10px 12px;
       background:var(--panel2);border-radius:10px;border:1.5px dashed var(--line);
@@ -973,21 +990,25 @@ const pickupWindowStatusBox = document.getElementById("pickupWindowStatusBox");
 const savePickupWindowsBtn = document.getElementById("savePickupWindowsBtn");
 const reloadPickupWindowsBtn = document.getElementById("reloadPickupWindowsBtn");
 
+    const _BASE_RICE        = { id: "base_rice",               name: "Rice" };
+    const _BASE_MASHED      = { id: "base_mashed_potatoes",    name: "Mashed Potatoes" };
+    const _BASE_CORNBREAD   = { id: "base_cornbread_dressing", name: "Cornbread Dressing" };
+
     let ITEM_CATALOG = [
-      { id: "monday_red_beans_fried_chicken", name: "Monday - Red Beans & Fried Chicken" },
-      { id: "monday_smothered_okra_fried_chicken", name: "Monday - Smothered Okra & Fried Chicken" },
-      { id: "tuesday_lasagna", name: "Tuesday - Lasagna Plate" },
-      { id: "tuesday_meatloaf", name: "Tuesday - Meatloaf Plate" },
-      { id: "wednesday_pork_neckbones", name: "Wednesday - Neck Bones Plate" },
-      { id: "wednesday_country_fried_steak", name: "Wednesday - Country Fried Steak Plate" },
-      { id: "wednesday_baked_chicken", name: "Wednesday - Baked Chicken Plate" },
-      { id: "thursday_turkey_wings", name: "Thursday - Turkey Wings Plate" },
-      { id: "friday_hamburger_steak", name: "Friday - Hamburger Steak Plate" },
-      { id: "friday_beef_tips", name: "Friday - Beef Tips Plate" },
-      { id: "friday_pork_neckbones", name: "Friday - Pork Neckbones Plate" },
-      { id: "sunday_pork_steak_gravy", name: "Sunday - Pork Steak and Gravy Plate" },
-      { id: "sunday_oxtails", name: "Sunday - Oxtails Plate" },
-      { id: "sunday_baked_chicken", name: "Sunday - Baked Chicken Plate" },
+      { id: "monday_red_beans_fried_chicken",      name: "Monday - Red Beans & Fried Chicken",      baseOptions: [] },
+      { id: "monday_smothered_okra_fried_chicken", name: "Monday - Smothered Okra & Fried Chicken", baseOptions: [] },
+      { id: "tuesday_lasagna",                     name: "Tuesday - Lasagna Plate",                 baseOptions: [] },
+      { id: "tuesday_meatloaf",                    name: "Tuesday - Meatloaf Plate",                baseOptions: [_BASE_RICE, _BASE_MASHED] },
+      { id: "wednesday_pork_neckbones",            name: "Wednesday - Neck Bones Plate",            baseOptions: [_BASE_RICE, _BASE_MASHED] },
+      { id: "wednesday_country_fried_steak",       name: "Wednesday - Country Fried Steak Plate",   baseOptions: [_BASE_RICE, _BASE_MASHED] },
+      { id: "wednesday_baked_chicken",             name: "Wednesday - Baked Chicken Plate",         baseOptions: [_BASE_RICE, _BASE_MASHED] },
+      { id: "thursday_turkey_wings",               name: "Thursday - Turkey Wings Plate",           baseOptions: [_BASE_CORNBREAD, _BASE_RICE] },
+      { id: "friday_hamburger_steak",              name: "Friday - Hamburger Steak Plate",          baseOptions: [_BASE_RICE, _BASE_MASHED] },
+      { id: "friday_beef_tips",                    name: "Friday - Beef Tips Plate",                baseOptions: [_BASE_RICE] },
+      { id: "friday_pork_neckbones",               name: "Friday - Pork Neckbones Plate",           baseOptions: [_BASE_RICE, _BASE_MASHED] },
+      { id: "sunday_pork_steak_gravy",             name: "Sunday - Pork Steak and Gravy Plate",     baseOptions: [_BASE_RICE, _BASE_MASHED] },
+      { id: "sunday_oxtails",                      name: "Sunday - Oxtails Plate",                  baseOptions: [_BASE_RICE, _BASE_MASHED] },
+      { id: "sunday_baked_chicken",                name: "Sunday - Baked Chicken Plate",            baseOptions: [_BASE_RICE, _BASE_MASHED] },
 
       { id: "drink_tropical_punch_koolaid", name: "Drink - Tropical Punch Kool-Aid" },
       { id: "drink_lemonade", name: "Drink - Lemonade" },
@@ -1552,13 +1573,33 @@ async function savePickupWindows() {
           const delBtn = item.weekly
             ? `<button class="ctrl-pill ctrl-pill-del" data-del-id="${item.id}" data-del-day="${item.weeklyDay}" style="background:#5a1a1a;color:#ff9999;border-color:#7a2a2a;">DEL</button>`
             : "";
+          const bases = Array.isArray(item.baseOptions) ? item.baseOptions : [];
+          const hasOverride = Array.isArray(_itemBaseOverrides[item.id]);
+          const basesBtn = bases.length > 0
+            ? `<button class="ctrl-pill ctrl-pill-bases${hasOverride ? " pill-active" : ""}" data-bases-for="${item.id}">BASES ▾</button>`
+            : "";
+
+          const overrideSet = hasOverride ? new Set(_itemBaseOverrides[item.id]) : null;
+          const basePillsHtml = bases.map(b => {
+            const isOn = overrideSet ? overrideSet.has(b.id) : true;
+            return `<button class="ctrl-pill ${isOn ? "ctrl-pill-base-on" : "ctrl-pill-base-off"}" data-item-base-item="${item.id}" data-item-base-id="${b.id}">${b.name}: ${isOn ? "ON" : "OFF"}</button>`;
+          }).join("");
+          const basesPanel = bases.length > 0 ? `
+          <div class="item-bases-panel" id="bases-panel-${item.id}">
+            <span style="font-size:.7rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);white-space:nowrap;">TODAY'S BASES</span>
+            ${basePillsHtml}
+            <span class="day-add-status" id="item-base-status-${item.id}" style="font-size:.72rem;"></span>
+          </div>` : "";
+
           return `
           <div class="ctrl-item-row" id="ctrl-row-${item.id}">
             <span class="ctrl-item-name">${label}</span>
             <button class="ctrl-pill ctrl-pill-hide${offSet.has(item.id) ? " pill-active" : ""}" data-for="${item.id}">HIDE</button>
             <button class="ctrl-pill ctrl-pill-sold${soldSet.has(item.id) ? " pill-active" : ""}" data-for="${item.id}">SOLD OUT</button>
+            ${basesBtn}
             ${delBtn}
-          </div>`;
+          </div>
+          ${basesPanel}`;
         }).join("");
 
         const dayKey = g.toLowerCase();
@@ -1654,6 +1695,21 @@ async function savePickupWindows() {
       wrap.querySelectorAll(".day-base-pill").forEach(btn => {
         btn.addEventListener("click", () => toggleDayBase(btn.dataset.day, btn.dataset.baseId, btn));
       });
+
+      // BASES expand/collapse toggle
+      wrap.querySelectorAll(".ctrl-pill-bases").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const panel = document.getElementById(`bases-panel-${btn.dataset.basesFor}`);
+          if (!panel) return;
+          const isOpen = panel.classList.toggle("open");
+          btn.textContent = `BASES ${isOpen ? "▴" : "▾"}`;
+        });
+      });
+
+      // Per-item base on/off toggle
+      wrap.querySelectorAll("[data-item-base-item]").forEach(btn => {
+        btn.addEventListener("click", () => toggleItemBase(btn.dataset.itemBaseItem, btn.dataset.itemBaseId, btn));
+      });
     }
 
     async function toggleDayBase(day, baseId, btn) {
@@ -1690,6 +1746,67 @@ async function savePickupWindows() {
           : `background:#7f1d1d;border-color:#b91c1c;color:#fecaca;`;
         const label = btn.textContent.split(":")[0];
         btn.textContent = `${label}: ${isOn ? "ON" : "OFF"}`;
+        if (statusEl) { statusEl.textContent = "Saved!"; statusEl.style.color = "#d6f5de"; }
+        setTimeout(() => { if (statusEl) statusEl.textContent = ""; }, 2000);
+      } catch (err) {
+        if (statusEl) { statusEl.textContent = err.message || "Error."; statusEl.style.color = "#ffd3d3"; }
+      }
+    }
+
+    async function toggleItemBase(itemId, baseId, btn) {
+      let token = getSavedToken();
+      if (!token) {
+        token = window.prompt("Enter Delish operator token");
+        if (!token) return;
+        if (window.confirm("Save token on this device?")) saveToken(token.trim());
+      }
+
+      const statusEl = document.getElementById(`item-base-status-${itemId}`);
+      const catalogItem = ITEM_CATALOG.find(x => x.id === itemId);
+      const allBases = (catalogItem?.baseOptions || []).map(b => b.id);
+
+      // Current active bases for this item (default = all bases ON if no override)
+      const current = Array.isArray(_itemBaseOverrides[itemId])
+        ? new Set(_itemBaseOverrides[itemId])
+        : new Set(allBases);
+
+      if (current.has(baseId)) current.delete(baseId);
+      else current.add(baseId);
+
+      const baseOn = [...current];
+
+      // If all bases are on again, clear the override
+      const isFullyRestored = allBases.every(id => current.has(id)) && current.size === allBases.length;
+      const sendBaseOn = isFullyRestored ? null : baseOn;
+
+      if (statusEl) statusEl.textContent = "Saving…";
+      try {
+        const res = await fetch("/api/delish/save-item-base/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-operator-token": token.trim() },
+          body: JSON.stringify({ itemId, baseOn: sendBaseOn }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) throw new Error(data.error || "Save failed.");
+
+        if (isFullyRestored) {
+          delete _itemBaseOverrides[itemId];
+        } else {
+          _itemBaseOverrides[itemId] = baseOn;
+        }
+
+        // Update pill visual
+        const isOn = current.has(baseId);
+        btn.className = `ctrl-pill ${isOn ? "ctrl-pill-base-on" : "ctrl-pill-base-off"}`;
+        btn.dataset.itemBaseItem = itemId;
+        btn.dataset.itemBaseId = baseId;
+        btn.textContent = `${btn.textContent.split(":")[0]}: ${isOn ? "ON" : "OFF"}`;
+
+        // Update the BASES header pill indicator
+        const hasOverride = !isFullyRestored;
+        const headerBtn = document.querySelector(`.ctrl-pill-bases[data-bases-for="${itemId}"]`);
+        if (headerBtn) headerBtn.classList.toggle("pill-active", hasOverride);
+
         if (statusEl) { statusEl.textContent = "Saved!"; statusEl.style.color = "#d6f5de"; }
         setTimeout(() => { if (statusEl) statusEl.textContent = ""; }, 2000);
       } catch (err) {
@@ -2162,7 +2279,13 @@ async function savePickupWindows() {
           const items = Array.isArray(data.weeklyMenu[day]) ? data.weeklyMenu[day] : [];
           for (const item of items) {
             if (item.id && !existingIds.has(item.id)) {
-              ITEM_CATALOG.push({ id: item.id, name: `${DAY_LABELS[day]} - ${item.name} ✦`, weekly: true, weeklyDay: day });
+              ITEM_CATALOG.push({
+                id: item.id,
+                name: `${DAY_LABELS[day]} - ${item.name} ✦`,
+                weekly: true,
+                weeklyDay: day,
+                baseOptions: Array.isArray(item.baseOptions) ? item.baseOptions : [],
+              });
               existingIds.add(item.id);
             }
           }
@@ -2172,6 +2295,7 @@ async function savePickupWindows() {
 
     let _lastSpecialMenu = { active: false, items: [] };
     let _currentDayBaseOn = {};
+    let _itemBaseOverrides = {};
 
     // What menu.json has set per day — default ON bases
     const DAY_BASE_DEFAULTS = {
@@ -2226,6 +2350,7 @@ async function savePickupWindows() {
       syncLimitedMenuPill();
       syncFridayMenuPill();
       _currentDayBaseOn = overrides?.dayBaseOn?.overrides || {};
+      _itemBaseOverrides = overrides?.itemBaseOverrides?.overrides || {};
       document.getElementById("customerMessage").value = overrides.customerMessage || "";
       const itemsOffArr = Array.isArray(overrides.itemsOff) ? overrides.itemsOff : [];
       const legacyBasesSoldOut = (Array.isArray(overrides.basesSoldOut) ? overrides.basesSoldOut : []).filter(id => !itemsOffArr.includes(id));
