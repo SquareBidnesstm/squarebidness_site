@@ -1644,13 +1644,14 @@ async function savePickupWindows() {
           return `<button class="ctrl-pill day-base-pill${isOn?" pill-on":""}" data-base-id="${b.id}" data-day="${dayKey}" style="${pillStyle}">${b.label}: ${isOn?"ON":"OFF"}</button>`;
         }).filter(Boolean).join("");
         const baseRow = isDayGroup && basePills ? `
-          <div class="day-base-row" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
-            <span style="font-size:.72rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);white-space:nowrap;">Plate Base</span>
+          <div class="day-base-row" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;border-color:rgba(215,174,114,.4);background:rgba(215,174,114,.06);">
+            <span style="font-size:.7rem;font-weight:900;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);white-space:nowrap;">ALL PLATES</span>
+            <span style="font-size:.65rem;color:var(--muted);white-space:nowrap;margin-right:4px;">master</span>
             ${basePills}
             <span class="day-add-status" id="day-base-status-${dayKey}" style="font-size:.72rem;color:var(--muted);"></span>
           </div>` : "";
 
-        return `<details class="day-group" data-group="${g}" ${isToday ? "open" : ""}><summary class="day-summary"><span class="day-label">${g}${badge}</span><span class="day-chevron">▾</span></summary><div class="day-items">${items}${addForm}${baseRow}</div></details>`;
+        return `<details class="day-group" data-group="${g}" ${isToday ? "open" : ""}><summary class="day-summary"><span class="day-label">${g}${badge}</span><span class="day-chevron">▾</span></summary><div class="day-items">${baseRow}${items}${addForm}</div></details>`;
       }).join("");
 
       function updateGroupBadge(detailsEl) {
