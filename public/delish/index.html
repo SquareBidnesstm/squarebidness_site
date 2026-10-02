@@ -777,7 +777,12 @@
     const fridayOverrideItems = day === "friday" ? getFridayMenuOverride() : null;
     const baseMains = fridayOverrideItems || (dayMenu.mains || []);
 
-    const weeklyItems = Array.isArray(WEEKLY_MENU[day]) ? WEEKLY_MENU[day] : [];
+    const weeklyItems = (Array.isArray(WEEKLY_MENU[day]) ? WEEKLY_MENU[day] : []).map(item => {
+      if (item.sideSelectionRequired && (!Array.isArray(item.baseOptions) || !item.baseOptions.length)) {
+        return { ...item, baseOptions: [{ id: "base_rice", name: "Rice" }] };
+      }
+      return item;
+    });
     const specialItems = getSpecialMenuItems();
     const allMains = [...baseMains, ...weeklyItems, ...specialItems];
     return {
