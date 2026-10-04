@@ -1,0 +1,734 @@
+<title>Disrupt Agenda</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Inter:wght@400;500;600&display=swap">
+
+<style>
+  /* -------------------------------------------------------
+     SBH Disrupt Agenda · Dark-first, mobile-first
+     Layout: sticky day tabs → scrollable session cards
+  ------------------------------------------------------- */
+  :root {
+    --bg:       #0D0F12;
+    --surface:  #161A20;
+    --border:   #252930;
+    --fg:       #F0EDE6;
+    --muted:    #8B92A0;
+    --gold:     #C9A227;
+    --gold-dim: rgba(201,162,39,0.12);
+    --must:     #C9392A;
+    --must-bg:  rgba(201,57,42,0.12);
+    --high:     #C9A227;
+    --infra:    #3B8BCC;
+    --infra-bg: rgba(59,139,204,0.12);
+    --raise:    #2E9E6B;
+    --raise-bg: rgba(46,158,107,0.12);
+    --nvidia:   #8B5CF6;
+    --nvidia-bg:rgba(139,92,246,0.12);
+    --net:      #E07B39;
+    --net-bg:   rgba(224,123,57,0.12);
+    color-scheme: dark;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    padding-inline: 16px;
+    padding-block: 0;
+  }
+
+  /* HEADER */
+  .header {
+    padding-block: 20px 12px;
+  }
+  .header-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 4px;
+  }
+  .header h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: .01em;
+    color: var(--fg);
+    text-wrap: balance;
+  }
+  .header-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 5px;
+  }
+
+  /* LEGEND */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-block: 14px;
+  }
+  .leg {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .leg-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* DAY TABS */
+  .tabs {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 10;
+    background: var(--bg);
+    display: flex;
+    gap: 4px;
+    padding-block: 10px;
+    border-bottom: 1px solid var(--border);
+    margin-inline: -16px;
+    padding-inline: 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+
+  .tab {
+    flex-shrink: 0;
+    padding: 7px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  .tab.active {
+    background: var(--gold-dim);
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  /* DAY SECTIONS */
+  .day-section { display: none; padding-block: 16px 32px; }
+  .day-section.visible { display: block; }
+
+  .day-date {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  /* TIME BLOCK */
+  .block {
+    margin-bottom: 10px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .block.must   { border-left: 3px solid var(--must); }
+  .block.high   { border-left: 3px solid var(--gold); }
+  .block.note   { border-left: 3px solid var(--border); }
+
+  .block-inner {
+    padding: 12px 14px;
+  }
+
+  .block-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .block-time {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+    white-space: nowrap;
+    padding-top: 1px;
+    min-width: 70px;
+    font-variant-numeric: tabular-nums;
+  }
+  .block-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--fg);
+    line-height: 1.3;
+    text-wrap: balance;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 7px;
+    padding-left: 80px;
+  }
+  .tag {
+    font-size: 10px;
+    font-weight: 600;
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .tag.must-tag    { background: var(--must-bg);   color: var(--must);   }
+  .tag.high-tag    { background: var(--gold-dim);   color: var(--gold);   }
+  .tag.infra-tag   { background: var(--infra-bg);  color: var(--infra);  }
+  .tag.raise-tag   { background: var(--raise-bg);  color: var(--raise);  }
+  .tag.nvidia-tag  { background: var(--nvidia-bg); color: var(--nvidia); }
+  .tag.net-tag     { background: var(--net-bg);    color: var(--net);    }
+
+  .block-why {
+    padding-left: 80px;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .block-venue {
+    padding-left: 80px;
+    font-size: 11px;
+    color: #4B5563;
+    margin-top: 3px;
+  }
+
+  /* DIVIDER */
+  .day-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-block: 18px 12px;
+  }
+  .day-divider-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    white-space: nowrap;
+  }
+  .day-divider-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ROHIT CALLOUT */
+  .callout {
+    background: var(--gold-dim);
+    border: 1px solid var(--gold);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+  }
+  .callout-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 4px;
+  }
+  .callout-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--fg);
+  }
+  .callout-note {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+</style>
+
+<div class="header">
+  <div class="header-label">Square Bidness Holdings</div>
+  <h1>Disrupt Agenda<br>October 13–15, 2026</h1>
+  <div class="header-sub">San Francisco · Curated for SBH</div>
+</div>
+
+<div class="legend">
+  <div class="leg"><div class="leg-dot" style="background:var(--must)"></div> Must attend</div>
+  <div class="leg"><div class="leg-dot" style="background:var(--gold)"></div> High value</div>
+  <div class="leg"><div class="leg-dot" style="background:var(--infra)"></div> Infrastructure</div>
+  <div class="leg"><div class="leg-dot" style="background:var(--raise)"></div> Fundraising</div>
+  <div class="leg"><div class="leg-dot" style="background:var(--nvidia)"></div> NVIDIA</div>
+  <div class="leg"><div class="leg-dot" style="background:var(--net)"></div> Networking</div>
+</div>
+
+<div class="tabs" id="tabs">
+  <button class="tab active" onclick="showDay('oct12')">Oct 12</button>
+  <button class="tab" onclick="showDay('oct13')">Oct 13</button>
+  <button class="tab" onclick="showDay('oct14')">Oct 14</button>
+  <button class="tab" onclick="showDay('oct15')">Oct 15</button>
+</div>
+
+<!-- ========== OCT 12 ========== -->
+<div class="day-section visible" id="oct12">
+  <div class="day-date">Sunday, October 12 · Pre-Conference</div>
+
+  <div class="callout">
+    <div class="callout-label">Confirmed Meeting</div>
+    <div class="callout-title">Rohit Gupta — Future Communities Capital</div>
+    <div class="callout-note">$1M / $10M cap conversation → presenting $2.5M / $25M. Confirm exact time. Bring Rohit Prep PDF.</div>
+  </div>
+
+  <div class="block note">
+    <div class="block-inner">
+      <div class="block-top">
+        <div class="block-time">1–5 PM</div>
+        <div class="block-title">Badge Pickup · Early Registration</div>
+      </div>
+      <div class="block-venue">Registration</div>
+      <div class="block-why">Get in and out early. Rest of the day is yours — review Rohit prep, walk the neighborhood, get your head right. Don't show up Day 1 without a badge.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== OCT 13 ========== -->
+<div class="day-section" id="oct13">
+  <div class="day-date">Monday, October 13 · Day 1</div>
+
+  <div class="day-divider"><div class="day-divider-label">Morning</div><div class="day-divider-line"></div></div>
+
+  <div class="block high">
+    <div class="block-inner">
+      <div class="block-top">
+        <div class="block-time">9:00 AM</div>
+        <div class="block-title">Equity Live</div>
+      </div>
+      <div class="tags">
+        <span class="tag high-tag">High Value</span>
+        <span class="tag raise-tag">Fundraising</span>
+      </div>
+      <div class="block-venue">Builders Stage · 30 min</div>
+      <div class="block-why">Quick warm-up session on fundraising mechanics. Good way to calibrate your ear before the day gets heavy.</div>
+    </div>
+  </div>
+
+  <div class="block must">
+    <div class="block-inner">
+      <div class="block-top">
+        <div class="block-time">10:00 AM</div>
+        <div class="block-title">Startup Battlefield — Space and Physical AI</div>
+      </div>
+      <div class="tags">
+        <span class="tag must-tag">Must Attend</span>
+        <span class="tag raise-tag">Fundraising</span>
+        <span class="tag infra-tag">Infrastructure</span>
+      </div>
+      <div class="block-venue">Disrupt Stage · 1h 15min</div>
+      <div class="block-why">Judges on this panel: Anu Bharadwaj (ICONIQ), Michael Palank (MaC Venture Capital), Aatish Nayak (Kleiner Perkins), Benjamin Narasin (Tenacity), Sara Deshpande (Maven). Know their faces before you speak to any of them. Watch how they probe Physical AI founders — that's your category.</div>
+    </div>
+  </div>
+
+  <div class="block high">
+    <div class="block-inner">
+      <div class="block-top">
+        <div class="block-time">11:40 AM</div>
+        <div class="block-title">The Science of Powerful Introductions</div>
+      </div>
+      <div class="tags">
+        <span class="tag high-tag">High Value</span>
+      </div>
+      <div class="block-venue">Roundtable 2 · 30 min · Cal Amir</div>
+      <div class="block-why">About being memorable in a crowded room. Directly applicable to what you're doing every hour you're here. Short session, worth the slot.</div>
+    </div>
+  </div>
+
+  <div class="day-divider"><div class="day-divider-label">Afternoon — Your Thesis on Stage</div><div class="day-divider-line"></div></div>
+
+  <div class="block must">
+    <div class="block-inner">
+      <div class="block-top">
+        <div class="block-time">1:20 PM</div>
+        <div class="block-title">Where the AI Infrastructure Boom Is Creating Winners</div>
+      </div>
+      <div class="tags">
+        <span class="tag must-tag">Must Attend</span>
+        <span class="tag infra-tag">Infrastructure</span>
+      </div>
+      <div class="block-venue">Industry Stage Smart Systems · 35 min</div>
+      <div class="block-why">Ben Longmier (Ambrosia Energy), Bill Thayer (Bloom Energy), Kim Zou (Currence). Your thesis on stage — private infrastructure as the play. Listen for how they frame the regional power grid angle. You have the same story: CLECO and Entergy, two grids, Applied Digital already there.</div>
+    </div>
+  </div>
+
+  <div class="block must">
+    <div class="block-inner">
+      <div class="block-top">
+        <div class="block-time">2:15 PM</div>
+        <div class="block-title">How Twilio's Founder Is Tackling the Power Problem</div>
+      </div>
+      <div class="tags">
+        <span class="tag must-tag">Must Attend</span>
+        <span class="tag infra-tag">Infrastructure</span>
+      </div>
+      <div class="block-venue">Industry Stage Smart Systems · 30 min · Jeff Lawson</div>
+      <div class="block-why">Jeff Lawson built Twilio and is now doing private infrastructure + power. That's exactly your arc — built platforms, now building the infrastructure underneath them. Listen for how he explains the transition to investors.</div>
+    </div>
+  </div>
+
+  <div class="block high">
+    <div class="block-inner">
+      <div class="block-top">
+        <div class="block-time">3:30 PM</div>
+        <div class="block-title">The Inference Economy: Why AI's Next Trillion Won't Look Like Its First</div>
+      </div>
+      <div class="tags">
+        <span class="tag high-tag">High Value</span>
+        <span class="tag infra-tag">Infrastructure</span>
+      </div>
+      <div class="block-venue">Breakout Stage · 50 min · Cerebras + Glasswing</div>
+      <div class="block-why">Hagay Lupesko (Cerebras SVP AI Cloud) + Rudina Seseri (Glasswing Ventures). Inference economy framing is exactly where private edge plays. Good for sharpening your own language on why ownership beats rental at scale.</div>
+    </div>
+  </div>
+
+  <div class="day-divider"><div class="day-divider-label">Evening — Work the Room</div><div class="day-divider-line"></div></div>
+
+  <div class="block must">
+    <div class="block-inner">
+      <div class="block-top">
+        <div class="block-time">4:00 PM</div>
+        <div class="block-title">AI Builders Happy Hour</div>
+      </div>
+      <div class="tags">
+        <span class="tag must-tag">Must Attend</span>
+        <span class="tag net-tag">Networking</span>
+      </div>
+      <div class="block-venue">Deal Flow Cafe · 2 hours</div>
+      <div class="block-why">This is where Day 1 conversations happen. Builders, not just investors. Good place to introduce yourself with your one-liner and see who leans in.</div>
+    </div>
+  </div>
+
+  <div class="block must">
+    <div class="block-inner">
+      <div class="block-top">
+        <div class="block-time">5:00 PM</div>
+        <div class="block-title">Industry Meet Up — Smart Money &amp; Smart Systems</div>
+      </div>
+      <div class="tags">
+        <span class="tag must-tag">Must Attend</span>
+        <span class="tag net-tag">Networking</span>
+        <span class="tag infra-tag">Infrastructure</span>
+      </div>
+      <div class="block-venue">Evening Reception · 2 hours</div>
+      <div class="block-why">Smart Systems is your track. Infrastructure operators, energy VCs, and grid plays all in one room. Highest-density relevant networking of the conference. Be here.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== OCT 14 ========== -->
+<div class="day-section" id="oct14">
+  <div class="day-date">Tuesday, October 14 · Day 2</div>
+
+  <div class="day-divider"><div class="day-divider-label">Morning — NVIDIA + Edge AI</div><div class="day-divider-line"></div></div>
+
+  <div class="block high">
+    <div class="block-inner">
+      <div class="block-top">
+        <div class="block-time">9:30 AM</div>
+        <div class="block-title">The Series A in 2027</div>
+      </div>
+      <div class="tags">
+        <span class="tag high-tag">High Value</span>
+        <span class="tag raise-tag">Fundraising</span>
+      </div>
+      <div class="block-venue">Builders Stage · 40 min · Index, Peak XV, Bessemer</div>
+      <div class="block-why">Jahanvi Sardana (Index), Shailendra Singh (Peak XV), Janelle Teng Wade (Bessemer). What the next bar looks like. Understanding how they think about Series A helps you frame your SAFE story — you're building toward that bar right now.</div>
+    </div>
+  </div>
+
+  <div class="block must">
+    <div class="block-inner">
+      <div class="block-top">
+        <div class="block-time">9:55 AM</div>
+        <div class="block-title">Operating at the Edge: How AI Works When the Cloud Doesn't</div>
+      </div>
+      <div class="tags">
+        <span class="tag must-tag">Must Attend</span>
+        <span class="tag infra-tag">Infrastructure</span>
+      </div>
+      <div class="block-venue">Industry Stage Real World AI · 35 min · FieldAI, Medra, Eclipse</div>
+      <div class="block-why">Dr. Ali Agha (FieldAI CEO), Michelle Lee (Medra CEO), Aidan Madigan-Curtis (Eclipse VC). This is literally your pitch on a stage. Listen to how they answer the "why not cloud" question — that's the question you'll get in every conversation this week. Also a potential investor introduction via Eclipse.</div>
+    </div>
+  </div>
+
+  <div class="block must">
+    <div class="block-inner">
+      <div class="block-top">
+        <div class="block-time">10:50 AM</div>
+        <div class="block-title">Robots Are Waiting for Their ChatGPT Moment — NVIDIA</div>
+      </div>
+      <div class="tags">
+        <span class="tag must-tag">Must Attend</span>
+        <span class="tag nvidia-tag">NVIDIA Inception</span>
+        <span class="tag infra-tag">Infrastructure</span>
+      </div>
+      <div class="block-venue">Industry Stage Real World AI · 30 min · Les Karpas</div>
+      <div class="block-why">Les Karpas is the NVIDIA Inception Global Head of Physical AI. You have NVIDIA Inception. This is your connection. Stay after and introduce yourself as an Inception member with Node 2 (Jetson AGX Orin) in procurement. That's not a cold intro — that's a warm one.</div>
+    </div>
+  </div>
+
+  <div class="block high">
+    <div class="block-inner">
+      <div class="block-top">
+        <div class="block-time">11:00 AM</div>
+        <div class="block-title">Stripe Founders Hub</div>
+      </div>
+      <div class="tags">
+        <span class="tag high-tag">High Value</span>
+        <span class="tag net-tag">Networking</span>
+      </div>
+      <div class="block-venue">Private Reception Room · 11AM–3PM</div>
+      <div class="block-why">You have a Troy Kowalski relationship at Stripe (Product GTM). Check with him whether you can get into this. If accessible, this is a tier-1 room — Stripe tends to host high-signal founder conversations. Don't assume you can walk in. Make the call before Tuesday.</div>
+    </div>
+  </div>
+
+  <div class="day-divider"><div class="day-divider-label">Afternoon — Fundraising + Benchmark</div><div class="day-divider-line"></div></div>
+
+  <div class="block must">
+    <div class="block-inner">
+      <div class="block-top">
+        <div class="block-time">11:40 AM</div>
+        <div class="block-title">How to Land Your First Institutional Check</div>
+      </div>
+      <div class="tags">
+        <span class="tag must-tag">Must Attend</span>
+        <span class="tag raise-tag">Fundraising</span>
+      </div>
+      <div class="block-venue">Roundtable 2 · 30 min · Aditi Maliwal (Upfront Ventures)</div>
+      <div class="block-why">Aditi Maliwal writes the checks she's describing. Small room (roundtable). Be there early. This is the conversation you're inside right now — your SAFE is your first institutional check ask. Listen for what she says about founder signal vs. traction.</div>
+    </div>
+  </div>
+
+  <div class="block high">
+    <div class="block-inner">
+      <div class="block-top">
+        <div class="block-time">1:40 PM</div>
+        <div class="block-title">How to Win When You're Not Building AI</div>
+      </div>
+      <div class="tags">
+        <span class="tag high-tag">High Value</span>
+        <span class="tag raise-tag">Fundraising</span>
+      </div>
+      <div class="block-venue">Builders Stage · 40 min · General Catalyst, Baillie Gifford, ALSO</div>
+      <div class="block-why">You're not building an AI lab — you're building the infrastructure that AI runs on. This is exactly the positioning question you need answered. Yuri Sagalov (General Catalyst) is the right person to hear frame this.</div>
+    </div>
+  </div>
+
+  <div class="block must">
+    <div class="block-inner">
+      <div class="block-top">
+        <div class="block-time">2:30 PM</div>
+        <div class="block-title">Sovereign AI: Who Will Build the Infrastructure of the Next AI Economy?</div>
+      </div>
+      <div class="tags">
+        <span class="tag must-tag">Must Attend</span>
+        <span class="tag infra-tag">Infrastructure</span>
+      </div>
+      <div class="block-venue">Breakout Stage · 50 min</div>
+      <div class="block-why">"Sovereign AI" is a term for private, regionally-owned AI infrastructure. Louisiana is the case study right now — Applied Digital, Hut 8, Meta all anchoring to your grids. This panel is describing exactly what you're building. Go in knowing your numbers: 2.29ac, 2 grids, 2 nodes.</div>
+    </div>
+  </div>
+
+  <div class="block must">
+    <div class="block-inner">
+      <div class="block-top">
+        <div class="block-time">2:45 PM</div>
+        <div class="block-title">What We Believe Now — All 5 Benchmark GPs</div>
+      </div>
+      <div class="tags">
+        <span class="tag must-tag">Must Attend</span>
+        <span class="tag raise-tag">Fundraising</span>
+      </div>
+      <div class="block-venue">Disrupt Stage · 30 min · Jack Altman, Peter Fenton, Chetan Puttagunta, Everett Randle, Eric Vishria</div>
+      <div class="block-why">Benchmark rarely puts all 5 GPs on one stage. This is a read on how the highest tier of venture thinks about the current moment. Even if you never pitch Benchmark, knowing how they're thinking shapes how every investor you do pitch is thinking. 30 minutes. Worth everything else you skip.</div>
+    </div>
+  </div>
+
+  <div class="block high">
+    <div class="block-inner">
+      <div class="block-top">
+        <div class="block-time">2:40 PM</div>
+        <div class="block-title">VC Insights for Founders: How to Raise Your First VC Round</div>
+      </div>
+      <div class="tags">
+        <span class="tag high-tag">High Value</span>
+        <span class="tag raise-tag">Fundraising</span>
+      </div>
+      <div class="block-venue">Roundtable 2 · 30 min · Recursive Ventures, Silicon Valley Venture</div>
+      <div class="block-why">Itamar Novick (Recursive) and Brian Sparkes. Small room. First VC round dynamics — the mechanics of what you're trying to close right now. Note: this conflicts with Sovereign AI. Check which room has more signal for you in the moment.</div>
+    </div>
+  </div>
+
+  <div class="day-divider"><div class="day-divider-label">Evening</div><div class="day-divider-line"></div></div>
+
+  <div class="block must">
+    <div class="block-inner">
+      <div class="block-top">
+        <div class="block-time">5:00 PM</div>
+        <div class="block-title">Industry Meet Up — AI</div>
+      </div>
+      <div class="tags">
+        <span class="tag must-tag">Must Attend</span>
+        <span class="tag net-tag">Networking</span>
+      </div>
+      <div class="block-venue">Evening Reception · 2 hours</div>
+      <div class="block-why">Day 2 evening is when the real conversations happen. People have heard the pitches. They're more relaxed. This is closing time — use it.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== OCT 15 ========== -->
+<div class="day-section" id="oct15">
+  <div class="day-date">Wednesday, October 15 · Day 3</div>
+
+  <div class="day-divider"><div class="day-divider-label">Morning — Battlefield Final</div><div class="day-divider-line"></div></div>
+
+  <div class="block high">
+    <div class="block-inner">
+      <div class="block-top">
+        <div class="block-time">9:30 AM</div>
+        <div class="block-title">Yes, It's Hard to Be a Founder: An Honest Conversation</div>
+      </div>
+      <div class="tags">
+        <span class="tag high-tag">High Value</span>
+      </div>
+      <div class="block-venue">Builders Stage · 40 min · Revenge Capital, Harvard</div>
+      <div class="block-why">Nell Daly (Revenge Capital) + Dr. David Rosmarin (Harvard Medical). About the real cost of building. Good for your headspace on the last day — grounds you in what this actually is.</div>
+    </div>
+  </div>
+
+  <div class="block must">
+    <div class="block-inner">
+      <div class="block-top">
+        <div class="block-time">11:30 AM</div>
+        <div class="block-title">Startup Battlefield Final</div>
+      </div>
+      <div class="tags">
+        <span class="tag must-tag">Must Attend</span>
+        <span class="tag raise-tag">Fundraising</span>
+      </div>
+      <div class="block-venue">Disrupt Stage · 1h 15min</div>
+      <div class="block-why">Judges: Stacy Brown-Philpot (Cherryrock Capital), Chi-Hua Chien (Goodwater), Dayna Grayson (Construct Capital), Carter Reum (M13), Alexa von Tobel (Inspired Capital). Watch how questions land on the finalists. The follow-up session at 2:50PM is the same judges talking openly — that's your post-game film.</div>
+    </div>
+  </div>
+
+  <div class="day-divider"><div class="day-divider-label">Afternoon — NVIDIA + Close</div><div class="day-divider-line"></div></div>
+
+  <div class="block high">
+    <div class="block-inner">
+      <div class="block-top">
+        <div class="block-time">1:10 PM</div>
+        <div class="block-title">Model Behavior: How Top Startups Get Real Value From AI Adoption</div>
+      </div>
+      <div class="tags">
+        <span class="tag high-tag">High Value</span>
+        <span class="tag infra-tag">Infrastructure</span>
+      </div>
+      <div class="block-venue">Industry Stage AI · 35 min · Clay, Anthropic, Gamma</div>
+      <div class="block-why">Cat de Jong is Anthropic's Head of Applied AI. Kareem Amin is Clay's CEO. Two people worth knowing. Good conversation about how enterprise AI actually gets adopted — relevant to your Health and FleetLog verticals selling into rural Louisiana orgs.</div>
+    </div>
+  </div>
+
+  <div class="block must">
+    <div class="block-inner">
+      <div class="block-top">
+        <div class="block-time">2:20 PM</div>
+        <div class="block-title">Building AI Startups Worth Betting On — NVIDIA</div>
+      </div>
+      <div class="tags">
+        <span class="tag must-tag">Must Attend</span>
+        <span class="tag nvidia-tag">NVIDIA Inception</span>
+        <span class="tag raise-tag">Fundraising</span>
+      </div>
+      <div class="block-venue">Builders Stage · 30 min · Nader Khalil + Sydney Sykes (NVIDIA)</div>
+      <div class="block-why">Nader Khalil (NVIDIA Director of Developer Tech) and Sydney Sykes (NVIDIA Global Head of VC Partnerships). You are an NVIDIA Inception member with a Jetson AGX Orin in procurement. Sydney Sykes runs VC partnerships — she connects Inception founders to investors. This is the single highest-leverage introduction you can make at Disrupt. Be in the front row. Introduce yourself after.</div>
+    </div>
+  </div>
+
+  <div class="block must">
+    <div class="block-inner">
+      <div class="block-top">
+        <div class="block-time">2:50 PM</div>
+        <div class="block-title">Ask the Investors — Battlefield Judges</div>
+      </div>
+      <div class="tags">
+        <span class="tag must-tag">Must Attend</span>
+        <span class="tag raise-tag">Fundraising</span>
+      </div>
+      <div class="block-venue">Builders Stage · 40 min</div>
+      <div class="block-why">Same judges from Battlefield Final: Stacy Brown-Philpot, Chi-Hua Chien, Dayna Grayson, Carter Reum, Alexa von Tobel. They just finished judging 3 days of pitches. This is where they tell you the unfiltered version of what they actually care about. Best Q&amp;A session at the whole conference. Sit close and ask a question.</div>
+    </div>
+  </div>
+
+  <div class="block high">
+    <div class="block-inner">
+      <div class="block-top">
+        <div class="block-time">1:40 PM</div>
+        <div class="block-title">Winning Pre-Seed Without a Product</div>
+      </div>
+      <div class="tags">
+        <span class="tag high-tag">High Value</span>
+        <span class="tag raise-tag">Fundraising</span>
+      </div>
+      <div class="block-venue">Builders Stage · 40 min · True Ventures, Slauson &amp; Co., Axiom Partners</div>
+      <div class="block-why">Austin Clements (Slauson &amp; Co.) invests in underrepresented founders. You're a Black veteran founder from rural Louisiana. This isn't a cold intro — this is someone whose thesis you're inside. Note the conflict with Model Behavior at 1:10 — you may have to choose. Slauson is the higher-leverage relationship.</div>
+    </div>
+  </div>
+
+  <div class="block high">
+    <div class="block-inner">
+      <div class="block-top">
+        <div class="block-time">3:15 PM</div>
+        <div class="block-title">Everyone Can Build Software Now. What Happens Next?</div>
+      </div>
+      <div class="tags">
+        <span class="tag high-tag">High Value</span>
+      </div>
+      <div class="block-venue">Disrupt Stage · 30 min · Amjad Masad (Replit CEO)</div>
+      <div class="block-why">Amjad built Replit — the platform you used to build ten platforms solo. This is your origin story told from the other side of the screen. Worth seeing in person if you're still there.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showDay(id) {
+    document.querySelectorAll('.day-section').forEach(s => s.classList.remove('visible'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).classList.add('visible');
+    const tabs = document.querySelectorAll('.tab');
+    const map = { oct12: 0, oct13: 1, oct14: 2, oct15: 3 };
+    tabs[map[id]].classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
