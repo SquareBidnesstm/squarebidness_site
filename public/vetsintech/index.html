@@ -2,9 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Summit Guide — Marcus D. Buckner</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>SBH Summit Field Guide</title>
   <meta name="description" content="NatSec + Space Innovation Summit · Pier 9, SF · Oct 8–9, 2026" />
+
+  <!-- PWA -->
+  <link rel="manifest" href="/vetsintech/manifest.json" />
+  <meta name="theme-color" content="#0D1117" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="SBH Summit" />
+  <link rel="apple-touch-icon" href="/icon-192.png" />
+
   <link rel="icon" type="image/x-icon" href="/favicon.ico" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" />
   <style>
@@ -27,9 +36,10 @@
       font-family: 'IBM Plex Sans', sans-serif;
       font-size: 15px;
       line-height: 1.5;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
     }
 
-    /* TOP BAR */
     .topbar {
       background: var(--gold);
       color: var(--navy);
@@ -42,7 +52,6 @@
       text-transform: uppercase;
     }
 
-    /* NAV */
     nav {
       background: var(--navy);
       border-bottom: 1px solid var(--dark);
@@ -52,7 +61,7 @@
       justify-content: space-between;
       height: 52px;
       position: sticky;
-      top: 0;
+      top: env(safe-area-inset-top, 0px);
       z-index: 100;
     }
     .nav-brand {
@@ -63,10 +72,7 @@
       text-decoration: none;
       letter-spacing: 0.06em;
     }
-    .nav-tabs {
-      display: flex;
-      gap: 0;
-    }
+    .nav-tabs { display: flex; gap: 0; }
     .nav-tab {
       padding: 0.4rem 0.9rem;
       font-size: 0.78rem;
@@ -79,11 +85,9 @@
     }
     .nav-tab:hover, .nav-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
 
-    /* SECTIONS */
     .section { padding: 1.5rem 1rem; }
     .container { max-width: 720px; margin: 0 auto; }
 
-    /* IDENTITY STRIP */
     .id-strip {
       background: var(--navy2);
       border-bottom: 1px solid var(--dark);
@@ -96,18 +100,9 @@
       justify-content: space-between;
       padding: 1rem;
     }
-    .id-name {
-      font-family: 'Oswald', sans-serif;
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: var(--white);
-    }
+    .id-name { font-family: 'Oswald', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--white); }
     .id-role { font-size: 0.82rem; color: var(--muted); }
-    .id-creds {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-    }
+    .id-creds { display: flex; flex-wrap: wrap; gap: 0.4rem; }
     .badge {
       font-family: 'Oswald', sans-serif;
       font-size: 0.7rem;
@@ -118,14 +113,19 @@
       color: var(--gold);
       border: 1px solid var(--gold);
     }
+    .badge.live {
+      background: rgba(74,222,128,0.15);
+      color: var(--green);
+      border-color: var(--green);
+    }
 
-    /* PITCH CARD */
     .pitch-card {
       background: var(--navy2);
       border-left: 3px solid var(--gold);
       padding: 1rem 1.25rem;
       margin-bottom: 1rem;
     }
+    .pitch-card.node0 { border-left-color: var(--green); }
     .pitch-label {
       font-size: 0.7rem;
       letter-spacing: 0.14em;
@@ -133,13 +133,9 @@
       color: var(--gold);
       margin-bottom: 0.4rem;
     }
-    .pitch-text {
-      font-size: 0.95rem;
-      color: var(--white);
-      line-height: 1.6;
-    }
+    .pitch-card.node0 .pitch-label { color: var(--green); }
+    .pitch-text { font-size: 0.95rem; color: var(--white); line-height: 1.6; }
 
-    /* DAY HEADERS */
     .day-header {
       display: flex;
       align-items: center;
@@ -158,68 +154,26 @@
       background: var(--gold);
       color: var(--navy);
     }
-    .day-title {
-      font-family: 'Oswald', sans-serif;
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--white);
-      text-transform: uppercase;
-    }
+    .day-title { font-family: 'Oswald', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--white); text-transform: uppercase; }
     .day-sub { font-size: 0.8rem; color: var(--muted); }
 
-    /* TIER LABEL */
-    .tier-label {
-      font-size: 0.72rem;
-      font-weight: 600;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      margin: 1rem 0 0.5rem;
-    }
+    .tier-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; margin: 1rem 0 0.5rem; }
     .tier-1 { color: var(--gold); }
     .tier-2 { color: var(--muted); }
 
-    /* TARGET CARDS */
     .target-card {
       background: var(--navy2);
       border: 1px solid var(--dark);
       border-left: 3px solid var(--dark);
       padding: 1rem 1.1rem;
       margin-bottom: 0.6rem;
-      position: relative;
     }
     .target-card.t1 { border-left-color: var(--gold); }
-    .target-card.t2 { border-left-color: var(--dark); }
-    .target-name {
-      font-family: 'Oswald', sans-serif;
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: var(--white);
-      margin-bottom: 0.1rem;
-    }
-    .target-org {
-      font-size: 0.8rem;
-      color: var(--muted);
-      margin-bottom: 0.7rem;
-    }
-    .target-section-label {
-      font-size: 0.68rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--gold);
-      margin-bottom: 0.2rem;
-      margin-top: 0.5rem;
-    }
-    .target-note {
-      font-size: 0.88rem;
-      color: var(--text);
-      line-height: 1.55;
-    }
-    .target-ask {
-      font-size: 0.88rem;
-      color: var(--white);
-      line-height: 1.55;
-      margin-top: 0.1rem;
-    }
+    .target-name { font-family: 'Oswald', sans-serif; font-size: 1.05rem; font-weight: 700; color: var(--white); margin-bottom: 0.1rem; }
+    .target-org { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.7rem; }
+    .target-section-label { font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.2rem; margin-top: 0.5rem; }
+    .target-note { font-size: 0.88rem; color: var(--text); line-height: 1.55; }
+    .target-ask { font-size: 0.88rem; color: var(--white); line-height: 1.55; margin-top: 0.1rem; }
     .check-row {
       display: flex;
       align-items: center;
@@ -240,19 +194,10 @@
       justify-content: center;
       transition: all 0.15s;
     }
-    .check-box.done {
-      background: var(--gold);
-      border-color: var(--gold);
-    }
-    .check-box.done::after {
-      content: '✓';
-      font-size: 11px;
-      color: var(--navy);
-      font-weight: 700;
-    }
+    .check-box.done { background: var(--gold); border-color: var(--gold); }
+    .check-box.done::after { content: '✓'; font-size: 11px; color: var(--navy); font-weight: 700; }
     .check-label { font-size: 0.78rem; color: var(--muted); }
 
-    /* MOVEMENT */
     .move-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
     .move-table tr { border-bottom: 1px solid var(--dark); }
     .move-table tr:last-child { border-bottom: none; }
@@ -266,31 +211,16 @@
       vertical-align: top;
       width: 90px;
     }
-    .move-note {
-      font-size: 0.88rem;
-      color: var(--text);
-      padding: 0.6rem 0;
-      line-height: 1.5;
-    }
+    .move-note { font-size: 0.88rem; color: var(--text); padding: 0.6rem 0; line-height: 1.5; }
 
-    /* CREDENTIALS */
-    .cred-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.5rem;
-    }
-    .cred-card {
-      background: var(--navy2);
-      border: 1px solid var(--dark);
-      padding: 0.75rem 1rem;
-    }
+    .cred-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+    .cred-card { background: var(--navy2); border: 1px solid var(--dark); padding: 0.75rem 1rem; }
+    .cred-card.live-card { border-color: var(--green); }
     .cred-label { font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.2rem; }
     .cred-value { font-family: 'Oswald', sans-serif; font-size: 0.95rem; font-weight: 600; color: var(--gold); }
+    .cred-card.live-card .cred-value { color: var(--green); }
 
-    /* DIVIDER */
     .divider { border: none; border-top: 1px solid var(--dark); margin: 1.25rem 0; }
-
-    /* SECTION TITLE */
     .section-title {
       font-family: 'Oswald', sans-serif;
       font-size: 0.8rem;
@@ -299,6 +229,40 @@
       text-transform: uppercase;
       color: var(--muted);
       margin-bottom: 0.75rem;
+    }
+
+    /* Install banner */
+    #install-banner {
+      display: none;
+      background: var(--navy2);
+      border-bottom: 1px solid var(--green);
+      padding: 0.75rem 1rem;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+    #install-banner.show { display: flex; }
+    .install-text { font-size: 0.82rem; color: var(--text); }
+    .install-btn {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: var(--green);
+      color: var(--navy);
+      border: none;
+      padding: 0.35rem 0.75rem;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .install-dismiss {
+      font-size: 0.78rem;
+      color: var(--muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.2rem;
     }
 
     @media (max-width: 500px) {
@@ -310,6 +274,13 @@
 <body>
 
 <div class="topbar">NatSec + Space Innovation Summit &nbsp;·&nbsp; Pier 9, SF &nbsp;·&nbsp; Oct 8–9, 2026</div>
+
+<!-- Install prompt (Android/Chrome) -->
+<div id="install-banner">
+  <span class="install-text">Add to home screen for offline access</span>
+  <button class="install-btn" id="install-btn">Add</button>
+  <button class="install-dismiss" id="install-dismiss">✕</button>
+</div>
 
 <nav>
   <a class="nav-brand" href="#top">SBH Field Guide</a>
@@ -336,6 +307,7 @@
       <span class="badge">MBE</span>
       <span class="badge">SBE</span>
       <span class="badge">Army Vet</span>
+      <span class="badge live">Node 0 Live</span>
     </div>
   </div>
 </div>
@@ -345,19 +317,24 @@
   <div class="container">
     <div class="section-title">Quick Pitch Reference</div>
 
+    <div class="pitch-card node0">
+      <div class="pitch-label">Node 0 Close — Use Every Time (NEW · Oct 5)</div>
+      <div class="pitch-text">"The first node is already running. I built it two nights before I flew out here. It's in Hammond, Louisiana right now on the Entergy grid — the same grid Meta and Hut 8 just validated with billions of dollars. I didn't wait for the check to start building."</div>
+    </div>
+
     <div class="pitch-card">
       <div class="pitch-label">30-Second — Infrastructure First (Raj Shah, Ernie Bio, Doug Beck)</div>
-      <div class="pitch-text">"Marcus Buckner, Square Bidness Holdings. We're building sovereign edge AI infrastructure in rural Louisiana — two private nodes on owned land, no AWS dependency, data never leaves the state. Ten live verticals running on it. SAM.gov registered, all four LED certs. Raising $2.5M on a $25M cap SAFE."</div>
+      <div class="pitch-text">"Marcus Buckner, Square Bidness Holdings. We're building sovereign edge AI infrastructure in rural Louisiana — two private nodes on owned land, no AWS dependency, data never leaves the state. Node 0 is live right now in Hammond. Ten live verticals running on it. SAM.gov registered, all four LED certs. Raising $2.5M on a $25M cap SAFE."</div>
     </div>
 
     <div class="pitch-card">
       <div class="pitch-label">30-Second — Veteran First (Ryan Micheletti, Katherine Webster)</div>
-      <div class="pitch-text">"Marcus Buckner — Army vet, Tangipahoa Parish Louisiana. B.S. Marketing, Southeastern Louisiana University. Built ten live platforms from scratch since April 2025, no investors, no team, not a CS background. Infrastructure layer, health staffing, tax prep, food ordering — all running. Private cloud on owned land. SAM.gov active. Raising $2.5M."</div>
+      <div class="pitch-text">"Marcus Buckner — Army vet, Tangipahoa Parish Louisiana. B.S. Marketing, Southeastern Louisiana University. Built ten live platforms from scratch since April 2025, no investors, no team, not a CS background. Infrastructure layer, health staffing, tax prep, food ordering — all running. Node 0 is live. Private cloud on owned land. SAM.gov active. Raising $2.5M."</div>
     </div>
 
     <div class="pitch-card">
       <div class="pitch-label">30-Second — Peer, VetsinTech / NatSec (Ian Kalin, Katherine Webster)</div>
-      <div class="pitch-text">"Marcus Buckner, Square Bidness Holdings. Rural Louisiana. We're doing what TurbineOne does but for the civilian vertical layer — sovereign edge, no cloud, owned hardware. Ten platforms live. Veteran-founded, zero cloud dependency."</div>
+      <div class="pitch-text">"Marcus Buckner, Square Bidness Holdings. Rural Louisiana. We're doing what TurbineOne does but for the civilian vertical layer — sovereign edge, no cloud, owned hardware. Node 0 is running right now. Ten platforms live. Veteran-founded, zero cloud dependency."</div>
     </div>
 
     <div class="pitch-card">
@@ -404,11 +381,11 @@
       <div class="target-name">Ryan Micheletti</div>
       <div class="target-org">The Veteran Fund — General Partner</div>
       <div class="target-section-label">Lead With</div>
-      <div class="target-note">Veteran-first frame. Army vet, built ten platforms since April 2025, no investors. Infrastructure layer for rural America.</div>
+      <div class="target-note">Veteran-first frame. Army vet, built ten platforms since April 2025, no investors. Node 0 is live — built it before flying out. Infrastructure layer for rural America.</div>
       <div class="target-section-label">Ask</div>
       <div class="target-ask">"Who in your portfolio is closest to what we're building? Would love an intro before Disrupt."</div>
       <div class="check-row">
-        <div class="check-box" onclick="this.classList.toggle('done')"></div>
+        <div class="check-box" onclick="toggle(this)"></div>
         <span class="check-label">Connected</span>
       </div>
     </div>
@@ -421,7 +398,7 @@
       <div class="target-section-label">Ask</div>
       <div class="target-ask">"Who else in this room should I make sure I talk to by end of day?"</div>
       <div class="check-row">
-        <div class="check-box" onclick="this.classList.toggle('done')"></div>
+        <div class="check-box" onclick="toggle(this)"></div>
         <span class="check-label">Connected</span>
       </div>
     </div>
@@ -430,33 +407,33 @@
       <div class="target-name">Blaise Zandoli</div>
       <div class="target-org">U.S. Army Private Capital — Director</div>
       <div class="target-section-label">Lead With</div>
-      <div class="target-note">Infrastructure + procurement frame. SAM.gov active, LED certified, sovereign edge compute in rural Louisiana.</div>
+      <div class="target-note">Infrastructure + procurement frame. SAM.gov active, LED certified, sovereign edge compute in rural Louisiana. Node 0 is running on the Entergy grid now.</div>
       <div class="target-section-label">Ask</div>
       <div class="target-ask">"How does Army Private Capital evaluate rural edge infrastructure? What's the path from SAM.gov to a contract vehicle?"</div>
       <div class="check-row">
-        <div class="check-box" onclick="this.classList.toggle('done')"></div>
+        <div class="check-box" onclick="toggle(this)"></div>
         <span class="check-label">Connected</span>
       </div>
     </div>
 
     <p class="tier-label tier-2">Tier 2 — If You Cross Paths</p>
 
-    <div class="target-card t2">
+    <div class="target-card">
       <div class="target-name">Nick Curry</div>
       <div class="target-org">Blue Origin — Veteran Talent</div>
       <div class="target-note">"Talent is everywhere, opportunity isn't" is your story too. His hire network is your future workforce pipeline.</div>
       <div class="check-row">
-        <div class="check-box" onclick="this.classList.toggle('done')"></div>
+        <div class="check-box" onclick="toggle(this)"></div>
         <span class="check-label">Connected</span>
       </div>
     </div>
 
-    <div class="target-card t2">
+    <div class="target-card">
       <div class="target-name">Skyra Rideaux</div>
       <div class="target-org">Blue Origin — Workforce AI (Navy Vet)</div>
       <div class="target-note">Peer conversation. Navy vet using responsible AI for workforce data. Share the health staffing story — 7 parishes, CNA placement.</div>
       <div class="check-row">
-        <div class="check-box" onclick="this.classList.toggle('done')"></div>
+        <div class="check-box" onclick="toggle(this)"></div>
         <span class="check-label">Connected</span>
       </div>
     </div>
@@ -496,11 +473,11 @@
       <div class="target-name">Raj Shah</div>
       <div class="target-org">Shield Capital — Managing Partner · Former DIU Director</div>
       <div class="target-section-label">Lead With</div>
-      <div class="target-note">Infrastructure first, not app verticals. "Sovereign edge AI, no cloud, owned land, two nodes, two grids — Louisiana." His exact thesis.</div>
+      <div class="target-note">Infrastructure first, not app verticals. "Sovereign edge AI, no cloud, owned land, two nodes, two grids — Louisiana." Node 0 is running right now. His exact thesis.</div>
       <div class="target-section-label">Ask</div>
       <div class="target-ask">"$2.5M / $25M cap SAFE. Would love 20 minutes after Disrupt — are you in SF this week?"</div>
       <div class="check-row">
-        <div class="check-box" onclick="this.classList.toggle('done')"></div>
+        <div class="check-box" onclick="toggle(this)"></div>
         <span class="check-label">Connected</span>
       </div>
     </div>
@@ -509,11 +486,11 @@
       <div class="target-name">Ernie Bio</div>
       <div class="target-org">Forgepoint Capital — Managing Director · Former DIU COO · Air Force Pilot</div>
       <div class="target-section-label">Lead With</div>
-      <div class="target-note">Brief and direct. Infrastructure + SAM.gov + veteran-owned. He was DIU COO — he knows procurement language. Don't over-explain.</div>
+      <div class="target-note">Brief and direct. Infrastructure + SAM.gov + veteran-owned. Node 0 live on Entergy grid. He was DIU COO — he knows procurement language. Don't over-explain.</div>
       <div class="target-section-label">Ask</div>
       <div class="target-ask">"Could we find 20 minutes the week after Disrupt for a deeper conversation?"</div>
       <div class="check-row">
-        <div class="check-box" onclick="this.classList.toggle('done')"></div>
+        <div class="check-box" onclick="toggle(this)"></div>
         <span class="check-label">Connected</span>
       </div>
     </div>
@@ -524,39 +501,39 @@
       <div class="target-section-label">If You Connected Day 1</div>
       <div class="target-note">Go deeper. Ask specifically: SBIR/STTR fit for rural edge infrastructure, Army OSC tools, path from SAM.gov active to a contract vehicle.</div>
       <div class="check-row">
-        <div class="check-box" onclick="this.classList.toggle('done')"></div>
+        <div class="check-box" onclick="toggle(this)"></div>
         <span class="check-label">Follow-up done</span>
       </div>
     </div>
 
     <p class="tier-label tier-2">Tier 2 — Strategic Peers &amp; Openers</p>
 
-    <div class="target-card t2">
+    <div class="target-card">
       <div class="target-name">Ian Kalin</div>
       <div class="target-org">TurbineOne — CEO ($36M Series B · $99M Army Contract)</div>
       <div class="target-note">"No cloud required" is their tagline too. Best peer in the room. Ask him how he framed the edge AI story to investors. Debrief, don't pitch.</div>
       <div class="check-row">
-        <div class="check-box" onclick="this.classList.toggle('done')"></div>
+        <div class="check-box" onclick="toggle(this)"></div>
         <span class="check-label">Connected</span>
       </div>
     </div>
 
-    <div class="target-card t2">
+    <div class="target-card">
       <div class="target-name">Kevin Damoa</div>
       <div class="target-org">Glid Technologies — CEO · TechCrunch Disrupt 2025 Winner</div>
       <div class="target-note">He won Startup Battlefield 2025. Ask him about the format, the judges, what landed, what didn't. Intel for next time.</div>
       <div class="check-row">
-        <div class="check-box" onclick="this.classList.toggle('done')"></div>
+        <div class="check-box" onclick="toggle(this)"></div>
         <span class="check-label">Connected</span>
       </div>
     </div>
 
-    <div class="target-card t2">
+    <div class="target-card">
       <div class="target-name">Doug Beck</div>
       <div class="target-org">Former DIU Director (DIU 3.0 + Replicator)</div>
       <div class="target-note">Network hub of this event. If you get 5 minutes: brief pitch + leave-behind. Don't ask for anything specific — plant the flag.</div>
       <div class="check-row">
-        <div class="check-box" onclick="this.classList.toggle('done')"></div>
+        <div class="check-box" onclick="toggle(this)"></div>
         <span class="check-label">Connected</span>
       </div>
     </div>
@@ -593,21 +570,30 @@
         <div class="cred-label">The Ask</div>
         <div class="cred-value">$2.5M · $25M Cap SAFE</div>
       </div>
+      <div class="cred-card live-card">
+        <div class="cred-label">Node 0 — LIVE</div>
+        <div class="cred-value">HQ1 Hammond · Entergy Grid</div>
+      </div>
+      <div class="cred-card">
+        <div class="cred-label">Node 1</div>
+        <div class="cred-value">Mac Mini M5 Pro · Oct 26–Nov 2</div>
+      </div>
       <div class="cred-card">
         <div class="cred-label">Infrastructure</div>
-        <div class="cred-value">2 Nodes · 2.29 Acres · 3 Parcels</div>
+        <div class="cred-value">2.29 Acres · 3 Parcels · 2 Grids</div>
       </div>
       <div class="cred-card">
         <div class="cred-label">Verticals Live</div>
-        <div class="cred-value">9 Platforms</div>
+        <div class="cred-value">10+ Platforms</div>
       </div>
     </div>
 
     <hr class="divider" />
 
     <div class="section-title">Talking Point — Use Every Time</div>
-    <div class="pitch-card">
-      <div class="pitch-text">"Veteran-founded. SAM.gov registered. Private edge AI in rural Louisiana. $2.5M / $25M cap SAFE. We own the land the servers run on."</div>
+    <div class="pitch-card node0">
+      <div class="pitch-label">Node 0 is Live (built Oct 4, two nights before flying out)</div>
+      <div class="pitch-text">"Veteran-founded. SAM.gov registered. Private edge AI in rural Louisiana. $2.5M / $25M cap SAFE. We own the land the servers run on. Node 0 is running right now in Hammond."</div>
     </div>
 
     <div class="section-title">Contact</div>
@@ -623,13 +609,42 @@
 </div>
 
 <script>
-  // Persist checkboxes in localStorage
+  // Register service worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/vetsintech/sw.js').catch(() => {});
+  }
+
+  // Android/Chrome install prompt
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    try {
+      if (!localStorage.getItem('install_dismissed')) {
+        document.getElementById('install-banner').classList.add('show');
+      }
+    } catch(err){}
+  });
+  document.getElementById('install-btn').addEventListener('click', () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
+    }
+    document.getElementById('install-banner').classList.remove('show');
+  });
+  document.getElementById('install-dismiss').addEventListener('click', () => {
+    document.getElementById('install-banner').classList.remove('show');
+    try { localStorage.setItem('install_dismissed', '1'); } catch(e){}
+  });
+
+  // Checkboxes
+  function toggle(box) {
+    box.classList.toggle('done');
+    const idx = [...document.querySelectorAll('.check-box')].indexOf(box);
+    try { localStorage.setItem('chk_' + idx, box.classList.contains('done') ? '1' : '0'); } catch(e){}
+  }
   document.querySelectorAll('.check-box').forEach((box, i) => {
-    const key = 'chk_' + i;
-    try { if (localStorage.getItem(key) === '1') box.classList.add('done'); } catch(e){}
-    box.addEventListener('click', () => {
-      try { localStorage.setItem(key, box.classList.contains('done') ? '1' : '0'); } catch(e){}
-    });
+    try { if (localStorage.getItem('chk_' + i) === '1') box.classList.add('done'); } catch(e){}
   });
 
   // Nav active state
